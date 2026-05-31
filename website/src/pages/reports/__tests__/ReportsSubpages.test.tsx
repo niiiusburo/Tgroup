@@ -191,13 +191,13 @@ describe('Report subpages — error handling', () => {
   });
 
   const subpages = [
-    { name: 'Revenue', Component: ReportsRevenue, label: 'metrics.totalInvoiced', responses: getRevenueResponses, loadingText: 'loading' },
-    { name: 'Appointments', Component: ReportsAppointments, label: 'metrics.totalAppointments', responses: getApptResponses, loadingText: 'loading' },
-    { name: 'Doctors', Component: ReportsDoctors, label: 'metrics.totalDoctors', responses: () => [getDoctorsResponse()], loadingText: 'loading' },
-    { name: 'Customers', Component: ReportsCustomers, label: 'metrics.totalCustomers', responses: () => [getCustomersResponse()], loadingText: 'loading' },
-    { name: 'Locations', Component: ReportsLocations, label: 'metrics.totalBranches', responses: () => [getLocationsResponse()], loadingText: 'loading' },
-    { name: 'Services', Component: ReportsServices, label: 'metrics.categories', responses: () => [getServicesResponse()], loadingText: 'loading' },
-    { name: 'Employees', Component: ReportsEmployees, label: 'metrics.totalEmployees', responses: () => [getEmployeesResponse()], loadingText: 'loading' },
+    { name: 'Revenue', Component: ReportsRevenue, label: 'Tổng đã xuất', responses: getRevenueResponses, loadingText: 'Đang tải…' },
+    { name: 'Appointments', Component: ReportsAppointments, label: 'Tổng lịch hẹn', responses: getApptResponses, loadingText: 'Đang tải…' },
+    { name: 'Doctors', Component: ReportsDoctors, label: 'Tổng bác sĩ', responses: () => [getDoctorsResponse()], loadingText: 'Đang tải…' },
+    { name: 'Customers', Component: ReportsCustomers, label: 'Tổng khách hàng', responses: () => [getCustomersResponse()], loadingText: 'Đang tải…' },
+    { name: 'Locations', Component: ReportsLocations, label: 'Tổng chi nhánh', responses: () => [getLocationsResponse()], loadingText: 'Đang tải…' },
+    { name: 'Services', Component: ReportsServices, label: 'Zirconia', responses: () => [getServicesResponse()], loadingText: 'Đang tải…' },
+    { name: 'Employees', Component: ReportsEmployees, label: 'Tổng nhân viên', responses: () => [getEmployeesResponse()], loadingText: 'Đang tải…' },
   ];
 
   for (const { name, Component, label, responses, loadingText } of subpages) {
@@ -236,11 +236,11 @@ describe('Report subpages — error handling', () => {
 
     render(<ReportsRevenue />);
 
-    await screen.findByText('metrics.totalInvoiced', undefined, { timeout: 3000 });
+    await screen.findByText('Tổng đã xuất', undefined, { timeout: 3000 });
     expect(screen.getByText('Xuất Excel báo cáo')).toBeInTheDocument();
     await userEvent.selectOptions(screen.getByLabelText('Loại báo cáo'), 'employee');
-    expect(screen.getByText('employeeExport.employeeType')).toBeInTheDocument();
-    expect(screen.getByText('employeeExport.employee')).toBeInTheDocument();
+    expect(screen.getByText('Loại nhân viên')).toBeInTheDocument();
+    expect(screen.getByText('Nhân viên')).toBeInTheDocument();
     expect(mockFetchEmployees).toHaveBeenCalledWith(expect.objectContaining({
       limit: 500,
       isDoctor: true,

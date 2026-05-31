@@ -55,8 +55,8 @@ describe('CalendarToolbar', () => {
     expect(screen.getByTestId('calendar-toolbar-actions')).toHaveClass('sm:flex-wrap', '2xl:flex-nowrap');
     expect(screen.getByTestId('calendar-toolbar-actions')).not.toHaveClass('xl:flex-nowrap');
     expect(screen.getByTestId('calendar-toolbar-actions')).not.toHaveClass('lg:flex-nowrap');
-    expect(screen.getByRole('button', { name: 'dayView' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'weekView' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'monthView' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Ngày' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Tuần' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Tháng' })).toBeVisible();
   });
 });

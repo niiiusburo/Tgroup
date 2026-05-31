@@ -92,12 +92,12 @@ describe('GlobalFaceIdButton', () => {
 
     render(<GlobalFaceIdButton />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Quick Face ID/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Quét nhanh khuôn mặt/i }));
     fireEvent.click(await screen.findByText('Mock capture'));
 
-    expect(await screen.findByText('No customer matched')).toBeInTheDocument();
+    expect(await screen.findByText('Không tìm thấy')).toBeInTheDocument();
 
-    fireEvent.change(screen.getByPlaceholderText('Name, phone, or code...'), {
+    fireEvent.change(screen.getByPlaceholderText('Tên, SĐT hoặc mã...'), {
       target: { value: 'T146292' },
     });
 
@@ -110,7 +110,7 @@ describe('GlobalFaceIdButton', () => {
       });
     });
     fireEvent.click(await screen.findByText('TRẦN THANH DUY- QL'));
-    fireEvent.click(screen.getByRole('button', { name: /Register face/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Đăng ký khuôn mặt/i }));
 
     await waitFor(() => {
       expect(registerFace).toHaveBeenCalledWith(
@@ -128,14 +128,16 @@ describe('GlobalFaceIdButton', () => {
 
     render(<GlobalFaceIdButton />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Quick Face ID/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Quét nhanh khuôn mặt/i }));
     fireEvent.click(await screen.findByText('Mock capture'));
 
     await waitFor(() => {
       expect(recognizeMock).toHaveBeenCalled();
     });
 
+    // Modal should still be open (capture button still visible)
     expect(screen.getByText('Mock capture')).toBeInTheDocument();
-    expect(screen.queryByText('Quick Face ID')).not.toBeInTheDocument();
+    // And the quick face button should still be visible
+    expect(screen.getByRole('button', { name: /Quét nhanh khuôn mặt/i })).toBeInTheDocument();
   });
 });

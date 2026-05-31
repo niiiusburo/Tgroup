@@ -37,7 +37,7 @@ describe('VietQrModal', () => {
       />
     );
 
-    const descriptionInput = screen.getByPlaceholderText('enterNote');
+    const descriptionInput = screen.getByPlaceholderText('Nhập ghi chú');
     expect(descriptionInput).toHaveValue('LT1234');
   });
 
@@ -51,7 +51,7 @@ describe('VietQrModal', () => {
       />
     );
 
-    const amountInput = screen.getByPlaceholderText('enterAmount');
+    const amountInput = screen.getByPlaceholderText('Nhập số tiền');
     fireEvent.change(amountInput, { target: { value: '500000' } });
 
     const generateButton = screen.getByRole('button', { name: /Tạo QR/i });

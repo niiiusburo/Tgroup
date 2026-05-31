@@ -28,9 +28,9 @@ describe('AppointmentFormShell — backdrop click leak', () => {
         onClose={onClose}
       />
     );
-    
-    // The modal should now be visible
-    expect(screen.getByText('appointments:createAppointment')).toBeInTheDocument();
+
+    // The modal should now be visible with the real translated text
+    expect(screen.getByText('Tạo lịch hẹn')).toBeInTheDocument();
     
     // Simulate click on the backdrop
     const backdrop = document.querySelector('.bg-black\\/40');

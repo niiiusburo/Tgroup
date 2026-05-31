@@ -100,7 +100,7 @@ describe('AppointmentFormCore customer search', () => {
 
     renderForm();
 
-    fireEvent.click(screen.getByText('appointments:form.selectCustomer'));
+    fireEvent.click(screen.getByText('Chọn khách hàng'));
     fireEvent.change(screen.getByPlaceholderText('Tìm theo tên, mã KH, SĐT, email...'), {
       target: { value: '09848' },
     });

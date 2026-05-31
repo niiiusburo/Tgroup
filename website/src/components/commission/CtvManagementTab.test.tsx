@@ -43,12 +43,12 @@ describe('CtvManagementTab → EditCtvModal payload', () => {
 
     await waitFor(() => expect(mockFetchCtvs).toHaveBeenCalled());
 
-    // Open the edit modal (i18n returns the raw key in tests: 'ctv.edit').
-    await user.click(await screen.findByRole('button', { name: 'ctv.edit' }));
+    // Open the edit modal (i18n resolves 'ctv.edit' to 'Sửa' in Vietnamese).
+    await user.click(await screen.findByRole('button', { name: 'Sửa' }));
 
-    // Save button (common ns 'save') must be ENABLED even though phone is blank —
+    // Save button (common ns 'save' = 'Lưu' in Vietnamese) must be ENABLED even though phone is blank —
     // only name is required now.
-    const saveBtn = await screen.findByRole('button', { name: 'save' });
+    const saveBtn = await screen.findByRole('button', { name: 'Lưu' });
     expect(saveBtn).toBeEnabled();
 
     await user.click(saveBtn);
@@ -68,13 +68,13 @@ describe('CtvManagementTab → EditCtvModal payload', () => {
     render(<CtvManagementTab />);
     await waitFor(() => expect(mockFetchCtvs).toHaveBeenCalled());
 
-    await user.click(await screen.findByRole('button', { name: 'ctv.edit' }));
+    await user.click(await screen.findByRole('button', { name: 'Sửa' }));
 
-    const dialog = screen.getByRole('button', { name: 'save' }).closest('div')!.parentElement!;
-    const pwInput = within(dialog).getByPlaceholderText('ctv.passwordPlaceholder');
+    const dialog = screen.getByRole('button', { name: 'Lưu' }).closest('div')!.parentElement!;
+    const pwInput = within(dialog).getByPlaceholderText('Nhập mật khẩu');
     await user.type(pwInput, 'freshpass1');
 
-    await user.click(screen.getByRole('button', { name: 'save' }));
+    await user.click(screen.getByRole('button', { name: 'Lưu' }));
 
     await waitFor(() => expect(mockUpdateCtv).toHaveBeenCalledTimes(1));
     const [, payload] = mockUpdateCtv.mock.calls[0];

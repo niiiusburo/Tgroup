@@ -11,12 +11,12 @@ describe('AppointmentDurationField', () => {
     expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
 
     const select = screen.getByRole('combobox', {
-      name: 'appointments:form.duration',
+      name: 'Thời lượng',
     });
     expect(select).toHaveValue('30');
 
     for (const minutes of ['10', '15', '20', '25', '30', '40', '45', '60', '90', '120']) {
-      expect(screen.getByRole('option', { name: `${minutes} appointments:common.minutes` })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: `${minutes} phút` })).toBeInTheDocument();
     }
 
     fireEvent.change(select, { target: { value: '15' } });

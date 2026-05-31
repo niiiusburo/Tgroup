@@ -182,7 +182,7 @@ describe('PaymentForm — new contract', () => {
       />
     );
 
-    const submitButton = screen.getByRole('button', { name: /ghiNhnThanhTon/i });
+    const submitButton = screen.getByRole('button', { name: /Ghi nhận thanh toán/i });
     expect(submitButton).toBeDisabled();
   });
 
@@ -206,7 +206,7 @@ describe('PaymentForm — new contract', () => {
     const inputs = getSourceInputs();
     fireEvent.change(inputs[1], { target: { value: '100000' } });
 
-    const submitButton = screen.getByRole('button', { name: /ghiNhnThanhTon/i });
+    const submitButton = screen.getByRole('button', { name: /Ghi nhận thanh toán/i });
     expect(submitButton).toBeDisabled();
   });
 
@@ -230,7 +230,7 @@ describe('PaymentForm — new contract', () => {
       typeCurrency(inputs[1], 999_999);
     });
 
-    const submitButton = screen.getByRole('button', { name: /ghiNhnThanhTon/i });
+    const submitButton = screen.getByRole('button', { name: /Ghi nhận thanh toán/i });
     await act(async () => {
       fireEvent.click(submitButton);
     });
@@ -262,7 +262,7 @@ describe('PaymentForm — new contract', () => {
     await act(async () => { typeCurrency(inputs[1], 200_000); });
     await act(async () => { typeCurrency(inputs[2], 200_000); });
 
-    const submitButton = screen.getByRole('button', { name: /ghiNhnThanhTon/i });
+    const submitButton = screen.getByRole('button', { name: /Ghi nhận thanh toán/i });
     await act(async () => { fireEvent.click(submitButton); });
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
@@ -290,7 +290,7 @@ describe('PaymentForm — new contract', () => {
     await act(async () => { typeCurrency(inputs[1], 100_000); });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /ghiNhnThanhTon/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Ghi nhận thanh toán/i }));
     });
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
@@ -318,7 +318,7 @@ describe('PaymentForm — new contract', () => {
     await act(async () => { typeCurrency(inputs[1], 50_000); });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /ghiNhnThanhTon/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Ghi nhận thanh toán/i }));
     });
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
@@ -346,7 +346,7 @@ describe('PaymentForm — new contract', () => {
     await act(async () => { typeCurrency(inputs[1], 100_000); });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /ghiNhnThanhTon/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Ghi nhận thanh toán/i }));
     });
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
@@ -399,7 +399,7 @@ describe('PaymentForm — new contract', () => {
       />
     );
 
-    expect(screen.getByText('chnhSaThanhTon')).toBeInTheDocument();
+    expect(screen.getByText('Chỉnh sửa thanh toán')).toBeInTheDocument();
     // Service card is still locked (recordName present, not editable)
     expect(screen.getByText(SALEORDER_CTX.recordName)).toBeInTheDocument();
   });
@@ -420,10 +420,10 @@ describe('PaymentForm — new contract', () => {
       />
     );
 
-    const useAllButton = screen.getByRole('button', { name: 'dngTtC' });
+    const useAllButton = screen.getByRole('button', { name: 'Dùng tất cả' });
     await act(async () => { fireEvent.click(useAllButton); });
 
-    const submitButton = screen.getByRole('button', { name: /ghiNhnThanhTon/i });
+    const submitButton = screen.getByRole('button', { name: /Ghi nhận thanh toán/i });
     await act(async () => { fireEvent.click(submitButton); });
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));

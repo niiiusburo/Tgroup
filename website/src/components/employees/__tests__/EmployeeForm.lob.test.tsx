@@ -77,10 +77,10 @@ describe('EmployeeForm LOB routing', () => {
   it('creates employees through the active cosmetic LOB', async () => {
     renderWithProviders(<EmployeeForm onClose={vi.fn()} onSave={vi.fn()} />);
 
-    fireEvent.change(screen.getByPlaceholderText('enterName'), {
+    fireEvent.change(screen.getByPlaceholderText('Nhập họ và tên'), {
       target: { value: 'Cosmetic Employee' },
     });
-    fireEvent.change(screen.getByPlaceholderText('nhpMtKhu'), {
+    fireEvent.change(screen.getByPlaceholderText('Nhập mật khẩu'), {
       target: { value: 'secret123' },
     });
     fireEvent.submit(document.querySelector('form')!);
@@ -109,7 +109,7 @@ describe('EmployeeForm LOB routing', () => {
       />,
     );
 
-    fireEvent.change(screen.getByPlaceholderText('enterName'), {
+    fireEvent.change(screen.getByPlaceholderText('Nhập họ và tên'), {
       target: { value: 'Edited Employee' },
     });
     fireEvent.submit(document.querySelector('form')!);

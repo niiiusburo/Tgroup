@@ -94,7 +94,7 @@ describe('ServiceHistory payment history', () => {
       />
     );
 
-    const payButton = screen.getByRole('button', { name: /pay 500\.000 ₫/ });
+    const payButton = screen.getByRole('button', { name: /Thanh toán 500\.000 ₫/ });
     expect(payButton).toHaveClass('bg-orange-50', 'border-orange-300', 'rounded-full');
 
     fireEvent.click(payButton);
@@ -111,7 +111,7 @@ describe('ServiceHistory payment history', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'deleteTreatment' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Xóa điều trị?' }));
 
     expect(onDeleteService).toHaveBeenCalledWith(mockServices[0]);
   });

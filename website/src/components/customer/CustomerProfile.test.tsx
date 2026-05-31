@@ -106,9 +106,9 @@ describe('CustomerProfile payment tab', () => {
 
     // Total service cost = 3,500,000
     // Amount paid = 3,500,000 - 1,000,000 = 2,500,000 (but payments only sum to 2M; however calculation uses totalCost - outstanding)
-    expect(screen.getByText('profileSection.totalCost').closest('div')?.textContent).toContain('3.500.000 ₫');
-    expect(screen.getByText('thanhTon').closest('div')?.textContent).toContain('2.500.000 ₫');
-    expect(screen.getByText('cnN').closest('div')?.textContent).toContain('1.000.000 ₫');
+    expect(screen.getByText('Tổng chi phí').closest('div')?.textContent).toContain('3.500.000 ₫');
+    expect(screen.getByText('Đã thanh toán').closest('div')?.textContent).toContain('2.500.000 ₫');
+    expect(screen.getByText('Còn nợ').closest('div')?.textContent).toContain('1.000.000 ₫');
   });
 
   it('shows referenceCode as primary identifier in payment history', () => {
@@ -185,10 +185,10 @@ describe('CustomerProfile payment tab', () => {
       </AuthProvider>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /pay 500\.000 ₫/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Thanh toán 500\.000 ₫/ }));
     const inputs = screen.getAllByPlaceholderText('0');
     fireEvent.change(inputs[1], { target: { value: '500000' } });
-    fireEvent.click(screen.getByRole('button', { name: /ghiNhnThanhTon 500\.000 ₫/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Ghi nhận thanh toán 500\.000 ₫/ }));
 
     await waitFor(() => expect(onMakePayment).toHaveBeenCalledTimes(1));
     expect(onMakePayment.mock.calls[0][0].allocations[0].invoiceId).toBe('order-so57144');
@@ -228,7 +228,7 @@ describe('CustomerProfile payment tab', () => {
       </AuthProvider>
     );
 
-    expect(screen.queryByRole('button', { name: /pay 500\.000 ₫/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Thanh toán 500\.000 ₫/ })).not.toBeInTheDocument();
   });
 
   it('hides payment delete controls when payment.void is missing', () => {
@@ -272,13 +272,13 @@ describe('CustomerProfile payment tab', () => {
       </AuthProvider>
     );
 
-    fireEvent.click(screen.getAllByRole('button', { name: 'deleteTreatment' })[0]);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Xóa điều trị?' })[0]);
 
-    expect(screen.getByText('deleteTreatment')).toBeInTheDocument();
+    expect(screen.getByText('Xóa điều trị?')).toBeInTheDocument();
     expect(screen.getAllByText('Cleaning')).toHaveLength(2);
     expect(onDeleteService).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole('button', { name: 'confirmDeleteTreatment' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Xóa điều trị' }));
 
     await waitFor(() => expect(onDeleteService).toHaveBeenCalledWith('s1'));
   });

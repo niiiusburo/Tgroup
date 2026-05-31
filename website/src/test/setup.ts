@@ -67,154 +67,175 @@ Object.defineProperty(window, 'sessionStorage', {
   value: new MockStorage(),
 });
 
-const TEST_TRANSLATIONS: Record<string, string> = {
-  'phase.scheduled': 'Đang hẹn',
-  'phase.waiting': 'Đang chờ',
-  'phase.in-treatment': 'Đang khám',
-  'phase.done': 'Hoàn tất',
-  'phase.cancelled': 'Đã hủy',
-  addAppointmentAt: 'Thêm lịch hẹn lúc {{time}}',
-  cancelAppointment: 'Hủy hẹn',
-  clearSelection: 'Bỏ chọn',
-  dKin: 'Dự kiến',
-  faceId: 'Nhận diện khuôn mặt',
-  'faceCapture.cameraError': 'Không thể truy cập camera. Vui lòng cấp quyền.',
-  'faceCapture.cameraStarting': 'Đang mở camera...',
-  'faceCapture.capture': 'Chụp',
-  'faceCapture.scanning': 'Đang tìm khuôn mặt...',
-  'faceCapture.faceDetected': 'Đã phát hiện khuôn mặt',
-  'faceCapture.quality': 'Chất lượng',
-  'faceCapture.profileStep': 'Bước {{current}}/{{total}}: {{pose}}',
-  'faceCapture.poseStraight': 'Nhìn thẳng',
-  'faceCapture.poseStraightHint': 'Giữ khuôn mặt trong khung.',
-  'faceCapture.poseLeft': 'Quay đầu sang trái',
-  'faceCapture.poseLeftHint': 'Từ từ quay đầu sang trái.',
-  'faceCapture.poseRight': 'Quay đầu sang phải',
-  'faceCapture.poseRightHint': 'Từ từ quay đầu sang phải.',
-  'faceCapture.autoCapturing': 'Đang tự chụp...',
-  'faceCapture.switchCamera': 'Đổi camera',
-  'faceCapture.title': 'Chụp ảnh khuôn mặt',
-  iTrngThi: 'Đổi trạng thái',
-  lchHn: 'Lịch hẹn',
-  noDoctorsFound: 'Không tìm thấy bác sĩ',
-  quickAdd: 'Thêm nhanh',
-  searchByNameOrRole: 'Tìm theo tên hoặc vai trò...',
-  thanhTonVietqr: 'Thanh toán VietQR',
-  qutMQrChuynKhon: 'Quét mã QR chuyển khoản',
-  sTinVnd: 'Số tiền (VND)',
-  niDungChuynKhon: 'Nội dung chuyển khoản',
-  toQr: 'Tạo QR',
-  vuiLngCuHnhTiKhonNgnHngTrongCiT: 'Vui lòng cấu hình tài khoản ngân hàng trong cài đặt',
-  // CTV module translations
-  'card.showFrontFor': 'Xem hành trình theo dõi của {{name}}',
-  'card.showServicesFor': 'Xem dịch vụ của {{name}}',
-  'card.serviceCount': '{{count}} dịch vụ',
-  'card.noServices': 'Chưa có dịch vụ',
-  'card.servicesUnderReferral': 'Dịch vụ của khách giới thiệu này',
-  'card.emptyBack': 'Chưa có dịch vụ đã thanh toán nào được ghi nhận cho khách giới thiệu này.',
-  'card.tapToReturn': 'Chạm để quay lại hành trình theo dõi',
-  'card.back': 'Quay lại',
-  'card.openCustomer': 'Mở khách hàng',
-  'card.copyLink': 'Sao chép liên kết',
-  'card.linkCopied': 'Đã sao chép',
-  'steps.referred': 'Ghi nhận',
-  'steps.visited': 'Đã đến',
-  'steps.serviced': 'Làm dịch vụ',
-  'steps.paid': 'Thanh toán',
-  expected: 'Dự kiến',
-  paidOut: 'Đã chi trả',
-  received: 'Đã nhận',
-  'lobs.dental': 'Nha khoa',
-  'lobs.cosmetic': 'Thẩm mỹ',
-  'serviceStatus.pending': 'Chờ chi trả',
-  'serviceStatus.paid': 'Đã chi trả',
-  'serviceStatus.reversed': 'Đã hoàn',
-  // CTV Dashboard specific
-  'portal': 'Cổng CTV',
-  'hello': 'Xin chào, {{name}}',
-  'notifications': 'Thông báo',
-  'forms.referClient.title': 'Khách giới thiệu',
-  'forms.recruitCtv.title': 'Giới thiệu CTV',
-  'hierarchy.title': 'Hệ thống giới thiệu CTV',
-  'hierarchy.uplineTitle': 'Tuyến trên',
-  'hierarchy.downlineTitle': 'Tuyến dưới',
-  'tabs.home': 'Tổng quan',
-  'tabs.commission': 'Hoa hồng',
-  'tabs.referrals': 'Theo dõi',
-  'tabs.network': 'Mạng lưới',
-  'tabs.me': 'Tôi',
-  'searchLabel': 'Tìm khách giới thiệu',
-  'searchPlaceholder': 'Tìm khách...',
+// Import all locale JSON files
+import enCommon from '../i18n/locales/en/common.json';
+import enNav from '../i18n/locales/en/nav.json';
+import enOverview from '../i18n/locales/en/overview.json';
+import enCalendar from '../i18n/locales/en/calendar.json';
+import enCustomers from '../i18n/locales/en/customers.json';
+import enAppointments from '../i18n/locales/en/appointments.json';
+import enServices from '../i18n/locales/en/services.json';
+import enPayment from '../i18n/locales/en/payment.json';
+import enEmployees from '../i18n/locales/en/employees.json';
+import enLocations from '../i18n/locales/en/locations.json';
+import enReports from '../i18n/locales/en/reports.json';
+import enSettings from '../i18n/locales/en/settings.json';
+import enAuth from '../i18n/locales/en/auth.json';
+import enWebsite from '../i18n/locales/en/website.json';
+import enCommission from '../i18n/locales/en/commission.json';
+import enFeedback from '../i18n/locales/en/feedback.json';
+import enNotifications from '../i18n/locales/en/notifications.json';
+import enRelationships from '../i18n/locales/en/relationships.json';
+import enServiceCatalog from '../i18n/locales/en/serviceCatalog.json';
+import enPermissions from '../i18n/locales/en/permissions.json';
+import enExports from '../i18n/locales/en/exports.json';
+import enCtv from '../i18n/locales/en/ctv.json';
+
+import viCommon from '../i18n/locales/vi/common.json';
+import viNav from '../i18n/locales/vi/nav.json';
+import viOverview from '../i18n/locales/vi/overview.json';
+import viCalendar from '../i18n/locales/vi/calendar.json';
+import viCustomers from '../i18n/locales/vi/customers.json';
+import viAppointments from '../i18n/locales/vi/appointments.json';
+import viServices from '../i18n/locales/vi/services.json';
+import viPayment from '../i18n/locales/vi/payment.json';
+import viEmployees from '../i18n/locales/vi/employees.json';
+import viLocations from '../i18n/locales/vi/locations.json';
+import viReports from '../i18n/locales/vi/reports.json';
+import viSettings from '../i18n/locales/vi/settings.json';
+import viAuth from '../i18n/locales/vi/auth.json';
+import viWebsite from '../i18n/locales/vi/website.json';
+import viCommission from '../i18n/locales/vi/commission.json';
+import viFeedback from '../i18n/locales/vi/feedback.json';
+import viNotifications from '../i18n/locales/vi/notifications.json';
+import viRelationships from '../i18n/locales/vi/relationships.json';
+import viServiceCatalog from '../i18n/locales/vi/serviceCatalog.json';
+import viPermissions from '../i18n/locales/vi/permissions.json';
+import viExports from '../i18n/locales/vi/exports.json';
+import viCtv from '../i18n/locales/vi/ctv.json';
+
+// Build flattened namespace maps from real locale JSON
+const EN_NAMESPACES: Record<string, Record<string, unknown>> = {
+  common: enCommon,
+  nav: enNav,
+  overview: enOverview,
+  calendar: enCalendar,
+  customers: enCustomers,
+  appointments: enAppointments,
+  services: enServices,
+  payment: enPayment,
+  employees: enEmployees,
+  locations: enLocations,
+  reports: enReports,
+  settings: enSettings,
+  auth: enAuth,
+  website: enWebsite,
+  commission: enCommission,
+  feedback: enFeedback,
+  notifications: enNotifications,
+  relationships: enRelationships,
+  serviceCatalog: enServiceCatalog,
+  permissions: enPermissions,
+  exports: enExports,
+  ctv: enCtv,
 };
 
+const VI_NAMESPACES: Record<string, Record<string, unknown>> = {
+  common: viCommon,
+  nav: viNav,
+  overview: viOverview,
+  calendar: viCalendar,
+  customers: viCustomers,
+  appointments: viAppointments,
+  services: viServices,
+  payment: viPayment,
+  employees: viEmployees,
+  locations: viLocations,
+  reports: viReports,
+  settings: viSettings,
+  auth: viAuth,
+  website: viWebsite,
+  commission: viCommission,
+  feedback: viFeedback,
+  notifications: viNotifications,
+  relationships: viRelationships,
+  serviceCatalog: viServiceCatalog,
+  permissions: viPermissions,
+  exports: viExports,
+  ctv: viCtv,
+};
+
+// Flatten nested objects to dot-notation keys
+function flattenObject(obj: Record<string, unknown>, prefix = ''): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const val = obj[key];
+      const fullKey = prefix ? `${prefix}.${key}` : key;
+      if (typeof val === 'string') {
+        result[fullKey] = val;
+      } else if (val !== null && typeof val === 'object') {
+        Object.assign(result, flattenObject(val as Record<string, unknown>, fullKey));
+      }
+    }
+  }
+  return result;
+}
+
+// Build flat translation maps for each namespace
+const enFlat: Record<string, Record<string, string>> = {};
+const viFlat: Record<string, Record<string, string>> = {};
+
+for (const ns in EN_NAMESPACES) {
+  enFlat[ns] = flattenObject(EN_NAMESPACES[ns]);
+  viFlat[ns] = flattenObject(VI_NAMESPACES[ns]);
+}
+
+// Interpolate {{var}} placeholders
 function interpolate(template: string, options?: Record<string, unknown>) {
   return template.replace(/\{\{(\w+)\}\}/g, (_match, key) => String(options?.[key] ?? ''));
 }
 
-const EN_TRANSLATIONS: Record<string, string> = {
-  'card.showFrontFor': 'Show client tracking journey for {{name}}',
-  'card.showServicesFor': 'Show services for {{name}}',
-  'card.serviceCount': '{{count}} services',
-  'card.noServices': 'No services yet',
-  'card.servicesUnderReferral': 'Services under this referred client',
-  'card.emptyBack': 'No paid services have been attributed to this referred client yet.',
-  'card.tapToReturn': 'Tap to return to the client tracking journey',
-  'card.back': 'Back',
-  'card.openCustomer': 'Open customer',
-  'card.copyLink': 'Copy link',
-  'card.linkCopied': 'Copied',
-  'steps.referred': 'Recorded',
-  'steps.visited': 'Visited',
-  'steps.serviced': 'Serviced',
-  'steps.paid': 'Paid',
-  expected: 'Expected',
-  paidOut: 'Paid out',
-  received: 'Received',
-  'lobs.dental': 'Dental',
-  'lobs.cosmetic': 'Cosmetic',
-  'serviceStatus.pending': 'Pending',
-  'serviceStatus.paid': 'Paid',
-  'serviceStatus.reversed': 'Reversed',
-  // CTV Dashboard specific
-  'portal': 'CTV Portal',
-  'hello': 'Hi, {{name}}',
-  'notifications': 'Notifications',
-  'forms.referClient.title': 'Refer a client',
-  'forms.recruitCtv.title': 'Recruit CTV',
-  'hierarchy.title': 'CTV Referral Hierarchy',
-  'hierarchy.uplineTitle': 'Upline',
-  'hierarchy.downlineTitle': 'Downline',
-  'tabs.home': 'Home',
-  'tabs.commission': 'Commission',
-  'tabs.referrals': 'Track Clients',
-  'tabs.network': 'Network',
-  'tabs.me': 'Me',
-  'searchLabel': 'Search referred clients',
-  'searchPlaceholder': 'Search referred clients...',
-};
-
-function translateForTest(key: string, options?: Record<string, unknown> | string) {
-  // Determine which language translation table to use
+// Resolve a translation key: detect namespace from key (ns:key) or use provided ns/default
+function translateForTest(key: string, options?: Record<string, unknown> | string, requestedNs?: string) {
   const savedLang = localStorage.getItem('tg-lang') as string | null;
   const lang = (savedLang && ['en', 'vi'].includes(savedLang)) ? savedLang : 'vi';
-  const translations = lang === 'en' ? EN_TRANSLATIONS : TEST_TRANSLATIONS;
+  const flatMap = lang === 'en' ? enFlat : viFlat;
 
   if (typeof options === 'string') {
-    return translations[key] ?? options;
+    return flatMap[requestedNs || 'common']?.[key] ?? options;
   }
+
   const defaultValue = typeof options?.defaultValue === 'string' ? options.defaultValue : undefined;
-  return interpolate(translations[key] ?? defaultValue ?? key, options);
+  // Check if options.ns overrides the requestedNs parameter
+  const nsFromOptions = typeof options?.ns === 'string' ? options.ns : undefined;
+
+  // Try to resolve: check namespace-prefixed key first (e.g., 'ctv:card.showFrontFor')
+  let resolvedKey = key;
+  let resolvedNs = nsFromOptions || requestedNs || 'common';
+
+  if (key.includes(':')) {
+    const [nsPrefix, ...keyParts] = key.split(':');
+    if (flatMap[nsPrefix]) {
+      resolvedNs = nsPrefix;
+      resolvedKey = keyParts.join(':');
+    }
+  }
+
+  const resolved = flatMap[resolvedNs]?.[resolvedKey] ?? defaultValue ?? key;
+  return interpolate(resolved, options);
 }
 
 // Mock react-i18next with the small locale surface needed by component tests.
 vi.mock('react-i18next', () => ({
-  useTranslation: (_ns?: string) => {
+  useTranslation: (ns?: string) => {
     // Respect localStorage language setting for tests
     const savedLang = localStorage.getItem('tg-lang') as string | null;
     const lang = (savedLang && ['en', 'vi'].includes(savedLang)) ? savedLang : 'vi';
 
     return {
-      t: translateForTest,
+      t: (key: string, options?: Record<string, unknown> | string) =>
+        translateForTest(key, options, ns),
       i18n: { language: lang, changeLanguage: vi.fn() },
     };
   },

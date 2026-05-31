@@ -50,7 +50,7 @@ describe('ReportsDashboard', () => {
   it('shows loading state while fetching', () => {
     mockFetch.mockReturnValue(new Promise(() => {}));
     renderWithProviders(<ReportsDashboard />);
-    expect(screen.getByText('loading')).toBeInTheDocument();
+    expect(screen.getByText('Đang tải…')).toBeInTheDocument();
   });
 
   it('renders KPI card labels when data loads', async () => {
@@ -58,11 +58,11 @@ describe('ReportsDashboard', () => {
 
     renderWithProviders(<ReportsDashboard />);
 
-    await screen.findByText('metrics.revenueCollected');
-    expect(screen.getByText('metrics.totalAppointments')).toBeInTheDocument();
-    expect(screen.getByText('metrics.newCustomers')).toBeInTheDocument();
+    await screen.findByText('Doanh thu đã thu');
+    expect(screen.getByText('Tổng lịch hẹn')).toBeInTheDocument();
+    expect(screen.getByText('Khách hàng mới')).toBeInTheDocument();
     // 'Outstanding' appears in KPI card and quick stats
-    const outstandingElements = screen.getAllByText('metrics.outstanding');
+    const outstandingElements = screen.getAllByText('Còn nợ');
     expect(outstandingElements.length).toBeGreaterThanOrEqual(1);
   });
 
@@ -91,7 +91,7 @@ describe('ReportsDashboard', () => {
 
     renderWithProviders(<ReportsDashboard />);
 
-    await screen.findByText('charts.revenueTrend12Month');
-    expect(screen.getByText('charts.appointmentRates')).toBeInTheDocument();
+    await screen.findByText('Xu hướng doanh thu 12 tháng');
+    expect(screen.getByText('Tỷ lệ lịch hẹn')).toBeInTheDocument();
   });
 });

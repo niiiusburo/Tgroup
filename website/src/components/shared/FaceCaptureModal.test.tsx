@@ -83,14 +83,15 @@ describe('FaceCaptureModal', () => {
 
   it('renders video and buttons when open', async () => {
     render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
-    expect(await screen.findByText('Chụp')).toBeInTheDocument();
+    expect(await screen.findByText('Chụp ảnh')).toBeInTheDocument();
     expect(screen.getByText('Hủy')).toBeInTheDocument();
   });
 
   it('calls onCancel when cancel is clicked', async () => {
     const onCancel = vi.fn();
     render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={onCancel} />);
-    fireEvent.click(await screen.findByText('Hủy'));
+    fireEvent.click(await screen.findByText('Chụp ảnh'));
+    fireEvent.click(screen.getByText('Hủy'));
     expect(onCancel).toHaveBeenCalled();
   });
 
@@ -103,7 +104,7 @@ describe('FaceCaptureModal', () => {
     mockGetUserMedia.mockRejectedValue(new Error('Camera denied'));
     render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
     await vi.waitFor(() => {
-      expect(screen.queryByText('Chụp')).not.toBeInTheDocument();
+      expect(screen.queryByText('Chụp ảnh')).not.toBeInTheDocument();
     });
   });
 
@@ -332,14 +333,14 @@ describe('FaceCaptureModal', () => {
 
   it('has close button with X icon', async () => {
     render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
-    const closeBtn = await screen.findByLabelText('Close');
+    const closeBtn = await screen.findByLabelText('Đóng');
     expect(closeBtn).toBeInTheDocument();
   });
 
   it('calls onCancel when close button is clicked', async () => {
     const onCancel = vi.fn();
     render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={onCancel} />);
-    fireEvent.click(await screen.findByLabelText('Close'));
+    fireEvent.click(await screen.findByLabelText('Đóng'));
     expect(onCancel).toHaveBeenCalled();
   });
 
@@ -352,7 +353,7 @@ describe('FaceCaptureModal', () => {
 
   it('renders camera icon in capture button', async () => {
     render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
-    const captureBtn = await screen.findByText('Chụp');
+    const captureBtn = await screen.findByText('Chụp ảnh');
     expect(captureBtn).toBeInTheDocument();
   });
 });

@@ -70,7 +70,7 @@ describe('AddCustomerForm', () => {
       />,
     );
 
-    expect(screen.getByText('form.notes')).toBeInTheDocument();
+    expect(screen.getByText('Ghi chú')).toBeInTheDocument();
     expect(screen.queryByText('form.customerSource')).not.toBeInTheDocument();
     expect(screen.queryByText('Nguồn khách hàng')).not.toBeInTheDocument();
     expect(screen.queryByDisplayValue('source-online')).not.toBeInTheDocument();
@@ -280,7 +280,7 @@ describe('AddCustomerForm', () => {
       expect(fetchEmployees).toHaveBeenCalledWith({ limit: 500, active: 'all', lob: 'cosmetic' });
     });
 
-    const referrerInput = screen.getByPlaceholderText(/tên hoặc số điện thoại/i);
+    const referrerInput = screen.getByPlaceholderText('Người giới thiệu');
     if (!referrerInput) throw new Error('Referrer input was not rendered');
 
     fireEvent.change(referrerInput, { target: { value: 'Cosmetic Referrer' } });
