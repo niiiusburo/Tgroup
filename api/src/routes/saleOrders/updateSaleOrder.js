@@ -96,7 +96,7 @@ async function updateSaleOrder(req, res) {
         customerId = ownerRows[0]?.partnerid || null;
       }
       if (ctv_id) {
-        await setCustomerReferrer(q, customerId, ctv_id);
+        await setCustomerReferrer(q, customerId, ctv_id, { lob: req.lob || 'dental' });
       } else {
         await clearCustomerReferrer(q, customerId);
       }

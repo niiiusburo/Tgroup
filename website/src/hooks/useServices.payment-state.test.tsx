@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createSaleOrder, updateSaleOrder } from '@/lib/api';
 import { useServices } from './useServices';
 
@@ -58,6 +58,10 @@ vi.mock('@/lib/api', () => ({
 }));
 
 describe('useServices payment state mapping', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('trusts explicit zero totalpaid instead of inferring fully paid from stale zero residual', async () => {
     const { result } = renderHook(() => useServices(undefined, 'customer-id'));
 
@@ -122,5 +126,74 @@ describe('useServices payment state mapping', () => {
     });
 
     expect(updateSaleOrder).toHaveBeenCalledWith('order-id', expect.any(Object), 'cosmetic');
+  });
+
+  it('drops fallback customer-source ids before writing sale orders', async () => {
+    const { result } = renderHook(() => useServices(undefined, 'customer-id'));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(async () => {
+      await result.current.createServiceRecord({
+        customerId: 'customer-id',
+        customerName: 'Customer',
+        customerPhone: '0900000000',
+        catalogItemId: 'service-id',
+        serviceName: 'Cosmetic service',
+        category: 'cosmetic',
+        doctorId: null,
+        doctorName: '',
+        locationId: 'location-id',
+        locationName: 'Cosmetic location',
+        totalVisits: 1,
+        totalCost: 100,
+        startDate: '2026-05-23',
+        expectedEndDate: '2026-05-23',
+        notes: '',
+        toothNumbers: [],
+        sourceId: 'src-1',
+      });
+    });
+
+    expect(createSaleOrder).toHaveBeenCalledWith(
+      expect.objectContaining({ sourceid: null }),
+      'cosmetic',
+    );
+  });
+
+  it('keeps valid customer-source uuids in the sale order payload', async () => {
+    const validSourceId = '11111111-1111-4111-8111-111111111111';
+    const { result } = renderHook(() => useServices(undefined, 'customer-id'));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(async () => {
+      await result.current.updateServiceRecord({
+        id: 'order-id',
+        customerId: 'customer-id',
+        customerName: 'Customer',
+        customerPhone: '0900000000',
+        catalogItemId: 'service-id',
+        serviceName: 'Cosmetic service',
+        category: 'cosmetic',
+        doctorId: null,
+        doctorName: '',
+        locationId: 'location-id',
+        locationName: 'Cosmetic location',
+        totalVisits: 1,
+        totalCost: 100,
+        startDate: '2026-05-23',
+        expectedEndDate: '2026-05-23',
+        notes: '',
+        toothNumbers: [],
+        sourceId: validSourceId,
+      });
+    });
+
+    expect(updateSaleOrder).toHaveBeenCalledWith(
+      'order-id',
+      expect.objectContaining({ sourceid: validSourceId }),
+      'cosmetic',
+    );
   });
 });

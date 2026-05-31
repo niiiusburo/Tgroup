@@ -44,7 +44,7 @@ beforeEach(() => {
 describe('PUT /api/Ctvs/:id', () => {
   it('updates name, phone and email and returns the updated row', async () => {
     mockDentalRows.mockImplementation(async (sql) => {
-      if (sql.includes('is_ctv = true AND isdeleted = false')) return [{ id: 'ctv-1' }];
+      if (sql.includes('id = $1 AND is_ctv = true')) return [{ id: 'ctv-1' }];
       if (sql.includes('LOWER(phone)')) return []; // no dup
       if (sql.includes('LOWER(email)')) return []; // no dup
       if (sql.trim().startsWith('UPDATE dbo.partners SET')) {
@@ -69,7 +69,7 @@ describe('PUT /api/Ctvs/:id', () => {
 
   it('hashes a provided password into password_hash', async () => {
     mockDentalRows.mockImplementation(async (sql) => {
-      if (sql.includes('is_ctv = true AND isdeleted = false')) return [{ id: 'ctv-1' }];
+      if (sql.includes('id = $1 AND is_ctv = true')) return [{ id: 'ctv-1' }];
       if (sql.includes('LOWER(email)')) return [];
       if (sql.trim().startsWith('UPDATE dbo.partners SET')) return [{ id: 'ctv-1', name: 'X' }];
       throw new Error(`Unexpected SQL: ${sql}`);
@@ -90,7 +90,7 @@ describe('PUT /api/Ctvs/:id', () => {
 
   it('rejects a duplicate phone belonging to another partner', async () => {
     mockDentalRows.mockImplementation(async (sql) => {
-      if (sql.includes('is_ctv = true AND isdeleted = false')) return [{ id: 'ctv-1' }];
+      if (sql.includes('id = $1 AND is_ctv = true')) return [{ id: 'ctv-1' }];
       if (sql.includes('LOWER(phone)')) return [{ id: 'other-ctv' }]; // dup!
       throw new Error(`Unexpected SQL: ${sql}`);
     });
@@ -101,6 +101,30 @@ describe('PUT /api/Ctvs/:id', () => {
 
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe('U_DUPLICATE_PHONE');
+  });
+
+  it('allows saving when the phone is shared by a CUSTOMER row (not another CTV)', async () => {
+    // Regression: a CTV's phone often also appears on their own customer rows (and migration 044
+    // allows duplicate customer phones). The dup guard must scope to is_ctv = true, so editing the
+    // CTV does not falsely trip "Phone number already exists" on a customer collision.
+    mockDentalRows.mockImplementation(async (sql) => {
+      if (sql.includes('id = $1 AND is_ctv = true')) return [{ id: 'ctv-1' }]; // the CTV exists
+      // dup query is scoped to is_ctv = true → no other CTV shares the phone (customers excluded)
+      if (sql.includes('LOWER(phone)')) {
+        expect(sql).toContain('is_ctv = true'); // guard must be CTV-scoped
+        return [];
+      }
+      if (sql.includes('LOWER(email)')) return [];
+      if (sql.trim().startsWith('UPDATE dbo.partners SET')) return [{ id: 'ctv-1', name: 'Trần Trung Kiên', phone: '0972020908' }];
+      throw new Error(`Unexpected SQL: ${sql}`);
+    });
+
+    const res = await request(app)
+      .put('/api/Ctvs/ctv-1')
+      .send({ name: 'Trần Trung Kiên', phone: '0972020908', password: 'newpass123' });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ id: 'ctv-1' });
   });
 
   it('rejects an invalid email format', async () => {
@@ -127,7 +151,7 @@ describe('PUT /api/Ctvs/:id', () => {
 
   it('returns 404 when the CTV does not exist', async () => {
     mockDentalRows.mockImplementation(async (sql) => {
-      if (sql.includes('is_ctv = true AND isdeleted = false')) return []; // not found
+      if (sql.includes('id = $1 AND is_ctv = true')) return []; // not found
       throw new Error(`Unexpected SQL: ${sql}`);
     });
     const res = await request(app).put('/api/Ctvs/missing').send({ name: 'X' });
@@ -144,7 +168,7 @@ describe('PUT /api/Ctvs/:id', () => {
 
   it('mirrors the update into the cosmetic DB when the row exists there', async () => {
     mockDentalRows.mockImplementation(async (sql) => {
-      if (sql.includes('is_ctv = true AND isdeleted = false')) return [{ id: 'ctv-1' }];
+      if (sql.includes('id = $1 AND is_ctv = true')) return [{ id: 'ctv-1' }];
       if (sql.includes('LOWER(email)')) return [];
       if (sql.trim().startsWith('UPDATE dbo.partners SET')) return [{ id: 'ctv-1', name: 'X' }];
       throw new Error(`Unexpected SQL: ${sql}`);
@@ -165,7 +189,7 @@ describe('PUT /api/Ctvs/:id', () => {
   // identifier of a non-legacy CTV would lock them out permanently). ---
   it('rejects an empty email (lockout guard) and never persists a blank email', async () => {
     mockDentalRows.mockImplementation(async (sql) => {
-      if (sql.includes('is_ctv = true AND isdeleted = false')) return [{ id: 'ctv-1' }];
+      if (sql.includes('id = $1 AND is_ctv = true')) return [{ id: 'ctv-1' }];
       if (sql.trim().startsWith('UPDATE dbo.partners SET')) {
         throw new Error('UPDATE must not run for an empty email');
       }
@@ -194,7 +218,7 @@ describe('PUT /api/Ctvs/:id', () => {
 
   it('rejects a duplicate email belonging to another partner', async () => {
     mockDentalRows.mockImplementation(async (sql) => {
-      if (sql.includes('is_ctv = true AND isdeleted = false')) return [{ id: 'ctv-1' }];
+      if (sql.includes('id = $1 AND is_ctv = true')) return [{ id: 'ctv-1' }];
       if (sql.includes('LOWER(email)')) return [{ id: 'other-ctv' }]; // dup!
       throw new Error(`Unexpected SQL: ${sql}`);
     });
@@ -205,7 +229,7 @@ describe('PUT /api/Ctvs/:id', () => {
 
   it('updates ONLY the name when no other field is provided', async () => {
     mockDentalRows.mockImplementation(async (sql) => {
-      if (sql.includes('is_ctv = true AND isdeleted = false')) return [{ id: 'ctv-1' }];
+      if (sql.includes('id = $1 AND is_ctv = true')) return [{ id: 'ctv-1' }];
       if (sql.trim().startsWith('UPDATE dbo.partners SET')) return [{ id: 'ctv-1', name: 'Only Name' }];
       throw new Error(`Unexpected SQL: ${sql}`);
     });
@@ -220,7 +244,7 @@ describe('PUT /api/Ctvs/:id', () => {
 
   it('updates ONLY the password when no other field is provided', async () => {
     mockDentalRows.mockImplementation(async (sql) => {
-      if (sql.includes('is_ctv = true AND isdeleted = false')) return [{ id: 'ctv-1' }];
+      if (sql.includes('id = $1 AND is_ctv = true')) return [{ id: 'ctv-1' }];
       if (sql.trim().startsWith('UPDATE dbo.partners SET')) return [{ id: 'ctv-1', name: 'X' }];
       throw new Error(`Unexpected SQL: ${sql}`);
     });
@@ -235,7 +259,7 @@ describe('PUT /api/Ctvs/:id', () => {
 
   it('treats an empty-string password as "no change" (kept) while still applying other fields', async () => {
     mockDentalRows.mockImplementation(async (sql) => {
-      if (sql.includes('is_ctv = true AND isdeleted = false')) return [{ id: 'ctv-1' }];
+      if (sql.includes('id = $1 AND is_ctv = true')) return [{ id: 'ctv-1' }];
       if (sql.includes('LOWER(email)')) return [];
       if (sql.trim().startsWith('UPDATE dbo.partners SET')) return [{ id: 'ctv-1', name: 'X' }];
       throw new Error(`Unexpected SQL: ${sql}`);
@@ -249,7 +273,7 @@ describe('PUT /api/Ctvs/:id', () => {
 
   it('resets a legacy CTV password without touching created_via (legacy login stays intact)', async () => {
     mockDentalRows.mockImplementation(async (sql) => {
-      if (sql.includes('is_ctv = true AND isdeleted = false')) return [{ id: 'ctv-1' }];
+      if (sql.includes('id = $1 AND is_ctv = true')) return [{ id: 'ctv-1' }];
       if (sql.trim().startsWith('UPDATE dbo.partners SET')) {
         return [{ id: 'ctv-1', name: 'Legacy', created_via: 'legacy_ctv_import_2026' }];
       }
@@ -266,7 +290,7 @@ describe('PUT /api/Ctvs/:id', () => {
 
   it('still returns 200 when the cosmetic mirror UPDATE throws (best-effort mirror)', async () => {
     mockDentalRows.mockImplementation(async (sql) => {
-      if (sql.includes('is_ctv = true AND isdeleted = false')) return [{ id: 'ctv-1' }];
+      if (sql.includes('id = $1 AND is_ctv = true')) return [{ id: 'ctv-1' }];
       if (sql.includes('LOWER(email)')) return [];
       if (sql.trim().startsWith('UPDATE dbo.partners SET')) return [{ id: 'ctv-1', name: 'X' }];
       throw new Error(`Unexpected SQL: ${sql}`);

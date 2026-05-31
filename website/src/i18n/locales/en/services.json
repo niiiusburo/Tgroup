@@ -18,7 +18,9 @@
     "description": "Description",
     "serviceCode": "Service Code",
     "uom": "Unit",
-    "listPrice": "List Price"
+    "listPrice": "List Price",
+    "commissionRate": "Commission Rate (%)",
+    "commissionRateShort": "Comm%"
   },
   "categories": {
     "all": "All Categories",

@@ -102,8 +102,9 @@ async function createAppointment(req, res) {
     const newAppointment = result[0];
 
     // Assign the chosen CTV as the customer's commission referrer (assign-only no-op
-    // when ctv_id is absent/empty — never clears an existing referrer).
-    await setCustomerReferrer(q, partnerId, ctvId);
+    // when ctv_id is absent/empty — never clears an existing referrer). lob enables the
+    // retroactive earnings backfill (harmless no-op on a new appointment with no payments).
+    await setCustomerReferrer(q, partnerId, ctvId, { lob: req.lob || 'dental' });
 
     // Fetch full details with joins
     const rows = await q(
@@ -351,7 +352,7 @@ async function updateAppointment(req, res) {
       const ownerRows = await q('SELECT partnerid FROM appointments WHERE id = $1', [id]);
       const customerId = ownerRows[0]?.partnerid || null;
       if (ctvId) {
-        await setCustomerReferrer(q, customerId, ctvId);
+        await setCustomerReferrer(q, customerId, ctvId, { lob: req.lob || 'dental' });
       } else {
         await clearCustomerReferrer(q, customerId);
       }

@@ -98,8 +98,9 @@ async function createSaleOrder(req, res) {
     }
 
     // Assign the chosen CTV as the customer's commission referrer (assign-only no-op
-    // when ctv_id is absent/empty — never clears an existing referrer).
-    await setCustomerReferrer(q, partnerid, ctv_id);
+    // when ctv_id is absent/empty — never clears an existing referrer). lob enables the
+    // retroactive earnings backfill (harmless no-op on a brand-new order with no payments).
+    await setCustomerReferrer(q, partnerid, ctv_id, { lob: req.lob || 'dental' });
 
     const rows = await fetchSaleOrderById(id, q);
     return res.status(201).json(rows[0]);

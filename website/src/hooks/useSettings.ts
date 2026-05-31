@@ -212,7 +212,7 @@ function mapApiSource(api: ApiCustomerSource): CustomerSource {
 
 export function useCustomerSources() {
   const { currentLOB } = useBusinessUnit();
-  const [sources, setSources] = useState<CustomerSource[]>([...DEFAULT_CUSTOMER_SOURCES]);
+  const [sources, setSources] = useState<CustomerSource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<string>('all');
@@ -226,12 +226,10 @@ export function useCustomerSources() {
         type: typeFilter !== 'all' ? typeFilter : undefined,
         lob: currentLOB,
       });
-      if (response.items.length > 0) {
-        setSources(response.items.map(mapApiSource));
-      }
+      setSources(response.items.map(mapApiSource));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load sources');
-      // Keep defaults on error
+      setSources([...DEFAULT_CUSTOMER_SOURCES]);
     } finally {
       setLoading(false);
     }
