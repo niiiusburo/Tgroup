@@ -1,107 +1,87 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pill } from '@/components/ctv/Pill';
-import type { CtvCommissionSummary } from '@/lib/api/ctv';
+
+import { formatVND } from '@/lib/formatting';
+import type { CtvCommissionRow, CtvCommissionSummary } from '@/lib/api/ctv';
+import { cn } from '@/lib/utils';
 import { useCtvLocale } from '@/lib/i18n/ctv';
 
-type CommissionSub = 'pending' | 'paid';
+type CommissionMode = 'pending' | 'paid';
 
-interface Props {
-  summary: CtvCommissionSummary | null;
+interface CtvCommissionTabProps {
+  readonly summary: CtvCommissionSummary | null;
+  readonly isLoading: boolean;
 }
 
-export function CtvCommissionTab({ summary }: Props) {
-  const { t } = useTranslation('ctv');
+function CommissionRow({ row }: { readonly row: CtvCommissionRow }) {
   const ctv = useCtvLocale();
-  const [commissionSub, setCommissionSub] = useState<CommissionSub>('pending');
-
-  const pending = summary?.totals?.pending || 0;
-  const paid = summary?.totals?.paid || 0;
 
   return (
-    <>
-      <div className="text-xl font-semibold tracking-tight mb-4">{t('commission.myCommission')}</div>
+    <article className="flex items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-100">
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold text-gray-900">{row.client_name || ctv.unknownClient()}</p>
+        <p className="mt-1 text-xs text-gray-500">
+          {ctv.getLobLabel(row.lob)} · {row.service_name || ctv.unknownService()}
+        </p>
+      </div>
+      <p className="shrink-0 text-sm font-bold text-orange-600">{formatVND(Math.abs(row.amount))}</p>
+    </article>
+  );
+}
 
-      {/* Segmented control */}
-      <div className="inline-flex bg-orange-50 ring-1 ring-orange-100 rounded-full p-1 mb-5">
-        <button
-          onClick={() => setCommissionSub('pending')}
-          className={`px-6 py-1.5 rounded-full text-sm font-semibold transition-all ${
-            commissionSub === 'pending'
-              ? 'bg-white text-orange-700 shadow-sm shadow-orange-500/20'
-              : 'text-orange-600/70 hover:text-orange-700'
-          }`}
-        >
-          {t('commission.pending')}
-        </button>
-        <button
-          onClick={() => setCommissionSub('paid')}
-          className={`px-6 py-1.5 rounded-full text-sm font-semibold transition-all ${
-            commissionSub === 'paid'
-              ? 'bg-white text-orange-700 shadow-sm shadow-orange-500/20'
-              : 'text-orange-600/70 hover:text-orange-700'
-          }`}
-        >
-          {t('commission.paid')}
-        </button>
+export function CtvCommissionTab({ summary, isLoading }: CtvCommissionTabProps) {
+  const { t } = useTranslation('ctv');
+  const [mode, setMode] = useState<CommissionMode>('pending');
+
+  const rows = useMemo(() => {
+    if (!summary) return [];
+    if (mode === 'pending') return summary.pendingList?.length ? summary.pendingList : summary.recent.filter((row) => row.status === 'pending');
+    return summary.paidList?.length ? summary.paidList : summary.recent.filter((row) => row.status !== 'pending');
+  }, [mode, summary]);
+
+  if (isLoading) {
+    return <div className="h-40 animate-pulse rounded-3xl bg-white ring-1 ring-gray-100" aria-hidden="true" />;
+  }
+
+  return (
+    <div>
+      <h2 className="text-xl font-semibold tracking-tight">{t('commission.myCommission')}</h2>
+
+      <div className="mt-4 inline-flex rounded-full bg-orange-50 p-1 ring-1 ring-orange-100">
+        {(['pending', 'paid'] as CommissionMode[]).map((item) => (
+          <button
+            key={item}
+            type="button"
+            onClick={() => setMode(item)}
+            className={cn(
+              'rounded-full px-5 py-1.5 text-sm font-semibold transition-all',
+              mode === item ? 'bg-white text-orange-700 shadow-sm shadow-orange-500/20' : 'text-orange-600/70'
+            )}
+          >
+            {t(`commission.${item}`)}
+          </button>
+        ))}
       </div>
 
-      {commissionSub === 'pending' ? (
-        <div className="space-y-3">
-          <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-3xl p-5 shadow-lg shadow-orange-500/25">
-            <div className="text-[11px] uppercase tracking-[0.15em] font-semibold text-orange-100/90">{t('commission.totalPending')}</div>
-            <div className="text-3xl font-bold tabular-nums mt-1">{ctv.formatCurrency(pending)}</div>
-            <div className="text-sm text-orange-100/90 mt-1">
-              {t('commission.servicesAcrossClients', { count: summary?.counts?.pending || 0, clients: summary?.pendingList?.length || 0 })}
-            </div>
-          </div>
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.15em] font-semibold text-gray-500 mb-2 px-1">{t('commission.byService')}</div>
-            {(summary?.pendingList || summary?.recent || []).filter((r: any) => r.status === 'pending').map((row: any, idx: number) => (
-              <div key={idx} className="bg-white rounded-2xl p-4 mb-2 ring-1 ring-gray-100 flex justify-between items-center text-sm">
-                <div className="flex items-center gap-2 min-w-0">
-                  <Pill lob={row.lob} />
-                  <span className="font-medium truncate">{row.client_name || ctv.unknownClient()}</span>
-                </div>
-                <div className="font-semibold tabular-nums shrink-0">{ctv.formatCurrency(row.amount)}</div>
-              </div>
-            ))}
-            {(!summary?.pendingList || summary.pendingList.length === 0) && (
-              <div className="text-gray-400 px-2 py-2 text-sm">{t('commission.noPending')}</div>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          <div className="bg-white rounded-3xl p-5 ring-1 ring-gray-100 shadow-sm">
-            <div className="text-[11px] uppercase tracking-[0.15em] font-semibold text-gray-500">{t('commission.totalPaid')}</div>
-            <div className="text-3xl font-bold tabular-nums text-gray-900 mt-1">{ctv.formatCurrency(paid)}</div>
-            <div className="text-sm text-gray-500 mt-1">{summary?.payouts?.length || 0} {t('commission.payoutCycles')}</div>
-          </div>
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.15em] font-semibold text-gray-500 mb-2 px-1">{t('commission.payoutCycles')}</div>
-            {(summary?.payouts || []).map((p) => (
-              <div key={p.id} className="bg-white p-4 rounded-2xl ring-1 ring-gray-100 mb-2 flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <div>
-                    <div className="text-sm font-medium">{p.cycle_label}</div>
-                    <div className="text-xs text-gray-500">{ctv.getLobLabel(p.lob)} · {ctv.formatShortDate(p.paid_at)}</div>
-                  </div>
-                  {p.receipt_url && (
-                    <a href={p.receipt_url} target="_blank" rel="noreferrer">
-                      <img src={p.receipt_url} alt="Receipt" className="h-8 w-8 rounded border border-gray-200 object-cover" />
-                    </a>
-                  )}
-                </div>
-                <div className="font-semibold tabular-nums">{ctv.formatCurrency(p.total_amount)}</div>
-              </div>
-            ))}
-            {(!summary?.payouts || summary.payouts.length === 0) && (
-              <div className="bg-white rounded-2xl p-4 ring-1 ring-gray-100 text-sm text-gray-500">{t('commission.noPayouts')}</div>
-            )}
-          </div>
-        </div>
-      )}
-    </>
+      <section className="mt-5 rounded-3xl bg-orange-500 p-5 text-white shadow-lg shadow-orange-500/20">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-orange-100">
+          {mode === 'pending' ? t('commission.totalPending') : t('commission.totalPaid')}
+        </p>
+        <p className="mt-1 text-3xl font-bold">
+          {formatVND(mode === 'pending' ? summary?.totals.pending ?? 0 : summary?.totals.paid ?? 0)}
+        </p>
+      </section>
+
+      <div className="mt-4 space-y-2">
+        {rows.map((row) => (
+          <CommissionRow key={row.id} row={row} />
+        ))}
+        {rows.length === 0 ? (
+          <p className="rounded-2xl bg-white p-5 text-center text-sm text-gray-500 ring-1 ring-gray-100">
+            {mode === 'pending' ? t('commission.noPending') : t('commission.noPayouts')}
+          </p>
+        ) : null}
+      </div>
+    </div>
   );
 }

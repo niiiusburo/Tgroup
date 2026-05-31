@@ -1,84 +1,87 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LogOut, Copy, Check } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { LANG_LABELS, type SupportedLang } from '@/i18n';
+import { Check, Copy, LogOut } from 'lucide-react';
 
-interface Props {
-  me: { id: string; name: string; email?: string; phone?: string; referral_code?: string } | null;
+import { LanguageToggle } from '@/components/shared/LanguageToggle';
+import { useAuth } from '@/contexts/AuthContext';
+import type { CtvProfile } from '@/lib/api/ctv';
+
+interface CtvMeTabProps {
+  readonly profile: CtvProfile | null;
 }
 
-export function CtvMeTab({ me }: Props) {
+export function CtvMeTab({ profile }: CtvMeTabProps) {
   const { logout, user } = useAuth();
-  const { t, i18n } = useTranslation('ctv');
+  const { t } = useTranslation('ctv');
   const [copied, setCopied] = useState(false);
-
-  const displayName = me?.name || user?.name || 'CTV';
-  const email = me?.email || user?.email || '—';
-  const phone = me?.phone;
-  const referralCode = me?.referral_code || 'CTV-' + (me?.id?.slice(0, 6).toUpperCase() || '000000');
-  const languageLabel = LANG_LABELS[(i18n.language.startsWith('en') ? 'en' : 'vi') as SupportedLang];
+  const displayName = profile?.name || user?.name || t('profileFallback');
+  const email = profile?.email || user?.email || '-';
+  const phone = profile?.phone;
+  const referralSource = profile?.id || user?.id || '000000';
+  const referralCode = `CTV-${referralSource.slice(0, 6).toUpperCase()}`;
 
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(referralCode);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      window.setTimeout(() => setCopied(false), 1800);
     } catch {
-      // fallback ignored
+      setCopied(false);
     }
   }
 
   return (
-    <div className="pt-2">
-      {/* Profile Card */}
-      <div className="bg-white rounded-3xl p-6 ring-1 ring-gray-100 shadow-sm text-center">
-        <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-3xl text-white shadow-lg shadow-orange-500/25 mb-3">
+    <div>
+      <section className="rounded-3xl bg-white p-6 text-center shadow-sm ring-1 ring-gray-100">
+        <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-orange-500 text-3xl font-bold text-white shadow-lg shadow-orange-500/25">
           {displayName.slice(0, 1).toUpperCase()}
         </div>
-        <div className="text-xl font-semibold tracking-tight">{displayName}</div>
-        <div className="text-xs text-orange-600 uppercase tracking-[0.15em] font-semibold mt-1">{t('me.ctvPartner')}</div>
-        <div className="text-sm text-gray-600 mt-3">{email}</div>
-        {phone && <div className="text-sm text-gray-600">{phone}</div>}
-      </div>
+        <h2 className="mt-3 text-xl font-semibold tracking-tight text-gray-900">{displayName}</h2>
+        <p className="mt-1 text-xs font-semibold uppercase tracking-[0.15em] text-orange-600">{t('me.ctvPartner')}</p>
+        <p className="mt-3 text-sm text-gray-600">{email}</p>
+        {phone ? <p className="text-sm text-gray-600">{phone}</p> : null}
+      </section>
 
-      {/* Referral Code */}
-      <div className="bg-white rounded-3xl ring-1 ring-gray-100 mt-4 p-5">
-        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t('me.referralCode')}</div>
-        <div className="flex items-center gap-2">
-          <div className="flex-1 px-4 py-3 bg-gray-50 rounded-xl text-sm font-mono font-semibold text-gray-800 tracking-wider">
+      <section className="mt-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{t('me.referralCode')}</p>
+        <div className="mt-3 flex items-center gap-2">
+          <div className="min-w-0 flex-1 rounded-xl bg-gray-50 px-4 py-3 font-mono text-sm font-semibold tracking-wider text-gray-800">
             {referralCode}
           </div>
           <button
+            type="button"
             onClick={handleCopy}
-            className="w-11 h-11 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center hover:bg-orange-100 transition"
+            className="grid h-11 w-11 place-items-center rounded-xl bg-orange-50 text-orange-600 transition-colors hover:bg-orange-100"
             aria-label={t('actions.copy')}
           >
-            {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+            {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
           </button>
         </div>
-        <div className="text-[11px] text-gray-400 mt-2">{t('me.copyCodeHint')}</div>
-        {copied && <div className="text-xs text-emerald-600 font-medium mt-1">{t('actions.copied')}</div>}
-      </div>
+        <p className="mt-2 text-[11px] text-gray-400">{t('me.copyCodeHint')}</p>
+        {copied ? <p className="mt-1 text-xs font-medium text-emerald-600">{t('actions.copied')}</p> : null}
+      </section>
 
-      {/* Settings */}
-      <div className="bg-white rounded-3xl ring-1 ring-gray-100 mt-4 divide-y divide-gray-50 text-sm">
-        <div className="flex justify-between items-center px-5 py-3.5">
+      <section className="mt-4 divide-y divide-gray-50 rounded-3xl bg-white text-sm shadow-sm ring-1 ring-gray-100">
+        <div className="flex items-center justify-between px-5 py-3.5">
           <span className="text-gray-600">{t('me.language')}</span>
-          <span className="font-medium text-gray-900">{languageLabel}</span>
+          <LanguageToggle compact menuPlacement="below" />
         </div>
-        <div className="flex justify-between items-center px-5 py-3.5">
+        <div className="flex items-center justify-between px-5 py-3.5">
           <span className="text-gray-600">{t('me.notifications')}</span>
           <span className="font-medium text-emerald-600">{t('me.on')}</span>
         </div>
-      </div>
+      </section>
 
-      {/* Logout */}
       <button
-        onClick={() => { logout(); window.location.href = '/login'; }}
-        className="w-full mt-6 py-3.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl font-semibold shadow-lg shadow-orange-500/25 active:opacity-90 active:scale-[0.99] transition flex items-center justify-center gap-2"
+        type="button"
+        onClick={() => {
+          logout();
+          window.location.href = '/login';
+        }}
+        className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 py-3.5 font-semibold text-white shadow-lg shadow-orange-500/25 transition active:scale-[0.99]"
       >
-        <LogOut className="w-4 h-4" /> {t('actions.logout')}
+        <LogOut className="h-4 w-4" />
+        {t('actions.logout')}
       </button>
     </div>
   );

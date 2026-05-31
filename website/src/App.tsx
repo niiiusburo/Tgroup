@@ -5,6 +5,7 @@ import { Layout } from '@/components/Layout';
 import { LocationProvider } from '@/contexts/LocationContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { BusinessUnitProvider, useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { TimezoneProvider } from '@/contexts/TimezoneContext';
 import { Login } from '@/pages';
 import { ROUTES, ROUTE_PERMISSIONS } from '@/constants';
@@ -135,6 +136,11 @@ function LoginRoute() {
   return <Login />;
 }
 
+function AppRoutes({ children }: { readonly children: React.ReactNode }) {
+  const { currentLOB } = useBusinessUnit();
+  return <Routes key={currentLOB}>{children}</Routes>;
+}
+
 /**
  * Main Application Component
  * @crossref:root-component
@@ -159,13 +165,14 @@ function App() {
     <AuthProvider>
       <TimezoneProvider>
         <LocationProvider>
-        <Suspense fallback={<div className="flex items-center justify-center h-screen text-gray-500">Loading...</div>}>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/login" element={<LoginRoute />} />
-          {import.meta.env.DEV && (
-            <Route path="/test/address" element={<AddressAutocompleteTest />} />
-          )}
+          <BusinessUnitProvider>
+            <Suspense fallback={<div className="flex items-center justify-center h-screen text-gray-500">Loading...</div>}>
+              <AppRoutes>
+                {/* Public routes */}
+                <Route path="/login" element={<LoginRoute />} />
+                {import.meta.env.DEV && (
+                  <Route path="/test/address" element={<AddressAutocompleteTest />} />
+                )}
 
           {/* Protected routes wrapped in Layout */}
           <Route
@@ -365,9 +372,10 @@ function App() {
               </CTVRouteGuard>
             }
           />
-        </Routes>
-        </Suspense>
-      </LocationProvider>
+              </AppRoutes>
+            </Suspense>
+          </BusinessUnitProvider>
+        </LocationProvider>
       </TimezoneProvider>
     </AuthProvider>
   );

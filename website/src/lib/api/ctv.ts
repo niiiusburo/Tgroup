@@ -1,125 +1,148 @@
-/**
- * ctv.ts — API client for CTV dashboard (v2.1)
- * Calls /api/ctv/* (self-gated)
- */
 import { apiFetch } from './core';
+import { maskPhone, maskEmail } from '@/lib/pii';
 
-export interface CtvPayoutCycle {
-  id: string;
-  lob: 'dental' | 'cosmetic';
-  cycle_label: string;
-  paid_at?: string;
-  total_amount: number;
-  receipt_url?: string | null;
-}
+export type CtvLob = 'dental' | 'cosmetic';
+export type CtvServiceStatus = 'pending' | 'paid' | 'reversed' | string;
+export type CtvJourneyStage = 'referred' | 'visited' | 'serviced' | 'paid';
 
-export interface CtvCommissionSummary {
-  totals: {
-    pending: number;
-    paid: number;
-    dentalPending: number;
-    cosmeticPending: number;
-  };
-  counts: { pending: number; paid: number };
-  recent: Array<{
-    id: string;
-    client_name: string | null;
-    amount: number;
-    source: string;
-    lob: 'dental' | 'cosmetic';
-    earned_at: string;
-    status: string;
-  }>;
-  pendingList?: any[];
-  paidList?: any[];
-  payouts?: CtvPayoutCycle[];
+export interface CtvReferralService {
+  readonly id: string;
+  readonly serviceLineId: string | null;
+  readonly paymentId: string | null;
+  readonly serviceName: string | null;
+  readonly amount: number;
+  readonly status: CtvServiceStatus;
+  readonly source: string;
+  readonly lob: CtvLob;
+  readonly earnedAt: string | null;
 }
 
 export interface CtvReferral {
-  id: string;
-  name: string | null;
-  phone?: string;
-  lobs: string[];
-  total_earned: number;
-  earned_count: number;
-  status: 'earning' | 'no visit yet';
-  referred_at?: string;
+  readonly id: string;
+  readonly name: string | null;
+  readonly phone: string;
+  readonly lobs: CtvLob[];
+  readonly total_earned: number;
+  readonly earned_count: number;
+  readonly service_count: number;
+  readonly status: 'earning' | 'no visit yet' | 'paid' | string;
+  readonly referred_at: string | null;
+  readonly services: CtvReferralService[];
+  // Activity-based journey (from /ctv/referrals): reflects the client's real progress
+  // (visited/serviced/paid) independent of commission payout. Optional for back-compat.
+  readonly stage?: CtvJourneyStage;
+  readonly stage_progress?: 1 | 2 | 3 | 4;
+  readonly last_payment_at?: string | null;
+  readonly last_visit_at?: string | null;
 }
 
-/** Extended referral with client journey tracking stages */
-export interface CtvClientJourney {
-  id: string;
-  name: string | null;
-  phone?: string;
-  lobs: string[];
-  referred_at: string;
-  referred_via?: string;
-  stage: 'referred' | 'visited' | 'serviced' | 'paid';
-  stage_progress: number; // 1-4
-  visit?: {
-    date: string;
-    time?: string;
-    doctor?: string;
-    location?: string;
+export interface CtvReferralResponse {
+  readonly referrals: CtvReferral[];
+}
+
+export interface CtvHierarchyNode {
+  readonly id: string;
+  readonly name: string;
+  readonly email: string;
+  readonly phone: string;
+  readonly joinedAt: string | null;
+  readonly referredByCtvId: string | null;
+  readonly level: number;
+  readonly directDownlineCount: number;
+  readonly lobs: CtvLob[];
+  /** This member's own total earnings (downline nodes only). */
+  readonly earned?: number;
+  /** This member's contribution to the current CTV's projected override (downline nodes only). */
+  readonly overrideContribution?: number;
+}
+
+export interface CtvHierarchyResponse {
+  readonly current: CtvHierarchyNode;
+  readonly upline: CtvHierarchyNode[];
+  readonly downline: CtvHierarchyNode[];
+  readonly totals: {
+    readonly uplineCount: number;
+    readonly downlineCount: number;
+    readonly directDownlineCount: number;
+    /** Σ of the whole downline's own earnings (their direct commissions). */
+    readonly downlineEarningsBase?: number;
+    /** Projected override this CTV could earn from the downline (base × level share %). */
+    readonly potentialOverride?: number;
+    /** Effective "% you earn from your downline" (blended), or the L1 rate when base is 0. */
+    readonly overrideRatePct?: number;
   };
-  service?: {
-    name: string | null;
-    amount: number;
-    date?: string;
-    next_appointment?: string;
+}
+
+export interface CtvCommissionRow {
+  readonly id: string;
+  readonly client_id?: string;
+  readonly client_name: string | null;
+  readonly service_line_id?: string | null;
+  readonly service_name?: string | null;
+  readonly payment_id?: string | null;
+  readonly amount: number;
+  readonly source: string;
+  readonly lob: CtvLob;
+  readonly earned_at: string | null;
+  readonly status: CtvServiceStatus;
+}
+
+export interface CtvCommissionSummary {
+  readonly totals: {
+    readonly pending: number;
+    readonly paid: number;
+    readonly dentalPending: number;
+    readonly cosmeticPending: number;
   };
-  payment?: {
-    amount: number;
-    date: string;
-    method?: string;
-    commission_earned: number;
-    commission_rate?: string;
+  readonly counts: {
+    readonly pending: number;
+    readonly paid: number;
   };
-  total_earned: number;
-  estimated_commission?: number;
+  readonly recent: CtvCommissionRow[];
+  readonly pendingList: CtvCommissionRow[];
+  readonly paidList: CtvCommissionRow[];
 }
 
-export interface CtvNetworkNode {
-  id: string;
-  name?: string;
-  phone?: string;
-  email?: string;
-  active?: boolean;
-  lobs?: string[];
-  level?: number;
-  referred_by_ctv_id?: string | null;
-  client_count?: number;
-  active_earnings_sum?: number;
-  children?: CtvNetworkNode[];
+export interface CtvProfile {
+  readonly id: string;
+  readonly name: string;
+  readonly email: string;
+  readonly phone: string;
+  readonly role: string;
 }
 
-export interface CtvNetworkResponse {
-  self: CtvNetworkNode;
-  upline: CtvNetworkNode | null;
-  direct: CtvNetworkNode[];
-  downline: CtvNetworkNode[];
+export function fetchCtvReferrals() {
+  return apiFetch<CtvReferralResponse>('/ctv/referrals');
 }
 
-export async function fetchCtvSummary(): Promise<CtvCommissionSummary> {
+function maskHierarchyNode(n: CtvHierarchyNode): CtvHierarchyNode {
+  if (!n) return n;
+  return { ...n, phone: maskPhone(n.phone), email: maskEmail(n.email) };
+}
+
+export async function fetchCtvHierarchy(): Promise<CtvHierarchyResponse> {
+  const res = await apiFetch<CtvHierarchyResponse>('/ctv/hierarchy');
+  // Mask PII (phone/email) of every CTV in the tree before it reaches the UI.
+  return {
+    ...res,
+    current: maskHierarchyNode(res.current),
+    upline: (res.upline ?? []).map(maskHierarchyNode),
+    downline: (res.downline ?? []).map(maskHierarchyNode),
+  };
+}
+
+export function fetchCtvCommissionSummary() {
   return apiFetch<CtvCommissionSummary>('/ctv/commission-summary');
 }
 
-export async function fetchCtvReferrals(): Promise<{ referrals: CtvReferral[] }> {
-  return apiFetch('/ctv/referrals');
+export async function fetchCtvProfile(): Promise<CtvProfile> {
+  const p = await apiFetch<CtvProfile>('/ctv/me');
+  return { ...p, phone: maskPhone(p.phone), email: maskEmail(p.email) };
 }
 
-export async function fetchCtvClientJourneys(): Promise<{ clients: CtvClientJourney[] }> {
-  return apiFetch('/ctv/client-journeys');
-}
-
-export async function fetchCtvNetwork(): Promise<CtvNetworkResponse> {
-  return apiFetch<CtvNetworkResponse>('/ctv/network');
-}
-
-export async function fetchCtvMe(): Promise<{ id: string; name: string; email?: string; phone?: string; role: string; referral_code?: string }> {
-  return apiFetch('/ctv/me');
-}
-
+// ─── Admin CTV management + CTV selector options (nk3) ────────────────────────
+// Preserved from the nk3-deploy lineage so CtvManagementTab (admin) and the
+// service/appointment CTV selector (useCtvs) keep working alongside the portal API.
 export interface CreateCtvInput {
   name: string;
   phone: string;
@@ -227,6 +250,19 @@ export async function setCtvActive(
   });
 }
 
+/**
+ * Admin: fetch the upline + downline hierarchy for an arbitrary CTV.
+ * Same response shape as the CTV self-portal hierarchy; spans both LOB DBs.
+ */
+export async function fetchCtvHierarchyForCtv(
+  id: string,
+  lob?: 'dental' | 'cosmetic'
+): Promise<CtvHierarchyResponse> {
+  return apiFetch<CtvHierarchyResponse>(`/Ctvs/${id}/hierarchy`, {
+    lob: lob === 'cosmetic' ? 'cosmetic' : undefined,
+  });
+}
+
 export interface CreateBookingInput {
   clientId?: string;
   name?: string;
@@ -241,4 +277,21 @@ export interface CreateBookingInput {
 /** Create a booking for a referred client (or new client). May fail with B_CLIENT_CLAIMED if client is under another CTV. */
 export async function createBooking(input: CreateBookingInput): Promise<{ clientId: string; appointmentId: string }> {
   return apiFetch<{ clientId: string; appointmentId: string }>('/ctv/bookings', { method: 'POST', body: input });
+}
+
+export interface CtvClientLookup {
+  readonly exists: boolean;
+  readonly lob: CtvLob;
+  readonly clientId?: string;
+  readonly name?: string | null;
+  readonly claimed?: boolean;
+  readonly claimedByMe?: boolean;
+  readonly ownerName?: string | null;
+  readonly expiresAt?: string | null;
+}
+
+/** Live phone cross-check: does this phone already exist in the CHOSEN LOB's DB, and is it claimed? */
+export async function lookupClientByPhone(phone: string, lob: CtvLob): Promise<CtvClientLookup> {
+  const qs = `?phone=${encodeURIComponent(phone)}&lob=${encodeURIComponent(lob)}`;
+  return apiFetch<CtvClientLookup>(`/ctv/client-lookup${qs}`);
 }

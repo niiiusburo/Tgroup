@@ -1,401 +1,242 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Home, Wallet, ListChecks, User, Sparkles,
-  BellRing, UserPlus, X,
-} from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { Bell, Home, ListChecks, Network, UserRound, Wallet } from 'lucide-react';
+
 import { LanguageToggle } from '@/components/shared/LanguageToggle';
 import {
-  fetchCtvSummary, fetchCtvMe,
-  fetchCtvClientJourneys, createCtv, createBooking,
-  type CtvCommissionSummary, type CtvClientJourney,
-} from '@/lib/api/ctv';
-import { useCtvLocale } from '@/lib/i18n/ctv';
-import { CtvHomeTab } from './tabs/CtvHomeTab';
+  fetchCtvCommissionSummary,
+  fetchCtvHierarchy,
+  fetchCtvProfile,
+  fetchCtvReferrals,
+  type CtvCommissionSummary,
+  type CtvHierarchyResponse,
+  type CtvProfile,
+  type CtvReferral,
+} from '@/lib/api';
+import { cn } from '@/lib/utils';
 import { CtvCommissionTab } from './tabs/CtvCommissionTab';
-import { CtvTrackingTab } from './tabs/CtvTrackingTab';
+import { CtvHomeTab } from './tabs/CtvHomeTab';
 import { CtvMeTab } from './tabs/CtvMeTab';
+import { CtvNetworkTab } from './tabs/CtvNetworkTab';
+import { CtvTrackingTab } from './tabs/CtvTrackingTab';
+import { CtvReferModal } from '@/components/ctv/CtvReferModal';
+import { CtvRecruitModal } from '@/components/ctv/CtvRecruitModal';
 
-type TabKey = 'home' | 'commission' | 'tracking' | 'me';
+type TabKey = 'home' | 'commission' | 'tracking' | 'network' | 'me';
 
-const TABS: { key: TabKey; labelKey: string; Icon: React.ComponentType<{ className?: string }> }[] = [
+const TABS: Array<{
+  key: TabKey;
+  labelKey: string;
+  Icon: ComponentType<{ className?: string }>;
+}> = [
   { key: 'home', labelKey: 'tabs.home', Icon: Home },
   { key: 'commission', labelKey: 'tabs.commission', Icon: Wallet },
-  { key: 'tracking', labelKey: 'tabs.tracking', Icon: ListChecks },
-  { key: 'me', labelKey: 'tabs.me', Icon: User },
+  { key: 'tracking', labelKey: 'tabs.referrals', Icon: ListChecks },
+  { key: 'network', labelKey: 'tabs.network', Icon: Network },
+  { key: 'me', labelKey: 'tabs.me', Icon: UserRound },
 ];
 
 export default function CtvDashboard() {
-  const { user } = useAuth();
-  const { t } = useTranslation('ctv');
-  const ctvLocale = useCtvLocale();
+  const { t, i18n } = useTranslation('ctv');
+  const isMountedRef = useRef(true);
   const [activeTab, setActiveTab] = useState<TabKey>('home');
-
+  const [referrals, setReferrals] = useState<CtvReferral[]>([]);
   const [summary, setSummary] = useState<CtvCommissionSummary | null>(null);
-  const [clients, setClients] = useState<CtvClientJourney[]>([]);
-  const [me, setMe] = useState<{ id: string; name: string; email?: string; phone?: string; referral_code?: string } | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<CtvProfile | null>(null);
+  const [hierarchy, setHierarchy] = useState<CtvHierarchyResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isHierarchyLoading, setIsHierarchyLoading] = useState(false);
+  const [referOpen, setReferOpen] = useState(false);
+  const [recruitOpen, setRecruitOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hierarchyError, setHierarchyError] = useState<string | null>(null);
 
-  // Sheet states
-  const [showClientSheet, setShowClientSheet] = useState(false);
-  const [showCtvSheet, setShowCtvSheet] = useState(false);
-
-  // Client form
-  const [clientForm, setClientForm] = useState({ name: '', phone: '', lob: 'dental' as 'dental' | 'cosmetic', date: '' });
-  const [clientLoading, setClientLoading] = useState(false);
-  const [clientError, setClientError] = useState<string | null>(null);
-  const [clientSuccess, setClientSuccess] = useState(false);
-
-  // CTV form
-  const [ctvForm, setCtvForm] = useState({ name: '', phone: '', email: '', password: '', lobs: ['dental'] as string[] });
-  const [ctvLoading, setCtvLoading] = useState(false);
-  const [ctvError, setCtvError] = useState<string | null>(null);
-  const [ctvSuccess, setCtvSuccess] = useState(false);
-
-  const displayName = me?.name || user?.name || 'CTV';
-  const displayError = error === 'errors.loadFailed' ? t('errors.loadFailed') : error;
-
-  const loadData = useCallback(async () => {
-    setLoading(true);
+  const loadDashboard = useCallback(async () => {
+    setIsLoading(true);
     setError(null);
+
+    const [referralsResult, summaryResult, profileResult] = await Promise.allSettled([
+      fetchCtvReferrals(),
+      fetchCtvCommissionSummary(),
+      fetchCtvProfile(),
+    ]);
+
+    if (!isMountedRef.current) return;
+
+    if (referralsResult.status === 'fulfilled') {
+      setReferrals(referralsResult.value.referrals);
+    } else {
+      setReferrals([]);
+      setError(referralsResult.reason instanceof Error ? referralsResult.reason.message : 'CTV data could not load');
+    }
+
+    setSummary(summaryResult.status === 'fulfilled' ? summaryResult.value : null);
+    setProfile(profileResult.status === 'fulfilled' ? profileResult.value : null);
+    setIsLoading(false);
+  }, []);
+
+  const loadHierarchy = useCallback(async () => {
+    setIsHierarchyLoading(true);
+    setHierarchyError(null);
+
     try {
-      const [s, c, m] = await Promise.all([
-        fetchCtvSummary(),
-        fetchCtvClientJourneys().catch(() => ({ clients: [] })),
-        fetchCtvMe(),
-      ]);
-      setSummary(s);
-      setClients(c.clients || []);
-      setMe(m);
-    } catch (e: any) {
-      console.error('[CtvDashboard] load failed:', e);
-      setError(e?.message || 'errors.loadFailed');
+      const data = await fetchCtvHierarchy();
+      if (!isMountedRef.current) return;
+      setHierarchy(data);
+    } catch (err) {
+      if (!isMountedRef.current) return;
+      setHierarchy(null);
+      setHierarchyError(err instanceof Error ? err.message : 'Please try again in a few minutes.');
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) setIsHierarchyLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    isMountedRef.current = true;
+    void loadDashboard();
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, [loadDashboard]);
 
-  async function handleClientSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setClientError(null);
-    if (!clientForm.name.trim() || !clientForm.phone.trim() || !clientForm.date.trim()) {
-      setClientError(t('forms.referClient.required'));
-      return;
+  useEffect(() => {
+    if (activeTab === 'network' && !hierarchy && !isHierarchyLoading) {
+      void loadHierarchy();
     }
-    setClientLoading(true);
-    try {
-      await createBooking({ name: clientForm.name, phone: clientForm.phone, lob: clientForm.lob, date: clientForm.date });
-      setClientSuccess(true);
-      setClientForm({ name: '', phone: '', lob: 'dental', date: '' });
-      setTimeout(() => {
-        setShowClientSheet(false);
-        setClientSuccess(false);
-        loadData();
-      }, 1500);
-    } catch (err: any) {
-      if (err?.code === 'B_CLIENT_CLAIMED') {
-        const ownerName = err?.body?.owner_name || 'unknown';
-        const expiresAt = err?.body?.expires_at
-          ? ctvLocale.formatDate(err.body.expires_at)
-          : ctvLocale.unknownValue();
-        setClientError(t('forms.referClient.errorClaimed', { owner: ownerName, expires: expiresAt }));
-      } else {
-        setClientError(err?.message || t('errors.generic'));
-      }
-    } finally {
-      setClientLoading(false);
-    }
-  }
+  }, [activeTab, hierarchy, isHierarchyLoading, loadHierarchy]);
 
-  async function handleCtvSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setCtvError(null);
-    if (!ctvForm.name.trim() || !ctvForm.phone.trim() || !ctvForm.email.trim() || !ctvForm.password.trim()) {
-      setCtvError(t('forms.referClient.required'));
-      return;
-    }
-    if (ctvForm.lobs.length === 0) {
-      setCtvError(t('forms.recruitCtv.selectOne'));
-      return;
-    }
-    setCtvLoading(true);
-    try {
-      await createCtv({ name: ctvForm.name, phone: ctvForm.phone, email: ctvForm.email, password: ctvForm.password, lob_scope: ctvForm.lobs });
-      setCtvSuccess(true);
-      setCtvForm({ name: '', phone: '', email: '', password: '', lobs: ['dental'] });
-      setTimeout(() => {
-        setShowCtvSheet(false);
-        setCtvSuccess(false);
-        loadData();
-      }, 1500);
-    } catch (err: any) {
-      setCtvError(err?.message || t('errors.generic'));
-    } finally {
-      setCtvLoading(false);
-    }
-  }
+  const profileName = profile?.name || t('profileFallback');
+  const isVietnamese = i18n.language?.startsWith('vi');
+  const tabFallbacks: Record<TabKey, string> = {
+    home: isVietnamese ? 'Tổng quan' : 'Home',
+    commission: isVietnamese ? 'Hoa hồng' : 'Commission',
+    tracking: t('tabs.referrals'),
+    network: isVietnamese ? 'Mạng lưới' : 'Network',
+    me: isVietnamese ? 'Tôi' : 'Me',
+  };
+  const activeTitle = useMemo(() => {
+    if (activeTab === 'home') return t('portal');
+    if (activeTab === 'commission') return t('commission.myCommission', { defaultValue: isVietnamese ? 'Hoa hồng của tôi' : 'My commission' });
+    if (activeTab === 'network') return t('hierarchy.title');
+    if (activeTab === 'me') return t('header.meTitle', { defaultValue: isVietnamese ? 'Tài khoản' : 'Account' });
+    return t('title');
+  }, [activeTab, isVietnamese, t]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50/40 via-white to-white text-gray-900 pb-24 font-sans">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-lg shadow-orange-500/20">
-        <div className="max-w-md mx-auto px-5 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="text-[11px] uppercase tracking-[0.18em] text-orange-100/90 font-medium">{t('header.brand')}</div>
-              <div className="text-lg font-semibold tracking-tight">{t('header.title')}</div>
+    <main className="min-h-screen bg-[#f7f5f2] text-gray-900">
+      <div className="mx-auto min-h-screen w-full max-w-[430px] bg-[#fbfaf8] pb-24 shadow-xl shadow-gray-200/70">
+        <header className="sticky top-0 z-20 bg-orange-500 px-5 pb-4 pt-4 text-white shadow-lg shadow-orange-500/20">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-orange-100">{t('brand')}</p>
+              <h1 className="mt-1 truncate text-lg font-bold">{t('portal')}</h1>
+              <p className="mt-1 truncate text-xs font-semibold text-orange-100">
+                {t('hello', { name: profileName })}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-start gap-2">
               <LanguageToggle compact menuPlacement="below" />
               <button
-                aria-label={t('header.notifications')}
-                className="relative w-10 h-10 rounded-full bg-white/15 backdrop-blur flex items-center justify-center hover:bg-white/25 transition"
+                type="button"
+                className="grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/20"
+                aria-label={t('notifications')}
               >
-                <BellRing className="w-5 h-5" />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-white rounded-full" />
+                <Bell className="h-5 w-5" />
               </button>
             </div>
           </div>
-          <div className="flex gap-2.5">
+
+          <div className="mt-4 grid grid-cols-2 gap-2">
             <button
-              onClick={() => setShowClientSheet(true)}
-              className="flex-1 py-3.5 px-4 bg-white text-orange-700 font-semibold rounded-2xl shadow-sm hover:bg-white/95 transition flex items-center justify-center gap-1.5"
+              type="button"
+              onClick={() => setReferOpen(true)}
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-white text-sm font-bold text-orange-600 shadow-sm transition-transform active:scale-[0.98]"
             >
-              <UserPlus className="w-4 h-4" />
-              <span>{t('actions.referClient')}</span>
+              <ListChecks className="h-4 w-4" />
+              {t('forms.referClient.title')}
             </button>
             <button
-              onClick={() => setShowCtvSheet(true)}
-              className="flex-1 py-3.5 px-4 bg-white/20 text-white font-semibold rounded-2xl ring-1 ring-white/30 hover:bg-white/25 transition flex items-center justify-center gap-1.5"
+              type="button"
+              onClick={() => setRecruitOpen(true)}
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-white/15 text-sm font-bold text-white ring-1 ring-white/25 transition-transform active:scale-[0.98]"
             >
-              <Sparkles className="w-4 h-4" />
-              <span>{t('actions.recruitCtv')}</span>
+              <Network className="h-4 w-4" />
+              {t('forms.recruitCtv.title')}
             </button>
           </div>
-        </div>
-      </div>
+        </header>
 
-      {/* Content */}
-      <div className="max-w-md mx-auto px-4 pt-5">
-        {loading && activeTab !== 'tracking' && (
-          <div className="text-center py-16 text-gray-500">
-            <div className="mx-auto w-10 h-10 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mb-3" />
-            {t('common:app.loading')}
-          </div>
-        )}
+        <section className="px-5 py-5">
+          <h2 className="sr-only">{activeTitle}</h2>
 
-        {displayError && !loading && (
-          <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-2xl mb-4 text-sm">
-            ⚠️ {displayError}
-            <button onClick={() => loadData()} className="ml-3 underline font-medium">{t('actions.reload')}</button>
-          </div>
-        )}
+          {activeTab === 'home' ? (
+            <CtvHomeTab summary={summary} referrals={referrals} profileName={profileName} isLoading={isLoading} />
+          ) : null}
+          {activeTab === 'commission' ? <CtvCommissionTab summary={summary} isLoading={isLoading} /> : null}
+          {activeTab === 'tracking' ? (
+            <CtvTrackingTab
+              referrals={referrals}
+              isLoading={isLoading}
+              error={error}
+              onRetry={() => void loadDashboard()}
+            />
+          ) : null}
+          {activeTab === 'network' ? (
+            <CtvNetworkTab
+              hierarchy={hierarchy}
+              isLoading={isHierarchyLoading}
+              error={hierarchyError}
+              onRetry={() => void loadHierarchy()}
+            />
+          ) : null}
+          {activeTab === 'me' ? <CtvMeTab profile={profile} /> : null}
+        </section>
 
-        {!loading && !displayError && (
-          <>
-            {activeTab === 'home' && <CtvHomeTab summary={summary} displayName={displayName} />}
-            {activeTab === 'commission' && <CtvCommissionTab summary={summary} />}
-            {activeTab === 'tracking' && (
-              <CtvTrackingTab
-                clients={clients}
-                loading={loading}
-                onReferClient={() => setShowClientSheet(true)}
-              />
-            )}
-            {activeTab === 'me' && <CtvMeTab me={me} />}
-          </>
-        )}
-      </div>
+        <CtvReferModal
+          open={referOpen}
+          onClose={() => setReferOpen(false)}
+          onSuccess={() => {
+            setActiveTab('tracking');
+            void loadDashboard();
+          }}
+        />
+        <CtvRecruitModal
+          open={recruitOpen}
+          onClose={() => setRecruitOpen(false)}
+          onSuccess={() => {
+            setActiveTab('network');
+            setHierarchy(null);
+            void loadHierarchy();
+          }}
+        />
 
-      {/* Client Referral Sheet */}
-      {showClientSheet && (
-        <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur" onClick={() => setShowClientSheet(false)}>
-          <div
-            className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl p-6 max-h-[85vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">{t('forms.referClient.title')}</h2>
-              <button onClick={() => setShowClientSheet(false)} className="p-1 hover:bg-gray-100 rounded-full transition">
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-            </div>
-
-            {clientSuccess ? (
-              <div className="text-center py-8">
-                <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 flex items-center justify-center mb-3">
-                  <span className="text-2xl text-emerald-600">✓</span>
-                </div>
-                <p className="text-lg font-semibold text-emerald-700">{t('forms.referClient.success')}</p>
-              </div>
-            ) : (
-              <form onSubmit={handleClientSubmit} className="space-y-4">
-                {clientError && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-sm">{clientError}</div>
-                )}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('forms.referClient.name')}</label>
-                  <input
-                    type="text" value={clientForm.name}
-                    onChange={(e) => setClientForm({ ...clientForm, name: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    placeholder={t('forms.referClient.namePlaceholder')}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('forms.referClient.phone')}</label>
-                  <input
-                    type="tel" value={clientForm.phone}
-                    onChange={(e) => setClientForm({ ...clientForm, phone: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    placeholder={t('forms.referClient.phonePlaceholder')}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('forms.referClient.date')}</label>
-                  <input
-                    type="date" value={clientForm.date}
-                    onChange={(e) => setClientForm({ ...clientForm, date: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('forms.referClient.lob')}</label>
-                  <div className="inline-flex bg-gray-100 ring-1 ring-gray-200 rounded-full p-1 w-full">
-                    <button
-                      type="button"
-                      onClick={() => setClientForm({ ...clientForm, lob: 'dental' })}
-                      className={`flex-1 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
-                        clientForm.lob === 'dental' ? 'bg-white text-orange-700 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      {t('forms.referClient.dental')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setClientForm({ ...clientForm, lob: 'cosmetic' })}
-                      className={`flex-1 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
-                        clientForm.lob === 'cosmetic' ? 'bg-white text-rose-700 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      {t('forms.referClient.cosmetic')}
-                    </button>
-                  </div>
-                </div>
+        <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-gray-100 bg-white/95 shadow-[0_-2px_10px_rgba(249,115,22,0.05)] backdrop-blur">
+          <div className="mx-auto flex max-w-[430px]">
+            {TABS.map(({ key, labelKey, Icon }) => {
+              const active = activeTab === key;
+              return (
                 <button
-                  type="submit"
-                  disabled={clientLoading}
-                  className="w-full py-3.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-2xl shadow-lg shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 disabled:opacity-60 disabled:cursor-not-allowed transition active:scale-[0.98]"
+                  key={key}
+                  type="button"
+                  onClick={() => setActiveTab(key)}
+                  className={cn(
+                    'flex h-16 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium leading-tight transition-colors',
+                    active ? 'text-orange-600' : 'text-gray-400'
+                  )}
+                  aria-current={active ? 'page' : undefined}
                 >
-                  {clientLoading ? t('forms.referClient.submitting') : t('forms.referClient.submit')}
+                  <span className={cn('grid h-7 w-10 place-items-center rounded-full', active ? 'bg-orange-100' : '')}>
+                    <Icon className={cn('h-5 w-5', active ? 'stroke-[2.5]' : '')} />
+                  </span>
+                  <span className="max-w-[4.5rem] text-center">{t(labelKey, { defaultValue: tabFallbacks[key] })}</span>
                 </button>
-              </form>
-            )}
+              );
+            })}
           </div>
-        </div>
-      )}
-
-      {/* CTV Signup Sheet */}
-      {showCtvSheet && (
-        <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur" onClick={() => setShowCtvSheet(false)}>
-          <div
-            className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl p-6 max-h-[85vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">{t('forms.recruitCtv.title')}</h2>
-              <button onClick={() => setShowCtvSheet(false)} className="p-1 hover:bg-gray-100 rounded-full transition">
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-            </div>
-
-            {ctvSuccess ? (
-              <div className="text-center py-8">
-                <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 flex items-center justify-center mb-3">
-                  <span className="text-2xl text-emerald-600">✓</span>
-                </div>
-                <p className="text-lg font-semibold text-emerald-700">{t('forms.recruitCtv.success')}</p>
-              </div>
-            ) : (
-              <form onSubmit={handleCtvSubmit} className="space-y-4">
-                {ctvError && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-sm">{ctvError}</div>
-                )}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('forms.recruitCtv.name')}</label>
-                  <input type="text" value={ctvForm.name} onChange={(e) => setCtvForm({ ...ctvForm, name: e.target.value })} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('forms.recruitCtv.phone')}</label>
-                  <input type="tel" value={ctvForm.phone} onChange={(e) => setCtvForm({ ...ctvForm, phone: e.target.value })} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('forms.recruitCtv.email')}</label>
-                  <input type="email" value={ctvForm.email} onChange={(e) => setCtvForm({ ...ctvForm, email: e.target.value })} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('forms.recruitCtv.password')}</label>
-                  <input type="password" value={ctvForm.password} onChange={(e) => setCtvForm({ ...ctvForm, password: e.target.value })} className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2.5">{t('forms.recruitCtv.lobs')}</label>
-                  <div className="space-y-2">
-                    {['dental', 'cosmetic'].map((lob) => (
-                      <label key={lob} className="flex items-center gap-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={ctvForm.lobs.includes(lob)}
-                          onChange={(e) => {
-                            if (e.target.checked) setCtvForm({ ...ctvForm, lobs: [...ctvForm.lobs, lob] });
-                            else setCtvForm({ ...ctvForm, lobs: ctvForm.lobs.filter((l) => l !== lob) });
-                          }}
-                          className="w-4 h-4 rounded border-gray-300 text-orange-500 cursor-pointer"
-                        />
-                        <span className="text-gray-700 capitalize">{lob}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  disabled={ctvLoading}
-                  className="w-full py-3.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-2xl shadow-lg shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 disabled:opacity-60 disabled:cursor-not-allowed transition active:scale-[0.98]"
-                >
-                  {ctvLoading ? t('forms.recruitCtv.submitting') : t('forms.recruitCtv.submit')}
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Bottom Nav */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-100 shadow-[0_-2px_10px_rgba(249,115,22,0.05)]">
-        <div className="max-w-md mx-auto flex">
-          {TABS.map(({ key, labelKey, Icon }) => {
-            const active = activeTab === key;
-            return (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key)}
-                className={`flex-1 py-2.5 flex flex-col items-center justify-center gap-0.5 text-[11px] transition ${active ? 'text-orange-600' : 'text-gray-400'}`}
-                aria-current={active ? 'page' : undefined}
-              >
-                <div className={`w-10 h-7 rounded-full flex items-center justify-center transition-all ${active ? 'bg-orange-100' : ''}`}>
-                  <Icon className={`w-5 h-5 ${active ? 'stroke-[2.5]' : ''}`} />
-                </div>
-                <span className={active ? 'font-semibold' : 'font-medium'}>{t(labelKey)}</span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
-    </div>
+        </nav>
+      </div>
+    </main>
   );
 }
