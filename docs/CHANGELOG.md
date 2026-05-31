@@ -2,6 +2,14 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.81] — 2026-05-31 (nk3-deploy)
+### Fixed
+- **Cosmetic service catalog is visible to location-scoped staff.** `GET /api/Products` now treats `products.companyid IS NULL` as global when a branch `companyId` filter is selected, so a single-location cosmetic employee like `thuan test` can see the global cosmetic service catalog instead of an empty table. — @agent
+- **Product category mutations are LOB-aware and no longer crash.** `POST/PUT/DELETE /api/ProductCategories` now uses the request-scoped `getQuery(req)` executor, fixing the pending auto-feedback crash `query is not defined` and keeping Cosmetic category writes on the Cosmetic DB. — @agent
+- **Doctors report no longer 500s on branch filters.** `/api/Reports/doctors/performance` now qualifies the joined appointment company filter as `a.companyid`, fixing the live `column reference "companyid" is ambiguous` error captured by feedback. — @agent
+### Tested
+- Focused Jest: `JWT_SECRET=test npx jest --runInBand src/routes/__tests__/productCatalogRoutes.test.js src/routes/reports/__tests__/doctorsPerformance.test.js src/__tests__/productsNormalizeImport.test.js` → 3 suites / 4 tests passed. — @agent
+
 ## [0.32.80] — 2026-05-31 (nk3-deploy)
 ### Fixed
 - **Cosmetic employee accounts leaked dental data (LOB isolation for non-admin staff).** A newly-created cosmetic employee logged in and saw **cosmetic locations but DENTAL appointments/data**. Root cause: the employee CREATE handler (`api/src/routes/employees/mutations.js`, INSERT) never set `lob_scope` → new cosmetic staff got `lob_scope=NULL` → login `getEmployeeLobScope()` returned `[]` → JWT `lobScope:[]` → frontend `BusinessUnitContext` `availableLOBs=['dental']` → `currentLOB='dental'` → all data hooks (appointments/customers/etc., which ARE LOB-aware) fetched **dental**; meanwhile locations came from the `authLob='cosmetic'` login resolution → the split the user saw. Fixes: (1) CREATE now stamps `lob_scope = [getCurrentLob()]` (`['cosmetic']` under `/api/cosmetic/*`, `['dental']` otherwise); (2) **login fallback** — a non-admin/non-CTV employee with empty/NULL `lob_scope` is now scoped to `[authLob]` (their home DB), which repairs **already-created** accounts at login with no DB migration (admins still get both; CTVs still `[]`); (3) `EmployeeForm.tsx` now calls `fetchPermissionGroups(currentLOB)` so the tier/permission-group dropdown shows the **cosmetic** groups for a cosmetic employee (was always loading dental groups). — @agent

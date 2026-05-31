@@ -13,7 +13,7 @@ router.post('/doctors/performance', requirePermission('reports.view'), async (re
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
-    const f = dateCompanyFilter(dateFrom, dateTo, companyId, 'a.date');
+    const f = dateCompanyFilter(dateFrom, dateTo, companyId, 'a.date', 'a.companyid');
     const rows = await query(
       `SELECT p.id, p.name, COUNT(a.id) as total_appointments,
               SUM(CASE WHEN a.state IN ('done','completed') THEN 1 ELSE 0 END) as done,

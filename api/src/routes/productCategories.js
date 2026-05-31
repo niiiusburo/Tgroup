@@ -1,5 +1,5 @@
 const express = require('express');
-const { query: legacyQuery, getQuery } = require('../db');
+const { getQuery } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const { requirePermission } = require('../middleware/auth');
 const { getVietnamNow } = require('../lib/dateUtils');
@@ -95,6 +95,7 @@ router.get('/', async (req, res) => {
  */
 router.post('/', requirePermission('services.edit'), async (req, res) => {
   try {
+    const q = getQuery(req);
     const { name, parentid } = req.body;
     if (!name || !name.trim()) {
       return res.status(400).json({ error: 'Name is required' });
@@ -103,13 +104,13 @@ router.post('/', requirePermission('services.edit'), async (req, res) => {
     const id = uuidv4();
     const now = getVietnamNow();
 
-    await query(
+    await q(
       `INSERT INTO dbo.productcategories (id, name, completename, parentid, active, datecreated, lastupdated)
        VALUES ($1, $2, $3, $4, true, $5, $5)`,
       [id, name.trim(), name.trim(), parentid || null, now]
     );
 
-    const rows = await query(
+    const rows = await q(
       `SELECT pc.*, COUNT(p.id)::int AS product_count
        FROM dbo.productcategories pc
        LEFT JOIN dbo.products p ON p.categid = pc.id AND p.active = true
@@ -131,6 +132,7 @@ router.post('/', requirePermission('services.edit'), async (req, res) => {
  */
 router.put('/:id', requirePermission('services.edit'), async (req, res) => {
   try {
+    const q = getQuery(req);
     const { id } = req.params;
     const { name, active } = req.body;
 
@@ -159,13 +161,13 @@ router.put('/:id', requirePermission('services.edit'), async (req, res) => {
 
     params.push(id);
 
-    await query(
+    await q(
       `UPDATE dbo.productcategories SET ${updates.join(', ')} WHERE id = $${paramIdx}`,
       params
     );
 
     // Fix: the id param index
-    const rows = await query(
+    const rows = await q(
       `SELECT pc.*, COUNT(p.id)::int AS product_count
        FROM dbo.productcategories pc
        LEFT JOIN dbo.products p ON p.categid = pc.id AND p.active = true
@@ -190,12 +192,13 @@ router.put('/:id', requirePermission('services.edit'), async (req, res) => {
  */
 router.delete('/:id', requirePermission('services.edit'), async (req, res) => {
   try {
+    const q = getQuery(req);
     const { id } = req.params;
 
     // Check if category has products or child categories
     const [prodResult, childResult] = await Promise.all([
-      query(`SELECT COUNT(*) AS count FROM dbo.products WHERE categid = $1`, [id]),
-      query(`SELECT COUNT(*) AS count FROM dbo.productcategories WHERE parentid = $1`, [id]),
+      q(`SELECT COUNT(*) AS count FROM dbo.products WHERE categid = $1`, [id]),
+      q(`SELECT COUNT(*) AS count FROM dbo.productcategories WHERE parentid = $1`, [id]),
     ]);
 
     if (parseInt(prodResult[0]?.count || '0', 10) > 0) {
@@ -206,7 +209,7 @@ router.delete('/:id', requirePermission('services.edit'), async (req, res) => {
       return res.status(400).json({ error: 'Cannot delete category with child categories. Remove or reassign child categories first.' });
     }
 
-    await query(`DELETE FROM dbo.productcategories WHERE id = $1`, [id]);
+    await q(`DELETE FROM dbo.productcategories WHERE id = $1`, [id]);
     return res.status(204).end();
   } catch (err) {
     console.error('Error deleting product category:', err);

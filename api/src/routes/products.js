@@ -91,7 +91,7 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
 
     // Company filter
     if (companyId) {
-      conditions.push(`p.companyid = $${paramIdx}`);
+      conditions.push(`(p.companyid = $${paramIdx} OR p.companyid IS NULL)`);
       params.push(companyId);
       paramIdx++;
     }

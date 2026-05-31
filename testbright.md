@@ -10,6 +10,56 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: TMV NK3 service catalog + feedback fixes 2026-05-31
+
+Feature/edit name: Cosmetic employee service catalog visibility and unresolved feedback fixes
+
+Changed URLs and API routes:
+- Verified URL: `https://tmv.2checkin.com/service-catalog`
+- Changed API route: `GET /api/Products` and `/api/cosmetic/Products`
+- Changed API route: `POST /api/ProductCategories`, `PUT /api/ProductCategories/:id`, `DELETE /api/ProductCategories/:id` and cosmetic mirrors
+- Changed API route: `POST /api/Reports/doctors/performance` and `/api/cosmetic/Reports/doctors/performance`
+
+Affected data flows:
+- Cosmetic service catalog list filtering for location-scoped employees.
+- Cosmetic product category create/edit/delete requests and their DB routing.
+- Doctors performance report branch/date filtering.
+- Feedback triage for pending manual and auto-captured TMV/NK3-only threads.
+
+User roles:
+- Cosmetic employee `0123123123` / `thuan test` with `lob_scope=["cosmetic"]`, Assistant tier, one assigned cosmetic location.
+- Admin `t@clinic.vn` for feedback inbox and reports verification.
+
+Happy paths:
+- A single-location cosmetic employee can open `/service-catalog`, select `Công nghệ cao`, and see active global cosmetic services.
+- Admin can create/edit/delete Cosmetic service groups without `query is not defined` or dental DB writes.
+- Admin can open `/reports/doctors` and the doctors performance endpoint returns 200 for a branch/date filter.
+
+Edge cases:
+- Product rows with `companyid IS NULL` are global and must remain visible under a selected branch filter.
+- Product rows assigned to a different branch must not leak under the selected branch filter.
+- Category mutations under `/api/cosmetic/*` must use request-scoped DB routing, not the dental legacy query.
+- Doctors report SQL joins both doctors and appointments, so company filters must stay qualified.
+
+Regressions:
+- Dental `/api/Products?companyId=...` keeps branch-specific products and global products visible.
+- Cosmetic `/api/cosmetic/Products?companyId=...` does not leak dental rows.
+- Category sidebar counts still match active global products.
+- Revenue report endpoints stay 200 while doctors report moves from 500 to 200.
+
+Setup/login state:
+- Live target: `https://tmv.2checkin.com` only (NK3). Do not touch `nk.2checkin.com` or `nk2.2checkin.com`.
+- Employee login: `0123123123` with current password.
+- Admin login: `t@clinic.vn` with current password.
+
+Checks:
+- [x] PASS: Root cause probe — employee `thuan test` has one location (`Thẩm mỹ Hồ Chí Minh`), `GET /api/cosmetic/Products?categId=<Công nghệ cao>&active=true` returned 24 global services, but adding `companyId=<employee location>` returned 0 before the fix.
+- [x] PASS: Focused Jest — product catalog and doctors performance regression tests passed locally.
+- [ ] PENDING: Semgrep — run scoped scan on changed backend files.
+- [ ] PENDING: NK3 deploy — copy only changed API files to `/opt/tgroup-nk3`, rebuild API, and verify live endpoints.
+- [ ] PENDING: Screenshot — capture `/service-catalog` as `thuan test` showing services visible after the fix.
+- [ ] PENDING: Feedback status recap — list which pending manual feedback is fixed/already fixed and which still needs controlled live write verification.
+
 # TestSprite Plan: TMV live feedback triage 2026-05-31
 
 Feature/edit name: TMV live feedback triage read-only audit
