@@ -24,6 +24,10 @@
       "env": {
         "CLAUDE_MEM_DATA_DIR": "/Users/thuanle/.claude-mem"
       }
+    },
+    "mobbin": {
+      "type": "http",
+      "url": "https://api.mobbin.com/mcp"
     }
   }
 }
