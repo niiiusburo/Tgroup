@@ -4,6 +4,8 @@ import { renderWithProviders } from '@/test/test-utils';
 import { AppointmentFormShell } from './AppointmentFormShell';
 
 vi.mock('@/contexts/AuthContext', () => ({
+  // Passthrough so renderWithProviders (which renders <AuthProvider>) works under this mock.
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
   useAuth: () => ({
     hasPermission: () => true,
   }),

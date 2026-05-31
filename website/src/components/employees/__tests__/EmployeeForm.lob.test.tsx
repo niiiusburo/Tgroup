@@ -6,6 +6,8 @@ import { createEmployee, fetchCompanies, fetchPermissionGroups, updateEmployee }
 
 vi.mock('@/contexts/BusinessUnitContext', () => ({
   useBusinessUnit: () => ({ currentLOB: 'cosmetic' }),
+  // Passthrough so renderWithProviders (which renders <BusinessUnitProvider>) works under this mock.
+  BusinessUnitProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 vi.mock('@/lib/api', () => ({
@@ -62,6 +64,14 @@ describe('EmployeeForm LOB routing', () => {
     });
     expect(await screen.findByText('Thẩm mỹ Hà Nội')).toBeInTheDocument();
     expect(screen.queryByText(/Tấm Dentist/)).not.toBeInTheDocument();
+  });
+
+  it('fetches permission groups (tiers) with the active cosmetic LOB', async () => {
+    renderWithProviders(<EmployeeForm onClose={vi.fn()} onSave={vi.fn()} />);
+
+    await waitFor(() => {
+      expect(fetchPermissionGroups).toHaveBeenCalledWith('cosmetic');
+    });
   });
 
   it('creates employees through the active cosmetic LOB', async () => {

@@ -16,6 +16,8 @@ vi.mock('@/contexts/BusinessUnitContext', () => ({
     isMultiLOBUser: true,
     isCosmeticEnabled: true,
   }),
+  // Passthrough so renderWithProviders (which renders <BusinessUnitProvider>) works under this mock.
+  BusinessUnitProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 vi.mock('@/lib/api', async () => {
