@@ -55,10 +55,14 @@ Setup/login state:
 Checks:
 - [x] PASS: Root cause probe — employee `thuan test` has one location (`Thẩm mỹ Hồ Chí Minh`), `GET /api/cosmetic/Products?categId=<Công nghệ cao>&active=true` returned 24 global services, but adding `companyId=<employee location>` returned 0 before the fix.
 - [x] PASS: Focused Jest — product catalog and doctors performance regression tests passed locally.
-- [ ] PENDING: Semgrep — run scoped scan on changed backend files.
-- [ ] PENDING: NK3 deploy — copy only changed API files to `/opt/tgroup-nk3`, rebuild API, and verify live endpoints.
-- [ ] PENDING: Screenshot — capture `/service-catalog` as `thuan test` showing services visible after the fix.
-- [ ] PENDING: Feedback status recap — list which pending manual feedback is fixed/already fixed and which still needs controlled live write verification.
+- [x] PASS: Semgrep — `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off api/src/routes/products.js api/src/routes/productCategories.js api/src/routes/reports/doctors.js` completed with 0 findings.
+- [x] PASS: NK3 deploy — backed up files to `/opt/tgroup-nk3/hotfix-backups/tmv-feedback-catalog-20260531T042418Z`, copied only NK3 API route files, and forced a no-cache `tgroup-nk3-api` rebuild.
+- [x] PASS: Live employee catalog API — `GET /api/cosmetic/Products?categId=<Công nghệ cao>&companyId=<employee location>&active=true` now returns 24 services.
+- [x] PASS: Live doctors report API — `POST /api/cosmetic/Reports/doctors/performance` now returns 200 with 38 rows for May 2026 / Thẩm mỹ Hồ Chí Minh.
+- [x] PASS: Live category mutation smoke — created and deleted a temporary Cosmetic category; create returned a UUID and delete returned 204.
+- [x] PASS: Screenshot — `/service-catalog` as `thuan test` shows service rows in `artifacts/screenshots/tmv-thuan-service-catalog-fixed-20260531T0430Z.png`.
+- [x] PASS: Screenshot — `/reports/doctors` as admin shows report data in `artifacts/screenshots/tmv-doctors-report-fixed-20260531T0430Z.png`.
+- [x] PASS: Feedback status recap — deposit and company-seed issues read as already fixed; service catalog/category mutation and doctors report were active and are now fixed; live appointment/customer-create save flows still require controlled write verification before marking resolved.
 
 # TestSprite Plan: TMV live feedback triage 2026-05-31
 
@@ -108,7 +112,7 @@ Checks:
 - [x] PASS: Cosmetic deposit balance probe — reported pending customer now returns nonzero `deposit_balance` from `/api/cosmetic/CustomerBalance/:id`.
 - [x] PASS: Cosmetic appointment list probe — `/api/cosmetic/Appointments` returned 200.
 - [x] PASS: Cosmetic report revenue probes — `/api/cosmetic/Reports/revenue/summary`, `/api/cosmetic/Reports/revenue/trend`, and `/api/cosmetic/Reports/revenue/by-location` returned 200.
-- [ ] FAIL: Cosmetic report doctor performance probe — `POST /api/cosmetic/Reports/doctors/performance` still returns 500 on live TMV with server log `column reference "companyid" is ambiguous`.
+- [x] PASS: Cosmetic report doctor performance probe — after the NK3 hotfix, `POST /api/cosmetic/Reports/doctors/performance` returned 200 with 38 rows for May 2026 / Thẩm mỹ Hồ Chí Minh.
 - [ ] PENDING: Non-mutating read probes cannot prove employee/customer/appointment create flows save successfully; use a controlled test customer/employee before marking those remaining pending user-feedback threads resolved.
 
 ---

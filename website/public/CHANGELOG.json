@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.32.81",
+    "date": "2026-05-31",
+    "commit": "pending",
+    "highlights": "Cosmetic service catalog now shows for location-scoped staff; fixed the product-category save crash and the doctors report error on branch filters.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Cosmetic employees assigned to a single branch now see the full cosmetic service catalog instead of an empty list (global, branch-less services are now included when a branch filter is applied).",
+          "Saving/editing/deleting a product category no longer errors out (and cosmetic category changes stay on the cosmetic line of business).",
+          "The Doctors report no longer fails with a server error when a branch filter is selected."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.80",
     "date": "2026-05-31",
     "commit": "pending",

@@ -9,6 +9,8 @@
 - **Doctors report no longer 500s on branch filters.** `/api/Reports/doctors/performance` now qualifies the joined appointment company filter as `a.companyid`, fixing the live `column reference "companyid" is ambiguous` error captured by feedback. — @agent
 ### Tested
 - Focused Jest: `JWT_SECRET=test npx jest --runInBand src/routes/__tests__/productCatalogRoutes.test.js src/routes/reports/__tests__/doctorsPerformance.test.js src/__tests__/productsNormalizeImport.test.js` → 3 suites / 4 tests passed. — @agent
+- Semgrep: `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off api/src/routes/products.js api/src/routes/productCategories.js api/src/routes/reports/doctors.js` → 0 findings. — @agent
+- NK3 live deploy only: backed up `/opt/tgroup-nk3/app/api/src/routes/{products.js,productCategories.js,reports/doctors.js}` to `/opt/tgroup-nk3/hotfix-backups/tmv-feedback-catalog-20260531T042418Z`, copied the patched files, forced a no-cache API rebuild, and verified `thuan test` now sees 24 services, doctors report returns 200, and a temporary Cosmetic category create/delete smoke returns 201/204. Screenshots saved under `artifacts/screenshots/`. — @agent
 
 ## [0.32.80] — 2026-05-31 (nk3-deploy)
 ### Fixed
