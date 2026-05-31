@@ -13,7 +13,7 @@ export interface ReferralClaim {
   ownerCtvId: string | null;
   ownerName: string | null;
   active: boolean;
-  expiresAt: string | null;
+  expiresAt: string | Date | null;
 }
 
 export interface CustomerProfileData {

@@ -30,7 +30,7 @@ interface AuthState {
 }
 
 interface AuthContextValue extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<void>;
   logout: () => void;
   hasPermission: (permission: string) => boolean;
   hasLocationAccess: (locationId: string) => boolean;
@@ -94,8 +94,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
   }, [clearSession]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const res = await apiLogin(email, password);
+  const login = useCallback(async (identifier: string, password: string) => {
+    const res = await apiLogin(identifier, password);
     localStorage.setItem(TOKEN_KEY, res.token);
     // Show the FeedbackWidget login hint once on each fresh login.
     sessionStorage.removeItem('tg_feedback_hint_dismissed');

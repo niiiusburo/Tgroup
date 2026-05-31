@@ -10,6 +10,288 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: TMV live feedback triage 2026-05-31
+
+Feature/edit name: TMV live feedback triage read-only audit
+
+Changed URLs and API routes:
+- No runtime code or live routes were changed.
+- Verified `https://tmv.2checkin.com/feedback`
+- Verified `GET /api/Feedback/all?source=manual`
+- Verified `GET /api/Feedback/all?source=auto&host=tmv.2checkin.com`
+- Verified supporting probes on `GET /api/Feedback/unread-count`, `GET /api/cosmetic/CustomerBalance/:id`, `GET /api/cosmetic/Payments`, `GET /api/cosmetic/Appointments`, `POST /api/cosmetic/Reports/revenue/*`, and `POST /api/cosmetic/Reports/doctors/performance`.
+
+Affected data flows:
+- Read-only admin feedback inbox retrieval for manual employee feedback and auto-captured error threads.
+- Cosmetic customer balance/payment read paths used to classify deposit-wallet feedback.
+- Cosmetic appointment/employee/company read paths used to classify wrong-LOB foreign-key feedback.
+- Report API read paths used to classify current auto-error health.
+
+User roles:
+- Admin `t@clinic.vn` with feedback inbox access and Dental/Cosmetic LOB scope.
+
+Happy paths:
+- Admin can log in and load `/feedback`.
+- Manual feedback tab returns the current feedback queue.
+- Auto-detected errors tab returns the current-host error queue.
+
+Edge cases:
+- Pending feedback can be stale even after a fix; verify the live route/API state before marking fixed.
+- Auto-detected dynamic-import errors may come from users running old cached chunks after deploy; compare current asset loading before treating them as active code defects.
+- 502 auto-errors may be transient deploy/restart errors; rerun the exact endpoint before prioritizing.
+
+Regressions:
+- Feedback unread badge still returns 200 and reports the current admin pending count.
+- Report APIs should not regress to 500/502 after classification.
+- Cosmetic data probes must stay on `/api/cosmetic/*` where the issue is LOB scoped.
+
+Setup/login state:
+- Live target: `https://tmv.2checkin.com`.
+- Admin login: `t@clinic.vn` with current password.
+- Data artifact: `artifacts/feedback/live-feedback-20260531T0340Z.json`.
+- Screenshot evidence: `artifacts/screenshots/tmv-feedback-inbox-20260531T0350Z.png` and `artifacts/screenshots/tmv-feedback-auto-errors-20260531T0350Z.png`.
+
+Checks:
+- [x] PASS: Feedback manual tab — `GET /api/Feedback/all?source=manual` returned 200 with 16 manual threads.
+- [x] PASS: Feedback auto tab — `GET /api/Feedback/all?source=auto&host=tmv.2checkin.com` returned 200 with 57 current-host auto threads.
+- [x] PASS: Feedback unread count — `GET /api/Feedback/unread-count` returned 200 with admin count 6.
+- [x] PASS: Cosmetic deposit balance probe — reported pending customer now returns nonzero `deposit_balance` from `/api/cosmetic/CustomerBalance/:id`.
+- [x] PASS: Cosmetic appointment list probe — `/api/cosmetic/Appointments` returned 200.
+- [x] PASS: Cosmetic report revenue probes — `/api/cosmetic/Reports/revenue/summary`, `/api/cosmetic/Reports/revenue/trend`, and `/api/cosmetic/Reports/revenue/by-location` returned 200.
+- [ ] FAIL: Cosmetic report doctor performance probe — `POST /api/cosmetic/Reports/doctors/performance` still returns 500 on live TMV with server log `column reference "companyid" is ambiguous`.
+- [ ] PENDING: Non-mutating read probes cannot prove employee/customer/appointment create flows save successfully; use a controlled test customer/employee before marking those remaining pending user-feedback threads resolved.
+
+---
+
+# TestSprite Plan: Cosmetic employee creation + LOB isolation (v0.32.80)
+
+Feature/edit name: New employees stamped with lob_scope on create; login scopes empty-scope staff to home LOB; EmployeeForm loads LOB-correct permission groups
+
+Files:
+- `api/src/routes/employees/mutations.js` — CREATE INSERT now stamps `lob_scope = [getCurrentLob()]`.
+- `api/src/routes/auth.js` — login: non-admin/non-CTV empty `lob_scope` → `[authLob]` (home LOB); admins → both; CTV → `[]`.
+- `website/src/components/employees/EmployeeForm.tsx` — `fetchPermissionGroups(currentLOB)` (+ removed a duplicate import).
+- `api/src/routes/__tests__/employeeLobScopeStamping.test.js` — new (9 cases).
+
+Checks:
+- [x] PASS: Unit — create stamps `['cosmetic']` under /api/cosmetic/*, `['dental']` otherwise (employeeLobScopeStamping.test.js).
+- [x] PASS: Unit — login fallback: non-admin empty→[authLob], CTV→[], admin→both, explicit scope preserved.
+- [x] PASS: Backend suite 476/476; EmployeeForm tsc clean.
+- [ ] PENDING: Live (tmv.2checkin.com v0.32.80) — log in as a cosmetic employee (e.g. ngocanh12@gmail.com): JWT lobScope=['cosmetic'], switcher=Cosmetic, appointments/data = COSMETIC (not dental).
+- [ ] PENDING: Live — edit/create a cosmetic employee: tier/permission-group dropdown lists COSMETIC groups (not dental).
+- [~] KNOWN: `EmployeeForm.lob.test.tsx` has 4 pre-existing failures (incomplete BusinessUnitProvider mock — part of the branch's baseline test rot, not this change).
+
+---
+
+# TestSprite Plan: Cosmetic deployment defaults to Cosmetic LOB (v0.32.79)
+
+Feature/edit name: Baked `VITE_DEFAULT_LOB` so NK3/tmv opens on Cosmetic by default (fixes Báo cáo + Phân quyền nhân sự showing dental data until manual toggle)
+
+Files:
+- `website/src/contexts/BusinessUnitContext.tsx` — `readDeploymentDefaultLob()`; default LOB precedence now `?lob=` > persisted localStorage > `VITE_DEFAULT_LOB` (if in available LOBs) > `finalAvailable[0]`.
+- `Dockerfile.web` — `ARG/ENV VITE_DEFAULT_LOB=dental` + baked into `.env.production.local`.
+- NK3 compose (`/opt/tgroup-nk3/runtime/docker-compose.nk3.yml`) web build arg `VITE_DEFAULT_LOB: "cosmetic"` (NK/NK2 leave unset → dental).
+- `website/src/contexts/__tests__/BusinessUnitContext.test.tsx` — +4 tests.
+
+Checks:
+- [x] PASS: Unit — admin defaults to cosmetic when `VITE_DEFAULT_LOB=cosmetic` and no persisted value (BusinessUnitContext.test.tsx, 14/14).
+- [x] PASS: Unit — persisted localStorage choice wins over `VITE_DEFAULT_LOB`.
+- [x] PASS: Unit — `VITE_DEFAULT_LOB` ignored when not in available LOBs (flag off → dental).
+- [x] PASS: Unit — dental deployment (flag unset) keeps admins on dental (no NK/NK2 regression).
+- [x] PASS: Live (tmv.2checkin.com v0.32.79) — fresh login, no toggle: LOB switcher = "Cosmetic"; Báo cáo shows cosmetic ₫1.929.658.000 (not dental ₫6.1B); Phân quyền shows cosmetic groups ("COSMETIC PERM TEST GROUP", Admin 56 perms/11 members); 0 console errors.
+- [x] PASS: Backend authz unchanged & correct — cosmetic admin (minted authLob=cosmetic JWT) 200 on `/api/cosmetic/Reports/*` + `/Permissions/*`; non-admin correctly 403.
+
+---
+
+# TestSprite Plan: Multi-level CTV override made real (v0.32.76)
+
+Feature/edit name: Downline override becomes real pending commission (engine multi-level split + backfill)
+
+Files:
+- `api/src/services/commissionEngine.js` — `_writeCtvOverrides()` (additive, idempotent), hooked into `createEarningsForPayment` (source='ctv' only), `backfillOverridesForLob()`, exports.
+- `api/src/services/ctvNetwork.js` — projection base scoped to `COALESCE(level,0)=0`.
+- `api/scripts/backfill-ctv-overrides.js` — one-time both-DB backfill.
+
+Checks:
+- [x] PASS: jest — override cascades to enabled upline levels (additive, 3 inserts: L0+L1+L2); salestaff source does NOT cascade; idempotent NOT-EXISTS guard. Commission suites (21) + hierarchy (8) green.
+- [x] PASS: NK3 deploy v0.32.76; backfill created TTK L2 override ₫41,230 (dental); `GET /api/ctv/commission-summary` → `totals.pending: 41230, counts.pending: 1` (was 0). Matches Network projection.
+- [ ] PENDING: NK3 live portal — Hoa hồng → Chờ nhận shows "TỔNG CHỜ NHẬN 41.230đ" with one line.
+- [ ] PENDING (pre-promotion): review real payout impact before NK2/NK (changes amounts owed for every CTV with downline).
+
+---
+
+# TestSprite Plan: CTV Network — potential flip card (v0.32.75)
+
+Feature/edit name: "Tiềm năng từ tuyến dưới" becomes a flip card showing the earning source (paid-to-them / your cut per member)
+
+Files:
+- `website/src/components/ctv/CtvHierarchyPanel.tsx` — new `PotentialFlipCard` (front summary → back source list); removed inline per-level chips + unused `ctv`/`levelBreakdown`.
+- `website/src/i18n/locales/{en,vi}/ctv.json` — `hierarchy.flipToSource/flipBack/paidToThem/noEarningSource`.
+- (No backend change — uses `earned`/`overrideContribution` already on each node.)
+
+Checks:
+- [x] PASS: `tsc --noEmit` clean; eslint 0 warnings; en/vi json valid.
+- [ ] PENDING: NK3 web rebuild + deploy v0.32.75.
+- [ ] PENDING: NK3 live — tap the potential card → flips → lists "lý kim phụng" with paid ₫2,061,500 + your cut ₫41,230; tap flips back.
+
+---
+
+# TestSprite Plan: CTV Network — detailed/collapsible downline + search (v0.32.74)
+
+Feature/edit name: Network tab — per-level override breakdown, collapsible downline cards with source detail, downline search bar
+
+Files:
+- `api/src/services/ctvNetwork.js` — each downline node now carries `earned` + `overrideContribution`.
+- `website/src/lib/api/ctv.ts` — `CtvHierarchyNode.earned?` / `.overrideContribution?`.
+- `website/src/components/ctv/CtvHierarchyPanel.tsx` — rewritten: per-level breakdown chips on the potential card, `DownlineCard` collapsible (expand → earnings/rate/cut/LOB/contact), search input (`normalizeText` diacritic-insensitive), no-match state.
+- `website/src/i18n/locales/{en,vi}/ctv.json` — `hierarchy.sourceLabel/searchPlaceholder/noMatch/yourCut/theyEarned/yourPotential/clearSearch`.
+
+Checks:
+- [x] PASS: `npx jest ctvNetwork.hierarchy` 8/8 (incl. per-node + sum=total); `tsc --noEmit` 0; eslint 0 warnings; en/vi json valid.
+- [x] PASS: NK3 build `tsc` gate passed; deployed v0.32.74; `GET /api/ctv/hierarchy` returns per-node `earned`/`overrideContribution` (L2 "lý kim phụng" earned ₫2,061,500 → cut ₫41,230); `/api/ctv/referrals` still `[]`.
+- [ ] PENDING: NK3 live portal visual — Mạng lưới shows breakdown chips, search filters downline, member cards expand/collapse with the earnings detail.
+
+---
+
+# TestSprite Plan: CTV Portal — Track shows real clients only + Network downline override (v0.32.73)
+
+Feature/edit name: Fix Theo dõi (Track) leaking downline CTVs as clients; add projected override-from-downline number to Mạng lưới (Network)
+
+Files:
+- `api/src/routes/ctv.js` — `/referrals` + `/client-journeys` refSql gained `AND COALESCE(is_ctv,false)=false` (exclude downline CTVs from the client list); `GET /hierarchy` now delegates to `getCtvHierarchy`.
+- `api/src/services/ctvNetwork.js` — `buildCtvHierarchy` rolls up downline earnings → `totals.downlineEarningsBase / potentialOverride / overrideRatePct` using `commission_level_config` shares (fallback `STANDARD_OVERRIDE_SHARES`; disabled levels pay 0). `loadHierarchySource` fetches the level config.
+- `website/src/lib/api/ctv.ts` — `CtvHierarchyResponse.totals` extended (3 optional fields).
+- `website/src/components/ctv/CtvHierarchyPanel.tsx` — "Potential from downline" card (₫ + %, "Projected/Tạm tính" badge), shown when `downlineCount > 0`.
+- `website/src/i18n/locales/{en,vi}/ctv.json` — `hierarchy.potentialTitle/potentialHint/projectedBadge`.
+- `api/src/services/__tests__/ctvNetwork.hierarchy.test.js` — new (7 cases).
+
+Checks:
+- [x] PASS: `npx jest ctvNetwork.hierarchy` 7/7; services suite (commissionEngine+ctvNetwork) 22/22.
+- [x] PASS: `tsc --noEmit` exit 0; eslint clean on changed FE files; en/vi ctv.json valid.
+- [ ] PENDING: NK3 API verify — minted CTV JWT for Trần Trung Kiên: `GET /api/ctv/referrals` returns ONLY `is_ctv=false` customers (0 for this CTV); `GET /api/ctv/hierarchy` `totals.potentialOverride/overrideRatePct` present and sane.
+- [ ] PENDING: NK3 live portal visual — Theo dõi no longer lists downline CTVs; Mạng lưới shows the "Tiềm năng từ tuyến dưới" card.
+
+---
+
+# TestSprite Plan: CTV Portal — Track-Clients Customer Deep-Link (v0.32.72)
+
+Feature/edit name: Shareable "Open customer" / "Copy link" on each Track-Clients card (CTV portal)
+
+Files:
+- `website/src/components/ctv/ReferralFlipCard.tsx` — footer (sibling of the flip button) with `<a href="/customers/:id" target=_blank>` Open customer + Copy-link button (clipboard, transient "Copied"). `customerPath = /customers/${referral.id}`.
+- `website/src/i18n/locales/{en,vi}/ctv.json` — `card.openCustomer/copyLink/linkCopied`.
+- (No API change — `referral.id` = `dbo.partners.id` of the referred client, confirmed in ctv.js /referrals SQL; `/customers/:id` route exists in App.tsx.)
+
+Checks:
+- [x] PASS: `tsc --noEmit` exit 0; ctv.json en/vi valid.
+- [x] PASS: id mapping — /referrals selects `id ... FROM dbo.partners WHERE referred_by_ctv_id`, so referral.id → /customers/:id is correct.
+- [~] PRE-EXISTING FAIL (not this change): `ReferralFlipCard.test.tsx` 2/3 fail — test harness renders raw i18n keys (flip button name = "card.showServicesFor"); getByRole-by-translated-name fails independently of the footer. Owner to fix async i18n in test.
+- [ ] PENDING: NK3 deploy + live verify on the CTV portal — each Track-Clients card shows Open customer + Copy link; Open navigates to /customers/:id; Copy puts the full URL on the clipboard.
+
+---
+
+# TestSprite Plan: Admin CTV Search + Hierarchy (v0.32.71) — VERIFIED ON LOCAL
+
+Feature/edit name: Commission → CTV tab — search box + click-to-expand upline/downline hierarchy
+
+Files:
+- `api/src/services/ctvNetwork.js` — `loadHierarchySource()` (both-LOB fetch, per-LOB resilient + logs failures) + `getCtvHierarchy(ctvId)` (validates ctvId, then `buildCtvHierarchy`). Existing `buildCtvNetwork`/`buildCtvHierarchy` unchanged.
+- `api/src/routes/ctvs.js` — admin-gated `GET /:id/hierarchy` → `getCtvHierarchy`; typed 500 envelope.
+- `website/src/lib/api/ctv.ts` — `fetchCtvHierarchyForCtv(id, lob?)`.
+- `website/src/components/commission/CtvManagementTab.tsx` — diacritic-insensitive multi-field search; per-row expand reusing `CtvHierarchyPanel`; cache cleared on suspend.
+- `website/src/i18n/locales/{en,vi}/commission.json` (+`common.json` `clear`).
+
+Checks:
+- [x] PASS: Website typecheck — `tsc --noEmit` exit 0.
+- [x] PASS: API jest — no new failures vs. pre-existing 9 failing suites.
+- [x] PASS: Backend endpoint — seeded chain root→mid→leaf: `GET /Ctvs/{mid}/hierarchy` → `upline:[root]`, `downline:[leaf]`, totals 1/1/1; `{root}` → `downline:[mid L1, leaf L2]`. No-token → 401. Cosmetic mirror path reachable.
+- [x] PASS: Browser (local Cosmetic LOB, WebBridge) — search "test" filters to 1 row; click "Admin" expands → `CtvHierarchyPanel` shows Direct=1/Total=1/Upline=1 + upline "CTV Demo Referrer"; no i18n key leakage (`ctv` ns loads on the admin page).
+- [x] PASS: Adversarial review (3 reviewers + per-finding verify) — confirmed findings fixed (silent-failure logging, ctvId guard, typed 500, stale-cache clear, placeholder copy); O(n²) BFS + no-cache noted as pre-existing/parity, out of scope.
+- [ ] PENDING: NK3 deploy — scp changed files, rebuild api+web, re-verify search + expand on https://tmv.2checkin.com (Vietnamese names exercise the diacritic search for real).
+
+---
+
+# TestSprite Plan: CTV Payout System (v0.32.70) — VERIFIED ON LOCAL
+
+Feature/edit name: Manual CTV payout cycles + receipt photo (`/api/Payouts`)
+
+Files:
+- `api/src/routes/payouts.js` — new Express router: `GET /` (list cycles), `POST /` (create cycle in a tx: lock earnings `FOR UPDATE`, all-pending guard, insert payout, flip earnings to `paid`), `POST /upload-receipt` (multer+sharp), `PATCH /:id` (attach receipt). Gate: admin or `commissions.payout.run`.
+- `api/src/server.js` — mounts `/api/Payouts` + `express.static('/uploads/payouts')`.
+- `api/src/services/payoutService.js` — REMOVED (broken knex; tx moved into router via raw pg).
+- `website/src/components/commission/EarningsPayoutsTabs.tsx` — receipt rendered via `getUploadUrl()`.
+- `nginx.conf` / `nginx.docker.conf` — `/uploads/payouts` proxy.
+- `api/migrations/051_add_payout_receipt.sql` — applied to local `tdental_demo` + `tcosmetic_demo`.
+
+Checks:
+- [x] PASS: API unit suite — `npx jest src/__tests__/payouts.test.js` → 7/7 (gate 403; admin allow; `commissions.payout.run` allow; POST creates + updates earnings; `409 B_EARNINGS_NOT_PAYABLE` when an earning isn't pending; PATCH sets receipt_url+uploaded_at; PATCH `404 S_NOT_FOUND`).
+- [x] PASS: Website typecheck — `tsc --noEmit` clean.
+- [x] PASS: No new regressions — the 9 failing suites/4 tests are identical on clean HEAD (pre-existing, unrelated to this change).
+- [x] PASS: Live browser (local Cosmetic LOB, WebBridge) — Payouts tab loads with **no 404**; 4 pending earnings (1,035,000đ); selected all + cycle "Tháng 5/2026 (verify)" → Pay; earnings cleared from pending; cycle shown under Recent cycles (cosmetic · 4 thu nhập · 1.035.000đ).
+- [x] PASS: Receipt chain — `POST /upload-receipt` (sharp → .jpg) → `PATCH /:id` (earnings_count=4, total=1035000) → `GET /uploads/payouts/<f>.jpg` → `HTTP 200 image/jpeg`; FE img src resolved to API origin.
+- [ ] PENDING: NK3 deploy — apply `051_add_payout_receipt.sql` to `tdental_smoketest` + `tcosmetic_smoketest`, rebuild api+web, re-verify the Chi trả tab on https://tmv.2checkin.com.
+
+---
+
+# TestSprite Plan: Flat Referral Commission, No Pool (v0.32.67) — VERIFIED ON NK3
+
+Feature/edit name: CTV commission = flat % of actual service (24% default, 7% braces), pool removed
+
+Changed code paths:
+- `api/src/services/commissionEngine.js` — `createEarningsForPayment` writes a single earnings row at level 0 = `Σ(line_amount × products.commission_rate_percent)` to the resolved recipient; the pool + `_walkCtvChain`/`commission_level_config` split is removed.
+- `api/scripts/set-referral-commission-rates.sql` — sets product rates (24 default / 7 braces). Applied to `tdental_smoketest` only.
+- Engine + backfill (`commissionEngine.js`, `customerReferrer.js`) deployed to `tgroup-nk3-api`.
+
+Execution checks:
+- [x] PASS: API unit suites — 36/36 (`createEarningsForPayment` now asserts single-row, direct rate; braces 7% case = 2,061,500 on 29,450,000).
+- [x] PASS: rates applied — `tdental_smoketest` products: 374 @ 24%, 36 braces @ 7% (her "Niềng Mắc Cài Kim Loại Tự Buộc 3M" @ 7%).
+- [x] PASS: **Live NK3** — backfill for ĐẶNG THỊ TUYẾT MAI created one earning of **2,061,500đ** (= 29,450,000 × 7%) to CTV "lý kim phụng"; `/api/ctv/client-journeys` → `total_earned=2061500`, `/api/ctv/commission-summary` → `pending=2061500`. NK/NK2 untouched; files backed up.
+- [ ] PENDING: Browser screenshot of the CTV **Hoa hồng** tab showing 2,061,500đ.
+- [ ] PENDING (owner decision): apply the rate script to NK/NK2 when promoting; decide whether upline MLM levels should ever pay.
+
+---
+
+# TestSprite Plan: Activity-Based CTV Journey Staging (v0.32.66) — VERIFIED ON NK3
+
+Feature/edit name: CTV journey stage from real activity (not commission payout)
+
+Changed code paths:
+- `api/src/routes/ctv.js` — `/client-journeys` (NK3's portal endpoint) + `/referrals` apply an activity-based stage override (completed appointment / sale-order line / payment), batched per LOB, guarded by `safeQueryRows`.
+- FE: `ReferralFlipCard.getProgress`, `CtvTrackingTab` filters, `CtvReferral` type prefer server `stage_progress`.
+- `api/src/services/commissionEngine.js` + `api/src/routes/commissionEngine.js` + `api/test/commissionEngine.test.js` — `triggerCommissionEngine` export + route load fix (#3).
+
+Execution checks:
+- [x] PASS: API unit suites — `cd api && JWT_SECRET=x npx jest test/commissionEngine.test.js src/services/__tests__/*` → all green.
+- [x] PASS: `website` typecheck clean; new ReferralFlipCard 4/4 test passes.
+- [x] PASS: activity SQL valid (EXPLAIN) on both `tdental_demo` and `tcosmetic_demo`.
+- [x] PASS: **Live NK3 endpoint** — deployed `/client-journeys` override to `tgroup-nk3-api`; minted CTV token for "lý kim phụng" and `GET /api/ctv/client-journeys` returned ĐẶNG THỊ TUYẾT MAI `stage=paid, stage_progress=4/4` (was 1/4), confirmed across 3 runs. NK / NK2 untouched; pre-patch `ctv.js` backed up to `/opt/tgroup-hotfix-backups/`.
+- [ ] PENDING: Browser screenshot of the NK3 CTV portal showing her at 4/4 (inject the minted JWT into localStorage; no password reset needed).
+- [ ] PENDING (pre-existing, not this change): FE vitest CTV suite fails on i18n-not-initialized in the test env (`aria-label="card.showServicesFor"`).
+
+---
+
+# TestSprite Plan: Retroactive CTV Earnings Backfill on Assignment
+
+Feature/edit name: Retroactive CTV Earnings Backfill on Assignment (v0.32.65)
+
+Changed code paths:
+- `api/src/services/commissionEngine.js` — new `backfillEarningsForClient({ clientId, lob, getDb })`.
+- `api/src/services/customerReferrer.js` — `setCustomerReferrer(..., { lob })` triggers backfill after a successful assign (non-fatal).
+- CTV-assignment call sites now pass `{ lob: req.lob || 'dental' }`: `saleOrders/createSaleOrder.js`, `saleOrders/updateSaleOrder.js`, `appointments/mutationHandlers.js` (create + update).
+
+Affected data flows:
+- A customer who already paid, then is linked to a CTV, now has `dbo.earnings` rows written retroactively for those past payments.
+- Earnings amount/pool computed from `payment_allocations → saleorderlines` product `commission_rate_percent` (same as live payment hook).
+- CTV portal `/api/ctv/client-journeys` derives stages purely from earnings, so backfill advances the journey past "referred" (1/4).
+
+Execution checks:
+- [ ] PENDING: Engine unit suite — `cd api && JWT_SECRET=x npx jest src/services/__tests__/commissionEngine.test.js src/services/__tests__/customerReferrer.backfill.test.js` is green (backfill attribution, idempotent skip, no-referrer no-op, trigger contract).
+- [ ] PENDING: Live NK3 — assign a CTV to a customer who already paid (Service form), then open that CTV's portal `Theo dõi` tab; the client card advances past 1/4 and shows commission. Evidence: screenshot before/after.
+- [ ] PENDING: Idempotency on NK3 — re-save the same CTV assignment; verify `dbo.earnings` for that client/payment did not gain a duplicate `source='ctv'` row.
+- [ ] PENDING: Regression — a brand-new service/appointment with a CTV (no prior payment) still assigns with no error and writes no earnings until payment.
+
+---
+
 # TestSprite Plan: TMV Cosmetic Employee Login Rate-Limit Fix
 
 Feature/edit name: TMV Cosmetic Employee Login Rate-Limit Fix
@@ -1917,3 +2199,59 @@ TestSprite execution items:
 - [ ] PENDING: Verify duplicate phone/email returns 400 while re-saving the CTV's own current values succeeds.
 - [ ] PENDING: Verify invalid email, weak password, and empty body each return the documented 400 error codes.
 - [ ] PENDING: Verify a non-admin caller gets 403 `S_FORBIDDEN`.
+
+---
+
+# TestSprite Plan: Legacy CTV Hierarchy Reconciliation
+
+Feature/edit name: NK3 legacy CTV hierarchy import and reconciliation
+
+Changed URLs and API routes:
+- Browser-visible: `https://tmv.2checkin.com/commission` > `CTV` tab, including legacy source badges and hierarchy data.
+- API routes/data surfaces: `GET /api/Ctvs`, `GET /api/cosmetic/Ctvs`, CTV login through `POST /api/Auth/login` for legacy phone/ref identifiers.
+
+Affected data flows:
+- Legacy source `ctv_db.ctv` active CTV rows -> NK3 Dental `dbo.partners` and Cosmetic `dbo.partners`.
+- Legacy CTV code/phone remains the login identifier; copied legacy password hashes stay on the imported CTV rows.
+- Legacy upline code -> `partners.referred_by_ctv_id` in both Dental and Cosmetic databases.
+
+User roles:
+- Admin/staff reviewing CTVs in Cosmetic LOB.
+- Imported legacy CTV users logging in with their legacy phone/ref and password.
+
+Happy paths:
+- Admin opens the CTV tab and sees all imported legacy CTVs with legacy source labels.
+- Imported legacy CTV login resolves by phone/ref and uses the copied legacy password hash.
+- Kien's CTV row exists in both NK3 databases and opens a hierarchy tree with 17 direct downlines.
+- The full legacy graph has 198 active legacy CTV rows, 147 upline links, 51 root/no-upline rows, and 0 orphan uplines in each NK3 database.
+
+Edge cases:
+- Existing NK3 CTV rows with matching legacy refs must be updated in place, not duplicated.
+- Missing legacy CTVs with phone collisions against non-CTV customer records must be inserted as dedicated CTV rows instead of merged into customer rows.
+- Root CTVs with no legacy upline, including Kien, must keep `referred_by_ctv_id = NULL`.
+- Existing copied password hashes must be preserved when updating already imported legacy CTV rows.
+
+Regressions:
+- Non-legacy NK3 CTV records remain active and are not converted to legacy source.
+- Dental and Cosmetic CTV counts may differ by pre-existing non-legacy rows, but legacy import counts and hierarchy links must match.
+- Historical clients, services, appointments, and earnings are not rewritten by this reconciliation.
+
+Setup data and login state:
+- Source backup: `backups/ctvlegacy/full-hierarchy-20260529-153624/vps-ctv_db-before-full-hierarchy-repair-20260529-153624.dump`.
+- Target backups: `backups/ctvlegacy/full-hierarchy-20260529-153624/vps-tdental_smoketest-before-full-hierarchy-repair-20260529-153624.dump` and `backups/ctvlegacy/full-hierarchy-20260529-153624/vps-tcosmetic_smoketest-before-full-hierarchy-repair-20260529-153624.dump`.
+- Dry-run artifact: `artifacts/ctv-import/full-hierarchy-20260529-153624/full-hierarchy-repair-dry-run.json`.
+
+Execution verification:
+- [x] PASS: Full hierarchy repair applied to NK3 after two explicit confirmations.
+- [x] PASS: Dental has 198 legacy CTVs, 147 with upline, 51 without upline, and 0 orphan uplines.
+- [x] PASS: Cosmetic has 198 legacy CTVs, 147 with upline, 51 without upline, and 0 orphan uplines.
+- [x] PASS: Kien exists in both databases as an active legacy CTV with a copied password hash, no upline, and 17 direct downlines.
+- [x] PASS: Live `GET /api/ctv/hierarchy` for Kien returns 17 direct downlines, 107 total downlines, and 0 uplines.
+- [x] PASS: Live `/ctv` browser screenshot captured at `screenshots/tmv-kien-ctv-hierarchy-20260529.png`.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `https://tmv.2checkin.com/commission` > `CTV` tab shows legacy source labels for imported CTV rows.
+- [ ] PENDING: Verify Kien's hierarchy tree displays 17 direct downlines under the root Kien row.
+- [ ] PENDING: Verify one imported legacy CTV can log in with their legacy phone/ref and known password.
+- [ ] PENDING: Verify legacy CTV search works with names and phone/ref last digits without duplicate rows.
+- [ ] PENDING: Verify Dental and Cosmetic CTV tabs show the same 198 legacy imported CTV identities, allowing only pre-existing non-legacy count differences.

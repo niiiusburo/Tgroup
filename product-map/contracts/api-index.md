@@ -51,11 +51,13 @@ When `COSMETIC_LOB_ENABLED=false` the entire family returns 503.
 |--------|------|------|--------------|----------|
 | GET | `/api/ctv/commission-summary` | CTV (ctv.commission.view.self) | — | Aggregated payload: { pending: {total, dental, cosmetic, count}, paid, recent_activity[], by_service[] } with LOB pills on every row |
 | GET | `/api/ctv/referrals` | CTV (ctv.referrals.view.self) | — | List of referred clients across both DBs with status (earning / no visit), totals earned, LOB pills |
+| GET | `/api/ctv/hierarchy` | CTV (ctv.dashboard.view) | — | `{ current, upline[], downline[], totals }` for the portal Network tab; `downline[]` is a flattened recursive tree from Dental + Cosmetic CTV partner rows |
+| GET | `/api/ctv/client-lookup` | CTV (ctv.dashboard.view) | `?phone=&lob=dental\|cosmetic` | Read-only LOB-specific phone check for the refer form: `{ exists, lob, clientId?, name?, claimed?, claimedByMe?, ownerName?, expiresAt? }`; authoritative claim gate remains `POST /api/ctv/bookings` |
 | POST | `/api/ctv` | CTV or admin | `{ name, phone, email, password, lob_scope?, referred_by_ctv_id? (admin) }` | 201 created CTV. Closed signup (no public). `employee=true`, instant active; referred_by = caller (CTV) or body (admin). Dups → `U_DUPLICATE_PHONE`/`U_DUPLICATE_EMAIL`; non-CTV/non-admin → 403 `S_CTV_CREATE_FORBIDDEN` |
 | POST | `/api/ctv/clients` | CTV or admin | `{ name, phone, lob }` | 201 referred customer in one LOB DB, `referred_by_ctv_id` = caller |
 | POST | `/api/ctv/bookings` | CTV or admin | `{ clientId?, name?, phone, lob, date, time?, companyId?, productId? }` | 201 `{ clientId, appointmentId }`. Eligibility gate: `400 B_CLIENT_CLAIMED {ownerName, expiresAt}` if actively claimed by another CTV; creates/re-claims client + Referral Start card + appointment. `409 REFERRAL_PRODUCT_NOT_CONFIGURED` if referral product unset |
 | (augmented) | `GET /api/Partners/resolve` & `GET /api/Partners/:id` | Auth | — | responses now include `referralClaim: { ownerCtvId, ownerName, active, expiresAt } | null` |
-| (internal) | commission recipient resolution | — | — | Implements D13 priority: referred_by_ctv_id > active consultation card (cosmetic) > salestaffid (dental). For `ctv` source the pool is split up the upline per `commission_level_config` |
+| (internal) | commission recipient resolution | — | — | Implements D13 priority: referred_by_ctv_id > active consultation card (cosmetic) > salestaffid (dental). Current NK3 model pays the resolved CTV recipient a flat product commission percent; no upline level split is paid unless a future contract reintroduces it. |
 
 CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin route.
 
@@ -66,8 +68,22 @@ CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin ro
 | GET | `/api/Ctvs`, `/api/cosmetic/Ctvs` | admin (`ctv.manage`/`*`) | `?status=active\|suspended` | `{ ctvs: [{id, name, phone, email, lob_scope, active, referred_by_ctv_id, upline_name, source, legacy_code, created_via}] }`; cosmetic mount filters to Cosmetic-scoped CTVs and exposes `source='legacy_ctv'` for legacy imports |
 | GET | `/api/Ctvs/options`, `/api/cosmetic/Ctvs/options` | Auth (any staff) | `?lob=dental\|cosmetic` | `{ ctvs: [{id, name, phone, lob_scope}] }` — active CTVs for the CTV selector in the Service/Appointment forms; LOB-filtered (cosmetic mount returns only Cosmetic-scoped CTVs) |
 | PATCH | `/api/Ctvs/:id`, `/api/cosmetic/Ctvs/:id` | admin | `{ active: boolean }` | Updated CTV (suspend/reactivate); mirrors to cosmetic DB if present |
+| PUT | `/api/Ctvs/:id`, `/api/cosmetic/Ctvs/:id` | admin | `{ name?, phone?, email?, password? }` | Full CTV profile edit. Empty provided identity fields are rejected; non-empty password is bcrypt-hashed; duplicate phone/email returns `U_DUPLICATE_PHONE`/`U_DUPLICATE_EMAIL`; mirrors to cosmetic DB when present. |
+| GET | `/api/Ctvs/:id/hierarchy`, `/api/cosmetic/Ctvs/:id/hierarchy` | admin (`ctv.manage`/`*`) | — | Upline chain + flat downline for an arbitrary CTV (`CtvHierarchyResponse`: `{ current, upline[], downline[], totals: { uplineCount, downlineCount, directDownlineCount } }`, nodes camelCase `joinedAt`/`directDownlineCount`/`lobs`). Reuses `ctvNetwork.getCtvHierarchy` (same builder as the self-portal `/api/ctv/hierarchy`); spans both LOB DBs so the result is LOB-independent. Powers the admin CTV tab's click-to-expand. `:id` is a JS filter key only (not interpolated into SQL). |
 | GET | `/api/CommissionConfig`, `/api/cosmetic/CommissionConfig` | Auth | — | `{ levels: [{level,label,enabled,share_percent}], defaultReferralPercent }` |
 | PUT | `/api/CommissionConfig`, `/api/cosmetic/CommissionConfig` | admin (`commission.config.manage`/`*`) | `{ levels[], defaultReferralPercent }` | Upserts config; enabled-sum > 100 → 400 `B_LEVEL_SUM_EXCEEDS_100` |
+
+## Earnings & Payouts (`/api/Earnings`, `/api/Payouts`) — admin / `commissions.*`
+
+Earnings (the CTV commission ledger) and Payouts (manual payout cycles that settle them) are **not** LOB-mirror routes — they live at the base path and take `lob` as a query/body field. Each payout is scoped to ONE LOB: the `dbo.payouts` row and the `dbo.earnings` it settles live in that LOB's database (no cross-DB SQL).
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/api/Earnings` | Auth (`commissions.view.team`/admin) | `?lob=dental\|cosmetic\|all, status, ctvId, clientId, dateFrom, dateTo, limit, offset` | `{ items[], totalItems, totals: { amount, byLob }, limit, offset }`. Reads both DBs when `lob=all`/omitted; merges in the API layer. |
+| GET | `/api/Payouts` | Auth (`commissions.payout.run`/admin) | `?lob=dental\|cosmetic, limit, offset` | `{ items: PayoutRow[], totalItems, limit, offset }`. Each `PayoutRow`: `{ id, lob, cycle_label, paid_at, total_amount, notes, receipt_url, receipt_uploaded_at, created_by_partner_id, created_by_name, earnings_count, created_at }`. Reads the LOB's `dbo.payouts`. |
+| POST | `/api/Payouts` | Auth (`commissions.payout.run`/admin) | `{ lob, earningIds[], cycleLabel, notes?, receipt_url? }` | `201 PayoutRow`. In one transaction: locks the given earnings `FOR UPDATE`, requires **all** still `pending` (else `409 B_EARNINGS_NOT_PAYABLE`), inserts the payout (`paid_at=now()`), flips those earnings to `status='paid'` with `payout_id`. Bad `lob` → `400 U_INVALID_LOB`; empty `earningIds`/`cycleLabel` → `400 U_INVALID_INPUT`. |
+| POST | `/api/Payouts/upload-receipt` | Auth (`commissions.payout.run`/admin) | multipart, field `receipt` (image, ≤5 MB) | `{ url }` (e.g. `/uploads/payouts/<uuid>.jpg`). Stored on disk via multer + sharp-compressed; served by `express.static` at `/uploads/payouts` (nginx proxies `/uploads/payouts`). |
+| PATCH | `/api/Payouts/:id` | Auth (`commissions.payout.run`/admin) | `{ receipt_url, lob? }` | Updated `PayoutRow` with `receipt_url` + `receipt_uploaded_at=now()`. Missing payout → `404 S_NOT_FOUND`. Used to attach a receipt to an existing cycle. |
 
 ## Account (`/api/Account`)
 

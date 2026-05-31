@@ -66,6 +66,7 @@ endpoints:
   - PUT/PATCH/DELETE /api/cosmetic/* (same)
   - GET    /api/ctv/commission-summary (cross-DB read of both earnings tables via recipient_partner_id for the authenticated CTV partner; returns LOB-tagged rows + aggregates per D13)
   - GET    /api/ctv/referrals (CTV's referred partners across LOBs with status/earned totals)
+  - GET    /api/cosmetic/Ctvs (admin CTV list for Cosmetic-scoped CTVs; returns legacy source markers)
   - POST   /api/Auth/login (now returns lob_scope + is_ctv; triggers hard redirect to /ctv when is_ctv=true)
   - GET    /api/Auth/me (augmented with lob_scope / is_ctv)
 ui_surfaces:

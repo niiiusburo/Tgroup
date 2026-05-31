@@ -22,6 +22,7 @@
 | v1.0.7 | 2026-05-28 | CTV portal payloads allow nullable display names so frontend i18n owns localized unknown-client/service fallbacks. |
 | v1.0.8 | 2026-05-28 | SaleOrders client contract now explicitly carries `sourceid?: UUID | null` and the frontend must only submit persisted active-LOB customer-source UUIDs. |
 | v1.0.9 | 2026-05-28 | `POST /api/Auth/login` accepts an email address for staff/admins or a legacy CTV phone/ref code for rows marked `legacy_ctv_import*`. |
+| v1.0.10 | 2026-05-29 | CTV portal adds hierarchy and LOB-aware client phone lookup contracts; admin CTV management supports full profile edits. |
 
 ---
 
@@ -29,7 +30,7 @@
 
 Cosmetic LOB mirror rule: when the frontend passes `lob: 'cosmetic'` to `apiFetch`, the client routes the same endpoint under `/api/cosmetic/*`. Mirrored handlers must run behind `requireLobScope('cosmetic')`, `attachCosmeticDb`, `runWithLob('cosmetic')`, and `cosmetic.access`, then read/write `tcosmetic_demo` through request-scoped `getQuery(req)` or ALS-aware `query()`. Dental remains the default legacy `/api/*` path.
 
-CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referrals`, and `GET /api/ctv/me` are mounted behind `ctv.dashboard.view` and must additionally require `req.user.is_ctv === true` or legacy JWT `req.user.isCtv === true`. Authenticated non-CTV staff, including admins, receive `403 S_CTV_ONLY`.
+CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referrals`, `GET /api/ctv/client-journeys`, `GET /api/ctv/hierarchy`, `GET /api/ctv/client-lookup`, and `GET /api/ctv/me` are mounted behind `ctv.dashboard.view` and are scoped to the authenticated CTV identity unless the route explicitly allows admin-assisted CTV creation/booking. Authenticated non-CTV staff must not receive another CTV's self data.
 
 Admin CTV list rule: `GET /api/Ctvs` and `GET /api/cosmetic/Ctvs` return CTV identity rows with `source`, `legacy_code`, and `created_via`. Cosmetic mode filters to CTV rows whose `lob_scope` includes `cosmetic`; `source='legacy_ctv'` is derived from `created_via LIKE 'legacy_ctv_import%'`.
 
@@ -100,6 +101,49 @@ All `/api/ctv/*` routes require `Authorization: Bearer <token>` and are self-sco
 }
 ```
 
+#### GET /api/ctv/hierarchy
+**Response 200:**
+```ts
+{
+  current: {
+    id: string;
+    name: string | null;
+    phone?: string;
+    email?: string | null;
+    level: number;                 // 0 for the authenticated CTV
+    lobs: Array<'dental' | 'cosmetic'>;
+    directDownlineCount: number;
+    clientCount: number;
+    earnedAmount: number;
+    joinedAt?: string | null;
+  };
+  upline: Array<CtvHierarchyNode>;  // nearest upline first
+  downline: Array<CtvHierarchyNode>; // flattened recursive downline
+  totals: {
+    uplineCount: number;
+    directDownlineCount: number;
+    downlineCount: number;
+  };
+}
+```
+
+#### GET /api/ctv/client-lookup
+**Query:** `phone` is required; `lob` defaults to `dental` unless set to `cosmetic`.
+**Response 200:**
+```ts
+{
+  exists: boolean;
+  lob: 'dental' | 'cosmetic';
+  clientId?: string;
+  name?: string | null;
+  claimed?: boolean;
+  claimedByMe?: boolean;
+  ownerName?: string | null;
+  expiresAt?: string | null;
+}
+```
+This route is read-only. The authoritative referral-claim gate still runs on `POST /api/ctv/bookings`.
+
 #### POST /api/ctv/bookings
 **Request:** `clientId?`, `name?`, `phone`, `lob`, `date`, optional `time`, `companyId`, `productId`.
 **Response 201:** `{ clientId: string; appointmentId: string }`.
@@ -117,6 +161,25 @@ All `/api/ctv/*` routes require `Authorization: Bearer <token>` and are self-sco
 }
 ```
 Both camelCase and snake_case fields are part of the compatibility contract for the refreshed CTV booking sheet.
+
+### 1.1B Admin CTV Management
+
+#### PUT /api/Ctvs/:id and PUT /api/cosmetic/Ctvs/:id
+Admin-only full edit for an existing CTV.
+
+**Request:**
+```ts
+{
+  name?: string;
+  phone?: string;
+  email?: string;
+  password?: string; // omitted or empty keeps the current password hash
+}
+```
+Provided `name`, `phone`, and `email` fields must be non-empty. A provided non-empty `password` must be at least 6 characters and is stored as bcrypt, including for legacy CTV rows. Duplicate `phone`/`email` checks exclude the edited CTV's own mirrored Dental/Cosmetic row.
+
+**Response 200:** `{ id, name, phone, email, lob_scope, active, referred_by_ctv_id, created_via }`.
+**Errors:** 400 `U_INVALID_NAME`, `U_INVALID_PHONE`, `U_INVALID_EMAIL`, `U_WEAK_PASSWORD`, `U_DUPLICATE_PHONE`, `U_DUPLICATE_EMAIL`, or `VALIDATION`; 403 `S_FORBIDDEN`; 404 `S_NOT_FOUND`.
 
 ---
 
