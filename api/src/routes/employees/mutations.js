@@ -1,5 +1,5 @@
 const express = require('express');
-const { query: legacyQuery, getQuery, pool } = require('../../db');
+const { query: legacyQuery, getQuery, pool, getCurrentLob } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
 const { fetchLocationScopeIds } = require('./locationScopes');
 const { getVietnamNow } = require('../../lib/dateUtils');
@@ -42,6 +42,9 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
 
     const id = require('crypto').randomUUID();
     const now = getVietnamNow();
+    // Stamp the line-of-business so a cosmetic employee stays cosmetic (and dental stays dental).
+    // getCurrentLob() resolves to 'cosmetic' inside /api/cosmetic/* (cosmeticRouter runWithLob), else 'dental'.
+    const lobScopeValue = [getCurrentLob() === 'cosmetic' ? 'cosmetic' : 'dental'];
 
     // Hash password if provided
     let passwordHash = null;
@@ -60,8 +63,8 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
         active, isdoctor, isassistant, isreceptionist, startworkdate,
         iscompany, ishead, isdeleted, isbusinessinvoice,
         password_hash, jobtitle, wage, allowance, hrjobid, tier_id,
-        datecreated, lastupdated
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
+        datecreated, lastupdated, lob_scope
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)
       RETURNING *`,
       [
         id,
@@ -91,6 +94,7 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
         tierId,
         now,    // datecreated
         now,    // lastupdated
+        lobScopeValue, // lob_scope — node-postgres serializes a JS string[] to text[]
       ]
     );
 

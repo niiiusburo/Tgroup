@@ -144,10 +144,16 @@ router.post('/login', async (req, res) => {
     const isAdmin = isAdminPermissionState(permissions);
     const adminLobScope = ['dental', 'cosmetic'];
     const employeeLobScope = getEmployeeLobScope(employee);
+    const employeeIsCtv = isEmployeeCtv(employee);
+    // Non-admin staff whose lob_scope is empty/NULL (e.g. accounts created before the create
+    // handler stamped lob_scope) must still be scoped to their HOME LOB (authLob = the DB they
+    // were found in), so a cosmetic employee defaults to cosmetic — NOT dental. CTVs keep [] (no
+    // LOB surface; requireLobScope blocks them). authLob never grants cross-LOB access.
     const effectiveLobScope = (Array.isArray(employeeLobScope) && employeeLobScope.length > 0)
       ? employeeLobScope
-      : (isAdmin ? adminLobScope : employeeLobScope);
-    const employeeIsCtv = isEmployeeCtv(employee);
+      : (isAdmin
+          ? adminLobScope
+          : (employeeIsCtv ? employeeLobScope : [authLob]));
 
     const tokenPayload = {
       employeeId: employee.id,

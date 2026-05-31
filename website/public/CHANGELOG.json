@@ -1,5 +1,33 @@
 [
   {
+    "version": "0.32.80",
+    "date": "2026-05-31",
+    "commit": "pending",
+    "highlights": "Cosmetic employee accounts now stay cosmetic: newly-created staff are correctly scoped to their clinic's line of business, so they see cosmetic appointments/data (not dental), and the permission-group dropdown shows the right line-of-business groups.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "New employee accounts created on the cosmetic clinic now correctly stay on the Cosmetic line of business. Previously a new cosmetic employee logged in and saw Cosmetic locations but DENTAL appointments/data, because the account was created without a line-of-business assignment.",
+          "Existing cosmetic employees that were created without a line-of-business are now fixed automatically at login (scoped to their home clinic) — no data migration needed.",
+          "The employee permission-group (tier) dropdown now lists the correct line-of-business groups (cosmetic groups for a cosmetic employee) instead of always showing the dental groups."
+        ]
+      },
+      {
+        "title": "Changed",
+        "items": [
+          "Employee creation now stamps the line-of-business (lob_scope) based on which clinic it is created under; login now scopes a staff account with no explicit line-of-business to its home clinic (admins keep both; CTVs unchanged)."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added backend tests for line-of-business stamping on create and login fallback (non-admin → home LOB, CTV → none, admin → both, explicit scope preserved). Full backend suite 476/476 green."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.79",
     "date": "2026-05-30",
     "commit": "pending",

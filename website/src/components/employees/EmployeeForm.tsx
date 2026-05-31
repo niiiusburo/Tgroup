@@ -27,7 +27,6 @@ import { LocationSelector } from '@/components/shared/LocationSelector';
 import { createEmployee, updateEmployee, fetchCompanies, fetchPermissionGroups, type ApiEmployee, type CreateEmployeeData, type PermissionGroup } from '@/lib/api';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { ALL_ROLES, ROLE_LABELS, ROLE_TO_DB_FLAGS, inferRoleFromFlags, type EmployeeRole } from '@/data/mockEmployees';
-import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 const ROLE_TO_JOBTITLE: Record<EmployeeRole, string> = {
   'doctor': 'Bác sĩ',
@@ -95,7 +94,7 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
       id: l.id, name: l.name, address: '', phone: l.phone || '',
       status: (l.active ? 'active' : 'inactive') as 'active' | 'inactive', doctorCount: 0, patientCount: 0, appointmentCount: 0
     })))).catch((err) => console.error('Failed to fetch locations:', err));
-    fetchPermissionGroups().then((groups) => setTiers(groups)).catch((err) => console.error('Failed to fetch tiers:', err));
+    fetchPermissionGroups(currentLOB).then((groups) => setTiers(groups)).catch((err) => console.error('Failed to fetch tiers:', err));
   }, [currentLOB]);
 
   const handleSubmit = async (e: React.FormEvent) => {
