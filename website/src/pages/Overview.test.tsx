@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
+import { renderWithProviders } from '@/test/test-utils';
 
 // Mock all child components and hooks so we only test Overview wiring
 vi.mock('@/components/modules/PatientCheckIn', () => ({
@@ -123,9 +124,19 @@ vi.mock('@/hooks/useOverviewAppointments', () => ({
 
 vi.mock('@/contexts/LocationContext', () => ({
   useLocationFilter: () => ({ selectedLocationId: 'all' }),
+  LocationProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 vi.mock('@/hooks/useLocations', () => ({
   useLocations: () => ({ getLocationById: () => null }),
+}));
+
+// Mock @/lib/api to prevent network calls from AuthProvider
+vi.mock('@/lib/api', () => ({
+  fetchMe: vi.fn().mockResolvedValue({
+    id: 'user-1',
+    email: 'test@clinic.vn',
+    name: 'Test User',
+  }),
 }));
 
 import { Overview } from './Overview';
@@ -136,7 +147,7 @@ describe('Overview search boxes', () => {
   });
 
   it('renders independent section searches without the sticky finder', () => {
-    render(<Overview />);
+    renderWithProviders(<Overview />);
 
     expect(screen.queryByTestId('overview-sticky-search')).not.toBeInTheDocument();
     expect(screen.getByTestId('zone1-search')).toBeInTheDocument();
@@ -145,7 +156,7 @@ describe('Overview search boxes', () => {
   });
 
   it('keeps Zone 1 and Zone 3 search state independent', () => {
-    render(<Overview />);
+    renderWithProviders(<Overview />);
 
     fireEvent.change(screen.getByTestId('zone1-search'), { target: { value: 'Minh' } });
 

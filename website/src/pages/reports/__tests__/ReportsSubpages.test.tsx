@@ -21,6 +21,12 @@ vi.mock('@/lib/api/employees', () => ({
   fetchEmployees: vi.fn(),
 }));
 
+// Report components consume useReportData → useBusinessUnit; mock it so the
+// subpages render without the full provider tree (they only need currentLOB).
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({ currentLOB: 'dental' }),
+}));
+
 import { apiFetch } from '@/lib/api';
 import { fetchEmployees } from '@/lib/api/employees';
 const mockFetch = vi.mocked(apiFetch);

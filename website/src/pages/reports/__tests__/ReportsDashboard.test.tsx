@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithProviders } from '@/test/test-utils';
 import { ReportsDashboard } from '../ReportsDashboard';
 
 vi.mock('@/lib/api', () => ({
@@ -24,9 +25,13 @@ vi.mock('framer-motion', async () => {
 });
 
 const mockContext = { dateFrom: '2025-01-01', dateTo: '2025-12-31', companyId: '' };
-vi.mock('react-router-dom', () => ({
-  useOutletContext: () => mockContext,
-}));
+vi.mock('react-router-dom', async () => {
+  const React = await import('react');
+  return {
+    BrowserRouter: ({ children }: any) => React.createElement(React.Fragment, null, children),
+    useOutletContext: () => mockContext,
+  };
+});
 
 const mockDashboardData = {
   revenue: { invoiced: 84070000, paid: 25770000, outstanding: 48890000, change: -38.8 },
@@ -44,14 +49,14 @@ describe('ReportsDashboard', () => {
 
   it('shows loading state while fetching', () => {
     mockFetch.mockReturnValue(new Promise(() => {}));
-    render(<ReportsDashboard />);
+    renderWithProviders(<ReportsDashboard />);
     expect(screen.getByText('loading')).toBeInTheDocument();
   });
 
   it('renders KPI card labels when data loads', async () => {
     mockFetch.mockResolvedValueOnce({ success: true, data: mockDashboardData });
 
-    render(<ReportsDashboard />);
+    renderWithProviders(<ReportsDashboard />);
 
     await screen.findByText('metrics.revenueCollected');
     expect(screen.getByText('metrics.totalAppointments')).toBeInTheDocument();
@@ -64,7 +69,7 @@ describe('ReportsDashboard', () => {
   it('renders error state with retry when API rejects', async () => {
     mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
-    render(<ReportsDashboard />);
+    renderWithProviders(<ReportsDashboard />);
 
     // Use getAllByText since the error appears in both heading and paragraph
     const errorElements = await screen.findAllByText('Failed to load report');
@@ -75,7 +80,7 @@ describe('ReportsDashboard', () => {
   it('renders error state when success is false', async () => {
     mockFetch.mockResolvedValueOnce({ success: false });
 
-    render(<ReportsDashboard />);
+    renderWithProviders(<ReportsDashboard />);
 
     await screen.findAllByText('Failed to load report');
     expect(screen.getByText('Retry')).toBeInTheDocument();
@@ -84,7 +89,7 @@ describe('ReportsDashboard', () => {
   it('renders chart section titles', async () => {
     mockFetch.mockResolvedValueOnce({ success: true, data: mockDashboardData });
 
-    render(<ReportsDashboard />);
+    renderWithProviders(<ReportsDashboard />);
 
     await screen.findByText('charts.revenueTrend12Month');
     expect(screen.getByText('charts.appointmentRates')).toBeInTheDocument();

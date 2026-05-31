@@ -19,6 +19,12 @@ vi.mock('@/contexts/TimezoneContext', () => ({
   }),
 }));
 
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({
+    currentLOB: 'dental',
+  }),
+}));
+
 import { useOverviewAppointments } from './useOverviewAppointments';
 
 describe('useOverviewAppointments search', () => {
@@ -163,7 +169,7 @@ describe('useOverviewAppointments search', () => {
       await result.current.updateCheckInStatus('a1', 'in-treatment');
     });
 
-    expect(api.updateAppointment).toHaveBeenCalledWith('a1', { state: 'in Examination' });
+    expect(api.updateAppointment).toHaveBeenCalledWith('a1', { state: 'in Examination' }, 'dental');
     expect(result.current.appointments.find((apt) => apt.id === 'a1')).toMatchObject({
       checkInStatus: 'in-treatment',
       treatmentStartTime: '2024-01-01T09:34:56.000Z',

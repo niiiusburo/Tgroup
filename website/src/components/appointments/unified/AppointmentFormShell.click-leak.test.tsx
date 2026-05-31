@@ -11,6 +11,13 @@ vi.mock('@/contexts/AuthContext', () => ({
   }),
 }));
 
+// Stub the form's data hooks so AppointmentFormCore mounts with static data and
+// fires no async fetch (avoids setState-after-unmount "window is not defined").
+vi.mock('@/hooks/useProducts', () => ({ useProducts: () => ({ products: [], isLoading: false }) }));
+vi.mock('@/hooks/useCustomers', () => ({ MIN_SEARCH_LENGTH: 3, useCustomers: () => ({ customers: [], createCustomer: vi.fn(), loading: false }) }));
+vi.mock('@/hooks/useEmployees', () => ({ useEmployees: () => ({ employees: [], isLoading: false }) }));
+vi.mock('@/hooks/useLocations', () => ({ useLocations: () => ({ allLocations: [], isLoading: false }) }));
+
 describe('AppointmentFormShell — backdrop click leak', () => {
   it('does NOT close when the same click that opened the modal reaches the backdrop', () => {
     const onClose = vi.fn();

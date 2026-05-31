@@ -136,7 +136,7 @@ describe('useCustomerFormActions', () => {
       await waitFor(() => {
         expect(createCustomer).toHaveBeenCalled();
       });
-      expect(registerFace).toHaveBeenCalledWith('new-customer', fakeBlob);
+      expect(registerFace).toHaveBeenCalledWith('new-customer', fakeBlob, 'profile_register');
     });
 
     it('does not call registerFace when no pendingFaceImage', async () => {

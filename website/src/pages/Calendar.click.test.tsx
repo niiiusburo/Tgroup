@@ -4,6 +4,7 @@ import { renderWithProviders } from '@/test/test-utils';
 import { Calendar } from './Calendar';
 
 vi.mock('@/contexts/AuthContext', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
   useAuth: () => ({
     hasPermission: (permission: string) => [
       'appointments.add',
@@ -26,7 +27,7 @@ vi.mock('@/lib/api', () => ({
       companyid: 'loc-1',
       companyname: 'Main Clinic',
       name: 'Cleaning',
-      date: '2026-05-04',
+      date: '2026-05-31',
       time: '09:00',
       note: '',
       timeexpected: 30,

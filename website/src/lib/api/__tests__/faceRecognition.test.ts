@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { recognizeFace, registerFace, getFaceStatus } from '../partners';
+import { API_URL } from '../core';
 
 describe('Face Recognition API client', () => {
   const originalFetch = global.fetch;
@@ -39,7 +40,7 @@ describe('Face Recognition API client', () => {
       const result = await recognizeFace(blob);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3002/api/face/recognize',
+        `${API_URL}/face/recognize`,
         expect.objectContaining({
           method: 'POST',
           body: expect.any(FormData),
@@ -124,7 +125,7 @@ describe('Face Recognition API client', () => {
       const result = await registerFace('p1', new Blob(['image']), 'no_match_rescue');
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3002/api/face/register',
+        `${API_URL}/face/register`,
         expect.objectContaining({
           method: 'POST',
           body: expect.any(FormData),
@@ -184,7 +185,7 @@ describe('Face Recognition API client', () => {
       const result = await getFaceStatus('p1');
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3002/api/face/status/p1',
+        `${API_URL}/face/status/p1`,
         expect.objectContaining({ method: 'GET' }),
       );
       expect(result.registered).toBe(true);
@@ -213,7 +214,7 @@ describe('Face Recognition API client', () => {
       await getFaceStatus('p1/abc');
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3002/api/face/status/p1%2Fabc',
+        `${API_URL}/face/status/p1%2Fabc`,
         expect.objectContaining({ method: 'GET' }),
       );
     });

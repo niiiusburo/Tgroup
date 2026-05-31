@@ -1,10 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
+import { renderHookWithProviders } from '@/test/test-utils';
 import { useReportData } from '../useReportData';
 
-// Mock apiFetch
+// Mock apiFetch and fetchMe (AuthProvider needs fetchMe)
 vi.mock('@/lib/api', () => ({
   apiFetch: vi.fn(),
+  fetchMe: vi.fn().mockResolvedValue(null), // AuthProvider calls fetchMe on mount
 }));
 
 import { apiFetch } from '@/lib/api';
@@ -24,7 +26,7 @@ describe('useReportData', () => {
 
   it('returns loading=true initially', () => {
     mockFetch.mockReturnValue(new Promise(() => {})); // never resolves
-    const { result } = renderHook(() => useReportData('/test', defaultFilters));
+    const { result } = renderHookWithProviders(() => useReportData('/test', defaultFilters));
     expect(result.current.loading).toBe(true);
     expect(result.current.data).toBeNull();
     expect(result.current.error).toBeNull();
@@ -34,7 +36,7 @@ describe('useReportData', () => {
     const mockData = { total: 42, items: [1, 2, 3] };
     mockFetch.mockResolvedValueOnce({ success: true, data: mockData });
 
-    const { result } = renderHook(() => useReportData('/test', defaultFilters));
+    const { result } = renderHookWithProviders(() => useReportData('/test', defaultFilters));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -45,7 +47,7 @@ describe('useReportData', () => {
   it('sets error when success is false', async () => {
     mockFetch.mockResolvedValueOnce({ success: false });
 
-    const { result } = renderHook(() => useReportData('/test', defaultFilters));
+    const { result } = renderHookWithProviders(() => useReportData('/test', defaultFilters));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -56,7 +58,7 @@ describe('useReportData', () => {
   it('sets error on network error', async () => {
     mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
-    const { result } = renderHook(() => useReportData('/test', defaultFilters));
+    const { result } = renderHookWithProviders(() => useReportData('/test', defaultFilters));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -67,7 +69,7 @@ describe('useReportData', () => {
   it('calls API with correct endpoint and POST method', async () => {
     mockFetch.mockResolvedValueOnce({ success: true, data: {} });
 
-    const { result } = renderHook(() => useReportData('/Reports/dashboard', defaultFilters));
+    const { result } = renderHookWithProviders(() => useReportData('/Reports/dashboard', defaultFilters));
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(mockFetch).toHaveBeenCalledWith(
@@ -82,7 +84,7 @@ describe('useReportData', () => {
   it('omits the all-location sentinel from report payloads', async () => {
     mockFetch.mockResolvedValueOnce({ success: true, data: {} });
 
-    const { result } = renderHook(() => useReportData('/Reports/dashboard', {
+    const { result } = renderHookWithProviders(() => useReportData('/Reports/dashboard', {
       dateFrom: '2025-01-01',
       dateTo: '2025-12-31',
       companyId: 'all',
@@ -102,7 +104,7 @@ describe('useReportData', () => {
     mockFetch.mockResolvedValueOnce({ success: true, data: { v: 1 } });
     mockFetch.mockResolvedValueOnce({ success: true, data: { v: 2 } });
 
-    const { result } = renderHook(() => useReportData('/test', defaultFilters));
+    const { result } = renderHookWithProviders(() => useReportData('/test', defaultFilters));
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.data).toEqual({ v: 1 });
 
@@ -115,7 +117,7 @@ describe('useReportData', () => {
   it('re-fetches when params change', async () => {
     mockFetch.mockResolvedValue({ success: true, data: {} });
 
-    const { result, rerender } = renderHook(
+    const { result, rerender } = renderHookWithProviders(
       (props: { dateFrom: string }) => useReportData('/test', { ...defaultFilters, dateFrom: props.dateFrom }),
       { initialProps: { dateFrom: '2025-01-01' } }
     );

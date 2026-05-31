@@ -1,7 +1,7 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { TimezoneProvider } from '@/contexts/TimezoneContext';
 import { AppointmentFormCore } from '../AppointmentFormCore';
+import { renderWithProviders } from '@/test/test-utils';
 import type { UnifiedAppointmentFormData } from '../appointmentForm.types';
 
 const mockFetchPartners = vi.fn();
@@ -9,6 +9,10 @@ const mockCreateCustomer = vi.fn();
 
 vi.mock('@/lib/api', () => ({
   fetchPartners: (...args: unknown[]) => mockFetchPartners(...args),
+  fetchMe: vi.fn().mockResolvedValue({
+    user: { id: 'test-user', email: 'test@test.com', is_ctv: false },
+    permissions: { locations: [], effectivePermissions: [] },
+  }),
 }));
 
 vi.mock('@/hooks/useCustomers', () => ({
@@ -45,6 +49,7 @@ vi.mock('@/hooks/useProducts', () => ({
 
 vi.mock('@/contexts/LocationContext', () => ({
   useLocationFilter: () => ({ selectedLocationId: 'branch-id' }),
+  LocationProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 function makeData(): UnifiedAppointmentFormData {
@@ -64,15 +69,13 @@ function makeData(): UnifiedAppointmentFormData {
 }
 
 function renderForm() {
-  return render(
-    <TimezoneProvider>
-      <AppointmentFormCore
-        mode="create"
-        data={makeData()}
-        onChange={vi.fn()}
-        errors={{}}
-      />
-    </TimezoneProvider>,
+  return renderWithProviders(
+    <AppointmentFormCore
+      mode="create"
+      data={makeData()}
+      onChange={vi.fn()}
+      errors={{}}
+    />
   );
 }
 
@@ -98,7 +101,7 @@ describe('AppointmentFormCore customer search', () => {
     renderForm();
 
     fireEvent.click(screen.getByText('appointments:form.selectCustomer'));
-    fireEvent.change(screen.getByPlaceholderText('Tìm theo tên, SĐT, email...'), {
+    fireEvent.change(screen.getByPlaceholderText('Tìm theo tên, mã KH, SĐT, email...'), {
       target: { value: '09848' },
     });
 

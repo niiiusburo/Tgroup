@@ -24,6 +24,12 @@ vi.mock('@/contexts/AuthContext', () => ({
   }),
 }));
 
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({
+    currentLOB: 'dental',
+  }),
+}));
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useCustomers } from '../useCustomers';
 
@@ -106,13 +112,14 @@ describe('useCustomers - CSKH Role Assignment', () => {
         cskhid: 'emp2',
       } as CustomerFormData);
 
-      // Then: Should call API with cskhid
+      // Then: Should call API with cskhid (passing currentLOB as third arg)
       expect(mockCreatePartner).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'Test Customer',
           phone: '0903333333',
           cskhid: 'emp2',
-        })
+        }),
+        'dental'
       );
 
       // And: Created customer should have CSKH data
@@ -140,13 +147,14 @@ describe('useCustomers - CSKH Role Assignment', () => {
         cskhid: 'emp3',
       } as CustomerFormData);
 
-      // Then: Should call API with cskhid
+      // Then: Should call API with cskhid (passing currentLOB as third arg)
       expect(mockUpdatePartner).toHaveBeenCalledWith(
         '1',
         expect.objectContaining({
           name: 'Updated Name',
           cskhid: 'emp3',
-        })
+        }),
+        'dental'
       );
     });
 
@@ -171,12 +179,13 @@ describe('useCustomers - CSKH Role Assignment', () => {
         cskhid: '',
       } as CustomerFormData);
 
-      // Then: Should call API with empty cskhid
+      // Then: Should call API with empty cskhid (passing currentLOB as third arg)
       expect(mockUpdatePartner).toHaveBeenCalledWith(
         '1',
         expect.objectContaining({
           cskhid: '',
-        })
+        }),
+        'dental'
       );
     });
 
@@ -203,7 +212,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
         '1',
         expect.objectContaining({
           note: '',
-        })
+        }),
+        'dental'
       );
     });
 
@@ -233,7 +243,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
       expect(mockCreatePartner).toHaveBeenCalledWith(
         expect.objectContaining({
           sourceid: 'source-online',
-        })
+        }),
+        'dental'
       );
     });
 
@@ -260,7 +271,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
         '1',
         expect.objectContaining({
           sourceid: 'source-hotline',
-        })
+        }),
+        'dental'
       );
     });
 
@@ -290,7 +302,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
           referraluserid: null,
           cskhid: null,
           salestaffid: null,
-        })
+        }),
+        'dental'
       );
     });
   });

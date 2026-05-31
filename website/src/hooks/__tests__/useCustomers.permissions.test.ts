@@ -16,6 +16,12 @@ vi.mock('@/contexts/AuthContext', () => ({
   }),
 }));
 
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({
+    currentLOB: 'dental',
+  }),
+}));
+
 vi.mock('@/lib/api', () => ({
   fetchPartners: vi.fn(),
   createPartner: vi.fn(),

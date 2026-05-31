@@ -3,6 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuthenticatedCheckupImage } from './AuthenticatedCheckupImage';
 
+vi.mock('@/lib/api/core', () => ({
+  API_URL: 'http://localhost:3002/api',
+}));
+
 describe('AuthenticatedCheckupImage', () => {
   const fetchMock = vi.fn();
   const createObjectUrlMock = vi.fn();

@@ -6,8 +6,8 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
-import { TimezoneProvider } from '@/contexts/TimezoneContext';
 import { useCustomerProfile } from '@/hooks/useCustomerProfile';
+import { renderHookWithProviders } from '@/test/test-utils';
 import type { ApiAppointment, ApiPartner } from '@/lib/api';
 
 // Mock the API module
@@ -104,10 +104,6 @@ vi.mock('@/lib/api', () => ({
   ),
 }));
 
-function Wrapper({ children }: { children: React.ReactNode }) {
-  return <TimezoneProvider>{children}</TimezoneProvider>;
-}
-
 function makePartner(id: string, name: string, code: string): ApiPartner {
   return {
     id,
@@ -175,9 +171,7 @@ describe('useCustomerProfile date normalization', () => {
   });
 
   it('should normalize ISO timestamp dates to YYYY-MM-DD in ICT', async () => {
-    const { result } = renderHook(() => useCustomerProfile('cust-1'), {
-      wrapper: Wrapper,
-    });
+    const { result } = renderHookWithProviders(() => useCustomerProfile('cust-1'));
 
     await waitFor(() => {
       expect(result.current.appointments).toHaveLength(1);
@@ -224,9 +218,7 @@ describe('useCustomerProfile date normalization', () => {
       aggregates: { total: 1, byState: { done: 1 } },
     });
 
-    const { result } = renderHook(() => useCustomerProfile('cust-1'), {
-      wrapper: Wrapper,
-    });
+    const { result } = renderHookWithProviders(() => useCustomerProfile('cust-1'));
 
     await waitFor(() => {
       expect(result.current.appointments).toHaveLength(1);
@@ -270,9 +262,7 @@ describe('useCustomerProfile date normalization', () => {
       aggregates: { total: 1, byState: { scheduled: 1 } },
     });
 
-    const { result } = renderHook(() => useCustomerProfile('cust-1'), {
-      wrapper: Wrapper,
-    });
+    const { result } = renderHookWithProviders(() => useCustomerProfile('cust-1'));
 
     await waitFor(() => {
       expect(result.current.appointments).toHaveLength(1);
@@ -290,9 +280,7 @@ describe('useCustomerProfile date normalization', () => {
       jobtitle: 'NhungHT,NHÂN VIÊN VĂN PHÒNG',
     } as ApiPartner);
 
-    const { result } = renderHook(() => useCustomerProfile('cust-1'), {
-      wrapper: Wrapper,
-    });
+    const { result } = renderHookWithProviders(() => useCustomerProfile('cust-1'));
 
     await waitFor(() => {
       expect(result.current.profile?.salestaffLabel).toBe('Sale Nhung');
@@ -313,11 +301,10 @@ describe('useCustomerProfile date normalization', () => {
     });
     vi.mocked(fetchCustomerBalance).mockResolvedValue({ depositBalance: 0, outstandingBalance: 0 });
 
-    const { result, rerender } = renderHook(
+    const { result, rerender } = renderHookWithProviders(
       ({ customerId }) => useCustomerProfile(customerId),
       {
         initialProps: { customerId: 'phan' },
-        wrapper: Wrapper,
       },
     );
 
@@ -332,7 +319,7 @@ describe('useCustomerProfile date normalization', () => {
     rerender({ customerId: 't8250' });
 
     await waitFor(() => {
-      expect(fetchPartnerById).toHaveBeenCalledWith('t8250');
+      expect(fetchPartnerById).toHaveBeenCalledWith('t8250', 'dental');
     });
 
     expect(result.current.appointments).toEqual([]);
