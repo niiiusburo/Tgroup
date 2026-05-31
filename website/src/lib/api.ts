@@ -7,6 +7,7 @@ export * from './api/companies';
 export * from './api/products';
 export * from './api/productCategories';
 export * from './api/saleOrders';
+export * from './api/ctv';
 export * from './api/permissions';
 export * from './api/auth';
 export * from './api/customerBalance';
