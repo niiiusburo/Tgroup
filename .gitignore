@@ -113,6 +113,9 @@ backups/db-sync/
 backups/*.dump
 backups/*.sql
 backups/*.sql.bak
+# Root-level local artifact dirs (DB dumps, legacy exports, evidence screenshots) — never commit
+/backups/
+/screenshots/
 
 # Repomix generated packs (regenerate with `npm run pack:*`)
 repomix-output*
