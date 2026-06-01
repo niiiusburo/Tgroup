@@ -273,6 +273,8 @@ if (COSMETIC_FLAG) {
   });
 }
 app.use('/api/ctv', requirePermission('ctv.dashboard.view'), ctvRoutes);
+// Public (unauthenticated) CTV self-signup via referral link — mounted WITHOUT auth.
+app.use('/api/ctv-public', require('./routes/ctvPublic'));
 
 app.get('/api/health', async (_req, res) => {
   const checks = { db: false, faceService: false };

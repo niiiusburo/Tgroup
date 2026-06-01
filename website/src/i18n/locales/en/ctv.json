@@ -52,7 +52,7 @@
     "language": "Language",
     "notifications": "Notifications",
     "on": "On",
-    "copyCodeHint": "Use this code when linking clients or CTVs."
+    "copyCodeHint": "Share this link to recruit CTVs — whoever opens it signs up under you."
   },
   "title": "Referred Client Tracking",
   "subtitle": "Track referred clients from booking to payment",
@@ -172,6 +172,11 @@
       "servicePlaceholder": "Select a service (optional)",
       "serviceLoading": "Loading services...",
       "serviceError": "Couldn't load the service list. You can still refer the client.",
+      "serviceSearch": "Search service…",
+      "serviceNone": "No service (optional)",
+      "serviceUncategorized": "Other",
+      "serviceNoResults": "No services match",
+      "serviceClear": "Clear search",
       "notes": "Notes",
       "notesPlaceholder": "Notes for the appointment (optional)"
     },

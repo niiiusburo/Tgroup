@@ -37,6 +37,8 @@ const Feedback = lazy(() => import('@/pages/Feedback').then(m => ({ default: m.F
 const Services = lazy(() => import('@/pages/Services').then(m => ({ default: m.Services })));
 const ServiceCatalog = lazy(() => import('@/pages/ServiceCatalog').then(m => ({ default: m.ServiceCatalog })));
 const CtvDashboard = lazy(() => import('@/pages/CTV/CtvDashboard'));
+const Landing = lazy(() => import('@/pages/Landing').then(m => ({ default: m.Landing })));
+const JoinCtv = lazy(() => import('@/pages/CTV/JoinCtv').then(m => ({ default: m.JoinCtv })));
 
 /**
  * Access Denied page — shown when authenticated but lacking permission
@@ -170,6 +172,10 @@ function App() {
               <AppRoutes>
                 {/* Public routes */}
                 <Route path="/login" element={<LoginRoute />} />
+                {/* @crossref:route[path="/welcome", component=Landing] — public Tâm Group landing (ported from CTV app) */}
+                <Route path="/welcome" element={<Landing />} />
+                {/* Public CTV self-signup via referral link (/ctv/join?ref=CTV-XXXXXX) */}
+                <Route path="/ctv/join" element={<JoinCtv />} />
                 {import.meta.env.DEV && (
                   <Route path="/test/address" element={<AddressAutocompleteTest />} />
                 )}

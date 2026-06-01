@@ -211,24 +211,7 @@ function ConfigTabContent({ config, onConfigChange, onSaveError, saving, setSavi
 
   return (
     <div className="bg-white rounded-xl shadow-card p-6 space-y-6">
-      {/* Global referral percent */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-900">{tc('config.globalReferralPercent')}</label>
-        <input
-          type="number"
-          min="0"
-          max="100"
-          step="0.1"
-          inputMode="decimal"
-          value={draftValue('default', config.defaultReferralPercent)}
-          onChange={(e) => {
-            setDrafts((d) => ({ ...d, default: e.target.value }));
-            onConfigChange({ ...config, defaultReferralPercent: clampPercent(parseFloat(e.target.value)) });
-          }}
-          onBlur={() => { commitDraft('default'); onConfigChange({ ...config, defaultReferralPercent: clampPercent(config.defaultReferralPercent) }); }}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-        />
-      </div>
+      {/* Commission is levels-only (v3): the global referral % was removed. */}
 
       {/* Levels table */}
       <div className="space-y-3">
