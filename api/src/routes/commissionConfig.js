@@ -33,10 +33,6 @@ router.get('/', requireAuth, async (req, res) => {
     const levelRows = await query(
       'SELECT level, label, enabled, share_percent FROM dbo.commission_level_config ORDER BY level'
     );
-    const settingsRows = await query('SELECT default_referral_percent FROM dbo.commission_settings LIMIT 1');
-    const defaultReferralPercent = settingsRows && settingsRows.length > 0
-      ? parseFloat(settingsRows[0].default_referral_percent)
-      : 20.0;
 
     const levels = (Array.isArray(levelRows) ? levelRows : []).map((row) => ({
       level: row.level,
@@ -45,7 +41,8 @@ router.get('/', requireAuth, async (req, res) => {
       share_percent: parseFloat(row.share_percent),
     }));
 
-    return res.json({ levels, defaultReferralPercent });
+    // Commission is levels-only (v3): the global default_referral_percent was removed.
+    return res.json({ levels });
   } catch (err) {
     return res.status(500).json({ message: 'Error fetching commission configuration', error: err.message });
   }
@@ -59,7 +56,7 @@ router.put('/', requireAuth, async (req, res) => {
   }
 
   try {
-    const { levels, defaultReferralPercent } = req.body || {};
+    const { levels } = req.body || {};
     if (!Array.isArray(levels)) {
       return res.status(400).json({ error: { code: 'VALIDATION', message: 'levels must be an array' } });
     }
@@ -85,21 +82,9 @@ router.put('/', requireAuth, async (req, res) => {
       );
     }
 
-    if (typeof defaultReferralPercent === 'number') {
-      // commission_settings is a singleton; update the existing row regardless of
-      // id type (int in fresh migrations, uuid in pre-existing envs), insert if empty.
-      const updated = await query('UPDATE dbo.commission_settings SET default_referral_percent = $1', [defaultReferralPercent]);
-      const settingsCount = await query('SELECT 1 FROM dbo.commission_settings LIMIT 1');
-      if (!settingsCount || settingsCount.length === 0) {
-        await query('INSERT INTO dbo.commission_settings (default_referral_percent) VALUES ($1)', [defaultReferralPercent]);
-      }
-    }
-
     const levelRows = await query('SELECT level, label, enabled, share_percent FROM dbo.commission_level_config ORDER BY level');
-    const settingsRows = await query('SELECT default_referral_percent FROM dbo.commission_settings LIMIT 1');
     return res.json({
       levels: levelRows.map((r) => ({ level: r.level, label: r.label, enabled: r.enabled, share_percent: parseFloat(r.share_percent) })),
-      defaultReferralPercent: settingsRows[0] ? parseFloat(settingsRows[0].default_referral_percent) : 20.0,
     });
   } catch (err) {
     return res.status(500).json({ message: 'Error updating commission configuration', error: err.message });

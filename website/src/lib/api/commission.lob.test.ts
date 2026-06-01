@@ -17,7 +17,6 @@ describe('Commission Config — LOB Awareness', () => {
       { level: 1, label: 'Level 1', enabled: true, share_percent: 30 },
       { level: 2, label: 'Level 2', enabled: true, share_percent: 20 },
     ],
-    defaultReferralPercent: 10,
   };
 
   beforeEach(() => {

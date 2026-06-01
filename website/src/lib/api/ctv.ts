@@ -283,10 +283,44 @@ export async function createBooking(input: CreateBookingInput): Promise<{ client
 }
 
 /** A selectable service (product) for the CTV refer form, scoped to one LOB. */
+export interface CtvServiceCategory {
+  readonly id: string;
+  readonly name: string | null;
+}
+
 export interface CtvServiceOption {
   readonly id: string;
   readonly name: string;
   readonly price: number | null;
+  /** Catalog category for grouping the picker. `null` for uncategorized services. */
+  readonly category?: CtvServiceCategory | null;
+}
+
+// ─── Public CTV self-signup via referral link (no auth) ───────────────────────
+export interface CtvRefCodeInfo {
+  readonly ok: boolean;
+  readonly uplineId?: string;
+  readonly uplineName?: string | null;
+}
+
+/** Resolve a referral code (CTV-XXXXXX) to its upline. PUBLIC — no auth required. */
+export async function resolveCtvRefCode(code: string): Promise<CtvRefCodeInfo> {
+  return apiFetch<CtvRefCodeInfo>(`/ctv-public/refcode/${encodeURIComponent(code)}`);
+}
+
+export interface CtvJoinInput {
+  readonly code: string;
+  readonly name: string;
+  readonly phone: string;
+  readonly email: string;
+  readonly password: string;
+}
+
+/** Self-register as a CTV under the referral code's upline. PUBLIC — no auth required. */
+export async function joinCtv(
+  input: CtvJoinInput
+): Promise<{ ok: boolean; id: string; name: string; uplineName?: string | null }> {
+  return apiFetch('/ctv-public/join', { method: 'POST', body: input });
 }
 
 /**

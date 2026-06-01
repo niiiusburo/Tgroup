@@ -11,7 +11,7 @@ const {
   listDeposits,
   listPayments,
 } = require("./payments/readHandlers");
-const { createEarningsForPayment, reverseOnRefund } = require("../services/commissionEngine"); // v2 earnings hook (D12/D13) — additive only, never touches legacy commission* tables
+const { createEarningsForPayment, reverseOnRefund, _linesForPayment } = require("../services/commissionEngine"); // v3 per-service CTV commission — additive only, never touches legacy commission* tables
 
 // GET /api/Payments - List payments with allocations
 router.get("/", requirePermission('payment.view'), listPayments);
@@ -129,35 +129,18 @@ router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema)
       }
     }
 
-    // === Cosmetic LOB v2 earnings engine hook (Phase 2) ===
-    // Append-only write to dbo.earnings in correct DB via txClient.
-    // D13 resolution inside engine. Safe: errors logged, payment tx not aborted.
+    // === Per-service CTV commission engine (v3) ===
+    // Each allocation (payment -> saleorder) earns commission for the saleorder's attached
+    // CTV (saleorders.ctv_id) + their upline chain, applied to the ALLOCATED (paid) amount.
+    // No CTV on the service => no commission. Non-fatal: payment tx continues on error.
     try {
-      const custRows = await rowsFrom(client, 'SELECT id, referred_by_ctv_id, salestaffid FROM partners WHERE id = $1 LIMIT 1', [customer_id]);
-      if (custRows[0]) {
-        // Map payment allocations to saleorderlines so the engine can apply
-        // per-product commission_rate_percent (Gap-3 wiring fix).
-        let engineLines = [];
-        if (createdAllocations.length > 0) {
-          const invoiceIds = createdAllocations.map((a) => a.invoice_id).filter(Boolean);
-          if (invoiceIds.length > 0) {
-            const solRows = await rowsFrom(
-              client,
-              `SELECT id, productid, pricetotal FROM dbo.saleorderlines WHERE orderid = ANY($1) AND isdeleted = false`,
-              [invoiceIds],
-            );
-            engineLines = solRows.map((sol) => ({
-              id: sol.id,
-              product_id: sol.productid,
-              amount: parseFloat(sol.pricetotal || 0),
-            }));
-          }
-        }
+      const engineLines = await _linesForPayment(row.id, { queryRows: (sql, p) => rowsFrom(client, sql, p) });
+      if (engineLines.length > 0) {
         await createEarningsForPayment({
           payment: row,
           lines: engineLines,
           lob: req.lob || 'dental',
-          clientRow: custRows[0],
+          clientRow: { id: customer_id },
           txClient: client,
         });
       }
@@ -330,7 +313,26 @@ router.delete("/:id", requirePermission('payment.void'), async (req, res) => {
   const txPool = req.db || pool;
   const client = await txPool.connect();
   try {
+    // ?hard=true permanently removes the payment + its (pending) earnings; default is a
+    // soft delete (status='deleted' + reversed earnings, row kept for audit).
+    const hard = req.query.hard === 'true' || req.query.hard === '1';
     await client.query("BEGIN");
+
+    // Commission guard: once a payment's commission has been PAID OUT it can no longer be
+    // deleted (the money already left). Refund instead. Pending/un-attributed commission is fine.
+    const paidOut = await client.query(
+      "SELECT 1 FROM dbo.earnings WHERE payment_id = $1 AND (status = 'paid' OR payout_id IS NOT NULL) LIMIT 1",
+      [id]
+    );
+    if (paidOut.rows.length > 0) {
+      await client.query("ROLLBACK");
+      return res.status(409).json({
+        error: {
+          code: 'B_COMMISSION_PAID_OUT',
+          message: 'Commission for this payment has already been paid out — it can no longer be deleted. Use a refund instead.',
+        },
+      });
+    }
 
     const allocationsToReverse = await client.query(
       "SELECT invoice_id, dotkham_id, allocated_amount FROM payment_allocations WHERE payment_id = $1",
@@ -353,14 +355,30 @@ router.delete("/:id", requirePermission('payment.void'), async (req, res) => {
       }
     }
 
-    const result = await client.query("DELETE FROM payments WHERE id = $1 RETURNING id", [id]);
+    let result;
+    if (hard) {
+      // HARD: commission is still pending (guard above), so its earnings rows are safe to
+      // drop. Remove earnings FIRST to satisfy the earnings->payments FK, then the row.
+      await client.query("DELETE FROM dbo.earnings WHERE payment_id = $1", [id]);
+      result = await client.query("DELETE FROM payments WHERE id = $1 RETURNING id", [id]);
+    } else {
+      // SOFT (default, audit-safe): reverse the pending commission (negative rows) and keep
+      // the payment row marked 'deleted' so the earnings FK + ledger history stay intact.
+      try {
+        await reverseOnRefund({ originalPaymentId: id, refundPayment: { id }, lob: req.lob || 'dental', txClient: client });
+      } catch (e) {
+        console.error('[earnings hook] delete reversal non-fatal:', e && e.message);
+      }
+      result = await client.query("UPDATE payments SET status = 'deleted' WHERE id = $1 RETURNING id", [id]);
+    }
+
     if (result.rows.length === 0) {
       await client.query("ROLLBACK");
       return res.status(404).json({ error: "Payment not found" });
     }
 
     await client.query("COMMIT");
-    res.json({ success: true, id: result.rows[0].id });
+    res.json({ success: true, id: result.rows[0].id, mode: hard ? 'hard' : 'soft' });
   } catch (err) {
     await client.query("ROLLBACK");
     console.error("Delete error:", err);
@@ -379,6 +397,19 @@ router.post("/:id/void", requirePermission('payment.void'), async (req, res) => 
   const client = await txPool.connect();
   try {
     await client.query("BEGIN");
+
+    // Same commission guard as delete: a paid-out payment can't be voided (would reverse
+    // money that already left). Refund instead.
+    const paidOut = await client.query(
+      "SELECT 1 FROM dbo.earnings WHERE payment_id = $1 AND (status = 'paid' OR payout_id IS NOT NULL) LIMIT 1",
+      [id]
+    );
+    if (paidOut.rows.length > 0) {
+      await client.query("ROLLBACK");
+      return res.status(409).json({
+        error: { code: 'B_COMMISSION_PAID_OUT', message: 'Commission for this payment has already been paid out — it can no longer be voided. Use a refund instead.' },
+      });
+    }
 
     const allocationsToReverse = await client.query(
       "SELECT invoice_id, dotkham_id, allocated_amount FROM payment_allocations WHERE payment_id = $1",
@@ -409,6 +440,21 @@ router.post("/:id/void", requirePermission('payment.void'), async (req, res) => 
       await client.query("ROLLBACK");
       return res.status(404).json({ error: "Payment not found" });
     }
+
+    // NK3 money integrity fix: reverse earnings on void (same as refund + delete).
+    // The payment row stays (status=voided), so negatives are cleanly linked to it.
+    // Only for nk3-deploy / local 5433 NK3 demo DBs.
+    try {
+      await reverseOnRefund({
+        originalPaymentId: id,
+        refundPayment: result.rows[0],
+        lob: req.lob || 'dental',
+        txClient: client,
+      });
+    } catch (e) {
+      console.error('[earnings hook] void non-fatal:', e && e.message);
+    }
+
     await client.query("COMMIT");
     res.json({ success: true, payment: result.rows[0] });
   } catch (err) {

@@ -13,7 +13,6 @@ export interface CommissionLevel {
 
 export interface CommissionConfig {
   levels: CommissionLevel[];
-  defaultReferralPercent: number;
 }
 
 export async function fetchCommissionConfig(lob?: 'dental' | 'cosmetic'): Promise<CommissionConfig> {

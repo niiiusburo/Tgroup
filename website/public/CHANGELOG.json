@@ -1,5 +1,33 @@
 [
   {
+    "version": "0.32.90",
+    "date": "2026-06-01",
+    "commit": "pending",
+    "highlights": "CTV commission is now per-service & levels-only; payments can be deleted again; CTVs can self-sign-up via a referral link.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Commission is now PER-SERVICE: a CTV attached to a service earns commission (and their upline chain earns level overrides) on the amount the client actually pays. Levels come straight from the commission configuration.",
+          "The CTV referral code on the 'Tôi' tab is now a shareable signup link — anyone who opens it registers as a CTV under you.",
+          "Payments can be deleted again: delete now works (soft-delete keeps an audit row; hard-delete removes it), and is blocked only after the commission has been paid out."
+        ]
+      },
+      {
+        "title": "Removed",
+        "items": [
+          "Removed the global 'Default referral %' (Tỷ lệ giới thiệu mặc định) — commission is driven entirely by the per-level configuration now."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Commission no longer over-pays on referral cycles, no longer double-pays on re-payment, and refund reversals now net correctly by level."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.83",
     "date": "2026-06-01",
     "commit": "pending",

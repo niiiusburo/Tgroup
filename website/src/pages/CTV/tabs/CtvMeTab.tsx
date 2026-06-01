@@ -19,10 +19,12 @@ export function CtvMeTab({ profile }: CtvMeTabProps) {
   const phone = profile?.phone;
   const referralSource = profile?.id || user?.id || '000000';
   const referralCode = `CTV-${referralSource.slice(0, 6).toUpperCase()}`;
+  // Shareable self-signup link: whoever opens it registers as a CTV UNDER this person.
+  const joinLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/ctv/join?ref=${referralCode}`;
 
   async function handleCopy() {
     try {
-      await navigator.clipboard.writeText(referralCode);
+      await navigator.clipboard.writeText(joinLink);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
     } catch {

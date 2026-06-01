@@ -182,6 +182,17 @@ export async function updatePayment(
   });
 }
 
-export async function deletePayment(id: string, lob?: 'dental' | 'cosmetic'): Promise<{ success: boolean }> {
-  return apiFetch<{ success: boolean }>(`/Payments/${id}`, { method: 'DELETE', lob });
+/**
+ * Delete a payment. `hard` (default) permanently removes the payment + its still-pending
+ * commission; `hard:false` soft-deletes (marks 'deleted', reverses earnings, keeps the row
+ * for audit). Either way the API returns 409 (B_COMMISSION_PAID_OUT) if the commission was
+ * already paid out — refund instead.
+ */
+export async function deletePayment(
+  id: string,
+  lob?: 'dental' | 'cosmetic',
+  opts: { hard?: boolean } = {}
+): Promise<{ success: boolean; mode?: 'hard' | 'soft' }> {
+  const hard = opts.hard !== false; // default hard so the payment actually disappears
+  return apiFetch<{ success: boolean; mode?: 'hard' | 'soft' }>(`/Payments/${id}?hard=${hard}`, { method: 'DELETE', lob });
 }
