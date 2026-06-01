@@ -27,6 +27,7 @@
 | v1.0.12 | 2026-06-01 | CTV booking client behavior clarified: `date` remains required by `POST /api/ctv/bookings`; the CTV refer-client UI pre-fills it with today's Asia/Ho_Chi_Minh date. |
 | v1.0.13 | 2026-06-01 | CTV booking contract corrected: phone lookup may prefill an available existing client's name; `POST /api/ctv/bookings` creates/reclaims the client and writes an appointment only, never a service card or Referral Start saleorder. |
 | v1.0.14 | 2026-06-01 | CTV booking appointment service metadata clarified: if no service is selected, the appointment defaults to the configured Referral Start product on `appointments.productid`; selected services still override the default. |
+| v1.0.15 | 2026-06-01 | CTV booking appointment location contract clarified: `companyId` remains optional on `/api/ctv/bookings`; the API resolves request company, CTV JWT company, then selected-LOB fallback company before any partner mutation. |
 
 ---
 
@@ -152,6 +153,7 @@ This route is read-only. When `exists=true`, `claimed=false`, and `name` is pres
 **Request:** `clientId?`, `name?`, `phone`, `lob`, `date`, optional `time`, `companyId`, `productId`, `note`.
 **Response 201:** `{ clientId: string; appointmentId: string }`.
 `date` remains a required API field. The first-party CTV refer-client sheet supplies today's `Asia/Ho_Chi_Minh` date by default so mobile users do not submit a blank appointment date.
+`companyId` is optional for CTV portal clients. The API resolves the appointment location from request `companyId`, then JWT `companyId`, then the selected LOB's active company fallback; if none exists, it returns `400 B_COMPANY_REQUIRED` before changing the partner row.
 When an existing partner row is accepted or reclaimed, the route updates that same row with `customer = true` before creating the appointment so the client is visible through admin customer search in the selected LOB. This route writes `dbo.appointments` only for the booking; selected `productId` is stored on the appointment and MUST NOT create `saleorders` or `saleorderlines`. If `productId` is omitted, the appointment uses the configured `commission_settings.referral_start_product_id` when that product is active in the selected LOB.
 **Error 400:** active claims owned by another CTV return:
 ```ts

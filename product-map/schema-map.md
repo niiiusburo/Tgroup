@@ -151,7 +151,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 |-----------|-------|
 | **Primary Key** | `id` (uuid) |
 | **Foreign Keys** | `partnerid` → partners (customer), `doctorid` → partners (doctor), `companyid` → companies, `productid` → products |
-| **W** | `api/src/routes/appointments.js`, `api/src/routes/ctv.js` (`POST /api/ctv/bookings`, appointment-only) |
+| **W** | `api/src/routes/appointments.js`, `api/src/routes/ctv.js` (`POST /api/ctv/bookings`, appointment-only with resolved non-null `companyid`) |
 | **R** | `appointments.js`, `customerReceipts.js`, `reports.js`, `dashboardReports.js`, `dotKhams.js` |
 | **E** | `GET/POST/PUT /api/Appointments` |
 | **UI** | Calendar, Appointments page, TodaySchedule, AppointmentForm, EditAppointmentModal, CustomerProfile appointment history |

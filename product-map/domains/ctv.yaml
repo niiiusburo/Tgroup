@@ -27,7 +27,7 @@ reads:
 writes:
   - POST /api/ctv (create CTV under caller/admin; writes partners in dental and optionally cosmetic)
   - POST /api/ctv/clients (refer a client under caller/admin; writes partners in selected LOB DB)
-  - POST /api/ctv/bookings (create or reclaim referred client, mark accepted existing partners as customer-visible, create appointment only in selected LOB DB; selected service or Referral Start default stays on appointments.productid and does not create a service card)
+  - POST /api/ctv/bookings (create or reclaim referred client after resolving a selected-LOB appointment company, mark accepted existing partners as customer-visible, create appointment only in selected LOB DB; selected service or Referral Start default stays on appointments.productid and does not create a service card)
   - PATCH /api/Ctvs/:id or /api/cosmetic/Ctvs/:id (admin suspend/reactivate; mirrors active flag to cosmetic row if present)
   - api/scripts/import-legacy-ctvs.js after explicit DB confirmation (mirrors safe legacy CTV identities into dental + cosmetic partners with identical UUIDs; skips ambiguous matches)
   - earnings remain written by payment paths + commissionEngine in earnings domain; payouts by admin
@@ -76,7 +76,7 @@ impact_tests:
   - Referred clients show correct LOB tags and status
   - Refer-client sheet defaults the appointment date to today's Asia/Ho_Chi_Minh date and submits without a manual date tap
   - Refer-client phone lookup pre-fills the name only for an existing available client, and never for a client actively claimed by another CTV
-  - POST /api/ctv/bookings creates dbo.appointments without creating saleorders or saleorderlines, defaulting omitted service metadata to Referral Start when configured
+  - POST /api/ctv/bookings resolves non-null appointment companyid, creates dbo.appointments without creating saleorders or saleorderlines, defaulting omitted service metadata to Referral Start when configured
 risk_level: high (only cross-DB surface)
 notes:
   - "D13 live demo: seed a CTV partner + referred patient + collected payment in dental and/or cosmetic; verify earnings row + CTV dashboard shows it."

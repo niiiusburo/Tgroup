@@ -9,6 +9,7 @@ const { requireAuth } = require('../middleware/auth');
 const { getDb } = require('../db');
 const { buildCtvNetwork, getCtvHierarchy } = require('../services/ctvNetwork');
 const { getReferralClaimStatus } = require('../services/referralClaim');
+const { resolveCtvBookingCompanyId } = require('../services/ctvBookingCompany');
 const { isCtvUser } = require('./ctvHelpers');
 
 const router = express.Router();
@@ -878,7 +879,42 @@ router.post('/bookings', requireAuth, async (req, res) => {
       }
     }
 
-    // 3a. Create client if new
+    // 3a. Validate the chosen service belongs to THIS LOB's catalog. If no
+    // service was chosen, tag the appointment with the configured Referral Start
+    // product so the calendar has a booking purpose without creating a service card.
+    let validProductId = null;
+    if (productId) {
+      const prodRows = await safeQueryRows(db, `SELECT id FROM dbo.products WHERE id = $1 AND active = true LIMIT 1`, [productId]);
+      validProductId = prodRows[0]?.id || null;
+    } else {
+      const referralStartRows = await safeQueryRows(
+        db,
+        `SELECT p.id
+           FROM dbo.commission_settings cs
+           JOIN dbo.products p ON p.id = cs.referral_start_product_id
+          WHERE p.active = true
+          LIMIT 1`,
+        []
+      );
+      validProductId = referralStartRows[0]?.id || null;
+    }
+
+    // 3b. Resolve a non-null appointment company before mutating the client.
+    const appointmentCompanyId = await resolveCtvBookingCompanyId({
+      queryRows: (sql, params) => safeQueryRows(db, sql, params),
+      requestedCompanyId: companyId || null,
+      tokenCompanyId: req.user?.companyId || null,
+    });
+    if (!appointmentCompanyId) {
+      return res.status(400).json({
+        error: {
+          code: 'B_COMPANY_REQUIRED',
+          message: 'No clinic location is available for this CTV booking',
+        },
+      });
+    }
+
+    // 3c. Create client if new
     if (!clientId) {
       clientId = require('crypto').randomUUID();
       const now = new Date().toISOString();
@@ -899,27 +935,7 @@ router.post('/bookings', requireAuth, async (req, res) => {
       );
     }
 
-    // 3b. Validate the chosen service belongs to THIS LOB's catalog. If no
-    // service was chosen, tag the appointment with the configured Referral Start
-    // product so the calendar has a booking purpose without creating a service card.
-    let validProductId = null;
-    if (productId) {
-      const prodRows = await safeQueryRows(db, `SELECT id FROM dbo.products WHERE id = $1 AND active = true LIMIT 1`, [productId]);
-      validProductId = prodRows[0]?.id || null;
-    } else {
-      const referralStartRows = await safeQueryRows(
-        db,
-        `SELECT p.id
-           FROM dbo.commission_settings cs
-           JOIN dbo.products p ON p.id = cs.referral_start_product_id
-          WHERE p.active = true
-          LIMIT 1`,
-        []
-      );
-      validProductId = referralStartRows[0]?.id || null;
-    }
-
-    // 3c. Appointment — use canonical insert pattern
+    // 3d. Appointment — use canonical insert pattern
     const apptId = require('crypto').randomUUID();
     const nameResult = await safeQueryRows(db,
       "SELECT COALESCE(MAX(CAST(SUBSTRING(name FROM 3) AS INTEGER)), 0) + 1 AS next_seq FROM dbo.appointments WHERE name LIKE 'AP%'"
@@ -937,7 +953,7 @@ router.post('/bookings', requireAuth, async (req, res) => {
         (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'),
         (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
       )`,
-      [apptId, apptName, date, time || null, clientId, null, companyId || null, apptNote, 30, '1', 'confirmed', 'confirmed', validProductId, null, null]);
+      [apptId, apptName, date, time || null, clientId, null, appointmentCompanyId, apptNote, 30, '1', 'confirmed', 'confirmed', validProductId, null, null]);
 
     return res.status(201).json({ clientId, appointmentId: apptId });
   } catch (e) {

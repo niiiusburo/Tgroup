@@ -2,6 +2,12 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.88] — 2026-06-01 (nk3-deploy)
+### Fixed
+- **CTV referral bookings now create appointments even when the portal omits `companyId`.** `POST /api/ctv/bookings` resolves a valid selected-LOB appointment company from the request, CTV JWT, or active company fallback before mutating `dbo.partners`, preventing the live `appointments.companyid` NOT NULL failure that updated the client but left no Referral Start appointment card. Preserves WF-015, UC-022, INV-022, and FM-20260601-02. — @agent
+### Tested
+- `JWT_SECRET=test-secret npm --prefix api test -- --runInBand src/routes/__tests__/ctvBookings.test.js src/services/__tests__/referralClaim.test.js` (project Jest runner matched all API suites: 83 suites / 905 tests passed; existing open-handles warning still appears after completion); `npm --prefix website run build`; `npm run verify:governance`; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off api/src/routes/ctv.js api/src/services/ctvBookingCompany.js api/src/routes/__tests__/ctvBookings.test.js` (0 findings). — @agent
+
 ## [0.32.87] — 2026-06-01 (nk3-deploy)
 ### Fixed
 - **CTV appointment-only bookings now default to a Referral Start appointment purpose.** If `/ctv` submits `POST /api/ctv/bookings` without a selected service, the appointment uses the selected LOB's active `commission_settings.referral_start_product_id` as `appointments.productid`; if the CTV selected a service, that selected product still wins. This keeps the booking as an appointment only and still avoids creating any saleorder/service card. Preserves WF-015, UC-022, and INV-022. — @agent

@@ -624,7 +624,12 @@ sequenceDiagram
     API->>DB: Resolve existing partner by clientId or phone
     alt active claim owned by another CTV
         API-->>FE: 400 B_CLIENT_CLAIMED
-    else new client
+    else no company can be resolved
+        API-->>FE: 400 B_COMPANY_REQUIRED
+    else valid booking
+        API->>DB: Resolve appointment company from body, JWT, or selected LOB fallback
+    end
+    alt new client
         API->>DB: INSERT partners { customer=true, referred_by_ctv_id=CTV }
     else existing accepted partner
         API->>DB: UPDATE partners SET customer=true, referred_by_ctv_id=CTV
@@ -638,7 +643,7 @@ sequenceDiagram
 **Data state transitions:**
 - Existing accepted partner row keeps the same UUID and gets `customer=true`.
 - `partners.referred_by_ctv_id` points to the submitting CTV.
-- New appointment row is created in the selected LOB database with `productid` set to the selected service, or the configured Referral Start product when no service was selected.
+- New appointment row is created in the selected LOB database with non-null `companyid` and `productid` set to the selected service, or the configured Referral Start product when no service was selected.
 - No `saleorders` or `saleorderlines` service card is created by this booking flow.
 - The CTV sheet initializes `date` to `Asia/Ho_Chi_Minh` today so mobile users do not submit an empty required appointment date.
 

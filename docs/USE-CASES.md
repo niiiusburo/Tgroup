@@ -422,13 +422,15 @@ When a use case is created or materially edited, add one compact `Traceability` 
   1. Actor enters phone, target LOB, appointment date, optional service, and optional note.
   2. Frontend calls `GET /api/ctv/client-lookup?phone=<phone>&lob=<lob>` to show whether the phone exists and whether an active claim blocks the booking; if an available existing client has a name, the frontend pre-fills the name input.
   3. Actor submits → `POST /api/ctv/bookings`.
-  4. Backend resolves an existing partner by `clientId` or phone, or creates a new customer row in the selected LOB database.
-  5. If an existing partner row is accepted, backend sets `customer = true` and `referred_by_ctv_id = actor` before creating the appointment.
-  6. Backend creates the appointment only, validating the optional product against the selected LOB catalog and storing it on `appointments.productid`; if no product is selected, the appointment uses the configured Referral Start product as its booking purpose.
+  4. Backend resolves an existing partner by `clientId` or phone.
+  5. Backend validates the optional product and resolves a non-null appointment company from request `companyId`, JWT `companyId`, or the selected LOB fallback before changing the partner row.
+  6. Backend creates a new customer row or accepts the existing partner row; existing rows get `customer = true` and `referred_by_ctv_id = actor`.
+  7. Backend creates the appointment only, storing the selected service on `appointments.productid`; if no product is selected, the appointment uses the configured Referral Start product as its booking purpose.
 - **Alternate flows:**
   - **AF-1 Claimed by another CTV:** API returns `400 B_CLIENT_CLAIMED` with owner/expires fields; no appointment is created.
   - **AF-2 Unknown product or cross-LOB product:** API drops `productId` to null and still creates the booking.
   - **AF-3 Existing employee/staff partner becomes a client:** The same partner identity is kept and `customer = true` makes the row visible in `/customers`.
-- **Postconditions:** The accepted client is searchable in admin Customers for the same LOB; appointment exists with selected service metadata or Referral Start default; no service card is created; the CTV claim/referrer pointer is updated.
+  - **AF-4 No company in selected LOB:** API returns `400 B_COMPANY_REQUIRED` before creating or updating the partner.
+- **Postconditions:** The accepted client is searchable in admin Customers for the same LOB; appointment exists with selected service metadata or Referral Start default and non-null `companyid`; no service card is created; the CTV claim/referrer pointer is updated.
 - **Invariants touched:** INV-001 (UUID identity), INV-002 (appointment name), INV-006 (search), INV-021 (CTV booking customer visibility), INV-022 (CTV booking appointment-only).
 - **Traceability:** Related WF: WF-015. Contracts/routes: `GET /api/ctv/client-lookup`, `POST /api/ctv/bookings`, `GET /api/Partners`. Data/tables: `dbo.partners`, `dbo.appointments`. Tests: `api/src/routes/__tests__/ctvBookings.test.js`, `api/src/services/__tests__/referralClaim.test.js`, `website/src/components/ctv/CtvReferModal.test.tsx`. Product-map domains: `ctv`, `cosmetic`, `cosmetic-clients`, `customers-partners`, `appointments-calendar`.

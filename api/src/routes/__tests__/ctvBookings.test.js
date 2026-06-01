@@ -33,6 +33,25 @@ const { getReferralClaimStatus } = require('../../services/referralClaim');
 const { createReferralStartCard } = require('../../services/referralCard');
 const { getDb } = require('../../db');
 
+function getRouteHandler(path, method) {
+  let handler;
+  ctvRouter.stack.forEach((layer) => {
+    if (layer.route && layer.route.path === path && layer.route.methods[method]) {
+      layer.route.stack.forEach((l) => { if (l.handle && typeof l.handle === 'function') handler = l.handle; });
+    }
+  });
+  return handler;
+}
+
+function makeRes() {
+  return {
+    statusCode: 200,
+    jsonBody: null,
+    status(code) { this.statusCode = code; return this; },
+    json(body) { this.jsonBody = body; return this; },
+  };
+}
+
 describe('POST /ctv/bookings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -61,21 +80,8 @@ describe('POST /ctv/bookings', () => {
       user: { employeeId: 'ctv-me', is_ctv: true },
     };
 
-    // Use supertest-like manual invocation
-    const res = {
-      statusCode: 200,
-      jsonBody: null,
-      status(code) { this.statusCode = code; return this; },
-      json(body) { this.jsonBody = body; return this; },
-    };
-
-    // Find the handler manually
-    let handler;
-    ctvRouter.stack.forEach((layer) => {
-      if (layer.route && layer.route.path === '/bookings' && layer.route.methods.post) {
-        layer.route.stack.forEach((l) => { if (l.handle && typeof l.handle === 'function') handler = l.handle; });
-      }
-    });
+    const res = makeRes();
+    const handler = getRouteHandler('/bookings', 'post');
 
     await handler(req, res);
 
@@ -95,10 +101,12 @@ describe('POST /ctv/bookings', () => {
 
     // Step 1: no client found by phone
     dbMock.queryRows.mockResolvedValueOnce([]);
-    // Step 3a: INSERT partner
-    dbMock.queryRows.mockResolvedValueOnce([{ id: 'new-client-id' }]);
-    // Step 3b: default Referral Start product for appointment purpose
+    // Step 3a: default Referral Start product for appointment purpose
     dbMock.queryRows.mockResolvedValueOnce([{ id: 'referral-start-prod' }]);
+    // Step 3b: selected LOB fallback company
+    dbMock.queryRows.mockResolvedValueOnce([{ id: 'fallback-company' }]);
+    // Step 3c: INSERT partner
+    dbMock.queryRows.mockResolvedValueOnce([{ id: 'new-client-id' }]);
     // Step 3b: appointment name seq
     dbMock.queryRows.mockResolvedValueOnce([{ next_seq: 42 }]);
     // Step 3b: INSERT appointment
@@ -106,12 +114,7 @@ describe('POST /ctv/bookings', () => {
 
     getReferralClaimStatus.mockResolvedValueOnce({ active: false });
 
-    let handler;
-    ctvRouter.stack.forEach((layer) => {
-      if (layer.route && layer.route.path === '/bookings' && layer.route.methods.post) {
-        layer.route.stack.forEach((l) => { if (l.handle && typeof l.handle === 'function') handler = l.handle; });
-      }
-    });
+    const handler = getRouteHandler('/bookings', 'post');
 
     const req = {
       method: 'POST',
@@ -119,12 +122,7 @@ describe('POST /ctv/bookings', () => {
       body: { phone: '0909999999', name: 'New Client', date: '2026-06-01', lob: 'dental' },
       user: { employeeId: 'ctv-me', is_ctv: true },
     };
-    const res = {
-      statusCode: 200,
-      jsonBody: null,
-      status(code) { this.statusCode = code; return this; },
-      json(body) { this.jsonBody = body; return this; },
-    };
+    const res = makeRes();
 
     await handler(req, res);
 
@@ -134,6 +132,7 @@ describe('POST /ctv/bookings', () => {
     expect(res.jsonBody).toHaveProperty('clientId');
     expect(res.jsonBody).toHaveProperty('appointmentId');
     const apptInsert = dbMock.queryRows.mock.calls.find(([sql]) => /INSERT INTO dbo\.appointments/.test(sql));
+    expect(apptInsert[1][6]).toBe('fallback-company');
     expect(apptInsert[1][12]).toBe('referral-start-prod');
   });
 
@@ -142,19 +141,15 @@ describe('POST /ctv/bookings', () => {
     getDb.mockReturnValue(dbMock);
 
     dbMock.queryRows.mockResolvedValueOnce([{ id: 'existing-partner-id' }]);
-    dbMock.queryRows.mockResolvedValueOnce([{}]);
     dbMock.queryRows.mockResolvedValueOnce([{ id: 'referral-start-prod' }]);
+    dbMock.queryRows.mockResolvedValueOnce([{ id: 'fallback-company' }]);
+    dbMock.queryRows.mockResolvedValueOnce([{}]);
     dbMock.queryRows.mockResolvedValueOnce([{ next_seq: 43 }]);
     dbMock.queryRows.mockResolvedValueOnce([{}]);
 
     getReferralClaimStatus.mockResolvedValueOnce({ active: false });
 
-    let handler;
-    ctvRouter.stack.forEach((layer) => {
-      if (layer.route && layer.route.path === '/bookings' && layer.route.methods.post) {
-        layer.route.stack.forEach((l) => { if (l.handle && typeof l.handle === 'function') handler = l.handle; });
-      }
-    });
+    const handler = getRouteHandler('/bookings', 'post');
 
     const req = {
       method: 'POST',
@@ -162,12 +157,7 @@ describe('POST /ctv/bookings', () => {
       body: { phone: '0123123123', name: 'thuan test', date: '2026-06-01', lob: 'cosmetic' },
       user: { employeeId: 'ctv-me', is_ctv: true },
     };
-    const res = {
-      statusCode: 200,
-      jsonBody: null,
-      status(code) { this.statusCode = code; return this; },
-      json(body) { this.jsonBody = body; return this; },
-    };
+    const res = makeRes();
 
     await handler(req, res);
 
@@ -178,6 +168,7 @@ describe('POST /ctv/bookings', () => {
     expect(updatePartner[1]).toEqual(['ctv-me', 'existing-partner-id']);
     expect(createReferralStartCard).not.toHaveBeenCalled();
     const apptInsert = dbMock.queryRows.mock.calls.find(([sql]) => /INSERT INTO dbo\.appointments/.test(sql));
+    expect(apptInsert[1][6]).toBe('fallback-company');
     expect(apptInsert[1][12]).toBe('referral-start-prod');
   });
 
@@ -186,19 +177,15 @@ describe('POST /ctv/bookings', () => {
     getDb.mockReturnValue(dbMock);
 
     dbMock.queryRows.mockResolvedValueOnce([]); // no client found by phone
-    dbMock.queryRows.mockResolvedValueOnce([{ id: 'new-client-id' }]); // INSERT partner
     dbMock.queryRows.mockResolvedValueOnce([{ id: 'prod-9' }]); // productId validation (exists + active)
+    dbMock.queryRows.mockResolvedValueOnce([{ id: 'fallback-company' }]); // selected LOB fallback company
+    dbMock.queryRows.mockResolvedValueOnce([{ id: 'new-client-id' }]); // INSERT partner
     dbMock.queryRows.mockResolvedValueOnce([{ next_seq: 7 }]); // appointment name seq
     dbMock.queryRows.mockResolvedValueOnce([{}]); // INSERT appointment
 
     getReferralClaimStatus.mockResolvedValueOnce({ active: false });
 
-    let handler;
-    ctvRouter.stack.forEach((layer) => {
-      if (layer.route && layer.route.path === '/bookings' && layer.route.methods.post) {
-        layer.route.stack.forEach((l) => { if (l.handle && typeof l.handle === 'function') handler = l.handle; });
-      }
-    });
+    const handler = getRouteHandler('/bookings', 'post');
 
     const req = {
       method: 'POST',
@@ -213,12 +200,7 @@ describe('POST /ctv/bookings', () => {
       },
       user: { employeeId: 'ctv-me', is_ctv: true },
     };
-    const res = {
-      statusCode: 200,
-      jsonBody: null,
-      status(code) { this.statusCode = code; return this; },
-      json(body) { this.jsonBody = body; return this; },
-    };
+    const res = makeRes();
 
     await handler(req, res);
 
@@ -227,6 +209,7 @@ describe('POST /ctv/bookings', () => {
     const apptInsert = dbMock.queryRows.mock.calls.find(([sql]) => /INSERT INTO dbo\.appointments/.test(sql));
     expect(apptInsert).toBeDefined();
     const params = apptInsert[1];
+    expect(params[6]).toBe('fallback-company'); // companyid
     expect(params[7]).toBe('whitening follow-up'); // note (trimmed)
     expect(params[12]).toBe('prod-9'); // productid
   });
@@ -236,19 +219,15 @@ describe('POST /ctv/bookings', () => {
     getDb.mockReturnValue(dbMock);
 
     dbMock.queryRows.mockResolvedValueOnce([]); // no client found by phone
-    dbMock.queryRows.mockResolvedValueOnce([{ id: 'new-client-id' }]); // INSERT partner
     dbMock.queryRows.mockResolvedValueOnce([]); // productId validation → not found in this LOB
+    dbMock.queryRows.mockResolvedValueOnce([{ id: 'fallback-company' }]); // selected LOB fallback company
+    dbMock.queryRows.mockResolvedValueOnce([{ id: 'new-client-id' }]); // INSERT partner
     dbMock.queryRows.mockResolvedValueOnce([{ next_seq: 8 }]); // appointment name seq
     dbMock.queryRows.mockResolvedValueOnce([{}]); // INSERT appointment
 
     getReferralClaimStatus.mockResolvedValueOnce({ active: false });
 
-    let handler;
-    ctvRouter.stack.forEach((layer) => {
-      if (layer.route && layer.route.path === '/bookings' && layer.route.methods.post) {
-        layer.route.stack.forEach((l) => { if (l.handle && typeof l.handle === 'function') handler = l.handle; });
-      }
-    });
+    const handler = getRouteHandler('/bookings', 'post');
 
     const req = {
       method: 'POST',
@@ -256,19 +235,71 @@ describe('POST /ctv/bookings', () => {
       body: { phone: '0900111222', name: 'X', date: '2026-06-01', lob: 'dental', productId: 'bogus-id' },
       user: { employeeId: 'ctv-me', is_ctv: true },
     };
-    const res = {
-      statusCode: 200,
-      jsonBody: null,
-      status(code) { this.statusCode = code; return this; },
-      json(body) { this.jsonBody = body; return this; },
-    };
+    const res = makeRes();
 
     await handler(req, res);
 
     expect(res.statusCode).toBe(201);
     expect(createReferralStartCard).not.toHaveBeenCalled();
     const apptInsert = dbMock.queryRows.mock.calls.find(([sql]) => /INSERT INTO dbo\.appointments/.test(sql));
+    expect(apptInsert[1][6]).toBe('fallback-company');
     expect(apptInsert[1][12]).toBeNull(); // productid dropped to null
+  });
+
+  test('uses the CTV token companyId when it belongs to the selected LOB', async () => {
+    const dbMock = { queryRows: jest.fn(), query: jest.fn() };
+    getDb.mockReturnValue(dbMock);
+
+    dbMock.queryRows.mockResolvedValueOnce([]); // no client found by phone
+    dbMock.queryRows.mockResolvedValueOnce([{ id: 'referral-start-prod' }]); // default product
+    dbMock.queryRows.mockResolvedValueOnce([{ id: 'jwt-company' }]); // token company exists in selected LOB
+    dbMock.queryRows.mockResolvedValueOnce([{ id: 'new-client-id' }]); // INSERT partner
+    dbMock.queryRows.mockResolvedValueOnce([{ next_seq: 9 }]); // appointment name seq
+    dbMock.queryRows.mockResolvedValueOnce([{}]); // INSERT appointment
+
+    const handler = getRouteHandler('/bookings', 'post');
+    const req = {
+      method: 'POST',
+      url: '/ctv/bookings',
+      body: { phone: '0900222333', name: 'Token Co', date: '2026-06-01', lob: 'cosmetic' },
+      user: { employeeId: 'ctv-me', is_ctv: true, companyId: 'jwt-company' },
+    };
+    const res = makeRes();
+
+    await handler(req, res);
+
+    expect(res.statusCode).toBe(201);
+    const companyLookup = dbMock.queryRows.mock.calls.find(([sql]) => /FROM dbo\.companies WHERE id = \$1/.test(sql));
+    expect(companyLookup[1]).toEqual(['jwt-company']);
+    const apptInsert = dbMock.queryRows.mock.calls.find(([sql]) => /INSERT INTO dbo\.appointments/.test(sql));
+    expect(apptInsert[1][6]).toBe('jwt-company');
+  });
+
+  test('returns B_COMPANY_REQUIRED before mutating the client when no company can be resolved', async () => {
+    const dbMock = { queryRows: jest.fn(), query: jest.fn() };
+    getDb.mockReturnValue(dbMock);
+
+    dbMock.queryRows.mockResolvedValueOnce([]); // no client found by phone
+    dbMock.queryRows.mockResolvedValueOnce([{ id: 'referral-start-prod' }]); // default product
+    dbMock.queryRows.mockResolvedValueOnce([]); // active company fallback empty
+    dbMock.queryRows.mockResolvedValueOnce([]); // any company fallback empty
+
+    const handler = getRouteHandler('/bookings', 'post');
+    const req = {
+      method: 'POST',
+      url: '/ctv/bookings',
+      body: { phone: '0900444555', name: 'No Co', date: '2026-06-01', lob: 'cosmetic' },
+      user: { employeeId: 'ctv-me', is_ctv: true },
+    };
+    const res = makeRes();
+
+    await handler(req, res);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.jsonBody).toMatchObject({ error: { code: 'B_COMPANY_REQUIRED' } });
+    expect(dbMock.queryRows.mock.calls.some(([sql]) => /INSERT INTO dbo\.partners/.test(sql))).toBe(false);
+    expect(dbMock.queryRows.mock.calls.some(([sql]) => /UPDATE dbo\.partners/.test(sql))).toBe(false);
+    expect(dbMock.queryRows.mock.calls.some(([sql]) => /INSERT INTO dbo\.appointments/.test(sql))).toBe(false);
   });
 });
 
@@ -285,12 +316,7 @@ describe('GET /ctv/services', () => {
       { id: 's2', name: 'Niềng răng', price: null },
     ]);
 
-    let handler;
-    ctvRouter.stack.forEach((layer) => {
-      if (layer.route && layer.route.path === '/services' && layer.route.methods.get) {
-        layer.route.stack.forEach((l) => { if (l.handle && typeof l.handle === 'function') handler = l.handle; });
-      }
-    });
+    const handler = getRouteHandler('/services', 'get');
 
     const req = {
       method: 'GET',
@@ -298,12 +324,7 @@ describe('GET /ctv/services', () => {
       query: { lob: 'cosmetic' },
       user: { employeeId: 'ctv-me', is_ctv: true },
     };
-    const res = {
-      statusCode: 200,
-      jsonBody: null,
-      status(code) { this.statusCode = code; return this; },
-      json(body) { this.jsonBody = body; return this; },
-    };
+    const res = makeRes();
 
     await handler(req, res);
 
