@@ -271,12 +271,33 @@ export interface CreateBookingInput {
   date: string;
   time?: string;
   companyId?: string;
+  /** Service (product) to attach to the created appointment card. */
   productId?: string;
+  /** Free-text note to attach to the created appointment card. */
+  note?: string;
 }
 
 /** Create a booking for a referred client (or new client). May fail with B_CLIENT_CLAIMED if client is under another CTV. */
 export async function createBooking(input: CreateBookingInput): Promise<{ clientId: string; appointmentId: string }> {
   return apiFetch<{ clientId: string; appointmentId: string }>('/ctv/bookings', { method: 'POST', body: input });
+}
+
+/** A selectable service (product) for the CTV refer form, scoped to one LOB. */
+export interface CtvServiceOption {
+  readonly id: string;
+  readonly name: string;
+  readonly price: number | null;
+}
+
+/**
+ * Fetch the active service catalog for the chosen LOB, for the refer form's
+ * service picker. CTV-scoped endpoint (does not require the admin `services.view`
+ * permission). `lob` is passed as an explicit query param — the CTV picks LOB
+ * per-referral, so this is NOT routed through the `/cosmetic` apiFetch mirror.
+ */
+export async function fetchCtvServices(lob: CtvLob): Promise<{ services: CtvServiceOption[] }> {
+  const qs = `?lob=${encodeURIComponent(lob === 'cosmetic' ? 'cosmetic' : 'dental')}`;
+  return apiFetch<{ services: CtvServiceOption[] }>(`/ctv/services${qs}`);
 }
 
 export interface CtvClientLookup {

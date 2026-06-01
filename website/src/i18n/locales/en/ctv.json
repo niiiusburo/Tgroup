@@ -167,7 +167,13 @@
       "checkNew": "New client in {{lob}}",
       "checkExists": "Exists in {{lob}}: {{name}} — available to claim",
       "checkClaimed": "⚠ Held by {{owner}} ({{lob}})",
-      "checkYours": "Your client ({{lob}}): {{name}}"
+      "checkYours": "Your client ({{lob}}): {{name}}",
+      "service": "Service",
+      "servicePlaceholder": "Select a service (optional)",
+      "serviceLoading": "Loading services...",
+      "serviceError": "Couldn't load the service list. You can still refer the client.",
+      "notes": "Notes",
+      "notesPlaceholder": "Notes for the appointment (optional)"
     },
     "recruitCtv": {
       "title": "Recruit CTV",

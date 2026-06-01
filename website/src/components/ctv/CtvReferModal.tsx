@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Loader2, X } from 'lucide-react';
-import { createBooking, lookupClientByPhone, type CtvClientLookup, type CtvLob } from '@/lib/api/ctv';
+import { createBooking, fetchCtvServices, lookupClientByPhone, type CtvClientLookup, type CtvLob, type CtvServiceOption } from '@/lib/api/ctv';
 import { ApiError } from '@/lib/api/core';
 import { cn } from '@/lib/utils';
 
@@ -12,7 +12,7 @@ interface CtvReferModalProps {
   readonly onSuccess: () => void;
 }
 
-const EMPTY = { name: '', phone: '', date: '', lob: 'dental' as CtvLob };
+const EMPTY = { name: '', phone: '', date: '', lob: 'dental' as CtvLob, serviceId: '', note: '' };
 
 export function CtvReferModal({ open, onClose, onSuccess }: CtvReferModalProps) {
   const { t } = useTranslation('ctv');
@@ -21,6 +21,9 @@ export function CtvReferModal({ open, onClose, onSuccess }: CtvReferModalProps) 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [lookup, setLookup] = useState<{ status: 'idle' | 'checking' | 'done'; result?: CtvClientLookup }>({ status: 'idle' });
+  const [services, setServices] = useState<CtvServiceOption[]>([]);
+  const [servicesLoading, setServicesLoading] = useState(false);
+  const [servicesError, setServicesError] = useState(false);
 
   // Live phone cross-check against the CHOSEN LOB's database (debounced).
   useEffect(() => {
@@ -45,6 +48,32 @@ export function CtvReferModal({ open, onClose, onSuccess }: CtvReferModalProps) 
     };
   }, [form.phone, form.lob, open]);
 
+  // Load the chosen LOB's service catalog for the service picker. Refetches when
+  // the LOB toggle flips (a dental service id is invalid in the cosmetic DB, and
+  // the selection is reset on toggle — see the LOB buttons below).
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    setServicesLoading(true);
+    setServicesError(false);
+    fetchCtvServices(form.lob)
+      .then((r) => {
+        if (!cancelled) setServices(r.services || []);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setServices([]);
+          setServicesError(true);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setServicesLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, form.lob]);
+
   if (!open) return null;
 
   const lobLabel = t(`forms.referClient.${form.lob}`);
@@ -62,7 +91,14 @@ export function CtvReferModal({ open, onClose, onSuccess }: CtvReferModalProps) 
     }
     setLoading(true);
     try {
-      await createBooking({ name: form.name, phone: form.phone, lob: form.lob, date: form.date });
+      await createBooking({
+        name: form.name,
+        phone: form.phone,
+        lob: form.lob,
+        date: form.date,
+        productId: form.serviceId || undefined,
+        note: form.note.trim() || undefined,
+      });
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -143,7 +179,7 @@ export function CtvReferModal({ open, onClose, onSuccess }: CtvReferModalProps) 
                   <button
                     key={l}
                     type="button"
-                    onClick={() => setForm({ ...form, lob: l })}
+                    onClick={() => setForm({ ...form, lob: l, serviceId: '' })}
                     className={cn(
                       'rounded-lg py-2 text-sm font-bold transition-colors',
                       form.lob === l
@@ -157,6 +193,40 @@ export function CtvReferModal({ open, onClose, onSuccess }: CtvReferModalProps) 
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">{t('forms.referClient.service')}</label>
+              <select
+                value={form.serviceId}
+                onChange={(e) => setForm({ ...form, serviceId: e.target.value })}
+                disabled={servicesLoading}
+                className="w-full appearance-none rounded-xl border border-gray-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-60"
+              >
+                <option value="">
+                  {servicesLoading ? t('forms.referClient.serviceLoading') : t('forms.referClient.servicePlaceholder')}
+                </option>
+                {services.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+              {servicesError ? (
+                <p className="mt-1.5 text-xs font-medium text-amber-600">{t('forms.referClient.serviceError')}</p>
+              ) : null}
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">{t('forms.referClient.notes')}</label>
+              <textarea
+                value={form.note}
+                onChange={(e) => setForm({ ...form, note: e.target.value })}
+                placeholder={t('forms.referClient.notesPlaceholder')}
+                rows={3}
+                maxLength={2000}
+                className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-orange-500"
+              />
             </div>
 
             {error ? <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">{error}</p> : null}

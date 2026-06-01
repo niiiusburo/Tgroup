@@ -167,7 +167,13 @@
       "checkNew": "Khách mới trong {{lob}}",
       "checkExists": "Đã có trong {{lob}}: {{name}} — có thể nhận",
       "checkClaimed": "⚠ Đang được {{owner}} giữ ({{lob}})",
-      "checkYours": "Khách của bạn ({{lob}}): {{name}}"
+      "checkYours": "Khách của bạn ({{lob}}): {{name}}",
+      "service": "Dịch vụ",
+      "servicePlaceholder": "Chọn dịch vụ (không bắt buộc)",
+      "serviceLoading": "Đang tải dịch vụ...",
+      "serviceError": "Không tải được danh sách dịch vụ. Bạn vẫn có thể giới thiệu khách.",
+      "notes": "Ghi chú",
+      "notesPlaceholder": "Ghi chú cho lịch hẹn (không bắt buộc)"
     },
     "recruitCtv": {
       "title": "Tuyển CTV",

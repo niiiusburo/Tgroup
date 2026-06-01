@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.32.83",
+    "date": "2026-06-01",
+    "commit": "pending",
+    "highlights": "CTV portal: the Refer-a-client form can now attach a service (from the dental/cosmetic catalog) and a note, which carry onto the created appointment card.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "The CTV 'Refer client' form now has a Service dropdown populated from the selected line of business's catalog (dental vs cosmetic) and a Notes field.",
+          "The chosen service and note are saved onto the appointment created from the referral, so they appear on the appointment card and its details.",
+          "Switching the Dental/Cosmetic toggle reloads the matching service list and clears any stale selection."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Backend tests cover service + note persistence onto the appointment, safe drop of an unknown/cross-LOB service id, and GET /api/ctv/services returning the LOB catalog."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.81",
     "date": "2026-05-31",
     "commit": "pending",

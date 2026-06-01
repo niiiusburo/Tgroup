@@ -790,6 +790,41 @@ router.get('/client-lookup', requireAuth, async (req, res) => {
 });
 
 /**
+ * GET /api/ctv/services?lob=dental|cosmetic
+ * CTV-scoped service catalog for the refer/booking form's service picker.
+ * Returns the active products of the CHOSEN LOB so the CTV can attach a service
+ * to the appointment they create. Mount-level `ctv.dashboard.view` gates this, so
+ * CTV users reach it without the admin-only `services.view` permission.
+ */
+router.get('/services', requireAuth, async (req, res) => {
+  if (!req.user?.employeeId) return res.status(401).json({ error: 'No token' });
+  const lob = req.query.lob === 'cosmetic' ? 'cosmetic' : 'dental';
+  try {
+    const db = getDb(lob);
+    const rows = await safeQueryRows(
+      db,
+      `SELECT id, name, COALESCE(listprice, saleprice) AS price
+       FROM dbo.products
+       WHERE active = true
+       ORDER BY name ASC
+       LIMIT 1000`,
+      []
+    );
+    return res.json({
+      lob,
+      services: rows.map((r) => ({
+        id: r.id,
+        name: r.name,
+        price: r.price != null ? Number(r.price) : null,
+      })),
+    });
+  } catch (e) {
+    console.error('[ctv GET /services] error:', e.message);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
  * POST /api/ctv/bookings
  * CTV books a client: resolve by phone → eligibility gate → create/reclaim client →
  * Referral Start card → appointment. Atomic within the handler (no explicit tx).
@@ -816,11 +851,13 @@ router.post('/bookings', requireAuth, async (req, res) => {
     });
   }
 
-  const { clientId: bodyClientId, name, phone, lob: bodyLob, date, time, companyId, productId } = req.body || {};
+  const { clientId: bodyClientId, name, phone, lob: bodyLob, date, time, companyId, productId, note } = req.body || {};
   if (!phone || !date) {
     return res.status(400).json({ error: { code: 'VALIDATION', message: 'phone and date are required' } });
   }
   const lob = bodyLob === 'cosmetic' ? 'cosmetic' : 'dental';
+  // Appointment note entered by the CTV in the refer form (optional, trimmed/capped).
+  const apptNote = note != null ? String(note).trim().slice(0, 2000) : '';
   const db = getDb(lob);
 
   try {
@@ -857,7 +894,16 @@ router.post('/bookings', requireAuth, async (req, res) => {
     // 3b. Referral Start card
     await createReferralStartCard({ clientId, lob });
 
-    // 3c. Appointment — use canonical insert pattern
+    // 3c. Validate the chosen service belongs to THIS LOB's catalog. An unknown
+    // or cross-LOB productId is silently dropped (→ null) so a bad id never
+    // breaks the booking via an FK violation; the appointment is still created.
+    let validProductId = null;
+    if (productId) {
+      const prodRows = await safeQueryRows(db, `SELECT id FROM dbo.products WHERE id = $1 AND active = true LIMIT 1`, [productId]);
+      validProductId = prodRows[0]?.id || null;
+    }
+
+    // 3d. Appointment — use canonical insert pattern
     const apptId = require('crypto').randomUUID();
     const nameResult = await safeQueryRows(db,
       "SELECT COALESCE(MAX(CAST(SUBSTRING(name FROM 3) AS INTEGER)), 0) + 1 AS next_seq FROM dbo.appointments WHERE name LIKE 'AP%'"
@@ -875,7 +921,7 @@ router.post('/bookings', requireAuth, async (req, res) => {
         (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'),
         (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
       )`,
-      [apptId, apptName, date, time || null, clientId, null, companyId || null, '', 30, '1', 'confirmed', 'confirmed', productId || null, null, null]);
+      [apptId, apptName, date, time || null, clientId, null, companyId || null, apptNote, 30, '1', 'confirmed', 'confirmed', validProductId, null, null]);
 
     return res.status(201).json({ clientId, appointmentId: apptId });
   } catch (e) {

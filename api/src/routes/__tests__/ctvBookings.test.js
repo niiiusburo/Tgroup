@@ -140,4 +140,138 @@ describe('POST /ctv/bookings', () => {
     expect(res.jsonBody).toHaveProperty('clientId');
     expect(res.jsonBody).toHaveProperty('appointmentId');
   });
+
+  test('persists the chosen service (productId) and trimmed note onto the appointment', async () => {
+    const dbMock = { queryRows: jest.fn(), query: jest.fn() };
+    getDb.mockReturnValue(dbMock);
+
+    dbMock.queryRows.mockResolvedValueOnce([]); // no client found by phone
+    dbMock.queryRows.mockResolvedValueOnce([{ id: 'new-client-id' }]); // INSERT partner
+    dbMock.queryRows.mockResolvedValueOnce([{ id: 'prod-9' }]); // productId validation (exists + active)
+    dbMock.queryRows.mockResolvedValueOnce([{ next_seq: 7 }]); // appointment name seq
+    dbMock.queryRows.mockResolvedValueOnce([{}]); // INSERT appointment
+
+    getReferralClaimStatus.mockResolvedValueOnce({ active: false });
+    createReferralStartCard.mockResolvedValueOnce({ orderId: 'order-1' });
+
+    let handler;
+    ctvRouter.stack.forEach((layer) => {
+      if (layer.route && layer.route.path === '/bookings' && layer.route.methods.post) {
+        layer.route.stack.forEach((l) => { if (l.handle && typeof l.handle === 'function') handler = l.handle; });
+      }
+    });
+
+    const req = {
+      method: 'POST',
+      url: '/ctv/bookings',
+      body: {
+        phone: '0909888777',
+        name: 'Svc Client',
+        date: '2026-06-01',
+        lob: 'cosmetic',
+        productId: 'prod-9',
+        note: '  whitening follow-up  ',
+      },
+      user: { employeeId: 'ctv-me', is_ctv: true },
+    };
+    const res = {
+      statusCode: 200,
+      jsonBody: null,
+      status(code) { this.statusCode = code; return this; },
+      json(body) { this.jsonBody = body; return this; },
+    };
+
+    await handler(req, res);
+
+    expect(res.statusCode).toBe(201);
+    const apptInsert = dbMock.queryRows.mock.calls.find(([sql]) => /INSERT INTO dbo\.appointments/.test(sql));
+    expect(apptInsert).toBeDefined();
+    const params = apptInsert[1];
+    expect(params[7]).toBe('whitening follow-up'); // note (trimmed)
+    expect(params[12]).toBe('prod-9'); // productid
+  });
+
+  test('drops an unknown/cross-LOB productId to null instead of failing the booking', async () => {
+    const dbMock = { queryRows: jest.fn(), query: jest.fn() };
+    getDb.mockReturnValue(dbMock);
+
+    dbMock.queryRows.mockResolvedValueOnce([]); // no client found by phone
+    dbMock.queryRows.mockResolvedValueOnce([{ id: 'new-client-id' }]); // INSERT partner
+    dbMock.queryRows.mockResolvedValueOnce([]); // productId validation → not found in this LOB
+    dbMock.queryRows.mockResolvedValueOnce([{ next_seq: 8 }]); // appointment name seq
+    dbMock.queryRows.mockResolvedValueOnce([{}]); // INSERT appointment
+
+    getReferralClaimStatus.mockResolvedValueOnce({ active: false });
+    createReferralStartCard.mockResolvedValueOnce({ orderId: 'order-2' });
+
+    let handler;
+    ctvRouter.stack.forEach((layer) => {
+      if (layer.route && layer.route.path === '/bookings' && layer.route.methods.post) {
+        layer.route.stack.forEach((l) => { if (l.handle && typeof l.handle === 'function') handler = l.handle; });
+      }
+    });
+
+    const req = {
+      method: 'POST',
+      url: '/ctv/bookings',
+      body: { phone: '0900111222', name: 'X', date: '2026-06-01', lob: 'dental', productId: 'bogus-id' },
+      user: { employeeId: 'ctv-me', is_ctv: true },
+    };
+    const res = {
+      statusCode: 200,
+      jsonBody: null,
+      status(code) { this.statusCode = code; return this; },
+      json(body) { this.jsonBody = body; return this; },
+    };
+
+    await handler(req, res);
+
+    expect(res.statusCode).toBe(201);
+    const apptInsert = dbMock.queryRows.mock.calls.find(([sql]) => /INSERT INTO dbo\.appointments/.test(sql));
+    expect(apptInsert[1][12]).toBeNull(); // productid dropped to null
+  });
+});
+
+describe('GET /ctv/services', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('returns the active service catalog for the chosen LOB', async () => {
+    const dbMock = { queryRows: jest.fn(), query: jest.fn() };
+    getDb.mockReturnValue(dbMock);
+    dbMock.queryRows.mockResolvedValueOnce([
+      { id: 's1', name: 'Tẩy trắng răng', price: '500000' },
+      { id: 's2', name: 'Niềng răng', price: null },
+    ]);
+
+    let handler;
+    ctvRouter.stack.forEach((layer) => {
+      if (layer.route && layer.route.path === '/services' && layer.route.methods.get) {
+        layer.route.stack.forEach((l) => { if (l.handle && typeof l.handle === 'function') handler = l.handle; });
+      }
+    });
+
+    const req = {
+      method: 'GET',
+      url: '/ctv/services?lob=cosmetic',
+      query: { lob: 'cosmetic' },
+      user: { employeeId: 'ctv-me', is_ctv: true },
+    };
+    const res = {
+      statusCode: 200,
+      jsonBody: null,
+      status(code) { this.statusCode = code; return this; },
+      json(body) { this.jsonBody = body; return this; },
+    };
+
+    await handler(req, res);
+
+    expect(getDb).toHaveBeenCalledWith('cosmetic');
+    expect(res.statusCode).toBe(200);
+    expect(res.jsonBody.services).toEqual([
+      { id: 's1', name: 'Tẩy trắng răng', price: 500000 },
+      { id: 's2', name: 'Niềng răng', price: null },
+    ]);
+  });
 });
