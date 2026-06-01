@@ -1,284 +1,175 @@
+'use strict';
+
 /**
- * TDD tests for commissionEngine (Cosmetic LOB v2, Phase 2)
- * D13 recipient priority, append-only earnings, refund reversals.
- * Run: cd api && npm test -- src/services/__tests__/commissionEngine.test.js
- * Must be RED before impl, then GREEN.
+ * commissionEngine v3 — per-service CTV commission.
+ * Levels (commission_level_config) applied directly to the PAID amount; level 0 = the CTV
+ * attached to the service, levels 1..N = the upline chain. Cycle-guarded, idempotent,
+ * pay-as-paid. No product rate, no default_referral_percent, no consultation/salestaff.
  */
 
-const commissionEngine = require('../commissionEngine');
+const engine = require('../commissionEngine');
 
-describe('commissionEngine - D13 recipient resolution & earnings writes', () => {
-  let mockDb;
-  let mockGetDb;
+// L0 33.33%, L1 14.5%, L2 7.3%, L3/L4 disabled.
+const CONFIG = [
+  { level: 0, share_percent: '33.33', enabled: true },
+  { level: 1, share_percent: '14.5', enabled: true },
+  { level: 2, share_percent: '7.3', enabled: true },
+  { level: 3, share_percent: '3.6', enabled: false },
+  { level: 4, share_percent: '1.8', enabled: false },
+];
 
-  beforeEach(() => {
-    mockDb = {
-      queryRows: jest.fn().mockResolvedValue([]),
-      query: jest.fn().mockResolvedValue({ rows: [] }),
-    };
-    mockGetDb = jest.fn((lob) => mockDb);
+// Mock DB: queryRows dispatches by SQL. uplineById maps a CTV id -> its referred_by_ctv_id.
+function makeDb({ config = CONFIG, uplineById = {} } = {}) {
+  const inserts = [];
+  const reversals = [];
+  const queryRows = jest.fn(async (sql, params = []) => {
+    if (/commission_level_config/.test(sql)) return config;
+    if (/referred_by_ctv_id FROM dbo\.partners/.test(sql)) {
+      return [{ referred_by_ctv_id: Object.prototype.hasOwnProperty.call(uplineById, params[0]) ? uplineById[params[0]] : null }];
+    }
+    if (/INSERT INTO dbo\.earnings/.test(sql)) {
+      if (/amount < 0/.test(sql)) {
+        reversals.push(params); // [client, recipient, refundId, line, source, level, amount]
+        return [{ id: 'r' + reversals.length, amount: params[6], level: params[5], recipient_partner_id: params[1] }];
+      }
+      inserts.push(params); // [client, recipient, payment, line, level, amount]
+      return [{ id: 'e' + inserts.length, amount: params[5], level: params[4], recipient_partner_id: params[1] }];
+    }
+    return [];
+  });
+  return { db: { queryRows }, inserts, reversals };
+}
+
+const getDbOf = (db) => () => db;
+
+describe('_walkCtvChain — cycle-guarded upline walk', () => {
+  test('walks L0..Ln up referred_by_ctv_id', async () => {
+    const { db } = makeDb({ uplineById: { X: 'Y', Y: 'Z', Z: null } });
+    const chain = await engine._walkCtvChain('X', 'dental', null, getDbOf(db));
+    expect(chain).toEqual([
+      { level: 0, partner_id: 'X' },
+      { level: 1, partner_id: 'Y' },
+      { level: 2, partner_id: 'Z' },
+    ]);
   });
 
-  test('resolveRecipient: referred_by_ctv_id wins first (CTV priority over consultation/salestaff)', async () => {
-    const clientRow = {
-      id: 'client-uuid',
-      referred_by_ctv_id: 'ctv-partner-uuid',
-      salestaffid: 'staff-uuid',
-    };
-    // Even with active consultation, CTV wins (claim active)
-    const result = await commissionEngine.resolveRecipient({
-      clientRow,
-      lob: 'dental',
-      referralClaim: { getReferralClaimStatus: async () => ({ active: true, ownerCtvId: 'ctv-partner-uuid' }) },
-    });
-    expect(result).toEqual({ recipient_partner_id: 'ctv-partner-uuid', source: 'ctv' });
-  });
-
-  test('resolveRecipient: lapsed CTV claim falls through (no credit), then null when no other source', async () => {
-    const clientRow = { id: 'cli-lapsed', referred_by_ctv_id: 'ctv-old', salestaffid: null };
-    const result = await commissionEngine.resolveRecipient({
-      clientRow,
-      lob: 'dental',
-      referralClaim: { getReferralClaimStatus: async () => ({ active: false, ownerCtvId: 'ctv-old' }) },
-    });
-    expect(result).toBeNull();
-  });
-
-  test('resolveRecipient: lapsed CTV claim falls through to salestaff (dental)', async () => {
-    const clientRow = { id: 'cli-lapsed2', referred_by_ctv_id: 'ctv-old', salestaffid: 'sales-x' };
-    const result = await commissionEngine.resolveRecipient({
-      clientRow,
-      lob: 'dental',
-      referralClaim: { getReferralClaimStatus: async () => ({ active: false, ownerCtvId: 'ctv-old' }) },
-    });
-    expect(result).toEqual({ recipient_partner_id: 'sales-x', source: 'salestaff' });
-  });
-
-  test('resolveRecipient: cosmetic consultation card used when no CTV referrer', async () => {
-    const clientRow = { id: '00000000-0000-0000-0000-0000000000cc', referred_by_ctv_id: null, salestaffid: null };
-    mockDb.queryRows.mockResolvedValueOnce([{ consulting_staff_id: '00000000-0000-0000-0000-0000000000ss' }]);
-    const result = await commissionEngine.resolveRecipient({
-      clientRow,
-      lob: 'cosmetic',
-      getDb: mockGetDb,
-    });
-    expect(mockDb.queryRows).toHaveBeenCalledWith(
-      expect.stringContaining('consultations'),
-      ['00000000-0000-0000-0000-0000000000cc']
-    );
-    expect(result).toEqual({ recipient_partner_id: '00000000-0000-0000-0000-0000000000ss', source: 'consultation' });
-  });
-
-  test('resolveRecipient: dental salestaffid fallback when no CTV no cons', async () => {
-    const clientRow = { id: 'client-den', referred_by_ctv_id: null, salestaffid: 'sales-uuid' };
-    const result = await commissionEngine.resolveRecipient({ clientRow, lob: 'dental' });
-    expect(result).toEqual({ recipient_partner_id: 'sales-uuid', source: 'salestaff' });
-  });
-
-  test('resolveRecipient: returns null if no attribution path', async () => {
-    const clientRow = { id: 'orphan', referred_by_ctv_id: null, salestaffid: null };
-    const result = await commissionEngine.resolveRecipient({ clientRow, lob: 'dental' });
-    expect(result).toBeNull();
-  });
-
-  test('createEarningsForPayment: CTV earns rate% of the service directly (no pool, no level split)', async () => {
-    const payment = { id: '00000000-0000-0000-0000-0000000000p1', amount: 1000000, customer_id: '00000000-0000-0000-0000-0000000000c1' };
-    const clientRow = { id: '00000000-0000-0000-0000-0000000000c1', referred_by_ctv_id: '00000000-0000-0000-0000-000000000ctv' };
-    const line = { id: '00000000-0000-0000-0000-0000000000ln', product_id: '00000000-0000-0000-0000-0000000000pr' };
-    mockDb.queryRows
-      .mockResolvedValueOnce([{ commission_rate_percent: 24 }])  // referral rate 24% → 1,000,000 × 24% = 240,000 to L0
-      .mockResolvedValueOnce([{ id: 'e0', amount: 240000, level: 0 }]); // single insert
-    const activeClaim = { getReferralClaimStatus: async () => ({ active: true, ownerCtvId: '00000000-0000-0000-0000-000000000ctv' }) };
-    await commissionEngine.createEarningsForPayment({ payment, lines: [line], lob: 'dental', clientRow, getDb: mockGetDb, referralClaim: activeClaim });
-    expect(mockDb.queryRows).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT INTO dbo.earnings'),
-      expect.arrayContaining(['00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-000000000ctv', '00000000-0000-0000-0000-0000000000p1', 240000])
-    );
-    // exactly ONE earnings row — no upline/level rows
-    const inserts = mockDb.queryRows.mock.calls.filter((c) => /INSERT INTO dbo\.earnings/.test(c[0]));
-    expect(inserts).toHaveLength(1);
-  });
-
-  test('createEarningsForPayment: braces rate (7%) applies directly to the service amount', async () => {
-    const payment = { id: 'pay-braces', amount: 29450000 };
-    const clientRow = { id: 'cli-braces', referred_by_ctv_id: 'ctv-direct' };
-    const line = { id: 'line-braces', product_id: 'prod-braces' };
-    mockDb.queryRows
-      .mockResolvedValueOnce([{ commission_rate_percent: 7 }])   // braces → 7%
-      .mockResolvedValueOnce([{ id: 'e0' }]);
-    const activeClaim = { getReferralClaimStatus: async () => ({ active: true, ownerCtvId: 'ctv-direct' }) };
-    await commissionEngine.createEarningsForPayment({ payment, lines: [line], lob: 'dental', clientRow, getDb: mockGetDb, referralClaim: activeClaim });
-    // 29,450,000 × 7% = 2,061,500 to the direct referrer, single row
-    expect(mockDb.queryRows).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO dbo.earnings'), expect.arrayContaining(['ctv-direct', 'pay-braces', 2061500]));
-    const inserts = mockDb.queryRows.mock.calls.filter((c) => /INSERT INTO dbo\.earnings/.test(c[0]));
-    expect(inserts).toHaveLength(1);
-  });
-
-  test('createEarningsForPayment: salestaff source writes a single row = service × rate at level 0', async () => {
-    const payment = { id: 'pay-ss', amount: 1000000 };
-    const clientRow = { id: 'cli-ss', referred_by_ctv_id: null, salestaffid: 'staff-1' };
-    const line = { id: 'line-ss', product_id: 'prod-ss' };
-    mockDb.queryRows
-      .mockResolvedValueOnce([{ commission_rate_percent: 10 }])  // 1,000,000 × 10% = 100,000
-      .mockResolvedValueOnce([{ id: 'e' }]);
-    await commissionEngine.createEarningsForPayment({ payment, lines: [line], lob: 'dental', clientRow, getDb: mockGetDb });
-    expect(mockDb.queryRows).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO dbo.earnings'), expect.arrayContaining(['staff-1', 'pay-ss', 100000]));
-  });
-
-  test('createEarningsForPayment: CTV source cascades override rows to enabled upline levels (additive)', async () => {
-    const payment = { id: 'pay-ov', amount: 1000000 };
-    const clientRow = { id: 'cli-ov', referred_by_ctv_id: 'ctv-L0' };
-    const line = { id: 'line-ov', product_id: 'prod-ov' };
-    mockDb.queryRows
-      .mockResolvedValueOnce([{ commission_rate_percent: 24 }]) // getProductRate → 1,000,000 × 24% = 240,000 direct
-      .mockResolvedValueOnce([{ id: 'e0', amount: 240000, level: 0 }]) // direct L0 insert
-      .mockResolvedValueOnce([
-        { level: 0, share_percent: 24, enabled: true },
-        { level: 1, share_percent: 4, enabled: true },
-        { level: 2, share_percent: 2, enabled: true },
-      ]) // _getCommissionLevelConfig
-      .mockResolvedValueOnce([{ referred_by_ctv_id: 'ctv-L1' }]) // _walkCtvChain: ctv-L0 → ctv-L1
-      .mockResolvedValueOnce([{ referred_by_ctv_id: 'ctv-L2' }]) // ctv-L1 → ctv-L2
-      .mockResolvedValueOnce([{ referred_by_ctv_id: null }]) // ctv-L2 → top
-      .mockResolvedValueOnce([{ id: 'ov1', amount: 9600, level: 1, recipient_partner_id: 'ctv-L1' }]) // L1 = 240000 × 4%
-      .mockResolvedValueOnce([{ id: 'ov2', amount: 4800, level: 2, recipient_partner_id: 'ctv-L2' }]); // L2 = 240000 × 2%
-    const activeClaim = { getReferralClaimStatus: async () => ({ active: true, ownerCtvId: 'ctv-L0' }) };
-    await commissionEngine.createEarningsForPayment({ payment, lines: [line], lob: 'dental', clientRow, getDb: mockGetDb, referralClaim: activeClaim });
-    const inserts = mockDb.queryRows.mock.calls.filter((c) => /INSERT INTO dbo\.earnings/.test(c[0]));
-    expect(inserts).toHaveLength(3); // direct L0 + L1 + L2 override
-    expect(mockDb.queryRows).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO dbo.earnings'), expect.arrayContaining(['ctv-L1', 1, 9600]));
-    expect(mockDb.queryRows).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO dbo.earnings'), expect.arrayContaining(['ctv-L2', 2, 4800]));
-  });
-
-  test('createEarningsForPayment: non-CTV source (salestaff) does NOT cascade overrides', async () => {
-    const payment = { id: 'pay-noov', amount: 1000000 };
-    const clientRow = { id: 'cli-noov', referred_by_ctv_id: null, salestaffid: 'staff-1' };
-    const line = { id: 'line-noov', product_id: 'prod-noov' };
-    mockDb.queryRows
-      .mockResolvedValueOnce([{ commission_rate_percent: 10 }]) // direct = 100,000
-      .mockResolvedValueOnce([{ id: 'e0' }]) // direct insert
-      .mockResolvedValueOnce([{ level: 1, share_percent: 4, enabled: true }]); // config present, but must be ignored
-    await commissionEngine.createEarningsForPayment({ payment, lines: [line], lob: 'dental', clientRow, getDb: mockGetDb });
-    const inserts = mockDb.queryRows.mock.calls.filter((c) => /INSERT INTO dbo\.earnings/.test(c[0]));
-    expect(inserts).toHaveLength(1); // direct only — salestaff has no referral chain
-  });
-
-  test('reverseOnRefund: creates negative reversal row; original earnings status untouched', async () => {
-    const originalPaymentId = '00000000-0000-0000-0000-0000000000po';
-    const refundPayment = { id: '00000000-0000-0000-0000-0000000000pr', amount: -1000000 };
-    mockDb.queryRows
-      .mockResolvedValueOnce([{ id: 'earn-orig', amount: 100000, status: 'pending', client_id: 'c1', recipient_partner_id: 'r1', service_line_id: 'l1', source: 'ctv' }])
-      .mockResolvedValueOnce([]);
-    await commissionEngine.reverseOnRefund({
-      originalPaymentId,
-      refundPayment,
-      lob: 'dental',
-      getDb: mockGetDb,
-    });
-    expect(mockDb.queryRows).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT INTO dbo.earnings'),
-      expect.arrayContaining([-100000, '00000000-0000-0000-0000-0000000000pr'])
-    );
-    expect(mockDb.query).not.toHaveBeenCalledWith(expect.stringContaining('UPDATE dbo.earnings SET status'));
-  });
-
-  test('earnings writes target correct DB via getDb(lob) — isolation', async () => {
-    const dentalDb = { queryRows: jest.fn().mockResolvedValue([]) };
-    const cosmeticDb = { queryRows: jest.fn().mockResolvedValue([]) };
-    const injected = jest.fn((l) => l === 'cosmetic' ? cosmeticDb : dentalDb);
-
-    // No CTV referrer → will hit cosmetic consultation query path + product rate
-    cosmeticDb.queryRows.mockResolvedValueOnce([]); // no active cons (falls to null recipient, but still calls getDb)
-    // To ensure call, use a path that queries: but since no recipient, still getProductRate is called
-    await commissionEngine.createEarningsForPayment({
-      payment: { id: '00000000-0000-0000-0000-0000000000pc', amount: 500000 },
-      lines: [{ id: '00000000-0000-0000-0000-0000000000l1', product_id: '00000000-0000-0000-0000-0000000000pr' }],
-      lob: 'cosmetic',
-      clientRow: { id: '00000000-0000-0000-0000-0000000000cc', referred_by_ctv_id: null, salestaffid: null },
-      getDb: injected,
-    });
-
-    expect(injected).toHaveBeenCalledWith('cosmetic');
-    // At minimum getProductRate and/or resolve paths called the injected
-    expect(injected.mock.calls.some(c => c[0] === 'cosmetic')).toBe(true);
+  test('stops at a referral cycle instead of looping/over-paying', async () => {
+    const { db } = makeDb({ uplineById: { X: 'Y', Y: 'X' } }); // X<->Y back-edge
+    const chain = await engine._walkCtvChain('X', 'dental', null, getDbOf(db));
+    expect(chain).toEqual([
+      { level: 0, partner_id: 'X' },
+      { level: 1, partner_id: 'Y' },
+    ]);
   });
 });
 
-describe('backfillEarningsForClient — retroactive CTV attribution over past payments', () => {
-  const CLIENT = '00000000-0000-0000-0000-0000000000c1';
-  const CTV = '00000000-0000-0000-0000-000000000ctv';
-  const PAYMENT = '00000000-0000-0000-0000-0000000000p1';
-  const INVOICE = '00000000-0000-0000-0000-0000000000iv';
-  const LINE = '00000000-0000-0000-0000-0000000000ln';
-  const PRODUCT = '00000000-0000-0000-0000-0000000000pr';
+describe('createEarningsForPayment — per-service levels on the paid amount', () => {
+  const payment = { id: 'pay-1', customer_id: 'cust-1' };
 
-  const activeClaim = {
-    getReferralClaimStatus: async () => ({ active: true, ownerCtvId: CTV }),
-  };
-
-  // SQL-routing mock so test order does not depend on a brittle mockResolvedValueOnce chain.
-  function makeSmartDb(overrides = {}) {
-    const inserts = [];
-    const db = {
-      queryRows: jest.fn(async (sql, params) => {
-        // client load (has salestaffid in projection) vs chain-walk (referred_by_ctv_id only)
-        if (/FROM dbo\.partners WHERE id/.test(sql) && /salestaffid/.test(sql)) {
-          return overrides.clientRow === null ? [] : [overrides.clientRow || { id: CLIENT, referred_by_ctv_id: CTV, salestaffid: null }];
-        }
-        if (/FROM payments WHERE customer_id/.test(sql)) return overrides.payments || [];
-        if (/FROM dbo\.earnings WHERE payment_id/.test(sql) && /source = 'ctv'/.test(sql)) return overrides.existingCtv || [];
-        if (/FROM payment_allocations/.test(sql)) return overrides.allocs || [{ invoice_id: INVOICE }];
-        if (/FROM dbo\.saleorderlines/.test(sql)) return overrides.lines || [{ id: LINE, productid: PRODUCT, pricetotal: 1000000 }];
-        if (/commission_rate_percent FROM products/.test(sql)) return [{ commission_rate_percent: overrides.rate ?? 10 }];
-        if (/FROM dbo\.commission_level_config/.test(sql)) return overrides.levels || [{ level: 0, share_percent: 100, enabled: true }];
-        if (/referred_by_ctv_id FROM dbo\.partners WHERE id/.test(sql)) return [{ referred_by_ctv_id: null }]; // chain top
-        if (/INSERT INTO dbo\.earnings/.test(sql)) { inserts.push(params); return [{ id: 'e' + inserts.length }]; }
-        return [];
-      }),
-      query: jest.fn(async () => ({ rows: [] })),
-    };
-    return { db, inserts };
-  }
-
-  test('attributes a past paid order to the newly-linked CTV (the reported bug)', async () => {
-    const { db, inserts } = makeSmartDb({
-      payments: [{ id: PAYMENT, amount: 1000000, payment_date: '2026-05-17' }],
+  test('attached CTV + uplines each earn level% of the paid amount', async () => {
+    const { db, inserts } = makeDb({ uplineById: { X: 'Y', Y: 'Z', Z: null } });
+    const created = await engine.createEarningsForPayment({
+      payment,
+      lines: [{ id: 'line-1', ctv_id: 'X', amount: 6000000 }],
+      lob: 'cosmetic',
+      getDb: getDbOf(db),
     });
-    const result = await commissionEngine.backfillEarningsForClient({
-      clientId: CLIENT, lob: 'dental', getDb: () => db, referralClaim: activeClaim,
-    });
-    expect(result).toEqual({ paymentsScanned: 1, paymentsAttributed: 1, earningsCreated: 1 });
-    // 1,000,000 × 10% = 100,000 paid directly to the CTV (no pool/level split)
-    expect(inserts[0]).toEqual(expect.arrayContaining([CLIENT, CTV, PAYMENT, 100000]));
+    expect(created).toHaveLength(3);
+    const byRecipient = Object.fromEntries(inserts.map((p) => [p[1], { level: p[4], amount: p[5] }]));
+    expect(byRecipient.X).toEqual({ level: 0, amount: 1999800 }); // 33.33%
+    expect(byRecipient.Y).toEqual({ level: 1, amount: 870000 }); // 14.5%
+    expect(byRecipient.Z).toEqual({ level: 2, amount: 438000 }); // 7.3%
   });
 
-  test('idempotent: skips a payment that already has a ctv earning (no double-pay)', async () => {
-    const { db, inserts } = makeSmartDb({
-      payments: [{ id: PAYMENT, amount: 1000000, payment_date: '2026-05-17' }],
-      existingCtv: [{ '?column?': 1 }],
+  test('a service with NO ctv_id earns nothing (explicit attribution only)', async () => {
+    const { db, inserts } = makeDb({ uplineById: { X: 'Y' } });
+    const created = await engine.createEarningsForPayment({
+      payment,
+      lines: [{ id: 'line-1', ctv_id: null, amount: 6000000 }],
+      lob: 'cosmetic',
+      getDb: getDbOf(db),
     });
-    const result = await commissionEngine.backfillEarningsForClient({
-      clientId: CLIENT, lob: 'dental', getDb: () => db, referralClaim: activeClaim,
-    });
-    expect(result).toEqual({ paymentsScanned: 1, paymentsAttributed: 0, earningsCreated: 0 });
+    expect(created).toHaveLength(0);
     expect(inserts).toHaveLength(0);
   });
 
-  test('no-op when the client has no CTV referrer (nothing to attribute)', async () => {
-    const { db } = makeSmartDb({ clientRow: { id: CLIENT, referred_by_ctv_id: null, salestaffid: null } });
-    const result = await commissionEngine.backfillEarningsForClient({
-      clientId: CLIENT, lob: 'dental', getDb: () => db, referralClaim: activeClaim,
+  test('pay-as-paid: commission is level% of the AMOUNT collected, not the full price', async () => {
+    const { db, inserts } = makeDb({ uplineById: { X: null } });
+    await engine.createEarningsForPayment({
+      payment,
+      lines: [{ id: 'line-1', ctv_id: 'X', amount: 2000000 }], // only 2M of a 6M service paid now
+      lob: 'cosmetic',
+      getDb: getDbOf(db),
     });
-    expect(result).toEqual({ paymentsScanned: 0, paymentsAttributed: 0, earningsCreated: 0 });
-    // must not even query payments when there is no referrer
-    expect(db.queryRows).not.toHaveBeenCalledWith(expect.stringContaining('FROM payments'), expect.anything());
+    expect(inserts).toHaveLength(1);
+    expect(inserts[0][5]).toBe(666600); // 33.33% × 2,000,000
   });
 
-  test('no-op when clientId or lob missing', async () => {
-    const empty = { paymentsScanned: 0, paymentsAttributed: 0, earningsCreated: 0 };
-    expect(await commissionEngine.backfillEarningsForClient({ clientId: null, lob: 'dental' })).toEqual(empty);
-    expect(await commissionEngine.backfillEarningsForClient({ clientId: CLIENT, lob: null })).toEqual(empty);
+  test('disabled levels pay nothing and do not redistribute', async () => {
+    const { db, inserts } = makeDb({ uplineById: { X: 'Y', Y: 'Z', Z: 'W', W: null } });
+    await engine.createEarningsForPayment({
+      payment,
+      lines: [{ id: 'line-1', ctv_id: 'X', amount: 1000000 }],
+      lob: 'cosmetic',
+      getDb: getDbOf(db),
+    });
+    expect(inserts.map((p) => p[4]).sort()).toEqual([0, 1, 2]); // no level 3 (disabled)
+  });
+
+  test('a referral cycle does NOT over-pay (guarded walk)', async () => {
+    const { db, inserts } = makeDb({ uplineById: { X: 'Y', Y: 'X' } });
+    await engine.createEarningsForPayment({
+      payment,
+      lines: [{ id: 'line-1', ctv_id: 'X', amount: 1000000 }],
+      lob: 'cosmetic',
+      getDb: getDbOf(db),
+    });
+    expect(inserts.map((p) => p[1]).sort()).toEqual(['X', 'Y']); // each once
+  });
+
+  test('no level config → no commission', async () => {
+    const { db, inserts } = makeDb({ config: [], uplineById: { X: null } });
+    const created = await engine.createEarningsForPayment({
+      payment,
+      lines: [{ id: 'line-1', ctv_id: 'X', amount: 1000000 }],
+      lob: 'cosmetic',
+      getDb: getDbOf(db),
+    });
+    expect(created).toHaveLength(0);
+    expect(inserts).toHaveLength(0);
+  });
+
+  test('forward insert is idempotent (NOT EXISTS per payment/line/recipient/level)', async () => {
+    const { db } = makeDb({ uplineById: { X: null } });
+    await engine.createEarningsForPayment({ payment, lines: [{ id: 'l', ctv_id: 'X', amount: 100 }], lob: 'cosmetic', getDb: getDbOf(db) });
+    const insertSql = db.queryRows.mock.calls.map((c) => c[0]).find((s) => /INSERT INTO dbo\.earnings/.test(s) && !/amount < 0/.test(s));
+    expect(insertSql).toMatch(/NOT EXISTS/);
+    expect(insertSql).toMatch(/payment_id = \$3 AND service_line_id = \$4 AND recipient_partner_id = \$2 AND level = \$5/);
   });
 });
 
-// Integration note: full payment hook tests in payments/__tests__ or e2e later
+describe('reverseOnRefund — level-preserving, idempotent reversal', () => {
+  test('writes a negative reversal per positive original, preserving level', async () => {
+    const reversals = [];
+    const queryRows = jest.fn(async (sql, params = []) => {
+      if (/FROM dbo\.earnings WHERE payment_id = \$1 AND amount > 0/.test(sql)) {
+        return [
+          { client_id: 'c', recipient_partner_id: 'X', service_line_id: 'l', source: 'ctv', level: 0, amount: '1999800' },
+          { client_id: 'c', recipient_partner_id: 'Y', service_line_id: 'l', source: 'ctv', level: 1, amount: '870000' },
+        ];
+      }
+      if (/INSERT INTO dbo\.earnings/.test(sql)) { reversals.push(params); return [{ id: 'r' + reversals.length }]; }
+      return [];
+    });
+    const db = { queryRows };
+    const out = await engine.reverseOnRefund({ originalPaymentId: 'pay-1', refundPayment: { id: 'ref-1' }, lob: 'cosmetic', getDb: () => db });
+    expect(out).toHaveLength(2);
+    expect(reversals[0][5]).toBe(0); // level preserved
+    expect(reversals[0][6]).toBe(-1999800); // negated
+    expect(reversals[1][5]).toBe(1);
+    expect(reversals[1][6]).toBe(-870000);
+    const revSql = queryRows.mock.calls.map((c) => c[0]).find((s) => /INSERT INTO dbo\.earnings/.test(s));
+    expect(revSql).toMatch(/NOT EXISTS/);
+    expect(revSql).toMatch(/amount < 0/);
+  });
+});

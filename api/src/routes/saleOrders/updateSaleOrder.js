@@ -51,6 +51,8 @@ async function updateSaleOrder(req, res) {
       { key: 'dateend', val: dateend },
       { key: 'notes', val: notes },
       { key: 'sourceid', val: sourceid },
+      // Per-service CTV (v3 commission). undefined => unchanged; null/'' => clear; uuid => set.
+      { key: 'ctv_id', val: ctv_id },
     ];
     if (paymentState) {
       fields.push(
