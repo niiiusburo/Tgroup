@@ -2,7 +2,8 @@ name: Earnings & Commissions Engine (v2) — Transactional Attribution (D13)
 summary: |
   Append-only transactional earnings table (dbo.earnings) in BOTH databases.
   Separate from legacy commission *rules* system (commissions, commissionproductrules, saleorderlinepartnercommissions tables — untouched by v2; see legacy in business-logic/commission-rules.md).
-  Triggered on payment collected (positive row via commissionEngine); refunds create negative reversal row (original untouched).
+  Triggered on payment collected (positive row via commissionEngine); refunds, voids, deletes, and safe service reversals create negative reversal rows (original untouched).
+  Paid-out earnings (status=paid or payout_id set) lock client-side payment/service reversal.
   Recipient resolution (D13, first match wins, strict order):
     1. If the client/partner row has referred_by_ctv_id → that CTV partner (crosses LOBs via soft ref)
     2. Else if cosmetic + active consultation card (consultations table) → the consulting_staff partner
@@ -11,11 +12,12 @@ summary: |
   Products carry commission_rate_percent (additive on both DBs; dental defaults 0 for backward compat).
   Payouts table for admin batch runs (earnings.payout_id link); admin-only via earnings.payout.run or commissions.* perms.
   consultations table cosmetic-only, invisible to admin UI, auto-managed by appointment handlers, 6mo TTL.
-  Engine: api/src/services/commissionEngine.js (resolveRecipientPartner, createEarningsForPayment, reverseOnRefund) — TDD'd, called from payments hooks.
+  Engine: api/src/services/commissionEngine.js (createEarningsForPayment, reverseOnRefund) and api/src/services/serviceReversal.js for saleorderline reversal guards.
   All earnings writes respect the correct DB via txClient from getDb or request-scoped.
 owns:
   - api/src/services/commissionEngine.js (resolveRecipient, createEarningsForPayment, reverseOnRefund, D13 logic)
   - api/src/routes/payments.js + saleorder close / refund paths (hook engine on collect + refund)
+  - api/src/services/serviceReversal.js + api/src/routes/saleOrderLines.js (safe service-line reversal, paid-out guard)
   - api/src/routes/cosmetic/appointments.js (auto create/supersede consultation card on book)
   - api/src/routes/payments/readHandlers.js (earnings-aware reports if any)
   - Future: admin payout runner (POST /api/payouts or /Earnings/payout)
@@ -73,11 +75,13 @@ dependencies:
   - CTV (reads the output)
 affected_by:
   - Any change to payments collect flow or refund
+  - Any service-line delete/reversal path that touches payment_allocations or saleorder residuals
   - partners columns for attribution
   - consultation card logic
 impact_tests:
   - Payment collect in dental or cosmetic creates exactly one earnings row per D13 (or none)
-  - Refund creates negative reversal row; original earnings row remains for history
+  - Refund/void/delete/safe service reversal creates negative reversal row; original earnings row remains for history
+  - Paid-out earnings block payment void/delete and service reversal
   - D13 priority verified in unit tests (ctv > consultation > salestaff)
   - Legacy commission rules tables never written by v2 engine
 risk_level: high (money movement)
@@ -85,4 +89,5 @@ notes:
   - "EARNINGS vs LEGACY COMMISSIONS: earnings is the transactional append-only attribution log (D12/D13). Legacy commissions/* are the old rules/config tables for calculating % — never touched by the new engine. See business-logic/commission-rules.md and DECISIONS.md."
   - "D13 implemented exactly as migration comment + engine: recipient_partner_id always references a row in the local DB's partners table (or soft-validated cross for CTV)."
   - "All earnings writes must be inside the payment txClient from the correct getDb(lob)."
+  - "Service reversal may auto-void a linked payment only for a single-line order whose payment is allocated solely to that order; otherwise staff must resolve the payment first."
   - "Per 047: earnings chosen over 'commissions' to avoid collision with legacy."

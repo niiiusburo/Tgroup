@@ -14,6 +14,7 @@ import type { BusinessUnitContextValue } from '@/contexts/BusinessUnitContext';
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
+    i18n: { language: 'en' },
   }),
 }));
 
@@ -68,9 +69,14 @@ vi.mock('@/lib/api/core', () => ({
   getUploadUrl: (url: string) => url,
 }));
 
+vi.mock('@/components/calendar/ExportDateRangeModal', () => ({
+  ExportDateRangeModal: () => null,
+}));
+
 // Mock BusinessUnitContext
 vi.mock('@/contexts/BusinessUnitContext', () => ({
   useBusinessUnitOptional: vi.fn(),
+  useBusinessUnit: vi.fn(() => ({ currentLOB: 'dental' })),
 }));
 
 import { fetchEarnings, fetchPayouts } from '@/lib/api/commission';

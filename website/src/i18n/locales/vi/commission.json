@@ -10,6 +10,21 @@
     "earnings": "Thu nhập",
     "payouts": "Chi trả"
   },
+  "flow": {
+    "today": "Hôm nay",
+    "current": "Đang xem",
+    "complete": "Sẵn sàng",
+    "next": "Tiếp theo",
+    "config": "Quy tắc và cấp",
+    "ctvs": "Mạng lưới CTV",
+    "newClients": "Khách được giới thiệu",
+    "earnings": "Thu nhập đã thu",
+    "payouts": "Biên lai chi trả"
+  },
+  "date": {
+    "fromPrefix": "Từ",
+    "untilPrefix": "Đến"
+  },
   "newClients": {
     "lob": "Lĩnh vực",
     "dateRange": "Khoảng thời gian",
@@ -88,6 +103,7 @@
     "service": "Dịch vụ",
     "level": "Cấp",
     "amount": "Số tiền",
+    "earnedAt": "Ngày ghi nhận",
     "refresh": "Làm mới",
     "loading": "Đang tải thu nhập...",
     "noEarnings": "Không tìm thấy thu nhập nào."
@@ -104,6 +120,10 @@
     "notesPlaceholder": "Ghi chú tùy chọn",
     "receiptPhoto": "Ảnh biên lai",
     "pendingEarnings": "Thu nhập chờ chi trả",
+    "ctv": "CTV",
+    "client": "Khách hàng",
+    "earnedAt": "Ngày ghi nhận",
+    "amount": "Số tiền",
     "noPending": "Không có thu nhập chờ chi trả cho LOB này.",
     "recentCycles": "Chu kỳ chi trả gần đây",
     "noCycles": "Chưa có chu kỳ chi trả nào.",

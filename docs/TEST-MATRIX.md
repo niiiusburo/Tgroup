@@ -92,6 +92,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | `api/src/routes/products.js` service create/edit | `api/src/__tests__/productsNormalizeImport.test.js`, live `POST/PUT /api/Products` and `/api/cosmetic/Products` smoke | Product writes populate `namenosign` through `normalizeVietnamese`; missing imports break service creation for both Dental and Cosmetic. |
 | `website/src/pages/ServiceCatalog.tsx` / service catalog hooks | Service catalog component tests, `/service-catalog` screenshots for Dental and Cosmetic | Service catalog is a shared Dental/Cosmetic workflow and must keep category filters, active toggles, and delete guards working. |
 | `website/src/components/services/ServiceForm.tsx`, `ServiceSourceSelector.tsx`, `website/src/hooks/useServices.ts`, `website/src/hooks/useSettings.ts`, or `website/src/lib/api/saleOrders.ts` service source handling | `npm --prefix website test -- src/hooks/useServices.payment-state.test.tsx src/hooks/useSettings.customerSources.test.tsx`; browser screenshot of Cosmetic customer add-service on `https://tmv.2checkin.com/customers/:id?lob=cosmetic` | Locks `sourceid` as an active-LOB UUID-only value so fallback/stale Dental customer-source chips cannot block `/api/cosmetic/SaleOrders` creation. |
+| `api/src/routes/saleOrderLines.js` or `api/src/services/serviceReversal.js` | `JWT_SECRET=test-secret npx jest src/services/__tests__/serviceReversal.test.js --runInBand`, payment void/delete tests, live Cosmetic service-delete smoke with pending and paid-out CTV earnings | Service deletion can now void linked payments and reverse CTV earnings; paid-out payout rows must block mutation and residuals must stay coherent. |
 
 ### Employees & HR
 
@@ -106,7 +107,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 
 | If you change... | Run these tests... | Why |
 |---|---|---|
-| `api/src/routes/payments.js` | `api/tests/readRoutePermissions.test.js`, `website/e2e/team-charlie-payments.spec.ts`, `website/src/lib/allocatePaymentSources.test.ts` | Money logic is high-risk. |
+| `api/src/routes/payments.js` | `api/tests/readRoutePermissions.test.js`, `api/src/services/__tests__/commissionEngine.test.js`, `api/src/services/__tests__/serviceReversal.test.js`, `website/e2e/team-charlie-payments.spec.ts`, `website/src/lib/allocatePaymentSources.test.ts` | Money logic is high-risk; payment void/delete must reverse earnings unless CTV payout is already paid out. |
 | `website/src/hooks/useDeposits.ts`, `website/src/hooks/useCustomerPayments.ts`, `website/src/hooks/usePayment.ts`, and `website/src/lib/api/payments.ts` | `website/src/hooks/useDeposits.test.tsx`, `website/src/hooks/__tests__/useCustomerPayments.lob.test.ts` | Locks cosmetic payment/deposit creates, deposit list, deposit usage, void/delete/update, and balance refresh against cosmetic payment routes. |
 | `api/src/routes/payments/helpers.js` | `website/src/lib/allocatePaymentSources.test.ts`, payment backend tests | Allocation math, receipt generation, residual validation. |
 | `website/src/components/payment/PaymentForm.tsx` | `PaymentForm.submit.test.tsx`, `website/e2e/vietqr-payment.spec.ts` | Payment entry and mixed-method breakdown. |

@@ -802,10 +802,12 @@ router.get('/services', requireAuth, async (req, res) => {
     const db = getDb(lob);
     const rows = await safeQueryRows(
       db,
-      `SELECT id, name, COALESCE(listprice, saleprice) AS price
-       FROM dbo.products
-       WHERE active = true
-       ORDER BY name ASC
+      `SELECT p.id, p.name, COALESCE(p.listprice, p.saleprice) AS price,
+              p.categid AS category_id, pc.name AS category_name
+       FROM dbo.products p
+       LEFT JOIN dbo.productcategories pc ON pc.id = p.categid
+       WHERE p.active = true
+       ORDER BY pc.name ASC NULLS LAST, p.name ASC
        LIMIT 1000`,
       []
     );
@@ -815,6 +817,9 @@ router.get('/services', requireAuth, async (req, res) => {
         id: r.id,
         name: r.name,
         price: r.price != null ? Number(r.price) : null,
+        // Category lets the picker group a long catalog (e.g. dental ~450 services
+        // across 16 categories). NULL categid → grouped under "Uncategorized" client-side.
+        category: r.category_id ? { id: r.category_id, name: r.category_name || null } : null,
       })),
     });
   } catch (e) {
@@ -826,8 +831,8 @@ router.get('/services', requireAuth, async (req, res) => {
 /**
  * POST /api/ctv/bookings
  * CTV books a client: resolve by phone → eligibility gate → create/reclaim client →
- * appointment only. Booking must not create a saleorder/service card; actual
- * service cards are reserved for completed clinic services.
+ * appointment. Appointment productid carries the selected service, or Referral
+ * Start as the default purpose, but this path never creates a saleorder card.
  */
 router.post('/bookings', requireAuth, async (req, res) => {
   const { employeeId } = req.user || {};
@@ -899,24 +904,25 @@ router.post('/bookings', requireAuth, async (req, res) => {
       );
     }
 
-    // 3b. Validate the chosen service belongs to THIS LOB's catalog. If no
-    // service was chosen, tag the appointment with the configured Referral Start
-    // product so the calendar has a booking purpose without creating a service card.
+    // 3b. Validate the chosen service belongs to THIS LOB's catalog. An unknown
+    // or cross-LOB productId is silently dropped (→ null) so a bad id never
+    // breaks the booking via an FK violation; the appointment is still created.
+    // If no service is selected, stamp the appointment with Referral Start as
+    // its purpose only. Do NOT create a saleorder/service card here.
     let validProductId = null;
     if (productId) {
       const prodRows = await safeQueryRows(db, `SELECT id FROM dbo.products WHERE id = $1 AND active = true LIMIT 1`, [productId]);
       validProductId = prodRows[0]?.id || null;
     } else {
-      const referralStartRows = await safeQueryRows(
+      const referralRows = await safeQueryRows(
         db,
         `SELECT p.id
            FROM dbo.commission_settings cs
            JOIN dbo.products p ON p.id = cs.referral_start_product_id
           WHERE p.active = true
-          LIMIT 1`,
-        []
+          LIMIT 1`
       );
-      validProductId = referralStartRows[0]?.id || null;
+      validProductId = referralRows[0]?.id || null;
     }
 
     // 3c. Appointment — use canonical insert pattern

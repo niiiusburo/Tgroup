@@ -2553,3 +2553,62 @@ TestSprite execution items:
 - [ ] PENDING: Verify one imported legacy CTV can log in with their legacy phone/ref and known password.
 - [ ] PENDING: Verify legacy CTV search works with names and phone/ref last digits without duplicate rows.
 - [ ] PENDING: Verify Dental and Cosmetic CTV tabs show the same 198 legacy imported CTV identities, allowing only pre-existing non-legacy count differences.
+
+---
+
+# TestSprite Plan: NK3 CTV Appointment, Service Reversal, and Admin Flow
+
+Feature/edit name: NK3 CTV referral appointment, commission reversal guard, and admin five-tab CTV flow
+
+Changed URLs and API routes:
+- Browser-visible: `https://tmv.2checkin.com/ctv` refer-client modal.
+- Browser-visible: `https://tmv.2checkin.com/commission` five tabs: Config, CTV, New Clients, Earnings, Payouts.
+- API routes: `POST /api/ctv/bookings`, `GET /api/ctv/client-lookup`, `DELETE /api/SaleOrderLines/:id`, `DELETE /api/cosmetic/SaleOrderLines/:id`, `GET /api/NewClients`, `GET /api/Earnings`, `GET /api/Payouts`, export types `new-clients`, `ctv-earnings`, `ctv-payouts`.
+
+Affected data flows:
+- CTV phone lookup -> existing available partner -> CTV modal name prefill without overwriting manual input.
+- CTV booking -> `dbo.partners` create/reclaim/customer=true -> `dbo.appointments` only; selected service or Referral Start default goes to `appointments.productid`.
+- Service reversal -> `payment_allocations`/saleorder residuals/payments/earnings stay consistent; paid-out CTV commissions block reversal.
+- Admin commission page -> five-step breadcrumb flow; clean date labels on New Clients, Earnings, and Payouts; earned dates visible before payout selection.
+
+User roles:
+- CTV portal user with `is_ctv=true`.
+- Admin/staff with Cosmetic LOB access, `customers.edit`, `payment.void`, `ctv.manage`, and commission payout/export permissions.
+
+Happy paths:
+- On `/ctv`, enter phone `0123123123` in Cosmetic when the client exists and is available; the name field pre-fills and booking creates one appointment only.
+- Booking with no selected service creates an appointment whose `productid` is the active Referral Start product when configured.
+- Booking with a selected service creates an appointment with that service as `productid` and no service card.
+- Deleting an unpaid service line soft-deletes the line and parent order when it is the last active line.
+- Deleting a paid single-line service with unpaid/pending CTV earnings voids the linked single-invoice payment, restores residual, and creates negative earnings reversals.
+- `/commission` shows the five tabs as a breadcrumb workflow; date filters render as readable dates instead of raw `YYYY-MM-DD`.
+
+Edge cases:
+- Existing client claimed by another CTV still blocks with `B_CLIENT_CLAIMED`.
+- A bad or cross-LOB selected `productId` is dropped to `null` and does not break appointment creation.
+- Service reversal with `earnings.status='paid'` or `payout_id IS NOT NULL` returns `B_COMMISSION_PAID_OUT` and does not delete the service.
+- Service reversal with a payment allocated to multiple invoices/dotkhams returns `B_PAYMENT_MIXED_ALLOCATIONS`.
+- Service reversal on a paid order with multiple active lines returns `B_SERVICE_PAYMENT_REQUIRES_ORDER_VOID`.
+
+Regressions:
+- CTV booking must never create `dbo.saleorders` or `dbo.saleorderlines`.
+- Dental and Cosmetic routes must remain LOB-isolated.
+- Payment delete/void paid-out guards from `POST /api/Payments/:id/void` and `DELETE /api/Payments/:id` must still work.
+- Existing CTV Excel exports for New Clients, Earnings, and Payouts must still preview/download.
+
+Setup data and login state:
+- NK3 deploy target: `https://tmv.2checkin.com`, Cosmetic LOB.
+- Admin login with access to Cosmetic and commission payout/export permissions.
+- CTV test account able to open `/ctv`.
+- Test records: one available existing Cosmetic client by phone, one pending single-line paid service with unpaid earnings, and one paid-out earning linked to a payout/proof.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `/ctv` phone lookup pre-fills the name for an existing available Cosmetic client and does not prefill when the user already typed a name.
+- [ ] PENDING: Submit `/ctv` booking with no service and confirm one `dbo.appointments` row with Referral Start `productid`, no `saleorders`, and no `saleorderlines`.
+- [ ] PENDING: Submit `/ctv` booking with a selected service and confirm the appointment uses that service `productid`, with no service card.
+- [ ] PENDING: Try a claimed client and confirm `B_CLIENT_CLAIMED`.
+- [ ] PENDING: Delete unpaid service line and confirm line/order soft-delete only.
+- [ ] PENDING: Delete paid single-line service with pending commission and confirm payment void + residual restore + negative earnings reversal.
+- [ ] PENDING: Delete service linked to paid-out commission and confirm `B_COMMISSION_PAID_OUT` with no service/payment mutation.
+- [ ] PENDING: Verify `/commission` five-tab breadcrumb flow and readable date labels on New Clients, Earnings, and Payouts.
+- [ ] PENDING: Verify New Clients, Earnings, and Payouts Excel preview/download still work with active date filters.

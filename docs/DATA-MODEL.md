@@ -291,7 +291,7 @@ erDiagram
 - `payment_allocations_payment_id_idx`
 - `payment_allocations_invoice_id_idx`
 
-**Cascade rules:** No `ON DELETE CASCADE`. Deleting a payment does not auto-delete allocations in current implementation (known edge case).
+**Cascade rules:** No schema-level `ON DELETE CASCADE`. Runtime void/delete paths explicitly delete allocation rows and restore residuals inside transactions. Service-line reversal may also delete allocations only when the linked payment is single-invoice, unpaid/pending for CTV payout purposes, and safe to mark `payments.status='voided'`.
 
 ---
 

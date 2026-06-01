@@ -31,6 +31,18 @@
 **Enforced by:** `validateAllocationResidual()` in `api/src/routes/payments/helpers.js` + `GREATEST(0, residual - amount)` SQL update.
 **Cite when:** Changing payment allocation, refund, void, or import logic.
 
+### INV-003A — Payment Delete/Void Must Reverse Earnings Attribution (NK3+)
+**Rule:** DELETE /api/Payments/:id and POST /api/Payments/:id/void MUST produce symmetric negative reversal rows in dbo.earnings (via commissionEngine.reverseOnRefund) for every positive earnings row previously created for that payment. Net attribution for the payment becomes zero. Hard delete may remove the original payment row; the negative reversal rows remain for audit.
+**Rationale:** The previous delete/void paths reversed residuals but left phantom positive earnings rows → phantom commissions in CTV downline, admin reports, and payouts. This was the root cause of "can't delete payments" + inflated downline numbers after deletes.
+**Enforced by:** payments.js DELETE and /void handlers (inside tx, non-fatal hook) + commissionEngine.reverseOnRefund. Only on nk3-deploy and later (local 5433 NK3 demo DBs first).
+**Cite when:** Editing payments delete/void, commissionEngine, or any earnings reversal path.
+
+### INV-003B — Paid-Out CTV Commission Locks Reversal
+**Rule:** A payment or service line tied to `dbo.earnings` rows where `status = 'paid'` or `payout_id IS NOT NULL` MUST NOT be voided, deleted, or auto-reversed. Service-line deletion may auto-void linked payments only when the deleted line is the last active line on the order, every affected payment is allocated solely to that order, and all related earnings are still unpaid/pending.
+**Rationale:** There are two money events: the client paying the clinic creates pending CTV earnings, and the clinic paying the CTV locks that commission. Once the CTV payout/proof exists, reversing the client-side service/payment would corrupt the payout ledger.
+**Enforced by:** `api/src/routes/payments.js` paid-out guards, `api/src/services/serviceReversal.js`, and `DELETE /api/SaleOrderLines/:id` requiring both `customers.edit` and `payment.void`.
+**Cite when:** Editing service deletion, sale-order residuals, `payment_allocations`, payouts, earnings statuses, or CTV commission reversal logic.
+
 ### INV-004 — Deposit Category Heuristic Stability
 **Rule:** If a payment has `method !== 'deposit'` and `method !== 'mixed'`, has no `service_id`, has no `deposit_used`, and has no allocations, it MUST be classified as `payment_category = 'deposit'` and `deposit_type = 'deposit'`.
 **Rationale:** This heuristic is the primary way deposits are identified in the absence of explicit flags. Changing it retroactively reclassifies historical payments.

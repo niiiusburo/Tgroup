@@ -24,6 +24,16 @@ Each entry:
 
 ---
 
+## FM-20260601-02: Deleted Service Leaves Outstanding Balance Or Reversible Paid-Out Commission
+
+- **Symptom:** Staff removes a service card, but the customer still shows an outstanding amount, or a client-side reversal could undo a service after the CTV commission was already paid.
+- **Root Cause:** The service-line delete path only soft-deleted `saleorderlines`/`saleorders`; it did not inspect `payment_allocations`, restore residuals, reverse pending earnings, or block paid-out CTV payout rows.
+- **Fix:** Route `DELETE /api/SaleOrderLines/:id` through `serviceReversal`: block paid-out earnings, reject mixed allocations and paid multi-line partial deletes, auto-void only safe single-invoice linked payments, restore residuals, and write negative earnings reversals before soft-deleting the service.
+- **Prevention:** Money-affecting service deletion must require `payment.void`, run in one transaction, and include tests for unpaid service delete, pending commission reversal, paid-out block, mixed allocation block, and multi-line paid-order block.
+- **Related:** INV-003B, WF-016, UC-012A.
+
+---
+
 ## FM-20260519-01: Feedback Attachment Row Points at Missing Uploaded File
 
 - **Symptom:** A resolved `/feedback` thread shows an uploaded image attachment card, but the proof image does not load and the `/uploads/feedback/<file>` URL returns 404.

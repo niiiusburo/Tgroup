@@ -642,5 +642,54 @@ sequenceDiagram
 - No `saleorders` or `saleorderlines` service card is created by this booking flow.
 - The CTV sheet initializes `date` to `Asia/Ho_Chi_Minh` today so mobile users do not submit an empty required appointment date.
 
-**Invariants:** INV-001, INV-002, INV-006, INV-021.
+**Invariants:** INV-001, INV-002, INV-006, INV-021, INV-022.
 **Traceability:** Related UC: UC-022. Contracts/routes: `GET /api/ctv/client-lookup`, `POST /api/ctv/bookings`, `GET /api/Partners`, `GET /api/cosmetic/Partners`. Data/tables: `dbo.partners`, `dbo.appointments`. Tests: `api/src/routes/__tests__/ctvBookings.test.js`, `website/src/components/ctv/CtvReferModal.test.tsx`. Product-map domains: `ctv`, `cosmetic`, `cosmetic-clients`, `customers-partners`, `appointments-calendar`.
+
+---
+
+## WF-016 — Service Reversal With CTV Paid-Out Guard
+
+**Trigger:** Admin removes a service line from a customer record in Dental or Cosmetic.
+
+```mermaid
+sequenceDiagram
+    actor A as Admin
+    participant FE as Admin UI
+    participant API as Express API
+    participant DB as Active LOB DB
+    participant CTV as CTV Payout Ledger
+
+    A->>FE: Delete service line
+    FE->>API: DELETE /api/SaleOrderLines/:id
+    API->>API: Require customers.edit + payment.void
+    API->>DB: BEGIN and lock saleorderline/order/payment allocations
+    API->>CTV: Check earnings for linked payments
+    alt earning status paid or payout_id set
+        API-->>FE: 409 B_COMMISSION_PAID_OUT
+        API->>DB: ROLLBACK
+    else unpaid, single-line, single-invoice payment
+        API->>CTV: Insert negative earnings reversals
+        API->>DB: DELETE payment_allocations for order
+        API->>DB: Restore saleorders.residual
+        API->>DB: UPDATE payments SET status='voided'
+        API->>DB: Soft-delete saleorderline and parent saleorder
+        API->>DB: COMMIT
+        API-->>FE: 200 { success, voidedPayments, reversedEarningsCount }
+    else unpaid service with no payment
+        API->>DB: Soft-delete saleorderline and parent saleorder if last line
+        API->>DB: COMMIT
+        API-->>FE: 200 { success }
+    else mixed allocation or paid multi-line order
+        API-->>FE: 409 B_PAYMENT_MIXED_ALLOCATIONS or B_SERVICE_PAYMENT_REQUIRES_ORDER_VOID
+        API->>DB: ROLLBACK
+    end
+```
+
+**Data state transitions:**
+- Paid-out CTV payout rows stay locked; service/payment state is unchanged.
+- Pending earnings are reversed with negative `dbo.earnings` rows, preserving original positive rows for audit.
+- Safe linked payments are marked `voided`; allocations are removed and residuals restored in the same transaction.
+- Service and parent saleorder are soft-deleted only after money/commission state is coherent.
+
+**Invariants:** INV-003, INV-003A, INV-003B, INV-010.
+**Traceability:** Related UC: UC-012, UC-012A. Contracts/routes: `DELETE /api/SaleOrderLines/:id`, `DELETE /api/cosmetic/SaleOrderLines/:id`, `POST /api/Payments/:id/void`. Data/tables: `dbo.saleorderlines`, `dbo.saleorders`, `dbo.payments`, `dbo.payment_allocations`, `dbo.earnings`, `dbo.payouts`. Tests: `api/src/services/__tests__/serviceReversal.test.js`, `api/src/services/__tests__/commissionEngine.test.js`. Product-map domains: `payments-deposits`, `earnings-commissions`, `services-catalog`.
