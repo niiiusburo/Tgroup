@@ -137,6 +137,9 @@ app.use('/api', enforceIpAccess);
 // Frontend reports errors here; management endpoints stay behind auth
 app.use('/api/telemetry/errors', publicTelemetryErrorRoutes);
 
+// Public (unauthenticated) CTV self-signup via referral link — mounted BEFORE the /api auth gate.
+app.use('/api/ctv-public', require('./routes/ctvPublic'));
+
 const PUBLIC_PATHS = new Set([
   '/api/Auth/login',
   '/api/auth/login',
@@ -273,8 +276,6 @@ if (COSMETIC_FLAG) {
   });
 }
 app.use('/api/ctv', requirePermission('ctv.dashboard.view'), ctvRoutes);
-// Public (unauthenticated) CTV self-signup via referral link — mounted WITHOUT auth.
-app.use('/api/ctv-public', require('./routes/ctvPublic'));
 
 app.get('/api/health', async (_req, res) => {
   const checks = { db: false, faceService: false };
