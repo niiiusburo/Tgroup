@@ -148,6 +148,7 @@ This route is read-only. The authoritative referral-claim gate still runs on `PO
 #### POST /api/ctv/bookings
 **Request:** `clientId?`, `name?`, `phone`, `lob`, `date`, optional `time`, `companyId`, `productId`.
 **Response 201:** `{ clientId: string; appointmentId: string }`.
+When an existing partner row is accepted or reclaimed, the route updates that same row with `customer = true` before creating the appointment so the client is visible through admin customer search in the selected LOB.
 **Error 400:** active claims owned by another CTV return:
 ```ts
 {

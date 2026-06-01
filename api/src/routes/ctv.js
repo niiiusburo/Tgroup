@@ -888,7 +888,15 @@ router.post('/bookings', requireAuth, async (req, res) => {
         [clientId, name || 'Khách CTV', phone, [lob], employeeId, now]);
     } else {
       // Re-claim (or claim a lapsed/unclaimed client) for this CTV
-      await safeQueryRows(db, `UPDATE dbo.partners SET referred_by_ctv_id = $1, lastupdated = now() WHERE id = $2`, [employeeId, clientId]);
+      await safeQueryRows(
+        db,
+        `UPDATE dbo.partners
+         SET referred_by_ctv_id = $1,
+             customer = true,
+             lastupdated = now()
+         WHERE id = $2`,
+        [employeeId, clientId]
+      );
     }
 
     // 3b. Referral Start card

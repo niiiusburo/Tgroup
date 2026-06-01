@@ -2,6 +2,12 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.84] — 2026-06-01 (nk3-deploy)
+### Fixed
+- **CTV bookings now make accepted existing partners visible in admin Customers.** `POST /api/ctv/bookings` now sets `dbo.partners.customer = true` when it reclaims/books an existing partner row, preserving the single partner identity while ensuring `/customers` and `GET /api/cosmetic/Partners?search=` can find portal-accepted clients such as the NK3 `thuan test` Cosmetic case. Preserves INV-001, INV-006, and new INV-021. — @agent
+### Tested
+- `JWT_SECRET=test-secret npm --prefix api test -- --runInBand src/routes/__tests__/ctvBookings.test.js` (project Jest runner matched all API suites: 83 suites / 901 tests passed; existing open-handles warning still appears after completion). — @agent
+
 ## [0.32.82] — 2026-06-01 (nk-feedback)
 ### Fixed
 - **Customer profile saves no longer fail on migrated blank DOB parts.** The shared `@tgroup/contracts` partner schema now normalizes blank, `0`, and `"0"` birthday/birthmonth/birthyear values to `null` before validation, so unrelated edits on migrated customer records are not blocked while real invalid days/months still fail. — @agent

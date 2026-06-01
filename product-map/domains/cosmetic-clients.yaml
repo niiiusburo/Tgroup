@@ -46,6 +46,7 @@ impact_tests:
   - No data leak: cosmetic client list never returns dental rows
   - Cross-view badge: only visible with lob.crossview; probe does not mutate data
   - Referral by CTV: client row with referred_by_ctv_id correctly attributes earnings on payment
+  - CTV booking/reclaim of an existing cosmetic partner sets `customer=true` so the client appears in Cosmetic admin `/customers` search.
 risk_level: medium
 notes:
   - "D2: No shared identity table. Independent clients per LOB, separate DB rows."

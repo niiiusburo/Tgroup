@@ -55,6 +55,12 @@
 **Enforced by:** `useCustomerSources()` active-LOB reload behavior, `ServiceSourceSelector`, and `nullableUuid()` normalization in `useServices`.
 **Cite when:** Editing service creation/editing, customer-source settings, `SaleOrders` API clients, or source reporting.
 
+### INV-021 — Accepted CTV Bookings Are Customer-Visible
+**Rule:** When `POST /api/ctv/bookings` accepts an existing `dbo.partners` row as the referred client, that row MUST be marked `customer = true` in the selected LOB database before the appointment is created.
+**Rationale:** The admin Customers page and `GET /api/Partners` intentionally filter to `customer = true`; a portal-accepted client must be searchable by admins without duplicating the partner identity.
+**Enforced by:** `api/src/routes/ctv.js` booking reclaim path and `api/src/routes/__tests__/ctvBookings.test.js`.
+**Cite when:** Editing CTV booking, partner phone lookup, referral claim, or admin customer search behavior.
+
 ---
 
 ## Auth & Permission Invariants

@@ -27,7 +27,7 @@ reads:
 writes:
   - POST /api/ctv (create CTV under caller/admin; writes partners in dental and optionally cosmetic)
   - POST /api/ctv/clients (refer a client under caller/admin; writes partners in selected LOB DB)
-  - POST /api/ctv/bookings (create or reclaim referred client, create Referral Start card, create appointment in selected LOB DB)
+  - POST /api/ctv/bookings (create or reclaim referred client, mark accepted existing partners as customer-visible, create Referral Start card, create appointment in selected LOB DB)
   - PATCH /api/Ctvs/:id or /api/cosmetic/Ctvs/:id (admin suspend/reactivate; mirrors active flag to cosmetic row if present)
   - api/scripts/import-legacy-ctvs.js after explicit DB confirmation (mirrors safe legacy CTV identities into dental + cosmetic partners with identical UUIDs; skips ambiguous matches)
   - earnings remain written by payment paths + commissionEngine in earnings domain; payouts by admin
@@ -45,7 +45,7 @@ endpoints:
   - POST /api/ctv (self/admin CTV recruit)
   - POST /api/ctv/clients (self/admin referred client create)
   - GET /api/ctv/network (self CTV upline/direct/downline graph)
-  - POST /api/ctv/bookings (self/admin referred-client booking; blocks B_CLIENT_CLAIMED)
+  - POST /api/ctv/bookings (self/admin referred-client booking; blocks B_CLIENT_CLAIMED; accepted existing partners are updated to customer=true)
   - GET /api/Ctvs and GET /api/cosmetic/Ctvs (admin CTV list; cosmetic mount filters Cosmetic-scoped rows and returns source/legacy_code/created_via)
   - GET /api/ctv/* (gated)
 ui_surfaces:

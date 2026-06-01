@@ -10,6 +10,57 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK3 CTV booking accepted customer search 2026-06-01
+
+Feature/edit name: CTV referral booking makes accepted existing clients searchable in admin Customers
+
+Changed URLs and API routes:
+- `/ctv` refer-client booking sheet (`Giới thiệu khách`)
+- `/customers?lob=cosmetic`
+- `/customers?lob=dental`
+- `GET /api/ctv/client-lookup?phone=&lob=`
+- `POST /api/ctv/bookings`
+- `GET /api/Partners?search=`
+- `GET /api/cosmetic/Partners?search=`
+
+Affected data flows:
+- `POST /api/ctv/bookings` resolves an existing partner by `clientId` or phone in the selected LOB.
+- Accepted existing partner rows are updated with `customer = true` and `referred_by_ctv_id = current CTV`.
+- Admin Customers search continues to filter `dbo.partners.customer = true`, so the portal-accepted client becomes visible without creating a duplicate partner identity.
+- Appointment creation and Referral Start card creation remain in the selected Dental/Cosmetic database only.
+
+User roles:
+- CTV user on `/ctv` can submit the referral booking.
+- Admin or customer staff with `customers.view` can search `/customers` in the matching LOB.
+
+Happy paths:
+- Cosmetic: book/reclaim existing phone `0123123123` as a CTV and verify `/customers?lob=cosmetic` finds `thuan test` by name and phone.
+- Dental: same path works for a Dental existing partner without crossing into Cosmetic data.
+- New clients still insert with `customer=true`.
+
+Edge cases:
+- Existing employee/staff partner accepted as a client keeps the same `partners.id` and becomes `customer=true`.
+- Active claim owned by another CTV still returns `B_CLIENT_CLAIMED` and does not update the row.
+- Unknown or cross-LOB `productId` is dropped to null and the appointment is still created.
+
+Regressions:
+- CTV users still cannot enter admin routes.
+- Admin Customers search remains accent-insensitive and LOB-isolated.
+- No duplicate partner row is created for the same accepted existing person.
+
+Setup/login state:
+- Use NK3/TMV live only after local verification and deployment.
+- Use a Cosmetic CTV account for `/ctv`; use admin login for `/customers?lob=cosmetic`.
+- Capture screenshot evidence of the CTV accepted-booking state and the admin Customers search result.
+
+TestSprite execution items:
+- [ ] PENDING: Submit or replay a CTV booking for an existing unclaimed Cosmetic partner and verify `POST /api/ctv/bookings` returns 201.
+- [ ] PENDING: Verify the same client appears in `/customers?lob=cosmetic` search by name and by phone, with screenshot evidence.
+- [ ] PENDING: Verify an active claim owned by another CTV still blocks with `B_CLIENT_CLAIMED`.
+- [ ] PENDING: Verify Dental `/customers?lob=dental` does not show the Cosmetic-only client.
+
+---
+
 # TestSprite Plan: NK Employee Feedback Revenue Source + Customer Profile Save 2026-06-01
 
 Feature/edit name: Revenue-by-source card on Revenue report and legacy DOB validation fix for customer profile save
@@ -58,6 +109,61 @@ TestSprite execution items:
 - [ ] PENDING: Verify invalid real DOB values, such as day 32 or month 13, still show a validation error.
 
 ---
+
+# TestSprite Plan: NK3 CTV MLM commission (Dental + Cosmetic) 2026-05-31
+
+Feature/edit name: Verify CTV MLM override commission levels 1–2 for both Dental and Cosmetic LOB
+
+Changed URLs and API routes:
+- No runtime code or live routes were changed in this task (local DB + engine verification only).
+- Optional (if validating via UI/API): `GET /api/Ctvs`, `GET /api/cosmetic/Ctvs`, `GET /api/ctv/commission-summary`, `GET /api/cosmetic/ctv/commission-summary` (if present in the deployment), and any admin earnings list surface.
+
+Affected data flows:
+- `dbo.partners.referred_by_ctv_id` as the CTV upline/downline pointer (CTV → upline).
+- `dbo.partners.referred_by_ctv_id` on the CUSTOMER partner as the direct referrer pointer (customer → leaf CTV).
+- `api/src/services/commissionEngine.createEarningsForPayment()` writing `dbo.earnings`:
+  - Level 0 (direct earner) = leaf CTV.
+  - Level 1 (upline override) = mid CTV.
+  - Level 2 (upline override) = top CTV.
+- `dbo.commission_level_config` share_percent used for level overrides (L1=14.5%, L2=7.3%).
+- `dbo.products.commission_rate_percent` used to compute the base direct commission (per-product rate).
+
+User roles:
+- Admin (for UI validation): can access `/commission` and view CTV earnings.
+- CTV users are not required for this verification (we validate earnings writes).
+
+Happy paths:
+- Dental DB: creating a paid service for a customer referred by leaf CTV creates 3 earnings rows (L0/L1/L2) with correct amounts.
+- Cosmetic DB: same behavior in `tcosmetic_demo`.
+
+Edge cases:
+- If `commission_level_config` disables a level (`enabled=false`) or sets share to 0, that level must not receive an override row.
+- Earnings are created on payment collection (not just “service created”), so tests must include a payment event.
+- Referral-claim gating: first payment should still attribute because the claim becomes active based on the payment_date anchor.
+
+Regressions:
+- Direct (level 0) earning amount remains `service_amount × product.commission_rate_percent` (not reduced by MLM shares).
+- Override rows are additive and idempotent per (payment_id, service_line_id, recipient, level).
+
+Setup/login state:
+- Local-first verification was executed against local Postgres on `127.0.0.1:5433`:
+  - Dental DB: `tdental_demo`
+  - Cosmetic DB: `tcosmetic_demo`
+- Deterministic test IDs used (same in both DBs):
+  - CTV top: `11111111-1111-4111-8111-111111111111`
+  - CTV mid: `22222222-2222-4222-8222-222222222222`
+  - CTV leaf: `33333333-3333-4333-8333-333333333333`
+  - Customer: `44444444-4444-4444-8444-444444444444`
+  - Product: `55555555-5555-4555-8555-555555555555` (`commission_rate_percent=24`)
+  - Order: `66666666-6666-4666-8666-666666666666`
+  - Order line: `77777777-7777-4777-8777-777777777777` (`pricetotal=1,000,000`)
+  - Payment: `88888888-8888-4888-8888-888888888888` (`payment_category='payment'`, `amount=1,000,000`)
+
+Checks:
+- [x] PASS: Local dental override amounts — base commission 240,000; L1 mid 34,800; L2 top 17,520; 3 rows created for payment `8888…` in `tdental_demo.dbo.earnings`.
+- [x] PASS: Local cosmetic override amounts — same amounts and 3 rows created for payment `8888…` in `tcosmetic_demo.dbo.earnings`.
+- [x] PASS: Focused Jest (local) — `JWT_SECRET=test-secret npm --prefix api test -- --runInBand src/services/__tests__/commissionEngine.test.js` (green; note: Jest prints an open-handles warning but exits 0).
+- [x] PASS: Live NK3 verification (controlled writes) — created 3-level chains + 1 paid service in BOTH LOBs and verified earnings via `GET /api/Earnings?lob=...&ctvId=...` + screenshots. Evidence JSON: `artifacts/live-checks/nk3-ctv-commission-20260531T185857.json`; screenshots: `artifacts/screenshots/nk3-ctv-commission-20260531T185850-01-after-login.png` + `artifacts/screenshots/nk3-ctv-commission-20260531T185850-02-commission-page.png`.
 
 # TestSprite Plan: TMV NK3 service catalog + feedback fixes 2026-05-31
 

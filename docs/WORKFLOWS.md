@@ -597,3 +597,45 @@ sequenceDiagram
 **Failure modes:**
 - Long Vietnamese text clips or overlaps if `ExpandableText`/runtime overflow detection is bypassed.
 - DotKham rows may be read-only or sync-owned; avoid implying unsupported edits.
+
+---
+
+## WF-015 — CTV Referral Booking Makes Client Searchable
+
+**Trigger:** A CTV submits the `/ctv` refer-client booking sheet for a Dental or Cosmetic client.
+
+```mermaid
+sequenceDiagram
+    actor C as CTV
+    participant FE as CTV Portal
+    participant API as Express API
+    participant DB as Selected LOB DB
+    participant Admin as Admin Customers
+
+    C->>FE: Enter phone, LOB, date, optional service/note
+    FE->>API: GET /api/ctv/client-lookup?phone=&lob=
+    API->>DB: SELECT partner by phone
+    API-->>FE: exists / claim status
+    C->>FE: Submit booking
+    FE->>API: POST /api/ctv/bookings
+    API->>DB: Resolve existing partner by clientId or phone
+    alt active claim owned by another CTV
+        API-->>FE: 400 B_CLIENT_CLAIMED
+    else new client
+        API->>DB: INSERT partners { customer=true, referred_by_ctv_id=CTV }
+    else existing accepted partner
+        API->>DB: UPDATE partners SET customer=true, referred_by_ctv_id=CTV
+    end
+    API->>DB: Create Referral Start card and appointment
+    API-->>FE: 201 { clientId, appointmentId }
+    Admin->>API: GET /api/cosmetic/Partners?search=<name or phone>
+    API-->>Admin: Client row appears because customer=true
+```
+
+**Data state transitions:**
+- Existing accepted partner row keeps the same UUID and gets `customer=true`.
+- `partners.referred_by_ctv_id` points to the submitting CTV.
+- New appointment row is created in the selected LOB database.
+
+**Invariants:** INV-001, INV-002, INV-006, INV-021.
+**Traceability:** Related UC: UC-022. Contracts/routes: `GET /api/ctv/client-lookup`, `POST /api/ctv/bookings`, `GET /api/Partners`, `GET /api/cosmetic/Partners`. Data/tables: `dbo.partners`, `dbo.appointments`. Tests: `api/src/routes/__tests__/ctvBookings.test.js`. Product-map domains: `ctv`, `cosmetic`, `cosmetic-clients`, `customers-partners`, `appointments-calendar`.

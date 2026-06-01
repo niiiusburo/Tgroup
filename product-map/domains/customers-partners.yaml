@@ -65,6 +65,7 @@ ui_invariants:
   - Customer list search must resolve customers by migrated customer ref, appointment number (`appointments.name`), and service/treatment order number (`saleorders.code` / `saleorders.name`).
   - Lightweight customer resolution uses `GET /api/Partners/resolve?key=` for UUID/ref/phone lookup and returns 404/409 payloads for no-match or ambiguous-match picker flows.
   - Customer-facing searches must be accent-insensitive for Vietnamese names so staff can type without diacritics.
+  - Existing partner rows accepted through CTV referral booking must be marked `customer=true`; otherwise `/customers` and `/api/Partners` correctly hide them from admin customer search.
   - Face registration for add/edit customer flows should collect straight, left, and right profile samples so recognition works when customers turn their head.
   - Customer profile assignment card and edit form must display the sales employee from `partners.salestaffid` / `salestaffname`, not the customer's `jobtitle` or other personal-detail fields.
   - Customer edit forms must resolve saved employee assignment IDs against all employees, including inactive migrated employees; active-only lists are for new selection defaults, not selected-value hydration.

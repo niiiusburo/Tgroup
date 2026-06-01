@@ -1,6 +1,5 @@
 'use strict';
 
-const express = require('express');
 const ctvRouter = require('../ctv');
 
 jest.mock('../../services/referralClaim', () => ({
@@ -34,13 +33,6 @@ const { getReferralClaimStatus } = require('../../services/referralClaim');
 const { createReferralStartCard } = require('../../services/referralCard');
 const { getDb } = require('../../db');
 
-function mockApp() {
-  const app = express();
-  app.use(express.json());
-  app.use('/ctv', ctvRouter);
-  return app;
-}
-
 describe('POST /ctv/bookings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -61,7 +53,6 @@ describe('POST /ctv/bookings', () => {
       expiresAt: new Date('2026-12-01'),
     });
 
-    const app = mockApp();
     const req = {
       method: 'POST',
       url: '/ctv/bookings',
@@ -139,6 +130,47 @@ describe('POST /ctv/bookings', () => {
     expect(res.statusCode).toBe(201);
     expect(res.jsonBody).toHaveProperty('clientId');
     expect(res.jsonBody).toHaveProperty('appointmentId');
+  });
+
+  test('marks an existing accepted partner as a customer so admin search can find it', async () => {
+    const dbMock = { queryRows: jest.fn(), query: jest.fn() };
+    getDb.mockReturnValue(dbMock);
+
+    dbMock.queryRows.mockResolvedValueOnce([{ id: 'existing-partner-id' }]);
+    dbMock.queryRows.mockResolvedValueOnce([{}]);
+    dbMock.queryRows.mockResolvedValueOnce([{ next_seq: 43 }]);
+    dbMock.queryRows.mockResolvedValueOnce([{}]);
+
+    getReferralClaimStatus.mockResolvedValueOnce({ active: false });
+    createReferralStartCard.mockResolvedValueOnce({ orderId: 'order-3' });
+
+    let handler;
+    ctvRouter.stack.forEach((layer) => {
+      if (layer.route && layer.route.path === '/bookings' && layer.route.methods.post) {
+        layer.route.stack.forEach((l) => { if (l.handle && typeof l.handle === 'function') handler = l.handle; });
+      }
+    });
+
+    const req = {
+      method: 'POST',
+      url: '/ctv/bookings',
+      body: { phone: '0123123123', name: 'thuan test', date: '2026-06-01', lob: 'cosmetic' },
+      user: { employeeId: 'ctv-me', is_ctv: true },
+    };
+    const res = {
+      statusCode: 200,
+      jsonBody: null,
+      status(code) { this.statusCode = code; return this; },
+      json(body) { this.jsonBody = body; return this; },
+    };
+
+    await handler(req, res);
+
+    expect(res.statusCode).toBe(201);
+    const updatePartner = dbMock.queryRows.mock.calls.find(([sql]) => /UPDATE dbo\.partners/.test(sql));
+    expect(updatePartner).toBeDefined();
+    expect(updatePartner[0]).toContain('customer = true');
+    expect(updatePartner[1]).toEqual(['ctv-me', 'existing-partner-id']);
   });
 
   test('persists the chosen service (productId) and trimmed note onto the appointment', async () => {

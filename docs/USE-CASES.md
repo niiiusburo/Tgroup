@@ -410,3 +410,25 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Postconditions:** Staff can inspect long migrated clinical notes without breaking dense profile layout.
 - **Invariants touched:** INV-015 (expandable overflow), INV-016 (i18n), INV-017 (dense list scroll).
 - **Traceability:** Related WF: WF-014. Contracts/routes: `GET /api/Partners/:id`, `GET /api/DotKhams`. Data/tables: `dbo.partners.medicalhistory`, `dbo.dotkhams`, `dbo.dotkhamsteps`. Tests: `website/src/components/customer/CustomerProfile.test.tsx`, `website/src/hooks/__tests__/useCustomerProfile.date-normalization.test.tsx`, no dedicated DotKham tooltip regression yet. Product-map domains: `customers-partners`, `services-catalog`, `payments-deposits` when DotKham allocations are shown.
+
+---
+
+## UC-022 — CTV Books Or Reclaims A Referred Client
+
+- **Actor:** CTV or admin acting for a CTV
+- **Trigger:** `/ctv` → `Giới thiệu khách` / refer-client booking sheet
+- **Preconditions:** Actor is authenticated as CTV or has CTV management access; target LOB is selected as Dental or Cosmetic; phone and date are present.
+- **Main flow:**
+  1. Actor enters client name, phone, appointment date, optional service, and optional note.
+  2. Frontend calls `GET /api/ctv/client-lookup?phone=<phone>&lob=<lob>` to show whether the phone exists and whether an active claim blocks the booking.
+  3. Actor submits → `POST /api/ctv/bookings`.
+  4. Backend resolves an existing partner by `clientId` or phone, or creates a new customer row in the selected LOB database.
+  5. If an existing partner row is accepted, backend sets `customer = true` and `referred_by_ctv_id = actor` before creating the appointment.
+  6. Backend creates the Referral Start card and appointment, validating the optional product against the selected LOB catalog.
+- **Alternate flows:**
+  - **AF-1 Claimed by another CTV:** API returns `400 B_CLIENT_CLAIMED` with owner/expires fields; no appointment is created.
+  - **AF-2 Unknown product or cross-LOB product:** API drops `productId` to null and still creates the booking.
+  - **AF-3 Existing employee/staff partner becomes a client:** The same partner identity is kept and `customer = true` makes the row visible in `/customers`.
+- **Postconditions:** The accepted client is searchable in admin Customers for the same LOB; appointment exists; the CTV claim/referrer pointer is updated.
+- **Invariants touched:** INV-001 (UUID identity), INV-002 (appointment name), INV-006 (search), INV-021 (CTV booking customer visibility).
+- **Traceability:** Related WF: WF-015. Contracts/routes: `GET /api/ctv/client-lookup`, `POST /api/ctv/bookings`, `GET /api/Partners`. Data/tables: `dbo.partners`, `dbo.appointments`, Referral Start sale-order/card tables. Tests: `api/src/routes/__tests__/ctvBookings.test.js`. Product-map domains: `ctv`, `cosmetic`, `cosmetic-clients`, `customers-partners`, `appointments-calendar`.
