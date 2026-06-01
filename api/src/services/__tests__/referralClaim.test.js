@@ -38,6 +38,24 @@ describe('referralClaim', () => {
       expect(result.ownerName).toBe('John Doe');
     });
 
+    it('uses the later of referral card, booking appointment, and paid service dates as anchor', () => {
+      const cardDate = new Date('2026-01-01');
+      const appointmentDate = new Date('2026-06-01');
+      const serviceDate = new Date('2026-03-15');
+
+      const result = computeClaim({
+        ownerCtvId: 'ctv-1',
+        ownerName: 'John Doe',
+        referralCardDate: cardDate,
+        bookingAppointmentDate: appointmentDate,
+        lastPaidServiceDate: serviceDate,
+        asOf: new Date('2026-06-02'),
+      });
+
+      expect(result.anchorDate).toEqual(appointmentDate);
+      expect(result.active).toBe(true);
+    });
+
     it('sets expiration to 6 months after anchor date', () => {
       const cardDate = new Date('2026-01-15');
 
@@ -153,6 +171,7 @@ describe('referralClaim', () => {
           .mockResolvedValueOnce([{ referred_by_ctv_id: 'ctv-1', owner_name: 'Owner' }]) // owner query
           .mockResolvedValueOnce([{ referral_start_product_id: 'product-1' }]) // settings query
           .mockResolvedValueOnce([{ d: null }]) // card query (no card)
+          .mockResolvedValueOnce([{ d: null }]) // appointment query
           .mockResolvedValueOnce([{ d: ownerDate }]) // payment query
       };
       const getDb = jest.fn().mockReturnValue(mockDb);
@@ -162,7 +181,7 @@ describe('referralClaim', () => {
         getDb: getDb,
       });
 
-      expect(mockDb.queryRows).toHaveBeenCalledTimes(4);
+      expect(mockDb.queryRows).toHaveBeenCalledTimes(5);
       expect(mockDb.queryRows.mock.calls[1][0]).toContain('commission_settings');
     });
 
@@ -174,6 +193,7 @@ describe('referralClaim', () => {
           .mockResolvedValueOnce([{ referred_by_ctv_id: 'ctv-1', owner_name: 'Owner' }]) // owner query
           .mockResolvedValueOnce([{ referral_start_product_id: 'product-1' }]) // settings query
           .mockResolvedValueOnce([{ d: cardDate }]) // card query (found)
+          .mockResolvedValueOnce([{ d: null }]) // appointment query
           .mockResolvedValueOnce([{ d: ownerDate }]) // payment query
       };
       const getDb = jest.fn().mockReturnValue(mockDb);
@@ -193,6 +213,7 @@ describe('referralClaim', () => {
         queryRows: jest.fn()
           .mockResolvedValueOnce([{ referred_by_ctv_id: 'ctv-1', owner_name: 'Owner' }])
           .mockResolvedValueOnce([{ referral_start_product_id: null }])
+          .mockResolvedValueOnce([{ d: null }])
           .mockResolvedValueOnce([{ d: paymentDate }])
       };
       const getDb = jest.fn().mockReturnValue(mockDb);
@@ -203,7 +224,28 @@ describe('referralClaim', () => {
       });
 
       expect(result.anchorDate).toEqual(paymentDate);
-      expect(mockDb.queryRows.mock.calls[2][0]).toContain('dbo.payments');
+      expect(mockDb.queryRows.mock.calls[3][0]).toContain('dbo.payments');
+    });
+
+    it('finds booking appointment date from appointments table', async () => {
+      const appointmentDate = new Date('2026-06-01T08:00:00.000Z');
+      const mockDb = {
+        queryRows: jest.fn()
+          .mockResolvedValueOnce([{ referred_by_ctv_id: 'ctv-1', owner_name: 'Owner' }])
+          .mockResolvedValueOnce([{ referral_start_product_id: null }])
+          .mockResolvedValueOnce([{ d: appointmentDate }])
+          .mockResolvedValueOnce([{ d: null }])
+      };
+      const getDb = jest.fn().mockReturnValue(mockDb);
+
+      const result = await getReferralClaimStatus('client-1', 'nk', {
+        asOf: new Date('2026-06-02'),
+        getDb: getDb,
+      });
+
+      expect(result.anchorDate).toEqual(appointmentDate);
+      expect(result.active).toBe(true);
+      expect(mockDb.queryRows.mock.calls[2][0]).toContain('dbo.appointments');
     });
 
     it('supports txClient for transaction context', async () => {
@@ -212,6 +254,7 @@ describe('referralClaim', () => {
         query: jest.fn()
           .mockResolvedValueOnce({ rows: [{ referred_by_ctv_id: 'ctv-1', owner_name: 'Owner' }] })
           .mockResolvedValueOnce({ rows: [{ referral_start_product_id: null }] })
+          .mockResolvedValueOnce({ rows: [{ d: null }] })
           .mockResolvedValueOnce({ rows: [{ d: ownerDate }] })
       };
 
@@ -221,7 +264,7 @@ describe('referralClaim', () => {
       });
 
       expect(result.ownerCtvId).toBe('ctv-1');
-      expect(txClient.query).toHaveBeenCalledTimes(3);
+      expect(txClient.query).toHaveBeenCalledTimes(4);
     });
 
     it('combines referral card and payment dates to find the later anchor', async () => {
@@ -232,6 +275,7 @@ describe('referralClaim', () => {
           .mockResolvedValueOnce([{ referred_by_ctv_id: 'ctv-1', owner_name: 'Owner' }])
           .mockResolvedValueOnce([{ referral_start_product_id: 'product-1' }])
           .mockResolvedValueOnce([{ d: cardDate }])
+          .mockResolvedValueOnce([{ d: null }])
           .mockResolvedValueOnce([{ d: paymentDate }])
       };
       const getDb = jest.fn().mockReturnValue(mockDb);

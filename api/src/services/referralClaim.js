@@ -8,12 +8,12 @@ function addMonths(date, months) {
   return d;
 }
 
-function computeClaim({ ownerCtvId, ownerName, referralCardDate, lastPaidServiceDate, asOf = new Date() }) {
+function computeClaim({ ownerCtvId, ownerName, referralCardDate, bookingAppointmentDate, lastPaidServiceDate, asOf = new Date() }) {
   if (!ownerCtvId) {
     return { ownerCtvId: null, ownerName: null, anchorDate: null, expiresAt: null, active: false };
   }
 
-  const dates = [referralCardDate, lastPaidServiceDate].filter(Boolean).map((d) => new Date(d));
+  const dates = [referralCardDate, bookingAppointmentDate, lastPaidServiceDate].filter(Boolean).map((d) => new Date(d));
   const anchorDate = dates.length ? new Date(Math.max(...dates.map((d) => d.getTime()))) : null;
   const expiresAt = anchorDate ? addMonths(anchorDate, 6) : null;
   const active = !!expiresAt && expiresAt.getTime() > new Date(asOf).getTime();
@@ -53,13 +53,19 @@ async function getReferralClaimStatus(clientId, lob, opts = {}) {
     referralCardDate = cardRows[0]?.d || null;
   }
 
+  const appointmentRows = await run(
+    `SELECT MAX(COALESCE(datecreated, date::timestamp)) AS d FROM dbo.appointments WHERE partnerid = $1`,
+    [clientId]
+  );
+  const bookingAppointmentDate = appointmentRows[0]?.d || null;
+
   const payRows = await run(
     `SELECT MAX(payment_date) AS d FROM dbo.payments WHERE customer_id = $1 AND amount > 0`,
     [clientId]
   );
   const lastPaidServiceDate = payRows[0]?.d || null;
 
-  return computeClaim({ ownerCtvId, ownerName: ownerRows[0]?.owner_name || null, referralCardDate, lastPaidServiceDate, asOf });
+  return computeClaim({ ownerCtvId, ownerName: ownerRows[0]?.owner_name || null, referralCardDate, bookingAppointmentDate, lastPaidServiceDate, asOf });
 }
 
 module.exports = { computeClaim, getReferralClaimStatus };

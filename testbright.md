@@ -10,6 +10,56 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK3 CTV appointment-only booking and name autofill 2026-06-01
+
+Feature/edit name: CTV refer-client available-name autofill and appointment-only booking
+
+Changed URLs and API routes:
+- `/ctv` refer-client booking sheet (`Giới thiệu khách`)
+- `GET /api/ctv/client-lookup?phone=&lob=`
+- `POST /api/ctv/bookings`
+
+Affected data flows:
+- Phone lookup still reads the selected Dental/Cosmetic database only.
+- If lookup returns an existing available client with a name, the modal pre-fills the name input without overwriting a manually typed name.
+- If lookup returns a client actively claimed by another CTV, the modal does not pre-fill the name and submit remains blocked by `B_CLIENT_CLAIMED`.
+- `POST /api/ctv/bookings` creates/reclaims the client, marks accepted existing partners `customer=true`, and creates a `dbo.appointments` row only.
+- Selected service stays as `appointments.productid`; booking must not create `dbo.saleorders`, `dbo.saleorderlines`, or a Referral Start/service card.
+- Referral-claim availability remains protected by using the booking appointment as the claim anchor.
+
+User roles:
+- CTV user on `/ctv`.
+- Admin/customer staff verifying the resulting client and appointment in the selected LOB.
+
+Happy paths:
+- Cosmetic available existing phone auto-fills the name and submits without retyping the client name.
+- Booking returns `201 { clientId, appointmentId }`, creates one appointment, and does not create a service card.
+- Existing accepted partner is still searchable in admin Customers because `customer=true` is set.
+
+Edge cases:
+- Active claim owned by another CTV does not auto-fill and still returns `B_CLIENT_CLAIMED`.
+- A manually typed name is not overwritten by a later lookup response.
+- Unknown or cross-LOB `productId` is dropped to null and the appointment still succeeds without a service card.
+
+Regressions:
+- Date still defaults to today's `Asia/Ho_Chi_Minh` date.
+- Dental and Cosmetic remain LOB-isolated.
+- CTV journey stage must not advance to serviced from a booking-only appointment.
+- Commission claim blocking still prevents another CTV from taking an active booking.
+
+Setup/login state:
+- Use NK3/TMV live CTV login state on `https://tmv.2checkin.com/ctv`.
+- Use an existing available Cosmetic phone for name-prefill proof; avoid submitting the user's real test booking before they retry.
+- Capture screenshot evidence for the autofilled name state and, after user-approved booking, verify appointment exists without a saleorder/service card.
+
+TestSprite execution items:
+- [ ] PENDING: Verify an available existing Cosmetic phone auto-fills the name field on `/ctv`.
+- [ ] PENDING: Verify a phone actively claimed by another CTV does not auto-fill the name and submit shows the claimed-client error.
+- [ ] PENDING: Submit a test booking and verify exactly one appointment row is created with no saleorder/saleorderline service card.
+- [ ] PENDING: Verify the client remains searchable in admin Customers for the selected LOB after booking.
+
+---
+
 # TestSprite Plan: NK3 CTV refer-client default date 2026-06-01
 
 Feature/edit name: CTV refer-client appointment date defaults to today
@@ -65,7 +115,7 @@ Affected data flows:
 - `POST /api/ctv/bookings` resolves an existing partner by `clientId` or phone in the selected LOB.
 - Accepted existing partner rows are updated with `customer = true` and `referred_by_ctv_id = current CTV`.
 - Admin Customers search continues to filter `dbo.partners.customer = true`, so the portal-accepted client becomes visible without creating a duplicate partner identity.
-- Appointment creation and Referral Start card creation remain in the selected Dental/Cosmetic database only.
+- Appointment creation remains in the selected Dental/Cosmetic database only; booking must not create a Referral Start/service card.
 
 User roles:
 - CTV user on `/ctv` can submit the referral booking.

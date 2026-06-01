@@ -61,6 +61,12 @@
 **Enforced by:** `api/src/routes/ctv.js` booking reclaim path and `api/src/routes/__tests__/ctvBookings.test.js`.
 **Cite when:** Editing CTV booking, partner phone lookup, referral claim, or admin customer search behavior.
 
+### INV-022 — CTV Booking Is Appointment-Only
+**Rule:** `POST /api/ctv/bookings` MUST create or reclaim the client and write `dbo.appointments` only. It MUST NOT create `dbo.saleorders` or `dbo.saleorderlines`; a selected service is metadata on `appointments.productid` until clinic staff convert the visit into an actual service card.
+**Rationale:** A booking is a scheduled appointment, not proof that the client already visited or received treatment. Creating a service card at booking time corrupts journey stage, service history, and operational status.
+**Enforced by:** `api/src/routes/ctv.js`, `api/src/routes/__tests__/ctvBookings.test.js`, and `api/src/services/referralClaim.js` using the booking appointment as a claim anchor.
+**Cite when:** Editing CTV booking, referral claim windows, service-card creation, appointment creation, or CTV journey stage logic.
+
 ---
 
 ## Auth & Permission Invariants
@@ -211,6 +217,7 @@
 
 | Date | ID | Action | Commit / PR |
 |---|---|---|---|
+| 2026-06-01 | INV-022 | Added appointment-only invariant for CTV booking flow | pending |
 | 2026-05-28 | INV-008C | Added import-marker-gated legacy CTV password and phone/ref-code login fallback invariant | pending |
 | 2026-05-13 | INV-001..INV-020 | Initial invariant set created | feat/complete-documentation-stack |
 | 2026-05-13 | INC-20260506-01, INC-20260506-02 | Incident-derived invariants added | feat/complete-documentation-stack |

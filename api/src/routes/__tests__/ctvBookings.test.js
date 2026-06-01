@@ -86,6 +86,7 @@ describe('POST /ctv/bookings', () => {
         ownerName: 'Other CTV',
       },
     });
+    expect(createReferralStartCard).not.toHaveBeenCalled();
   });
 
   test('creates booking for new client when no claim exists', async () => {
@@ -96,13 +97,12 @@ describe('POST /ctv/bookings', () => {
     dbMock.queryRows.mockResolvedValueOnce([]);
     // Step 3a: INSERT partner
     dbMock.queryRows.mockResolvedValueOnce([{ id: 'new-client-id' }]);
-    // Step 3c: appointment name seq
+    // Step 3b: appointment name seq
     dbMock.queryRows.mockResolvedValueOnce([{ next_seq: 42 }]);
-    // Step 3c: INSERT appointment
+    // Step 3b: INSERT appointment
     dbMock.queryRows.mockResolvedValueOnce([{}]);
 
     getReferralClaimStatus.mockResolvedValueOnce({ active: false });
-    createReferralStartCard.mockResolvedValueOnce({ orderId: 'order-1' });
 
     let handler;
     ctvRouter.stack.forEach((layer) => {
@@ -126,7 +126,8 @@ describe('POST /ctv/bookings', () => {
 
     await handler(req, res);
 
-    expect(createReferralStartCard).toHaveBeenCalled();
+    expect(createReferralStartCard).not.toHaveBeenCalled();
+    expect(dbMock.queryRows.mock.calls.some(([sql]) => /saleorders|saleorderlines/i.test(sql))).toBe(false);
     expect(res.statusCode).toBe(201);
     expect(res.jsonBody).toHaveProperty('clientId');
     expect(res.jsonBody).toHaveProperty('appointmentId');
@@ -142,7 +143,6 @@ describe('POST /ctv/bookings', () => {
     dbMock.queryRows.mockResolvedValueOnce([{}]);
 
     getReferralClaimStatus.mockResolvedValueOnce({ active: false });
-    createReferralStartCard.mockResolvedValueOnce({ orderId: 'order-3' });
 
     let handler;
     ctvRouter.stack.forEach((layer) => {
@@ -171,6 +171,7 @@ describe('POST /ctv/bookings', () => {
     expect(updatePartner).toBeDefined();
     expect(updatePartner[0]).toContain('customer = true');
     expect(updatePartner[1]).toEqual(['ctv-me', 'existing-partner-id']);
+    expect(createReferralStartCard).not.toHaveBeenCalled();
   });
 
   test('persists the chosen service (productId) and trimmed note onto the appointment', async () => {
@@ -184,7 +185,6 @@ describe('POST /ctv/bookings', () => {
     dbMock.queryRows.mockResolvedValueOnce([{}]); // INSERT appointment
 
     getReferralClaimStatus.mockResolvedValueOnce({ active: false });
-    createReferralStartCard.mockResolvedValueOnce({ orderId: 'order-1' });
 
     let handler;
     ctvRouter.stack.forEach((layer) => {
@@ -216,6 +216,7 @@ describe('POST /ctv/bookings', () => {
     await handler(req, res);
 
     expect(res.statusCode).toBe(201);
+    expect(createReferralStartCard).not.toHaveBeenCalled();
     const apptInsert = dbMock.queryRows.mock.calls.find(([sql]) => /INSERT INTO dbo\.appointments/.test(sql));
     expect(apptInsert).toBeDefined();
     const params = apptInsert[1];
@@ -234,7 +235,6 @@ describe('POST /ctv/bookings', () => {
     dbMock.queryRows.mockResolvedValueOnce([{}]); // INSERT appointment
 
     getReferralClaimStatus.mockResolvedValueOnce({ active: false });
-    createReferralStartCard.mockResolvedValueOnce({ orderId: 'order-2' });
 
     let handler;
     ctvRouter.stack.forEach((layer) => {
@@ -259,6 +259,7 @@ describe('POST /ctv/bookings', () => {
     await handler(req, res);
 
     expect(res.statusCode).toBe(201);
+    expect(createReferralStartCard).not.toHaveBeenCalled();
     const apptInsert = dbMock.queryRows.mock.calls.find(([sql]) => /INSERT INTO dbo\.appointments/.test(sql));
     expect(apptInsert[1][12]).toBeNull(); // productid dropped to null
   });

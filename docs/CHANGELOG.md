@@ -2,6 +2,12 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.86] — 2026-06-01 (nk3-deploy)
+### Fixed
+- **CTV refer-client booking is appointment-only and can prefill available existing names.** `/ctv` now fills the name field after `GET /api/ctv/client-lookup` finds an existing unclaimed client, without overwriting manual input. `POST /api/ctv/bookings` now creates/reclaims the client and inserts a `dbo.appointments` row only; selected service stays on `appointments.productid` and no Referral Start/service-card saleorder is created. Referral claims remain protected by using the booking appointment as the active-claim anchor. Preserves WF-015, UC-022, INV-021, and new INV-022. — @agent
+### Tested
+- `JWT_SECRET=test-secret npm --prefix api test -- --runInBand src/routes/__tests__/ctvBookings.test.js src/services/__tests__/referralClaim.test.js` (project Jest runner matched all API suites: 83 suites / 903 tests passed); `npm --prefix website test -- src/components/ctv/CtvReferModal.test.tsx` (4 tests passed); `npm --prefix website run build`; `npm run verify:governance`; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off api/src/routes/ctv.js api/src/services/referralClaim.js api/src/routes/__tests__/ctvBookings.test.js api/src/services/__tests__/referralClaim.test.js website/src/components/ctv/CtvReferModal.tsx website/src/components/ctv/CtvReferModal.test.tsx` (0 findings). — @agent
+
 ## [0.32.85] — 2026-06-01 (nk3-deploy)
 ### Fixed
 - **CTV refer-client sheet now defaults the appointment date to today in Vietnam time.** The `/ctv` `Giới thiệu khách` modal no longer opens with a blank required date field on mobile Safari, so CTVs can submit a booking without hitting `Vui lòng nhập đầy đủ thông tin` when the only missing value is the hidden/empty date input. Preserves WF-015 and UC-022. — @agent

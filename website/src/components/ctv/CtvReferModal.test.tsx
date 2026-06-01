@@ -61,4 +61,43 @@ describe('CtvReferModal', () => {
     });
     expect(screen.queryByText('Vui lòng nhập đầy đủ thông tin')).not.toBeInTheDocument();
   });
+
+  it('prefills the name when phone lookup finds an available existing client', async () => {
+    mockedLookupClientByPhone.mockResolvedValueOnce({
+      exists: true,
+      lob: 'cosmetic',
+      clientId: 'client-1',
+      name: 'thuan test',
+      claimed: false,
+      claimedByMe: false,
+    });
+    const { container } = render(<CtvReferModal open onClose={vi.fn()} onSuccess={vi.fn()} />);
+    const [nameInput, phoneInput] = Array.from(container.querySelectorAll('input')) as HTMLInputElement[];
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cosmetic' }));
+    fireEvent.change(phoneInput, { target: { value: '0123123123' } });
+
+    await waitFor(() => expect(mockedLookupClientByPhone).toHaveBeenCalledWith('0123123123', 'cosmetic'));
+    await waitFor(() => expect(nameInput).toHaveValue('thuan test'));
+  });
+
+  it('does not prefill the name when phone lookup says another CTV owns the client', async () => {
+    mockedLookupClientByPhone.mockResolvedValueOnce({
+      exists: true,
+      lob: 'cosmetic',
+      clientId: 'client-2',
+      name: 'claimed client',
+      claimed: true,
+      claimedByMe: false,
+      ownerName: 'Other CTV',
+    });
+    const { container } = render(<CtvReferModal open onClose={vi.fn()} onSuccess={vi.fn()} />);
+    const [nameInput, phoneInput] = Array.from(container.querySelectorAll('input')) as HTMLInputElement[];
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cosmetic' }));
+    fireEvent.change(phoneInput, { target: { value: '0999888777' } });
+
+    await waitFor(() => expect(mockedLookupClientByPhone).toHaveBeenCalledWith('0999888777', 'cosmetic'));
+    expect(nameInput).toHaveValue('');
+  });
 });

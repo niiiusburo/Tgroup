@@ -616,6 +616,9 @@ sequenceDiagram
     FE->>API: GET /api/ctv/client-lookup?phone=&lob=
     API->>DB: SELECT partner by phone
     API-->>FE: exists / claim status
+    opt exists and not claimed
+        FE->>FE: Prefill name from lookup result
+    end
     C->>FE: Submit booking
     FE->>API: POST /api/ctv/bookings
     API->>DB: Resolve existing partner by clientId or phone
@@ -626,7 +629,7 @@ sequenceDiagram
     else existing accepted partner
         API->>DB: UPDATE partners SET customer=true, referred_by_ctv_id=CTV
     end
-    API->>DB: Create Referral Start card and appointment
+    API->>DB: Create appointment only
     API-->>FE: 201 { clientId, appointmentId }
     Admin->>API: GET /api/cosmetic/Partners?search=<name or phone>
     API-->>Admin: Client row appears because customer=true
@@ -636,6 +639,7 @@ sequenceDiagram
 - Existing accepted partner row keeps the same UUID and gets `customer=true`.
 - `partners.referred_by_ctv_id` points to the submitting CTV.
 - New appointment row is created in the selected LOB database.
+- No `saleorders` or `saleorderlines` service card is created by this booking flow.
 - The CTV sheet initializes `date` to `Asia/Ho_Chi_Minh` today so mobile users do not submit an empty required appointment date.
 
 **Invariants:** INV-001, INV-002, INV-006, INV-021.

@@ -92,6 +92,6 @@
 - **Unknown:** Dental commission policy — do dental services ever earn non-zero commission? (column + engine in place, rates default 0%).
   - Evidence: v2 spec Open Questions #2; mechanism ready but policy TBD.
 
-- **CTV referral claim — admin force-reassign (PARKED):** When a client is actively claimed by CTV-A, an admin currently cannot reassign them to CTV-B (the booking gate blocks claiming, not ordinary admin appointments). A future admin override (reassign + reset the Referral Start anchor) is deferred. Also deferred: a UI to set `commission_settings.referral_start_product_id` (set via SQL for now) and lapse-warning notifications to CTVs. — 2026-05-23.
+- **CTV referral claim — admin force-reassign (PARKED):** When a client is actively claimed by CTV-A, an admin currently cannot reassign them to CTV-B (the booking gate blocks claiming, not ordinary admin appointments). A future admin override (reassign + reset the active-claim anchor) is deferred. Also deferred: a UI for legacy Referral Start configuration where still used outside booking, and lapse-warning notifications to CTVs. — 2026-05-23; updated 2026-06-01 after CTV booking became appointment-only.
 
 - **Note:** All unknowns above must be resolved before Phase 4 or explicitly parked in DECISIONS.md. Cosmetic LOB work must not touch legacy commission rules tables.

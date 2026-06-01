@@ -5,6 +5,7 @@ summary: |
   (service). Check-in flow and drag-to-reschedule are frontend features.
 owns:
   - api/src/routes/appointments.js
+  - api/src/routes/ctv.js (CTV booking creates appointments through POST /api/ctv/bookings)
   - website/src/pages/Calendar.tsx
   - website/src/pages/Appointments/index.tsx
   - website/src/components/calendar/
@@ -32,6 +33,7 @@ endpoints:
   - GET  /api/Appointments/:id
   - POST /api/Appointments
   - PUT  /api/Appointments/:id
+  - POST /api/ctv/bookings (CTV appointment-only booking path)
 ui_surfaces:
   - /calendar
   - TodaySchedule / TodayAppointments on Overview
@@ -59,6 +61,7 @@ invariants:
   - Appointment edit saves must persist changed clinic/location values by writing `appointments.companyid` and returning the refreshed `companyid/companyname`.
   - Appointment exports must serialize the same `appointments.date` calendar value shown in `/calendar`, include `time` when present, and allow phone searches through `partners.phone`.
   - Appointment customer selectors must search by customer code as well as name, phone, and email.
+  - CTV booking-created appointments must not create service cards; optional service selection is appointment metadata until a real saleorder is created.
 impact_tests:
   - api/src/routes/appointments/__tests__/readHandlers.test.js
   - api/src/routes/appointments/__tests__/mutationHandlers.test.js

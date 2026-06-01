@@ -51,11 +51,21 @@ export function CtvReferModal({ open, onClose, onSuccess }: CtvReferModalProps) 
       return;
     }
     let cancelled = false;
+    const lookupLob = form.lob;
     setLookup({ status: 'checking' });
     const id = setTimeout(async () => {
       try {
-        const r = await lookupClientByPhone(phone, form.lob);
-        if (!cancelled) setLookup({ status: 'done', result: r });
+        const r = await lookupClientByPhone(phone, lookupLob);
+        if (!cancelled) {
+          setLookup({ status: 'done', result: r });
+          const existingName = r.exists && !r.claimed ? r.name?.trim() : '';
+          if (existingName) {
+            setForm((current) => {
+              if (current.phone.trim() !== phone || current.lob !== lookupLob || current.name.trim()) return current;
+              return { ...current, name: existingName };
+            });
+          }
+        }
       } catch {
         if (!cancelled) setLookup({ status: 'idle' });
       }

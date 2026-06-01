@@ -9,7 +9,6 @@ const { requireAuth } = require('../middleware/auth');
 const { getDb } = require('../db');
 const { buildCtvNetwork, getCtvHierarchy } = require('../services/ctvNetwork');
 const { getReferralClaimStatus } = require('../services/referralClaim');
-const { createReferralStartCard } = require('../services/referralCard');
 const { isCtvUser } = require('./ctvHelpers');
 
 const router = express.Router();
@@ -827,7 +826,8 @@ router.get('/services', requireAuth, async (req, res) => {
 /**
  * POST /api/ctv/bookings
  * CTV books a client: resolve by phone → eligibility gate → create/reclaim client →
- * Referral Start card → appointment. Atomic within the handler (no explicit tx).
+ * appointment only. Booking must not create a saleorder/service card; actual
+ * service cards are reserved for completed clinic services.
  */
 router.post('/bookings', requireAuth, async (req, res) => {
   const { employeeId } = req.user || {};
@@ -899,10 +899,7 @@ router.post('/bookings', requireAuth, async (req, res) => {
       );
     }
 
-    // 3b. Referral Start card
-    await createReferralStartCard({ clientId, lob });
-
-    // 3c. Validate the chosen service belongs to THIS LOB's catalog. An unknown
+    // 3b. Validate the chosen service belongs to THIS LOB's catalog. An unknown
     // or cross-LOB productId is silently dropped (→ null) so a bad id never
     // breaks the booking via an FK violation; the appointment is still created.
     let validProductId = null;
@@ -911,7 +908,7 @@ router.post('/bookings', requireAuth, async (req, res) => {
       validProductId = prodRows[0]?.id || null;
     }
 
-    // 3d. Appointment — use canonical insert pattern
+    // 3c. Appointment — use canonical insert pattern
     const apptId = require('crypto').randomUUID();
     const nameResult = await safeQueryRows(db,
       "SELECT COALESCE(MAX(CAST(SUBSTRING(name FROM 3) AS INTEGER)), 0) + 1 AS next_seq FROM dbo.appointments WHERE name LIKE 'AP%'"
@@ -933,9 +930,6 @@ router.post('/bookings', requireAuth, async (req, res) => {
 
     return res.status(201).json({ clientId, appointmentId: apptId });
   } catch (e) {
-    if (e.code === 'REFERRAL_PRODUCT_NOT_CONFIGURED') {
-      return res.status(409).json({ error: { code: 'REFERRAL_PRODUCT_NOT_CONFIGURED', message: 'Admin must configure the Referral Start product first' } });
-    }
     console.error('[ctv POST /bookings] error:', e.message);
     return res.status(500).json({ error: 'Internal server error' });
   }
