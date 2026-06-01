@@ -12,9 +12,10 @@ import { fetchCommissionConfig, saveCommissionConfig, type CommissionConfig, typ
 import { ApiError } from '@/lib/api/core';
 import { EarningsTab, PayoutsTab } from '@/components/commission/EarningsPayoutsTabs';
 import { CtvManagementTab } from '@/components/commission/CtvManagementTab';
+import { NewClientsTab } from '@/components/commission/NewClientsTab';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
-type TabType = 'config' | 'ctvs' | 'earnings' | 'payouts';
+type TabType = 'config' | 'ctvs' | 'newClients' | 'earnings' | 'payouts';
 
 export function Commission() {
   const { t } = useTranslation('common');
@@ -34,6 +35,7 @@ export function Commission() {
         {[
           ['config', tc('tabs.config')],
           ['ctvs', tc('tabs.ctvs')],
+          ['newClients', tc('tabs.newClients')],
           ['earnings', tc('tabs.earnings')],
           ['payouts', tc('tabs.payouts')],
         ].map(([key, label]) => (
@@ -54,6 +56,7 @@ export function Commission() {
       {/* Tab content */}
       {activeTab === 'config' && <ConfigTab />}
       {activeTab === 'ctvs' && <CtvManagementTab />}
+      {activeTab === 'newClients' && <NewClientsTab />}
       {activeTab === 'earnings' && <EarningsTab />}
       {activeTab === 'payouts' && <PayoutsTab />}
     </div>

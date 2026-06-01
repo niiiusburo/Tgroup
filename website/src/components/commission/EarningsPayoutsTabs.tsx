@@ -1,8 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { CalendarDays } from 'lucide-react';
 import { fetchEarnings, fetchPayouts, createPayout, uploadPayoutReceipt, updatePayoutReceipt, type EarningsRow, type PayoutRow } from '@/lib/api/commission';
 import { ApiError, getUploadUrl } from '@/lib/api/core';
 import { useBusinessUnitOptional } from '@/contexts/BusinessUnitContext';
+import { useExport } from '@/hooks/useExport';
+import { ExportMenu } from '@/components/shared/ExportMenu';
+import { ExportPreviewModal } from '@/components/shared/ExportPreviewModal';
+import { ExportDateRangeModal } from '@/components/calendar/ExportDateRangeModal';
 
 function formatVnd(value: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value || 0);
@@ -19,13 +24,24 @@ function EarningsTab() {
   const [lob, setLob] = useState<'all' | 'dental' | 'cosmetic'>(
     businessUnit?.currentLOB === 'cosmetic' ? 'cosmetic' : 'dental'
   );
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [dateModalOpen, setDateModalOpen] = useState(false);
 
-  const handleLoad = async (currentLob?: 'all' | 'dental' | 'cosmetic') => {
+  const handleLoad = async (override?: { lob?: 'all' | 'dental' | 'cosmetic'; dateFrom?: string; dateTo?: string }) => {
     setLoading(true);
     setError(null);
     try {
-      const lobToUse = currentLob ?? lob;
-      const data = await fetchEarnings({ status: status || undefined, lob: lobToUse, limit: 100 });
+      const lobToUse = override?.lob ?? lob;
+      const fromToUse = override?.dateFrom ?? dateFrom;
+      const toToUse = override?.dateTo ?? dateTo;
+      const data = await fetchEarnings({
+        status: status || undefined,
+        lob: lobToUse,
+        dateFrom: fromToUse || undefined,
+        dateTo: toToUse || undefined,
+        limit: 100,
+      });
       setRows(data.items || []);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to load earnings');
@@ -38,9 +54,31 @@ function EarningsTab() {
   useEffect(() => {
     const next = businessUnit?.currentLOB === 'cosmetic' ? 'cosmetic' : 'dental';
     setLob(next);
-    handleLoad(next);
+    handleLoad({ lob: next });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [businessUnit?.currentLOB]);
+
+  const exportFilters = useMemo(
+    () => ({ lob, status: status || undefined, dateFrom: dateFrom || undefined, dateTo: dateTo || undefined }),
+    [lob, status, dateFrom, dateTo]
+  );
+  // ctv-earnings builder queries both LOB DBs → force the plain /api/Exports mount.
+  const exporter = useExport({ type: 'ctv-earnings', filters: exportFilters, lobOverride: 'dental' });
+
+  const handleDateApply = (from: string, to: string) => {
+    setDateFrom(from);
+    setDateTo(to);
+    setDateModalOpen(false);
+    handleLoad({ dateFrom: from, dateTo: to });
+  };
+
+  const clearDates = () => {
+    setDateFrom('');
+    setDateTo('');
+    handleLoad({ dateFrom: '', dateTo: '' });
+  };
+
+  const dateLabel = dateFrom || dateTo ? `${dateFrom || '…'} → ${dateTo || '…'}` : t('newClients.allDates');
 
   return (
     <div className="bg-white rounded-xl shadow-card p-6 space-y-4">
@@ -61,10 +99,26 @@ function EarningsTab() {
               <option value="cosmetic">Cosmetic</option>
             </select>
           </label>
+          <div className="text-sm text-gray-600">
+            <span className="block mb-1">{t('newClients.dateRange')}</span>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setDateModalOpen(true)} className="flex items-center gap-2 px-3 py-2 border rounded-lg hover:bg-gray-50 transition-colors">
+                <CalendarDays className="w-4 h-4 text-primary" />
+                <span>{dateLabel}</span>
+              </button>
+              {(dateFrom || dateTo) && (
+                <button onClick={clearDates} className="text-xs text-gray-500 hover:text-red-500">{tc('clear')}</button>
+              )}
+            </div>
+          </div>
         </div>
-        <button onClick={() => handleLoad()} className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-dark">{t('earnings.refresh')}</button>
+        <div className="flex items-center gap-2">
+          <ExportMenu onExport={exporter.handleDirectExport} onPreview={exporter.openPreview} loading={exporter.downloading} disabled={loading} />
+          <button onClick={() => handleLoad()} className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-dark">{t('earnings.refresh')}</button>
+        </div>
       </div>
       {error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">{error}</div>}
+      {exporter.error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">{exporter.error}</div>}
       {loading ? <div className="p-8 text-center text-gray-500">{t('earnings.loading')}</div> : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -80,6 +134,15 @@ function EarningsTab() {
           </table>
         </div>
       )}
+      <ExportDateRangeModal isOpen={dateModalOpen} onClose={() => setDateModalOpen(false)} onApply={handleDateApply} />
+      <ExportPreviewModal
+        isOpen={exporter.previewOpen}
+        onClose={exporter.closePreview}
+        onDownload={exporter.handleDownload}
+        preview={exporter.previewData}
+        loading={exporter.loading}
+        error={exporter.error}
+      />
     </div>
   );
 }
@@ -101,7 +164,28 @@ function PayoutsTab() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [dateModalOpen, setDateModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const exportFilters = useMemo(
+    () => ({ lob, dateFrom: dateFrom || undefined, dateTo: dateTo || undefined }),
+    [lob, dateFrom, dateTo]
+  );
+  // ctv-payouts builder queries both LOB DBs → force the plain /api/Exports mount.
+  const exporter = useExport({ type: 'ctv-payouts', filters: exportFilters, lobOverride: 'dental' });
+
+  const handleDateApply = (from: string, to: string) => {
+    setDateFrom(from);
+    setDateTo(to);
+    setDateModalOpen(false);
+  };
+  const clearDates = () => {
+    setDateFrom('');
+    setDateTo('');
+  };
+  const dateLabel = dateFrom || dateTo ? `${dateFrom || '…'} → ${dateTo || '…'}` : t('newClients.allDates');
 
   const handleLoad = async (currentLob?: 'dental' | 'cosmetic') => {
     setLoading(true); setError(null);
@@ -188,8 +272,24 @@ function PayoutsTab() {
               <option value="cosmetic">Cosmetic</option><option value="dental">Dental</option>
             </select>
           </label>
-          <button onClick={() => handleLoad()} className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200">{t('payouts.reload')}</button>
+          <div className="flex items-center gap-2">
+            <div className="text-sm text-gray-600">
+              <span className="block mb-1">{t('newClients.dateRange')}</span>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setDateModalOpen(true)} className="flex items-center gap-2 px-3 py-2 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <CalendarDays className="w-4 h-4 text-primary" />
+                  <span>{dateLabel}</span>
+                </button>
+                {(dateFrom || dateTo) && (
+                  <button onClick={clearDates} className="text-xs text-gray-500 hover:text-red-500">{tc('clear')}</button>
+                )}
+              </div>
+            </div>
+            <ExportMenu onExport={exporter.handleDirectExport} onPreview={exporter.openPreview} loading={exporter.downloading} disabled={loading} />
+            <button onClick={() => handleLoad()} className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200">{t('payouts.reload')}</button>
+          </div>
         </div>
+        {exporter.error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">{exporter.error}</div>}
         {error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">{error}</div>}
         <div className="grid md:grid-cols-[1fr_auto] gap-3 items-end">
           <label className="text-sm text-gray-600">{t('payouts.cycleLabel')}
@@ -263,6 +363,15 @@ function PayoutsTab() {
           </tbody>
         </table>
       </div>
+      <ExportDateRangeModal isOpen={dateModalOpen} onClose={() => setDateModalOpen(false)} onApply={handleDateApply} />
+      <ExportPreviewModal
+        isOpen={exporter.previewOpen}
+        onClose={exporter.closePreview}
+        onDownload={exporter.handleDownload}
+        preview={exporter.previewData}
+        loading={exporter.loading}
+        error={exporter.error}
+      />
     </div>
   );
 }
