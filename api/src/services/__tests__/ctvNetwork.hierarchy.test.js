@@ -119,3 +119,43 @@ describe('buildCtvHierarchy — downline earnings rollup + projected override', 
     expect(res.totals.overrideRatePct).toBe(0);
   });
 });
+
+describe('buildCtvHierarchy — corrupt back-edge / cycle guard', () => {
+  // Regression for the NK3 "Võ Thúy Quỳnh" bug: a new CTV (T) signed up under upline K,
+  // but one LOB DB had a corrupt back-edge making K also referred-by T (a 2-cycle, from a
+  // bad legacy hierarchy import). Without a guard, T's downline BFS walked up into K and
+  // inherited K's entire subtree. T must show ZERO downline.
+  test('a new CTV does NOT inherit its upline\'s downline through a back-edge cycle', () => {
+    const res = buildCtvHierarchy({
+      ctvId: 'T',
+      dentalCtvs: [
+        ctv('T', 'K'), // T's real upline is K
+        ctv('K', 'T'), // CORRUPT: back-edge makes K appear referred-by T
+        ctv('X', 'K'), // K's real downline
+        ctv('Y', 'K'),
+        ctv('Z', 'X'), // deeper under K
+      ],
+      cosmeticCtvs: [],
+      levelConfig: CONFIG,
+    });
+    expect(res.current.id).toBe('T');
+    expect(res.upline.map((u) => u.id)).toEqual(['K']); // K is correctly T's upline
+    expect(res.downline.map((d) => d.id)).toEqual([]); // …and is NOT pulled into T's downline
+    expect(res.totals.downlineCount).toBe(0);
+    expect(res.totals.directDownlineCount).toBe(0);
+    expect(res.current.directDownlineCount).toBe(0);
+  });
+
+  test('the upline K, viewed directly, still sees its full real downline', () => {
+    const res = buildCtvHierarchy({
+      ctvId: 'K',
+      dentalCtvs: [ctv('K'), ctv('T', 'K'), ctv('X', 'K'), ctv('Y', 'K'), ctv('Z', 'X')],
+      cosmeticCtvs: [],
+      levelConfig: CONFIG,
+    });
+    expect(res.upline).toEqual([]); // K is a root CTV
+    expect(new Set(res.downline.map((d) => d.id))).toEqual(new Set(['T', 'X', 'Y', 'Z']));
+    expect(res.totals.directDownlineCount).toBe(3); // T, X, Y are direct; Z is L2
+    expect(res.current.directDownlineCount).toBe(3);
+  });
+});
