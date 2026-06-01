@@ -2,6 +2,15 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.92] — 2026-06-01 (nk3-deploy)
+### Fixed
+- **CTV bookings are appointment-only again and name lookup fills available existing clients.** `POST /api/ctv/bookings` no longer calls `createReferralStartCard()` or writes `saleorders`/`saleorderlines`; selected services or the configured Referral Start product are stored only on `appointments.productid`. The CTV refer modal also pre-fills the name after phone lookup when the existing client is available and does not overwrite manual typing. Preserves INV-021 and INV-022. — @agent
+- **Service deletion now respects the CTV paid-out lock.** `DELETE /api/SaleOrderLines/:id` runs through `serviceReversal`: paid-out earnings block reversal; pending linked earnings get negative reversal rows; single-invoice payments are voided only when safe; mixed allocations or partially paid multi-line orders are rejected instead of silently corrupting residuals. New invariant INV-003B. — @agent
+### Changed
+- **Admin `/commission` now uses a five-step CTV workflow rail.** Config, CTVs, New Clients, Earnings, and Payouts are presented as a breadcrumb-style operational flow with clean date labels and explicit earned dates in earnings/payout tables. Website version bumped to `0.32.92`. — @agent
+### Tested
+- `JWT_SECRET=test-secret npx jest src/routes/__tests__/ctvBookings.test.js --runInBand`; `JWT_SECRET=test-secret npx jest src/services/__tests__/serviceReversal.test.js --runInBand`; `npm --prefix website test -- ServicePicker`; `npm --prefix website test -- CtvReferModal`; `npm --prefix website test -- EarningsPayoutsTabs`; `npm --prefix website run build`; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off <changed paths>` (0 findings); `npm run verify:governance`. Live verification still to run before deploy. — @agent
+
 ## [0.32.90] — 2026-06-01 (nk3-deploy)
 ### Fixed
 - **Customer outstanding balance now ignores deleted service cards.** `GET /api/CustomerBalance/:id` and its Cosmetic mirror exclude soft-deleted `dbo.saleorders` when summing residual debt, so deleting the last service line for a 6,000,000đ Cosmetic card removes that receivable from the customer profile balance instead of leaving a phantom amount owed. Preserves INV-023 and FM-20260601-03. — @agent

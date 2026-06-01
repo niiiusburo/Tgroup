@@ -245,12 +245,34 @@ When a use case is created or materially edited, add one compact `Traceability` 
   1. Actor finds payment in `PaymentHistory`.
   2. Clicks Void → confirmation modal.
   3. Confirms → `POST /api/Payments/:id/void`.
-  4. Current backend marks `status='voided'`, deletes payment allocation rows for that payment, and restores `saleorders.residual` or `dotkhams.amountresidual`.
+  4. Backend first checks linked CTV earnings; if commission is not paid out, it marks `status='voided'`, writes negative earnings reversals, deletes payment allocation rows for that payment, and restores `saleorders.residual` or `dotkhams.amountresidual`.
 - **Alternate flows:**
   - **AF-1 Already voided:** Button disabled; backend idempotent.
-- **Postconditions:** Payment status = `voided`; invoice or medical-record residual is restored by the current route.
-- **Invariants touched:** INV-003 (residual non-negative). Current route behavior diverges from INV-010's immutable-allocation wording; fix the invariant or route before treating void semantics as locked.
-- **Traceability:** Related WF: WF-003. Contracts/routes: `POST /api/Payments/:id/void`, `DELETE /api/Payments/:id` legacy destructive path. Data/tables: `dbo.payments`, `dbo.payment_allocations`, `dbo.saleorders`, `dbo.dotkhams`. Tests: `api/tests/readRoutePermissions.test.js`; backend void math coverage remains a known gap. Product-map domains: `payments-deposits`.
+  - **AF-2 Commission already paid out:** Backend returns `409 B_COMMISSION_PAID_OUT`; payment, allocations, residual, and earnings are unchanged.
+- **Postconditions:** Payment status = `voided`; invoice or medical-record residual is restored; CTV earnings net to zero unless the paid-out guard blocked the action.
+- **Invariants touched:** INV-003, INV-003A, INV-003B.
+- **Traceability:** Related WF: WF-003, WF-016. Contracts/routes: `POST /api/Payments/:id/void`, `DELETE /api/Payments/:id` legacy destructive path. Data/tables: `dbo.payments`, `dbo.payment_allocations`, `dbo.saleorders`, `dbo.dotkhams`, `dbo.earnings`. Tests: `api/src/services/__tests__/commissionEngine.test.js`, `api/tests/readRoutePermissions.test.js`; backend route-level void math coverage remains a known gap. Product-map domains: `payments-deposits`, `earnings-commissions`.
+
+---
+
+## UC-012A — Reverse A Service Line With CTV Commission Guard
+
+- **Actor:** Manager / Admin
+- **Trigger:** Customer service card -> remove service line
+- **Preconditions:** Service line exists; actor has `customers.edit` and `payment.void`.
+- **Main flow:**
+  1. Actor chooses to remove a service line.
+  2. Frontend calls `DELETE /api/SaleOrderLines/:id` or `DELETE /api/cosmetic/SaleOrderLines/:id`.
+  3. Backend locks the service line, order, linked payment allocations, and related earnings inside one transaction.
+  4. If the service is unpaid, backend soft-deletes the line and, when it was the last line, soft-deletes the parent saleorder.
+  5. If the service has a linked single-invoice payment and unpaid/pending earnings, backend writes negative earnings reversals, deletes that invoice allocation, restores residual, marks the payment `voided`, then soft-deletes the line/order.
+- **Alternate flows:**
+  - **AF-1 Paid-out commission:** Backend returns `409 B_COMMISSION_PAID_OUT`; no service/payment mutation.
+  - **AF-2 Mixed payment allocation:** Backend returns `409 B_PAYMENT_MIXED_ALLOCATIONS`; staff must void/resolve the payment first.
+  - **AF-3 Paid multi-line order:** Backend returns `409 B_SERVICE_PAYMENT_REQUIRES_ORDER_VOID`; staff must void/resolve the payment before deleting one line.
+- **Postconditions:** Service history, payment allocations, residuals, and CTV earnings remain reconcilable.
+- **Invariants touched:** INV-003, INV-003A, INV-003B, INV-010.
+- **Traceability:** Related WF: WF-016. Contracts/routes: `DELETE /api/SaleOrderLines/:id`, `DELETE /api/cosmetic/SaleOrderLines/:id`. Data/tables: `dbo.saleorderlines`, `dbo.saleorders`, `dbo.payments`, `dbo.payment_allocations`, `dbo.earnings`. Tests: `api/src/services/__tests__/serviceReversal.test.js`. Product-map domains: `payments-deposits`, `services-catalog`, `earnings-commissions`.
 
 ---
 

@@ -18,18 +18,12 @@ import { useExport } from '@/hooks/useExport';
 import { ExportMenu } from '@/components/shared/ExportMenu';
 import { ExportPreviewModal } from '@/components/shared/ExportPreviewModal';
 import { ExportDateRangeModal } from '@/components/calendar/ExportDateRangeModal';
+import { formatCommissionDate, formatCommissionDateRange } from './dateFormatting';
 
 const LOB_LABELS: Record<string, string> = { dental: 'Nha khoa', cosmetic: 'Thẩm mỹ' };
 
-function formatDateVN(value?: string): string {
-  if (!value) return '—';
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString('vi-VN');
-}
-
 export function NewClientsTab() {
-  const { t } = useTranslation('commission');
+  const { t, i18n } = useTranslation('commission');
   const { t: tc } = useTranslation('common');
   const businessUnit = useBusinessUnitOptional();
 
@@ -92,7 +86,12 @@ export function NewClientsTab() {
     handleLoad({ dateFrom: '', dateTo: '' });
   };
 
-  const dateLabel = dateFrom || dateTo ? `${dateFrom || '…'} → ${dateTo || '…'}` : t('newClients.allDates');
+  const dateLabel = formatCommissionDateRange(dateFrom, dateTo, {
+    allLabel: t('newClients.allDates'),
+    fromPrefix: t('date.fromPrefix'),
+    untilPrefix: t('date.untilPrefix'),
+    locale: i18n.language,
+  });
 
   return (
     <div className="bg-white rounded-xl shadow-card p-6 space-y-4">
@@ -203,7 +202,7 @@ export function NewClientsTab() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-gray-700">{LOB_LABELS[row.lob] || row.lob}</td>
-                  <td className="px-4 py-3 text-gray-700">{formatDateVN(row.referred_at)}</td>
+                  <td className="px-4 py-3 text-gray-700">{formatCommissionDate(row.referred_at, i18n.language)}</td>
                 </tr>
               ))}
             </tbody>

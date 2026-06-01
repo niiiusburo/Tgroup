@@ -5,6 +5,7 @@ import { Check, Loader2, X } from 'lucide-react';
 import { createBooking, fetchCtvServices, lookupClientByPhone, type CtvClientLookup, type CtvLob, type CtvServiceOption } from '@/lib/api/ctv';
 import { ApiError } from '@/lib/api/core';
 import { cn } from '@/lib/utils';
+import { ServicePicker } from './ServicePicker';
 
 interface CtvReferModalProps {
   readonly open: boolean;
@@ -51,17 +52,19 @@ export function CtvReferModal({ open, onClose, onSuccess }: CtvReferModalProps) 
       return;
     }
     let cancelled = false;
-    const lookupLob = form.lob;
     setLookup({ status: 'checking' });
     const id = setTimeout(async () => {
       try {
+        const lookupLob = form.lob;
         const r = await lookupClientByPhone(phone, lookupLob);
         if (!cancelled) {
           setLookup({ status: 'done', result: r });
           const existingName = r.exists && !r.claimed ? r.name?.trim() : '';
           if (existingName) {
             setForm((current) => {
-              if (current.phone.trim() !== phone || current.lob !== lookupLob || current.name.trim()) return current;
+              if (current.phone.trim() !== phone || current.lob !== lookupLob || current.name.trim()) {
+                return current;
+              }
               return { ...current, name: existingName };
             });
           }
@@ -225,21 +228,12 @@ export function CtvReferModal({ open, onClose, onSuccess }: CtvReferModalProps) 
 
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700">{t('forms.referClient.service')}</label>
-              <select
+              <ServicePicker
+                services={services}
                 value={form.serviceId}
-                onChange={(e) => setForm({ ...form, serviceId: e.target.value })}
-                disabled={servicesLoading}
-                className="w-full appearance-none rounded-xl border border-gray-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-60"
-              >
-                <option value="">
-                  {servicesLoading ? t('forms.referClient.serviceLoading') : t('forms.referClient.servicePlaceholder')}
-                </option>
-                {services.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
+                onChange={(serviceId) => setForm({ ...form, serviceId })}
+                loading={servicesLoading}
+              />
               {servicesError ? (
                 <p className="mt-1.5 text-xs font-medium text-amber-600">{t('forms.referClient.serviceError')}</p>
               ) : null}

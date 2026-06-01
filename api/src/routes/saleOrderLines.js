@@ -1,6 +1,7 @@
 const express = require('express');
-const { query } = require('../db');
+const { getQuery, pool } = require('../db');
 const { requirePermission } = require('../middleware/auth');
+const { reverseServiceLine, ServiceReversalError } = require('../services/serviceReversal');
 
 const router = express.Router();
 
@@ -18,6 +19,7 @@ const router = express.Router();
  */
 router.get('/', async (req, res) => {
   try {
+    const query = getQuery(req);
     const {
       offset = '0',
       limit = '20',
@@ -226,49 +228,30 @@ router.get('/', async (req, res) => {
  * Soft-deletes a service line. If this was the last active line on the
  * order, the parent sale order is also soft-deleted.
  */
-router.delete('/:id', requirePermission('customers.edit'), async (req, res) => {
+router.delete('/:id', requirePermission('customers.edit'), requirePermission('payment.void'), async (req, res) => {
+  const txPool = req.db || pool;
+  const client = await txPool.connect();
   try {
     const { id } = req.params;
-
-    const rows = await query(
-      `UPDATE saleorderlines
-       SET isdeleted = true,
-           lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
-       WHERE id = $1 AND isdeleted = false
-       RETURNING id, orderid`,
-      [id]
-    );
-
-    if (!rows || rows.length === 0) {
-      return res.status(404).json({ error: 'Sale order line not found' });
-    }
-
-    const orderId = rows[0].orderid;
-    let deletedOrder = false;
-
-    if (orderId) {
-      const countResult = await query(
-        'SELECT COUNT(*) AS count FROM saleorderlines WHERE orderid = $1 AND isdeleted = false',
-        [orderId]
-      );
-      const activeLineCount = parseInt(countResult[0]?.count || '0', 10);
-
-      if (activeLineCount === 0) {
-        await query(
-          `UPDATE saleorders
-           SET isdeleted = true,
-               lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
-           WHERE id = $1 AND isdeleted = false`,
-          [orderId]
-        );
-        deletedOrder = true;
-      }
-    }
-
-    return res.json({ success: true, id: rows[0].id, orderId, deletedOrder });
+    await client.query('BEGIN');
+    const result = await reverseServiceLine({ lineId: id, lob: req.lob || 'dental', txClient: client });
+    await client.query('COMMIT');
+    return res.json(result);
   } catch (err) {
+    try { await client.query('ROLLBACK'); } catch (_) {}
+    if (err instanceof ServiceReversalError) {
+      return res.status(err.status).json({
+        error: {
+          code: err.code,
+          message: err.message,
+          ...err.details,
+        },
+      });
+    }
     console.error('Error deleting sale order line:', err);
     return res.status(500).json({ error: err instanceof Error ? err.message : 'Unknown error' });
+  } finally {
+    client.release();
   }
 });
 

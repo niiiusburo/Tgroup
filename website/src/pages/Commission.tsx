@@ -13,14 +13,12 @@ import { ApiError } from '@/lib/api/core';
 import { EarningsTab, PayoutsTab } from '@/components/commission/EarningsPayoutsTabs';
 import { CtvManagementTab } from '@/components/commission/CtvManagementTab';
 import { NewClientsTab } from '@/components/commission/NewClientsTab';
+import { CommissionFlowTabs, type CommissionTabType } from '@/components/commission/CommissionFlowTabs';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
-
-type TabType = 'config' | 'ctvs' | 'newClients' | 'earnings' | 'payouts';
 
 export function Commission() {
   const { t } = useTranslation('common');
-  const { t: tc } = useTranslation('commission');
-  const [activeTab, setActiveTab] = useState<TabType>('config');
+  const [activeTab, setActiveTab] = useState<CommissionTabType>('config');
 
   return (
     <div className="space-y-6">
@@ -30,28 +28,7 @@ export function Commission() {
         icon={<Percent className="w-6 h-6 text-primary" />}
       />
 
-      {/* Segmented tab control */}
-      <div className="flex gap-2 bg-gray-100 rounded-lg p-1 w-fit">
-        {[
-          ['config', tc('tabs.config')],
-          ['ctvs', tc('tabs.ctvs')],
-          ['newClients', tc('tabs.newClients')],
-          ['earnings', tc('tabs.earnings')],
-          ['payouts', tc('tabs.payouts')],
-        ].map(([key, label]) => (
-          <button
-            key={key}
-            onClick={() => setActiveTab(key as TabType)}
-            className={`px-4 py-2 rounded-md font-medium text-sm transition-colors ${
-              activeTab === key
-                ? 'bg-white text-primary shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <CommissionFlowTabs activeTab={activeTab} onChange={setActiveTab} />
 
       {/* Tab content */}
       {activeTab === 'config' && <ConfigTab />}

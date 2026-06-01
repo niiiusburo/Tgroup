@@ -30,6 +30,7 @@
 | v1.0.15 | 2026-06-01 | CTV booking appointment location contract clarified: `companyId` remains optional on `/api/ctv/bookings`; the API resolves request company, CTV JWT company, then selected-LOB fallback company before any partner mutation. |
 | v1.0.16 | 2026-06-01 | CTV booking selected-LOB company fallback clarified: active company rows with QA/test/verify fixture names are deprioritized behind real clinic locations. |
 | v1.0.17 | 2026-06-01 | CustomerBalance outstanding-balance contract clarified: soft-deleted saleorders do not count as customer debt. |
+| v1.0.18 | 2026-06-01 | Service-line reversal contract clarified: `DELETE /api/SaleOrderLines/:id` is permissioned as customer edit + payment void, blocks paid-out CTV commissions, and only auto-voids linked payments when allocations are single-invoice and still unpaid. |
 
 ---
 
@@ -438,13 +439,13 @@ Frontend client payload:
 
 #### DELETE /api/Payments/:id
 **Auth:** Requires `payment.void`.
-**Effect:** Deletes the payment row and reverses linked payment allocations against `saleorders.residual` or `dotkhams.amountresidual`.
-**Response:** `{ success: true, id: string }`
+**Effect:** Blocks with `409 B_COMMISSION_PAID_OUT` when linked CTV earnings have `status='paid'` or `payout_id IS NOT NULL`. Otherwise reverses linked payment allocations against `saleorders.residual` or `dotkhams.amountresidual`; default soft mode writes negative earnings reversals and marks the payment `deleted`, while `?hard=true` removes pending earnings and the payment row.
+**Response:** `{ success: true, id: string, mode: 'soft' | 'hard' }`
 
 #### POST /api/Payments/:id/void
 **Auth:** Requires `payment.void`.
 **Body:** `{ reason?: string }`
-**Effect:** Marks payment `status = 'voided'` and reverses linked allocations.
+**Effect:** Blocks with `409 B_COMMISSION_PAID_OUT` when linked CTV earnings have already been paid out. Otherwise marks payment `status = 'voided'`, writes negative earnings reversals, deletes linked allocations, and restores residuals.
 
 #### POST /api/Payments/refund
 **Auth:** Requires `payment.refund`.
@@ -458,6 +459,13 @@ Frontend client payload:
 **Response:** `{ success: true, proofId: string }`
 
 Cosmetic mirror: `GET/POST/PATCH/DELETE /api/cosmetic/Payments...`, `/api/cosmetic/Payments/deposits`, and `/api/cosmetic/Payments/deposit-usage` use the same contract and operate only on cosmetic `dbo.payments` / `dbo.payment_allocations`.
+
+#### DELETE /api/SaleOrderLines/:id
+**Auth:** Requires `customers.edit` and `payment.void`.
+**Effect:** Soft-deletes the active service line. If it is the last active line, soft-deletes the parent saleorder. If linked payment allocations exist, the route first enforces the CTV paid-out guard, then only auto-voids linked payments when the deleted line is the last active line on the order and every affected payment is allocated solely to that saleorder.
+**Response 200:** `{ success: true, id: string, orderId: string | null, deletedOrder: boolean, voidedPayments: string[], reversedAllocationTotal: number, reversedEarningsCount: number }`
+**Error 409:** `B_COMMISSION_PAID_OUT`, `B_PAYMENT_MIXED_ALLOCATIONS`, or `B_SERVICE_PAYMENT_REQUIRES_ORDER_VOID`.
+Cosmetic mirror: `DELETE /api/cosmetic/SaleOrderLines/:id` uses the same contract against the cosmetic DB.
 
 #### GET /api/CustomerBalance/:id
 **Auth:** Authenticated route mounted through the app router.

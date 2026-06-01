@@ -8,13 +8,14 @@ import { useExport } from '@/hooks/useExport';
 import { ExportMenu } from '@/components/shared/ExportMenu';
 import { ExportPreviewModal } from '@/components/shared/ExportPreviewModal';
 import { ExportDateRangeModal } from '@/components/calendar/ExportDateRangeModal';
+import { formatCommissionDate, formatCommissionDateRange } from './dateFormatting';
 
 function formatVnd(value: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value || 0);
 }
 
 function EarningsTab() {
-  const { t } = useTranslation('commission');
+  const { t, i18n } = useTranslation('commission');
   const { t: tc } = useTranslation('common');
   const businessUnit = useBusinessUnitOptional();
   const [rows, setRows] = useState<EarningsRow[]>([]);
@@ -78,7 +79,12 @@ function EarningsTab() {
     handleLoad({ dateFrom: '', dateTo: '' });
   };
 
-  const dateLabel = dateFrom || dateTo ? `${dateFrom || '…'} → ${dateTo || '…'}` : t('newClients.allDates');
+  const dateLabel = formatCommissionDateRange(dateFrom, dateTo, {
+    allLabel: t('newClients.allDates'),
+    fromPrefix: t('date.fromPrefix'),
+    untilPrefix: t('date.untilPrefix'),
+    locale: i18n.language,
+  });
 
   return (
     <div className="bg-white rounded-xl shadow-card p-6 space-y-4">
@@ -123,13 +129,13 @@ function EarningsTab() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-y border-gray-200"><tr>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.ctv')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.client')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.service')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.lob')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.level')}</th><th className="text-right px-4 py-3 font-medium text-gray-600">{t('earnings.amount')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.status')}</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.ctv')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.client')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.service')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.lob')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.level')}</th><th className="text-right px-4 py-3 font-medium text-gray-600">{t('earnings.amount')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.earnedAt')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.status')}</th>
             </tr></thead>
             <tbody className="divide-y divide-gray-200">
               {rows.map((row) => <tr key={`${row.lob}-${row.id}`} className="hover:bg-gray-50">
-                <td className="px-4 py-3 font-medium text-gray-900">{row.recipient_name || row.recipient_partner_id}</td><td className="px-4 py-3 text-gray-700">{row.client_name || row.client_id || '—'}</td><td className="px-4 py-3 text-gray-700">{row.product_name || '—'}</td><td className="px-4 py-3 text-gray-700">{row.lob}</td><td className="px-4 py-3 text-gray-700">{row.level ?? '—'}</td><td className="px-4 py-3 text-right font-semibold">{formatVnd(row.amount)}</td><td className="px-4 py-3 text-gray-700">{row.status}</td>
+                <td className="px-4 py-3 font-medium text-gray-900">{row.recipient_name || row.recipient_partner_id}</td><td className="px-4 py-3 text-gray-700">{row.client_name || row.client_id || '-'}</td><td className="px-4 py-3 text-gray-700">{row.product_name || '-'}</td><td className="px-4 py-3 text-gray-700">{row.lob}</td><td className="px-4 py-3 text-gray-700">{row.level ?? '-'}</td><td className="px-4 py-3 text-right font-semibold">{formatVnd(row.amount)}</td><td className="px-4 py-3 text-gray-700">{formatCommissionDate(row.earned_at || row.created_at, i18n.language)}</td><td className="px-4 py-3 text-gray-700">{row.status}</td>
               </tr>)}
-              {rows.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">{t('earnings.noEarnings')}</td></tr>}
+              {rows.length === 0 && <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-500">{t('earnings.noEarnings')}</td></tr>}
             </tbody>
           </table>
         </div>
@@ -148,7 +154,7 @@ function EarningsTab() {
 }
 
 function PayoutsTab() {
-  const { t } = useTranslation('commission');
+  const { t, i18n } = useTranslation('commission');
   const { t: tc } = useTranslation('common');
   const businessUnit = useBusinessUnitOptional();
   const [payouts, setPayouts] = useState<PayoutRow[]>([]);
@@ -185,7 +191,12 @@ function PayoutsTab() {
     setDateFrom('');
     setDateTo('');
   };
-  const dateLabel = dateFrom || dateTo ? `${dateFrom || '…'} → ${dateTo || '…'}` : t('newClients.allDates');
+  const dateLabel = formatCommissionDateRange(dateFrom, dateTo, {
+    allLabel: t('newClients.allDates'),
+    fromPrefix: t('date.fromPrefix'),
+    untilPrefix: t('date.untilPrefix'),
+    locale: i18n.language,
+  });
 
   const handleLoad = async (currentLob?: 'dental' | 'cosmetic') => {
     setLoading(true); setError(null);
@@ -314,9 +325,9 @@ function PayoutsTab() {
         )}
         {loading ? <div className="p-8 text-center text-gray-500">{tc('loading')}</div> : (
           <div className="overflow-x-auto max-h-80">
-            <table className="w-full text-sm"><thead className="bg-gray-50 border-y border-gray-200"><tr><th className="px-4 py-3" /><th className="text-left px-4 py-3 font-medium text-gray-600">CTV</th><th className="text-left px-4 py-3 font-medium text-gray-600">Client</th><th className="text-right px-4 py-3 font-medium text-gray-600">Amount</th></tr></thead><tbody className="divide-y divide-gray-200">
-              {pending.map((e) => <tr key={e.id}><td className="px-4 py-3"><input type="checkbox" checked={selected.includes(e.id)} onChange={(ev) => setSelected((s) => ev.target.checked ? [...s, e.id] : s.filter((id) => id !== e.id))} /></td><td className="px-4 py-3">{e.recipient_name || e.recipient_partner_id}</td><td className="px-4 py-3">{e.client_name || '—'}</td><td className="px-4 py-3 text-right font-semibold">{formatVnd(e.amount)}</td></tr>)}
-              {pending.length === 0 && <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-500">{t('payouts.noPending')}</td></tr>}
+            <table className="w-full text-sm"><thead className="bg-gray-50 border-y border-gray-200"><tr><th className="px-4 py-3" /><th className="text-left px-4 py-3 font-medium text-gray-600">{t('payouts.ctv')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('payouts.client')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('payouts.earnedAt')}</th><th className="text-right px-4 py-3 font-medium text-gray-600">{t('payouts.amount')}</th></tr></thead><tbody className="divide-y divide-gray-200">
+              {pending.map((e) => <tr key={e.id}><td className="px-4 py-3"><input type="checkbox" checked={selected.includes(e.id)} onChange={(ev) => setSelected((s) => ev.target.checked ? [...s, e.id] : s.filter((id) => id !== e.id))} /></td><td className="px-4 py-3">{e.recipient_name || e.recipient_partner_id}</td><td className="px-4 py-3">{e.client_name || '-'}</td><td className="px-4 py-3 text-gray-700">{formatCommissionDate(e.earned_at || e.created_at, i18n.language)}</td><td className="px-4 py-3 text-right font-semibold">{formatVnd(e.amount)}</td></tr>)}
+              {pending.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-500">{t('payouts.noPending')}</td></tr>}
             </tbody></table>
           </div>
         )}
@@ -331,7 +342,7 @@ function PayoutsTab() {
                   <div className="flex items-center gap-3">
                     <div>
                       <div className="font-medium">{p.cycle_label}</div>
-                      <div className="text-xs text-gray-500">{p.lob} · {t('payouts.earningsCount', { count: p.earnings_count })} · {p.paid_at ? new Date(p.paid_at).toLocaleDateString('vi-VN') : '—'}</div>
+                      <div className="text-xs text-gray-500">{p.lob} · {t('payouts.earningsCount', { count: p.earnings_count })} · {p.paid_at ? formatCommissionDate(p.paid_at, i18n.language) : '-'}</div>
                     </div>
                   </div>
                 </td>

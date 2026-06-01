@@ -10,6 +10,21 @@
     "earnings": "Earnings",
     "payouts": "Payouts"
   },
+  "flow": {
+    "today": "Today",
+    "current": "Current",
+    "complete": "Ready",
+    "next": "Next",
+    "config": "Rules and levels",
+    "ctvs": "Partner network",
+    "newClients": "Referred clients",
+    "earnings": "Client-paid earnings",
+    "payouts": "Payout proof"
+  },
+  "date": {
+    "fromPrefix": "From",
+    "untilPrefix": "Until"
+  },
   "newClients": {
     "lob": "Field",
     "dateRange": "Date range",
@@ -88,6 +103,7 @@
     "service": "Service",
     "level": "Level",
     "amount": "Amount",
+    "earnedAt": "Earned on",
     "refresh": "Refresh",
     "loading": "Loading earnings...",
     "noEarnings": "No earnings found."
@@ -104,6 +120,10 @@
     "notesPlaceholder": "Optional notes",
     "receiptPhoto": "Receipt photo",
     "pendingEarnings": "Pending earnings",
+    "ctv": "CTV",
+    "client": "Client",
+    "earnedAt": "Earned on",
+    "amount": "Amount",
     "noPending": "No pending earnings for this LOB.",
     "recentCycles": "Recent payout cycles",
     "noCycles": "No payout cycles yet.",

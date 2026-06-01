@@ -6,10 +6,6 @@ jest.mock('../../services/referralClaim', () => ({
   getReferralClaimStatus: jest.fn(),
 }));
 
-jest.mock('../../services/referralCard', () => ({
-  createReferralStartCard: jest.fn(),
-}));
-
 jest.mock('../../db', () => {
   const mockQueryRows = jest.fn();
   const mockQuery = jest.fn((sql, params) => mockQueryRows(sql, params).then((rows) => ({ rows })));
@@ -30,7 +26,6 @@ jest.mock('../../services/permissionService', () => ({
 }));
 
 const { getReferralClaimStatus } = require('../../services/referralClaim');
-const { createReferralStartCard } = require('../../services/referralCard');
 const { getDb } = require('../../db');
 
 function getRouteHandler(path, method) {
@@ -92,7 +87,6 @@ describe('POST /ctv/bookings', () => {
         ownerName: 'Other CTV',
       },
     });
-    expect(createReferralStartCard).not.toHaveBeenCalled();
   });
 
   test('creates booking for new client when no claim exists', async () => {
@@ -109,7 +103,7 @@ describe('POST /ctv/bookings', () => {
     dbMock.queryRows.mockResolvedValueOnce([{ id: 'new-client-id' }]);
     // Step 3b: appointment name seq
     dbMock.queryRows.mockResolvedValueOnce([{ next_seq: 42 }]);
-    // Step 3b: INSERT appointment
+    // Step 3c: INSERT appointment
     dbMock.queryRows.mockResolvedValueOnce([{}]);
 
     getReferralClaimStatus.mockResolvedValueOnce({ active: false });
@@ -126,11 +120,12 @@ describe('POST /ctv/bookings', () => {
 
     await handler(req, res);
 
-    expect(createReferralStartCard).not.toHaveBeenCalled();
-    expect(dbMock.queryRows.mock.calls.some(([sql]) => /saleorders|saleorderlines/i.test(sql))).toBe(false);
     expect(res.statusCode).toBe(201);
     expect(res.jsonBody).toHaveProperty('clientId');
     expect(res.jsonBody).toHaveProperty('appointmentId');
+    const sqlCalls = dbMock.queryRows.mock.calls.map(([sql]) => sql);
+    expect(sqlCalls.some((sql) => /INSERT INTO dbo\.saleorders/i.test(sql))).toBe(false);
+    expect(sqlCalls.some((sql) => /INSERT INTO dbo\.saleorderlines/i.test(sql))).toBe(false);
     const apptInsert = dbMock.queryRows.mock.calls.find(([sql]) => /INSERT INTO dbo\.appointments/.test(sql));
     expect(apptInsert[1][6]).toBe('fallback-company');
     expect(apptInsert[1][12]).toBe('referral-start-prod');
@@ -162,11 +157,13 @@ describe('POST /ctv/bookings', () => {
     await handler(req, res);
 
     expect(res.statusCode).toBe(201);
+    const sqlCalls = dbMock.queryRows.mock.calls.map(([sql]) => sql);
+    expect(sqlCalls.some((sql) => /INSERT INTO dbo\.saleorders/i.test(sql))).toBe(false);
+    expect(sqlCalls.some((sql) => /INSERT INTO dbo\.saleorderlines/i.test(sql))).toBe(false);
     const updatePartner = dbMock.queryRows.mock.calls.find(([sql]) => /UPDATE dbo\.partners/.test(sql));
     expect(updatePartner).toBeDefined();
     expect(updatePartner[0]).toContain('customer = true');
     expect(updatePartner[1]).toEqual(['ctv-me', 'existing-partner-id']);
-    expect(createReferralStartCard).not.toHaveBeenCalled();
     const apptInsert = dbMock.queryRows.mock.calls.find(([sql]) => /INSERT INTO dbo\.appointments/.test(sql));
     expect(apptInsert[1][6]).toBe('fallback-company');
     expect(apptInsert[1][12]).toBe('referral-start-prod');
@@ -205,7 +202,6 @@ describe('POST /ctv/bookings', () => {
     await handler(req, res);
 
     expect(res.statusCode).toBe(201);
-    expect(createReferralStartCard).not.toHaveBeenCalled();
     const apptInsert = dbMock.queryRows.mock.calls.find(([sql]) => /INSERT INTO dbo\.appointments/.test(sql));
     expect(apptInsert).toBeDefined();
     const params = apptInsert[1];
@@ -240,7 +236,6 @@ describe('POST /ctv/bookings', () => {
     await handler(req, res);
 
     expect(res.statusCode).toBe(201);
-    expect(createReferralStartCard).not.toHaveBeenCalled();
     const apptInsert = dbMock.queryRows.mock.calls.find(([sql]) => /INSERT INTO dbo\.appointments/.test(sql));
     expect(apptInsert[1][6]).toBe('fallback-company');
     expect(apptInsert[1][12]).toBeNull(); // productid dropped to null
@@ -312,8 +307,8 @@ describe('GET /ctv/services', () => {
     const dbMock = { queryRows: jest.fn(), query: jest.fn() };
     getDb.mockReturnValue(dbMock);
     dbMock.queryRows.mockResolvedValueOnce([
-      { id: 's1', name: 'Tẩy trắng răng', price: '500000' },
-      { id: 's2', name: 'Niềng răng', price: null },
+      { id: 's1', name: 'Tẩy trắng răng', price: '500000', category_id: 'cat1', category_name: 'Whitening' },
+      { id: 's2', name: 'Niềng răng', price: null, category_id: null, category_name: null },
     ]);
 
     const handler = getRouteHandler('/services', 'get');
@@ -331,8 +326,8 @@ describe('GET /ctv/services', () => {
     expect(getDb).toHaveBeenCalledWith('cosmetic');
     expect(res.statusCode).toBe(200);
     expect(res.jsonBody.services).toEqual([
-      { id: 's1', name: 'Tẩy trắng răng', price: 500000 },
-      { id: 's2', name: 'Niềng răng', price: null },
+      { id: 's1', name: 'Tẩy trắng răng', price: 500000, category: { id: 'cat1', name: 'Whitening' } },
+      { id: 's2', name: 'Niềng răng', price: null, category: null },
     ]);
   });
 });
