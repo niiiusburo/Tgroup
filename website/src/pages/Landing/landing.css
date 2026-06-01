@@ -1,0 +1,265 @@
+/*
+ * Tâm Group landing page styles.
+ * Faithful port of the CTV affiliate app's standalone landing
+ * (ctv.thammyvientam.com `/` -> templates/landing.html).
+ *
+ * Every selector is scoped under `.tam-landing` so the generic class names
+ * (.btn, .logo, .stage, .actions) cannot collide with the rest of the app
+ * or Tailwind's global layer. The original `body` background lives on the
+ * `.tam-landing` root element here; the original `body::after` overlay
+ * becomes `.tam-landing::after`.
+ */
+
+.tam-landing,
+.tam-landing * { box-sizing: border-box; }
+
+.tam-landing {
+  position: relative;
+  min-height: 100vh;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  color: #6b5430;
+  background-color: #f4e5c2;
+  background-image:
+    radial-gradient(ellipse 90% 70% at 50% 18%, rgba(255, 244, 210, 0.95), rgba(250, 235, 200, 0) 55%),
+    radial-gradient(ellipse 55% 55% at 82% 60%, rgba(232, 195, 130, 0.55), rgba(232, 195, 130, 0) 60%),
+    radial-gradient(ellipse 60% 60% at 12% 92%, rgba(210, 165, 95, 0.45), rgba(210, 165, 95, 0) 60%),
+    radial-gradient(ellipse 120% 100% at 50% 50%, rgba(120, 80, 30, 0) 55%, rgba(110, 70, 20, 0.18) 100%),
+    linear-gradient(180deg, #fbf2d8 0%, #f4e1b4 55%, #e7cf94 100%);
+  overflow-x: hidden;
+}
+
+.tam-landing::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 248, 220, 0.45) 0%, rgba(255, 248, 220, 0) 18%),
+    linear-gradient(0deg, rgba(80, 50, 10, 0.18) 0%, rgba(80, 50, 10, 0) 22%);
+  z-index: 0;
+}
+
+.tam-landing .stage {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px 56px;
+  z-index: 1;
+}
+
+.tam-landing .halo {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  width: min(880px, 95vw);
+  height: min(880px, 95vw);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle,
+      rgba(255, 238, 185, 0.7) 0%,
+      rgba(255, 220, 145, 0.28) 35%,
+      rgba(255, 220, 145, 0) 65%);
+  filter: blur(22px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.tam-landing .logo-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  z-index: 1;
+}
+
+.tam-landing .logo {
+  width: min(520px, 78vw);
+  height: auto;
+  display: block;
+  filter:
+    saturate(1.12)
+    contrast(1.04)
+    drop-shadow(0 14px 30px rgba(180, 130, 40, 0.18));
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.tam-landing .actions {
+  width: min(420px, 92vw);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 32px;
+  margin-bottom: 24px;
+  z-index: 1;
+}
+
+.tam-landing .actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.tam-landing .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 56px;
+  padding: 14px 22px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.25s ease, filter 0.25s ease;
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.tam-landing .btn:hover { transform: translateY(-2px); }
+.tam-landing .btn:active { transform: translateY(0); }
+
+.tam-landing .btn::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    linear-gradient(180deg,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(255, 255, 255, 0.12) 22%,
+      rgba(255, 255, 255, 0) 45%,
+      rgba(0, 0, 0, 0) 65%,
+      rgba(0, 0, 0, 0.18) 100%);
+}
+
+.tam-landing .btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(115deg,
+    rgba(255, 255, 255, 0) 35%,
+    rgba(255, 255, 255, 0.35) 50%,
+    rgba(255, 255, 255, 0) 65%);
+  transform: translateX(-30%);
+  opacity: 0.5;
+  transition: transform 0.7s ease, opacity 0.3s ease;
+}
+.tam-landing .btn:hover::after {
+  transform: translateX(30%);
+  opacity: 0.85;
+}
+
+.tam-landing .btn > * { position: relative; z-index: 1; }
+
+.tam-landing .btn .icon-chip {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 250, 235, 0.45);
+  flex: 0 0 auto;
+}
+.tam-landing .btn svg {
+  width: 16px; height: 16px;
+  stroke: currentColor; fill: none;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+
+.tam-landing .btn-cream {
+  background:
+    linear-gradient(180deg,
+      #fffaea 0%,
+      #f7e8c2 28%,
+      #ead7a2 50%,
+      #f6e7bf 72%,
+      #fff5d8 100%);
+  color: #7a4d12;
+  border: 1px solid rgba(180, 135, 55, 0.55);
+  box-shadow:
+    0 14px 28px rgba(168, 117, 38, 0.18),
+    0 2px 4px rgba(168, 117, 38, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(140, 95, 25, 0.18);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.tam-landing .btn-cream .icon-chip {
+  background: linear-gradient(180deg, #fffbee 0%, #ecd9a2 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 135, 55, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.tam-landing .btn-cream:hover { filter: brightness(1.04); }
+
+.tam-landing .btn-copper {
+  background:
+    linear-gradient(180deg,
+      #e8b685 0%,
+      #c98a52 22%,
+      #a76330 48%,
+      #b87138 62%,
+      #8e4f22 88%,
+      #ad6c34 100%);
+  color: #fff5dc;
+  border: 1px solid rgba(255, 215, 170, 0.5);
+  box-shadow:
+    0 16px 30px rgba(140, 80, 25, 0.4),
+    0 2px 4px rgba(140, 80, 25, 0.2),
+    inset 0 1px 0 rgba(255, 230, 200, 0.55),
+    inset 0 -1px 0 rgba(60, 30, 5, 0.35);
+  text-shadow: 0 1px 1px rgba(80, 40, 10, 0.45);
+}
+.tam-landing .btn-copper .icon-chip {
+  background: linear-gradient(180deg, rgba(255, 235, 205, 0.4) 0%, rgba(160, 90, 35, 0.35) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 230, 200, 0.4),
+    inset 0 1px 0 rgba(255, 240, 215, 0.5);
+}
+
+.tam-landing .btn-bronze {
+  background:
+    linear-gradient(180deg,
+      #7a5a26 0%,
+      #4a3613 22%,
+      #2f2107 48%,
+      #4a3613 75%,
+      #6b4d1f 100%);
+  color: #f4d896;
+  border: 1px solid rgba(200, 160, 90, 0.55);
+  box-shadow:
+    0 16px 30px rgba(30, 20, 5, 0.5),
+    0 2px 4px rgba(30, 20, 5, 0.3),
+    inset 0 1px 0 rgba(220, 180, 110, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.55);
+}
+.tam-landing .btn-bronze .icon-chip {
+  background: linear-gradient(180deg, rgba(244, 216, 150, 0.22) 0%, rgba(30, 20, 5, 0.4) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(220, 180, 110, 0.4),
+    inset 0 1px 0 rgba(244, 216, 150, 0.3);
+}
+
+@media (max-width: 420px) {
+  .tam-landing .stage { padding: 32px 18px 40px; }
+  .tam-landing .logo { width: min(420px, 84vw); }
+  .tam-landing .actions { margin-top: 20px; }
+  .tam-landing .btn { font-size: 14.5px; min-height: 52px; padding: 12px 16px; gap: 8px; }
+  .tam-landing .btn .icon-chip { width: 26px; height: 26px; }
+}

@@ -6,6 +6,7 @@
 ### Fixed
 - **CTV bookings are appointment-only again and name lookup fills available existing clients.** `POST /api/ctv/bookings` no longer calls `createReferralStartCard()` or writes `saleorders`/`saleorderlines`; selected services or the configured Referral Start product are stored only on `appointments.productid`. The CTV refer modal also pre-fills the name after phone lookup when the existing client is available and does not overwrite manual typing. Preserves INV-021 and INV-022. — @agent
 - **Service deletion now respects the CTV paid-out lock.** `DELETE /api/SaleOrderLines/:id` runs through `serviceReversal`: paid-out earnings block reversal; pending linked earnings get negative reversal rows; single-invoice payments are voided only when safe; mixed allocations or partially paid multi-line orders are rejected instead of silently corrupting residuals. New invariant INV-003B. — @agent
+- **NK3 clean deploy builds include the existing `/welcome` Landing module.** The branch already referenced `@/pages/Landing`; the deployable bundle now includes the missing page module and export so clean worktrees do not fail TypeScript during build. — @agent
 ### Changed
 - **Admin `/commission` now uses a five-step CTV workflow rail.** Config, CTVs, New Clients, Earnings, and Payouts are presented as a breadcrumb-style operational flow with clean date labels and explicit earned dates in earnings/payout tables. Website version bumped to `0.32.92`. — @agent
 ### Tested

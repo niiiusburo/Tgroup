@@ -17,3 +17,4 @@ export { Notifications } from './Notifications';
 export { PermissionBoard } from './PermissionBoard';
 export { Login } from './Login';
 export { Payment } from './Payment';
+export { Landing } from './Landing';
