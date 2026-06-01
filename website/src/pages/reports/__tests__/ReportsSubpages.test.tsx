@@ -70,6 +70,9 @@ function getRevenueResponses() {
     { success: true, data: [
       { id: 'cat1', category: 'Răng sứ', lineCount: 15, revenue: 45000000 },
     ]},
+    { success: true, data: [
+      { id: 'source1', name: 'Facebook', orderCount: 3, paid: 1230000 },
+    ]},
     { success: true, data: {
       rules: [
         { key: 'servicePayments', label: 'Service payments', treatment: 'revenue' },
@@ -246,5 +249,16 @@ describe('Report subpages — error handling', () => {
       isDoctor: true,
       active: 'true',
     }));
+  });
+
+  it('renders revenue by source on the revenue report', async () => {
+    for (const resp of getRevenueResponses()) {
+      mockFetch.mockResolvedValueOnce(resp);
+    }
+
+    render(<ReportsRevenue />);
+
+    await screen.findByText('Doanh thu theo nguồn', undefined, { timeout: 3000 });
+    expect(screen.getByText('Facebook')).toBeInTheDocument();
   });
 });

@@ -2,6 +2,14 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.82] — 2026-06-01 (nk-feedback)
+### Fixed
+- **Customer profile saves no longer fail on migrated blank DOB parts.** The shared `@tgroup/contracts` partner schema now normalizes blank, `0`, and `"0"` birthday/birthmonth/birthyear values to `null` before validation, so unrelated edits on migrated customer records are not blocked while real invalid days/months still fail. — @agent
+### Added
+- **Revenue report now shows in-app revenue by customer source.** `/reports/revenue` calls `POST /api/Reports/revenue/by-source` and renders a `Doanh thu theo nguồn` card using the same posted service-payment recognition rules as the main revenue report, attributing by sale-order source first and customer source second. — @agent
+### Tested
+- `npm --prefix contracts run build`; `JWT_SECRET=test npm --prefix api test -- --runInBand src/routes/partners/__tests__/partnerValidation.test.js src/routes/reports/__tests__/revenueRecognition.test.js` (project script matched full API suite: 83 suites / 897 tests passed); `npm --prefix website test -- src/pages/reports/__tests__/ReportsSubpages.test.tsx` (23 tests passed); `npm --prefix website run build`; `npm run verify:docs`; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off contracts/partner.ts api/src/routes/reports/revenueBreakdowns.js website/src/pages/reports/ReportsRevenue.tsx` (0 findings); local Playwright screenshot `output/playwright/nk-feedback-fixes-20260601/reports-revenue-by-source-local.png`. — @agent
+
 ## [0.32.81] — 2026-05-31 (nk3-deploy)
 ### Fixed
 - **Cosmetic service catalog is visible to location-scoped staff.** `GET /api/Products` now treats `products.companyid IS NULL` as global when a branch `companyId` filter is selected, so a single-location cosmetic employee like `thuan test` can see the global cosmetic service catalog instead of an empty table. — @agent

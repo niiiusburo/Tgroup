@@ -23,6 +23,7 @@
 | v1.0.8 | 2026-05-28 | SaleOrders client contract now explicitly carries `sourceid?: UUID | null` and the frontend must only submit persisted active-LOB customer-source UUIDs. |
 | v1.0.9 | 2026-05-28 | `POST /api/Auth/login` accepts an email address for staff/admins or a legacy CTV phone/ref code for rows marked `legacy_ctv_import*`. |
 | v1.0.10 | 2026-05-29 | CTV portal adds hierarchy and LOB-aware client phone lookup contracts; admin CTV management supports full profile edits. |
+| v1.0.11 | 2026-06-01 | Partner create/update normalizes legacy zero/blank DOB parts to null; Revenue report adds source breakdown. |
 
 ---
 
@@ -293,13 +294,16 @@ Cosmetic mirror: `POST /api/cosmetic/Appointments` and `PUT /api/cosmetic/Appoin
   ref?: string | null;           // customer code
   saleStaffId?: string | null;   // assigned sales employee
   sourceId?: string | null;      // hidden in UI but stored
+  birthday?: number | null;      // blank, 0, or "0" normalizes to null
+  birthmonth?: number | null;    // blank, 0, or "0" normalizes to null
+  birthyear?: number | null;     // blank, 0, or "0" normalizes to null
   faceSubjectId?: string | null;
   // ... plus Odoo legacy fields
 }
 ```
 
 #### PUT /api/Partners/:id
-**Body:** Partial partner fields. `ref` cannot be changed after creation (enforced by backend).
+**Body:** Partial partner fields. `ref` cannot be changed after creation (enforced by backend). Optional DOB parts (`birthday`, `birthmonth`, `birthyear`) accept blank, `0`, or `"0"` as legacy missing values and normalize them to `null` before backend validation; real out-of-range days/months still fail validation.
 
 #### PATCH /api/Partners/:id/soft-delete
 **Effect:** Sets `isdeleted = true`. Requires `customers.delete`.
@@ -580,7 +584,7 @@ All current `/api/Reports` endpoints use `POST`, require `reports.view`, and ret
 ```
 Date-scoped endpoints accept `{ dateFrom?: 'YYYY-MM-DD'; dateTo?: 'YYYY-MM-DD'; companyId?: string }` unless noted.
 
-Revenue recognition rule: paid revenue counts posted payment allocations linked to saleorders plus direct posted `payments.payment_category = 'payment'` receipts with no `payment_allocations` row, including imported receipts whose `service_id` is still blank. Deposits, refunds, deposit usage, and voided payments are excluded. The by-location report includes a synthetic unassigned row for paid receipts that cannot yet be attributed to a company.
+Revenue recognition rule: paid revenue counts posted payment allocations linked to saleorders plus direct posted `payments.payment_category = 'payment'` receipts with no `payment_allocations` row, including imported receipts whose `service_id` is still blank. Deposits, refunds, deposit usage, and voided payments are excluded. The by-location report includes a synthetic unassigned row for paid receipts that cannot yet be attributed to a company. The by-source report attributes paid revenue by `COALESCE(saleorders.sourceid, partners.sourceid)` and includes an unassigned source row when no source is present.
 
 | Endpoint | Body | `data` shape |
 |---|---|---|
@@ -589,6 +593,7 @@ Revenue recognition rule: paid revenue counts posted payment allocations linked 
 | `/api/Reports/revenue/by-location` | Date scope | `{ id, name, orderCount, invoiced, paid, outstanding }[]` |
 | `/api/Reports/revenue/by-doctor` | Date scope | `{ id, name, orderCount, invoiced, paid }[]` |
 | `/api/Reports/revenue/by-category` | Date scope | `{ id, category, lineCount, revenue }[]` |
+| `/api/Reports/revenue/by-source` | Date scope | `{ id, name, orderCount, paid }[]` |
 | `/api/Reports/revenue/payment-plans` | Date scope | `{ plans: { status, count, total, downPayment }[]; installments: { status, count, total, paid }[] }` |
 | `/api/Reports/cash-flow/summary` | Date scope | `{ moneyIn, moneyOut, netCashFlow, internalDepositUsed, adjustments, categories[], trend[] }` |
 | `/api/Reports/appointments/summary` | Date scope | `{ total, done, cancelled, completionRate, cancellationRate, conversionRate, states[], repeatCustomers, newCustomers }` |

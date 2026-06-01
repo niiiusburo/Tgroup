@@ -117,6 +117,8 @@ PUT handler-level validation: `companyId` (when present) must be a UUID (`400 IN
 | PATCH | `/:id/soft-delete` | Perm:`customers.delete` | — | Soft-deleted partner |
 | DELETE | `/:id/hard-delete` | Perm:`customers.hard_delete` | — | Hard-deleted partner |
 
+Partner create/update contract note: optional `birthday`, `birthmonth`, and `birthyear` accept legacy missing values as blank, `0`, or `"0"` and normalize them to `null` before validation. Valid non-null day/month values remain bounded to real calendar ranges.
+
 ## Employees (`/api/Employees`)
 
 | Method | Path | Auth | Body / Query | Response |
@@ -247,7 +249,7 @@ Cosmetic LOB mirror: LOB-aware employee and location UI surfaces must call `GET 
 
 ## Reports (`/api/Reports`)
 
-Revenue paid totals count posted `payment_allocations` linked to saleorders plus direct posted service receipts with `payments.service_id IS NOT NULL` and no allocation rows. Deposits, refunds, deposit usage, unallocated wallet/customer payments without `service_id`, and voided rows are excluded.
+Revenue paid totals count posted `payment_allocations` linked to saleorders plus direct posted `payment_category = 'payment'` service receipts with no allocation rows yet. Deposits, refunds, deposit usage, and voided rows are excluded. Source attribution uses sale-order source first, then customer source fallback.
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
@@ -257,6 +259,7 @@ Revenue paid totals count posted `payment_allocations` linked to saleorders plus
 | POST | `/revenue/by-location` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: [{ id, name, orderCount, invoiced, paid, outstanding }] }` |
 | POST | `/revenue/by-doctor` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: [{ id, name, orderCount, invoiced, paid }] }` |
 | POST | `/revenue/by-category` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: [{ id, category, lineCount, revenue }] }` |
+| POST | `/revenue/by-source` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: [{ id, name, orderCount, paid }] }` |
 | POST | `/revenue/payment-plans` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { plans[], installments[] } }` |
 | POST | `/revenue/rules` | Perm:`reports.view` | — | Revenue recognition rule metadata |
 | POST | `/cash-flow/summary` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { moneyIn, moneyOut, netCashFlow, internalDepositUsed, adjustments, categories[], trend[] } }` |

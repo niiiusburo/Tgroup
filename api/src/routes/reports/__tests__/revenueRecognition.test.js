@@ -183,4 +183,31 @@ describe('reports revenue recognition', () => {
     expect(sql).toContain('ABS(COALESCE(sol.pricetotal, 0)) / lt.line_total');
     expect(sql).not.toContain('SUM(sol.pricetotal),0) as revenue');
   });
+
+  it('shows recognized paid revenue by customer source on the revenue report', async () => {
+    query.mockResolvedValueOnce([
+      { id: 'source-1', name: 'Facebook', order_count: '3', paid: '1230000' },
+      { id: 'unassigned', name: 'Chưa gán nguồn', order_count: '0', paid: '500000' },
+    ]);
+
+    const res = await request(makeApp())
+      .post('/api/Reports/revenue/by-source')
+      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual([
+      { id: 'source-1', name: 'Facebook', order_count: '3', orderCount: 3, paid: 1230000 },
+      { id: 'unassigned', name: 'Chưa gán nguồn', order_count: '0', orderCount: 0, paid: 500000 },
+    ]);
+
+    const sql = query.mock.calls[0][0];
+    expect(sql).toContain('allocated_service_payments AS');
+    expect(sql).toContain('direct_service_payments AS');
+    expect(sql).toContain('recognized_service_payments AS');
+    expect(sql).toContain('COALESCE(so.sourceid, customer.sourceid) AS sourceid');
+    expect(sql).toContain('LEFT JOIN dbo.customersources cs');
+    expect(sql).toContain('existing_pa.payment_id = p.id');
+    expect(sql).toContain("COALESCE(sk.sourceid::text, 'unassigned') as id");
+    expect(sql).toContain("COALESCE(cs.name, 'Chưa gán nguồn') as name");
+  });
 });

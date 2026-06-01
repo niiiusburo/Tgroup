@@ -10,6 +10,55 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK Employee Feedback Revenue Source + Customer Profile Save 2026-06-01
+
+Feature/edit name: Revenue-by-source card on Revenue report and legacy DOB validation fix for customer profile save
+
+Changed URLs and API routes:
+- `/reports/revenue`
+- `/customers/:id`
+- `POST /api/Reports/revenue/by-source`
+- `PUT /api/Partners/:id`
+- `PUT /api/cosmetic/Partners/:id` (same shared contract behavior)
+
+Affected data flows:
+- Revenue source breakdown uses recognized posted service revenue from payment allocations plus direct posted `payment_category = 'payment'` receipts with no allocation rows.
+- Source attribution uses `COALESCE(saleorders.sourceid, partners.sourceid)` and keeps an unassigned row for paid receipts with no source.
+- Customer profile create/update validation normalizes migrated blank/zero DOB parts to null before Zod validation.
+
+User roles:
+- Admin or reporting staff with `reports.view`.
+- Admin or clinic staff with `customers.edit`.
+
+Happy paths:
+- Open `/reports/revenue` and verify `Doanh thu theo nguồn` renders source bars from `POST /api/Reports/revenue/by-source`.
+- Export the source card CSV and verify source name, order count, and collected amount match the visible card.
+- Open migrated customer `/customers/c271050f-6f03-45ab-b7e6-b419008393be`, edit a non-DOB field, and save without `Number must be greater than or equal to 1`.
+
+Edge cases:
+- Source-specific sale order source wins over customer fallback source.
+- Unallocated direct receipts with no source appear under `Chưa gán nguồn`.
+- DOB day/month values above valid ranges still fail validation.
+- Empty string, `0`, and `"0"` DOB fields normalize to null on create/update.
+
+Regressions:
+- Existing revenue summary, trend, branch, doctor, category, cash-flow, and export controls still load.
+- Customer source remains hidden on the customer profile assignment card/edit form.
+- Customer phone overlap rules and LOB-aware cosmetic partner routing remain unchanged.
+
+Setup/login state:
+- Use NK admin login (`t@clinic.vn`) for production verification after deploy.
+- Use a customer with migrated DOB zero/blank values; reported example was `/customers/c271050f-6f03-45ab-b7e6-b419008393be`.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `/reports/revenue` shows `Doanh thu theo nguồn` with nonblank source rows for a date range with payments.
+- [ ] PENDING: Verify `POST /api/Reports/revenue/by-source` excludes deposits, refunds, deposit usage, and voided payments.
+- [ ] PENDING: Verify unassigned paid receipts appear as `Chưa gán nguồn`, not silently dropped.
+- [ ] PENDING: Verify customer profile save succeeds when legacy DOB fields are blank/0 and only unrelated fields are edited.
+- [ ] PENDING: Verify invalid real DOB values, such as day 32 or month 13, still show a validation error.
+
+---
+
 # TestSprite Plan: TMV NK3 service catalog + feedback fixes 2026-05-31
 
 Feature/edit name: Cosmetic employee service catalog visibility and unresolved feedback fixes

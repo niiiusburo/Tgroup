@@ -9,6 +9,11 @@ const optionalNullableUuid = z.preprocess(
   z.string().uuid().optional().nullable(),
 );
 
+const optionalNullableDatePart = (schema: z.ZodNumber) => z.preprocess(
+  (value) => value === "" || value === 0 || value === "0" ? null : value,
+  schema.optional().nullable(),
+);
+
 export const PartnerBaseSchema = z.object({
   id: z.string().uuid().optional(),
   name: z.string().min(1).max(255),
@@ -16,9 +21,9 @@ export const PartnerBaseSchema = z.object({
   email: z.string().email().optional().nullable(),
   companyid: optionalNullableUuid,
   gender: z.string().optional().nullable(),
-  birthday: z.coerce.number().int().min(1).max(31).optional().nullable(),
-  birthmonth: z.coerce.number().int().min(1).max(12).optional().nullable(),
-  birthyear: z.coerce.number().int().optional().nullable(),
+  birthday: optionalNullableDatePart(z.coerce.number().int().min(1).max(31)),
+  birthmonth: optionalNullableDatePart(z.coerce.number().int().min(1).max(12)),
+  birthyear: optionalNullableDatePart(z.coerce.number().int()),
   street: z.string().optional().nullable(),
   cityname: z.string().optional().nullable(),
   districtname: z.string().optional().nullable(),
