@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.32.91",
+    "date": "2026-06-01",
+    "commit": "pending",
+    "highlights": "New 'Khách hàng mới' (New Clients) tab lists CTV-referred leads with no paid service yet — phone shown for staff callbacks; Excel export + date filters added to New Clients, Thu nhập & Chi trả.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Added a 'Khách hàng mới' (New Clients) tab on the Commission page, between CTV and Thu nhập. It lists clients a CTV referred who have not yet used a paid service, with their phone number so staff can call and book them.",
+          "Excel export added to the New Clients, Thu nhập (Earnings) and Chi trả (Payouts) tabs — each export spans both dental & cosmetic.",
+          "Today / this-week date-range filters (like the Calendar) on New Clients, Thu nhập and Chi trả, scoping both the on-screen list and the Excel export."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.90",
     "date": "2026-06-01",
     "commit": "pending",

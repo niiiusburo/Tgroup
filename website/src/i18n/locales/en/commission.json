@@ -6,8 +6,23 @@
   "tabs": {
     "config": "Config",
     "ctvs": "CTV",
+    "newClients": "New Clients",
     "earnings": "Earnings",
     "payouts": "Payouts"
+  },
+  "newClients": {
+    "lob": "Field",
+    "dateRange": "Date range",
+    "allDates": "All",
+    "refresh": "Refresh",
+    "loading": "Loading new clients...",
+    "loadError": "Could not load new clients",
+    "empty": "No new clients yet (CTV-referred leads without a paid service).",
+    "count": "{{count}} clients",
+    "client": "Client",
+    "phone": "Phone",
+    "ctv": "Referred by",
+    "referredAt": "Referred on"
   },
   "config": {
     "globalReferralPercent": "Default referral percent",

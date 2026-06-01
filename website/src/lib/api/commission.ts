@@ -71,6 +71,29 @@ export interface PayoutsResponse {
   offset: number;
 }
 
+export interface NewClientRow {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  referred_at?: string;
+  referring_ctv_id?: string;
+  referring_ctv_name: string;
+  referring_ctv_phone: string;
+  lob: 'dental' | 'cosmetic';
+}
+
+export interface NewClientsResponse {
+  items: NewClientRow[];
+  totalItems: number;
+  limit: number;
+  offset: number;
+}
+
+export async function fetchNewClients(params: Record<string, string | number | undefined> = {}): Promise<NewClientsResponse> {
+  return apiFetch<NewClientsResponse>('/NewClients', { params });
+}
+
 export async function fetchEarnings(params: Record<string, string | number | undefined> = {}): Promise<EarningsResponse> {
   return apiFetch<EarningsResponse>('/Earnings', { params });
 }

@@ -8,6 +8,9 @@ const servicesExport = require('./builders/servicesExport');
 const paymentsExport = require('./builders/paymentsExport');
 const reportSalesEmployeesExport = require('./builders/reportSalesEmployeesExport');
 const legacyFlatReportsExport = require('./builders/legacyFlatReportsExport');
+const newClientsExport = require('./builders/newClientsExport');
+const ctvEarningsExport = require('./builders/ctvEarningsExport');
+const ctvPayoutsExport = require('./builders/ctvPayoutsExport');
 
 /**
  * Export Registry
@@ -78,6 +81,40 @@ const REGISTRY = {
       dateFrom: { type: 'string', default: '' },
       dateTo: { type: 'string', default: '' },
       status: { type: 'string', default: '' },
+    },
+  },
+  'new-clients': {
+    label: 'Khách hàng mới',
+    permission: 'commissions.view.team',
+    filename: () => buildFilename('KhachHangMoi'),
+    builder: newClientsExport,
+    filterSchema: {
+      lob: { type: 'string', default: 'all' },
+      dateFrom: { type: 'string', default: '' },
+      dateTo: { type: 'string', default: '' },
+    },
+  },
+  'ctv-earnings': {
+    label: 'Thu nhập CTV',
+    permission: 'commissions.view.team',
+    filename: () => buildFilename('ThuNhapCTV'),
+    builder: ctvEarningsExport,
+    filterSchema: {
+      lob: { type: 'string', default: 'all' },
+      status: { type: 'string', default: '' },
+      dateFrom: { type: 'string', default: '' },
+      dateTo: { type: 'string', default: '' },
+    },
+  },
+  'ctv-payouts': {
+    label: 'Chi trả CTV',
+    permission: 'commissions.payout.run',
+    filename: () => buildFilename('ChiTraCTV'),
+    builder: ctvPayoutsExport,
+    filterSchema: {
+      lob: { type: 'string', default: 'all' },
+      dateFrom: { type: 'string', default: '' },
+      dateTo: { type: 'string', default: '' },
     },
   },
   'report-sales-employees': {

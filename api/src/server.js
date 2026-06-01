@@ -61,6 +61,7 @@ const ctvRoutes = require('./routes/ctv');
 const ctvsRoutes = require('./routes/ctvs');
 const earningsRoutes = require('./routes/earnings');
 const payoutsRoutes = require('./routes/payouts');
+const newClientsRoutes = require('./routes/newClients');
 const {
   healthCheck: faceRecognitionHealth,
   getFaceRecognitionProvider,
@@ -179,6 +180,7 @@ app.use('/api/CommissionConfig', commissionConfigRoutes);
 app.use('/api/Ctvs', ctvsRoutes);
 app.use('/api/Earnings', earningsRoutes);
 app.use('/api/Payouts', payoutsRoutes);
+app.use('/api/NewClients', newClientsRoutes);
 app.use('/api/HrPayslips', hrPayslipsRoutes);
 app.use('/api/Employees', employeesRoutes);
 app.use('/api/Products', productsRoutes);

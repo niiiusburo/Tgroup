@@ -7,6 +7,13 @@ import type { ExportPreviewResponse } from '@/lib/api/exports';
 interface UseExportOptions {
   readonly type: string;
   readonly filters: Record<string, unknown>;
+  /**
+   * Force the LOB used for routing. Cross-LOB exports (e.g. CTV new-clients /
+   * earnings / payouts whose builders query both DBs) pass 'dental' so the
+   * request hits the plain /api/Exports mount instead of the cosmetic mirror,
+   * regardless of the active business unit. Omit to follow currentLOB.
+   */
+  readonly lobOverride?: 'dental' | 'cosmetic';
 }
 
 interface UseExportResult {
@@ -21,9 +28,10 @@ interface UseExportResult {
   readonly handleDirectExport: () => Promise<void>;
 }
 
-export function useExport({ type, filters }: UseExportOptions): UseExportResult {
+export function useExport({ type, filters, lobOverride }: UseExportOptions): UseExportResult {
   const { t } = useTranslation('exports');
-  const { currentLOB } = useBusinessUnit();
+  const { currentLOB: activeLOB } = useBusinessUnit();
+  const currentLOB = lobOverride ?? activeLOB;
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewData, setPreviewData] = useState<ExportPreviewResponse | null>(null);
   const [loading, setLoading] = useState(false);

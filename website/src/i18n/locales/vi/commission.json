@@ -6,8 +6,23 @@
   "tabs": {
     "config": "Cấu hình",
     "ctvs": "CTV",
+    "newClients": "Khách hàng mới",
     "earnings": "Thu nhập",
     "payouts": "Chi trả"
+  },
+  "newClients": {
+    "lob": "Lĩnh vực",
+    "dateRange": "Khoảng thời gian",
+    "allDates": "Tất cả",
+    "refresh": "Làm mới",
+    "loading": "Đang tải khách hàng mới...",
+    "loadError": "Không thể tải danh sách khách hàng mới",
+    "empty": "Chưa có khách hàng mới nào (khách được CTV giới thiệu nhưng chưa dùng dịch vụ).",
+    "count": "{{count}} khách hàng",
+    "client": "Khách hàng",
+    "phone": "Số điện thoại",
+    "ctv": "CTV giới thiệu",
+    "referredAt": "Ngày giới thiệu"
   },
   "config": {
     "globalReferralPercent": "Tỷ lệ giới thiệu mặc định",
