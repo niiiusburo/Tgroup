@@ -41,15 +41,17 @@ function mergeById(dCtvs, cCtvs, clientCounts, earnRows) {
 function buildCtvNetwork({ ctvId, dentalCtvs = [], cosmeticCtvs = [], dentalClientCounts = [], cosmeticClientCounts = [], dentalEarnings = [], cosmeticEarnings = [] }) {
   const byId = mergeById(dentalCtvs, cosmeticCtvs, [...dentalClientCounts, ...cosmeticClientCounts], [...dentalEarnings, ...cosmeticEarnings]);
   const root = byId.get(ctvId) || { id: ctvId, children: [] };
-  const visited = new Set();
+  // Cycle guard: pre-mark this CTV's direct upline as visited so a corrupt back-edge
+  // (upline.referred_by_ctv_id === ctvId) can't surface the upline as a descendant.
+  const visited = new Set(root.referred_by_ctv_id ? [root.referred_by_ctv_id] : []);
   function children(parentId, depth) {
     if (depth >= 5 || visited.has(parentId)) return [];
     visited.add(parentId);
     return Array.from(byId.values())
-      .filter((n) => n.referred_by_ctv_id === parentId)
+      .filter((n) => n.referred_by_ctv_id === parentId && !visited.has(n.id))
       .map((n) => ({ ...n, level: depth + 1, children: children(n.id, depth + 1) }));
   }
-  const direct = Array.from(byId.values()).filter((n) => n.referred_by_ctv_id === ctvId);
+  const direct = Array.from(byId.values()).filter((n) => n.referred_by_ctv_id === ctvId && n.id !== root.referred_by_ctv_id);
   const upline = root.referred_by_ctv_id && byId.has(root.referred_by_ctv_id) ? byId.get(root.referred_by_ctv_id) : null;
   return {
     self: { ...root, level: 0, children: undefined },
@@ -134,7 +136,10 @@ function buildCtvHierarchy(args) {
   const downline = [];
   let downlineEarningsBase = 0;
   let potentialOverride = 0;
-  const seen = new Set([ctvId]);
+  // Cycle guard: seed the visited set with this CTV *and its entire upline chain*, so a
+  // corrupt back-edge (an ancestor whose referred_by_ctv_id points back down at this CTV)
+  // can never drag the upline — and its whole subtree — into this CTV's downline.
+  const seen = new Set([ctvId, ...upline.map((u) => u.id)]);
   let frontier = [ctvId];
   let depth = 1;
   while (frontier.length && depth <= 5) {
@@ -165,12 +170,16 @@ function buildCtvHierarchy(args) {
     ? Math.round((potentialOverride / downlineEarningsBase) * 1000) / 10
     : Math.round(rateForDepth(1) * 10) / 10;
 
+  // Derive the direct count from the (cycle-safe) downline so it can never disagree with
+  // the rendered list (e.g. counting an ancestor back-edge as a "direct downline").
+  const directDownlineCount = downline.filter((d) => d.level === 1).length;
+
   return {
-    current: nodeOf(root, 0),
+    current: { ...nodeOf(root, 0), directDownlineCount },
     upline,
     downline,
     totals: {
-      directDownlineCount: directCountOf(ctvId),
+      directDownlineCount,
       downlineCount: downline.length,
       uplineCount: upline.length,
       downlineEarningsBase: Math.round(downlineEarningsBase),
