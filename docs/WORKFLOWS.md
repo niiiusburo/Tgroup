@@ -612,7 +612,7 @@ sequenceDiagram
     participant DB as Selected LOB DB
     participant Admin as Admin Customers
 
-    C->>FE: Enter phone, LOB, date, optional service/note
+    C->>FE: Enter phone, LOB, optional service/note; date defaults to today's Vietnam date
     FE->>API: GET /api/ctv/client-lookup?phone=&lob=
     API->>DB: SELECT partner by phone
     API-->>FE: exists / claim status
@@ -636,6 +636,7 @@ sequenceDiagram
 - Existing accepted partner row keeps the same UUID and gets `customer=true`.
 - `partners.referred_by_ctv_id` points to the submitting CTV.
 - New appointment row is created in the selected LOB database.
+- The CTV sheet initializes `date` to `Asia/Ho_Chi_Minh` today so mobile users do not submit an empty required appointment date.
 
 **Invariants:** INV-001, INV-002, INV-006, INV-021.
-**Traceability:** Related UC: UC-022. Contracts/routes: `GET /api/ctv/client-lookup`, `POST /api/ctv/bookings`, `GET /api/Partners`, `GET /api/cosmetic/Partners`. Data/tables: `dbo.partners`, `dbo.appointments`. Tests: `api/src/routes/__tests__/ctvBookings.test.js`. Product-map domains: `ctv`, `cosmetic`, `cosmetic-clients`, `customers-partners`, `appointments-calendar`.
+**Traceability:** Related UC: UC-022. Contracts/routes: `GET /api/ctv/client-lookup`, `POST /api/ctv/bookings`, `GET /api/Partners`, `GET /api/cosmetic/Partners`. Data/tables: `dbo.partners`, `dbo.appointments`. Tests: `api/src/routes/__tests__/ctvBookings.test.js`, `website/src/components/ctv/CtvReferModal.test.tsx`. Product-map domains: `ctv`, `cosmetic`, `cosmetic-clients`, `customers-partners`, `appointments-calendar`.

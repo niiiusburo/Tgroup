@@ -10,6 +10,44 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK3 CTV refer-client default date 2026-06-01
+
+Feature/edit name: CTV refer-client appointment date defaults to today
+
+Changed URLs and API routes:
+- `/ctv` refer-client booking sheet (`Giới thiệu khách`)
+- `POST /api/ctv/bookings` (same payload contract, now reached because the required `date` field is prefilled)
+
+Affected data flows:
+- The CTV modal initializes `date` to today's `Asia/Ho_Chi_Minh` calendar date when it opens.
+- Submitting a valid name/phone/LOB without manually touching the date input sends that default date to `POST /api/ctv/bookings`.
+
+User roles:
+- CTV user on `/ctv`.
+
+Happy paths:
+- Open the refer-client sheet on mobile Safari and verify the `Ngày hẹn` field displays today's date.
+- Enter `thuan test`, `0123123123`, select Cosmetic, add a note, and submit without changing the date; booking should proceed instead of showing `Vui lòng nhập đầy đủ thông tin`.
+
+Edge cases:
+- If a user clears the date manually, the existing required-field validation should still block submit.
+- Reopening the sheet after a successful booking should show a fresh today default.
+
+Regressions:
+- Phone lookup and `B_CLIENT_CLAIMED` blocking still work.
+- Optional service and note fields still submit when present.
+
+Setup/login state:
+- Use NK3/TMV live CTV login state on `https://tmv.2checkin.com/ctv`.
+- Capture screenshot evidence of the date-filled sheet and the successful/accepted booking state.
+
+TestSprite execution items:
+- [ ] PENDING: Verify mobile `/ctv` sheet opens with today's date visible in `Ngày hẹn`.
+- [ ] PENDING: Submit the Cosmetic `thuan test / 0123123123` booking without manually selecting a date and verify no required-field error appears.
+- [ ] PENDING: Verify a manually cleared date still blocks with `Vui lòng nhập đầy đủ thông tin`.
+
+---
+
 # TestSprite Plan: NK3 CTV booking accepted customer search 2026-06-01
 
 Feature/edit name: CTV referral booking makes accepted existing clients searchable in admin Customers

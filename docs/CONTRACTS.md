@@ -24,6 +24,7 @@
 | v1.0.9 | 2026-05-28 | `POST /api/Auth/login` accepts an email address for staff/admins or a legacy CTV phone/ref code for rows marked `legacy_ctv_import*`. |
 | v1.0.10 | 2026-05-29 | CTV portal adds hierarchy and LOB-aware client phone lookup contracts; admin CTV management supports full profile edits. |
 | v1.0.11 | 2026-06-01 | Partner create/update normalizes legacy zero/blank DOB parts to null; Revenue report adds source breakdown. |
+| v1.0.12 | 2026-06-01 | CTV booking client behavior clarified: `date` remains required by `POST /api/ctv/bookings`; the CTV refer-client UI pre-fills it with today's Asia/Ho_Chi_Minh date. |
 
 ---
 
@@ -148,6 +149,7 @@ This route is read-only. The authoritative referral-claim gate still runs on `PO
 #### POST /api/ctv/bookings
 **Request:** `clientId?`, `name?`, `phone`, `lob`, `date`, optional `time`, `companyId`, `productId`.
 **Response 201:** `{ clientId: string; appointmentId: string }`.
+`date` remains a required API field. The first-party CTV refer-client sheet supplies today's `Asia/Ho_Chi_Minh` date by default so mobile users do not submit a blank appointment date.
 When an existing partner row is accepted or reclaimed, the route updates that same row with `customer = true` before creating the appointment so the client is visible through admin customer search in the selected LOB.
 **Error 400:** active claims owned by another CTV return:
 ```ts

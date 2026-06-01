@@ -12,11 +12,24 @@ interface CtvReferModalProps {
   readonly onSuccess: () => void;
 }
 
-const EMPTY = { name: '', phone: '', date: '', lob: 'dental' as CtvLob, serviceId: '', note: '' };
+function getVietnamDateInputValue(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const byType = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${byType.year}-${byType.month}-${byType.day}`;
+}
+
+function createEmptyForm() {
+  return { name: '', phone: '', date: getVietnamDateInputValue(), lob: 'dental' as CtvLob, serviceId: '', note: '' };
+}
 
 export function CtvReferModal({ open, onClose, onSuccess }: CtvReferModalProps) {
   const { t } = useTranslation('ctv');
-  const [form, setForm] = useState(EMPTY);
+  const [form, setForm] = useState(createEmptyForm);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -24,6 +37,11 @@ export function CtvReferModal({ open, onClose, onSuccess }: CtvReferModalProps) 
   const [services, setServices] = useState<CtvServiceOption[]>([]);
   const [servicesLoading, setServicesLoading] = useState(false);
   const [servicesError, setServicesError] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setForm((current) => (current.date ? current : { ...current, date: getVietnamDateInputValue() }));
+  }, [open]);
 
   // Live phone cross-check against the CHOSEN LOB's database (debounced).
   useEffect(() => {
@@ -102,7 +120,7 @@ export function CtvReferModal({ open, onClose, onSuccess }: CtvReferModalProps) 
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
-        setForm(EMPTY);
+        setForm(createEmptyForm());
         setLookup({ status: 'idle' });
         onSuccess();
         onClose();

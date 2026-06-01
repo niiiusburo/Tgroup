@@ -2,6 +2,12 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.85] — 2026-06-01 (nk3-deploy)
+### Fixed
+- **CTV refer-client sheet now defaults the appointment date to today in Vietnam time.** The `/ctv` `Giới thiệu khách` modal no longer opens with a blank required date field on mobile Safari, so CTVs can submit a booking without hitting `Vui lòng nhập đầy đủ thông tin` when the only missing value is the hidden/empty date input. Preserves WF-015 and UC-022. — @agent
+### Tested
+- `npm --prefix website test -- src/components/ctv/CtvReferModal.test.tsx` (2 tests passed). — @agent
+
 ## [0.32.84] — 2026-06-01 (nk3-deploy)
 ### Fixed
 - **CTV bookings now make accepted existing partners visible in admin Customers.** `POST /api/ctv/bookings` now sets `dbo.partners.customer = true` when it reclaims/books an existing partner row, preserving the single partner identity while ensuring `/customers` and `GET /api/cosmetic/Partners?search=` can find portal-accepted clients such as the NK3 `thuan test` Cosmetic case. Preserves INV-001, INV-006, and new INV-021. — @agent

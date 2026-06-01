@@ -74,6 +74,7 @@ impact_tests:
   - Legacy CTV import dry-run reports planned/skipped counts and writes an audit before any confirmed DB write
   - commission-summary returns live aggregated numbers from both DB earnings tables for the CTV's recipient_partner_id
   - Referred clients show correct LOB tags and status
+  - Refer-client sheet defaults the appointment date to today's Asia/Ho_Chi_Minh date and submits without a manual date tap
 risk_level: high (only cross-DB surface)
 notes:
   - "D13 live demo: seed a CTV partner + referred patient + collected payment in dental and/or cosmetic; verify earnings row + CTV dashboard shows it."
