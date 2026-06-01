@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PartnerUpdateSchema = exports.PartnerCreateSchema = exports.PartnerBaseSchema = void 0;
 const zod_1 = require("zod");
 const optionalNullableUuid = zod_1.z.preprocess((value) => value === "" ? null : value, zod_1.z.string().uuid().optional().nullable());
+const optionalNullableDatePart = (schema) => zod_1.z.preprocess((value) => value === "" || value === 0 || value === "0" ? null : value, schema.optional().nullable());
 exports.PartnerBaseSchema = zod_1.z.object({
     id: zod_1.z.string().uuid().optional(),
     name: zod_1.z.string().min(1).max(255),
@@ -13,9 +14,9 @@ exports.PartnerBaseSchema = zod_1.z.object({
     email: zod_1.z.string().email().optional().nullable(),
     companyid: optionalNullableUuid,
     gender: zod_1.z.string().optional().nullable(),
-    birthday: zod_1.z.coerce.number().int().min(1).max(31).optional().nullable(),
-    birthmonth: zod_1.z.coerce.number().int().min(1).max(12).optional().nullable(),
-    birthyear: zod_1.z.coerce.number().int().optional().nullable(),
+    birthday: optionalNullableDatePart(zod_1.z.coerce.number().int().min(1).max(31)),
+    birthmonth: optionalNullableDatePart(zod_1.z.coerce.number().int().min(1).max(12)),
+    birthyear: optionalNullableDatePart(zod_1.z.coerce.number().int()),
     street: zod_1.z.string().optional().nullable(),
     cityname: zod_1.z.string().optional().nullable(),
     districtname: zod_1.z.string().optional().nullable(),

@@ -19,6 +19,7 @@ type RevTrend = { month: string; orderCount: number; invoiced: number; paid: num
 type RevByLoc = { id: string; name: string; orderCount: number; invoiced: number; paid: number; outstanding: number }[]
 type RevByDoc = { id: string; name: string; orderCount: number; invoiced: number; paid: number }[]
 type RevByCat = { id: string; category: string; lineCount: number; revenue: number }[]
+type RevBySource = { id: string; name: string; orderCount: number; paid: number }[]
 type RevenueRule = { key: string; label?: string; treatment: string }
 type CashFlowCategory = { key: string; direction: string; count: number; amount: number; signedAmount: number }
 type CashFlowSummary = {
@@ -65,6 +66,7 @@ export function ReportsRevenue() {
   const byLocQ = useReportData<RevByLoc>('/Reports/revenue/by-location', filters);
   const byDocQ = useReportData<RevByDoc>('/Reports/revenue/by-doctor', filters);
   const byCatQ = useReportData<RevByCat>('/Reports/revenue/by-category', filters);
+  const bySourceQ = useReportData<RevBySource>('/Reports/revenue/by-source', filters);
   const rulesQ = useReportData<{ rules: RevenueRule[] }>('/Reports/revenue/rules', filters);
   const cashFlowQ = useReportData<CashFlowSummary>('/Reports/cash-flow/summary', filters);
   const employeeExportFilters = useMemo(() => ({
@@ -126,7 +128,7 @@ export function ReportsRevenue() {
     };
   }, [filters.companyId, employeeType]);
 
-  const anyLoading = summaryQ.loading || trendQ.loading || byLocQ.loading || byDocQ.loading || byCatQ.loading || rulesQ.loading || cashFlowQ.loading;
+  const anyLoading = summaryQ.loading || trendQ.loading || byLocQ.loading || byDocQ.loading || byCatQ.loading || bySourceQ.loading || rulesQ.loading || cashFlowQ.loading;
   if (anyLoading) return <div className="text-center py-12 text-gray-400">{t('loading')}</div>;
   if (summaryQ.error) return <ReportError error={summaryQ.error} onRetry={summaryQ.refetch} />;
   if (!summaryQ.data) return <div className="text-center py-12 text-gray-400">{t('noData')}</div>;
@@ -347,6 +349,20 @@ export function ReportsRevenue() {
             items={(byLocQ.data || []).filter(l => l.invoiced > 0 || l.paid > 0 || l.outstanding > 0).map(l => ({ label: l.name, value: l.paid }))}
             formatValue={formatVND}
             color="bg-blue-500"
+          />
+        )}
+      </SectionCard>
+
+      {/* Revenue by Source */}
+      <SectionCard
+        title={t('charts.revenueBySource')}
+        action={bySourceQ.data ? <ExportCSVButton data={bySourceQ.data.filter(s => s.paid > 0).map(s => ({ Source: s.name, Orders: s.orderCount, Collected: s.paid }))} filename="revenue-by-source" /> : undefined}
+      >
+        {bySourceQ.error ? <ReportError error={bySourceQ.error} onRetry={bySourceQ.refetch} /> : (
+          <HorizontalBarList
+            items={(bySourceQ.data || []).filter(s => s.paid > 0).map(s => ({ label: s.name, value: s.paid }))}
+            formatValue={formatVND}
+            color="bg-cyan-500"
           />
         )}
       </SectionCard>

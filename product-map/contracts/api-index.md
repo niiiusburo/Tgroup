@@ -104,6 +104,8 @@ PUT handler-level validation: `companyId` (when present) must be a UUID (`400 IN
 | PATCH | `/:id/soft-delete` | Perm:`customers.delete` | — | Soft-deleted partner |
 | DELETE | `/:id/hard-delete` | Perm:`customers.hard_delete` | — | Hard-deleted partner |
 
+Partner create/update validation normalizes optional DOB fields (`birthday`, `birthmonth`, `birthyear`) from blank/zero migrated values to `null`; valid date ranges still apply for nonblank values.
+
 ## Employees (`/api/Employees`)
 
 | Method | Path | Auth | Body / Query | Response |
@@ -236,6 +238,7 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 | POST | `/revenue/by-location` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: [{ id, name, orderCount, invoiced, paid, outstanding }] }` |
 | POST | `/revenue/by-doctor` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: [{ id, name, orderCount, invoiced, paid }] }` |
 | POST | `/revenue/by-category` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: [{ id, category, lineCount, revenue }] }` |
+| POST | `/revenue/by-source` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: [{ id, name, orderCount, paid }] }` |
 | POST | `/revenue/payment-plans` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { plans[], installments[] } }` |
 | POST | `/revenue/rules` | Perm:`reports.view` | — | Revenue recognition rule metadata |
 | POST | `/cash-flow/summary` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { moneyIn, moneyOut, netCashFlow, internalDepositUsed, adjustments, categories[], trend[] } }` |

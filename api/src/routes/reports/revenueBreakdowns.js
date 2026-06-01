@@ -4,8 +4,10 @@ const { requirePermission } = require('../../middleware/auth');
 const { err, validDate, validUUID, dateCompanyFilter } = require('./helpers');
 const {
   SERVICE_REVENUE_PAYMENT_CONDITION,
+  UNALLOCATED_SERVICE_PAYMENT_CONDITION,
   ALLOCATION_TOTALS_CTE,
   CAPPED_ALLOCATED_AMOUNT_SQL,
+  DIRECT_SERVICE_PAYMENT_AMOUNT_SQL,
   buildPairedRevenueFilters,
   buildPaymentRevenueFilter,
   toNumber,
@@ -121,6 +123,83 @@ router.post('/revenue/by-category', requirePermission('reports.view'), async (re
 
     return res.json({ success: true, data: rows.map(r => ({ ...r, lineCount: toInt(r.line_count), revenue: toNumber(r.revenue) })) });
   } catch (e) { console.error('reports/revenue/by-category:', e); return err(res, 500, 'Internal error'); }
+});
+
+// ── Revenue by Source ────────────────────────────────────────────────
+
+router.post('/revenue/by-source', requirePermission('reports.view'), async (req, res) => {
+  try {
+    const { dateFrom, dateTo, companyId } = req.body || {};
+    if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+
+    const f = buildPairedRevenueFilters({
+      dateFrom,
+      dateTo,
+      companyId,
+      orderDateCol: 'so.datecreated',
+      paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
+      orderCompanyCol: 'so.companyid',
+      paymentCompanyCol: 'so.companyid',
+    });
+    const directF = buildPaymentRevenueFilter({
+      dateFrom,
+      dateTo,
+      companyId,
+      paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
+      companyCol: 'COALESCE(so.companyid, customer.companyid)',
+    });
+    const rows = await query(
+      `WITH ${ALLOCATION_TOTALS_CTE},
+       allocated_service_payments AS (
+         SELECT COALESCE(so.sourceid, customer.sourceid) AS sourceid,
+                so.id AS order_id,
+                ${CAPPED_ALLOCATED_AMOUNT_SQL} AS paid
+         FROM dbo.payment_allocations pa
+         JOIN dbo.payments p ON p.id = pa.payment_id
+         LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
+         JOIN dbo.saleorders so ON so.id = pa.invoice_id AND so.isdeleted=false
+         LEFT JOIN dbo.partners customer ON customer.id = COALESCE(p.customer_id, so.partnerid)
+         WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${f.paymentWhere}
+       ),
+       direct_service_payments AS (
+         SELECT COALESCE(so.sourceid, customer.sourceid) AS sourceid,
+                so.id AS order_id,
+                ${DIRECT_SERVICE_PAYMENT_AMOUNT_SQL} AS paid
+         FROM dbo.payments p
+         LEFT JOIN dbo.saleorders so ON so.id = p.service_id AND so.isdeleted=false
+         LEFT JOIN dbo.partners customer ON customer.id = COALESCE(p.customer_id, so.partnerid)
+         WHERE ${UNALLOCATED_SERVICE_PAYMENT_CONDITION} ${directF.where}
+       ),
+       recognized_service_payments AS (
+         SELECT sourceid, order_id, paid FROM allocated_service_payments
+         UNION ALL
+         SELECT sourceid, order_id, paid FROM direct_service_payments
+       ),
+       paid_totals AS (
+         SELECT sourceid,
+                COUNT(DISTINCT order_id) AS order_count,
+                COALESCE(SUM(paid),0) AS paid
+         FROM recognized_service_payments
+         GROUP BY sourceid
+       ),
+       source_keys AS (
+         SELECT id AS sourceid FROM dbo.customersources
+         UNION
+         SELECT sourceid FROM paid_totals
+       )
+       SELECT COALESCE(sk.sourceid::text, 'unassigned') as id,
+              COALESCE(cs.name, 'Chưa gán nguồn') as name,
+              COALESCE(pt.order_count,0) as order_count,
+              COALESCE(pt.paid,0) as paid
+       FROM source_keys sk
+       LEFT JOIN dbo.customersources cs ON cs.id=sk.sourceid
+       LEFT JOIN paid_totals pt ON (
+         pt.sourceid=sk.sourceid OR (pt.sourceid IS NULL AND sk.sourceid IS NULL)
+       )
+       ORDER BY paid DESC, name ASC LIMIT 100`, f.params);
+
+    return res.json({ success: true, data: rows.map(r => ({ ...r, orderCount: toInt(r.order_count), paid: toNumber(r.paid) })) });
+  } catch (e) { console.error('reports/revenue/by-source:', e); return err(res, 500, 'Internal error'); }
 });
 
 

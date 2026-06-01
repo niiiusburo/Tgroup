@@ -69,6 +69,7 @@ ui_invariants:
   - Customer edit forms must resolve saved employee assignment IDs against all employees, including inactive migrated employees; active-only lists are for new selection defaults, not selected-value hydration.
   - Employee assignment suggestions in customer forms must hide inactive employees so TDental duplicate staff records do not appear as selectable options.
   - Customer phone is not a durable unique identity. Phone may overlap another phone or match a customer code (`partners.ref`) and must not block customer create/edit saves.
+  - Customer DOB date parts imported as blank or zero values must normalize to null on create/update; nonblank invalid day/month values still fail validation.
 jobs:
   - none (archive scripts in api/scripts/archive/ are stale)
 shared_types:

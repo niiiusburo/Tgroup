@@ -15,6 +15,7 @@
 | v1.0.0 | 2026-05-13 | Initial contract freeze covering all active API routes, shared types, and integration boundaries. |
 | v1.0.1 | 2026-05-17 | Contract documentation aligned to live payment method enum, report API, and operational export registry. |
 | v1.0.2 | 2026-05-18 | Reconfirmed `@tgroup/contracts` payment method enum and generated contract artifacts are limited to live methods only. |
+| v1.0.5 | 2026-06-01 | Partner DOB date parts normalize migrated blank/zero values to `null`; revenue by source report endpoint added. |
 | v1.0.4 | 2026-05-21 | Feedback creation now queues optional Lark custom bot alerts after manual or auto-detected feedback threads commit. |
 | v1.0.3 | 2026-05-19 | Feedback attachment persistence contract clarified: file-only messages are valid, DB/file writes are transactional, and destructive file cleanup happens only after DB commit. |
 
@@ -175,6 +176,7 @@ PaginatedResponse<{
 
 #### PUT /api/Partners/:id
 **Body:** Partial partner fields. `ref` cannot be changed after creation (enforced by backend).
+Optional DOB date parts (`birthday`, `birthmonth`, `birthyear`) normalize `""`, `0`, and `"0"` to `null` before validation so migrated records can be saved without inventing a date. Real invalid values still fail range validation.
 
 #### PATCH /api/Partners/:id/soft-delete
 **Effect:** Sets `isdeleted = true`. Requires `customers.delete`.
@@ -390,6 +392,7 @@ Date-scoped endpoints accept `{ dateFrom?: 'YYYY-MM-DD'; dateTo?: 'YYYY-MM-DD'; 
 | `/api/Reports/revenue/by-location` | Date scope | `{ id, name, orderCount, invoiced, paid, outstanding }[]` |
 | `/api/Reports/revenue/by-doctor` | Date scope | `{ id, name, orderCount, invoiced, paid }[]` |
 | `/api/Reports/revenue/by-category` | Date scope | `{ id, category, lineCount, revenue }[]` |
+| `/api/Reports/revenue/by-source` | Date scope | `{ id, name, orderCount, paid }[]`, using sale-order source first and customer source fallback |
 | `/api/Reports/revenue/payment-plans` | Date scope | `{ plans: { status, count, total, downPayment }[]; installments: { status, count, total, paid }[] }` |
 | `/api/Reports/cash-flow/summary` | Date scope | `{ moneyIn, moneyOut, netCashFlow, internalDepositUsed, adjustments, categories[], trend[] }` |
 | `/api/Reports/appointments/summary` | Date scope | `{ total, done, cancelled, completionRate, cancellationRate, conversionRate, states[], repeatCustomers, newCustomers }` |

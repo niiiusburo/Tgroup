@@ -14,6 +14,14 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.38] — 2026-06-01
+### Fixed
+- **Customer profile saves no longer fail on migrated blank DOB parts.** The shared `@tgroup/contracts` partner schema now normalizes blank, `0`, and `"0"` birthday/birthmonth/birthyear values to `null` before validation, so unrelated edits on migrated customer records are not blocked while real invalid days/months still fail. — @agent — UC-001 customer profile edit.
+### Added
+- **Revenue report now shows in-app revenue by customer source.** `/reports/revenue` calls `POST /api/Reports/revenue/by-source` and renders a `Doanh thu theo nguồn` card using the same posted service-payment recognition rules as the main revenue report, attributing by sale-order source first and customer source second. — @agent — UC-013 report analytics.
+### Tested
+- `npm --prefix contracts run build`; `cd api && JWT_SECRET=test npx jest --runInBand src/routes/partners/__tests__/partnerValidation.test.js src/routes/reports/__tests__/revenueRecognition.test.js`; `npm --prefix website test -- src/pages/reports/__tests__/ReportsSubpages.test.tsx`; `npm --prefix website run build`; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off contracts/partner.ts api/src/routes/reports/revenueRecognition.js api/src/routes/reports/revenueBreakdowns.js website/src/pages/reports/ReportsRevenue.tsx`; local Playwright screenshot `output/playwright/nk-feedback-fixes-20260601/reports-revenue-by-source-local.png`. — @agent
+
 ## [0.32.37] — 2026-05-21
 ### Added
 - **FeedbackWidget login hint:** small dismissible bubble next to the speech-bubble icon in the header that prompts "Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc." (EN: "Any problem? Tap here to report it — we read every one."). Shows once per fresh login session — `AuthContext.login` clears `sessionStorage['tg_feedback_hint_dismissed']`, the X button on the bubble sets it. New i18n keys: `feedback.loginHintTitle`, `feedback.loginHintBody`, `feedback.loginHintDismiss` (EN + VI). — @agent — 2026-05-21 surfaces the feedback channel to staff on every login.
