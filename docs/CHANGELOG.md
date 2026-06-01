@@ -2,6 +2,12 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.89] — 2026-06-01 (nk3-deploy)
+### Fixed
+- **CTV booking company fallback now prefers real clinic locations over QA/test rows.** The selected-LOB fallback for `/api/ctv/bookings` still handles portal payloads without `companyId`, but it deprioritizes company names that look like QA/test/verify fixtures before choosing the first active clinic location. Preserves WF-015, UC-022, INV-022, and FM-20260601-02. — @agent
+### Tested
+- `JWT_SECRET=test-secret npm --prefix api test -- --runInBand src/routes/__tests__/ctvBookings.test.js src/services/__tests__/ctvBookingCompany.test.js src/services/__tests__/referralClaim.test.js` (project Jest runner matched all API suites: 84 suites / 908 tests passed; existing open-handles warning still appears after completion); `npm --prefix website run build`; `npm run verify:governance`; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off api/src/routes/ctv.js api/src/services/ctvBookingCompany.js api/src/routes/__tests__/ctvBookings.test.js api/src/services/__tests__/ctvBookingCompany.test.js` (0 findings). — @agent
+
 ## [0.32.88] — 2026-06-01 (nk3-deploy)
 ### Fixed
 - **CTV referral bookings now create appointments even when the portal omits `companyId`.** `POST /api/ctv/bookings` resolves a valid selected-LOB appointment company from the request, CTV JWT, or active company fallback before mutating `dbo.partners`, preventing the live `appointments.companyid` NOT NULL failure that updated the client but left no Referral Start appointment card. Preserves WF-015, UC-022, INV-022, and FM-20260601-02. — @agent

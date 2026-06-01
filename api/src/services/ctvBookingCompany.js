@@ -18,7 +18,15 @@ async function resolveCtvBookingCompanyId({ queryRows, requestedCompanyId, token
     `SELECT id
        FROM dbo.companies
       WHERE COALESCE(active, true) = true
-      ORDER BY name ASC NULLS LAST, id ASC
+      ORDER BY
+        CASE
+          WHEN LOWER(COALESCE(name, '')) LIKE 'qa%' THEN 1
+          WHEN LOWER(COALESCE(name, '')) LIKE '%test%' THEN 1
+          WHEN LOWER(COALESCE(name, '')) LIKE '%verify%' THEN 1
+          ELSE 0
+        END,
+        name ASC NULLS LAST,
+        id ASC
       LIMIT 1`,
     []
   );

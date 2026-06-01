@@ -24,7 +24,7 @@ Affected data flows:
 - If lookup returns an existing available client with a name, the modal pre-fills the name input without overwriting a manually typed name.
 - If lookup returns a client actively claimed by another CTV, the modal does not pre-fill the name and submit remains blocked by `B_CLIENT_CLAIMED`.
 - `POST /api/ctv/bookings` creates/reclaims the client, marks accepted existing partners `customer=true`, and creates a `dbo.appointments` row only.
-- Before changing a client row, `POST /api/ctv/bookings` resolves a non-null appointment company from request `companyId`, the CTV JWT, or the selected LOB's active company fallback.
+- Before changing a client row, `POST /api/ctv/bookings` resolves a non-null appointment company from request `companyId`, the CTV JWT, or the selected LOB's active company fallback, preferring real clinic locations over QA/test/verify fixture rows.
 - Selected service stays as `appointments.productid`; when no service is selected, the active configured Referral Start product is used as appointment metadata. Booking must not create `dbo.saleorders`, `dbo.saleorderlines`, or a Referral Start/service card.
 - Referral-claim availability remains protected by using the booking appointment as the claim anchor.
 
@@ -35,7 +35,7 @@ User roles:
 Happy paths:
 - Cosmetic available existing phone auto-fills the name and submits without retyping the client name.
 - Booking returns `201 { clientId, appointmentId }`, creates one appointment, and does not create a service card.
-- Booking from the CTV portal without a posted `companyId` still creates the appointment with the selected LOB's fallback `appointments.companyid`.
+- Booking from the CTV portal without a posted `companyId` still creates the appointment with a real selected-LOB clinic fallback `appointments.companyid`.
 - Booking with no selected service creates an appointment tagged with Referral Start when the selected LOB has `commission_settings.referral_start_product_id` configured.
 - Existing accepted partner is still searchable in admin Customers because `customer=true` is set.
 
