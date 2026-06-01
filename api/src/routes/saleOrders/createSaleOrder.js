@@ -48,9 +48,9 @@ async function createSaleOrder(req, res) {
       `INSERT INTO saleorders (
         id, name, code, partnerid, companyid, doctorid, assistantid, dentalaideid,
         quantity, unit, amounttotal, residual, totalpaid, state,
-        datestart, dateend, notes, sourceid,
+        datestart, dateend, notes, sourceid, ctv_id,
         isdeleted, datecreated
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,(NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'))
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,(NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'))
       RETURNING *`,
       [
         id,
@@ -71,6 +71,7 @@ async function createSaleOrder(req, res) {
         dateend || null,
         notes || null,
         sourceid || null,
+        ctv_id || null,
         false,
       ],
     );
