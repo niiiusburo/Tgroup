@@ -209,7 +209,7 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/:id` | Auth | — | `{ id, name, deposit_balance, outstanding_balance, total_deposited, total_used, total_refunded }`; cosmetic mirror reads request-scoped cosmetic DB at `/api/cosmetic/CustomerBalance/:id` |
+| GET | `/:id` | Auth | — | `{ id, name, deposit_balance, outstanding_balance, total_deposited, total_used, total_refunded }`; cosmetic mirror reads request-scoped cosmetic DB at `/api/cosmetic/CustomerBalance/:id`; `outstanding_balance` excludes cancelled and soft-deleted saleorders |
 
 ## Customer Receipts (`/api/CustomerReceipts`)
 

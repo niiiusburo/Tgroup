@@ -108,3 +108,4 @@ notes:
   - Payment allocation flows can update `dotkhams.amountresidual`, so DotKhams route/schema drift belongs in payment verification even though `/api/DotKhams` itself is read-only.
   - Cosmetic deposit wallet flows must pass the active LOB to `Payments`, `CustomerBalance`, and customer payment hooks; otherwise a posted cosmetic deposit row can appear in history while summary cards read the dental balance and stay at 0.
   - Customer balance advance totals are based on `payments.payment_category = 'deposit'`; unallocated service/payment receipts must not be counted as advances even when `service_id` is blank.
+  - CustomerBalance outstanding totals are based on non-deleted receivables only; soft-deleted `saleorders` residuals must not appear as customer debt after a service card is removed.

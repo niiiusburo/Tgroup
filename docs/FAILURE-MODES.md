@@ -14,6 +14,16 @@ Each entry:
 
 ---
 
+## FM-20260601-03: Deleted Cosmetic Service Still Shows as Customer Debt
+
+- **Symptom:** Staff deletes a Cosmetic service card, but the customer profile still shows the deleted service amount in `Outstanding` / `Công nợ`.
+- **Root Cause:** `DELETE /api/SaleOrderLines/:id` soft-deletes the last active service line and parent saleorder, but `GET /api/CustomerBalance/:id` summed `saleorders.residual` without filtering `isdeleted=false`.
+- **Fix:** Customer balance residual SQL now excludes soft-deleted saleorders before summing outstanding debt.
+- **Prevention:** CustomerBalance regression tests assert the residual query filters `COALESCE(isdeleted, false) = false`, and profile balance changes must cite INV-023.
+- **Related:** INV-023, UC-009, WF-003.
+
+---
+
 ## FM-20260601-02: CTV Booking Updates Client But No Appointment Appears
 
 - **Symptom:** A CTV submits a referral booking, the client row is accepted/reclaimed, but no "Referral Start" appointment card appears on the calendar.

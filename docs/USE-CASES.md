@@ -190,8 +190,9 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Alternate flows:**
   - **AF-1 Service not in catalog:** Must create service first (UC-041 analog).
   - **AF-2 Tooth picker missing data:** Validation fails for multi-tooth services.
-- **Postconditions:** SaleOrder created; appointment linked; revenue recognized.
-- **Invariants touched:** INV-003 (residual non-negative on any immediate payment), INV-017 (dense list).
+  - **AF-3 Remove mistaken service card:** Staff deletes a service line through `DELETE /api/SaleOrderLines/:id`; when it was the last active line, the parent saleorder is soft-deleted and its residual must disappear from `GET /api/CustomerBalance/:id`.
+- **Postconditions:** SaleOrder created; appointment linked; revenue recognized. If the service card is later removed, profile outstanding balance excludes the removed card.
+- **Invariants touched:** INV-003 (residual non-negative on any immediate payment), INV-017 (dense list), INV-023 (deleted receivables excluded from customer balance).
 
 ---
 

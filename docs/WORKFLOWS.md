@@ -144,8 +144,9 @@ sequenceDiagram
 - New `payments` row with `payment_category='deposit'`.
 - New `payment_allocations` rows.
 - `saleorders.residual` reduced (never below 0).
+- If a mistaken service line is later removed and the parent saleorder is soft-deleted, `GET /api/CustomerBalance/:id` excludes that saleorder residual from `outstanding_balance`.
 
-**Invariants:** INV-003, INV-004, INV-010, INV-011, INV-012.
+**Invariants:** INV-003, INV-004, INV-010, INV-011, INV-012, INV-023.
 **Failure modes:**
 - Stale residual (paid via other channel) → over-charge risk.
 - Concurrent deposits → race condition on residual (no row lock currently).

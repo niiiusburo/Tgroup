@@ -117,6 +117,12 @@
 
 ## Money & Payment Invariants
 
+### INV-023 — Customer Outstanding Balance Excludes Deleted Receivables
+**Rule:** Customer balance calculations MUST exclude soft-deleted service orders (`dbo.saleorders.isdeleted = true`) from `outstanding_balance`.
+**Rationale:** Deleting the last active service line soft-deletes the parent sale order. Keeping its residual in profile balance makes staff see phantom debt for a service that was removed.
+**Enforced by:** `api/src/routes/customerBalance.js` and `api/src/routes/__tests__/customerBalance.lob.test.js`.
+**Cite when:** Editing customer balance, service-line deletion, saleorder residuals, payment allocation displays, or customer profile financial cards.
+
 ### INV-010 — Payment Allocation Immutability
 **Rule:** Once a payment allocation row is created in `dbo.payment_allocations`, the API does NOT support updating or deleting it via a PATCH/PUT on the payment. Changing a payment's `amount` does NOT recalculate allocations.
 **Rationale:** Prevents race conditions and audit drift. Corrections require void + new payment.
@@ -217,6 +223,7 @@
 
 | Date | ID | Action | Commit / PR |
 |---|---|---|---|
+| 2026-06-01 | INV-023 | Added customer balance deleted-receivable invariant | pending |
 | 2026-06-01 | INV-022 | Added appointment-only invariant for CTV booking flow | pending |
 | 2026-05-28 | INV-008C | Added import-marker-gated legacy CTV password and phone/ref-code login fallback invariant | pending |
 | 2026-05-13 | INV-001..INV-020 | Initial invariant set created | feat/complete-documentation-stack |

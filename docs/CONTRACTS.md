@@ -29,6 +29,7 @@
 | v1.0.14 | 2026-06-01 | CTV booking appointment service metadata clarified: if no service is selected, the appointment defaults to the configured Referral Start product on `appointments.productid`; selected services still override the default. |
 | v1.0.15 | 2026-06-01 | CTV booking appointment location contract clarified: `companyId` remains optional on `/api/ctv/bookings`; the API resolves request company, CTV JWT company, then selected-LOB fallback company before any partner mutation. |
 | v1.0.16 | 2026-06-01 | CTV booking selected-LOB company fallback clarified: active company rows with QA/test/verify fixture names are deprioritized behind real clinic locations. |
+| v1.0.17 | 2026-06-01 | CustomerBalance outstanding-balance contract clarified: soft-deleted saleorders do not count as customer debt. |
 
 ---
 
@@ -472,7 +473,7 @@ Cosmetic mirror: `GET/POST/PATCH/DELETE /api/cosmetic/Payments...`, `/api/cosmet
   total_refunded: number;
 }
 ```
-**Behavior:** Reads `partners`, `payments`, `saleorders`, and `dotkhams` in the request-scoped LOB database. Cosmetic callers must use `GET /api/cosmetic/CustomerBalance/:id`; otherwise the deposit summary cards can read dental balances for cosmetic customers. Deposit totals are based on `payments.payment_category = 'deposit'`; unallocated service/payment receipts are not treated as customer advances.
+**Behavior:** Reads `partners`, `payments`, `saleorders`, and `dotkhams` in the request-scoped LOB database. Cosmetic callers must use `GET /api/cosmetic/CustomerBalance/:id`; otherwise the deposit summary cards can read dental balances for cosmetic customers. Deposit totals are based on `payments.payment_category = 'deposit'`; unallocated service/payment receipts are not treated as customer advances. `outstanding_balance` excludes cancelled and soft-deleted saleorders so removed service cards do not remain as customer debt.
 
 #### POST /api/Products and PUT /api/Products/:id
 **Auth:** Requires the service catalog permission enforced by the product route.

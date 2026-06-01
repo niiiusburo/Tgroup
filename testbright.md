@@ -10,6 +10,55 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK3 Cosmetic deleted-service balance reversal 2026-06-01
+
+Feature/edit name: Customer outstanding balance excludes deleted service cards
+
+Changed URLs and API routes:
+- `/customers/:id?lob=cosmetic`
+- `/payment?lob=cosmetic` when showing customer outstanding balances
+- `GET /api/CustomerBalance/:id`
+- `GET /api/cosmetic/CustomerBalance/:id`
+- Existing related delete route: `DELETE /api/cosmetic/SaleOrderLines/:id`
+
+Affected data flows:
+- Staff deletes a Cosmetic service line from the customer service records.
+- If the deleted line was the last active line, the parent `dbo.saleorders` row is soft-deleted.
+- `GET /api/cosmetic/CustomerBalance/:id` now sums only non-deleted saleorders when calculating `outstanding_balance`.
+- Deposit balance math remains based on `payments.payment_category = 'deposit'` and is unchanged.
+
+User roles:
+- Admin or staff with `customers.edit` can delete the service line.
+- Admin or staff with customer/payment view permissions can see the refreshed balance.
+
+Happy paths:
+- Delete the last active 6,000,000đ Cosmetic service card for a customer and verify the profile `Outstanding` value drops by 6,000,000đ.
+- Refresh the customer profile and verify the same balance remains correct through `GET /api/cosmetic/CustomerBalance/:id`.
+
+Edge cases:
+- Deleted zero-amount Referral Start service cards do not create debt.
+- Dental `/api/CustomerBalance/:id` still follows the same deleted-order exclusion.
+- Existing active saleorders with residuals still appear as debt.
+- DotKham residuals remain included unless cancelled.
+
+Regressions:
+- Cosmetic balance reads stay on `/api/cosmetic/CustomerBalance/:id`, not dental.
+- Deposit Balance stays unchanged when only a service card is deleted.
+- Payment allocation residual validation still rejects over-allocation.
+
+Setup/login state:
+- Live target: `https://tmv.2checkin.com`, Cosmetic LOB only.
+- Use `thuan test / 0123123123` as the incident data if available; do not create or delete extra live service cards unless explicitly requested.
+- Capture screenshot evidence after deploy showing the customer profile balance.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `GET /api/cosmetic/CustomerBalance/:id` for `0123123123` returns `outstanding_balance: 0` when only deleted saleorders remain.
+- [ ] PENDING: Verify `/customers/:id?lob=cosmetic` shows `Outstanding 0 đ` for the same customer after deploy.
+- [ ] PENDING: Verify an active non-deleted saleorder residual still appears in outstanding balance.
+- [ ] PENDING: Verify deposit balance is unchanged by deleting a service line.
+
+---
+
 # TestSprite Plan: NK3 CTV appointment-only booking and name autofill 2026-06-01
 
 Feature/edit name: CTV refer-client available-name autofill and appointment-only booking

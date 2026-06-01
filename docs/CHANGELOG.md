@@ -2,6 +2,12 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.90] — 2026-06-01 (nk3-deploy)
+### Fixed
+- **Customer outstanding balance now ignores deleted service cards.** `GET /api/CustomerBalance/:id` and its Cosmetic mirror exclude soft-deleted `dbo.saleorders` when summing residual debt, so deleting the last service line for a 6,000,000đ Cosmetic card removes that receivable from the customer profile balance instead of leaving a phantom amount owed. Preserves INV-023 and FM-20260601-03. — @agent
+### Tested
+- `JWT_SECRET=test-secret npx jest src/routes/__tests__/customerBalance.lob.test.js --runInBand` (3 tests passed); `npm --prefix website run build`; `npm run verify:governance`; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off api/src/routes/customerBalance.js api/src/routes/__tests__/customerBalance.lob.test.js` (0 findings). — @agent
+
 ## [0.32.89] — 2026-06-01 (nk3-deploy)
 ### Fixed
 - **CTV booking company fallback now prefers real clinic locations over QA/test rows.** The selected-LOB fallback for `/api/ctv/bookings` still handles portal payloads without `companyId`, but it deprioritizes company names that look like QA/test/verify fixtures before choosing the first active clinic location. Preserves WF-015, UC-022, INV-022, and FM-20260601-02. — @agent

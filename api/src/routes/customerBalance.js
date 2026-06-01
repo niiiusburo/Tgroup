@@ -59,7 +59,11 @@ router.get('/:id', async (req, res) => {
     let outstandingBalance = 0;
     try {
       const residualResult = await q(`
-        SELECT COALESCE(SUM(residual), 0) AS total FROM saleorders WHERE partnerid = $1 AND state != 'cancelled'
+        SELECT COALESCE(SUM(residual), 0) AS total
+        FROM saleorders
+        WHERE partnerid = $1
+          AND state != 'cancelled'
+          AND COALESCE(isdeleted, false) = false
         UNION ALL
         SELECT COALESCE(SUM(amountresidual), 0) FROM dotkhams WHERE partnerid = $1 AND state != 'cancelled'
       `, [id]);

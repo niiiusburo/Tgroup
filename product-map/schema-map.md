@@ -192,7 +192,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | **R** | `saleOrders.js`, `saleOrderLines.js`, `payments.js` (allocations), `reports.js`, `partners.js` (KPIs), `appointments.js`, employee revenue export builder |
 | **E** | `GET/POST/PATCH /api/SaleOrders` |
 | **UI** | Services patient records, Payment allocations, CustomerProfile service history, Reports |
-| **Risk** | **High** — state transitions (`draft` → `confirmed` → `done` → `cancelled`) are logged in `saleorder_state_logs` and drive payment residual calculations. `sourceid` is UUID-typed and must come from the active LOB's `customersources`; fallback UI ids are not valid writes. |
+| **Risk** | **High** — state transitions (`draft` → `confirmed` → `done` → `cancelled`) are logged in `saleorder_state_logs` and drive payment residual calculations. Soft-deleted saleorders must not count toward `/api/CustomerBalance/:id` outstanding debt. `sourceid` is UUID-typed and must come from the active LOB's `customersources`; fallback UI ids are not valid writes. |
 
 ### dbo.saleorderlines
 
