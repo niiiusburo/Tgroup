@@ -97,6 +97,8 @@ describe('POST /ctv/bookings', () => {
     dbMock.queryRows.mockResolvedValueOnce([]);
     // Step 3a: INSERT partner
     dbMock.queryRows.mockResolvedValueOnce([{ id: 'new-client-id' }]);
+    // Step 3b: default Referral Start product for appointment purpose
+    dbMock.queryRows.mockResolvedValueOnce([{ id: 'referral-start-prod' }]);
     // Step 3b: appointment name seq
     dbMock.queryRows.mockResolvedValueOnce([{ next_seq: 42 }]);
     // Step 3b: INSERT appointment
@@ -131,6 +133,8 @@ describe('POST /ctv/bookings', () => {
     expect(res.statusCode).toBe(201);
     expect(res.jsonBody).toHaveProperty('clientId');
     expect(res.jsonBody).toHaveProperty('appointmentId');
+    const apptInsert = dbMock.queryRows.mock.calls.find(([sql]) => /INSERT INTO dbo\.appointments/.test(sql));
+    expect(apptInsert[1][12]).toBe('referral-start-prod');
   });
 
   test('marks an existing accepted partner as a customer so admin search can find it', async () => {
@@ -139,6 +143,7 @@ describe('POST /ctv/bookings', () => {
 
     dbMock.queryRows.mockResolvedValueOnce([{ id: 'existing-partner-id' }]);
     dbMock.queryRows.mockResolvedValueOnce([{}]);
+    dbMock.queryRows.mockResolvedValueOnce([{ id: 'referral-start-prod' }]);
     dbMock.queryRows.mockResolvedValueOnce([{ next_seq: 43 }]);
     dbMock.queryRows.mockResolvedValueOnce([{}]);
 
@@ -172,6 +177,8 @@ describe('POST /ctv/bookings', () => {
     expect(updatePartner[0]).toContain('customer = true');
     expect(updatePartner[1]).toEqual(['ctv-me', 'existing-partner-id']);
     expect(createReferralStartCard).not.toHaveBeenCalled();
+    const apptInsert = dbMock.queryRows.mock.calls.find(([sql]) => /INSERT INTO dbo\.appointments/.test(sql));
+    expect(apptInsert[1][12]).toBe('referral-start-prod');
   });
 
   test('persists the chosen service (productId) and trimmed note onto the appointment', async () => {

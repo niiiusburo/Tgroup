@@ -899,13 +899,24 @@ router.post('/bookings', requireAuth, async (req, res) => {
       );
     }
 
-    // 3b. Validate the chosen service belongs to THIS LOB's catalog. An unknown
-    // or cross-LOB productId is silently dropped (→ null) so a bad id never
-    // breaks the booking via an FK violation; the appointment is still created.
+    // 3b. Validate the chosen service belongs to THIS LOB's catalog. If no
+    // service was chosen, tag the appointment with the configured Referral Start
+    // product so the calendar has a booking purpose without creating a service card.
     let validProductId = null;
     if (productId) {
       const prodRows = await safeQueryRows(db, `SELECT id FROM dbo.products WHERE id = $1 AND active = true LIMIT 1`, [productId]);
       validProductId = prodRows[0]?.id || null;
+    } else {
+      const referralStartRows = await safeQueryRows(
+        db,
+        `SELECT p.id
+           FROM dbo.commission_settings cs
+           JOIN dbo.products p ON p.id = cs.referral_start_product_id
+          WHERE p.active = true
+          LIMIT 1`,
+        []
+      );
+      validProductId = referralStartRows[0]?.id || null;
     }
 
     // 3c. Appointment — use canonical insert pattern

@@ -424,11 +424,11 @@ When a use case is created or materially edited, add one compact `Traceability` 
   3. Actor submits → `POST /api/ctv/bookings`.
   4. Backend resolves an existing partner by `clientId` or phone, or creates a new customer row in the selected LOB database.
   5. If an existing partner row is accepted, backend sets `customer = true` and `referred_by_ctv_id = actor` before creating the appointment.
-  6. Backend creates the appointment only, validating the optional product against the selected LOB catalog and storing it on `appointments.productid`.
+  6. Backend creates the appointment only, validating the optional product against the selected LOB catalog and storing it on `appointments.productid`; if no product is selected, the appointment uses the configured Referral Start product as its booking purpose.
 - **Alternate flows:**
   - **AF-1 Claimed by another CTV:** API returns `400 B_CLIENT_CLAIMED` with owner/expires fields; no appointment is created.
   - **AF-2 Unknown product or cross-LOB product:** API drops `productId` to null and still creates the booking.
   - **AF-3 Existing employee/staff partner becomes a client:** The same partner identity is kept and `customer = true` makes the row visible in `/customers`.
-- **Postconditions:** The accepted client is searchable in admin Customers for the same LOB; appointment exists; no service card is created; the CTV claim/referrer pointer is updated.
+- **Postconditions:** The accepted client is searchable in admin Customers for the same LOB; appointment exists with selected service metadata or Referral Start default; no service card is created; the CTV claim/referrer pointer is updated.
 - **Invariants touched:** INV-001 (UUID identity), INV-002 (appointment name), INV-006 (search), INV-021 (CTV booking customer visibility), INV-022 (CTV booking appointment-only).
 - **Traceability:** Related WF: WF-015. Contracts/routes: `GET /api/ctv/client-lookup`, `POST /api/ctv/bookings`, `GET /api/Partners`. Data/tables: `dbo.partners`, `dbo.appointments`. Tests: `api/src/routes/__tests__/ctvBookings.test.js`, `api/src/services/__tests__/referralClaim.test.js`, `website/src/components/ctv/CtvReferModal.test.tsx`. Product-map domains: `ctv`, `cosmetic`, `cosmetic-clients`, `customers-partners`, `appointments-calendar`.

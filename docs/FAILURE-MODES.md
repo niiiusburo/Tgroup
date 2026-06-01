@@ -18,7 +18,7 @@ Each entry:
 
 - **Symptom:** A CTV submits a referral booking and the client immediately appears as if they already received service because a "Referral Start" saleorder/service card exists.
 - **Root Cause:** `POST /api/ctv/bookings` created a zero-amount Referral Start saleorder before inserting the appointment, so booking side effects polluted service-history and journey-stage signals.
-- **Fix:** Keep the booking route appointment-only: create/reclaim the partner, mark accepted existing rows `customer=true`, validate optional `productId` for appointment metadata, and insert `dbo.appointments` without touching `saleorders` or `saleorderlines`. Preserve claim blocking by using the booking appointment's `datecreated` as a referral-claim anchor.
+- **Fix:** Keep the booking route appointment-only: create/reclaim the partner, mark accepted existing rows `customer=true`, validate optional `productId` for appointment metadata, default omitted service metadata to the configured Referral Start product, and insert `dbo.appointments` without touching `saleorders` or `saleorderlines`. Preserve claim blocking by using the booking appointment's `datecreated` as a referral-claim anchor.
 - **Prevention:** CTV booking tests must assert `createReferralStartCard` is not called and no saleorder SQL runs. Service cards may only be created by actual service/saleorder workflows.
 - **Related:** INV-022, WF-015, UC-022.
 

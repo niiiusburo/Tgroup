@@ -61,7 +61,7 @@ invariants:
   - Appointment edit saves must persist changed clinic/location values by writing `appointments.companyid` and returning the refreshed `companyid/companyname`.
   - Appointment exports must serialize the same `appointments.date` calendar value shown in `/calendar`, include `time` when present, and allow phone searches through `partners.phone`.
   - Appointment customer selectors must search by customer code as well as name, phone, and email.
-  - CTV booking-created appointments must not create service cards; optional service selection is appointment metadata until a real saleorder is created.
+  - CTV booking-created appointments must not create service cards; optional service selection or Referral Start default is appointment metadata until a real saleorder is created.
 impact_tests:
   - api/src/routes/appointments/__tests__/readHandlers.test.js
   - api/src/routes/appointments/__tests__/mutationHandlers.test.js

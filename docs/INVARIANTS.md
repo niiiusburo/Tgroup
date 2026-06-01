@@ -62,7 +62,7 @@
 **Cite when:** Editing CTV booking, partner phone lookup, referral claim, or admin customer search behavior.
 
 ### INV-022 — CTV Booking Is Appointment-Only
-**Rule:** `POST /api/ctv/bookings` MUST create or reclaim the client and write `dbo.appointments` only. It MUST NOT create `dbo.saleorders` or `dbo.saleorderlines`; a selected service is metadata on `appointments.productid` until clinic staff convert the visit into an actual service card.
+**Rule:** `POST /api/ctv/bookings` MUST create or reclaim the client and write `dbo.appointments` only. It MUST NOT create `dbo.saleorders` or `dbo.saleorderlines`; a selected service, or the configured Referral Start product when no service is selected, is metadata on `appointments.productid` until clinic staff convert the visit into an actual service card.
 **Rationale:** A booking is a scheduled appointment, not proof that the client already visited or received treatment. Creating a service card at booking time corrupts journey stage, service history, and operational status.
 **Enforced by:** `api/src/routes/ctv.js`, `api/src/routes/__tests__/ctvBookings.test.js`, and `api/src/services/referralClaim.js` using the booking appointment as a claim anchor.
 **Cite when:** Editing CTV booking, referral claim windows, service-card creation, appointment creation, or CTV journey stage logic.
