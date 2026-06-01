@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Percent, Loader, AlertCircle, Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -14,11 +15,21 @@ import { EarningsTab, PayoutsTab } from '@/components/commission/EarningsPayouts
 import { CtvManagementTab } from '@/components/commission/CtvManagementTab';
 import { NewClientsTab } from '@/components/commission/NewClientsTab';
 import { CommissionFlowTabs, type CommissionTabType } from '@/components/commission/CommissionFlowTabs';
+import { isCommissionTab } from '@/components/commission/CommissionNavigation';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 export function Commission() {
   const { t } = useTranslation('common');
-  const [activeTab, setActiveTab] = useState<CommissionTabType>('config');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = isCommissionTab(searchParams.get('tab')) ? searchParams.get('tab') as CommissionTabType : 'config';
+
+  const setActiveTab = useCallback((tab: CommissionTabType) => {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.set('tab', tab);
+      return next;
+    }, { replace: false });
+  }, [setSearchParams]);
 
   return (
     <div className="space-y-6">

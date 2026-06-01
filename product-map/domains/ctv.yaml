@@ -56,7 +56,7 @@ ui_surfaces:
     - Me: profile, current language label, logout
   - Hard redirect on login for partners.is_ctv=true (before any admin mount)
   - 403 guards on all / (admin) routes for CTV
-  - /commission admin five-step CTV flow (Config, CTV, New Clients, Earnings, Payouts) with breadcrumb rail, clean date labels, and LOB-aware export/payment surfaces
+  - /commission admin five-step CTV flow (Config, CTV, New Clients, Earnings, Payouts) with URL-backed breadcrumb rail, clean date labels, profile drilldowns from New Clients, and LOB-aware export/payment surfaces
   - /commission > CTV tab (admin only; LOB-aware list with source badges so legacy imports are visibly distinguishable)
 shared_types:
   - website/src/lib/api/ctv.ts : CtvCommissionSummary, CtvReferral, CommissionRow (with lob tag)
@@ -79,6 +79,7 @@ impact_tests:
   - Refer-client phone lookup pre-fills the name only for an existing available client, and never for a client actively claimed by another CTV
   - POST /api/ctv/bookings resolves non-null appointment companyid, creates dbo.appointments without creating saleorders or saleorderlines, defaulting omitted service metadata to Referral Start when configured
   - Admin /commission five-tab flow keeps date filters legible and shows earned dates before payout selection
+  - Admin /commission?tab=newClients links client names to /customers/:id with a return trail back to the New Clients tab while keeping phone numbers as tel: links
 risk_level: high (only cross-DB surface)
 notes:
   - "D13 live demo: seed a CTV partner + referred patient + collected payment in dental and/or cosmetic; verify earnings row + CTV dashboard shows it."

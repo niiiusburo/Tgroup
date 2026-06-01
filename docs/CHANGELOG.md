@@ -2,6 +2,12 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.93] — 2026-06-01 (nk3-deploy)
+### Changed
+- **Admin CTV commission flow now supports breadcrumb drilldowns.** `/commission?tab=...` preserves the five-step workflow in the URL, New Clients names open `/customers/:id`, Earnings/Payout pending service links open the customer's Records tab with the service row focused, and customer profiles show a return trail back to the originating commission tab. Preserves UC-023, WF-017, and INV-017. — @agent
+### Tested
+- `npm --prefix website test -- --run CommissionNavigation NewClientsTab EarningsPayoutsTabs ServiceHistory` (18 tests passed); `npm --prefix website run build`; `npm run verify:governance`; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off <changed website paths>` (0 findings). Live NK3 screenshot proof pending deploy. — @agent
+
 ## [0.32.92] — 2026-06-01 (nk3-deploy)
 ### Fixed
 - **CTV bookings are appointment-only again and name lookup fills available existing clients.** `POST /api/ctv/bookings` no longer calls `createReferralStartCard()` or writes `saleorders`/`saleorderlines`; selected services or the configured Referral Start product are stored only on `appointments.productid`. The CTV refer modal also pre-fills the name after phone lookup when the existing client is available and does not overwrite manual typing. Preserves INV-021 and INV-022. — @agent

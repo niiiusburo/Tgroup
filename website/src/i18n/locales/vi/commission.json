@@ -28,6 +28,7 @@
   "newClients": {
     "lob": "Lĩnh vực",
     "dateRange": "Khoảng thời gian",
+    "description": "Theo dõi khách được giới thiệu trước khi chuyển đổi và mở thẳng hồ sơ từ từng dòng.",
     "allDates": "Tất cả",
     "refresh": "Làm mới",
     "loading": "Đang tải khách hàng mới...",
@@ -97,6 +98,8 @@
   },
   "earnings": {
     "status": "Trạng thái",
+    "description": "Xem từng dòng hoa hồng đã ghi nhận hoặc đang chờ và nhảy thẳng tới dịch vụ liên quan.",
+    "count": "{{count}} dòng",
     "lob": "LOB",
     "ctv": "CTV",
     "client": "Khách hàng",
@@ -110,6 +113,8 @@
   },
   "payouts": {
     "lob": "LOB chi trả",
+    "description": "Chọn các dòng hoa hồng chờ chi trả, kiểm tra bằng chứng và quay lại dịch vụ gốc khi cần.",
+    "pendingCount": "{{count}} chờ chi trả",
     "reload": "Tải lại",
     "cycleLabel": "Nhãn chu kỳ",
     "cyclePlaceholder": "Tháng 5/2026",
@@ -122,6 +127,7 @@
     "pendingEarnings": "Thu nhập chờ chi trả",
     "ctv": "CTV",
     "client": "Khách hàng",
+    "service": "Dịch vụ",
     "earnedAt": "Ngày ghi nhận",
     "amount": "Số tiền",
     "noPending": "Không có thu nhập chờ chi trả cho LOB này.",
@@ -129,6 +135,12 @@
     "noCycles": "Chưa có chu kỳ chi trả nào.",
     "attach": "Đính kèm",
     "earningsCount": "{{count}} thu nhập"
+  },
+  "breadcrumbs": {
+    "clientProfile": "Hồ sơ khách",
+    "serviceDetail": "Chi tiết dịch vụ",
+    "returnHint": "Bạn mở hồ sơ này từ luồng hoa hồng. Dùng nút quay lại để về đúng bước hoa hồng.",
+    "backToCommission": "Quay lại hoa hồng"
   },
   "cancel": "Hủy",
   "loading": "Đang tải...",

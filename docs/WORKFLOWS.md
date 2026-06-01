@@ -699,3 +699,32 @@ sequenceDiagram
 
 **Invariants:** INV-003, INV-003A, INV-003B, INV-010.
 **Traceability:** Related UC: UC-012, UC-012A. Contracts/routes: `DELETE /api/SaleOrderLines/:id`, `DELETE /api/cosmetic/SaleOrderLines/:id`, `POST /api/Payments/:id/void`. Data/tables: `dbo.saleorderlines`, `dbo.saleorders`, `dbo.payments`, `dbo.payment_allocations`, `dbo.earnings`, `dbo.payouts`. Tests: `api/src/services/__tests__/serviceReversal.test.js`, `api/src/services/__tests__/commissionEngine.test.js`. Product-map domains: `payments-deposits`, `earnings-commissions`, `services-catalog`.
+
+---
+
+## WF-017 — Admin CTV Commission Drilldown Navigation
+
+**Trigger:** Admin reviews `/commission` CTV workflow tabs and needs to inspect a related client or service before taking the next action.
+
+```mermaid
+sequenceDiagram
+    actor A as Admin / Staff
+    participant C as Commission UI
+    participant P as Customer Profile
+    participant R as Customer Records
+
+    A->>C: Open /commission?tab=newClients&lob=cosmetic
+    C-->>A: Render five-step breadcrumb rail and New Clients rows
+    A->>C: Click client name
+    C->>P: Navigate /customers/:id?tab=profile&from=commission&returnTab=newClients&lob=cosmetic
+    P-->>A: Show profile with return trail to Commission > New Clients
+    A->>P: Return via trail or browser back
+    P->>C: Restore /commission?tab=newClients&lob=cosmetic
+    A->>C: Open /commission?tab=earnings or payouts and click service
+    C->>R: Navigate /customers/:id?tab=records&serviceLineId=:lineId&from=commission&returnTab=earnings
+    R-->>A: Expand, highlight, and scroll the matching service row into view
+```
+
+**Data state transitions:** None. This workflow is read-only navigation over existing CTV, customer, earning, and service-line records.
+
+**Traceability:** Related UC: UC-023. Contracts/routes: `GET /api/Earnings`, `GET /api/Payouts`, `GET /api/Partners/:id`, `GET /api/SaleOrderLines`. Data/tables: `dbo.partners`, `dbo.earnings`, `dbo.saleorderlines`, `dbo.payouts`. Invariants: INV-017. Tests: `website/src/components/commission/CommissionNavigation.test.ts`, `website/src/components/commission/NewClientsTab.test.tsx`, `website/src/components/commission/EarningsPayoutsTabs.test.tsx`, `website/src/components/customer/ServiceHistory.test.tsx`. Product-map domains: `ctv`, `earnings-commissions`, `customers-partners`, `services-catalog`.

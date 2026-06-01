@@ -19,6 +19,7 @@ import { ExportMenu } from '@/components/shared/ExportMenu';
 import { ExportPreviewModal } from '@/components/shared/ExportPreviewModal';
 import { ExportDateRangeModal } from '@/components/calendar/ExportDateRangeModal';
 import { formatCommissionDate, formatCommissionDateRange } from './dateFormatting';
+import { ClientProfileLink, CommissionTabHeader } from './CommissionNavigation';
 
 const LOB_LABELS: Record<string, string> = { dental: 'Nha khoa', cosmetic: 'Thẩm mỹ' };
 
@@ -92,9 +93,18 @@ export function NewClientsTab() {
     untilPrefix: t('date.untilPrefix'),
     locale: i18n.language,
   });
+  const countText = loading || error ? undefined : t('newClients.count', { count: rows.length });
 
   return (
     <div className="bg-white rounded-xl shadow-card p-6 space-y-4">
+      <CommissionTabHeader
+        tab="newClients"
+        count={countText}
+        description={t('newClients.description')}
+        previousTab="ctvs"
+        nextTab="earnings"
+      />
+
       {/* Toolbar */}
       <div className="flex flex-wrap gap-3 items-end justify-between">
         <div className="flex flex-wrap gap-3 items-end">
@@ -169,9 +179,42 @@ export function NewClientsTab() {
           <p>{t('newClients.empty')}</p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <div className="text-sm text-gray-500 mb-2">{t('newClients.count', { count: rows.length })}</div>
-          <table className="w-full text-sm">
+        <div className="space-y-3">
+          <div className="grid gap-3 md:hidden">
+            {rows.map((row) => (
+              <article key={`${row.lob}-${row.id}`} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <ClientProfileLink clientId={row.id} name={row.name} returnTab="newClients" lob={row.lob} className="text-base" />
+                    <p className="mt-1 text-xs text-gray-500">
+                      {LOB_LABELS[row.lob] || row.lob} · {formatCommissionDate(row.referred_at, i18n.language)}
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700 ring-1 ring-orange-200">
+                    {LOB_LABELS[row.lob] || row.lob}
+                  </span>
+                </div>
+                <div className="mt-3 grid gap-2 text-sm">
+                  {row.phone ? (
+                    <a href={`tel:${row.phone}`} className="inline-flex w-fit items-center gap-1.5 text-primary hover:underline">
+                      <Phone className="h-3.5 w-3.5" />
+                      {row.phone}
+                    </a>
+                  ) : (
+                    <span className="text-gray-400">-</span>
+                  )}
+                  <div className="text-gray-700">
+                    <span className="text-xs font-semibold uppercase text-gray-400">{t('newClients.ctv')}</span>
+                    <div className="mt-0.5 font-medium">{row.referring_ctv_name || '-'}</div>
+                    {row.referring_ctv_phone && <div className="text-xs text-gray-400">{row.referring_ctv_phone}</div>}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto md:block">
+            <table className="w-full min-w-[760px] text-sm">
             <thead className="bg-gray-50 border-y border-gray-200">
               <tr>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t('newClients.client')}</th>
@@ -184,7 +227,9 @@ export function NewClientsTab() {
             <tbody className="divide-y divide-gray-200">
               {rows.map((row) => (
                 <tr key={`${row.lob}-${row.id}`} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-900">{row.name || '—'}</td>
+                  <td className="px-4 py-3">
+                    <ClientProfileLink clientId={row.id} name={row.name} returnTab="newClients" lob={row.lob} />
+                  </td>
                   <td className="px-4 py-3 text-gray-700">
                     {row.phone ? (
                       <a href={`tel:${row.phone}`} className="inline-flex items-center gap-1.5 text-primary hover:underline">
@@ -207,6 +252,7 @@ export function NewClientsTab() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 

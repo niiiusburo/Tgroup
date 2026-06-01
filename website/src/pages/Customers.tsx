@@ -7,15 +7,21 @@ import {
   hardDeletePartner,
 } from "@/lib/api";
 import { resolvePartnerKey, type PartnerResolveCandidate } from "@/lib/api/partners";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useLocations } from "@/hooks/useLocations";
 import type { ProfileTab } from "@/components/customer/CustomerProfile";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { CustomerKeyPicker } from "@/components/customer/CustomerKeyPicker";
+import { CommissionReturnTrail } from "@/components/commission/CommissionNavigation";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const PROFILE_TABS: readonly ProfileTab[] = ['profile', 'appointments', 'records', 'payment'];
+
+function parseProfileTab(value: string | null): ProfileTab | null {
+  return value && PROFILE_TABS.includes(value as ProfileTab) ? (value as ProfileTab) : null;
+}
 
 import { buildCustomerColumns } from "./Customers/CustomerColumns";
 import { CustomerListView } from "./Customers/CustomerListView";
@@ -34,6 +40,12 @@ export function Customers() {
   const { t } = useTranslation("customers");
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const requestedProfileTab = parseProfileTab(searchParams.get('tab'));
+  const focusedServiceId = searchParams.get('serviceLineId');
+  const fromCommission = searchParams.get('from') === 'commission';
+  const commissionReturnTab = searchParams.get('returnTab');
+  const commissionReturnLob = searchParams.get('lob');
   const [showForm, setShowForm] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   // Only seed with the URL id when it's already a UUID. Non-UUID keys must wait
@@ -112,10 +124,11 @@ export function Customers() {
     };
   }, [id, navigate]);
 
-  // Reset profile tab when switching customers or returning to list
+  // Reset profile tab when switching customers, while honoring deep links from
+  // admin commission rows such as /customers/:id?tab=records&serviceLineId=...
   useEffect(() => {
-    setProfileTab("profile");
-  }, [selectedCustomerId]);
+    setProfileTab(requestedProfileTab ?? "profile");
+  }, [requestedProfileTab, selectedCustomerId]);
 
   const { hasPermission } = useAuth();
 
@@ -300,11 +313,14 @@ export function Customers() {
   }
 
   const content = selectedCustomerId ? (
-    <CustomerProfileContent
+    <>
+      {fromCommission && <CommissionReturnTrail returnTab={commissionReturnTab} serviceLineId={focusedServiceId} lob={commissionReturnLob} />}
+      <CustomerProfileContent
         profile={profileData}
         appointments={hookAppointments}
         services={saleOrderLines}
         loadingServices={saleOrderLinesLoading}
+        focusedServiceId={focusedServiceId}
         employees={allEmployees}
         depositList={depositList}
         usageHistory={usageHistory}
@@ -343,7 +359,8 @@ export function Customers() {
         checkupsError={checkupsError}
         onRefetchCheckups={refetchCheckups}
         updateServiceStatus={updateServiceStatus}
-    />
+      />
+    </>
   ) : (
     <CustomerListView
       customers={customers}

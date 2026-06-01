@@ -457,3 +457,24 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Postconditions:** The accepted client is searchable in admin Customers for the same LOB; appointment exists with selected service metadata or Referral Start default and non-null `companyid`; no service card is created; the CTV claim/referrer pointer is updated.
 - **Invariants touched:** INV-001 (UUID identity), INV-002 (appointment name), INV-006 (search), INV-021 (CTV booking customer visibility), INV-022 (CTV booking appointment-only).
 - **Traceability:** Related WF: WF-015. Contracts/routes: `GET /api/ctv/client-lookup`, `POST /api/ctv/bookings`, `GET /api/Partners`. Data/tables: `dbo.partners`, `dbo.appointments`. Tests: `api/src/routes/__tests__/ctvBookings.test.js`, `api/src/services/__tests__/referralClaim.test.js`, `website/src/components/ctv/CtvReferModal.test.tsx`. Product-map domains: `ctv`, `cosmetic`, `cosmetic-clients`, `customers-partners`, `appointments-calendar`.
+
+---
+
+## UC-023 — Admin Navigates CTV Commission Work Without Losing Context
+
+- **Actor:** Admin or staff member with commission/customer visibility.
+- **Trigger:** `/commission` five-step CTV workflow, especially New Clients, Earnings, and Payouts.
+- **Preconditions:** Actor is authenticated; current LOB is Dental or Cosmetic; commission rows include customer and, where applicable, service-line identifiers.
+- **Main flow:**
+  1. Actor opens `/commission?tab=newClients`, `/commission?tab=earnings`, or `/commission?tab=payouts`.
+  2. The active tab is preserved in the URL and shown in a compact breadcrumb/step rail.
+  3. From New Clients, actor clicks a customer name and lands on `/customers/:id?tab=profile&from=commission&returnTab=newClients&lob=<lob>`.
+  4. From Earnings or Payouts, actor clicks a service and lands on `/customers/:id?tab=records&serviceLineId=<lineId>&from=commission&returnTab=<tab>&lob=<lob>`.
+  5. Customer profile renders a return trail to the originating commission tab; the Records tab expands and highlights the target service row when a service-line id is present.
+- **Alternate flows:**
+  - **AF-1 Missing client id:** The row renders plain text instead of a broken profile link.
+  - **AF-2 Missing service_line_id:** The service name remains visible but does not navigate to an unknown service row.
+  - **AF-3 Mobile viewport:** Rows render as stacked cards with the same drilldown targets and date context.
+- **Postconditions:** No data is mutated; staff can return to the same CTV workflow step with LOB context preserved.
+- **Invariants touched:** INV-017 (dense list navigation/scroll context), INV-016 (i18n labels).
+- **Traceability:** Related WF: WF-017. Contracts/routes: `GET /api/Earnings`, `GET /api/Payouts`, `GET /api/Partners/:id`, `GET /api/SaleOrderLines`. Data/tables: `dbo.partners`, `dbo.earnings`, `dbo.saleorderlines`, `dbo.payouts`. Tests: `website/src/components/commission/CommissionNavigation.test.ts`, `website/src/components/commission/NewClientsTab.test.tsx`, `website/src/components/commission/EarningsPayoutsTabs.test.tsx`, `website/src/components/customer/ServiceHistory.test.tsx`. Product-map domains: `ctv`, `earnings-commissions`, `customers-partners`, `services-catalog`.

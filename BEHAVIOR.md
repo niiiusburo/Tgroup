@@ -21,6 +21,7 @@ If behavior is accepted as product truth, promote it here or to a domain runbook
 - Destructive actions require confirmation and should preserve enough context for staff to know what will be removed.
 - After successful writes, the visible surface must refresh immediately. Do not require a manual reload for normal staff workflows.
 - Search bars must be accent-insensitive across the project. Staff typing `Nguyen`, `Thoai`, `Duong`, or `Quyen` must match records such as `NGUYỄN`, `THOẠI`, `DƯƠNG`, or `Quyền`.
+- Admin workflow pages that span multiple operational states must preserve the active step in the URL and provide a visible return trail after drilling into a related record. In `/commission`, staff must be able to click CTV new-client names into customer profiles and click earning/payout service rows into the customer's service records, then return to the originating commission tab without losing LOB or date context.
 
 ## 3. Auth And Permissions
 

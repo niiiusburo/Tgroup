@@ -57,11 +57,11 @@ tables:
   - etc.
 endpoints:
   - Internal only for v1: earnings writes via payments path
-  - GET /api/Earnings or reports (future admin view of earnings)
-  - POST /api/Payouts (future batch payout)
+  - GET /api/Earnings or reports (admin earnings view reads earning rows, including service_line_id for service drilldowns)
+  - POST /api/Payouts (batch payout)
 ui_surfaces:
   - CTV dashboard (reads only)
-  - Future admin earnings/payouts UI (not in v1)
+  - /commission?tab=earnings and /commission?tab=payouts admin views; earning and pending-payout service links open /customers/:id?tab=records&serviceLineId=:lineId&from=commission for audit context before staff pay out
 jobs:
   - commissionEngine on payment collect/refund
   - auto-consultation lifecycle on cosmetic appt
@@ -84,6 +84,7 @@ impact_tests:
   - Paid-out earnings block payment void/delete and service reversal
   - D13 priority verified in unit tests (ctv > consultation > salestaff)
   - Legacy commission rules tables never written by v2 engine
+  - Admin earnings/payout rows with service_line_id link to the matching customer Records tab and focus the service row without mutating earnings or payout state
 risk_level: high (money movement)
 notes:
   - "EARNINGS vs LEGACY COMMISSIONS: earnings is the transactional append-only attribution log (D12/D13). Legacy commissions/* are the old rules/config tables for calculating % — never touched by the new engine. See business-logic/commission-rules.md and DECISIONS.md."

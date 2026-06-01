@@ -10,6 +10,65 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK3 admin CTV commission breadcrumb navigation 2026-06-01
+
+Feature/edit name: Admin CTV commission five-tab breadcrumb and drilldown navigation
+
+Changed URLs and API routes:
+- `/commission?tab=config&lob=cosmetic`
+- `/commission?tab=ctvs&lob=cosmetic`
+- `/commission?tab=newClients&lob=cosmetic`
+- `/commission?tab=earnings&lob=cosmetic`
+- `/commission?tab=payouts&lob=cosmetic`
+- `/customers/:id?tab=profile&from=commission&returnTab=newClients&lob=cosmetic`
+- `/customers/:id?tab=records&serviceLineId=:serviceLineId&from=commission&returnTab=earnings&lob=cosmetic`
+- `/customers/:id?tab=records&serviceLineId=:serviceLineId&from=commission&returnTab=payouts&lob=cosmetic`
+- Existing reads only: `GET /api/Earnings`, `GET /api/Payouts`, `GET /api/Partners/:id`, `GET /api/SaleOrderLines`
+
+Affected data flows:
+- Admin commission tabs now preserve the active step in the URL instead of keeping the tab only in component state.
+- New Clients rows link customer names to customer profiles; phone numbers remain `tel:` links.
+- Earnings and pending-payout service rows link to the customer's Records tab when `service_line_id` is present, expanding and highlighting the target service line.
+- Customer profiles reached from commission show a return trail back to the originating commission tab and preserve the active LOB.
+- This feature is read-only navigation; it must not create, edit, delete, pay, reverse, or export records.
+
+User roles:
+- Admin or staff with access to `/commission`, customer profile, earnings, and payout surfaces.
+- Cosmetic LOB is the default verification lane for NK3/TMV.
+
+Happy paths:
+- Open `/commission?tab=newClients&lob=cosmetic`, click a client name, verify `/customers/:id?tab=profile...` opens and the return trail goes back to New Clients.
+- Open `/commission?tab=earnings&lob=cosmetic`, click a service with `service_line_id`, verify `/customers/:id?tab=records...` opens, Records is active, and the matching service row is highlighted.
+- Open `/commission?tab=payouts&lob=cosmetic`, click a pending service with `service_line_id`, verify the same focused Records drilldown works.
+- Refresh each `/commission?tab=...` URL and verify the same active tab remains selected.
+- Use mobile viewport and verify rows render as stacked cards without losing click targets or date context.
+
+Edge cases:
+- Missing `client_id` renders the name as plain text instead of a broken link.
+- Missing `service_line_id` renders the service name as plain text instead of navigating to an unknown row.
+- Empty tabs still show the breadcrumb rail and do not crash.
+- Browser Back and the commission return trail both preserve LOB context.
+
+Regressions:
+- CTV management, New Clients export, Earnings export, Payout creation, selected pending earnings, date filters, and existing customer service edit/pay/delete buttons still work.
+- CTV users must still be redirected away from admin `/commission`.
+- Cosmetic/Dental route prefixes remain isolated.
+
+Setup/login state:
+- Live target after deploy: `https://tmv.2checkin.com`, Cosmetic LOB.
+- Use admin login with Cosmetic LOB access.
+- Capture screenshot evidence for New Clients and Earnings tabs after deploy.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `/commission?tab=newClients&lob=cosmetic` shows the breadcrumb rail and client names are profile links while phone numbers remain call links.
+- [ ] PENDING: Verify customer profile reached from New Clients shows a return trail back to `/commission?tab=newClients&lob=cosmetic`.
+- [ ] PENDING: Verify an Earnings service link opens `/customers/:id?tab=records&serviceLineId=:id...` and focuses the target service row.
+- [ ] PENDING: Verify a pending Payouts service link opens the same focused Records flow.
+- [ ] PENDING: Verify refreshing each of the five `/commission?tab=...` URLs keeps the selected tab.
+- [ ] PENDING: Verify mobile layout has no overlapping row text or lost action targets.
+
+---
+
 # TestSprite Plan: NK3 Cosmetic deleted-service balance reversal 2026-06-01
 
 Feature/edit name: Customer outstanding balance excludes deleted service cards

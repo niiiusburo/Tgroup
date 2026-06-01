@@ -1,4 +1,4 @@
-import { BadgeDollarSign, CalendarDays, CheckCircle2, ChevronRight, ReceiptText, Settings2, UserPlus, Users } from 'lucide-react';
+import { ArrowLeft, BadgeDollarSign, CalendarDays, CheckCircle2, ChevronRight, ReceiptText, Settings2, UserPlus, Users } from 'lucide-react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -23,11 +23,13 @@ export function CommissionFlowTabs({ activeTab, onChange }: CommissionFlowTabsPr
   const { t, i18n } = useTranslation('commission');
   const today = useMemo(() => formatCommissionDate(new Date(), i18n.language), [i18n.language]);
   const activeIndex = Math.max(0, tabs.findIndex((tab) => tab.key === activeTab));
+  const previousTab = activeIndex > 0 ? tabs[activeIndex - 1] : null;
+  const nextTab = activeIndex < tabs.length - 1 ? tabs[activeIndex + 1] : null;
 
   return (
     <section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-card">
       <div className="flex flex-col gap-3 border-b border-gray-100 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+        <div className="flex min-w-0 gap-1.5 overflow-x-auto pb-1">
           {tabs.map((tab, index) => {
             const isCurrent = tab.key === activeTab;
             const isDone = index < activeIndex;
@@ -39,7 +41,7 @@ export function CommissionFlowTabs({ activeTab, onChange }: CommissionFlowTabsPr
                   onClick={() => onChange(tab.key)}
                   aria-current={isCurrent ? 'step' : undefined}
                   className={cn(
-                    'inline-flex h-9 items-center gap-2 rounded-lg border px-2.5 text-sm font-semibold transition-colors',
+                    'inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border px-2.5 text-sm font-semibold transition-colors',
                     isCurrent ? tab.active : 'border-transparent text-gray-500 hover:border-gray-200 hover:bg-gray-50 hover:text-gray-900'
                   )}
                 >
@@ -58,14 +60,40 @@ export function CommissionFlowTabs({ activeTab, onChange }: CommissionFlowTabsPr
             );
           })}
         </div>
-        <div className="inline-flex h-9 w-fit items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-600">
+        <div className="inline-flex h-9 w-fit shrink-0 items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-600">
           <CalendarDays className="h-4 w-4 text-primary" />
           <span>{t('flow.today')}</span>
           <span className="font-semibold text-gray-900">{today}</span>
         </div>
       </div>
 
-      <div className="grid gap-2 p-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="flex items-center justify-between gap-2 border-b border-gray-100 px-4 py-3 lg:hidden">
+        {previousTab ? (
+          <button
+            type="button"
+            onClick={() => onChange(previousTab.key)}
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-600"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {t(`tabs.${previousTab.key}`)}
+          </button>
+        ) : <span />}
+        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
+          {activeIndex + 1}/{tabs.length}
+        </span>
+        {nextTab ? (
+          <button
+            type="button"
+            onClick={() => onChange(nextTab.key)}
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3 text-sm font-semibold text-white"
+          >
+            {t(`tabs.${nextTab.key}`)}
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        ) : <span />}
+      </div>
+
+      <div className="hidden gap-2 p-3 lg:grid xl:grid-cols-5">
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
           const isCurrent = tab.key === activeTab;

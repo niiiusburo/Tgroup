@@ -27,6 +27,7 @@ export type { OrchestratorProps as CustomerProfileProps } from './types';
 export function CustomerProfile(props: OrchestratorProps) {
   const {
     profile, appointments, services = [], loadingServices = false, employees,
+    focusedServiceId,
     depositList = [], usageHistory = [], depositBalance,
     payments = [], activeTab: controlledActiveTab, onTabChange,
     onBack, onEdit, onAddDeposit, onAddRefund, onVoidDeposit, onDeleteDeposit,
@@ -251,6 +252,7 @@ export function CustomerProfile(props: OrchestratorProps) {
           profile={profile}
           services={services}
           loadingServices={loadingServices}
+          focusedServiceId={focusedServiceId}
           payments={payments}
           onCreateService={handleInitiateServiceCreate}
           onEditService={handleInitiateServiceEdit}

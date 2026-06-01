@@ -31,6 +31,7 @@
 | v1.0.16 | 2026-06-01 | CTV booking selected-LOB company fallback clarified: active company rows with QA/test/verify fixture names are deprioritized behind real clinic locations. |
 | v1.0.17 | 2026-06-01 | CustomerBalance outstanding-balance contract clarified: soft-deleted saleorders do not count as customer debt. |
 | v1.0.18 | 2026-06-01 | Service-line reversal contract clarified: `DELETE /api/SaleOrderLines/:id` is permissioned as customer edit + payment void, blocks paid-out CTV commissions, and only auto-voids linked payments when allocations are single-invoice and still unpaid. |
+| v1.0.19 | 2026-06-01 | Admin commission navigation contract clarified: earnings rows may expose `service_line_id`; frontend clients use it only for read-only drilldown links into customer Records. |
 
 ---
 
@@ -41,6 +42,8 @@ Cosmetic LOB mirror rule: when the frontend passes `lob: 'cosmetic'` to `apiFetc
 CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referrals`, `GET /api/ctv/client-journeys`, `GET /api/ctv/hierarchy`, `GET /api/ctv/client-lookup`, and `GET /api/ctv/me` are mounted behind `ctv.dashboard.view` and are scoped to the authenticated CTV identity unless the route explicitly allows admin-assisted CTV creation/booking. Authenticated non-CTV staff must not receive another CTV's self data.
 
 Admin CTV list rule: `GET /api/Ctvs` and `GET /api/cosmetic/Ctvs` return CTV identity rows with `source`, `legacy_code`, and `created_via`. Cosmetic mode filters to CTV rows whose `lob_scope` includes `cosmetic`; `source='legacy_ctv'` is derived from `created_via LIKE 'legacy_ctv_import%'`.
+
+Admin commission navigation rule: `/commission?tab=config|ctvs|newClients|earnings|payouts&lob=<lob>` preserves the active CTV workflow step in the URL. `GET /api/Earnings` rows consumed by the admin UI may include `service_line_id?: string | null`; when present, the frontend may link to `/customers/:client_id?tab=records&serviceLineId=:service_line_id&from=commission&returnTab=earnings|payouts&lob=<lob>`. The link is read-only navigation only; it must not change earning status, payout status, payment state, or service-line data.
 
 ### 1.1 Auth
 
