@@ -2,6 +2,7 @@ import { Calendar, CalendarPlus, Clock, Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { ApiAppointment } from '@/lib/api';
 import { RecordDateBadge } from './RecordDateBadge';
+import { DoctorCtvTrail } from '@/components/shared';
 
 interface CustomerAppointmentHistoryProps {
   readonly appointments: readonly ApiAppointment[];
@@ -165,7 +166,11 @@ export function CustomerAppointmentHistory({
                       </td>
                       <td className="py-3 pr-4 align-top">
                         <div className="min-w-[150px] space-y-1">
-                          <TeamLine label="Bác sĩ" value={appointment.doctorname} />
+                          {appointment.ctv_name ? (
+                            <DoctorCtvTrail doctorName={appointment.doctorname} ctvName={appointment.ctv_name} doctorLabel="BS." />
+                          ) : (
+                            <TeamLine label="Bác sĩ" value={appointment.doctorname} />
+                          )}
                           {appointment.assistantname && <TeamLine label="Phụ tá" value={appointment.assistantname} />}
                           {appointment.dentalaidename && <TeamLine label="Nha tá" value={appointment.dentalaidename} />}
                         </div>

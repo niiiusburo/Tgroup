@@ -7,6 +7,7 @@ import { formatVND } from '@/lib/formatting';
 import { getPaymentsForService, resolveServiceFinancials } from './ServiceHistoryUtils';
 import { ServiceHistoryPayments } from './ServiceHistoryPayments';
 import { RecordDateBadge } from './RecordDateBadge';
+import { DoctorCtvTrail } from '@/components/shared';
 
 interface ServiceHistoryRowProps {
   readonly service: CustomerService;
@@ -57,8 +58,12 @@ export function ServiceHistoryRow({
               {(service.orderCode || service.orderName) && (
                 <p className="text-xs font-mono text-primary mt-0.5">{service.orderCode || service.orderName}</p>
               )}
-              {service.doctor && service.doctor !== 'N/A' && (
-                <p className="mt-0.5 truncate text-xs font-medium text-gray-500">{service.doctor}</p>
+              {service.ctvName ? (
+                <DoctorCtvTrail doctorName={service.doctor} ctvName={service.ctvName} doctorLabel="BS." />
+              ) : (
+                service.doctor && service.doctor !== 'N/A' && (
+                  <p className="mt-0.5 truncate text-xs font-medium text-gray-500">{service.doctor}</p>
+                )
               )}
               <StaffLine label="Trợ lý BS" value={service.dentalAideName} />
               <StaffLine label="Phụ tá" value={service.assistantName} />
