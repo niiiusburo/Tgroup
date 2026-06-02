@@ -196,7 +196,7 @@ router.get('/referrals', requireAuth, requireCtvUser, async (req, res) => {
       if (!rows || rows.length === 0) return [];
       const ids = rows.map((r) => r.id);
 
-      const [earnAgg, payAgg, svcRows, visitAgg] = await Promise.all([
+      const [earnAgg, payAgg, svcRows, visitAgg, apptCtvRows, svcCtvRows] = await Promise.all([
         safeQueryRows(
           db,
           `SELECT client_id AS id, COALESCE(SUM(amount), 0) AS total, COUNT(*) AS cnt
@@ -228,6 +228,29 @@ router.get('/referrals', requireAuth, requireCtvUser, async (req, res) => {
             GROUP BY partnerid`,
           [ids]
         ),
+        safeQueryRows(
+          db,
+          `SELECT DISTINCT ON (a.partnerid) a.partnerid AS id, a.ctv_id AS "ctvId",
+                  ctvp.name AS "ctvName", COALESCE(a.date, a.datecreated) AS dt
+             FROM dbo.appointments a
+             LEFT JOIN dbo.partners ctvp ON ctvp.id = a.ctv_id
+            WHERE a.partnerid = ANY($1) AND a.ctv_id IS NOT NULL
+              AND COALESCE(a.state, '') NOT ILIKE 'cancel%'
+            ORDER BY a.partnerid, COALESCE(a.date, a.datecreated) DESC NULLS LAST`,
+          [ids]
+        ),
+        safeQueryRows(
+          db,
+          `SELECT DISTINCT ON (so.partnerid) so.partnerid AS id, so.ctv_id AS "ctvId",
+                  ctvp.name AS "ctvName", COALESCE(so.dateordered, so.datecreated) AS dt
+             FROM dbo.saleorders so
+             LEFT JOIN dbo.partners ctvp ON ctvp.id = so.ctv_id
+            WHERE so.partnerid = ANY($1) AND so.ctv_id IS NOT NULL
+              AND COALESCE(so.state, '') NOT ILIKE 'cancel%'
+              AND COALESCE(so.isdeleted, false) = false
+            ORDER BY so.partnerid, COALESCE(so.dateordered, so.datecreated) DESC NULLS LAST`,
+          [ids]
+        ),
       ]);
 
       const earnMap = new Map(earnAgg.map((r) => [r.id, r]));
@@ -238,6 +261,11 @@ router.get('/referrals', requireAuth, requireCtvUser, async (req, res) => {
         if (!svcMap.has(s.id)) svcMap.set(s.id, []);
         svcMap.get(s.id).push(s);
       }
+
+      // 6-month CTV-link window: latest non-cancelled CTV-bearing appointment OR service wins.
+      const { computeCtvLink } = require('../services/referralClaim');
+      const apptCtvMap = new Map(apptCtvRows.map((r) => [r.id, r]));
+      const svcCtvMap = new Map(svcCtvRows.map((r) => [r.id, r]));
 
       return rows.map((row) => {
         const e = earnMap.get(row.id) || { total: 0, cnt: 0 };
@@ -271,6 +299,12 @@ router.get('/referrals', requireAuth, requireCtvUser, async (req, res) => {
 
         const total = Math.round(parseFloat(e.total || 0));
         const cnt = parseInt(e.cnt || 0, 10);
+        const link = computeCtvLink({
+          appt: apptCtvMap.get(row.id) || null,
+          service: svcCtvMap.get(row.id) || null,
+          fallbackOwnerCtvId: ctvId, // this CTV owns the /referrals list query
+          fallbackOwnerName: null,
+        });
         return {
           id: row.id,
           name: row.name,
@@ -286,6 +320,11 @@ router.get('/referrals', requireAuth, requireCtvUser, async (req, res) => {
           services,
           last_payment_at: p ? p.last_at : null,
           last_visit_at: v ? v.last_at : null,
+          link_expires_at: link.expiresAt ? link.expiresAt.toISOString() : null,
+          link_anchor_at: link.anchorAt ? link.anchorAt.toISOString() : null,
+          link_active: link.active,
+          eligible: link.eligible,
+          linked_ctv_name: link.linkedCtvName,
         };
       });
     };
@@ -315,6 +354,16 @@ router.get('/referrals', requireAuth, requireCtvUser, async (req, res) => {
         if (item.last_payment_at && (!prev.last_payment_at || new Date(item.last_payment_at) > new Date(prev.last_payment_at))) {
           prev.last_payment_at = item.last_payment_at;
         }
+        // Latest-expiring window wins; eligible only when every LOB window is inactive.
+        const prevExp = prev.link_expires_at ? new Date(prev.link_expires_at).getTime() : -Infinity;
+        const itemExp = item.link_expires_at ? new Date(item.link_expires_at).getTime() : -Infinity;
+        if (itemExp > prevExp) {
+          prev.link_expires_at = item.link_expires_at;
+          prev.link_anchor_at = item.link_anchor_at;
+          prev.linked_ctv_name = item.linked_ctv_name;
+        }
+        prev.link_active = prev.link_active || item.link_active;
+        prev.eligible = !prev.link_active;
       } else {
         byId.set(item.id, { ...item });
       }
