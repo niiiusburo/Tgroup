@@ -8,6 +8,8 @@ export { ChangePasswordModal } from './ChangePasswordModal';
 export { default as ComboboxInput } from './ComboboxInput';
 export { default as CurrencyInput } from './CurrencyInput';
 export { CustomerNameLink } from './CustomerNameLink';
+export { CtvLinkBar, ctvLinkBarFraction } from './CtvLinkBar';
+export { DoctorCtvTrail } from './DoctorCtvTrail';
 export { CustomerSelector } from './CustomerSelector';
 export { CustomerSourceDropdown } from './CustomerSourceDropdown';
 export { type Column, DataTable } from './DataTable';
