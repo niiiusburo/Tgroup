@@ -2,6 +2,16 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.96] — 2026-06-02 (nk3-deploy)
+### Added
+- **CTV 6-month eligibility bar + Doctor→CTV breadcrumb.** A client's link to a CTV is now a computed, non-destructive status anchored on the most recent non-cancelled **CTV-bearing** appointment or service (service wins ties); the window is `anchor + 6 months`. Surfaced as a color-shifting countdown bar (`CtvLinkBar`) on the admin customer profile header and every CTV-portal card, plus a `BS. … › CTV: …` breadcrumb (`DoctorCtvTrail`) on appointment and service rows. When the window lapses the bar shows "Đã hết hạn — khách có thể gắn CTV khác" and the portal card surfaces an eligibility banner with the journey dimmed. — @agent (Claude)
+### Backend
+- New `appointments.ctv_id` column (migration `054_add_appointments_ctv.sql`) persisted on appointment create/update and portal booking, with an idempotent anchor backfill. `getCtvLinkStatus`/`computeCtvLink` derive `anchorAt → expiresAt(+6mo) → active/eligible`; the legacy `getReferralClaimStatus` now delegates to it so `/ctv/referrals`, the customer-profile `referralClaim`, `/client-lookup` and the booking gate all agree. No change to commission %, earnings rows, payouts, or `referred_by_ctv_id` (only the existing assign/claim paths mutate it). — @agent (Claude)
+### Fixed
+- **`useCustomerProfileData` dropped `referralClaim`**, so the countdown bar never rendered on the `/customers/:id` deep-link page. Now passed through. Caught by live Playwright verification, not unit tests. — @agent (Claude)
+### Tested
+- Jest (`computeCtvLink` + `getReferralClaimStatus` delegation, `getPartnerById`/`resolveHandler` referralClaim); Vitest (`CtvLinkBar`, `DoctorCtvTrail`, + 7 affected customer/ctv suites, 48 green); `tsc --noEmit` clean; `npm run build` green; Playwright live verification on `http://127.0.0.1:5175` (t@clinic.vn) of the expired bar + appointment-row breadcrumb against local NK3 demo data (5433 `tdental_demo`). CTV-portal cards covered by unit + API only (no CTV test account). — @agent (Claude)
+
 ## [0.32.95] — 2026-06-02 (nk3-deploy)
 ### Changed
 - **CTV profile now shows the actual shareable invite link.** `/ctv` Me tab promotes the `/ctv/join?ref=CTV-...` URL as the primary visible value, keeps the referral code as a secondary reference, and adds explicit share/copy-link actions so CTVs can send a working signup link instead of seeing only a code. Preserves the existing public join flow and CTV-only portal behavior; no API or backend data flow changed. — @agent

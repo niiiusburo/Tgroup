@@ -195,6 +195,73 @@ TestSprite execution items:
 
 ---
 
+# TestSprite Plan: NK3 CTV eligibility bar + Doctor→CTV breadcrumb 2026-06-02
+Feature/edit name: 6-month CTV-link countdown bar (`CtvLinkBar`) + Doctor→CTV breadcrumb (`DoctorCtvTrail`)
+Branch: nk3-deploy. Local verification on 5433 `tdental_demo` (+ `tcosmetic_demo`); never run against real NK/nk2.
+
+Changed URLs / API routes / data flow:
+- DB: new `dbo.appointments.ctv_id` (migration 054) + idempotent anchor backfill; persisted on appointment create/update and `POST /api/ctv/bookings`.
+- Read paths now expose real `appointments.ctv_id` + `ctv_name`, and `GET /api/SaleOrders/lines` exposes per-service `so.ctv_id` + `ctv_name`.
+- `GET /api/Partners/:id` & `/Partners/resolve` `referralClaim` gains `anchorAt` + `eligible` (via `getCtvLinkStatus`).
+- `GET /api/ctv/referrals` gains `link_expires_at`, `link_anchor_at`, `link_active`, `eligible`, `linked_ctv_name` (latest-expiring window wins across LOBs).
+- Anchor rule: latest non-cancelled CTV-bearing appointment OR service (service wins ties); `expiresAt = anchor + 6 months`; computed on read, non-destructive.
+
+User roles: Admin (customer profile bar + breadcrumb); CTV (portal card bar + eligibility banner).
+
+Happy path:
+- A referred client with a CTV-bearing event in the last 6 months → green/amber bar with "≈N tháng/tuần/ngày còn lại"; appointment/service rows show `BS. … › CTV: …`.
+- A client whose latest CTV-bearing event is older than 6 months → grey bar "Đã hết hạn — khách có thể gắn CTV khác"; portal card shows the eligibility banner with the journey dimmed.
+
+Edge cases / regressions to check:
+- No CTV-bearing event but `referred_by_ctv_id` set → linked, no anchor, not eligible (no countdown).
+- Appt vs service tie on date → service wins and names its CTV.
+- Cancelled appointments / soft-deleted services ignored; paid AND unpaid services both count.
+- Cross-LOB: latest-expiring active window wins; eligible only when every LOB window is inactive.
+- Invariants: no change to commission %, earnings rows, payouts, or `referred_by_ctv_id` outside existing assign/claim paths.
+
+Test plan (automated + live):
+- [x] PASS: Jest `computeCtvLink` + `getReferralClaimStatus` delegation + `getPartnerById`/`resolveHandler` referralClaim — 22 + 6 green; full API suite 917 pass (3 pre-existing, DB-fixture failures unrelated, proven at baseline 6a4674e1).
+- [x] PASS: Vitest `CtvLinkBar` + `DoctorCtvTrail` (9) and 7 affected customer/ctv suites (48) — all green; `tsc --noEmit` clean; `npm run build` green.
+- [x] PASS: Live Playwright on http://127.0.0.1:5175 (t@clinic.vn) — customer `0de4e55d…` profile shows the expired `ctv-link-bar-expired` + "CTV Demo Referrer"; appointment row shows the `doctor-ctv-trail` `CTV: CTV Demo Referrer` pill. Screenshots in `website/docs/live-artifacts/`.
+- [ ] PENDING: Live CTV-portal card bar + eligibility banner — needs a CTV account (only admin creds available); covered by unit (`ReferralFlipCard`) + `/ctv/referrals` API for now.
+- [ ] PENDING: Verify an ACTIVE (green/amber, not expired) bar live once a client has a CTV-bearing event within 6 months (all current demo anchors are 2023–2025 → expired).
+
+---
+
+# TestSprite Plan: NK3 Payment DELETE/VOID earnings reversal (money integrity) 2026-06
+Feature/edit name: Payment delete and void now reverse v2 earnings attribution (prevents phantom commissions after delete)
+Branch: nk3-deploy only (local 5433 tdental_demo + tcosmetic_demo demo data for NK3). Never applied to real NK or nk2.
+
+Changed URLs and API routes:
+- DELETE /api/Payments/:id (now calls reverseOnRefund inside tx)
+- POST /api/Payments/:id/void (now calls reverseOnRefund inside tx)
+- No new routes; existing endpoints now produce symmetric negative earnings rows (like refund path).
+
+Affected data flows:
+- Before: delete/void reversed only residuals/allocations; positive earnings rows for the payment remained → phantom commissions visible in CTV downline, admin Commission tab, potentialOverride, and future payouts.
+- After: both paths call commissionEngine.reverseOnRefund (inserts negative rows for every prior positive earnings row for that payment_id). Net = 0 for the payment. Original positive rows left untouched (audit). Negatives reference the payment (even if hard-deleted).
+- Only on nk3-deploy + local NK3 demo DBs during verification.
+
+User roles: Admin with payment.void (the role that could previously "delete" payments).
+
+Happy path:
+- Admin creates payment on a referred client → earnings row(s) created (source ctv/salestaff/etc., amount = line * product rate).
+- Admin deletes or voids the payment → negative reversal row(s) appear for the same recipients/sources; net attribution for that payment = 0.
+- CTV downline views and reports no longer show phantom from the deleted payment.
+
+Edge cases / regressions to check:
+- Delete a payment that had MLM overrides (L1-L4) → all levels get matching negatives.
+- Delete a payment with no prior earnings → no-op (no error).
+- Delete after partial payout (some earnings have payout_id) → still insert negatives for the unpaid portion (current reverse does all; refine later if needed).
+- Void vs hard delete produce equivalent net-zero effect.
+- LOB isolation (dental vs cosmetic) preserved via req.lob + txClient.
+
+Test plan (manual + automated):
+- [x] PASS: Added contract test in commissionEngine.test.js (NK3 reversal section) — 854 tests pass in the suite.
+- [ ] PENDING: Browser verification on http://127.0.0.1:5175 (t@clinic.vn / 123123) — create payment on a client with referred_by_ctv_id or salestaffid, confirm earnings in DB, delete via admin Payment UI (or API), re-query earnings for net zero on that payment_id.
+- [ ] PENDING: Run the NK3-only cleanup script (scripts/nk3-only/fix-commission-attribution-2026-06.sql) against local 5433 only; re-check the specific "Trung kien" downline view in admin /commission CTV tab.
+- [ ] PENDING: Confirm no earnings reversal call on non-NK3 branches/environments (guarded by branch + comments).
+
 # TestSprite Plan: NK3 CTV appointment-only booking and name autofill 2026-06-01
 
 Feature/edit name: CTV refer-client available-name autofill and appointment-only booking
@@ -2801,3 +2868,46 @@ TestSprite execution items:
 - [ ] PENDING: Delete service linked to paid-out commission and confirm `B_COMMISSION_PAID_OUT` with no service/payment mutation.
 - [ ] PENDING: Verify `/commission` five-tab breadcrumb flow and readable date labels on New Clients, Earnings, and Payouts.
 - [ ] PENDING: Verify New Clients, Earnings, and Payouts Excel preview/download still work with active date filters.
+
+---
+
+# TestSprite Plan: NK Production Login Monitor 2026-06-02
+
+Feature/edit name: NK production read-only login health monitor
+
+Changed URLs and API routes:
+- Browser-visible: `https://nk.2checkin.com/`, `https://nk.2checkin.com/customers`, `https://nk.2checkin.com/calendar`.
+- API routes observed only through live app navigation/login; no route was changed.
+
+Affected data flows:
+- Production login via the visible login form.
+- Read-only dashboard, customer list, and calendar page loads after authentication.
+
+User roles:
+- Existing clinic account `t@clinic.vn` with production access.
+- Fallback account `t@clinic.com` only if the primary account cannot log in.
+
+Happy paths:
+- Primary account logs in without visible login errors.
+- Three distinct visible-navigation screens load nonblank content.
+- Browser console, page errors, and `/api/*` responses remain free of blocking errors.
+
+Edge cases:
+- If primary login fails, retry with fallback credentials and capture the visible login error.
+- If a page is blank, visibly broken, or reports a blocking API error, preserve screenshots and network evidence before fixing.
+
+Regressions:
+- Do not create, edit, delete, submit, or otherwise mutate production data during the monitor.
+- Keep screenshots privacy-redacted when reporting production UI evidence.
+
+Setup data and login state:
+- Target: `https://nk.2checkin.com`.
+- Credentials checked in order: `t@clinic.vn / 123123`, then `t@clinic.com / 123123` only if needed.
+- Evidence directory: `output/playwright/nk-login-monitor-20260602-000500/`.
+
+Execution verification:
+- [x] PASS: Primary account `t@clinic.vn` logged in successfully; fallback was not used.
+- [x] PASS: Overview `/` loaded through visible navigation with nonblank content and no visible error; screenshot `output/playwright/nk-login-monitor-20260602-000500/redacted-safe/01-overview-privacy-redacted.png`.
+- [x] PASS: Customers `/customers` loaded through visible navigation with nonblank content and no visible error; screenshot `output/playwright/nk-login-monitor-20260602-000500/redacted-safe/02-customers-privacy-redacted.png`.
+- [x] PASS: Calendar `/calendar` loaded through visible navigation with nonblank content and no visible error; screenshot `output/playwright/nk-login-monitor-20260602-000500/redacted-safe/03-calendar-privacy-redacted.png`.
+- [x] PASS: Monitor result recorded 0 API errors, 0 console errors, and 0 page errors.
