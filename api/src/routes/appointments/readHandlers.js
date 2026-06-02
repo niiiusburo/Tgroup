@@ -164,7 +164,8 @@ async function listAppointments(req, res) {
         p.name AS partnername,
         p.phone AS partnerphone,
         p.ref AS partnercode,
-        p.referred_by_ctv_id AS ctv_id,
+        a.ctv_id AS ctv_id,
+        ctvp.name AS ctv_name,
         a.companyid,
         c.name AS companyname,
         a.doctorid,
@@ -200,7 +201,8 @@ async function listAppointments(req, res) {
         p.displayname AS partnerdisplayname,
         p.phone AS partnerphone,
         p.ref AS partnercode,
-        p.referred_by_ctv_id AS ctv_id,
+        a.ctv_id AS ctv_id,
+        ctvp.name AS ctv_name,
         a.companyid,
         c.name AS companyname,
         a.userid,
@@ -240,6 +242,7 @@ async function listAppointments(req, res) {
     const calendarJoins = `
       FROM appointments a
       LEFT JOIN partners p ON p.id = a.partnerid
+      LEFT JOIN partners ctvp ON ctvp.id = a.ctv_id
       LEFT JOIN companies c ON c.id = a.companyid
       LEFT JOIN employees doc ON doc.id = a.doctorid
       LEFT JOIN employees ass ON ass.id = a.assistantid
@@ -249,6 +252,7 @@ async function listAppointments(req, res) {
     const fullJoins = `
       FROM appointments a
       LEFT JOIN partners p ON p.id = a.partnerid
+      LEFT JOIN partners ctvp ON ctvp.id = a.ctv_id
       LEFT JOIN companies c ON c.id = a.companyid
       LEFT JOIN aspnetusers au ON au.id = a.userid
       LEFT JOIN employees doc ON doc.id = a.doctorid
@@ -352,7 +356,8 @@ async function getAppointmentById(req, res) {
         p.phone AS partnerphone,
         p.email AS partneremail,
         p.ref AS partnercode,
-        p.referred_by_ctv_id AS ctv_id,
+        a.ctv_id AS ctv_id,
+        ctvp.name AS ctv_name,
         a.companyid,
         c.name AS companyname,
         a.userid,
@@ -390,6 +395,7 @@ async function getAppointmentById(req, res) {
         da.name AS dentalaidename
       FROM appointments a
       LEFT JOIN partners p ON p.id = a.partnerid
+      LEFT JOIN partners ctvp ON ctvp.id = a.ctv_id
       LEFT JOIN companies c ON c.id = a.companyid
       LEFT JOIN aspnetusers au ON au.id = a.userid
       LEFT JOIN employees doc ON doc.id = a.doctorid
