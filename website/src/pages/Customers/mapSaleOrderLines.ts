@@ -79,6 +79,7 @@ export function mapSaleOrderLineToCustomerService(line: SaleOrderLineInput): Cus
     residual,
     sourceId: firstDefined(line.sourceId, line.sourceid),
     ctvId: firstDefined(line.ctvId, line.ctv_id),
+    ctvName: firstDefined(line.ctvName, line.ctv_name) || undefined,
     locationId: firstDefined(line.companyId, line.companyid),
     locationName: line.companyname || undefined,
   };

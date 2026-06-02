@@ -141,6 +141,8 @@ export interface CustomerService {
   readonly sourceId?: string | null;
   /** CTV (Cộng tác viên) commission referrer assigned to this customer. */
   readonly ctvId?: string | null;
+  /** Display name of the CTV attributed to this service (from saleorders.ctv_id). */
+  readonly ctvName?: string | null;
   readonly locationId?: string | null;
   /** Branch/clinic name where the service was performed. */
   readonly locationName?: string;
