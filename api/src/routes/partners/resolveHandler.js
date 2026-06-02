@@ -1,7 +1,7 @@
 'use strict';
 
 const { query } = require('../../db');
-const { getReferralClaimStatus } = require('../../services/referralClaim');
+const { getCtvLinkStatus } = require('../../services/referralClaim');
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -132,7 +132,15 @@ async function resolvePartner(req, res) {
   let referralClaim = null;
   if (row && row.id) {
     const lob = req.lob || 'dental';
-    referralClaim = await getReferralClaimStatus(row.id, lob, {});
+    const s = await getCtvLinkStatus(row.id, lob, {});
+    referralClaim = {
+      ownerCtvId: s.linkedCtvId,
+      ownerName: s.linkedCtvName,
+      active: s.active,
+      expiresAt: s.expiresAt,
+      anchorAt: s.anchorAt,
+      eligible: s.eligible,
+    };
   }
   const body = {
     matchedBy: result.matchedBy,

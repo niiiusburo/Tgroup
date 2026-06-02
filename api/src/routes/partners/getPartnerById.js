@@ -112,12 +112,21 @@ async function getPartnerById(req, res) {
 
     const partner = rows[0];
 
-    // Attach referral claim status if partner has referred_by_ctv_id
+    // Attach CTV link status (6-month eligibility window). Keeps legacy ownerCtvId/ownerName/
+    // active/expiresAt and adds anchorAt + eligible for the countdown bar.
     let referralClaim = null;
     if (partner && partner.id) {
-      const { getReferralClaimStatus } = require('../../services/referralClaim');
+      const { getCtvLinkStatus } = require('../../services/referralClaim');
       const lob = req.lob || 'dental';
-      referralClaim = await getReferralClaimStatus(partner.id, lob, {});
+      const s = await getCtvLinkStatus(partner.id, lob, {});
+      referralClaim = {
+        ownerCtvId: s.linkedCtvId,
+        ownerName: s.linkedCtvName,
+        active: s.active,
+        expiresAt: s.expiresAt,
+        anchorAt: s.anchorAt,
+        eligible: s.eligible,
+      };
     }
 
     return res.json({ ...partner, referralClaim });
