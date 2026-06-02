@@ -56,6 +56,7 @@ export function useCustomerProfileData(
         sourceid: hookProfile.sourceid,
         sourcename: hookProfile.sourcename,
         faceRegisteredAt: hookProfile.faceRegisteredAt,
+        referralClaim: hookProfile.referralClaim ?? null,
       };
     }
 
