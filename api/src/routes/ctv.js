@@ -953,13 +953,13 @@ router.post('/bookings', requireAuth, async (req, res) => {
       `INSERT INTO dbo.appointments (
         id, name, date, time, partnerid, doctorid, companyid, note, timeexpected,
         color, state, aptstate, isrepeatcustomer, isnotreatment, productid, assistantid, dentalaideid,
-        datecreated, lastupdated
+        ctv_id, datecreated, lastupdated
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, false, false, $13, $14, $15,
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, false, false, $13, $14, $15, $16,
         (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'),
         (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
       )`,
-      [apptId, apptName, date, time || null, clientId, null, appointmentCompanyId, apptNote, 30, '1', 'confirmed', 'confirmed', validProductId, null, null]);
+      [apptId, apptName, date, time || null, clientId, null, appointmentCompanyId, apptNote, 30, '1', 'confirmed', 'confirmed', validProductId, null, null, employeeId]);
 
     return res.status(201).json({ clientId, appointmentId: apptId });
   } catch (e) {

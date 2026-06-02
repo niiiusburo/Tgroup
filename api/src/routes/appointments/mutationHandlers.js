@@ -92,11 +92,11 @@ async function createAppointment(req, res) {
       `INSERT INTO appointments (
         id, name, date, time, partnerid, doctorid, companyid, note, timeexpected,
         color, state, aptstate, isrepeatcustomer, isnotreatment, productid, assistantid, dentalaideid,
-        datecreated, lastupdated
+        ctv_id, datecreated, lastupdated
       ) VALUES (
-        gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, false, false, $12, $13, $14, ${VIETNAM_NOW_SQL}, ${VIETNAM_NOW_SQL}
+        gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, false, false, $12, $13, $14, $15, ${VIETNAM_NOW_SQL}, ${VIETNAM_NOW_SQL}
       ) RETURNING *`,
-      [name, date, time || null, partnerId, doctorId || null, companyId, note, timeExpectedNum, color, state, state, productId, assistantId, dentalAideId]
+      [name, date, time || null, partnerId, doctorId || null, companyId, note, timeExpectedNum, color, state, state, productId, assistantId, dentalAideId, ctvId]
     );
 
     const newAppointment = result[0];
@@ -328,6 +328,14 @@ async function updateAppointment(req, res) {
       updates.push(`dentalaideid = $${paramIdx}`);
       params.push(dentalAideId || null);
       paramIdx++;
+    }
+
+    // Persist the per-appointment CTV when the edit sent it. undefined => key absent => unchanged;
+    // a UUID stamps this appointment's ctv_id; null/'' clears it.
+    if (ctvId !== undefined) {
+      updates.push(`ctv_id = $${paramIdx}`);
+      params.push(ctvId || null);
+      paramIdx += 1;
     }
 
     // Always update lastupdated
