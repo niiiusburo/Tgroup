@@ -2,6 +2,20 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [Unreleased] — 2026-06-01
+### Infrastructure
+- **ctv.thammyvientam.com now forwards to tmv.2checkin.com.** Added nginx server block (`docs/live-artifacts/ctv-thammyvientam/ctv.thammyvientam.com.nginx.conf`) returning 301 for all paths. Replaced `CTVlegacy/app/dist/index.html` with a client-side fallback redirect so the old CTV landing page no longer loads. Aligns ctv.thammyvientam.com behavior with the existing ctv.2checkin.com forwarding setup. — @agent
+
+## [0.32.93] — 2026-06-02 (nk3-deploy)
+### Added
+- **CTV 6-month eligibility bar + Doctor→CTV breadcrumb.** A client's link to a CTV is now a computed, non-destructive status anchored on the most recent non-cancelled **CTV-bearing** appointment or service (service wins ties); the window is `anchor + 6 months`. Surfaced as a color-shifting countdown bar (`CtvLinkBar`) on the admin customer profile header and every CTV-portal card, plus a `BS. … › CTV: …` breadcrumb (`DoctorCtvTrail`) on appointment and service rows. When the window lapses the bar shows "Đã hết hạn — khách có thể gắn CTV khác" and the portal card surfaces an eligibility banner with the journey dimmed. — @agent (Claude)
+### Backend
+- New `appointments.ctv_id` column (migration `054_add_appointments_ctv.sql`) persisted on appointment create/update and portal booking, with an idempotent anchor backfill. `getCtvLinkStatus`/`computeCtvLink` derive `anchorAt → expiresAt(+6mo) → active/eligible`; the legacy `getReferralClaimStatus` now delegates to it so `/ctv/referrals`, the customer-profile `referralClaim`, `/client-lookup` and the booking gate all agree. No change to commission %, earnings rows, payouts, or `referred_by_ctv_id` (only the existing assign/claim paths mutate it). — @agent (Claude)
+### Fixed
+- **`useCustomerProfileData` dropped `referralClaim`**, so the countdown bar never rendered on the `/customers/:id` deep-link page. Now passed through. Caught by live Playwright verification, not unit tests. — @agent (Claude)
+### Tested
+- Jest (`computeCtvLink` + `getReferralClaimStatus` delegation, `getPartnerById`/`resolveHandler` referralClaim); Vitest (`CtvLinkBar`, `DoctorCtvTrail`, + 7 affected customer/ctv suites, 48 green); `tsc --noEmit` clean; `npm run build` green; Playwright live verification on `http://127.0.0.1:5175` (t@clinic.vn) of the expired bar + appointment-row breadcrumb against local NK3 demo data (5433 `tdental_demo`). CTV-portal cards covered by unit + API only (no CTV test account). — @agent (Claude)
+
 ## [0.32.92] — 2026-06-01 (nk3-deploy)
 ### Fixed
 - **CTV bookings are appointment-only again and name lookup fills available existing clients.** `POST /api/ctv/bookings` no longer calls `createReferralStartCard()` or writes `saleorders`/`saleorderlines`; selected services or the configured Referral Start product are stored only on `appointments.productid`. The CTV refer modal also pre-fills the name after phone lookup when the existing client is available and does not overwrite manual typing. Preserves INV-021 and INV-022. — @agent
@@ -10,6 +24,14 @@
 - **Admin `/commission` now uses a five-step CTV workflow rail.** Config, CTVs, New Clients, Earnings, and Payouts are presented as a breadcrumb-style operational flow with clean date labels and explicit earned dates in earnings/payout tables. Website version bumped to `0.32.92`. — @agent
 ### Tested
 - `JWT_SECRET=test-secret npx jest src/routes/__tests__/ctvBookings.test.js --runInBand`; `JWT_SECRET=test-secret npx jest src/services/__tests__/serviceReversal.test.js --runInBand`; `npm --prefix website test -- ServicePicker`; `npm --prefix website test -- CtvReferModal`; `npm --prefix website test -- EarningsPayoutsTabs`; `npm --prefix website run build`; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off <changed paths>` (0 findings); `npm run verify:governance`. Live verification still to run before deploy. — @agent
+
+## [0.32.88] — 2026-06-01 (nk3-deploy only)
+### Fixed (money integrity — NK3 demo DBs only during verification)
+- **Payment DELETE and /void now reverse v2 earnings attribution (no more phantom commissions).** Both paths now call `commissionEngine.reverseOnRefund` inside the transaction (exactly like the refund path). Negative reversal rows are inserted for every prior positive earnings row for that payment. Net attribution = 0. Original positive rows left untouched for audit. Prevents the exact class of bugs that caused "Trung kien 39k under downline" after deletes and "can't delete payments" leaving orphan earnings. New invariant INV-003A. One-off NK3-only cleanup script added in `scripts/nk3-only/`. All changes on nk3-deploy branch; local 5433 tdental_demo + tcosmetic_demo only for verification. Never applied to real NK or nk2. — @agent (Grok)
+### Tested
+- New contract test in `api/src/services/__tests__/commissionEngine.test.js` (NK3 reversal section); relevant suite reports 854 passed.
+- Manual DB + browser verification planned on http://127.0.0.1:5175 (t@clinic.vn) against local NK3 demo data only.
+- `npm run verify:governance` (authority gate + docs) to be re-run before any PR from this branch.
 
 ## [0.32.87] — 2026-06-01 (nk3-deploy)
 ### Fixed
