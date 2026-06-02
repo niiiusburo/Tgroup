@@ -2,6 +2,12 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.95] — 2026-06-02 (nk3-deploy)
+### Changed
+- **CTV profile now shows the actual shareable invite link.** `/ctv` Me tab promotes the `/ctv/join?ref=CTV-...` URL as the primary visible value, keeps the referral code as a secondary reference, and adds explicit share/copy-link actions so CTVs can send a working signup link instead of seeing only a code. Preserves the existing public join flow and CTV-only portal behavior; no API or backend data flow changed. — @agent
+### Tested
+- `npm --prefix website test -- src/pages/CTV/CtvDashboard.test.tsx` (6 passed); `npm --prefix website run lint` (0 errors, 50 existing warnings); `npm --prefix website run build`; live `/ctv` screenshot proof required after NK3 deployment. — @agent
+
 ## [0.32.94] — 2026-06-02 (nk3-deploy)
 ### Changed
 - **CTV portal orange menu is now a compact motion pill.** `/ctv` replaces the tall orange header block with a smaller rounded header, groups `Giới thiệu khách` and `Tuyển CTV` inside a pill action menu, and hides the header on downward scroll while returning it on upward scroll or focus. Preserves the CTV-only portal behavior in BEHAVIOR.md and product-map `ctv.yaml`; no API or backend data flow changed. — @agent

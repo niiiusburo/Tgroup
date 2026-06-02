@@ -54,7 +54,7 @@ ui_surfaces:
     - Home: greeting + pending tile (split dental/cosmetic) + this-month + recent activity feed with [den]/[cos] pills
     - Commission: Pending/Paid segmented; earnings list (client, service, amount, LOB pill)
     - Tracking: referred clients by stage (referred, visited, serviced, paid) with LOB pills and earned/estimated commission context
-    - Me: profile, current language label, logout
+    - Me: profile, visible /ctv/join?ref=CTV-... invite link with share/copy-link actions, current language label, logout
   - Hard redirect on login for partners.is_ctv=true (before any admin mount)
   - 403 guards on all / (admin) routes for CTV
   - /commission admin five-step CTV flow (Config, CTV, New Clients, Earnings, Payouts) with URL-backed breadcrumb rail, clean date labels, profile drilldowns from New Clients, and LOB-aware export/payment surfaces

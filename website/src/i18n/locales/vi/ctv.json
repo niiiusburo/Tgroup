@@ -26,7 +26,10 @@
     "trackClients": "Khách giới thiệu",
     "inviteCtv": "Giới thiệu CTV",
     "copy": "Sao chép mã giới thiệu",
+    "copyLink": "Sao chép liên kết mời CTV",
+    "shareLink": "Chia sẻ liên kết mời CTV",
     "copied": "Đã sao chép",
+    "linkCopied": "Đã sao chép liên kết",
     "logout": "Đăng xuất"
   },
   "home": {
@@ -50,6 +53,8 @@
   },
   "me": {
     "ctvPartner": "Đối tác CTV",
+    "referralLink": "Liên kết mời CTV",
+    "referralCodeLabel": "Mã",
     "referralCode": "Mã giới thiệu",
     "language": "Ngôn ngữ",
     "notifications": "Thông báo",

@@ -10,6 +10,46 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: CTV profile shareable invite link 2026-06-02
+Feature/edit name: `/ctv` Me tab visible CTV invite link
+Branch: nk3-deploy. Local-first frontend verification; no backend data writes and no VPS/database sync involved.
+
+Changed URLs / API routes / data flow:
+- URL changed: `/ctv` Me/Profile tab.
+- Public destination URL surfaced: `/ctv/join?ref=CTV-XXXXXX`.
+- API routes changed: none.
+- Existing public join APIs remain in use when a visitor opens the link and submits signup: `GET /api/ctv-public/refcode/:code`, `POST /api/ctv-public/join`.
+- Data flow changed: none on copy/share; the only write remains the existing visitor signup submit on `/ctv/join`.
+
+User roles:
+- CTV user copying or sharing their invite link from `/ctv`.
+- Public visitor opening `/ctv/join?ref=CTV-XXXXXX` from the shared link.
+
+Happy paths:
+- CTV opens `/ctv`, taps `Tôi`, and sees `Liên kết mời CTV` with a visible `tmv.2checkin.com/ctv/join?ref=CTV-...` style link.
+- Copy action writes the full absolute join URL to the clipboard.
+- Share action opens the native share sheet when available, otherwise falls back to copying the same full URL.
+- Public visitor opens the URL and lands on the existing CTV join form with the referral code resolved.
+
+Edge cases / regressions:
+- The short `CTV-...` code remains visible as secondary context.
+- Long invite URLs truncate visually without clipping the copy/share buttons.
+- Vietnamese and English labels both fit in the mobile card.
+- `/ctv` profile, language toggle, notification row, and logout still render below the card.
+
+Setup/login state:
+- Use a CTV-authenticated `/ctv` session on local `http://127.0.0.1:<vite-port>/ctv` or live `https://tmv.2checkin.com/ctv` after deployment.
+- Capture mobile screenshot evidence of the Me tab showing the invite link.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `/ctv` > `Tôi` shows the full visible invite link, not only `CTV-...`.
+- [ ] PENDING: Verify copy writes `https://tmv.2checkin.com/ctv/join?ref=CTV-...` on live NK3.
+- [ ] PENDING: Verify native share or fallback copy uses the same full link.
+- [ ] PENDING: Verify opening the copied link loads `/ctv/join?ref=CTV-...` and resolves the referrer.
+- [ ] PENDING: Verify profile/language/notification/logout rows remain usable below the invite-link card.
+
+---
+
 # TestSprite Plan: CTV portal orange motion pill header 2026-06-02
 Feature/edit name: `/ctv` compact orange menu + scroll-hide motion header
 Branch: nk3-deploy. Local-first frontend verification; no backend data writes and no VPS/database sync involved.
