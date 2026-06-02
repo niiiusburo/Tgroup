@@ -10,6 +10,43 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: CTV portal orange motion pill header 2026-06-02
+Feature/edit name: `/ctv` compact orange menu + scroll-hide motion header
+Branch: nk3-deploy. Local-first frontend verification; no backend data writes and no VPS/database sync involved.
+
+Changed URLs / API routes / data flow:
+- URL changed: `/ctv` CTV portal shell only.
+- API routes changed: none.
+- Data flow changed: none; existing `GET /api/ctv/referrals`, `GET /api/ctv/commission-summary`, `GET /api/ctv/me`, and `GET /api/ctv/network` calls are unchanged.
+- UI behavior: the orange header is now a smaller rounded pill; `Giới thiệu khách` and `Tuyển CTV` are grouped inside a compact pill action menu; the header hides on downward scroll and returns on upward scroll or focus.
+
+User roles:
+- CTV user on `/ctv`.
+
+Happy paths:
+- First load shows the compact orange pill header with TG Clinic, Cổng CTV, greeting, language, notifications, and both action buttons.
+- Scrolling down moves the header out of view to free mobile content space.
+- Scrolling up returns the header without changing the active bottom tab or loaded CTV data.
+- Tapping `Giới thiệu khách` still opens the refer-client sheet; tapping `Tuyển CTV` still opens the recruit modal.
+
+Edge cases / regressions:
+- Reduced-motion users still get a visible, usable header without animated movement.
+- Header focus reveals the header so keyboard/focus users do not lose controls.
+- Vietnamese and English labels remain present and do not clip in the pill buttons.
+- Bottom navigation stays fixed and the single `Theo dõi` tab remains unchanged.
+
+Setup/login state:
+- Use a CTV-authenticated `/ctv` session on local `http://127.0.0.1:<vite-port>/ctv` or live `https://tmv.2checkin.com/ctv` after deployment.
+- Capture mobile screenshot evidence for expanded, hidden-after-scroll, and returned-after-scroll states.
+
+TestSprite execution items:
+- [x] PASS: Verify `/ctv` first-load compact pill header on a mobile viewport with screenshot evidence - local Playwright/Chrome mocked CTV session, `docs/live-artifacts/ctv-header-motion/01-expanded.png`.
+- [x] PASS: Verify downward scroll hides the header without moving or duplicating bottom navigation - local Playwright/Chrome mocked CTV session, `docs/live-artifacts/ctv-header-motion/02-hidden-on-scroll-down.png`.
+- [x] PASS: Verify upward scroll returns the header and both action buttons remain clickable - local Playwright/Chrome mocked CTV session, `docs/live-artifacts/ctv-header-motion/03-returned-on-scroll-up.png`; action button accessibility covered by `CtvDashboard.test.tsx`.
+- [x] PASS: Verify EN/VI labels and the language dropdown still render under the compact header - `npm --prefix website test -- src/pages/CTV/CtvDashboard.test.tsx` covered English shell, Vietnamese shell, and below-header language dropdown.
+
+---
+
 # TestSprite Plan: NK3 CTV eligibility bar + Doctor→CTV breadcrumb 2026-06-02
 Feature/edit name: 6-month CTV-link countdown bar (`CtvLinkBar`) + Doctor→CTV breadcrumb (`DoctorCtvTrail`)
 Branch: nk3-deploy. Local verification on 5433 `tdental_demo` (+ `tcosmetic_demo`); never run against real NK/nk2.

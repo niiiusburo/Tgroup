@@ -50,6 +50,7 @@ endpoints:
   - GET /api/ctv/* (gated)
 ui_surfaces:
   - /ctv (full bypass of admin Layout/sidebar; mobile-first with bottom nav 4 tabs; also usable desktop; EN/VI switcher in the CTV header)
+    - Header: compact orange motion pill; hides on downward scroll, returns on upward scroll/focus, and groups Refer Client + Recruit CTV as a smaller pill action menu.
     - Home: greeting + pending tile (split dental/cosmetic) + this-month + recent activity feed with [den]/[cos] pills
     - Commission: Pending/Paid segmented; earnings list (client, service, amount, LOB pill)
     - Tracking: referred clients by stage (referred, visited, serviced, paid) with LOB pills and earned/estimated commission context

@@ -14,9 +14,11 @@
   "hello": "Xin chào, {{name}}",
   "notifications": "Thông báo",
   "language": "Ngôn ngữ",
+  "quickActions": "Thao tác CTV nhanh",
   "header": {
     "brand": "TG CLINIC",
     "title": "Cổng CTV",
+    "portalMenu": "Menu Cổng CTV",
     "commissionTitle": "Hoa hồng",
     "networkTitle": "Mạng lưới",
     "meTitle": "Tài khoản"

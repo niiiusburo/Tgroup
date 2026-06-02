@@ -6,6 +6,12 @@
 ### Infrastructure
 - **ctv.thammyvientam.com now forwards to tmv.2checkin.com.** Added nginx server block (`docs/live-artifacts/ctv-thammyvientam/ctv.thammyvientam.com.nginx.conf`) returning 301 for all paths. Replaced `CTVlegacy/app/dist/index.html` with a client-side fallback redirect so the old CTV landing page no longer loads. Aligns ctv.thammyvientam.com behavior with the existing ctv.2checkin.com forwarding setup. — @agent
 
+## [0.32.94] — 2026-06-02 (nk3-deploy)
+### Changed
+- **CTV portal orange menu is now a compact motion pill.** `/ctv` replaces the tall orange header block with a smaller rounded header, groups `Giới thiệu khách` and `Tuyển CTV` inside a pill action menu, and hides the header on downward scroll while returning it on upward scroll or focus. Preserves the CTV-only portal behavior in BEHAVIOR.md and product-map `ctv.yaml`; no API or backend data flow changed. — @agent
+### Tested
+- `npm --prefix website test -- src/pages/CTV/CtvDashboard.test.tsx` (5 passed); `npm --prefix website run lint` (0 errors, 48 existing warnings); `npm --prefix website run build`; local Playwright/Chrome visual companion against `http://127.0.0.1:5175/ctv` with mocked CTV API responses: `docs/live-artifacts/ctv-header-motion/ctv-orange-menu-scroll-companion.png`. — @agent
+
 ## [0.32.93] — 2026-06-02 (nk3-deploy)
 ### Added
 - **CTV 6-month eligibility bar + Doctor→CTV breadcrumb.** A client's link to a CTV is now a computed, non-destructive status anchored on the most recent non-cancelled **CTV-bearing** appointment or service (service wins ties); the window is `anchor + 6 months`. Surfaced as a color-shifting countdown bar (`CtvLinkBar`) on the admin customer profile header and every CTV-portal card, plus a `BS. … › CTV: …` breadcrumb (`DoctorCtvTrail`) on appointment and service rows. When the window lapses the bar shows "Đã hết hạn — khách có thể gắn CTV khác" and the portal card surfaces an eligibility banner with the journey dimmed. — @agent (Claude)
