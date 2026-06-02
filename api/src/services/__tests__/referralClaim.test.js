@@ -1,6 +1,6 @@
 'use strict';
 
-const { computeClaim, getReferralClaimStatus } = require('../referralClaim');
+const { computeClaim, getReferralClaimStatus, computeCtvLink } = require('../referralClaim');
 
 describe('referralClaim', () => {
   describe('computeClaim', () => {
@@ -143,17 +143,21 @@ describe('referralClaim', () => {
     });
   });
 
-  describe('getReferralClaimStatus', () => {
-    it('returns inactive claim when client has no referred_by_ctv_id', async () => {
+  describe('getReferralClaimStatus (delegates to getCtvLinkStatus)', () => {
+    // The legacy implementation queried commission_settings/saleorderlines/payments. It now
+    // delegates to getCtvLinkStatus, which finds the latest non-cancelled CTV-bearing appointment
+    // OR saleorder (3 queries: appointments, saleorders, owner) and returns the legacy shape.
+
+    it('returns inactive claim when no CTV-bearing event and no owner on file', async () => {
       const mockDb = {
         queryRows: jest.fn()
-          .mockResolvedValueOnce([{ referred_by_ctv_id: null, owner_name: null }]) // owner query
+          .mockResolvedValueOnce([])                                   // appointments (no CTV-bearing)
+          .mockResolvedValueOnce([])                                   // saleorders (no CTV-bearing)
+          .mockResolvedValueOnce([{ ownerId: null, ownerName: null }]) // owner lookup
       };
       const getDb = jest.fn().mockReturnValue(mockDb);
 
-      const result = await getReferralClaimStatus('client-1', 'nk', {
-        getDb: getDb,
-      });
+      const result = await getReferralClaimStatus('client-1', 'nk', { getDb });
 
       expect(result).toEqual({
         ownerCtvId: null,
@@ -164,129 +168,187 @@ describe('referralClaim', () => {
       });
     });
 
-    it('queries settings for referral_start_product_id', async () => {
-      const ownerDate = new Date('2026-02-01');
+    it('queries appointments and saleorders for the latest CTV-bearing event', async () => {
       const mockDb = {
         queryRows: jest.fn()
-          .mockResolvedValueOnce([{ referred_by_ctv_id: 'ctv-1', owner_name: 'Owner' }]) // owner query
-          .mockResolvedValueOnce([{ referral_start_product_id: 'product-1' }]) // settings query
-          .mockResolvedValueOnce([{ d: null }]) // card query (no card)
-          .mockResolvedValueOnce([{ d: null }]) // appointment query
-          .mockResolvedValueOnce([{ d: ownerDate }]) // payment query
+          .mockResolvedValueOnce([])
+          .mockResolvedValueOnce([])
+          .mockResolvedValueOnce([{ ownerId: null, ownerName: null }])
       };
       const getDb = jest.fn().mockReturnValue(mockDb);
 
-      const result = await getReferralClaimStatus('client-1', 'nk', {
-        asOf: new Date('2026-03-01'),
-        getDb: getDb,
-      });
+      await getReferralClaimStatus('client-1', 'nk', { getDb });
 
-      expect(mockDb.queryRows).toHaveBeenCalledTimes(5);
-      expect(mockDb.queryRows.mock.calls[1][0]).toContain('commission_settings');
+      expect(mockDb.queryRows).toHaveBeenCalledTimes(3);
+      expect(mockDb.queryRows.mock.calls[0][0]).toContain('dbo.appointments');
+      expect(mockDb.queryRows.mock.calls[0][0]).toContain('ctv_id');
+      expect(mockDb.queryRows.mock.calls[1][0]).toContain('dbo.saleorders');
     });
 
-    it('finds referral card date from saleorderlines when referral_start_product_id is set', async () => {
-      const cardDate = new Date('2026-01-10');
-      const ownerDate = new Date('2026-02-01');
+    it('uses the latest CTV-bearing appointment as the anchor', async () => {
+      const apptDate = new Date('2026-04-01');
       const mockDb = {
         queryRows: jest.fn()
-          .mockResolvedValueOnce([{ referred_by_ctv_id: 'ctv-1', owner_name: 'Owner' }]) // owner query
-          .mockResolvedValueOnce([{ referral_start_product_id: 'product-1' }]) // settings query
-          .mockResolvedValueOnce([{ d: cardDate }]) // card query (found)
-          .mockResolvedValueOnce([{ d: null }]) // appointment query
-          .mockResolvedValueOnce([{ d: ownerDate }]) // payment query
-      };
-      const getDb = jest.fn().mockReturnValue(mockDb);
-
-      const result = await getReferralClaimStatus('client-1', 'nk', {
-        asOf: new Date('2026-03-01'),
-        getDb: getDb,
-      });
-
-      expect(result.anchorDate).toEqual(ownerDate); // Later date wins
-      expect(mockDb.queryRows.mock.calls[2][0]).toContain('saleorderlines');
-    });
-
-    it('finds last paid service date from payments table', async () => {
-      const paymentDate = new Date('2026-02-01');
-      const mockDb = {
-        queryRows: jest.fn()
-          .mockResolvedValueOnce([{ referred_by_ctv_id: 'ctv-1', owner_name: 'Owner' }])
-          .mockResolvedValueOnce([{ referral_start_product_id: null }])
-          .mockResolvedValueOnce([{ d: null }])
-          .mockResolvedValueOnce([{ d: paymentDate }])
-      };
-      const getDb = jest.fn().mockReturnValue(mockDb);
-
-      const result = await getReferralClaimStatus('client-1', 'nk', {
-        asOf: new Date('2026-03-01'),
-        getDb: getDb,
-      });
-
-      expect(result.anchorDate).toEqual(paymentDate);
-      expect(mockDb.queryRows.mock.calls[3][0]).toContain('dbo.payments');
-    });
-
-    it('finds booking appointment date from appointments table', async () => {
-      const appointmentDate = new Date('2026-06-01T08:00:00.000Z');
-      const mockDb = {
-        queryRows: jest.fn()
-          .mockResolvedValueOnce([{ referred_by_ctv_id: 'ctv-1', owner_name: 'Owner' }])
-          .mockResolvedValueOnce([{ referral_start_product_id: null }])
-          .mockResolvedValueOnce([{ d: appointmentDate }])
-          .mockResolvedValueOnce([{ d: null }])
+          .mockResolvedValueOnce([{ ctvId: 'ctv-1', ctvName: 'Owner', dt: apptDate }])
+          .mockResolvedValueOnce([])
+          .mockResolvedValueOnce([{ ownerId: 'ctv-1', ownerName: 'Owner' }])
       };
       const getDb = jest.fn().mockReturnValue(mockDb);
 
       const result = await getReferralClaimStatus('client-1', 'nk', {
         asOf: new Date('2026-06-02'),
-        getDb: getDb,
-      });
-
-      expect(result.anchorDate).toEqual(appointmentDate);
-      expect(result.active).toBe(true);
-      expect(mockDb.queryRows.mock.calls[2][0]).toContain('dbo.appointments');
-    });
-
-    it('supports txClient for transaction context', async () => {
-      const ownerDate = new Date('2026-02-01');
-      const txClient = {
-        query: jest.fn()
-          .mockResolvedValueOnce({ rows: [{ referred_by_ctv_id: 'ctv-1', owner_name: 'Owner' }] })
-          .mockResolvedValueOnce({ rows: [{ referral_start_product_id: null }] })
-          .mockResolvedValueOnce({ rows: [{ d: null }] })
-          .mockResolvedValueOnce({ rows: [{ d: ownerDate }] })
-      };
-
-      const result = await getReferralClaimStatus('client-1', 'nk', {
-        asOf: new Date('2026-03-01'),
-        txClient: txClient,
+        getDb,
       });
 
       expect(result.ownerCtvId).toBe('ctv-1');
-      expect(txClient.query).toHaveBeenCalledTimes(4);
+      expect(result.anchorDate).toEqual(apptDate);
+      expect(result.active).toBe(true);
     });
 
-    it('combines referral card and payment dates to find the later anchor', async () => {
-      const cardDate = new Date('2026-01-10');
-      const paymentDate = new Date('2026-02-15');
+    it('lets a newer CTV-bearing service win over an older appointment', async () => {
+      const apptDate = new Date('2026-03-01');
+      const svcDate = new Date('2026-05-01');
       const mockDb = {
         queryRows: jest.fn()
-          .mockResolvedValueOnce([{ referred_by_ctv_id: 'ctv-1', owner_name: 'Owner' }])
-          .mockResolvedValueOnce([{ referral_start_product_id: 'product-1' }])
-          .mockResolvedValueOnce([{ d: cardDate }])
-          .mockResolvedValueOnce([{ d: null }])
-          .mockResolvedValueOnce([{ d: paymentDate }])
+          .mockResolvedValueOnce([{ ctvId: 'ctv-A', ctvName: 'Lan', dt: apptDate }])
+          .mockResolvedValueOnce([{ ctvId: 'ctv-B', ctvName: 'Huy', dt: svcDate }])
+          .mockResolvedValueOnce([{ ownerId: 'ctv-A', ownerName: 'Lan' }])
       };
       const getDb = jest.fn().mockReturnValue(mockDb);
 
       const result = await getReferralClaimStatus('client-1', 'nk', {
-        asOf: new Date('2026-03-01'),
-        getDb: getDb,
+        asOf: new Date('2026-06-02'),
+        getDb,
       });
 
-      expect(result.anchorDate).toEqual(paymentDate); // Later wins
+      expect(result.ownerCtvId).toBe('ctv-B');
+      expect(result.ownerName).toBe('Huy');
+      expect(result.anchorDate).toEqual(svcDate);
+    });
+
+    it('is inactive when the latest CTV-bearing event is older than 6 months', async () => {
+      const apptDate = new Date('2025-11-01');
+      const mockDb = {
+        queryRows: jest.fn()
+          .mockResolvedValueOnce([{ ctvId: 'ctv-1', ctvName: 'Owner', dt: apptDate }])
+          .mockResolvedValueOnce([])
+          .mockResolvedValueOnce([{ ownerId: 'ctv-1', ownerName: 'Owner' }])
+      };
+      const getDb = jest.fn().mockReturnValue(mockDb);
+
+      const result = await getReferralClaimStatus('client-1', 'nk', {
+        asOf: new Date('2026-06-02'),
+        getDb,
+      });
+
+      expect(result.active).toBe(false);
+    });
+
+    it('falls back to referred_by owner (linked, no anchor) when no CTV-bearing event exists', async () => {
+      const mockDb = {
+        queryRows: jest.fn()
+          .mockResolvedValueOnce([])
+          .mockResolvedValueOnce([])
+          .mockResolvedValueOnce([{ ownerId: 'ctv-1', ownerName: 'Owner' }])
+      };
+      const getDb = jest.fn().mockReturnValue(mockDb);
+
+      const result = await getReferralClaimStatus('client-1', 'nk', { getDb });
+
+      expect(result.ownerCtvId).toBe('ctv-1');
+      expect(result.ownerName).toBe('Owner');
+      expect(result.anchorDate).toBeNull();
+      expect(result.expiresAt).toBeNull();
       expect(result.active).toBe(true);
+    });
+
+    it('supports txClient for transaction context (3 queries)', async () => {
+      const apptDate = new Date('2026-04-01');
+      const txClient = {
+        query: jest.fn()
+          .mockResolvedValueOnce({ rows: [{ ctvId: 'ctv-1', ctvName: 'Owner', dt: apptDate }] })
+          .mockResolvedValueOnce({ rows: [] })
+          .mockResolvedValueOnce({ rows: [{ ownerId: 'ctv-1', ownerName: 'Owner' }] })
+      };
+
+      const result = await getReferralClaimStatus('client-1', 'nk', {
+        asOf: new Date('2026-06-02'),
+        txClient,
+      });
+
+      expect(result.ownerCtvId).toBe('ctv-1');
+      expect(txClient.query).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('computeCtvLink', () => {
+    const asOf = new Date('2026-06-02T00:00:00Z');
+
+    it('no CTV-bearing event and no fallback owner => eligible, not linked', () => {
+      const { computeCtvLink } = require('../referralClaim');
+      const r = computeCtvLink({ appt: null, service: null, fallbackOwnerCtvId: null, fallbackOwnerName: null, asOf });
+      expect(r.linkedCtvId).toBeNull();
+      expect(r.active).toBe(false);
+      expect(r.eligible).toBe(true);
+      expect(r.anchorAt).toBeNull();
+    });
+
+    it('latest CTV-bearing event within 6 months => active, not eligible', () => {
+      const { computeCtvLink } = require('../referralClaim');
+      const r = computeCtvLink({
+        appt: { ctvId: 'ctv-A', ctvName: 'Lan', dt: new Date('2026-04-01') },
+        service: null, fallbackOwnerCtvId: 'ctv-A', fallbackOwnerName: 'Lan', asOf,
+      });
+      expect(r.linkedCtvId).toBe('ctv-A');
+      expect(r.linkedCtvName).toBe('Lan');
+      expect(r.anchorSource).toBe('appointment');
+      expect(r.active).toBe(true);
+      expect(r.eligible).toBe(false);
+      expect(r.expiresAt.getTime()).toBe(new Date('2026-10-01').getTime());
+    });
+
+    it('latest CTV-bearing event older than 6 months => expired, eligible', () => {
+      const { computeCtvLink } = require('../referralClaim');
+      const r = computeCtvLink({
+        appt: { ctvId: 'ctv-A', ctvName: 'Lan', dt: new Date('2025-11-01') },
+        service: null, fallbackOwnerCtvId: 'ctv-A', fallbackOwnerName: 'Lan', asOf,
+      });
+      expect(r.active).toBe(false);
+      expect(r.eligible).toBe(true);
+    });
+
+    it('service is newer than appointment => service wins and names its CTV', () => {
+      const { computeCtvLink } = require('../referralClaim');
+      const r = computeCtvLink({
+        appt: { ctvId: 'ctv-A', ctvName: 'Lan', dt: new Date('2026-03-01') },
+        service: { ctvId: 'ctv-B', ctvName: 'Huy', dt: new Date('2026-05-01') },
+        fallbackOwnerCtvId: 'ctv-A', fallbackOwnerName: 'Lan', asOf,
+      });
+      expect(r.linkedCtvId).toBe('ctv-B');
+      expect(r.linkedCtvName).toBe('Huy');
+      expect(r.anchorSource).toBe('service');
+    });
+
+    it('tie on date => service wins', () => {
+      const { computeCtvLink } = require('../referralClaim');
+      const sameDay = new Date('2026-05-01');
+      const r = computeCtvLink({
+        appt: { ctvId: 'ctv-A', ctvName: 'Lan', dt: sameDay },
+        service: { ctvId: 'ctv-B', ctvName: 'Huy', dt: sameDay },
+        fallbackOwnerCtvId: null, fallbackOwnerName: null, asOf,
+      });
+      expect(r.anchorSource).toBe('service');
+      expect(r.linkedCtvId).toBe('ctv-B');
+    });
+
+    it('fallback owner set but no event => linked, no anchor, not eligible', () => {
+      const { computeCtvLink } = require('../referralClaim');
+      const r = computeCtvLink({ appt: null, service: null, fallbackOwnerCtvId: 'ctv-A', fallbackOwnerName: 'Lan', asOf });
+      expect(r.linkedCtvId).toBe('ctv-A');
+      expect(r.anchorAt).toBeNull();
+      expect(r.expiresAt).toBeNull();
+      expect(r.active).toBe(true);
+      expect(r.eligible).toBe(false);
     });
   });
 });
