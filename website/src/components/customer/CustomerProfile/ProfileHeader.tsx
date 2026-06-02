@@ -5,6 +5,7 @@ import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { probeCrossLob, type CrossLobProbeResult } from '@/lib/api/partners';
+import { CtvLinkBar } from '@/components/shared';
 
 interface ProfileHeaderProps {
   profile: CustomerProfileData;
@@ -115,28 +116,19 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
             </button>
           )}
 
-          {/* Referral Claim Badge: shows "Referred by CTV" with claim status */}
+          {/* Referral claim: "Referred by CTV" + 6-month eligibility countdown bar */}
           {profile.referralClaim?.ownerCtvId && (
-            <div className="mt-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1"
-                data-testid="referral-claim-badge"
-                title={profile.referralClaim.ownerName || 'CTV Referral'}
-              >
-                <span className="text-gray-700">Người giới thiệu (CTV): <strong>{profile.referralClaim.ownerName}</strong></span>
-              </span>
-              {profile.referralClaim.active && profile.referralClaim.expiresAt ? (
-                <span className="ml-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200"
-                  data-testid="referral-active-badge"
-                >
-                  còn hiệu lực đến {new Date(profile.referralClaim.expiresAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-                </span>
-              ) : (
-                <span className="ml-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 ring-1 ring-gray-200"
-                  data-testid="referral-expired-badge"
-                >
-                  đã hết hạn
-                </span>
-              )}
+            <div className="mt-2 max-w-xs" data-testid="referral-claim-badge">
+              <p className="mb-1 text-xs text-gray-500">
+                Người giới thiệu (CTV): <strong className="text-gray-700">{profile.referralClaim.ownerName}</strong>
+              </p>
+              <CtvLinkBar
+                ctvName={profile.referralClaim.ownerName}
+                anchorAt={profile.referralClaim.anchorAt ?? null}
+                expiresAt={profile.referralClaim.expiresAt ?? null}
+                active={profile.referralClaim.active}
+                eligible={profile.referralClaim.eligible ?? !profile.referralClaim.active}
+              />
             </div>
           )}
 
