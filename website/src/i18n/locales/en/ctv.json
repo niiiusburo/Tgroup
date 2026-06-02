@@ -1,4 +1,13 @@
 {
+  "link": {
+    "ctvLabel": "CTV",
+    "expired": "Expired — client can be linked to another CTV",
+    "activeNoDate": "Linked",
+    "monthsLeft": "≈{{count}} months left",
+    "weeksLeft": "≈{{count}} weeks left",
+    "daysLeft": "≈{{count}} days left",
+    "portalEligible": "Link expired — this client can be linked to another CTV"
+  },
   "brand": "TG CLINIC",
   "portal": "CTV Portal",
   "profileFallback": "CTV",
