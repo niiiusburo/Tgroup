@@ -227,7 +227,8 @@ router.get('/lines', requirePermission('services.view'), async (req, res) => {
         so.dentalaideid,
         so.companyid,
         so.sourceid,
-        cust.referred_by_ctv_id AS ctv_id,
+        so.ctv_id AS ctv_id,
+        ctvp.name AS ctv_name,
         COALESCE(NULLIF(NULLIF(so.unit, ''), 'services.form.unitPlaceholder'), pr.uomname) as unit,
         so.id as orderid,
         so.name as ordername,
@@ -250,6 +251,7 @@ router.get('/lines', requirePermission('services.view'), async (req, res) => {
       LEFT JOIN employees da ON da.id = so.dentalaideid
       LEFT JOIN companies c ON c.id = so.companyid
       LEFT JOIN partners cust ON cust.id = so.partnerid
+      LEFT JOIN partners ctvp ON ctvp.id = so.ctv_id
       LEFT JOIN (
         SELECT orderid, COUNT(*) as order_line_count
         FROM saleorderlines
