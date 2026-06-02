@@ -4,10 +4,10 @@ const {
   PARTNER_BY_ID_SQL,
   fetchPartnerProfileById,
 } = require('../getPartnerById');
-const { getReferralClaimStatus } = require('../../../services/referralClaim');
+const { getCtvLinkStatus } = require('../../../services/referralClaim');
 
 jest.mock('../../../services/referralClaim', () => ({
-  getReferralClaimStatus: jest.fn(),
+  getCtvLinkStatus: jest.fn(),
 }));
 
 jest.mock('../../../db', () => {
@@ -65,11 +65,13 @@ describe('getPartnerById referralClaim', () => {
       },
     ]);
 
-    getReferralClaimStatus.mockResolvedValueOnce({
-      ownerCtvId: 'ctv-1',
-      ownerName: 'Bob CTV',
+    getCtvLinkStatus.mockResolvedValueOnce({
+      linkedCtvId: 'ctv-1',
+      linkedCtvName: 'Bob CTV',
       active: true,
       expiresAt: new Date('2026-12-01'),
+      anchorAt: new Date('2026-06-01'),
+      eligible: false,
     });
 
     const req = { params: { id: 'partner-1' }, lob: 'dental' };
@@ -77,7 +79,7 @@ describe('getPartnerById referralClaim', () => {
 
     await getPartnerById(req, res);
 
-    expect(getReferralClaimStatus).toHaveBeenCalledWith('partner-1', 'dental', {});
+    expect(getCtvLinkStatus).toHaveBeenCalledWith('partner-1', 'dental', {});
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'partner-1',
@@ -85,6 +87,7 @@ describe('getPartnerById referralClaim', () => {
           ownerCtvId: 'ctv-1',
           ownerName: 'Bob CTV',
           active: true,
+          eligible: false,
         }),
       })
     );
