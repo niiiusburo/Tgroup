@@ -34,6 +34,12 @@ export interface CtvReferral {
   readonly stage_progress?: 1 | 2 | 3 | 4;
   readonly last_payment_at?: string | null;
   readonly last_visit_at?: string | null;
+  // 6-month CTV-link eligibility window (from /ctv/referrals). Optional for back-compat.
+  readonly link_expires_at?: string | null;
+  readonly link_anchor_at?: string | null;
+  readonly link_active?: boolean;
+  readonly eligible?: boolean;
+  readonly linked_ctv_name?: string | null;
 }
 
 export interface CtvReferralResponse {

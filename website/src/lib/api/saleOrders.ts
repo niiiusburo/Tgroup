@@ -167,6 +167,8 @@ export interface ApiSaleOrderLine {
   sourceId?: string | null;
   ctv_id?: string | null;
   ctvId?: string | null;
+  ctv_name?: string | null;
+  ctvName?: string | null;
   unit?: string | null;
   orderid?: string | null;
   orderId?: string | null;

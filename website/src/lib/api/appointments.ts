@@ -39,6 +39,8 @@ export interface ApiAppointment {
   dentalaidename: string | null;
   /** CTV (Cộng tác viên) commission referrer of the customer (partners.referred_by_ctv_id). */
   ctv_id?: string | null;
+  /** Display name of the CTV this appointment was booked under (partners.name via appointments.ctv_id). */
+  ctv_name?: string | null;
 }
 
 export function fetchAppointments(params?: {

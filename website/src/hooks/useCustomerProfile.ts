@@ -14,6 +14,8 @@ export interface ReferralClaim {
   ownerName: string | null;
   active: boolean;
   expiresAt: string | Date | null;
+  anchorAt?: string | Date | null;
+  eligible?: boolean;
 }
 
 export interface CustomerProfileData {
