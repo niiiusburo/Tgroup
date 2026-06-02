@@ -2,6 +2,8 @@
 
 const { getDb: defaultGetDb } = require('../db');
 
+const WINDOW_MONTHS = 6;
+
 function addMonths(date, months) {
   const d = new Date(date);
   d.setMonth(d.getMonth() + months);
@@ -21,51 +23,102 @@ function computeClaim({ ownerCtvId, ownerName, referralCardDate, bookingAppointm
   return { ownerCtvId, ownerName, anchorDate, expiresAt, active };
 }
 
-async function getReferralClaimStatus(clientId, lob, opts = {}) {
+/**
+ * Pure: pick the most-recent CTV-bearing event (service wins ties), derive the 6-month window.
+ */
+function computeCtvLink({ appt, service, fallbackOwnerCtvId = null, fallbackOwnerName = null, asOf = new Date() }) {
+  const candidates = [];
+  if (appt && appt.ctvId && appt.dt) candidates.push({ ...appt, dt: new Date(appt.dt), source: 'appointment', rank: 0 });
+  if (service && service.ctvId && service.dt) candidates.push({ ...service, dt: new Date(service.dt), source: 'service', rank: 1 });
+
+  candidates.sort((a, b) => (b.dt.getTime() - a.dt.getTime()) || (b.rank - a.rank));
+  const winner = candidates[0] || null;
+
+  if (!winner) {
+    if (fallbackOwnerCtvId) {
+      return {
+        linkedCtvId: fallbackOwnerCtvId, linkedCtvName: fallbackOwnerName,
+        anchorAt: null, anchorSource: null, expiresAt: null,
+        active: true, eligible: false, windowMonths: WINDOW_MONTHS,
+      };
+    }
+    return {
+      linkedCtvId: null, linkedCtvName: null, anchorAt: null, anchorSource: null,
+      expiresAt: null, active: false, eligible: true, windowMonths: WINDOW_MONTHS,
+    };
+  }
+
+  const anchorAt = winner.dt;
+  const expiresAt = addMonths(anchorAt, WINDOW_MONTHS);
+  const active = expiresAt.getTime() > new Date(asOf).getTime();
+  return {
+    linkedCtvId: winner.ctvId, linkedCtvName: winner.ctvName || null,
+    anchorAt, anchorSource: winner.source, expiresAt,
+    active, eligible: !active, windowMonths: WINDOW_MONTHS,
+  };
+}
+
+/**
+ * DB wrapper: latest non-cancelled CTV-bearing appointment + saleorder for a client.
+ */
+async function getCtvLinkStatus(clientId, lob, opts = {}) {
   const { asOf = new Date(), txClient = null, getDb: injectedGetDb = null } = opts;
   const db = txClient || (injectedGetDb || defaultGetDb)(lob);
   const run = txClient
     ? (sql, p) => txClient.query(sql, p).then((r) => r.rows)
     : (sql, p) => db.queryRows(sql, p);
 
+  const apptRows = await run(
+    `SELECT a.ctv_id AS "ctvId", c.name AS "ctvName", COALESCE(a.date, a.datecreated) AS dt
+       FROM dbo.appointments a
+       LEFT JOIN dbo.partners c ON c.id = a.ctv_id
+      WHERE a.partnerid = $1 AND a.ctv_id IS NOT NULL
+        AND COALESCE(a.state, '') NOT ILIKE 'cancel%'
+      ORDER BY COALESCE(a.date, a.datecreated) DESC NULLS LAST
+      LIMIT 1`,
+    [clientId]
+  );
+
+  const svcRows = await run(
+    `SELECT so.ctv_id AS "ctvId", c.name AS "ctvName", COALESCE(so.dateordered, so.datecreated) AS dt
+       FROM dbo.saleorders so
+       LEFT JOIN dbo.partners c ON c.id = so.ctv_id
+      WHERE so.partnerid = $1 AND so.ctv_id IS NOT NULL
+        AND COALESCE(so.state, '') NOT ILIKE 'cancel%'
+        AND COALESCE(so.isdeleted, false) = false
+      ORDER BY COALESCE(so.dateordered, so.datecreated) DESC NULLS LAST
+      LIMIT 1`,
+    [clientId]
+  );
+
   const ownerRows = await run(
-    `SELECT p.referred_by_ctv_id, o.name AS owner_name FROM dbo.partners p
-       LEFT JOIN dbo.partners o ON o.id = p.referred_by_ctv_id WHERE p.id = $1`,
+    `SELECT p.referred_by_ctv_id AS "ownerId", o.name AS "ownerName"
+       FROM dbo.partners p LEFT JOIN dbo.partners o ON o.id = p.referred_by_ctv_id
+      WHERE p.id = $1`,
     [clientId]
   );
-  const ownerCtvId = ownerRows[0]?.referred_by_ctv_id || null;
 
-  if (!ownerCtvId) {
-    return computeClaim({ ownerCtvId: null });
-  }
-
-  const settings = await run(`SELECT referral_start_product_id FROM dbo.commission_settings LIMIT 1`, []);
-  const refProductId = settings[0]?.referral_start_product_id || null;
-
-  let referralCardDate = null;
-  if (refProductId) {
-    const cardRows = await run(
-      `SELECT MIN(so.datecreated) AS d FROM dbo.saleorderlines sol
-         JOIN dbo.saleorders so ON so.id = sol.orderid
-        WHERE so.partnerid = $1 AND sol.productid = $2 AND sol.isdeleted = false`,
-      [clientId, refProductId]
-    );
-    referralCardDate = cardRows[0]?.d || null;
-  }
-
-  const appointmentRows = await run(
-    `SELECT MAX(COALESCE(datecreated, date::timestamp)) AS d FROM dbo.appointments WHERE partnerid = $1`,
-    [clientId]
-  );
-  const bookingAppointmentDate = appointmentRows[0]?.d || null;
-
-  const payRows = await run(
-    `SELECT MAX(payment_date) AS d FROM dbo.payments WHERE customer_id = $1 AND amount > 0`,
-    [clientId]
-  );
-  const lastPaidServiceDate = payRows[0]?.d || null;
-
-  return computeClaim({ ownerCtvId, ownerName: ownerRows[0]?.owner_name || null, referralCardDate, bookingAppointmentDate, lastPaidServiceDate, asOf });
+  return computeCtvLink({
+    appt: apptRows[0] || null,
+    service: svcRows[0] || null,
+    fallbackOwnerCtvId: ownerRows[0]?.ownerId || null,
+    fallbackOwnerName: ownerRows[0]?.ownerName || null,
+    asOf,
+  });
 }
 
-module.exports = { computeClaim, getReferralClaimStatus };
+/**
+ * Legacy shape, now backed by the CTV-bearing-event rule so every caller agrees with the bar.
+ */
+async function getReferralClaimStatus(clientId, lob, opts = {}) {
+  const s = await getCtvLinkStatus(clientId, lob, opts);
+  return {
+    ownerCtvId: s.linkedCtvId,
+    ownerName: s.linkedCtvName,
+    anchorDate: s.anchorAt,
+    expiresAt: s.expiresAt,
+    active: s.active,
+  };
+}
+
+module.exports = { computeClaim, computeCtvLink, getCtvLinkStatus, getReferralClaimStatus };
