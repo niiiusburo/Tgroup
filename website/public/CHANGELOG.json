@@ -1,5 +1,37 @@
 [
   {
+    "version": "0.32.93",
+    "date": "2026-06-02",
+    "commit": "d96a4edc",
+    "highlights": "CTV 6-month eligibility countdown bar + Doctor→CTV breadcrumb. A client's link to a CTV is now a computed, non-destructive status anchored on the most recent CTV-bearing appointment or service, shown as a color-shifting bar on the customer profile and CTV portal.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Customer profile: a 6-month CTV-link countdown bar (green → amber → red → grey) that shows 'Đã hết hạn — khách có thể gắn CTV khác' once the window lapses.",
+          "Customer profile: a Doctor → CTV breadcrumb on each appointment and service row, showing which CTV that record was booked under.",
+          "CTV portal: per-client link countdown on each referral card, plus an 'eligible for another CTV' banner with the journey dimmed when expired."
+        ]
+      },
+      {
+        "title": "Backend",
+        "items": [
+          "New appointments.ctv_id column (migration 054) persisted on booking, edit, and portal booking, with an idempotent anchor backfill.",
+          "getCtvLinkStatus: the link is anchored on the latest non-cancelled CTV-bearing appointment OR service (service wins ties); expiry = anchor + 6 months, computed on read — referrer, earnings, and payouts are never mutated.",
+          "/ctv/referrals, the customer-profile referralClaim, /client-lookup and the booking gate all derive eligibility from the same rule."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Jest: computeCtvLink unit cases (active/expired/latest-wins/tie/fallback) and delegation tests for getReferralClaimStatus.",
+          "Vitest: CtvLinkBar + DoctorCtvTrail component tests.",
+          "Playwright: live admin-profile verification of the bar (expired state) + the appointment-row breadcrumb against local NK3 demo data."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.91",
     "date": "2026-06-01",
     "commit": "pending",
