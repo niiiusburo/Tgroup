@@ -5,9 +5,11 @@
   "hello": "Hi, {{name}}",
   "notifications": "Notifications",
   "language": "Language",
+  "quickActions": "Quick CTV actions",
   "header": {
     "brand": "TG CLINIC",
     "title": "CTV Portal",
+    "portalMenu": "CTV portal menu",
     "commissionTitle": "Commission",
     "networkTitle": "Network",
     "meTitle": "Account"

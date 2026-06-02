@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
@@ -139,12 +139,17 @@ describe('CtvDashboard', () => {
   afterEach(() => {
     localStorage.clear();
     localStorage.setItem('tg-lang', 'vi');
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 0 });
     void i18n.changeLanguage('vi');
   });
 
   async function prepareCtvLanguage(lang: 'en' | 'vi') {
     localStorage.setItem('tg-lang', lang);
     await i18n.changeLanguage(lang);
+  }
+
+  function setScrollY(value: number) {
+    Object.defineProperty(window, 'scrollY', { configurable: true, value });
   }
 
   it('renders one canonical bottom-menu portal shell in English', async () => {
@@ -163,6 +168,27 @@ describe('CtvDashboard', () => {
     expect(screen.getByRole('button', { name: /track clients/i })).toBeVisible();
     expect(screen.getByRole('button', { name: /^network$/i })).toBeVisible();
     expect(screen.getByRole('button', { name: /^me$/i })).toBeVisible();
+  });
+
+  it('renders a compact pill action menu and reveals the motion header when scrolling up', async () => {
+    await prepareCtvLanguage('en');
+    localStorage.setItem('tgclinic_token', 'test-token');
+    setScrollY(0);
+    renderWithProviders(<CtvDashboard />);
+
+    await waitFor(() => expect(screen.getAllByText('Hi, CTV Demo')[0]).toBeVisible());
+
+    const header = screen.getByTestId('ctv-motion-header');
+    expect(header).toHaveAttribute('data-scroll-state', 'visible');
+    expect(screen.getByRole('group', { name: /quick ctv actions/i })).toHaveClass('rounded-full');
+
+    setScrollY(140);
+    fireEvent.scroll(window);
+    await waitFor(() => expect(header).toHaveAttribute('data-scroll-state', 'hidden'));
+
+    setScrollY(72);
+    fireEvent.scroll(window);
+    await waitFor(() => expect(header).toHaveAttribute('data-scroll-state', 'visible'));
   });
 
   it('keeps tracking on one bottom Theo dõi label and searches accent-insensitively', async () => {

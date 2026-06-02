@@ -2,6 +2,12 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.94] — 2026-06-02 (nk3-deploy)
+### Changed
+- **CTV portal orange menu is now a compact motion pill.** `/ctv` replaces the tall orange header block with a smaller rounded header, groups `Giới thiệu khách` and `Tuyển CTV` inside a pill action menu, and hides the header on downward scroll while returning it on upward scroll or focus. Preserves the CTV-only portal behavior in BEHAVIOR.md and product-map `ctv.yaml`; no API or backend data flow changed. — @agent
+### Tested
+- `npm --prefix website test -- src/pages/CTV/CtvDashboard.test.tsx` (5 passed); `npm --prefix website run lint` (0 errors, 48 existing warnings); `npm --prefix website run build`; local Playwright/Chrome visual companion against `http://127.0.0.1:5175/ctv` with mocked CTV API responses: `docs/live-artifacts/ctv-header-motion/ctv-orange-menu-scroll-companion.png`. — @agent
+
 ## [0.32.93] — 2026-06-01 (nk3-deploy)
 ### Changed
 - **Admin CTV commission flow now supports breadcrumb drilldowns.** `/commission?tab=...` preserves the five-step workflow in the URL, New Clients names open `/customers/:id`, Earnings/Payout pending service links open the customer's Records tab with the service row focused, and customer profiles show a return trail back to the originating commission tab. Preserves UC-023, WF-017, and INV-017. — @agent
