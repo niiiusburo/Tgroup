@@ -2,6 +2,12 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.97] — 2026-06-02 (nk3-deploy)
+### Fixed
+- **Shared calendar/date fields no longer use native mobile date popups or overlapping absolute panels.** `/ctv` `Giới thiệu khách`, `/calendar` quick-add/export date ranges, `/reports/revenue` filters, payment/deposit dates, customer health-check upload dates, and patient service dates now use the shared app `DatePicker`, which opens in normal document flow with a Monday-first calendar. Appointment and service modals reserve enough bottom scroll space for fixed footers, and the feedback login hint hides while dialogs/date pickers are open. Preserves existing date string payloads, including the CTV booking default to today's `Asia/Ho_Chi_Minh` date; no API or backend data-flow changes. — @agent
+### Tested
+- `npm --prefix website test -- src/components/ui/DatePicker.test.tsx src/components/ctv/CtvReferModal.test.tsx` (8 passed); `npm --prefix website run build` (passed; existing Vite dynamic/static import and chunk-size warnings only); `rg -n "type=\"date\"|type='date'" website/src --glob '!**/*.map'` (no production native date inputs remain); local Playwright/Chrome screenshot verification with mocked API for `http://127.0.0.1:5175`: `docs/live-artifacts/ctv-date-picker/01-ctv-refer-calendar-open.png`, `02-reports-revenue-date-filter-open.png`, `03-calendar-export-date-range-open.png`, `04-calendar-quick-add-date-open.png`. Scoped Semgrep: `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off <22 changed frontend/i18n/css paths>` scanned 22 files, 0 findings, 0 blocking HIGH/ERROR findings. — @agent
+
 ## [0.32.96] — 2026-06-02 (nk3-deploy)
 ### Added
 - **CTV 6-month eligibility bar + Doctor→CTV breadcrumb.** A client's link to a CTV is now a computed, non-destructive status anchored on the most recent non-cancelled **CTV-bearing** appointment or service (service wins ties); the window is `anchor + 6 months`. Surfaced as a color-shifting countdown bar (`CtvLinkBar`) on the admin customer profile header and every CTV-portal card, plus a `BS. … › CTV: …` breadcrumb (`DoctorCtvTrail`) on appointment and service rows. When the window lapses the bar shows "Đã hết hạn — khách có thể gắn CTV khác" and the portal card surfaces an eligibility banner with the journey dimmed. — @agent (Claude)

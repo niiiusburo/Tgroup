@@ -1,6 +1,7 @@
 import {
   ChevronLeft,
   ChevronRight,
+  CalendarDays,
   Coins,
   DollarSign,
   Edit2,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { formatVND, formatVNDInput } from '@/lib/formatting';
 import type { DepositBalance, DepositTransaction } from '@/hooks/useDeposits';
 
@@ -103,15 +105,13 @@ export function DepositFormModal({
       <div className="modal-content w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
         <h4 className="text-lg font-semibold text-gray-900 mb-4">{title}</h4>
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('ngyGiaoDch')}</label>
-            <input
-              type="date"
-              value={formDate}
-              onChange={(e) => onDateChange(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary"
-            />
-          </div>
+          <DatePicker
+            value={formDate}
+            onChange={onDateChange}
+            label={t('ngyGiaoDch')}
+            icon={<CalendarDays className="h-3.5 w-3.5" />}
+            size="compact"
+          />
 
           <div>
             <div className="flex items-center justify-between px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl">

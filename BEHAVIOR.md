@@ -41,6 +41,8 @@ If behavior is accepted as product truth, promote it here or to a domain runbook
 - Validate before submit and keep errors next to the field.
 - For edit forms, prefill from canonical backend records, not display-only derived text.
 - For customer and treatment records, IDs from migration should remain searchable and visible where staff use them operationally.
+- Date pickers inside sheets, modals, and scrollable forms must use the app's in-flow picker treatment instead of native mobile `type=date` popups or absolute overlays that cover later fields, footers, or action buttons.
+- Floating helpers such as the feedback login hint must not render over active modal, dialog, or date-picker workflows.
 
 ## 5. Dense Lists
 

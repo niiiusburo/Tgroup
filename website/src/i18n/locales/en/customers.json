@@ -275,6 +275,7 @@
   "service": "Service",
   "examiningDoctor": "Examining doctor",
   "examDate": "Exam date",
+  "examDateRequired": "Exam date is required",
   "examContent": "Exam content",
   "nextAppointmentDate": "Next appointment date",
   "attachments": "Attachments",

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Wallet, Plus, Loader2, QrCode, DollarSign } from 'lucide-react';
+import { Wallet, Plus, Loader2, QrCode, DollarSign, CalendarDays } from 'lucide-react';
 import { VietQrModal } from './VietQrModal';
 import { formatVND, formatVNDInput } from '@/lib/formatting';
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { useTranslation } from 'react-i18next';
 import { useTimezone } from '@/contexts/TimezoneContext';
 
@@ -88,15 +89,13 @@ export function DepositWallet({
             <h4 className="text-lg font-semibold text-gray-900 mb-4">{t('addDepositBtn')}</h4>
             
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('ngyGiaoDch')}</label>
-                <input
-                type="date"
+              <DatePicker
                 value={addDate}
-                onChange={(e) => setAddDate(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary" />
-              
-              </div>
+                onChange={setAddDate}
+                label={t('ngyGiaoDch')}
+                icon={<CalendarDays className="h-3.5 w-3.5" />}
+                size="compact"
+              />
 
               <div>
                 <div className="flex items-center justify-between px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl">

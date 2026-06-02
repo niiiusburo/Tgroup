@@ -9,9 +9,11 @@ import {
   createFeedback,
   replyToMyFeedbackThread,
   fetchFeedbackUnreadCount,
-  getUploadUrl,
 } from '@/lib/api';
 import type { FeedbackThread, FeedbackMessage, FeedbackStatus } from '@/types/feedback';
+import { AttachmentThumbnails } from './FeedbackWidgetAttachments';
+import { FeedbackLoginHint } from './FeedbackLoginHint';
+import { useBlockingDialogPresence, useObjectUrls } from './FeedbackWidgetHooks';
 
 // Per-session flag: cleared on login (AuthContext.login), set when the user
 // dismisses the inline hint. Keeps the prompt visible once per fresh session
@@ -63,50 +65,6 @@ function getInitials(name: string | null) {
     .toUpperCase();
 }
 
-function useObjectUrls(files: File[]) {
-  const [urls, setUrls] = useState<string[]>([]);
-  useEffect(() => {
-    const next = files.map((f) => URL.createObjectURL(f));
-    setUrls(next);
-    return () => {
-      next.forEach((u) => URL.revokeObjectURL(u));
-    };
-  }, [files]);
-  return urls;
-}
-
-function AttachmentThumbnails({ attachments }: { attachments?: { url: string; originalName: string; sizeBytes: number }[] }) {
-  if (!attachments || attachments.length === 0) return null;
-  return (
-    <div className="flex flex-wrap gap-2 mt-2">
-      {attachments.map((att) => {
-        const src = getUploadUrl(att.url);
-        return (
-          <a
-            key={att.url}
-            href={src}
-            target="_blank"
-            rel="noreferrer"
-            className="group relative block w-20 h-20 rounded-lg border border-gray-200 overflow-hidden bg-gray-50"
-            title={att.originalName}
-          >
-            <img
-              src={src}
-              alt={att.originalName}
-              className="w-full h-full object-cover"
-              loading="lazy"
-              onError={(e) => {
-                console.error('Failed to load attachment image:', src);
-                (e.currentTarget as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          </a>
-        );
-      })}
-    </div>
-  );
-}
-
 export function FeedbackWidget() {
   const { t: tFeedback } = useTranslation('feedback');
   const { user } = useAuth();
@@ -126,6 +84,7 @@ export function FeedbackWidget() {
   const [showLoginHint, setShowLoginHint] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const hasBlockingDialog = useBlockingDialogPresence(panelRef);
 
   // Show the "Any problem? Tap here" hint once per fresh session.
   // AuthContext.login removes the dismissal key on each successful login.
@@ -328,36 +287,7 @@ export function FeedbackWidget() {
         )}
       </button>
 
-      {showLoginHint && !open && (
-        <div
-          role="status"
-          className="absolute right-0 top-full mt-2 z-40 w-64 rounded-xl bg-white shadow-lg ring-1 ring-gray-200 px-3.5 py-3 animate-in fade-in slide-in-from-top-1 duration-200"
-        >
-          {/* Arrow pointing up to the icon */}
-          <span
-            aria-hidden="true"
-            className="absolute -top-1.5 right-4 w-3 h-3 bg-white ring-1 ring-gray-200 rotate-45"
-          />
-          <div className="relative flex items-start gap-2">
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 leading-tight">
-                {tFeedback('loginHintTitle')}
-              </p>
-              <p className="mt-1 text-xs text-gray-600 leading-snug">
-                {tFeedback('loginHintBody')}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={dismissLoginHint}
-              aria-label={tFeedback('loginHintDismiss')}
-              className="-mr-1 -mt-1 p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
+      {showLoginHint && !open && !hasBlockingDialog && <FeedbackLoginHint onDismiss={dismissLoginHint} />}
 
       {open && (
         <div className="absolute right-0 top-full mt-2 z-50 w-96 max-h-[80vh] flex flex-col bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden">

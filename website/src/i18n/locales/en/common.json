@@ -249,6 +249,9 @@
   },
   "datePicker": {
     "chooseDate": "Choose date",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "clear": "Clear",
     "today": "Today"
   },
   "timePicker": {

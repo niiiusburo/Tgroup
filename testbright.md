@@ -10,6 +10,53 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: Shared no-overlap DatePicker calendar controls 2026-06-02
+Feature/edit name: Mobile-safe shared DatePicker redesign across CTV, calendar, reports, payments, customers, and service forms
+Branch: nk3-deploy. Local-first frontend verification; no backend data writes and no VPS/database sync involved.
+
+Changed URLs / API routes / data flow:
+- URL changed: `/ctv` CTV portal refer-client sheet (`Giới thiệu khách`).
+- URLs changed: `/calendar` quick-add appointment modal and export custom date-range modal.
+- URL changed: `/reports/revenue` date filters.
+- Form surfaces changed: payment/deposit transaction-date forms, customer health-check upload date form, and patient service form date control.
+- Shared UI changed: `website/src/components/ui/DatePicker.tsx` now opens in normal document flow and uses a Monday-first grid.
+- API routes changed: none.
+- Data flow changed: none; existing form state strings and API payload fields are preserved, including `POST /api/ctv/bookings` receiving the same `date` string defaulting to today's `Asia/Ho_Chi_Minh` date when the sheet opens.
+
+User roles:
+- CTV user on `/ctv`.
+- Authenticated admin/staff using calendar, reports, payment/deposit, customer profile, and service forms.
+
+Happy paths:
+- Tapping `Ngày hẹn` opens the app calendar instead of Safari/iOS native `type=date`.
+- Opening the calendar pushes `Lĩnh vực`, `Dịch vụ`, notes, and the submit button down instead of covering them.
+- Selecting a date updates the displayed `dd/mm/yyyy` value and closes the panel.
+- Submitting with the default date still works without manually touching the calendar.
+- `/calendar` export custom date-range and quick-add appointment date pickers keep footer/apply buttons visible.
+- `/reports/revenue` date filters open without the feedback hint covering the modal area.
+
+Edge cases / regressions:
+- The picker remains Monday-first in Vietnamese and English.
+- Date fields in appointment, service, payment, deposit, reports, customer health-check upload, and CTV forms do not use an overlapping absolute panel or native mobile date input.
+- Feedback login hint does not render over modal/dialog/date-picker states.
+- Phone lookup, LOB selection, optional service, notes, and `B_CLIENT_CLAIMED` blocking remain unchanged.
+- Mobile Safari, mobile Chrome, tablet, and desktop layouts must not show clipped controls or overlapping text.
+
+Setup/login state:
+- Use a CTV-authenticated `/ctv` session on local `http://127.0.0.1:<vite-port>/ctv` or live `https://tmv.2checkin.com/ctv` after deployment.
+- For admin/staff surfaces, use an authenticated session on local `http://127.0.0.1:<vite-port>/` or live `https://tmv.2checkin.com/` after deployment.
+- Capture mobile screenshot evidence of the refer-client sheet and representative admin date controls with the calendar open.
+
+TestSprite execution items:
+- [x] PASS: Unit coverage locks the no-native-date-input CTV sheet and in-flow custom picker - `npm --prefix website test -- src/components/ui/DatePicker.test.tsx src/components/ctv/CtvReferModal.test.tsx` (8 passed).
+- [x] PASS: Production source scan found no remaining native date inputs - `rg -n "type=\"date\"|type='date'" website/src --glob '!**/*.map'` returned only test assertions.
+- [x] PASS: Browser screenshot of `/ctv` mobile refer-client sheet with `Ngày hẹn` calendar open and no overlap - `docs/live-artifacts/ctv-date-picker/01-ctv-refer-calendar-open.png`.
+- [x] PASS: Browser screenshot of `/reports/revenue` date filter with custom calendar open and no feedback overlap - `docs/live-artifacts/ctv-date-picker/02-reports-revenue-date-filter-open.png`.
+- [x] PASS: Browser screenshot of `/calendar` export date-range modal with custom calendar open and Apply button reachable - `docs/live-artifacts/ctv-date-picker/03-calendar-export-date-range-open.png`.
+- [x] PASS: Browser screenshot of `/calendar` quick-add appointment date picker with submit footer reachable - `docs/live-artifacts/ctv-date-picker/04-calendar-quick-add-date-open.png`.
+
+---
+
 # TestSprite Plan: CTV profile shareable invite link 2026-06-02
 Feature/edit name: `/ctv` Me tab visible CTV invite link
 Branch: nk3-deploy. Local-first frontend verification; no backend data writes and no VPS/database sync involved.

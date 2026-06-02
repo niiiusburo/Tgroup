@@ -204,6 +204,7 @@ export function AppointmentFormCore({
           <DatePicker
             value={data.date}
             onChange={(date) => onChange({ date })}
+            size="compact"
           />
           {errors.date && (
             <p className="text-xs text-red-500 mt-1">{errors.date}</p>

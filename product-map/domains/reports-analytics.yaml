@@ -123,3 +123,4 @@ notes:
     and branch filters; cash-flow cards remain raw cash-movement context and are
     not the paid-revenue source of truth.
   - Overview Zone 1 and Zone 3 searches must be accent-insensitive so unaccented input matches Vietnamese names and labels with diacritics.
+  - Report date filters must use the shared in-flow DatePicker so mobile report controls do not invoke native date popups or overlap feedback helpers.

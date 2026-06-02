@@ -249,6 +249,9 @@
   },
   "datePicker": {
     "chooseDate": "Chọn ngày",
+    "previousMonth": "Tháng trước",
+    "nextMonth": "Tháng sau",
+    "clear": "Xóa",
     "today": "Hôm nay"
   },
   "timePicker": {

@@ -275,6 +275,7 @@
   "service": "Dịch vụ",
   "examiningDoctor": "Bác sĩ khám",
   "examDate": "Ngày khám",
+  "examDateRequired": "Vui lòng chọn ngày khám",
   "examContent": "Nội dung khám",
   "nextAppointmentDate": "Ngày hẹn lịch tiếp theo",
   "attachments": "Tệp đính kèm",

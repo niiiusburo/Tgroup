@@ -285,7 +285,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       />
 
       <form id="service-form" onSubmit={handleSubmitForm} className="flex flex-col flex-1 min-h-0">
-        <div className="service-ipad-form flex-1 overflow-y-auto px-4 py-5 space-y-5 custom-scrollbar sm:px-6 sm:py-6">
+        <div className="service-ipad-form flex-1 overflow-y-auto px-4 pt-5 pb-36 space-y-5 custom-scrollbar sm:px-6 sm:pt-6 sm:pb-32">
           {isLoading && (
             <div className="flex items-center justify-center py-8 text-gray-400">
               <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2" />
@@ -376,7 +376,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
               {errors.location && <p className="mt-2 text-xs text-red-500">{errors.location}</p>}
             </div>
             <div>
-              <DatePicker value={startDate} onChange={handleStartDateChange} label={t('form.startDate', 'Ngày bắt đầu')} icon={<CalendarDays className="w-3.5 h-3.5" />} error={errors.startDate} />
+              <DatePicker value={startDate} onChange={handleStartDateChange} label={t('form.startDate', 'Ngày bắt đầu')} icon={<CalendarDays className="w-3.5 h-3.5" />} error={errors.startDate} size="compact" />
             </div>
           </FormGrid>
 

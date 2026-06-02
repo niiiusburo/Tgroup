@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import i18n from '@/i18n';
 import { CtvReferModal } from './CtvReferModal';
 import { createBooking, fetchCtvServices, lookupClientByPhone } from '@/lib/api/ctv';
+import { TimezoneProvider } from '@/contexts/TimezoneContext';
 
 vi.mock('@/lib/api/ctv', () => ({
   createBooking: vi.fn(),
@@ -14,6 +15,14 @@ vi.mock('@/lib/api/ctv', () => ({
 const mockedCreateBooking = vi.mocked(createBooking);
 const mockedFetchCtvServices = vi.mocked(fetchCtvServices);
 const mockedLookupClientByPhone = vi.mocked(lookupClientByPhone);
+
+function renderReferModal() {
+  return render(
+    <TimezoneProvider>
+      <CtvReferModal open onClose={vi.fn()} onSuccess={vi.fn()} />
+    </TimezoneProvider>
+  );
+}
 
 describe('CtvReferModal', () => {
   beforeEach(async () => {
@@ -31,17 +40,16 @@ describe('CtvReferModal', () => {
   it('prefills the appointment date with today in Vietnam time', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-05-31T18:30:00.000Z'));
-    const { container } = render(<CtvReferModal open onClose={vi.fn()} onSuccess={vi.fn()} />);
+    const { container } = renderReferModal();
 
-    const dateInput = container.querySelector('input[type="date"]') as HTMLInputElement;
-
-    expect(dateInput).toHaveValue('2026-06-01');
+    expect(container.querySelector('input[type="date"]')).toBeNull();
+    expect(screen.getByRole('button', { name: /ngày hẹn: 01\/06\/2026/i })).toBeInTheDocument();
   });
 
   it('submits a booking without requiring the CTV to manually pick today', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-05-31T18:30:00.000Z'));
-    const { container } = render(<CtvReferModal open onClose={vi.fn()} onSuccess={vi.fn()} />);
+    const { container } = renderReferModal();
     vi.useRealTimers();
     const [nameInput, phoneInput] = Array.from(container.querySelectorAll('input')) as HTMLInputElement[];
 
@@ -71,7 +79,7 @@ describe('CtvReferModal', () => {
       claimed: false,
       claimedByMe: false,
     });
-    const { container } = render(<CtvReferModal open onClose={vi.fn()} onSuccess={vi.fn()} />);
+    const { container } = renderReferModal();
     const [nameInput, phoneInput] = Array.from(container.querySelectorAll('input')) as HTMLInputElement[];
 
     fireEvent.click(screen.getByRole('button', { name: 'Cosmetic' }));
@@ -91,7 +99,7 @@ describe('CtvReferModal', () => {
       claimedByMe: false,
       ownerName: 'Other CTV',
     });
-    const { container } = render(<CtvReferModal open onClose={vi.fn()} onSuccess={vi.fn()} />);
+    const { container } = renderReferModal();
     const [nameInput, phoneInput] = Array.from(container.querySelectorAll('input')) as HTMLInputElement[];
 
     fireEvent.click(screen.getByRole('button', { name: 'Cosmetic' }));
@@ -99,5 +107,16 @@ describe('CtvReferModal', () => {
 
     await waitFor(() => expect(mockedLookupClientByPhone).toHaveBeenCalledWith('0999888777', 'cosmetic'));
     expect(nameInput).toHaveValue('');
+  });
+
+  it('opens the custom calendar in flow instead of the native iOS date popup', () => {
+    const { container } = renderReferModal();
+
+    fireEvent.click(screen.getByRole('button', { name: /ngày hẹn/i }));
+
+    const panel = screen.getByTestId('date-picker-panel');
+    expect(container.querySelector('input[type="date"]')).toBeNull();
+    expect(panel).toBeInTheDocument();
+    expect(panel).not.toHaveClass('absolute');
   });
 });
