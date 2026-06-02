@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { formatVND } from '@/lib/formatting';
 import { useCtvLocale } from '@/lib/i18n/ctv';
 import type { CtvLob, CtvReferral, CtvReferralService } from '@/lib/api/ctv';
+import { CtvLinkBar } from '@/components/shared';
 
 interface ReferralFlipCardProps {
   readonly referral: CtvReferral;
@@ -153,7 +154,7 @@ export function ReferralFlipCard({ referral }: ReferralFlipCardProps) {
                 </div>
               </div>
 
-              <div className="mt-7 grid grid-cols-4 gap-1.5">
+              <div className={cn('mt-7 grid grid-cols-4 gap-1.5', referral.eligible && 'opacity-40')}>
                 {steps.map((step, index) => {
                   const number = index + 1;
                   const done = number < progress.current || (number === 4 && progress.paid);
@@ -181,6 +182,29 @@ export function ReferralFlipCard({ referral }: ReferralFlipCardProps) {
                   );
                 })}
               </div>
+
+              {(referral.link_expires_at || referral.eligible) && (
+                <div className="mt-4">
+                  {referral.eligible ? (
+                    <div
+                      className="flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-500/20"
+                      data-testid="ctv-eligible-banner"
+                    >
+                      <span aria-hidden="true">⚠</span>
+                      {t('link.portalEligible', 'Đã hết hạn liên kết — khách có thể gắn CTV khác')}
+                    </div>
+                  ) : (
+                    <CtvLinkBar
+                      ctvName={referral.linked_ctv_name ?? referral.name}
+                      anchorAt={referral.link_anchor_at ?? null}
+                      expiresAt={referral.link_expires_at ?? null}
+                      active={referral.link_active ?? true}
+                      eligible={referral.eligible ?? false}
+                      compact
+                    />
+                  )}
+                </div>
+              )}
 
               <div className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-orange-50 px-3 py-2 text-xs font-semibold text-orange-700">
                 <Sparkles className="h-4 w-4" />
