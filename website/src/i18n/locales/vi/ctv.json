@@ -1,4 +1,13 @@
 {
+  "link": {
+    "ctvLabel": "CTV",
+    "expired": "Đã hết hạn — khách có thể gắn CTV khác",
+    "activeNoDate": "Đang liên kết",
+    "monthsLeft": "≈{{count}} tháng còn lại",
+    "weeksLeft": "≈{{count}} tuần còn lại",
+    "daysLeft": "≈{{count}} ngày còn lại",
+    "portalEligible": "Đã hết hạn liên kết — khách có thể gắn CTV khác"
+  },
   "brand": "TG CLINIC",
   "portal": "Cổng CTV",
   "profileFallback": "CTV",
