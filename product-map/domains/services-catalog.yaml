@@ -93,3 +93,4 @@ notes:
   - Customer profile service edits patch the parent sale order but must also persist rendered line fields such as `saleorderlines.productuomqty`, `tooth_numbers`, and `tooth_comment` because the `Phiếu khám` table is sourced from `/api/SaleOrders/lines`.
   - Customer source chips in ServiceForm must be persisted UUIDs from the active LOB only; do not show or submit fallback IDs such as `src-1` to `SaleOrders.sourceid`.
   - Tooth picker saves should sync quantity to selected tooth count only while quantity is still following the picker/default count; manual quantity overrides must be preserved.
+  - Patient service form dates must use the compact shared in-flow DatePicker, and the form scroll body must reserve enough space so fixed action footers never cover the open calendar.

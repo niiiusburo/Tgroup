@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Loader2 } from 'lucide-react';
+import { CalendarDays, Loader2 } from 'lucide-react';
 import { createExternalCheckup } from '@/lib/api';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { formatUploadBytes, prepareImageForUpload } from '@/lib/imageUpload';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
@@ -84,6 +85,10 @@ export function HealthCheckupUploadForm({
     e.preventDefault();
     if (processingFiles) return;
     onError(null);
+    if (!date.trim()) {
+      onError(t('examDateRequired', 'Exam date is required'));
+      return;
+    }
     onSaving(true);
     try {
       await createExternalCheckup(customerCode, {
@@ -128,25 +133,21 @@ export function HealthCheckupUploadForm({
             placeholder={t('form.fullName', { ns: 'customers' })}
           />
         </div>
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">{t('examDate')}</label>
-          <input
-            type="date"
-            required
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">{t('nextAppointmentDate')}</label>
-          <input
-            type="date"
-            value={nextAppointmentDate}
-            onChange={(e) => setNextAppointmentDate(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
-          />
-        </div>
+        <DatePicker
+          value={date}
+          onChange={setDate}
+          label={t('examDate')}
+          icon={<CalendarDays className="h-3.5 w-3.5" />}
+          size="compact"
+        />
+        <DatePicker
+          value={nextAppointmentDate}
+          onChange={setNextAppointmentDate}
+          label={t('nextAppointmentDate')}
+          icon={<CalendarDays className="h-3.5 w-3.5" />}
+          allowClear
+          size="compact"
+        />
       </div>
 
       <div>

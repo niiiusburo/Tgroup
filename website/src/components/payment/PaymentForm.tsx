@@ -20,6 +20,7 @@ import { ServicePaymentCard, type ServicePaymentContext } from './ServicePayment
 import { useDeposits } from '@/hooks/useDeposits';
 import { formatVND } from '@/lib/formatting';
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { allocatePaymentSources } from '@/lib/allocatePaymentSources';
 
 export interface PaymentSourceBreakdown {
@@ -414,18 +415,12 @@ export function PaymentForm({
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-              <CalendarDays className="w-3.5 h-3.5" />
-              {t('ngyThanhTon')}
-            </label>
-            <input
-              type="date"
-              value={paymentDate}
-              onChange={(e) => setPaymentDate(e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
-            
-          </div>
+          <DatePicker
+            value={paymentDate}
+            onChange={setPaymentDate}
+            label={t('ngyThanhTon')}
+            icon={<CalendarDays className="w-3.5 h-3.5" />}
+          />
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">

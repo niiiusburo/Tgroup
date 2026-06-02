@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, Loader2, X } from 'lucide-react';
+import { CalendarDays, Check, Loader2, X } from 'lucide-react';
 import { createBooking, fetchCtvServices, lookupClientByPhone, type CtvClientLookup, type CtvLob, type CtvServiceOption } from '@/lib/api/ctv';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { ApiError } from '@/lib/api/core';
 import { cn } from '@/lib/utils';
 import { ServicePicker } from './ServicePicker';
@@ -193,15 +194,12 @@ export function CtvReferModal({ open, onClose, onSuccess }: CtvReferModalProps) 
               <PhoneCheck lookup={lookup} lobLabel={lobLabel} t={t} />
             </div>
 
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">{t('forms.referClient.date')}</label>
-              <input
-                type="date"
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-orange-500"
-              />
-            </div>
+            <DatePicker
+              value={form.date}
+              onChange={(date) => setForm({ ...form, date })}
+              label={t('forms.referClient.date')}
+              icon={<CalendarDays className="h-3.5 w-3.5" />}
+            />
 
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700">{t('forms.referClient.lob')}</label>

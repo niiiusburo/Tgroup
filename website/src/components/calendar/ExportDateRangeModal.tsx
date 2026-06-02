@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, CalendarDays } from 'lucide-react';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { useTimezone } from '@/contexts/TimezoneContext';
 
 interface ExportDateRangeModalProps {
@@ -101,7 +102,7 @@ export function ExportDateRangeModal({
   const canApply = activePreset !== null || (dateFrom && dateTo);
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center" role="dialog" aria-modal="true" aria-label={t('selectDateRange', 'Chọn khoảng thởi gian')}>
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
@@ -139,32 +140,30 @@ export function ExportDateRangeModal({
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
               {t('customRange', 'Hoặc chọn ngày tùy chỉnh')}
             </p>
-            <div className="flex items-center gap-2">
-              <div className="flex-1">
-                <label className="block text-xs text-gray-500 mb-1">{t('fromDate', 'Từ ngày')}</label>
-                <input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => {
-                    setDateFrom(e.target.value);
-                    setActivePreset(null);
-                  }}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-                />
-              </div>
-              <span className="text-gray-400 mt-5">—</span>
-              <div className="flex-1">
-                <label className="block text-xs text-gray-500 mb-1">{t('toDate', 'Đến ngày')}</label>
-                <input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => {
-                    setDateTo(e.target.value);
-                    setActivePreset(null);
-                  }}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-                />
-              </div>
+            <div className="grid grid-cols-1 items-end gap-2 sm:grid-cols-[1fr_auto_1fr]">
+              <DatePicker
+                value={dateFrom}
+                onChange={(date) => {
+                  setDateFrom(date);
+                  setActivePreset(null);
+                }}
+                label={t('fromDate', 'Từ ngày')}
+                icon={<CalendarDays className="h-3.5 w-3.5" />}
+                allowClear
+                size="compact"
+              />
+              <span className="hidden pb-2 text-gray-400 sm:inline">—</span>
+              <DatePicker
+                value={dateTo}
+                onChange={(date) => {
+                  setDateTo(date);
+                  setActivePreset(null);
+                }}
+                label={t('toDate', 'Đến ngày')}
+                icon={<CalendarDays className="h-3.5 w-3.5" />}
+                allowClear
+                size="compact"
+              />
             </div>
           </div>
         </div>

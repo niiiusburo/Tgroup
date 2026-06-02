@@ -1,12 +1,13 @@
 /**
- * DatePicker - Custom date picker with luxurious design
+ * DatePicker - Custom date picker for modal-safe appointment/date workflows
  * @crossref:used-in[AppointmentForm, EditAppointmentModal, ServiceForm, Appointments]
  *
- * Matches website aesthetic with rounded-xl, orange accents, and smooth animations
+ * Opens in normal document flow so mobile sheets and scrollable modals do not
+ * cover the fields below the selected date.
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toISODateString } from '@/lib/dateUtils';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +23,8 @@ interface DatePickerProps {
   readonly maxDate?: string;
   readonly error?: string;
   readonly disabled?: boolean;
+  readonly allowClear?: boolean;
+  readonly size?: 'default' | 'compact';
 }
 
 const MONTH_KEYS = [
@@ -29,7 +32,7 @@ const MONTH_KEYS = [
   'july', 'august', 'september', 'october', 'november', 'december'
 ] as const;
 
-const WEEKDAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
+const WEEKDAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
 export function DatePicker({
   value: rawValue,
@@ -40,7 +43,9 @@ export function DatePicker({
   minDate,
   maxDate,
   error,
-  disabled = false
+  disabled = false,
+  allowClear = false,
+  size = 'default'
 }: DatePickerProps) {
   const { t } = useTranslation('common');
   // Defensive normalize: accept clean YYYY-MM-DD, ISO timestamps, or empty.
@@ -82,16 +87,18 @@ export function DatePicker({
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
 
-  // Get days in month
+  // Get days in month. The clinic calendar is Monday-first, matching the
+  // Vietnamese operational calendar used by the CTV booking sheet.
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfMonth = new Date(year, month, 1).getDay();
+  const leadingBlankDays = (firstDayOfMonth + 6) % 7;
 
   // Generate calendar days
   const calendarDays: Array<{date: number | null;isCurrentMonth: boolean;dateKey?: string;}> = [];
 
   // Previous month padding
   const prevMonthDays = new Date(year, month, 0).getDate();
-  for (let i = firstDayOfMonth - 1; i >= 0; i--) {
+  for (let i = leadingBlankDays - 1; i >= 0; i--) {
     calendarDays.push({ date: prevMonthDays - i, isCurrentMonth: false });
   }
 
@@ -122,11 +129,20 @@ export function DatePicker({
     setIsOpen(false);
   };
 
+  const handleClear = () => {
+    onChange('');
+    setIsOpen(false);
+  };
+
   const formatDisplayDate = (dateStr: string): string => {
     if (!dateStr) return '';
     const [y, m, d] = dateStr.split('-');
     return `${d}/${m}/${y}`;
   };
+
+  const displayValue = value ? formatDisplayDate(value) : resolvedPlaceholder;
+  const triggerLabel = label ? `${label}: ${displayValue}` : displayValue;
+  const isCompact = size === 'compact';
 
   const isDateDisabled = (dateKey: string): boolean => {
     if (minDate && dateKey < minDate) return true;
@@ -137,7 +153,10 @@ export function DatePicker({
   return (
     <div ref={containerRef} className="relative">
       {label &&
-      <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
+      <label className={cn(
+        'mb-1.5 flex items-center gap-2 font-medium text-gray-700',
+        isCompact ? 'text-xs' : 'text-sm'
+      )}>
           {icon}
           {label}
         </label>
@@ -148,11 +167,15 @@ export function DatePicker({
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
+        aria-label={triggerLabel}
         className={cn(
-          'w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-200 text-left',
+          'w-full flex items-center gap-3 border text-left transition-all duration-200',
+          isCompact ? 'rounded-lg px-3 py-2' : 'rounded-xl px-4 py-3',
           disabled ?
           'bg-gray-50 border-gray-200 cursor-not-allowed' :
-          'bg-white border-gray-200 hover:border-orange-300 hover:shadow-md cursor-pointer',
+          'bg-white border-gray-200 hover:border-orange-300 hover:shadow-sm cursor-pointer',
           error && 'border-red-300 focus:border-red-400',
           isOpen && 'border-orange-400 ring-2 ring-orange-500/20'
         )}>
@@ -164,10 +187,11 @@ export function DatePicker({
           <Calendar className="w-4 h-4" />
         </span>
         <span className={cn(
-          'flex-1 text-sm',
+          'flex-1',
+          isCompact ? 'text-xs' : 'text-sm',
           value ? 'text-gray-900 font-medium' : 'text-gray-400'
         )}>
-          {value ? formatDisplayDate(value) : resolvedPlaceholder}
+          {displayValue}
         </span>
         <ChevronLeft className={cn(
           'w-4 h-4 text-gray-400 transition-transform duration-200',
@@ -179,44 +203,74 @@ export function DatePicker({
 
       {/* Calendar dropdown */}
       {isOpen &&
-      <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+      <div
+        role="dialog"
+        aria-label={t('datePicker.chooseDate')}
+        data-testid="date-picker-panel"
+        className={cn(
+          'mt-2 w-full overflow-hidden border border-gray-200 bg-white shadow-lg ring-1 ring-gray-900/5 animate-in fade-in slide-in-from-top-2 duration-200',
+          isCompact ? 'rounded-xl' : 'rounded-2xl'
+        )}
+      >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <div className={cn(
+            'flex items-center justify-between border-b border-gray-100 bg-gray-50/80 px-3',
+            isCompact ? 'py-2' : 'py-2.5'
+          )}>
             <button
             type="button"
             onClick={handlePrevMonth}
-            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+            aria-label={t('datePicker.previousMonth')}
+            className={cn(
+              'grid place-items-center rounded-lg text-gray-600 transition-colors hover:bg-white hover:shadow-sm',
+              isCompact ? 'h-8 w-8' : 'h-9 w-9'
+            )}>
             
               <ChevronLeft className="w-4 h-4 text-gray-600" />
             </button>
-            <span className="text-sm font-semibold text-gray-900">
+            <span className="text-sm font-semibold text-gray-900" aria-live="polite">
               {t(`months.${MONTH_KEYS[month]}`)} {year}
             </span>
             <button
             type="button"
             onClick={handleNextMonth}
-            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+            aria-label={t('datePicker.nextMonth')}
+            className={cn(
+              'grid place-items-center rounded-lg text-gray-600 transition-colors hover:bg-white hover:shadow-sm',
+              isCompact ? 'h-8 w-8' : 'h-9 w-9'
+            )}>
             
               <ChevronRight className="w-4 h-4 text-gray-600" />
             </button>
           </div>
 
           {/* Weekday headers */}
-          <div className="grid grid-cols-7 px-2 py-2">
+          <div className={cn(
+            'grid grid-cols-7 gap-1 px-3 pb-1',
+            isCompact ? 'pt-2' : 'pt-3'
+          )} role="row">
             {WEEKDAY_KEYS.map((day) =>
-          <div key={day} className="text-center text-xs font-medium text-gray-400 py-1">
+          <div
+            key={day}
+            role="columnheader"
+            data-testid="date-picker-weekday"
+            className="py-1 text-center text-[11px] font-semibold text-gray-400"
+          >
                 {t(`days.short.${day}`)}
               </div>
           )}
           </div>
 
           {/* Calendar grid */}
-          <div className="grid grid-cols-7 px-2 pb-3">
+          <div className="grid grid-cols-7 gap-1 px-3 pb-3" role="grid">
             {calendarDays.map((day, index) => {
             if (!day.isCurrentMonth || !day.date) {
               return (
-                <div key={index} className="h-9 flex items-center justify-center">
-                    <span className="text-sm text-gray-300">{day.date}</span>
+                <div key={index} data-testid="date-picker-cell" className={cn(
+                  'flex items-center justify-center',
+                  isCompact ? 'h-8' : 'h-9'
+                )}>
+                    <span className={cn(isCompact ? 'text-xs' : 'text-sm', 'text-gray-300')}>{day.date}</span>
                   </div>);
 
             }
@@ -232,10 +286,14 @@ export function DatePicker({
                 type="button"
                 onClick={() => handleDateSelect(dateKey)}
                 disabled={isDisabled}
+                aria-label={formatDisplayDate(dateKey)}
+                aria-pressed={isSelected}
+                data-testid="date-picker-cell"
                 className={cn(
-                  'h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all',
+                  'flex items-center justify-center rounded-lg font-semibold transition-all',
+                  isCompact ? 'h-8 text-xs' : 'h-9 text-sm',
                   isSelected ?
-                  'bg-primary text-white shadow-md' :
+                  'bg-primary text-white shadow-sm' :
                   isToday ?
                   'bg-orange-50 text-orange-600 border border-orange-200' :
                   'text-gray-700 hover:bg-gray-100',
@@ -249,12 +307,32 @@ export function DatePicker({
           </div>
 
           {/* Today button */}
-          <div className="px-3 pb-3">
+          <div className={cn(
+            'border-t border-gray-100 px-3',
+            isCompact ? 'py-2' : 'py-2.5',
+            allowClear && value ? 'grid grid-cols-2 gap-2' : ''
+          )}>
+            {allowClear && value ? (
+              <button
+                type="button"
+                onClick={handleClear}
+                className={cn(
+                  'inline-flex w-full items-center justify-center gap-1.5 rounded-lg font-semibold text-gray-500 transition-colors hover:bg-gray-50',
+                  isCompact ? 'py-1.5 text-xs' : 'py-2 text-sm'
+                )}
+              >
+                <X className="h-3.5 w-3.5" />
+                {t('datePicker.clear')}
+              </button>
+            ) : null}
             <button
             type="button"
             onClick={() => handleDateSelect(todayKey)}
             disabled={isDateDisabled(todayKey)}
-            className="w-full py-2 text-sm font-medium text-orange-600 hover:bg-orange-50 rounded-lg transition-colors disabled:opacity-40"
+            className={cn(
+              'w-full rounded-lg font-semibold text-orange-600 transition-colors hover:bg-orange-50 disabled:opacity-40',
+              isCompact ? 'py-1.5 text-xs' : 'py-2 text-sm'
+            )}
           >
             {t('datePicker.today')}
           </button>

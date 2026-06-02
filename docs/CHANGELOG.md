@@ -6,6 +6,12 @@
 ### Infrastructure
 - **ctv.thammyvientam.com now forwards to tmv.2checkin.com.** Added nginx server block (`docs/live-artifacts/ctv-thammyvientam/ctv.thammyvientam.com.nginx.conf`) returning 301 for all paths. Replaced `CTVlegacy/app/dist/index.html` with a client-side fallback redirect so the old CTV landing page no longer loads. Aligns ctv.thammyvientam.com behavior with the existing ctv.2checkin.com forwarding setup. — @agent
 
+## [0.32.95] — 2026-06-02 (nk3-deploy)
+### Fixed
+- **Shared calendar/date fields no longer use native mobile date popups or overlapping absolute panels.** `/ctv` `Giới thiệu khách`, `/calendar` quick-add/export date ranges, `/reports/revenue` filters, payment/deposit dates, customer health-check upload dates, and patient service dates now use the shared app `DatePicker`, which opens in normal document flow with a Monday-first calendar. Appointment and service modals reserve enough bottom scroll space for fixed footers, and the feedback login hint hides while dialogs/date pickers are open. Preserves existing date string payloads, including the CTV booking default to today's `Asia/Ho_Chi_Minh` date; no API or backend data-flow changes. — @agent
+### Tested
+- `npm --prefix website test -- src/components/ui/DatePicker.test.tsx src/components/ctv/CtvReferModal.test.tsx` (8 passed); `npm --prefix website run build` (passed; existing Vite dynamic/static import and chunk-size warnings only); `rg -n "type=\"date\"|type='date'" website/src --glob '!**/*.map'` (no production native date inputs remain); local Playwright/Chrome screenshot verification with mocked API for `http://127.0.0.1:5175`: `docs/live-artifacts/ctv-date-picker/01-ctv-refer-calendar-open.png`, `02-reports-revenue-date-filter-open.png`, `03-calendar-export-date-range-open.png`, `04-calendar-quick-add-date-open.png`. Scoped Semgrep: `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off <22 changed frontend/i18n/css paths>` scanned 22 files, 0 findings, 0 blocking HIGH/ERROR findings. — @agent
+
 ## [0.32.94] — 2026-06-02 (nk3-deploy)
 ### Changed
 - **CTV portal orange menu is now a compact motion pill.** `/ctv` replaces the tall orange header block with a smaller rounded header, groups `Giới thiệu khách` and `Tuyển CTV` inside a pill action menu, and hides the header on downward scroll while returning it on upward scroll or focus. Preserves the CTV-only portal behavior in BEHAVIOR.md and product-map `ctv.yaml`; no API or backend data flow changed. — @agent

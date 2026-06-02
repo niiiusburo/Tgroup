@@ -65,7 +65,9 @@ affected_by:
   - Changes to feedback attachment size limits
   - Changes to nginx /uploads/feedback proxy config
   - Changes to websitepages schema
+  - Changes to global modal/dialog/date-picker behavior that should suppress floating feedback hints
 impact_tests:
   - website/e2e/phase2-quick-features.spec.ts (indirect)
   - api feedback route tests should cover unread-count admin/staff counts, /all admin-only access, attachments, reply, status, and delete behavior.
+  - docs/live-artifacts/ctv-date-picker/02-reports-revenue-date-filter-open.png (feedback hint hidden while a date picker is open)
 risk_level: low

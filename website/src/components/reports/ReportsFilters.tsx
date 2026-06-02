@@ -1,4 +1,8 @@
 import { motion } from 'framer-motion';
+import { CalendarDays } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { DatePicker } from '@/components/ui/DatePicker';
+import { useTimezone } from '@/contexts/TimezoneContext';
 
 interface ReportsFiltersProps {
   dateFrom: string;
@@ -10,9 +14,6 @@ interface ReportsFiltersProps {
   locations: { id: string; name: string }[];
   locationsLoading?: boolean;
 }
-
-import { useTranslation } from 'react-i18next';
-import { useTimezone } from '@/contexts/TimezoneContext';
 
 function formatPeriod(dateFrom: string, dateTo: string, locale: string): string {
   if (!dateFrom || !dateTo) return '';
@@ -96,19 +97,21 @@ export function ReportsFilters({
       </div>
 
       {/* Date inputs */}
-      <div className="flex items-center gap-2">
-        <input
-          type="date"
+      <div className="grid w-full grid-cols-1 items-end gap-2 sm:w-auto sm:grid-cols-[minmax(10rem,1fr)_auto_minmax(10rem,1fr)]">
+        <DatePicker
           value={dateFrom}
-          onChange={(e) => onDateFromChange(e.target.value)}
-          className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+          onChange={onDateFromChange}
+          label={t('filters.from')}
+          icon={<CalendarDays className="h-3.5 w-3.5" />}
+          size="compact"
         />
-        <span className="text-gray-400 text-sm">→</span>
-        <input
-          type="date"
+        <span className="hidden pb-2 text-sm text-gray-400 sm:inline">→</span>
+        <DatePicker
           value={dateTo}
-          onChange={(e) => onDateToChange(e.target.value)}
-          className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+          onChange={onDateToChange}
+          label={t('filters.to')}
+          icon={<CalendarDays className="h-3.5 w-3.5" />}
+          size="compact"
         />
       </div>
 

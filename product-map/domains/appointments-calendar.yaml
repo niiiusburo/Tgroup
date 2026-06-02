@@ -62,6 +62,7 @@ invariants:
   - Appointment exports must serialize the same `appointments.date` calendar value shown in `/calendar`, include `time` when present, and allow phone searches through `partners.phone`.
   - Appointment customer selectors must search by customer code as well as name, phone, and email.
   - CTV booking-created appointments must not create service cards; optional service selection or Referral Start default is appointment metadata until a real saleorder is created.
+  - Appointment and calendar export date pickers must open in normal document flow, keep fixed modal footers reachable, and avoid native mobile date overlays.
 impact_tests:
   - api/src/routes/appointments/__tests__/readHandlers.test.js
   - api/src/routes/appointments/__tests__/mutationHandlers.test.js
@@ -76,4 +77,7 @@ impact_tests:
   - website/e2e/appointment-status-persistence.spec.ts
   - website/e2e/calendar-april-seed-check.spec.ts
   - website/src/components/modules/__tests__/EditAppointmentModal.test.tsx
+  - website/src/components/ui/DatePicker.test.tsx
+  - docs/live-artifacts/ctv-date-picker/03-calendar-export-date-range-open.png
+  - docs/live-artifacts/ctv-date-picker/04-calendar-quick-add-date-open.png
 risk_level: high

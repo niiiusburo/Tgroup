@@ -51,6 +51,7 @@ endpoints:
 ui_surfaces:
   - /ctv (full bypass of admin Layout/sidebar; mobile-first with bottom nav 4 tabs; also usable desktop; EN/VI switcher in the CTV header)
     - Header: compact orange motion pill; hides on downward scroll, returns on upward scroll/focus, and groups Refer Client + Recruit CTV as a smaller pill action menu.
+    - Refer Client sheet: appointment date uses the shared in-flow app DatePicker, not the mobile browser native `type=date` picker, so opening the calendar pushes later fields/buttons instead of covering them.
     - Home: greeting + pending tile (split dental/cosmetic) + this-month + recent activity feed with [den]/[cos] pills
     - Commission: Pending/Paid segmented; earnings list (client, service, amount, LOB pill)
     - Tracking: referred clients by stage (referred, visited, serviced, paid) with LOB pills and earned/estimated commission context
@@ -77,6 +78,7 @@ impact_tests:
   - commission-summary returns live aggregated numbers from both DB earnings tables for the CTV's recipient_partner_id
   - Referred clients show correct LOB tags and status
   - Refer-client sheet defaults the appointment date to today's Asia/Ho_Chi_Minh date and submits without a manual date tap
+  - Refer-client calendar opens as a custom in-flow Monday-first picker on mobile and desktop; no native iOS calendar overlay, clipped panel, or field/button overlap.
   - Refer-client phone lookup pre-fills the name only for an existing available client, and never for a client actively claimed by another CTV
   - POST /api/ctv/bookings creates dbo.appointments without creating saleorders or saleorderlines, defaulting omitted service metadata to Referral Start when configured
   - Admin /commission five-tab flow keeps date filters legible and shows earned dates before payout selection
