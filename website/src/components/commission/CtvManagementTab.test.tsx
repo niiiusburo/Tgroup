@@ -58,7 +58,8 @@ describe('CtvManagementTab → EditCtvModal payload', () => {
     expect(id).toBe('ctv-1');
     expect(lob).toBe('dental');
     // The crucial assertion: no empty phone is sent (it would 400 at the API).
-    expect(payload).toEqual({ name: 'No Phone CTV', email: 'haskemail@x.vn' });
+    // lob_scope is always included (defaults to ['dental'] for CTVs).
+    expect(payload).toEqual({ name: 'No Phone CTV', email: 'haskemail@x.vn', lob_scope: ['dental'] });
     expect(payload).not.toHaveProperty('phone');
     expect(payload).not.toHaveProperty('password');
   });
@@ -78,7 +79,7 @@ describe('CtvManagementTab → EditCtvModal payload', () => {
 
     await waitFor(() => expect(mockUpdateCtv).toHaveBeenCalledTimes(1));
     const [, payload] = mockUpdateCtv.mock.calls[0];
-    expect(payload).toMatchObject({ name: 'No Phone CTV', email: 'haskemail@x.vn', password: 'freshpass1' });
+    expect(payload).toMatchObject({ name: 'No Phone CTV', email: 'haskemail@x.vn', password: 'freshpass1', lob_scope: ['dental'] });
     expect(payload).not.toHaveProperty('phone');
   });
 });

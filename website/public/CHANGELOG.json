@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.32.103",
+    "date": "2026-06-05",
+    "commit": "nk3-deploy-edit-ctv-lob",
+    "highlights": "Admin CTV edit modal now includes LOB scope (dental/cosmetic) checkboxes, matching Add CTV form for consistency on NK3.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "EditCtvModal: added LOB scope selection (dental always present and required for CTV auth; cosmetic optional).",
+          "Backend: extended PUT /Ctvs/:id to accept lob_scope, force 'dental', and create cosmetic mirror row when newly scoped.",
+          "Updated UpdateCtvInput type and adjusted the EditCtvModal payload unit test."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.93",
     "date": "2026-06-02",
     "commit": "d96a4edc",

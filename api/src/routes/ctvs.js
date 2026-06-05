@@ -247,12 +247,15 @@ router.post('/:id/move', requireAuth, async (req, res) => {
 });
 
 /**
- * PUT /api/Ctvs/:id  Body: { name?, phone?, email?, password? }
- * Admin-only full edit of a CTV's profile fields. Any subset of fields may be
- * supplied; only the provided ones are updated. A non-empty password is
- * bcrypt-hashed into password_hash (login tries bcrypt.compare first, so this
- * works for legacy CTVs too). Mirrors the change into the cosmetic DB best-effort
- * (the row shares the same id when the CTV is cosmetic-scoped).
+ * PUT /api/Ctvs/:id  Body: { name?, phone?, email?, password?, lob_scope? }
+ * Admin-only full edit of a CTV's profile fields and/or LOB scope.
+ * Any subset of fields may be supplied; only the provided ones are updated.
+ * A non-empty password is bcrypt-hashed into password_hash (login tries
+ * bcrypt.compare first, so this works for legacy CTVs too).
+ * lob_scope: string[] e.g. ['dental'] or ['dental','cosmetic']. 'dental' is
+ * always forced (CTV auth row lives in dental DB).
+ * Mirrors profile + lob_scope into the cosmetic DB best-effort (creates the
+ * mirror row if 'cosmetic' is newly added and the row did not exist).
  */
 router.put('/:id', requireAuth, async (req, res) => {
   const { employeeId } = req.user || {};
@@ -269,6 +272,10 @@ router.put('/:id', requireAuth, async (req, res) => {
   const phone = typeof body.phone === 'string' ? body.phone.trim() : undefined;
   const email = typeof body.email === 'string' ? body.email.trim() : undefined;
   const password = typeof body.password === 'string' ? body.password : undefined;
+  // lob_scope for admin edit of CTV participation in LOBs (cosmetic earnings etc.)
+  const lob_scope = Array.isArray(body.lob_scope)
+    ? Array.from(new Set(['dental', ...body.lob_scope.filter((l) => typeof l === 'string' && ['dental', 'cosmetic'].includes(l))]))
+    : undefined;
 
   // Provided fields must be non-empty. Crucially, email/phone are login identifiers:
   // a non-legacy CTV can ONLY log in by email, so blanking it would lock them out
@@ -289,7 +296,7 @@ router.put('/:id', requireAuth, async (req, res) => {
     return res.status(400).json({ error: { code: 'U_WEAK_PASSWORD', message: 'Password must be at least 6 characters' } });
   }
 
-  const hasUpdate = name !== undefined || phone !== undefined || email !== undefined || !!password;
+  const hasUpdate = name !== undefined || phone !== undefined || email !== undefined || !!password || lob_scope !== undefined;
   if (!hasUpdate) {
     return res.status(400).json({ error: { code: 'VALIDATION', message: 'No fields to update' } });
   }
@@ -344,6 +351,7 @@ router.put('/:id', requireAuth, async (req, res) => {
       const bcrypt = require('bcryptjs');
       addSet('password_hash', await bcrypt.hash(password, 10));
     }
+    if (lob_scope !== undefined) addSet('lob_scope', lob_scope);
     sets.push('lastupdated = now()');
     params.push(id);
 
@@ -359,6 +367,58 @@ router.put('/:id', requireAuth, async (req, res) => {
 
     const updated = dRows[0];
     if (!updated) return res.status(404).json({ error: { code: 'S_NOT_FOUND', message: 'CTV not found' } });
+
+    // If lob_scope change added 'cosmetic', ensure the mirror row exists in cosmetic DB
+    // (the blind UPDATE above only affects existing rows).
+    if (lob_scope !== undefined && lob_scope.includes('cosmetic')) {
+      try {
+        const cExists = await cosmeticDb.queryRows(
+          `SELECT id FROM dbo.partners WHERE id = $1 AND is_ctv = true LIMIT 1`,
+          [id]
+        );
+        if (!cExists[0]) {
+          const now = new Date().toISOString();
+          // Re-fetch full current (incl. password_hash) from dental for the INSERT copy.
+          const dentalFull = await dentalDb.queryRows(
+            `SELECT name, phone, email, password_hash, referred_by_ctv_id FROM dbo.partners WHERE id = $1 LIMIT 1`,
+            [id]
+          );
+          const full = dentalFull[0] || updated;
+          let pwHash = full.password_hash || null;
+          if (password) {
+            const bcrypt = require('bcryptjs');
+            pwHash = await bcrypt.hash(password, 10);
+          }
+          const mirParams = [
+            id,
+            full.name || updated.name,
+            full.phone || updated.phone || null,
+            full.email || updated.email || null,
+            pwHash,
+            lob_scope,
+            full.referred_by_ctv_id || updated.referred_by_ctv_id || null,
+            now,
+          ];
+          const mirSql = `
+            INSERT INTO dbo.partners (
+              id, name, phone, email, password_hash, is_ctv, lob_scope, referred_by_ctv_id,
+              active, employee, customer, supplier, isagent, isinsurance, iscompany, ishead,
+              isbusinessinvoice, isdeleted, datecreated, lastupdated
+            ) VALUES (
+              $1, $2, $3, $4, $5, true, $6, $7,
+              true, true, false, false, false, false, false, false,
+              false, false, $8, $8
+            )
+          `;
+          await cosmeticDb.queryRows(mirSql, mirParams).catch((e) => {
+            console.error('[Ctvs PUT /:id] cosmetic mirror INSERT on lob_scope add:', e.message);
+          });
+        }
+      } catch (e) {
+        console.error('[Ctvs PUT /:id] ensure cosmetic mirror for lob_scope:', e.message);
+      }
+    }
+
     return res.json(updated);
   } catch (e) {
     console.error('[Ctvs PUT /:id] error:', e.message);

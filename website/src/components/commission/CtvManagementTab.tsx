@@ -221,7 +221,7 @@ function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
     phone: '',
     email: '',
     password: '',
-    lob_scope: [],
+    lob_scope: ['dental'],
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -241,6 +241,7 @@ function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
   };
 
   const handleToggleLob = (lob: string) => {
+    if (lob === 'dental') return; // always required for CTV auth row
     setInput({
       ...input,
       lob_scope: input.lob_scope?.includes(lob)
@@ -313,7 +314,8 @@ function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
                     type="checkbox"
                     checked={input.lob_scope?.includes(lob) || false}
                     onChange={() => handleToggleLob(lob)}
-                    className="w-4 h-4 rounded border-gray-300 text-primary"
+                    disabled={lob === 'dental'}
+                    className="w-4 h-4 rounded border-gray-300 text-primary disabled:opacity-60"
                   />
                   <span className="text-sm text-gray-700 capitalize">{lob}</span>
                 </label>
@@ -366,6 +368,10 @@ function EditCtvModal({ ctv, onClose, onSuccess }: EditCtvModalProps) {
   const [phone, setPhone] = useState(ctv.phone || '');
   const [email, setEmail] = useState(ctv.email || '');
   const [password, setPassword] = useState('');
+  const [lobScope, setLobScope] = useState<string[]>(() => {
+    const s = ctv.lob_scope || [];
+    return Array.from(new Set(['dental', ...s]));
+  });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -376,7 +382,7 @@ function EditCtvModal({ ctv, onClose, onSuccess }: EditCtvModalProps) {
       // Only send fields the admin actually filled in. Sending an empty phone/email
       // would be rejected by the API (they are login identifiers), which would make
       // a CTV that has no phone/email on record impossible to edit at all.
-      const payload: UpdateCtvInput = { name: name.trim() };
+      const payload: UpdateCtvInput = { name: name.trim(), lob_scope: lobScope };
       if (phone.trim()) payload.phone = phone.trim();
       if (email.trim()) payload.email = email.trim();
       if (password.trim()) payload.password = password;
@@ -388,6 +394,16 @@ function EditCtvModal({ ctv, onClose, onSuccess }: EditCtvModalProps) {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleToggleLob = (lob: string) => {
+    setLobScope((prev) => {
+      const has = prev.includes(lob);
+      let next = has ? prev.filter((l) => l !== lob) : [...prev, lob];
+      // Always keep 'dental' (canonical auth row for CTVs)
+      if (!next.includes('dental')) next = ['dental', ...next];
+      return next;
+    });
   };
 
   return (
@@ -445,6 +461,24 @@ function EditCtvModal({ ctv, onClose, onSuccess }: EditCtvModalProps) {
               placeholder={tc('ctv.passwordPlaceholder')}
             />
             <p className="mt-1 text-xs text-gray-500">{tc('ctv.newPasswordHint')}</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-2">{tc('ctv.lobScope')}</label>
+            <div className="space-y-2">
+              {['dental', 'cosmetic'].map((lob) => (
+                <label key={lob} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={lobScope.includes(lob)}
+                    onChange={() => handleToggleLob(lob)}
+                    disabled={lob === 'dental'}
+                    className="w-4 h-4 rounded border-gray-300 text-primary disabled:opacity-60"
+                  />
+                  <span className="text-sm text-gray-700 capitalize">{lob}</span>
+                </label>
+              ))}
+            </div>
           </div>
         </div>
 

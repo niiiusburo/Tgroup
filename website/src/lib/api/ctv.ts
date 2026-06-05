@@ -215,9 +215,11 @@ export interface UpdateCtvInput {
   email?: string;
   /** When provided and non-empty, resets the CTV's login password. */
   password?: string;
+  /** lob_scope to assign to this CTV (e.g. ['dental'], ['dental','cosmetic']). 'dental' is always forced by backend for auth. */
+  lob_scope?: string[];
 }
 
-/** Admin: edit a CTV's profile fields (name, phone, email, password). */
+/** Admin: edit a CTV's profile fields (name, phone, email, password) and/or lob_scope. */
 export async function updateCtv(
   id: string,
   input: UpdateCtvInput,
