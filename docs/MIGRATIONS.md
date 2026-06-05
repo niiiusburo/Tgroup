@@ -33,9 +33,9 @@ Current inventory from disk:
 | 006 | `006_dotkham_payment_allocations.sql` | Adds `dotkham_id` to `payment_allocations` | `ALTER TABLE payment_allocations ADD COLUMN dotkham_id ...` | `ALTER TABLE payment_allocations DROP COLUMN dotkham_id` | 2026-01 |
 | 006 | `006_fix_location_scope_column.sql` | Column rename/fix | `ALTER TABLE ... RENAME COLUMN ...` | Reverse rename | 2026-01 |
 | 007 | `007_add_external_checkups_permission.sql` | Adds permission strings for external checkups | `INSERT INTO group_permissions ...` | `DELETE FROM group_permissions WHERE permission_string IN (...)` | 2026-02 |
-| 008 | `008_data_migration_from_tdental.sql` | TDental import schema adjustments (v1) | Multiple ALTER TABLE | Reverse per column | 2026-02 |
-| 008 | `008_data_migration_from_tdental_v2.sql` | TDental import schema adjustments (v2) | Multiple ALTER TABLE | Reverse per column | 2026-02 |
-| 008 | `008_data_migration_from_tdental_v3.sql` | TDental import schema adjustments (v3) | Multiple ALTER TABLE | Reverse per column | 2026-02 |
+| 008 | `008_data_migration_from_tdental.sql` | TDental import schema adjustments (v1); destructive legacy rebuild guarded by break-glass settings | Multiple ALTER TABLE + guarded destructive data rebuild | Restore from pre-run backup; do not run on protected DB names without explicit break-glass | 2026-02 / guard added 2026-06 |
+| 008 | `008_data_migration_from_tdental_v2.sql` | TDental import schema adjustments (v2); destructive legacy rebuild guarded by break-glass settings | Multiple ALTER TABLE + guarded destructive data rebuild | Restore from pre-run backup; do not run on protected DB names without explicit break-glass | 2026-02 / guard added 2026-06 |
+| 008 | `008_data_migration_from_tdental_v3.sql` | TDental import schema adjustments (v3); destructive legacy rebuild guarded by break-glass settings | Multiple ALTER TABLE + guarded destructive data rebuild | Restore from pre-run backup; do not run on protected DB names without explicit break-glass | 2026-02 / guard added 2026-06 |
 | 011 | `011_fix_payment_proofs_type.sql` | Type correction on `payment_proofs` | `ALTER TABLE payment_proofs ALTER COLUMN ...` | Reverse type | 2026-02 |
 | 012 | `012_add_cskhid_salestaffid.sql` | Adds `cskhid` and `salestaffid` to `partners` | `ALTER TABLE partners ADD COLUMN ...` | `ALTER TABLE partners DROP COLUMN cskhid, salestaffid` | 2026-02 |
 | 013 | `013_add_employee_role_fields.sql` | Adds `isdoctor`, `isassistant`, `isreceptionist` | `ALTER TABLE partners ADD COLUMN ...` | `ALTER TABLE partners DROP COLUMN ...` | 2026-03 |
@@ -121,6 +121,13 @@ docker exec -i tgroup-db psql -U postgres -d tdental_demo < rollback-001.sql
 - [ ] Application code that depends on new schema is merged BEFORE or WITH the migration.
 - [ ] Migration applied on VPS AFTER code deploy.
 - [ ] `schema_migrations` table updated (if using tracking).
+- [ ] Destructive SQL (`TRUNCATE`, broad `DELETE`, `DROP TABLE/VIEW/DATABASE`) is blocked by a break-glass guard and covered by `api/tests/destructiveMigrationGuard.test.js`.
+
+## Destructive Legacy Import Guardrails
+
+`008_data_migration_from_tdental.sql`, `_v2.sql`, and `_v3.sql` are manual reconstruction scripts, not normal deploy migrations. They now abort unless `tgroup.allow_destructive_tdental_import=1` and `tgroup.legacy_import_password_hash=<approved bcrypt hash>` are set in the SQL session. Protected database names (`tdental_demo`, `tdental_smoketest`, `tcosmetic_demo`, `tcosmetic_smoketest`) require the extra `tgroup.allow_live_destructive_tdental_import=1` setting after explicit backup and approval.
+
+Do not include these files in an automatic "apply all pending migrations" loop for NK3. For recovery work, restore a source dump into an isolated probe database, compare current-vs-source rows, and prefer insert-only merge scripts over blind restore or truncate.
 
 ## Migration Drift Detection
 

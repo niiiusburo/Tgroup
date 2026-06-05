@@ -76,6 +76,8 @@ function mapPayoutRow(row, lob) {
     created_by_name: row.created_by_name ?? null,
     earnings_count: parseInt(row.earnings_count || 0, 10) || 0,
     created_at: row.created_at,
+    // §10: set when this payout is one leg of a combined Dental+Cosmetic payout.
+    payout_group_id: row.payout_group_id ?? null,
   };
 }
 
@@ -150,6 +152,7 @@ router.get('/', requireAuth, requirePayoutPermission, async (req, res) => {
       SELECT
         p.id, p.cycle_label, p.paid_at, p.total_amount, p.notes,
         p.receipt_url, p.receipt_uploaded_at, p.created_by_partner_id, p.created_at,
+        p.payout_group_id,
         creator.name AS created_by_name,
         (SELECT COUNT(*) FROM dbo.earnings e WHERE e.payout_id = p.id) AS earnings_count
       FROM dbo.payouts p
@@ -241,6 +244,82 @@ router.post('/', requireAuth, requirePayoutPermission, async (req, res) => {
     return res.status(500).json({ error: { code: 'E_PAYOUT_CREATE_FAILED', message: 'Failed to create payout' } });
   } finally {
     client.release();
+  }
+});
+
+// POST /api/Payouts/combined  — §10 combined payout across Dental + Cosmetic.
+// Body: { cycleLabel, notes?, receipt_url?, dental?: [earningIds], cosmetic?: [earningIds] }
+// Creates one LOB-local payout row in each DB that has earnings, all sharing the SAME
+// payout_group_id and receipt. Each leg is its own transaction; on partial failure the
+// succeeded leg(s) are reported under `partial` (admin retries the failed LOB).
+router.post('/combined', requireAuth, requirePayoutPermission, async (req, res) => {
+  const { cycleLabel, notes, receipt_url: receiptUrl } = req.body || {};
+  const legs = {
+    dental: Array.isArray(req.body && req.body.dental) ? req.body.dental : [],
+    cosmetic: Array.isArray(req.body && req.body.cosmetic) ? req.body.cosmetic : [],
+  };
+  if (!cycleLabel || typeof cycleLabel !== 'string' || !cycleLabel.trim()) {
+    return res.status(400).json({ error: { code: 'U_INVALID_INPUT', message: 'cycleLabel is required' } });
+  }
+  if (legs.dental.length === 0 && legs.cosmetic.length === 0) {
+    return res.status(400).json({ error: { code: 'U_INVALID_INPUT', message: 'at least one of dental/cosmetic earningIds is required' } });
+  }
+
+  const createdBy = req.user.employeeId || req.user.id;
+  const groupId = crypto.randomUUID();
+  const result = { payout_group_id: groupId, dental: null, cosmetic: null };
+
+  async function createLeg(lob, earningIds) {
+    const client = await getDb(lob).connect();
+    try {
+      await client.query('BEGIN');
+      const lockRes = await client.query(
+        `SELECT id, amount FROM dbo.earnings WHERE id = ANY($1) AND status = 'pending' FOR UPDATE`,
+        [earningIds]
+      );
+      const payable = lockRes.rows || [];
+      if (payable.length !== earningIds.length) {
+        await client.query('ROLLBACK');
+        const e = new Error('not_payable');
+        e.code = 'B_EARNINGS_NOT_PAYABLE';
+        e.lob = lob;
+        e.detail = { payableCount: payable.length, requestedCount: earningIds.length };
+        throw e;
+      }
+      const total = payable.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
+      const uploadedAt = receiptUrl ? new Date() : null;
+      const ins = await client.query(
+        `INSERT INTO dbo.payouts
+          (cycle_label, paid_at, total_amount, notes, created_by_partner_id, receipt_url, receipt_uploaded_at, payout_group_id)
+         VALUES ($1, now(), $2, $3, $4, $5, $6, $7)
+         RETURNING id, cycle_label, paid_at, total_amount, notes, receipt_url, receipt_uploaded_at, created_by_partner_id, created_at, payout_group_id`,
+        [cycleLabel.trim(), total, notes || null, createdBy, receiptUrl || null, uploadedAt, groupId]
+      );
+      const payout = (ins.rows || [])[0];
+      await client.query(`UPDATE dbo.earnings SET status = 'paid', payout_id = $1 WHERE id = ANY($2)`, [payout.id, earningIds]);
+      await client.query('COMMIT');
+      return mapPayoutRow({ ...payout, earnings_count: earningIds.length, created_by_name: req.user.name || null }, lob);
+    } catch (err) {
+      try { await client.query('ROLLBACK'); } catch (_) {}
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
+  try {
+    if (legs.dental.length > 0) result.dental = await createLeg('dental', legs.dental);
+    if (legs.cosmetic.length > 0) result.cosmetic = await createLeg('cosmetic', legs.cosmetic);
+    return res.status(201).json(result);
+  } catch (err) {
+    if (err && err.code === 'B_EARNINGS_NOT_PAYABLE') {
+      return res.status(409).json({
+        error: { code: err.code, message: 'Some earnings are not pending (already paid, reversed, or not found)', lob: err.lob, ...err.detail },
+        partial: result,
+      });
+    }
+    console.error('[Payouts POST /combined] error:', err);
+    return res.status(500).json({ error: { code: 'E_PAYOUT_CREATE_FAILED', message: 'Failed to create combined payout' }, partial: result });
   }
 });
 

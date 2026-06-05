@@ -3,6 +3,11 @@ const { query: legacyQuery, getQuery } = require('../../db');
 const { calculateSaleOrderPaymentStateFromAllocations } = require('../../lib/saleOrderTotals');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
 const { setCustomerReferrer, clearCustomerReferrer } = require('../../services/customerReferrer');
+const { createEarningsForServiceCard, reverseServiceCardEarnings } = require('../../services/commissionEngine');
+
+function serviceCardCommissionEnabled() {
+  return process.env.CTV_SERVICE_CARD_COMMISSION === 'true' || process.env.CTV_SERVICE_CARD_COMMISSION === '1';
+}
 
 async function updateSaleOrder(req, res) {
   try {
@@ -33,6 +38,44 @@ async function updateSaleOrder(req, res) {
     }
     if (quantity != null && !isNaN(parseFloat(quantity)) && parseFloat(quantity) < 0) {
       return res.status(400).json({ error: 'quantity must be >= 0' });
+    }
+
+    // INV-003C (Wave 3): admin service-card CTV reassignment. When the service-card model is on
+    // and this edit changes the attached CTV, enforce the paid-out lock and reverse the OLD
+    // pending earnings up-front; new earnings are recreated for the NEW CTV after the change.
+    // No-op unless the CTV actually changes.
+    let scReassign = null;
+    if (serviceCardCommissionEnabled() && Object.prototype.hasOwnProperty.call(req.body, 'ctv_id')) {
+      const cur = await q('SELECT ctv_id, partnerid FROM saleorders WHERE id = $1 AND isdeleted = false', [id]);
+      if (cur && cur[0]) {
+        const oldCtv = cur[0].ctv_id || null;
+        const newCtv = ctv_id || null;
+        if (oldCtv !== newCtv) {
+          const lines = await q(
+            'SELECT id, pricetotal FROM saleorderlines WHERE orderid = $1 AND COALESCE(isdeleted, false) = false',
+            [id],
+          );
+          const lineIds = lines.map((l) => l.id);
+          if (lineIds.length > 0) {
+            const paid = await q(
+              "SELECT 1 FROM dbo.earnings WHERE service_line_id = ANY($1) AND (status = 'paid' OR payout_id IS NOT NULL) LIMIT 1",
+              [lineIds],
+            );
+            if (paid && paid.length > 0) {
+              return res.status(409).json({
+                error: {
+                  code: 'B_COMMISSION_PAID_OUT',
+                  message: 'Commission for this service has already been paid out — the CTV can no longer be changed.',
+                },
+              });
+            }
+          }
+          for (const l of lines) {
+            await reverseServiceCardEarnings({ serviceLineId: l.id, run: q });
+          }
+          scReassign = { newCtv, customerId: cur[0].partnerid || partnerid || null };
+        }
+      }
     }
 
     const paymentState = amounttotal !== undefined
@@ -101,6 +144,20 @@ async function updateSaleOrder(req, res) {
         await setCustomerReferrer(q, customerId, ctv_id, { lob: req.lob || 'dental' });
       } else {
         await clearCustomerReferrer(q, customerId);
+      }
+    }
+
+    // Recreate pending earnings for the NEW CTV at the (post-update) full line price.
+    if (scReassign && scReassign.newCtv) {
+      const freshLines = await q(
+        'SELECT id, pricetotal FROM saleorderlines WHERE orderid = $1 AND COALESCE(isdeleted, false) = false',
+        [id],
+      );
+      for (const l of freshLines) {
+        await createEarningsForServiceCard({
+          serviceLine: { id: l.id, ctv_id: scReassign.newCtv, price: l.pricetotal, client_id: scReassign.customerId },
+          run: q,
+        });
       }
     }
 

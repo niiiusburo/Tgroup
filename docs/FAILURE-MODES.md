@@ -138,6 +138,14 @@ Each entry:
 - **Prevention:** Every UI text change requires both `en` and `vi` keys. `website/src/i18n/__tests__/i18n-coverage.test.ts` catches missing keys.
 - **Related:** INV-016.
 
+## FM-20260604-01: Legacy TDental Import Wipes NK3 Cosmetic Smoketest Rows
+
+- **Symptom:** NK3 Cosmetic loses historical appointments, service orders, payments, allocations, and earnings while newer CTV/signup rows still exist.
+- **Root Cause:** A destructive legacy TDental import migration (`008_data_migration_from_tdental*.sql`) or equivalent broad migration loop can run `TRUNCATE`/rebuild SQL against a protected smoketest database when it is treated like a normal pending migration.
+- **Fix:** Recover from a pre-wipe backup by restoring it into an isolated probe DB, comparing probe-vs-live IDs, and applying an insert-only merge that preserves newer live rows. Add SQL-session break-glass guards to the destructive legacy import files.
+- **Prevention:** Never auto-apply destructive import files to NK3. Require fresh current backups, probe restore, row diff, two confirmations for live data writes, and `api/tests/destructiveMigrationGuard.test.js` coverage for any destructive migration SQL.
+- **Related:** `docs/MIGRATIONS.md`, `api/migrations/008_data_migration_from_tdental*.sql`, `testbright.md`.
+
 ---
 
 ## How to Add a New Failure Mode

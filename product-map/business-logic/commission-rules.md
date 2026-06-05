@@ -1,6 +1,8 @@
 # Business Logic: Commission Rules
 
 > How commissions are defined, calculated, and reported in `api/src/routes/commissions.js`.
+> Legacy scope: this file describes the historical admin commission/rules tables. It is not the source of truth for CTV referral, CTV tier, CTV payout, or NK3 service-card commission behavior.
+> Current CTV authority: `docs/business-logic/ctv-referral-commission.md`.
 
 ## 1. Commission Types
 

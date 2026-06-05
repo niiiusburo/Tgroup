@@ -6,7 +6,7 @@
  * @crossref:uses[DepositWallet, OutstandingBalance, PaymentHistory, MonthlyPlanCreator, PaymentSchedule, usePayment, useMonthlyPlans, useLocationFilter]
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   CreditCard, Plus, Search, Wallet, Receipt,
@@ -16,6 +16,8 @@ import { MonthlyPlanCreator, PaymentSchedule } from '@/components/payment/Monthl
 import { DepositWallet } from '@/components/payment/DepositWallet';
 import { OutstandingBalance } from '@/components/payment/OutstandingBalance';
 import { PaymentHistory } from '@/components/payment/PaymentHistory';
+import { CustomerDeposits } from '@/components/payment/CustomerDeposits';
+import { useDeposits } from '@/hooks/useDeposits';
 import { usePayment } from '@/hooks/usePayment';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { LoadingState } from '@/components/shared/LoadingState';
@@ -59,6 +61,21 @@ export function Payment() {
     topUpWallet,
     isLoading,
   } = usePayment(selectedLocationId);
+
+  // §11: admin deposit wallet history for a selected customer (top-ups, refunds, used, void/deleted).
+  const deposits = useDeposits();
+  const [historyCustomer, setHistoryCustomer] = useState<{ id: string; name: string } | null>(null);
+  // Any customer with a wallet OR an outstanding balance can be selected to view deposit history.
+  const depositCustomerOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    wallets.forEach((w) => { if (w.customerId) map.set(w.customerId, w.customerName || w.customerId); });
+    outstandingBalances.forEach((b) => { if (b.customerId) map.set(b.customerId, b.customerName || b.customerId); });
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
+  }, [wallets, outstandingBalances]);
+  useEffect(() => {
+    if (historyCustomer) deposits.loadDeposits(historyCustomer.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [historyCustomer]);
 
   // Monthly plans hook
   const {
@@ -204,12 +221,24 @@ export function Payment() {
             {isLoading ? (
               <LoadingState title={t('states.loadingWallets')} />
             ) : wallets.map((wallet) => (
-              <DepositWallet
-                key={wallet.id}
-                depositBalance={wallet.balance}
-                outstandingBalance={0}
-                onAddDeposit={async (amount, method, date, note) => { await handleTopUp(wallet.customerId)(amount, method, date, note); }}
-              />
+              <div key={wallet.id} className="space-y-1.5">
+                <DepositWallet
+                  depositBalance={wallet.balance}
+                  outstandingBalance={0}
+                  onAddDeposit={async (amount, method, date, note) => { await handleTopUp(wallet.customerId)(amount, method, date, note); }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setHistoryCustomer({ id: wallet.customerId, name: wallet.customerName })}
+                  className={`w-full rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
+                    historyCustomer?.id === wallet.customerId
+                      ? 'border-orange-300 bg-orange-50 text-orange-700'
+                      : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  {t('viewDepositHistory', { defaultValue: 'Lịch sử ví nạp' })}
+                </button>
+              </div>
             ))}
 
             {/* Outstanding balances */}
@@ -224,6 +253,56 @@ export function Payment() {
 
           {/* Right column: Payment history */}
           <div className="lg:col-span-2 space-y-4">
+            {/* §11: select any customer to view their deposit wallet history */}
+            <div className="rounded-lg border border-gray-200 bg-white p-3">
+              <label htmlFor="deposit-history-customer" className="mb-1 block text-xs font-medium text-gray-600">
+                {t('depositHistoryFor', { defaultValue: 'Lịch sử ví nạp của khách hàng' })}
+              </label>
+              <select
+                id="deposit-history-customer"
+                value={historyCustomer?.id || ''}
+                onChange={(e) => {
+                  const opt = depositCustomerOptions.find((o) => o.id === e.target.value);
+                  setHistoryCustomer(opt ? { id: opt.id, name: opt.name } : null);
+                }}
+                className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+              >
+                <option value="">{t('selectCustomer', { defaultValue: '— Chọn khách hàng —' })}</option>
+                {depositCustomerOptions.map((o) => (
+                  <option key={o.id} value={o.id}>{o.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* §11: selected customer's deposit wallet history (top-ups, refunds, used, void/deleted) */}
+            {historyCustomer && (
+              <div className="rounded-lg border border-gray-200 bg-white p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-gray-800">
+                    {t('depositWalletHistory', { defaultValue: 'Lịch sử ví nạp' })} — {historyCustomer.name}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setHistoryCustomer(null)}
+                    className="text-xs text-gray-400 hover:text-gray-600"
+                    aria-label="close"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <CustomerDeposits
+                  depositList={deposits.depositList}
+                  usageHistory={deposits.usageHistory}
+                  balance={deposits.balance}
+                  loading={deposits.loading}
+                  onAddDeposit={async (amount, method, date, note) => { await deposits.addDeposit(historyCustomer.id, amount, method, date, note); }}
+                  onAddRefund={async (amount, method, date, note) => { await deposits.addRefund(historyCustomer.id, amount, method, date, note); }}
+                  onVoidDeposit={async (id) => { await deposits.voidDeposit(id); }}
+                  onDeleteDeposit={async (id) => { await deposits.removeDeposit(id); }}
+                  onRefresh={() => { void deposits.loadDeposits(historyCustomer.id); }}
+                />
+              </div>
+            )}
             {/* Search & filters */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
               <div className="relative flex-1 w-full sm:max-w-xs">

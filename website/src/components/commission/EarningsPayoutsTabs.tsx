@@ -158,9 +158,49 @@ function PayoutsTab() {
   const { t: tc } = useTranslation('common');
   const businessUnit = useBusinessUnitOptional();
   const [payouts, setPayouts] = useState<PayoutRow[]>([]);
+  // §10: merge combined payouts (rows sharing payout_group_id across LOBs) into one row,
+  // expandable into the per-LOB legs. Single-LOB payouts pass through unchanged.
+  const payoutGroups = useMemo(() => {
+    const byGroup = new Map<string, PayoutRow[]>();
+    const singles: PayoutRow[] = [];
+    for (const p of payouts) {
+      if (p.payout_group_id) {
+        const arr = byGroup.get(p.payout_group_id) || [];
+        arr.push(p);
+        byGroup.set(p.payout_group_id, arr);
+      } else {
+        singles.push(p);
+      }
+    }
+    const merged = [
+      ...Array.from(byGroup.values()).map((rows) => ({
+        key: `g-${rows[0].payout_group_id}`,
+        combined: rows.length > 1,
+        cycleLabel: rows[0].cycle_label,
+        lobs: rows.map((r) => r.lob),
+        total: rows.reduce((s, r) => s + r.total_amount, 0),
+        count: rows.reduce((s, r) => s + r.earnings_count, 0),
+        paidAt: rows[0].paid_at,
+        receiptRow: rows[0],
+        legs: rows,
+      })),
+      ...singles.map((p) => ({
+        key: `${p.lob}-${p.id}`,
+        combined: false,
+        cycleLabel: p.cycle_label,
+        lobs: [p.lob] as ('dental' | 'cosmetic')[],
+        total: p.total_amount,
+        count: p.earnings_count,
+        paidAt: p.paid_at,
+        receiptRow: p,
+        legs: [p],
+      })),
+    ];
+    return merged.sort((a, b) => new Date(b.paidAt || 0).getTime() - new Date(a.paidAt || 0).getTime());
+  }, [payouts]);
   const [pending, setPending] = useState<EarningsRow[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
-  const [lob, setLob] = useState<'dental' | 'cosmetic'>(
+  const [lob, setLob] = useState<'all' | 'dental' | 'cosmetic'>(
     businessUnit?.currentLOB === 'cosmetic' ? 'cosmetic' : 'dental'
   );
   const [cycleLabel, setCycleLabel] = useState('');
@@ -176,7 +216,7 @@ function PayoutsTab() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const exportFilters = useMemo(
-    () => ({ lob, dateFrom: dateFrom || undefined, dateTo: dateTo || undefined }),
+    () => ({ lob: lob === 'all' ? 'dental' : lob, dateFrom: dateFrom || undefined, dateTo: dateTo || undefined }),
     [lob, dateFrom, dateTo]
   );
   // ctv-payouts builder queries both LOB DBs → force the plain /api/Exports mount.
@@ -198,16 +238,28 @@ function PayoutsTab() {
     locale: i18n.language,
   });
 
-  const handleLoad = async (currentLob?: 'dental' | 'cosmetic') => {
+  const handleLoad = async (currentLob?: 'all' | 'dental' | 'cosmetic') => {
     setLoading(true); setError(null);
     try {
       const lobToUse = currentLob ?? lob;
-      const [payoutData, earningsData] = await Promise.all([
-        fetchPayouts({ lob: lobToUse, limit: 50 }),
-        fetchEarnings({ lob: lobToUse, status: 'pending', limit: 200 }),
-      ]);
-      setPayouts(payoutData.items || []);
-      setPending(earningsData.items || []);
+      if (lobToUse === 'all') {
+        // §10 All filter: fetch BOTH LOB DBs so combined payouts (shared payout_group_id)
+        // merge into one row. Pending earnings default to dental for the create flow.
+        const [dPay, cPay, dEarn] = await Promise.all([
+          fetchPayouts({ lob: 'dental', limit: 50 }),
+          fetchPayouts({ lob: 'cosmetic', limit: 50 }),
+          fetchEarnings({ lob: 'dental', status: 'pending', limit: 200 }),
+        ]);
+        setPayouts([...(dPay.items || []), ...(cPay.items || [])]);
+        setPending(dEarn.items || []);
+      } else {
+        const [payoutData, earningsData] = await Promise.all([
+          fetchPayouts({ lob: lobToUse, limit: 50 }),
+          fetchEarnings({ lob: lobToUse, status: 'pending', limit: 200 }),
+        ]);
+        setPayouts(payoutData.items || []);
+        setPending(earningsData.items || []);
+      }
       setSelected([]);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to load payouts');
@@ -246,7 +298,7 @@ function PayoutsTab() {
         const uploadRes = await uploadPayoutReceipt(receiptFile);
         receiptUrl = uploadRes.url;
       }
-      await createPayout({ lob, earningIds: selected, cycleLabel, notes: notes || undefined, receipt_url: receiptUrl });
+      await createPayout({ lob: lob === 'all' ? 'dental' : lob, earningIds: selected, cycleLabel, notes: notes || undefined, receipt_url: receiptUrl });
       setCycleLabel('');
       setNotes('');
       setReceiptFile(null);
@@ -260,12 +312,12 @@ function PayoutsTab() {
     }
   };
 
-  const attachReceipt = async (payoutId: string, file: File) => {
+  const attachReceipt = async (payoutId: string, file: File, payoutLob: 'dental' | 'cosmetic') => {
     setSubmitting(true);
     setError(null);
     try {
       const uploadRes = await uploadPayoutReceipt(file);
-      await updatePayoutReceipt(payoutId, uploadRes.url, lob);
+      await updatePayoutReceipt(payoutId, uploadRes.url, payoutLob);
       await handleLoad();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to attach receipt');
@@ -279,7 +331,12 @@ function PayoutsTab() {
       <div className="bg-white rounded-xl shadow-card p-6 space-y-4">
         <div className="flex flex-wrap gap-3 items-end justify-between">
           <label className="text-sm text-gray-600">{t('payouts.lob')}
-            <select value={lob} onChange={(e) => setLob(e.target.value as any)} className="block mt-1 px-3 py-2 border rounded-lg">
+            <select
+              value={lob}
+              onChange={(e) => { const v = e.target.value as 'all' | 'dental' | 'cosmetic'; setLob(v); handleLoad(v); }}
+              className="block mt-1 px-3 py-2 border rounded-lg"
+            >
+              <option value="all">{t('payouts.allLobs', { defaultValue: 'Tất cả (Combined)' })}</option>
               <option value="cosmetic">Cosmetic</option><option value="dental">Dental</option>
             </select>
           </label>
@@ -336,21 +393,35 @@ function PayoutsTab() {
         <div className="px-6 py-4 font-semibold text-gray-900">{t('payouts.recentCycles')}</div>
         <table className="w-full text-sm">
           <tbody className="divide-y divide-gray-200">
-            {payouts.map((p) => (
-              <tr key={`${p.lob}-${p.id}`}>
+            {payoutGroups.map((g) => (
+              <tr key={g.key}>
                 <td className="px-6 py-3">
                   <div className="flex items-center gap-3">
                     <div>
-                      <div className="font-medium">{p.cycle_label}</div>
-                      <div className="text-xs text-gray-500">{p.lob} · {t('payouts.earningsCount', { count: p.earnings_count })} · {p.paid_at ? formatCommissionDate(p.paid_at, i18n.language) : '-'}</div>
+                      <div className="font-medium flex items-center gap-2">
+                        {g.cycleLabel}
+                        {g.combined && (
+                          <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-700">
+                            {t('payouts.combined', { defaultValue: 'Combined' })}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500">{g.lobs.join(' + ')} · {t('payouts.earningsCount', { count: g.count })} · {g.paidAt ? formatCommissionDate(g.paidAt, i18n.language) : '-'}</div>
+                      {g.combined && (
+                        <div className="mt-1 space-y-0.5">
+                          {g.legs.map((leg) => (
+                            <div key={`${leg.lob}-${leg.id}`} className="text-[11px] text-gray-400">↳ {leg.lob}: {formatVnd(leg.total_amount)}</div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-3 text-right font-semibold">{formatVnd(p.total_amount)}</td>
+                <td className="px-6 py-3 text-right font-semibold">{formatVnd(g.total)}</td>
                 <td className="px-6 py-3">
-                  {p.receipt_url ? (
-                    <a href={getUploadUrl(p.receipt_url)} target="_blank" rel="noreferrer" className="inline-block">
-                      <img src={getUploadUrl(p.receipt_url)} alt="Receipt" className="h-10 w-10 rounded border border-gray-200 object-cover hover:ring-2 hover:ring-primary/30" />
+                  {g.receiptRow.receipt_url ? (
+                    <a href={getUploadUrl(g.receiptRow.receipt_url)} target="_blank" rel="noreferrer" className="inline-block">
+                      <img src={getUploadUrl(g.receiptRow.receipt_url)} alt="Receipt" className="h-10 w-10 rounded border border-gray-200 object-cover hover:ring-2 hover:ring-primary/30" />
                     </a>
                   ) : (
                     <label className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 cursor-pointer">
@@ -361,7 +432,7 @@ function PayoutsTab() {
                         className="hidden"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          if (file) attachReceipt(p.id, file);
+                          if (file) attachReceipt(g.receiptRow.id, file, g.receiptRow.lob);
                           e.target.value = '';
                         }}
                       />
@@ -370,7 +441,7 @@ function PayoutsTab() {
                 </td>
               </tr>
             ))}
-            {payouts.length === 0 && <tr><td className="px-6 py-8 text-center text-gray-500">{t('payouts.noCycles')}</td></tr>}
+            {payoutGroups.length === 0 && <tr><td className="px-6 py-8 text-center text-gray-500">{t('payouts.noCycles')}</td></tr>}
           </tbody>
         </table>
       </div>

@@ -1,0 +1,216 @@
+{
+  "checkedAt": "2026-06-02T17:04:50.028Z",
+  "login": {
+    "account": "t@clinic.vn",
+    "success": true,
+    "urlAfterLogin": "https://nk.2checkin.com/",
+    "tokenAccount": {
+      "savedEmail": "t@clinic.vn",
+      "hasToken": true
+    },
+    "textLength": 15197
+  },
+  "results": [
+    {
+      "label": "Calendar",
+      "url": "https://nk.2checkin.com/calendar",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/2026-06-03/calendar.png",
+      "textLength": 47171,
+      "textPreview": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Lịch All Locations 2 Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Lịch hẹn Quản lý lịch hẹn khám bệnh Ngày Tuần Tháng Thứ Tư, 3 tháng 6, 2026 Hôm nay Xuất dữ liệu Bộ lọc Hẹn mới Thứ Tư, 3 tháng 6 500 Lịch hẹn 07:00 07:30 08:00 4 Lịch hẹn Đã hủy ▾ BÁC SĨ 26 0901111111 BÁC SĨ 26 08:00 · 30 phút BÁC SĨ 26 - OFF ✎ Đang hẹn KELLY QUỲNH ANH- BẠN SẾP LL ZALO HOTLINE 11111 08:00 · 30 phút CVR + tRÁM R- BẠN SẾP ( NHẮN QUA ZL HOTLINE CHỐT LẠI LỊCH) ✎ Đang hẹn BÁC SĨ 21 0901111112 BÁC SĨ 21 08:00 · 30 phút BÁC SĨ 21-OFF ✎ Đang hẹn LƯU Ý 0972020908 Bác sĩ 15 08:00 · 30 phút BÁC 15 OFF ✎ 08:30 09:00 46 Lịch hẹn Đang hẹn Nông Thị Hải Yến 0827200355 Bác sĩ Tuất 09:00 · 30 phút Làm 8RS Venus 3D HT (bs 19 tư vấn) ✎ Đang hẹn LƯ THỊ HOÀI VỸ-ĐÃ UP 0368354467 BÁC SĨ 09 09:00 · 30 phút tluc-ta đặt trc ✎ Đang hẹn BÙI NGỌC HOÀNG YẾN 0925714577 BS (11) 09:00 · 30 phút TĂNG LỰC-L-KHÁNH-K ✎ Đang hẹn NGUYỄN HOÀNG NHẬT HÀ- PT CỨNG LÀM CH",
+      "alerts": [
+        "30h 53m 57s*",
+        "Xóa bộ lọc"
+      ],
+      "visibleErrorHints": [
+        "30h 53m 57s*",
+        "Xóa bộ lọc",
+        "500"
+      ],
+      "blockingEvents": []
+    },
+    {
+      "label": "Customers",
+      "url": "https://nk.2checkin.com/customers",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/2026-06-03/customers.png",
+      "textLength": 2091,
+      "textPreview": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Khách hàng All Locations 2 Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Khách hàng 36948 patients · 36911 active Xuất dữ liệu Add Customer All Status Active Inactive Pending CODE CUSTOMER PHONE EMAIL LOCATION STATUS LAST VISIT T216843 T Trân Nguyễn 0943994954 Tấm Dentist Quận 10 Active 02 Jun 2026 T829878 H Hồng Nhung 0336983747 Tấm Dentist Thủ Đức Active 02 Jun 2026 T558839 M Mai Linh 0971489614 Tấm Dentist Thủ Đức Active 02 Jun 2026 T530864 H Huỳnh Thị Điểm 0342483453 Tấm Dentist Thủ Đức Active 02 Jun 2026 T920874 J Jade Nguyễn 0867494823 Tấm Dentist Thủ Đức Active 02 Jun 2026 T237098 L Lê Huỳnh Chức Lê Huỳnh Chức0944253224 Tấm Dentist Gò Vấp Active 02 Jun 2026 T856621 K Kim Ngân 0914347172 Tấm Dentist Quận 10 Active 01 Jun 2026 T279332 C Châu Châu 0903867610 Tấm Dentist Quận 10 Active 01 Jun 2026 T270035 P Phạm Thị Bảo Tâm 0355658667 Tấm Dentist Quận 3 Active 01 Jun 2026 T488337 Đ Đào Thị Ngọc Ý. 0908853796 T",
+      "alerts": [],
+      "visibleErrorHints": [],
+      "blockingEvents": []
+    },
+    {
+      "label": "Service Catalog",
+      "url": "https://nk.2checkin.com/service-catalog",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/2026-06-03/service-catalog.png",
+      "textLength": 2267,
+      "textPreview": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Danh mục dịch vụ All Locations 2 Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Danh mục dịch vụ Dịch vụ Vật tư Thuốc Nhóm dịch vụ TÊN NHÓM DỊCH VỤ Tất cả (408) Bọc sứ 24 BỘC LỘ 1 CHỈNH NHA 71 Có thể bán 1 Dán sứ 5 Implant 20 KHÍ CỤ TWINBLOCK 1 MÀI CHỈNH 0 Máy tăm nước 2 Nhổ răng 19 Niềng răng 56 Phẫu thuật và điều trị 11 Phục hình 2 Tất cả 0 TỔNG QUÁT 133 VPP 5 test 0 Điều trị tổng quát 47 Thêm Xuất dữ liệu Đang sử dụng Ngừng sử dụng Tất cả TÊN DỊCH VỤ DANH MỤC CHI NHÁNH GIÁ THAO TÁC ART Đơn vị tính: TúiSP0056 CHỈNH NHA Tấm Dentist Quận 3 - Abutment Đơn vị tính: LẦN - Tấm Dentist Quận 3 3.500.000 ₫ Abutment Đơn vị tính: RĂNGDV0034 Implant Tất cả chi nhánh 3.000.000 ₫ Abutment Đơn vị tính: LẦN - Tấm Dentist Quận 3 3.000.000 ₫ Abutment Đơn vị tính: RăngDV0034 Implant Tấm Dentist Quận 3 3.000.000 ₫ Abutment Test Đơn vị tính: LẦN - Tấm Dentist Quận 3 3.000.000 ₫ Band Đơn vị tính: CÁISP0305 Niềng răng Tất cả chi nhánh",
+      "alerts": [],
+      "visibleErrorHints": [
+        "500"
+      ],
+      "blockingEvents": []
+    }
+  ],
+  "apiEvents": [
+    {
+      "at": "2026-06-02T17:04:39.217Z",
+      "page": "https://nk.2checkin.com/login",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Auth/login",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:39.428Z",
+      "page": "https://nk.2checkin.com/",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Feedback/unread-count",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:39.481Z",
+      "page": "https://nk.2checkin.com/",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Companies?offset=0&limit=50",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:39.534Z",
+      "page": "https://nk.2checkin.com/",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Employees?offset=0&limit=500&active=all",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:39.553Z",
+      "page": "https://nk.2checkin.com/",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Appointments?offset=0&limit=200&date_from=2026-06-03&date_to=2026-06-03T23%3A59%3A59",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:40.376Z",
+      "page": "https://nk.2checkin.com/calendar",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Auth/me",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:40.587Z",
+      "page": "https://nk.2checkin.com/calendar",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Feedback/unread-count",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:40.594Z",
+      "page": "https://nk.2checkin.com/calendar",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Companies?offset=0&limit=50",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:40.638Z",
+      "page": "https://nk.2checkin.com/calendar",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Appointments?offset=0&limit=3000&date_from=2026-06-03&date_to=2026-06-03+23%3A59%3A59&calendar_mode=true&include_counts=false",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:43.556Z",
+      "page": "https://nk.2checkin.com/customers",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Auth/me",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:44.027Z",
+      "page": "https://nk.2checkin.com/customers",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Feedback/unread-count",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:44.027Z",
+      "page": "https://nk.2checkin.com/customers",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Companies?offset=0&limit=50",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:44.091Z",
+      "page": "https://nk.2checkin.com/customers",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Partners?offset=0&limit=20",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:44.123Z",
+      "page": "https://nk.2checkin.com/customers",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Companies?offset=0&limit=50",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:46.891Z",
+      "page": "https://nk.2checkin.com/service-catalog",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Auth/me",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:47.349Z",
+      "page": "https://nk.2checkin.com/service-catalog",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/ProductCategories",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:47.351Z",
+      "page": "https://nk.2checkin.com/service-catalog",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Products?offset=0&limit=20&active=true",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:47.351Z",
+      "page": "https://nk.2checkin.com/service-catalog",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Companies?offset=0&limit=50",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:47.351Z",
+      "page": "https://nk.2checkin.com/service-catalog",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Feedback/unread-count",
+      "body": ""
+    },
+    {
+      "at": "2026-06-02T17:04:47.441Z",
+      "page": "https://nk.2checkin.com/service-catalog",
+      "type": "response",
+      "status": 200,
+      "url": "https://nk.2checkin.com/api/Companies?offset=0&limit=50",
+      "body": ""
+    }
+  ]
+}

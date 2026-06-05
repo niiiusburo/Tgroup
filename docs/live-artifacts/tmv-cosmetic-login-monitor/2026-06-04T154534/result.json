@@ -1,0 +1,414 @@
+{
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/2026-06-04T154534",
+  "loginAttempts": [
+    {
+      "account": "t@clinic.vn",
+      "stillLogin": false,
+      "url": "https://tmv.2checkin.com/",
+      "text": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Tổng quan Cosmetic All Locations Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Hẹn mới Lịch trình ngày Tất cả · 0 Đang chờ · 0 Đang khám · 0 Hoàn thành · 0 Không có bệnh nhân Bệnh nhân chờ check-in sẽ hiển thị ở đây TODAY'S SERVICES / ACTIVITY SERVICE PATIENT QTY DOCTOR AMOUNT STATUS Services will populate as patients are treated throughout the day. LỊCH HẸN HÔM NAY Tất cả · 4 Đã đến · 0 Đã hủy · 0 test --- 09:00 · 30 phút 0921828212 Đang hẹn Nguyễn Hồng Tú BS 21 VYTDT 09:10 · 30 phút 0982138698 Đang hẹn Chị Hà Thanh --- 10:00 · 60 phút 0911666444 Đang hẹn Phạm T Khánh Nhàn (mẫu) BS 11 LINHTM 11:00 · 15 phút 0976408928"
+    }
+  ],
+  "loginSucceeded": true,
+  "cosmeticCheck": {
+    "action": "no-switch-needed",
+    "clicked": false,
+    "beforeSignals": {
+      "hasCosmeticSignal": true,
+      "hasDentalSignal": false
+    },
+    "afterSignals": {
+      "hasCosmeticSignal": true,
+      "hasDentalSignal": false
+    },
+    "beforeText": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Tổng quan Cosmetic All Locations Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Hẹn mới Lịch trình ngày Tất cả · 0 Đang chờ · 0 Đang khám · 0 Hoàn thành · 0 Không có bệnh nhân Bệnh nhân chờ check-in sẽ hiển thị ở đây TODAY'S SERVICES / ACTIVITY SERVICE PATIENT QTY DOCTOR AMOUNT STATUS Services will populate as patients are treated throughout the day. LỊCH HẸN HÔM NAY Tất cả · 4 Đã đến · 0 Đã hủy · 0 test --- 09:00 · 30 phút",
+    "afterText": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Tổng quan Cosmetic All Locations Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Hẹn mới Lịch trình ngày Tất cả · 0 Đang chờ · 0 Đang khám · 0 Hoàn thành · 0 Không có bệnh nhân Bệnh nhân chờ check-in sẽ hiển thị ở đây TODAY'S SERVICES / ACTIVITY SERVICE PATIENT QTY DOCTOR AMOUNT STATUS Services will populate as patients are treated throughout the day. LỊCH HẸN HÔM NAY Tất cả · 4 Đã đến · 0 Đã hủy · 0 test --- 09:00 · 30 phút",
+    "controls": [
+      {
+        "tag": "A",
+        "text": "",
+        "href": "https://tmv.2checkin.com/",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "",
+        "href": "https://tmv.2checkin.com/calendar",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "",
+        "href": "https://tmv.2checkin.com/customers",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Dịch vụ",
+        "href": "https://tmv.2checkin.com/services",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Danh mục dịch vụ",
+        "href": "https://tmv.2checkin.com/service-catalog",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Kế hoạch thanh toán",
+        "href": "https://tmv.2checkin.com/payment",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Nhân viên",
+        "href": "https://tmv.2checkin.com/employees",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Hoa hồng Pro",
+        "href": "https://tmv.2checkin.com/commission",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Chi nhánh",
+        "href": "https://tmv.2checkin.com/locations",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Bảng điều khiển",
+        "href": "https://tmv.2checkin.com/reports/dashboard",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Doanh thu",
+        "href": "https://tmv.2checkin.com/reports/revenue",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Lịch hẹn",
+        "href": "https://tmv.2checkin.com/reports/appointments",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Bác sĩ",
+        "href": "https://tmv.2checkin.com/reports/doctors",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Khách hàng",
+        "href": "https://tmv.2checkin.com/reports/customers",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Chi nhánh",
+        "href": "https://tmv.2checkin.com/reports/locations",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Dịch vụ",
+        "href": "https://tmv.2checkin.com/reports/services",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Nhân viên",
+        "href": "https://tmv.2checkin.com/reports/employees",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Cài đặt",
+        "href": "https://tmv.2checkin.com/settings",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Phản hồi",
+        "href": "https://tmv.2checkin.com/feedback",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Quyền hạn",
+        "href": "https://tmv.2checkin.com/permissions",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Mối quan hệ",
+        "href": "https://tmv.2checkin.com/relationships",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Thông báo",
+        "href": "https://tmv.2checkin.com/notifications",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "A",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Switch language",
+        "href": "",
+        "aria": "Switch language",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Cosmetic",
+        "href": "",
+        "aria": "Cosmetic",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "All Locations",
+        "href": "",
+        "aria": "All Locations",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Quét nhanh khuôn mặt",
+        "href": "",
+        "aria": "Quét nhanh khuôn mặt",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Phản hồi",
+        "href": "",
+        "aria": "Phản hồi",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Bỏ qua",
+        "href": "",
+        "aria": "Bỏ qua",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Hẹn mới",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Tất cả · 0",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Đang chờ · 0",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Đang khám · 0",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Hoàn thành · 0",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Tất cả · 4",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Đã đến · 0",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Đã hủy · 0",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "SPAN",
+        "text": "test",
+        "href": "",
+        "aria": "",
+        "role": "button",
+        "visible": true
+      },
+      {
+        "tag": "SPAN",
+        "text": "Nguyễn Hồng Tú",
+        "href": "",
+        "aria": "",
+        "role": "button",
+        "visible": true
+      },
+      {
+        "tag": "SPAN",
+        "text": "Chị Hà Thanh",
+        "href": "",
+        "aria": "",
+        "role": "button",
+        "visible": true
+      },
+      {
+        "tag": "SPAN",
+        "text": "Phạm T Khánh Nhàn (mẫu)",
+        "href": "",
+        "aria": "",
+        "role": "button",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "v0.32.101",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      }
+    ]
+  },
+  "screens": [
+    {
+      "name": "dashboard",
+      "label": "Dashboard",
+      "href": "/",
+      "finalUrl": "https://tmv.2checkin.com/",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/2026-06-04T154534/dashboard.png",
+      "bodyChars": 919,
+      "textStart": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Tổng quan Cosmetic All Locations Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Hẹn mới Lịch trình ngày Tất cả · 0 Đang chờ · 0 Đang khám · 0 Hoàn thành · 0 Không có bệnh nhân Bệnh nhân chờ check-in sẽ hiển thị ở đây TODAY'S SERVICES / ACTIVITY SERVICE PATIENT QTY DOCTOR AMOUNT STATUS Services will populate as patients are treated throughout the day. LỊCH HẸN HÔM NAY Tất cả · 4 Đã đến · 0 Đã hủy · 0 test --- 09:00 · 30 phút",
+      "cosmeticSignals": true,
+      "dentalSignals": false,
+      "obviousIssue": false,
+      "events": []
+    },
+    {
+      "name": "calendar",
+      "label": "Calendar",
+      "href": "/calendar",
+      "finalUrl": "https://tmv.2checkin.com/calendar",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/2026-06-04T154534/calendar.png",
+      "bodyChars": 1092,
+      "textStart": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Lịch Cosmetic All Locations Lịch hẹn Quản lý lịch hẹn khám bệnh Ngày Tuần Tháng Thứ Năm, 4 tháng 6, 2026 Hôm nay Xuất dữ liệu Bộ lọc Hẹn mới Thứ Năm, 4 tháng 6 4 Lịch hẹn 07:00 07:30 08:00 08:30 09:00 2 Lịch hẹn Đang hẹn test 0921828212 09:00 · 30 phút tư vấn mí ✎ Đang hẹn Nguyễn Hồng Tú 0982138698 BS 21 VYTDT 09:10 · 30 phút Cắt chỉ Cắt mí trên L2 - 28/5/26 - bs21. Huevm ✎ 09:30 10:00 1 Lịch hẹn Đang hẹn Chị Hà Thanh 0911666444 10:00 · 60 phút 4/6 T",
+      "cosmeticSignals": true,
+      "dentalSignals": false,
+      "obviousIssue": false,
+      "events": []
+    },
+    {
+      "name": "customers",
+      "label": "Customers",
+      "href": "/customers",
+      "finalUrl": "https://tmv.2checkin.com/customers",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/2026-06-04T154534/customers.png",
+      "bodyChars": 1400,
+      "textStart": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Khách hàng Cosmetic All Locations Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Khách hàng 12402 patients · 12402 active Xuất dữ liệu Add Customer All Status Active Inactive Pending CODE CUSTOMER PHONE EMAIL LOCATION STATUS LAST VISIT - t test 0921828212 Unknown Active 03 Jun 2026 TM944004 C Chị Hà Thanh 0911666444 Thẩm mỹ Hồ Chí Minh Active 03 Jun 2026 TM527705 H Hà Thu Hằng 0372376905 Thẩm mỹ Hà Nội Active 03 Jun 2026 TM",
+      "cosmeticSignals": true,
+      "dentalSignals": false,
+      "obviousIssue": false,
+      "events": []
+    }
+  ],
+  "events": [
+    {
+      "type": "requestfailed",
+      "url": "https://tmv.2checkin.com/_dxJbBpJwPJgWIhe9j_MJ02_JNpan73wx9PT3DjSkMgIGCHbMoHsi3vmOEfSv1PRwAur29mdx13n908mjbPBTMzKqCAh8k4GHCIXUKDFwAsZJF7PVjIyovgyjq5xTLPljfBT_XiKFqJMs6vFsFuHbATRRdfLyQFgAWPO3s4WMVs0jeB2RaW_c5vkIU3In5dF6mlPPWz9G1l8_vsFehd8aT8rluxjNwDp1KbcDB7JDK-lGtXArUWxMmzBvMQ7r1oqfyGpxaReQ0WPOAj3cYpgtedHvS6RDMzG177sYCKRe_Gc1Ny59Tlk2sb8iaM2ss1ZcKbQgJ8fhNSWe-HSDNkuoHjL9QPMGUotGgFS8VEX5GCaIk4JcSYmzkUd3YU3AhBJTAWLAh5ZEjx5dbstWt5WfYkezr3j-LKfoudFZa8rmzGqD9o0qzzVd1MzrAZ6QUwkvEsz2kyTbJp2",
+      "failure": "net::ERR_ABORTED"
+    }
+  ],
+  "workingAccount": "t@clinic.vn",
+  "cosmeticHeaderScreenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/2026-06-04T154534/cosmetic-header.png"
+}

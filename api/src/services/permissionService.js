@@ -70,9 +70,9 @@ async function resolveEffectivePermissions(employeeId, authLob) {
     return { groupId: null, groupName: null, effectivePermissions: [], locations: [] };
   }
 
-  // Read tier_id from partners (primary source, matches middleware/auth.js lookup)
+  // Read tier_id + is_ctv from partners (primary source, matches middleware/auth.js lookup)
   const partnerRows = await q(
-    `SELECT p.tier_id, pg.name AS group_name
+    `SELECT p.tier_id, p.is_ctv, pg.name AS group_name
      FROM dbo.partners p
      LEFT JOIN dbo.permission_groups pg ON pg.id = p.tier_id
      WHERE p.id = $1 AND p.employee = true AND p.isdeleted = false`,
@@ -85,20 +85,24 @@ async function resolveEffectivePermissions(employeeId, authLob) {
 
   const groupId = partnerRows[0].tier_id;
   const groupName = partnerRows[0].group_name;
+  const isCtv = partnerRows[0].is_ctv === true;
 
-  // CTV self-only perms (v2): is_ctv users (no tier/group) get dashboard/commission/referrals self-view automatically.
-  // This allows ctv-demo@clinic.vn (and future CTVs) to hit /api/ctv/* without needing group assignment.
-  // Soft-gated by is_ctv flag in JWT + route logic; additive, does not affect admin groups.
+  // CTV self-only perms (v2): is_ctv users get dashboard/commission/referrals self-view
+  // automatically and NEVER inherit staff permission groups. A CTV is an external vendor,
+  // not a staff member, so this must hold even when a staff tier_id was erroneously stamped
+  // on the CTV row (NK3 data drift stamped tier_id="Editor", which both denied
+  // ctv.dashboard.view and leaked payment.edit/appointments.add). Checking is_ctv before the
+  // groupId branch fixes the 403 and removes the privilege escalation in one place.
+  if (isCtv) {
+    return {
+      groupId: null,
+      groupName: 'CTV',
+      effectivePermissions: ['ctv.dashboard.view', 'ctv.commission.view.self', 'ctv.referrals.view.self'],
+      locations: [],
+    };
+  }
+
   if (!groupId) {
-    const ctvCheck = await q(`SELECT is_ctv FROM dbo.partners WHERE id = $1 LIMIT 1`, [employeeId]);
-    if (ctvCheck && ctvCheck[0] && ctvCheck[0].is_ctv) {
-      return {
-        groupId: null,
-        groupName: 'CTV',
-        effectivePermissions: ['ctv.dashboard.view', 'ctv.commission.view.self', 'ctv.referrals.view.self'],
-        locations: [],
-      };
-    }
     return { groupId: null, groupName: null, effectivePermissions: [], locations: [] };
   }
 

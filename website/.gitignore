@@ -20,3 +20,5 @@ dist/
 .DS_Store
 Thumbs.db
 .auth/
+
+testsprite_tests/tmp/config.json

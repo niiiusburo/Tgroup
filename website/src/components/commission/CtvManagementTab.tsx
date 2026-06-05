@@ -6,6 +6,7 @@ import {
   createCtv,
   fetchCtvHierarchyForCtv,
   fetchCtvs,
+  moveCtv,
   setCtvActive,
   updateCtv,
   type CreateCtvInput,
@@ -61,9 +62,13 @@ interface CtvRowProps {
   ctv: CtvRecord;
   onStatusChange: () => void;
   onEdit: (ctv: CtvRecord) => void;
+  // §12 drag-drop hierarchy: drag a CTV row onto another to re-parent it under that CTV.
+  draggedCtvId: string | null;
+  onDragStartCtv: (id: string | null) => void;
+  onMoveCtv: (draggedId: string, targetId: string) => void;
 }
 
-function CtvRow({ ctv, onStatusChange, onEdit }: CtvRowProps) {
+function CtvRow({ ctv, onStatusChange, onEdit, draggedCtvId, onDragStartCtv, onMoveCtv }: CtvRowProps) {
   const { t: tc } = useTranslation('commission');
   const [toggling, setToggling] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -112,9 +117,23 @@ function CtvRow({ ctv, onStatusChange, onEdit }: CtvRowProps) {
     }
   };
 
+  const isDropTarget = !!draggedCtvId && draggedCtvId !== ctv.id;
   return (
     <>
-      <tr className="hover:bg-gray-50">
+      <tr
+        className={`hover:bg-gray-50 ${draggedCtvId === ctv.id ? 'opacity-50' : ''} ${isDropTarget ? 'outline-dashed outline-1 outline-orange-300' : ''}`}
+        draggable
+        onDragStart={(e) => { e.dataTransfer.setData('text/plain', ctv.id); e.dataTransfer.effectAllowed = 'move'; onDragStartCtv(ctv.id); }}
+        onDragEnd={() => onDragStartCtv(null)}
+        onDragOver={(e) => { if (isDropTarget) e.preventDefault(); }}
+        onDrop={(e) => {
+          e.preventDefault();
+          const dragged = e.dataTransfer.getData('text/plain') || draggedCtvId;
+          if (dragged && dragged !== ctv.id) onMoveCtv(dragged, ctv.id);
+          onDragStartCtv(null);
+        }}
+        title={tc('ctv.dragToMove', { defaultValue: 'Kéo một CTV thả vào đây để chuyển làm tuyến dưới' })}
+      >
         <td className="px-4 py-3">
           <button
             type="button"
@@ -469,6 +488,10 @@ export function CtvManagementTab() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCtv, setEditingCtv] = useState<CtvRecord | null>(null);
   const [search, setSearch] = useState('');
+  // §12 drag-drop hierarchy move state.
+  const [draggedCtvId, setDraggedCtvId] = useState<string | null>(null);
+  const [moveError, setMoveError] = useState<string | null>(null);
+  const [moveInfo, setMoveInfo] = useState<string | null>(null);
 
   const legacyCount = useMemo(() => (ctvs || []).filter(isLegacyCtv).length, [ctvs]);
 
@@ -496,6 +519,20 @@ export function CtvManagementTab() {
       setError(message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleMoveCtv = async (draggedId: string, targetId: string) => {
+    setMoveError(null);
+    setMoveInfo(null);
+    if (!draggedId || draggedId === targetId) return;
+    try {
+      await moveCtv(draggedId, targetId);
+      setMoveInfo(tc('hierarchy.moveSuccess', { defaultValue: 'CTV moved.' }));
+      await handleLoad();
+    } catch (err) {
+      // 409 B_CTV_HAS_ACTIVITY surfaces here (CTV has referrals/services/earnings).
+      setMoveError(err instanceof ApiError ? err.message : 'Failed to move CTV');
     }
   };
 
@@ -587,6 +624,13 @@ export function CtvManagementTab() {
         </div>
       </div>
 
+      {/* §12 drag-drop hierarchy: hint + move feedback */}
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <span className="text-gray-400">{tc('hierarchy.dragHint', { defaultValue: 'Tip: kéo một CTV và thả vào CTV khác để chuyển làm tuyến trên (chỉ với CTV chưa phát sinh hoạt động).' })}</span>
+        {moveError && <span className="rounded bg-red-50 px-2 py-1 font-medium text-red-600">{moveError}</span>}
+        {moveInfo && <span className="rounded bg-emerald-50 px-2 py-1 font-medium text-emerald-600">{moveInfo}</span>}
+      </div>
+
       <div className="bg-white rounded-xl shadow-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -604,7 +648,15 @@ export function CtvManagementTab() {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {filtered.map((ctv) => (
-                <CtvRow key={ctv.id} ctv={ctv} onStatusChange={() => handleLoad()} onEdit={setEditingCtv} />
+                <CtvRow
+                  key={ctv.id}
+                  ctv={ctv}
+                  onStatusChange={() => handleLoad()}
+                  onEdit={setEditingCtv}
+                  draggedCtvId={draggedCtvId}
+                  onDragStartCtv={setDraggedCtvId}
+                  onMoveCtv={handleMoveCtv}
+                />
               ))}
               {filtered.length === 0 && (
                 <tr>

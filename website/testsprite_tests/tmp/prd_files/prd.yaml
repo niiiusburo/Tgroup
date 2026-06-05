@@ -1,0 +1,46 @@
+project:
+  name: tgclinic-website
+  description: TG Clinic Management System - Clinic web application for managing appointments, customers, employees, payments and services.
+
+features:
+  - Authentication and authorization
+  - Customer management (CRUD, search, profile viewing)
+  - Employee management with permission groups
+  - Appointment calendar (day/week/month views)
+  - Payment processing and allocation
+  - Service catalog management
+  - Permission matrix and role-based access control
+  - Reports and Excel export
+  - CTV (Consultant) module with hierarchy
+  - Cosmetic Line of Business support
+
+userFlows:
+  login:
+    - Navigate to /login
+    - Enter credentials (email: tg@clinic.vn, password: 123456)
+    - Submit form
+    - Verify redirect to /overview
+  
+  customerManagement:
+    - Navigate to /customers
+    - Search customers (accent-insensitive)
+    - View customer details
+    - Create new customer
+    - Edit existing customer
+    - Delete customer with confirmation
+  
+  calendar:
+    - Navigate to /calendar
+    - View appointments by date
+    - Create new appointment
+    - Edit appointment status
+  
+  payments:
+    - Navigate to /payments
+    - View payment history
+    - Process payment allocation
+  
+  permissions:
+    - Navigate to /settings/permissions
+    - View permission matrix
+    - Assign permissions to employees

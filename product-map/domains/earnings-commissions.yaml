@@ -2,21 +2,19 @@ name: Earnings & Commissions Engine (v2) — Transactional Attribution (D13)
 summary: |
   Append-only transactional earnings table (dbo.earnings) in BOTH databases.
   Separate from legacy commission *rules* system (commissions, commissionproductrules, saleorderlinepartnercommissions tables — untouched by v2; see legacy in business-logic/commission-rules.md).
-  Triggered on payment collected (positive row via commissionEngine); refunds, voids, deletes, and safe service reversals create negative reversal rows (original untouched).
+  CTV v3 authority lives in docs/business-logic/ctv-referral-commission.md. For CTV, earnings are triggered when a service card with an attached CTV is created, based on the full service price, and tier percentages come from CTV admin tier config.
+  Older payment-collected + product commission_rate_percent behavior is an implementation gap for CTV, not the target rule.
+  Refunds, voids, deletes, and safe service reversals create negative reversal rows (original untouched) while earnings remain unpaid/pending.
   Paid-out earnings (status=paid or payout_id set) lock client-side payment/service reversal.
-  Recipient resolution (D13, first match wins, strict order):
-    1. If the client/partner row has referred_by_ctv_id → that CTV partner (crosses LOBs via soft ref)
-    2. Else if cosmetic + active consultation card (consultations table) → the consulting_staff partner
-    3. Else if dental + partners.salestaffid is set → that salestaff partner
-    4. Else no earnings row is created for the line
-  Products carry commission_rate_percent (additive on both DBs; dental defaults 0 for backward compat).
-  Payouts table for admin batch runs (earnings.payout_id link); admin-only via earnings.payout.run or commissions.* perms.
+  CTV recipient resolution starts from the CTV selected on the service card. Disabled/missing uplines earn nothing; company keeps those percentages.
+  Product/service commission_rate_percent is legacy mock data and must not drive CTV earnings.
+  Payouts table for admin batch runs (earnings.payout_id link); combined Dental+Cosmetic payouts use LOB-local payout rows linked by shared payout_group_id and receipt URL.
   consultations table cosmetic-only, invisible to admin UI, auto-managed by appointment handlers, 6mo TTL.
   Engine: api/src/services/commissionEngine.js (createEarningsForPayment, reverseOnRefund) and api/src/services/serviceReversal.js for saleorderline reversal guards.
   All earnings writes respect the correct DB via txClient from getDb or request-scoped.
 owns:
-  - api/src/services/commissionEngine.js (resolveRecipient, createEarningsForPayment, reverseOnRefund, D13 logic)
-  - api/src/routes/payments.js + saleorder close / refund paths (hook engine on collect + refund)
+  - api/src/services/commissionEngine.js (legacy/partial CTV engine behavior; must move CTV creation to service-card-created full-price tier logic)
+  - api/src/routes/payments.js + saleorder close / refund paths (refund/reversal guards; payment-collected CTV creation is superseded)
   - api/src/services/serviceReversal.js + api/src/routes/saleOrderLines.js (safe service-line reversal, paid-out guard)
   - api/src/routes/cosmetic/appointments.js (auto create/supersede consultation card on book)
   - api/src/routes/payments/readHandlers.js (earnings-aware reports if any)
@@ -29,15 +27,16 @@ reads:
   - tcosmetic_demo.dbo.consultations
   - tdental_demo.dbo.partners (salestaffid, referred_by_ctv_id, for D13)
   - tcosmetic_demo.dbo.partners (referred_by_ctv_id, consulting_staff_id on related)
-  - tdental_demo.dbo.products (+ commission_rate_percent)
-  - tcosmetic_demo.dbo.products
+  - CTV admin tier config (levels 0-4, enabled/disabled, normal percentages, future Braces percentages)
+  - tdental_demo.dbo.products (legacy + commission_rate_percent; Braces override detection by category/name planned)
+  - tcosmetic_demo.dbo.products (legacy + commission_rate_percent)
   - (legacy commissions tables untouched for rules only)
 writes:
   - Both DBs: dbo.earnings (append only; never UPDATE existing earnings rows)
   - Both DBs: dbo.payouts
   - tcosmetic_demo.dbo.consultations (auto create/supersede)
   - tdental_demo.dbo.partners (referred_by_ctv_id additive only)
-  - tdental_demo.dbo.products (commission_rate_percent additive)
+  - tdental_demo.dbo.products (legacy commission_rate_percent additive; not CTV source of truth)
   - tcosmetic_demo.dbo.products (same)
 tables:
   # NEW transactional earnings (both DBs) — per migration 047
@@ -56,22 +55,26 @@ tables:
   - tdental_demo.dbo.commissionproductrules
   - etc.
 endpoints:
-  - Internal only for v1: earnings writes via payments path
+  - Current partial implementation: earnings writes via payments path
+  - Target CTV implementation: earnings writes when service card with attached CTV is created or reassigned before payout
   - GET /api/Earnings or reports (future admin view of earnings)
   - POST /api/Payouts (future batch payout)
 ui_surfaces:
   - CTV dashboard (reads only)
   - Future admin earnings/payouts UI (not in v1)
 jobs:
-  - commissionEngine on payment collect/refund
+  - Target CTV engine: service-card create/reassign/cancel/delete/refund creates positive/reversal CTV earnings based on full service price and tier config
+  - Current partial commissionEngine: payment collect/refund
   - auto-consultation lifecycle on cosmetic appt
 shared_types:
   - api/src/services/commissionEngine (D13 types, EarningsRow)
   - contracts for payout/earnings if exposed
 dependencies:
-  - Payments / Deposits (trigger on collect)
+  - Service cards / SaleOrderLines (target CTV trigger on service-card create and reassignment)
+  - Payments / Deposits (reversal and paid-out guard surfaces; current partial trigger on collect is superseded for CTV)
   - Cosmetic Clients / Partners (D13 inputs: referred_by, salestaffid, consulting_staff)
-  - Products / Services (rate on product)
+  - CTV tier config (rate source)
+  - Products / Services (full service price; Dental-only Braces/Orthodontics override detection planned)
   - CTV (reads the output)
 affected_by:
   - Any change to payments collect flow or refund
@@ -79,14 +82,16 @@ affected_by:
   - partners columns for attribution
   - consultation card logic
 impact_tests:
-  - Payment collect in dental or cosmetic creates exactly one earnings row per D13 (or none)
+  - Service-card creation in dental or cosmetic with attached CTV creates CTV earnings from full service price and configured enabled tier levels
+  - Service-card creation without selected CTV creates no CTV earnings, even if the customer has an appointment owner
   - Refund/void/delete/safe service reversal creates negative reversal row; original earnings row remains for history
   - Paid-out earnings block payment void/delete and service reversal
-  - D13 priority verified in unit tests (ctv > consultation > salestaff)
+  - Service-card CTV reassignment before payout reverses old pending earnings and creates new pending earnings for the new CTV/uplines
+  - Combined Dental+Cosmetic payout stores one row per LOB linked by shared payout_group_id and shared receipt URL
   - Legacy commission rules tables never written by v2 engine
 risk_level: high (money movement)
 notes:
-  - "EARNINGS vs LEGACY COMMISSIONS: earnings is the transactional append-only attribution log (D12/D13). Legacy commissions/* are the old rules/config tables for calculating % — never touched by the new engine. See business-logic/commission-rules.md and DECISIONS.md."
+  - "EARNINGS vs LEGACY COMMISSIONS: earnings is the transactional append-only attribution log. Legacy commissions/* are the old rules/config tables and product commission_rate_percent is legacy mock data for CTV. See product-map/business-logic/commission-rules.md, docs/business-logic/ctv-referral-commission.md, and DECISIONS.md."
   - "D13 implemented exactly as migration comment + engine: recipient_partner_id always references a row in the local DB's partners table (or soft-validated cross for CTV)."
   - "All earnings writes must be inside the payment txClient from the correct getDb(lob)."
   - "Service reversal may auto-void a linked payment only for a single-line order whose payment is allocated solely to that order; otherwise staff must resolve the payment first."

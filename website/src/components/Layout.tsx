@@ -33,6 +33,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { useLocations } from '@/hooks/useLocations';
 import { FeedbackWidget } from '@/components/shared/FeedbackWidget';
+import { Breadcrumbs } from '@/components/shared/Breadcrumbs';
 import { GlobalFaceIdButton } from '@/components/shared/GlobalFaceIdButton';
 import { LanguageToggle } from '@/components/shared/LanguageToggle';
 import { ChangePasswordModal } from '@/components/shared/ChangePasswordModal';
@@ -470,6 +471,7 @@ export function Layout() {
 
         {/* Page content */}
         <main className="flex-1 p-3 sm:p-4 lg:p-6 relative z-0 overflow-x-hidden tablet-flow">
+          <Breadcrumbs />
           {/* Keyed subtree: toggling LOB causes full remount of page content (prevents stale data from other LOB) */}
           <div key={currentLOB}>
             <Outlet />

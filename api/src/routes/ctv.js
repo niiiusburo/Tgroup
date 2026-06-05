@@ -119,10 +119,14 @@ router.get('/commission-summary', requireAuth, requireCtvUser, async (req, res) 
     lob: e.lob,
     earned_at: e.earned_at || e.created_at,
     status: e.status,
+    payout_id: e.payout_id || null,
   }));
 
   const pendingList = recent.filter((r) => r.status === 'pending');
-  const paidList = recent.filter((r) => r.status !== 'pending' || parseFloat(r.amount) < 0);
+  // Paid = actually paid out (matches the aggregation's isPaid). This deliberately
+  // EXCLUDES 'pending' reversals and INV-003C service-card 'reversed' rows, neither of
+  // which are paid earnings.
+  const paidList = recent.filter((r) => r.status === 'paid' || !!r.payout_id);
 
   // Fetch payout cycles referenced by this CTV's earnings (for Paid tab grouping)
   const dPayoutIds = [...new Set(dRows.map((r) => r.payout_id).filter(Boolean))];
@@ -531,19 +535,11 @@ router.get('/client-journeys', requireAuth, async (req, res) => {
   return res.json({ clients });
 });
 
-/**
- * GET /api/ctv/me — lightweight profile for Me tab (no extra DB hit)
- */
-router.get('/me', requireAuth, requireCtvUser, (req, res) => {
-  const u = req.user || {};
-  res.json({
-    id: u.employeeId,
-    name: u.name || 'CTV',
-    email: u.email || '',
-    phone: '',
-    role: 'CTV',
-  });
-});
+// NOTE: GET /api/ctv/me is served by ctvProfileRoutes (mounted before ctvRoutes
+// in server.js). It returns the DB-backed profile (real phone/email) that the
+// portal "Me" tab consumes. A duplicate lightweight /me handler used to live
+// here but was permanently shadowed by that mount order — it has been removed to
+// avoid dead code that would silently win if the mount order ever changed.
 
 /**
  * POST /api/ctv
@@ -699,14 +695,47 @@ router.post('/clients', requireAuth, async (req, res) => {
   const referredById = isCTV && !bodyReferredBy ? employeeId : (bodyReferredBy || null);
 
   try {
+    // A phone identifies one real person. If ANY LOB's partners table already
+    // has this phone, run the same 6-month claim check that POST /bookings uses:
+    // an actively-claimed client must never be re-registered under a different
+    // CTV, even in the OTHER LOB. Same-LOB duplicates still surface as
+    // U_DUPLICATE_PHONE for backwards compatibility.
     const phoneCheckSql = `SELECT id FROM dbo.partners WHERE LOWER(phone) = LOWER($1) LIMIT 1`;
-    const dup = await safeQueryRows(db, phoneCheckSql, [phone]);
-    if (dup.length > 0) {
-      return res.status(400).json({ error: { code: 'U_DUPLICATE_PHONE', message: 'Phone number already exists' } });
+    const otherLob = lob === 'dental' ? 'cosmetic' : 'dental';
+    const [dupInLob, dupInOtherLob] = await Promise.all([
+      safeQueryRows(db, phoneCheckSql, [phone]),
+      safeQueryRows(getDb(otherLob), phoneCheckSql, [phone]),
+    ]);
+    const existingMatch = dupInLob[0]
+      ? { id: dupInLob[0].id, sourceLob: lob }
+      : dupInOtherLob[0]
+        ? { id: dupInOtherLob[0].id, sourceLob: otherLob }
+        : null;
+
+    if (existingMatch) {
+      const claim = await getReferralClaimStatus(existingMatch.id, existingMatch.sourceLob, {});
+      if (claim.active && claim.ownerCtvId && claim.ownerCtvId !== employeeId) {
+        return res.status(400).json({
+          error: {
+            code: 'B_CLIENT_CLAIMED',
+            message: 'Client already active with another CTV',
+            ownerName: claim.ownerName,
+            owner_name: claim.ownerName,
+            expiresAt: claim.expiresAt,
+            expires_at: claim.expiresAt,
+          },
+        });
+      }
+      if (existingMatch.sourceLob === lob) {
+        return res.status(400).json({
+          error: { code: 'U_DUPLICATE_PHONE', message: 'Phone number already exists' },
+        });
+      }
+      // Cross-LOB with a lapsed or unclaimed match: allow create in the requested LOB.
     }
 
-    const { v4: uuidv4 } = require('uuid');
-    const id = uuidv4();
+    const { randomUUID } = require('crypto');
+    const id = randomUUID();
     const now = new Date().toISOString();
 
     // customer=true, employee=false (clients never log in). lob_scope = [lob].

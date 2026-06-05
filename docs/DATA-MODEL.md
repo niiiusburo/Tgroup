@@ -559,6 +559,7 @@ If `dbo.customer_face_embeddings` exists and the local provider is active, the e
 - Canonical migration directory: `api/migrations/` (53 SQL files, through `046_split_payment_and_hoso_permissions.sql`).
 - Supplemental migration directory: `api/src/db/migrations/` (2 SQL files: `003_add_payment_category.sql`, `046_customer_face_embeddings.sql`).
 - Runbook status: `docs/RUNBOOK.md` and `docs/runbooks/DEPLOYMENT.md` both use `api/migrations/*.sql` as the canonical deploy loop. Supplemental files under `api/src/db/migrations/` require explicit review, consolidation, or manual execution when a change depends on them.
+- Safety status: destructive legacy TDental import migrations (`008_data_migration_from_tdental*.sql`) are protected by SQL-session break-glass guards. They must not run against `tdental_demo`, `tdental_smoketest`, `tcosmetic_demo`, or `tcosmetic_smoketest` unless an isolated backup/compare plan has been approved, the destructive/live guard settings are intentionally supplied, and the legacy import password hash is supplied through `tgroup.legacy_import_password_hash` instead of being hardcoded in the file.
 
 ---
 

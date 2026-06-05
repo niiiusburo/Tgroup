@@ -40,6 +40,10 @@ Staff → /login form → POST /api/Auth/login
 
 **CSRF posture:** Authenticated API requests must include an explicit `Authorization: Bearer <token>` header. The app does not use cookie-backed API sessions, and CORS is allowlist-based; CSRF middleware is therefore not part of the current auth boundary. If API auth moves to cookies, CSRF protection must be added before release.
 
+**CTV self account settings:** `GET/PATCH /api/ctv/me` and `POST /api/ctv/me/password` are authenticated, require `ctv.dashboard.view`, and then enforce `partners.is_ctv=true` from the JWT identity. The routes never accept another CTV id in the body; they derive the target from `req.user.employeeId`. Password changes require the current password, accept the gated legacy CTV password fallback only for imported CTV rows, and always store the replacement as bcrypt.
+
+**Public CTV landing flows:** `/api/ctv-public/client-lookup`, `/api/ctv-public/ctv-lookup`, `/api/ctv-public/services`, `/api/ctv-public/bookings`, `/api/ctv-public/refcode/:code`, and `/api/ctv-public/join` intentionally bypass JWT auth for the Tâm landing page. Booking requires a submitted `ctvPhone`, live-verifies it through read-only lookup, resolves only active non-deleted `partners.is_ctv=true` rows from Dental, runs the active referral-claim gate, and may write only `partners` plus `appointments` in the selected LOB. Signup requires either a referral code or submitted `uplinePhone`, live-verifies typed upline phones, and creates a new CTV partner only under the resolved active CTV. These routes must not create service cards, sale orders, payments, earnings, payouts, or permission/session state. Treat submitted CTV phone values as attribution identifiers, not proof of login.
+
 **Secret:** `JWT_SECRET` env var. Must be identical across all environments sharing token validation (prod and staging may differ, but swapping tokens between them fails validation).
 
 **Expiry:**
@@ -111,6 +115,8 @@ Effective permissions = (Group ∪ Grants) − Revokes, then filtered by locatio
 | `POST /api/Auth/login` | 10 failures / 15 min per login identifier+IP | Brute-force protection |
 | `POST /api/Auth/login` | 75 failures / 15 min per IP | Network-wide cap |
 | `POST /api/telemetry/errors` | 100 req / min per IP | Public ingestion abuse prevention |
+| `POST /api/ctv/me/password` | Auth + current-password check only today | CTV self-service password changes are not public; add endpoint-specific throttling if abuse is observed or the portal is widened. |
+| `/api/ctv-public/*` | Covered by IP access/CORS only today | Public booking and signup are intentionally unauthenticated; add endpoint-specific throttling before widening beyond phone-attributed appointment creation or CTV partner signup. |
 
 **Implementation:** two `express-rate-limit` limiters in `api/src/server.js`; successful logins are skipped so the lockout budget counts failed attempts.
 

@@ -109,14 +109,6 @@ export interface CtvCommissionSummary {
   readonly paidList: CtvCommissionRow[];
 }
 
-export interface CtvProfile {
-  readonly id: string;
-  readonly name: string;
-  readonly email: string;
-  readonly phone: string;
-  readonly role: string;
-}
-
 export function fetchCtvReferrals() {
   return apiFetch<CtvReferralResponse>('/ctv/referrals');
 }
@@ -139,11 +131,6 @@ export async function fetchCtvHierarchy(): Promise<CtvHierarchyResponse> {
 
 export function fetchCtvCommissionSummary() {
   return apiFetch<CtvCommissionSummary>('/ctv/commission-summary');
-}
-
-export async function fetchCtvProfile(): Promise<CtvProfile> {
-  const p = await apiFetch<CtvProfile>('/ctv/me');
-  return { ...p, phone: maskPhone(p.phone), email: maskEmail(p.email) };
 }
 
 // ─── Admin CTV management + CTV selector options (nk3) ────────────────────────
@@ -283,9 +270,19 @@ export interface CreateBookingInput {
   note?: string;
 }
 
+export interface CreatePublicBookingInput extends CreateBookingInput {
+  /** Public landing flow identifier for the CTV who should own the referral. */
+  ctvPhone: string;
+}
+
 /** Create a booking for a referred client (or new client). May fail with B_CLIENT_CLAIMED if client is under another CTV. */
 export async function createBooking(input: CreateBookingInput): Promise<{ clientId: string; appointmentId: string }> {
   return apiFetch<{ clientId: string; appointmentId: string }>('/ctv/bookings', { method: 'POST', body: input });
+}
+
+/** Public no-login booking from the landing page; resolves the CTV by phone server-side. */
+export async function createPublicBooking(input: CreatePublicBookingInput): Promise<{ clientId: string; appointmentId: string }> {
+  return apiFetch<{ clientId: string; appointmentId: string }>('/ctv-public/bookings', { method: 'POST', body: input });
 }
 
 /** A selectable service (product) for the CTV refer form, scoped to one LOB. */
@@ -309,20 +306,33 @@ export interface CtvRefCodeInfo {
   readonly uplineName?: string | null;
 }
 
+export interface PublicCtvLookup {
+  readonly exists: boolean;
+  readonly name?: string | null;
+}
+
 /** Resolve a referral code (CTV-XXXXXX) to its upline. PUBLIC — no auth required. */
 export async function resolveCtvRefCode(code: string): Promise<CtvRefCodeInfo> {
   return apiFetch<CtvRefCodeInfo>(`/ctv-public/refcode/${encodeURIComponent(code)}`);
 }
 
+/** Verify a public CTV phone field while typing. PUBLIC — no auth required. */
+export async function lookupPublicCtvByPhone(phone: string): Promise<PublicCtvLookup> {
+  const qs = `?phone=${encodeURIComponent(phone)}`;
+  return apiFetch<PublicCtvLookup>(`/ctv-public/ctv-lookup${qs}`);
+}
+
 export interface CtvJoinInput {
-  readonly code: string;
+  readonly code?: string;
+  /** Public no-link signup field: phone for the CTV this new CTV should sit under. */
+  readonly uplinePhone?: string;
   readonly name: string;
   readonly phone: string;
   readonly email: string;
   readonly password: string;
 }
 
-/** Self-register as a CTV under the referral code's upline. PUBLIC — no auth required. */
+/** Self-register as a CTV under a referral code or upline CTV phone. PUBLIC — no auth required. */
 export async function joinCtv(
   input: CtvJoinInput
 ): Promise<{ ok: boolean; id: string; name: string; uplineName?: string | null }> {
@@ -340,6 +350,12 @@ export async function fetchCtvServices(lob: CtvLob): Promise<{ services: CtvServ
   return apiFetch<{ services: CtvServiceOption[] }>(`/ctv/services${qs}`);
 }
 
+/** Public service catalog for the landing booking sheet. */
+export async function fetchPublicCtvServices(lob: CtvLob): Promise<{ services: CtvServiceOption[] }> {
+  const qs = `?lob=${encodeURIComponent(lob === 'cosmetic' ? 'cosmetic' : 'dental')}`;
+  return apiFetch<{ services: CtvServiceOption[] }>(`/ctv-public/services${qs}`);
+}
+
 export interface CtvClientLookup {
   readonly exists: boolean;
   readonly lob: CtvLob;
@@ -355,4 +371,22 @@ export interface CtvClientLookup {
 export async function lookupClientByPhone(phone: string, lob: CtvLob): Promise<CtvClientLookup> {
   const qs = `?phone=${encodeURIComponent(phone)}&lob=${encodeURIComponent(lob)}`;
   return apiFetch<CtvClientLookup>(`/ctv/client-lookup${qs}`);
+}
+
+/** Public phone cross-check for the landing booking sheet. */
+export async function lookupPublicClientByPhone(phone: string, lob: CtvLob, ctvPhone?: string): Promise<CtvClientLookup> {
+  const params = new URLSearchParams({
+    phone,
+    lob,
+  });
+  if (ctvPhone) params.set('ctvPhone', ctvPhone);
+  return apiFetch<CtvClientLookup>(`/ctv-public/client-lookup?${params.toString()}`);
+}
+
+/**
+ * §12 admin hierarchy move: re-parent a CTV under a new upline (or null = root).
+ * Backend enforces the fresh-CTV no-activity guard (409 B_CTV_HAS_ACTIVITY) + writes an audit log.
+ */
+export async function moveCtv(id: string, uplineId: string | null): Promise<{ ok: boolean; id: string; oldUpline: string | null; newUpline: string | null }> {
+  return apiFetch(`/Ctvs/${id}/move`, { method: 'POST', body: { uplineId } });
 }

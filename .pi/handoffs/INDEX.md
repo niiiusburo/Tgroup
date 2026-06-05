@@ -10,3 +10,4 @@
 **Branch:** fix/feedback-reports
 **Commit:** 175cf151 (v0.32.5)
 **File:** `.pi/handoffs/pi-20260516-083000-feedback-fixes-done.md`
+| claude-20260601-183137-newclients | Claude | 275e24cf | 2026-06-01 | New Clients page + Excel exports | complete |

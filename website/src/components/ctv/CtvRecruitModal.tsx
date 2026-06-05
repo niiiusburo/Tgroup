@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, Loader2, X } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
 import { createCtv } from '@/lib/api/ctv';
 import { ApiError } from '@/lib/api/core';
 import { cn } from '@/lib/utils';
+import { CtvModalSheet } from './CtvModalSheet';
 
 interface CtvRecruitModalProps {
   readonly open: boolean;
@@ -20,6 +21,15 @@ export function CtvRecruitModal({ open, onClose, onSuccess }: CtvRecruitModalPro
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      setForm(EMPTY);
+      setError(null);
+      setLoading(false);
+      setSuccess(false);
+    }
+  }, [open]);
 
   if (!open) return null;
 
@@ -56,24 +66,16 @@ export function CtvRecruitModal({ open, onClose, onSuccess }: CtvRecruitModalPro
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center" role="dialog" aria-modal="true">
-      <div className="max-h-[92vh] w-full max-w-[430px] overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl sm:rounded-3xl">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">{t('forms.recruitCtv.title')}</h2>
-          <button type="button" onClick={onClose} aria-label={t('forms.close')} className="grid h-9 w-9 place-items-center rounded-full bg-gray-100 text-gray-500">
-            <X className="h-5 w-5" />
-          </button>
+    <CtvModalSheet title={t('forms.recruitCtv.title')} closeLabel={t('forms.close')} onClose={onClose}>
+      {success ? (
+        <div className="flex flex-col items-center gap-3 py-10 text-center">
+          <span className="grid h-14 w-14 place-items-center rounded-full bg-emerald-100 text-emerald-600">
+            <Check className="h-7 w-7" />
+          </span>
+          <p className="text-sm font-bold text-gray-900">{t('forms.recruitCtv.success')}</p>
         </div>
-
-        {success ? (
-          <div className="flex flex-col items-center gap-3 py-10 text-center">
-            <span className="grid h-14 w-14 place-items-center rounded-full bg-emerald-100 text-emerald-600">
-              <Check className="h-7 w-7" />
-            </span>
-            <p className="text-sm font-bold text-gray-900">{t('forms.recruitCtv.success')}</p>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4">
             <Field label={t('forms.recruitCtv.name')}>
               <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-orange-500" />
             </Field>
@@ -110,10 +112,9 @@ export function CtvRecruitModal({ open, onClose, onSuccess }: CtvRecruitModalPro
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               {loading ? t('forms.recruitCtv.submitting') : t('forms.recruitCtv.submit')}
             </button>
-          </form>
-        )}
-      </div>
-    </div>
+        </form>
+      )}
+    </CtvModalSheet>
   );
 }
 

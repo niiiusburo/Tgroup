@@ -1,0 +1,382 @@
+{
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-dental-login-monitor/2026-06-04T150241",
+  "loginAttempts": [
+    {
+      "account": "t@clinic.vn",
+      "stillLogin": false,
+      "url": "https://tmv.2checkin.com/",
+      "text": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Tổng quan Cosmetic All Locations Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Hẹn mới Lịch trình ngày Tất cả · 0 Đang chờ · 0 Đang khám · 0 Hoàn thành · 0 Không có bệnh nhân Bệnh nhân chờ check-in sẽ hiển thị ở đây TODAY'S SERVICES / ACTIVITY SERVICE PATIENT QTY DOCTOR AMOUNT STATUS Services will populate as patients are treated throughout the day. LỊCH HẸN HÔM NAY Tất cả · 4 Đã đến · 0 Đã hủy · 0 test --- 09:00 · 30 phút 0921828212 Đang hẹn Nguyễn Hồng Tú BS 21 VYTDT 09:10 · 30 phút 0982138698 Đang hẹn Chị Hà Thanh ---"
+    }
+  ],
+  "loginSucceeded": true,
+  "dentalCheck": {
+    "action": "clicked-dental-option",
+    "clicked": true,
+    "beforeSignals": {
+      "hasDentalSignal": true,
+      "hasCosmeticSignal": true
+    },
+    "afterSignals": {
+      "hasDentalSignal": true,
+      "hasCosmeticSignal": false
+    },
+    "beforeText": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Tổng quan Cosmetic All Locations Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Hẹn mới Lịch trình ngày Tất cả · 0 Đang chờ · 0 Đang khám · 0 Hoàn thành · 0 Không có bệnh nhân Bệnh nhân chờ check-in sẽ hiển thị ở đây TODAY'S SERVICES / ACTIVITY SERVICE PATIENT QTY DOCTOR AMOUNT STATUS Services will populate as patients are tr",
+    "afterText": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Tổng quan Dental All Locations Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Hẹn mới Lịch trình ngày Tất cả · 0 Đang chờ · 0 Đang khám · 0 Hoàn thành · 0 Không có bệnh nhân Bệnh nhân chờ check-in sẽ hiển thị ở đây TODAY'S SERVICES / ACTIVITY SERVICE PATIENT QTY DOCTOR AMOUNT STATUS Services will populate as patients are trea",
+    "controls": [
+      {
+        "tag": "A",
+        "text": "",
+        "href": "https://tmv.2checkin.com/",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "",
+        "href": "https://tmv.2checkin.com/calendar",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "",
+        "href": "https://tmv.2checkin.com/customers",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Dịch vụ",
+        "href": "https://tmv.2checkin.com/services",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Danh mục dịch vụ",
+        "href": "https://tmv.2checkin.com/service-catalog",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Kế hoạch thanh toán",
+        "href": "https://tmv.2checkin.com/payment",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Nhân viên",
+        "href": "https://tmv.2checkin.com/employees",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Hoa hồng Pro",
+        "href": "https://tmv.2checkin.com/commission",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Chi nhánh",
+        "href": "https://tmv.2checkin.com/locations",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Bảng điều khiển",
+        "href": "https://tmv.2checkin.com/reports/dashboard",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Doanh thu",
+        "href": "https://tmv.2checkin.com/reports/revenue",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Lịch hẹn",
+        "href": "https://tmv.2checkin.com/reports/appointments",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Bác sĩ",
+        "href": "https://tmv.2checkin.com/reports/doctors",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Khách hàng",
+        "href": "https://tmv.2checkin.com/reports/customers",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Chi nhánh",
+        "href": "https://tmv.2checkin.com/reports/locations",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Dịch vụ",
+        "href": "https://tmv.2checkin.com/reports/services",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Nhân viên",
+        "href": "https://tmv.2checkin.com/reports/employees",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Cài đặt",
+        "href": "https://tmv.2checkin.com/settings",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Phản hồi",
+        "href": "https://tmv.2checkin.com/feedback",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Quyền hạn",
+        "href": "https://tmv.2checkin.com/permissions",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Mối quan hệ",
+        "href": "https://tmv.2checkin.com/relationships",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "A",
+        "text": "Thông báo",
+        "href": "https://tmv.2checkin.com/notifications",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "A",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Switch language",
+        "href": "",
+        "aria": "Switch language",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Dental",
+        "href": "",
+        "aria": "Dental",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "All Locations",
+        "href": "",
+        "aria": "All Locations",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Quét nhanh khuôn mặt",
+        "href": "",
+        "aria": "Quét nhanh khuôn mặt",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Phản hồi",
+        "href": "",
+        "aria": "Phản hồi",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Bỏ qua",
+        "href": "",
+        "aria": "Bỏ qua",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Hẹn mới",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Tất cả · 0",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Đang chờ · 0",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Đang khám · 0",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Hoàn thành · 0",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Tất cả · 0",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Đã đến · 0",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Đã hủy · 0",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      },
+      {
+        "tag": "BUTTON",
+        "text": "v0.32.101",
+        "href": "",
+        "aria": "",
+        "role": "",
+        "visible": true
+      }
+    ]
+  },
+  "screens": [
+    {
+      "name": "dashboard",
+      "label": "Dashboard",
+      "href": "/",
+      "finalUrl": "https://tmv.2checkin.com/",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-dental-login-monitor/2026-06-04T150241/dashboard.png",
+      "bodyChars": 709,
+      "textStart": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Tổng quan Dental All Locations Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Hẹn mới Lịch trình ngày Tất cả · 0 Đang chờ · 0 Đang khám · 0 Hoàn thành · 0 Không có bệnh nhân Bệnh nhân chờ check-in sẽ hiển thị ở đây TODAY'S SERVICES / ACTIVITY SERVICE PATIENT QTY DOCTOR AMOUNT STATUS Services will populate as patients are trea",
+      "dentalSignals": true,
+      "cosmeticSignals": false,
+      "obviousIssue": false,
+      "events": []
+    },
+    {
+      "name": "calendar",
+      "label": "Calendar",
+      "href": "/calendar",
+      "finalUrl": "https://tmv.2checkin.com/calendar",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-dental-login-monitor/2026-06-04T150241/calendar.png",
+      "bodyChars": 586,
+      "textStart": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Lịch Dental All Locations Lịch hẹn Quản lý lịch hẹn khám bệnh Ngày Tuần Tháng Thứ Năm, 4 tháng 6, 2026 Hôm nay Xuất dữ liệu Bộ lọc Hẹn mới Thứ Năm, 4 tháng 6 0 Lịch hẹn 07:00 07:30 08:00 08:30 09:00 09:30 10:00 10:30 11:00 11:30 12:00 12:30 13:00 13:30 14:00 14:30 15:00 15:30 16:00 16:30 17:00 17:30 18:00 18:30 19:00 19:30 20:00 v0.32.101",
+      "dentalSignals": true,
+      "cosmeticSignals": false,
+      "obviousIssue": false,
+      "events": []
+    },
+    {
+      "name": "customers",
+      "label": "Customers",
+      "href": "/customers",
+      "finalUrl": "https://tmv.2checkin.com/customers",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-dental-login-monitor/2026-06-04T150241/customers.png",
+      "bodyChars": 1200,
+      "textStart": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Khách hàng Dental All Locations Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Khách hàng 36361 patients · 36324 active Xuất dữ liệu Add Customer All Status Active Inactive Pending CODE CUSTOMER PHONE EMAIL LOCATION STATUS LAST VISIT - t test ctv nha khoa 0928202812 Unknown Active 01 Jun 2026 0972020908 T Trần Trung Kiên 0972",
+      "dentalSignals": true,
+      "cosmeticSignals": false,
+      "obviousIssue": false,
+      "events": []
+    }
+  ],
+  "events": [
+    {
+      "type": "requestfailed",
+      "url": "https://tmv.2checkin.com/gB_0uR92xi021pMVMZr3rlGnzqKNnOJygTue8PtpmMdNfiRngxvXKb42TVj4otZYghPu70SCh6Rj3vf1kEXfYZqgNKmYWrBzUUzAtYWDFw6PtzG9TR8m5jttMjmmv2kAH9TDbl4w1epLB4zLB1IppUSdr2iqqIDZYZDZdU0nIcOUgs3DS6nrbiSFJIaSPSAUrMwvXa_-Yphp5x4MjXrm390-dOhYApYWII6ckbTTYYhVF6_7PGKASou-Oc4Kj33b3Tj0R_IvgSEqgH16vvInIBXzZvIwGdBXXsPR_bde18QPJ5kB0GrNR4b-tc2XMHeHy83DxeOoLfQXS0MaF_qVjttVx9v9pNiGghmmAUP3_OQmZFAXQYUsv6Z42dIjdT6EWHFbOkPUOYomG-OfYuBhWgfnys92usb4Xi4roLF10TkKNykXJ1HjPfs0Xyy_hb6zFeH71v6E6ov-",
+      "failure": "net::ERR_ABORTED"
+    }
+  ],
+  "workingAccount": "t@clinic.vn",
+  "dentalHeaderScreenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-dental-login-monitor/2026-06-04T150241/dental-header.png"
+}

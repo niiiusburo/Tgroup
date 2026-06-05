@@ -4,13 +4,15 @@ import { Check, Copy, LogOut } from 'lucide-react';
 
 import { LanguageToggle } from '@/components/shared/LanguageToggle';
 import { useAuth } from '@/contexts/AuthContext';
-import type { CtvProfile } from '@/lib/api/ctv';
+import { type CtvProfile } from '@/lib/api';
+import { CtvAccountSettings } from './CtvAccountSettings';
 
 interface CtvMeTabProps {
   readonly profile: CtvProfile | null;
+  readonly onProfileUpdated?: (profile: CtvProfile) => void;
 }
 
-export function CtvMeTab({ profile }: CtvMeTabProps) {
+export function CtvMeTab({ profile, onProfileUpdated }: CtvMeTabProps) {
   const { logout, user } = useAuth();
   const { t } = useTranslation('ctv');
   const [copied, setCopied] = useState(false);
@@ -21,7 +23,6 @@ export function CtvMeTab({ profile }: CtvMeTabProps) {
   const referralCode = `CTV-${referralSource.slice(0, 6).toUpperCase()}`;
   // Shareable self-signup link: whoever opens it registers as a CTV UNDER this person.
   const joinLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/ctv/join?ref=${referralCode}`;
-
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(joinLink);
@@ -62,6 +63,8 @@ export function CtvMeTab({ profile }: CtvMeTabProps) {
         <p className="mt-2 text-[11px] text-gray-400">{t('me.copyCodeHint')}</p>
         {copied ? <p className="mt-1 text-xs font-medium text-emerald-600">{t('actions.copied')}</p> : null}
       </section>
+
+      <CtvAccountSettings displayName={displayName} onProfileUpdated={onProfileUpdated} />
 
       <section className="mt-4 divide-y divide-gray-50 rounded-3xl bg-white text-sm shadow-sm ring-1 ring-gray-100">
         <div className="flex items-center justify-between px-5 py-3.5">

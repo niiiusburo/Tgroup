@@ -52,6 +52,9 @@ When `COSMETIC_LOB_ENABLED=false` the entire family returns 503.
 | GET | `/api/ctv/commission-summary` | CTV (ctv.commission.view.self) | — | Aggregated payload: { pending: {total, dental, cosmetic, count}, paid, recent_activity[], by_service[] } with LOB pills on every row |
 | GET | `/api/ctv/referrals` | CTV (ctv.referrals.view.self) | — | List of referred clients across both DBs with status (earning / no visit), totals earned, LOB pills |
 | GET | `/api/ctv/hierarchy` | CTV (ctv.dashboard.view) | — | `{ current, upline[], downline[], totals }` for the portal Network tab; `downline[]` is a flattened recursive tree from Dental + Cosmetic CTV partner rows |
+| GET | `/api/ctv/me` | CTV (ctv.dashboard.view) | — | Self profile from canonical CTV partner row: `{ id, name, email, phone, role: 'CTV' }`; frontend masks phone/email before rendering. |
+| PATCH | `/api/ctv/me` | CTV (ctv.dashboard.view) | `{ name }` | Updated self profile; trims/collapses whitespace, rejects blank or >120-char names, and mirrors the CTV `partners.name` row by UUID in Dental/Cosmetic when present. Errors: `P_NAME_REQUIRED`, `P_NAME_TOO_LONG`, `P_CTV_NOT_FOUND`. |
+| POST | `/api/ctv/me/password` | CTV (ctv.dashboard.view) | `{ currentPassword, newPassword }` | `{ success: true }` after verifying the current bcrypt or gated legacy CTV password, then writing a new bcrypt `password_hash` to mirrored CTV rows. Errors: `P_PASSWORD_REQUIRED`, `P_PASSWORD_TOO_SHORT`, `P_PASSWORD_NOT_SET`, `P_CURRENT_PASSWORD_INVALID`, `P_CTV_NOT_FOUND`. |
 | GET | `/api/ctv/client-lookup` | CTV (ctv.dashboard.view) | `?phone=&lob=dental\|cosmetic` | Read-only LOB-specific phone check for the refer form: `{ exists, lob, clientId?, name?, claimed?, claimedByMe?, ownerName?, expiresAt? }`; the UI may autofill `name` only when the phone exists and remains claim-available. Authoritative claim gate remains `POST /api/ctv/bookings`. |
 | POST | `/api/ctv` | CTV or admin | `{ name, phone, email, password, lob_scope?, referred_by_ctv_id? (admin) }` | 201 created CTV. Closed signup (no public). `employee=true`, instant active; referred_by = caller (CTV) or body (admin). Dups → `U_DUPLICATE_PHONE`/`U_DUPLICATE_EMAIL`; non-CTV/non-admin → 403 `S_CTV_CREATE_FORBIDDEN` |
 | POST | `/api/ctv/clients` | CTV or admin | `{ name, phone, lob }` | 201 referred customer in one LOB DB, `referred_by_ctv_id` = caller |
@@ -60,6 +63,17 @@ When `COSMETIC_LOB_ENABLED=false` the entire family returns 503.
 | (internal) | commission recipient resolution | — | — | Implements D13 priority: referred_by_ctv_id > active consultation card (cosmetic) > salestaffid (dental). Current NK3 model pays the resolved CTV recipient a flat product commission percent; no upline level split is paid unless a future contract reintroduces it. |
 
 CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin route.
+
+## Public CTV Landing API (`/api/ctv-public`) — no login
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/api/ctv-public/client-lookup` | Public | `?phone=&lob=dental\|cosmetic&ctvPhone?=` | Read-only LOB-specific phone check for the no-login landing sheet: `{ exists, lob, clientId?, name?, claimed?, claimedByMe?, ownerName?, expiresAt? }`. `ctvPhone` is optional and is used only to tell whether an active claim belongs to that CTV. |
+| GET | `/api/ctv-public/ctv-lookup` | Public | `?phone=` | Live CTV phone verification for public booking attribution and public signup upline fields: `{ exists, name }`. Returns only active, non-deleted `partners.is_ctv=true` rows from Dental; no auth or session state. |
+| GET | `/api/ctv-public/services` | Public | `?lob=dental\|cosmetic` | `{ lob, services: [{ id, name, price, category? }] }` for the landing service picker. |
+| POST | `/api/ctv-public/bookings` | Public | `{ ctvPhone, clientId?, name?, phone, lob, date, time?, companyId?, productId?, note? }` | 201 `{ clientId, appointmentId }`. Resolves an active non-deleted CTV by `ctvPhone`, then creates/reclaims the client and writes one appointment in the selected LOB. Active claim conflicts return `400 B_CLIENT_CLAIMED`; an unknown CTV phone returns `404 P_CTV_NOT_FOUND`. The route must not create `saleorders` or `saleorderlines`. |
+| GET | `/api/ctv-public/refcode/:code` | Public | — | `{ ok, uplineId, uplineName }` for referral-link signup. Unknown/malformed codes return `404 U_INVALID_CODE`. |
+| POST | `/api/ctv-public/join` | Public | `{ code?, uplinePhone?, name, phone, email, password }` | 201 `{ ok, id, name, uplineName }`. Direct `/ctv/join` signup resolves an active non-deleted parent CTV by `uplinePhone`; referral links may use `code`. Missing parent input returns `400 U_UPLINE_REQUIRED`; unknown phone returns `404 U_INVALID_UPLINE`; duplicate identity and weak password guards still apply. |
 
 ## Admin CTV & Commission config
 
@@ -485,7 +499,8 @@ See cosmetic-clients.yaml, business-unit.yaml for details.
 ## CTV Dashboard (v2)
 - GET /api/ctv/commission-summary — CTV only (is_ctv + ctv.commission.view.self); aggregates earnings from both DBs; returns { totals: { pending, paid, dental, cosmetic }, rows: [...] with lob tags }. Display names may be null; frontend owns localized unknown-client fallbacks.
 - GET /api/ctv/referrals — self referred clients across LOBs + earning status
-- GET /api/ctv/me — profile
+- GET/PATCH /api/ctv/me — self profile read/update
+- POST /api/ctv/me/password — self password change after current-password verification
 - All CTV routes return 403 for non-is_ctv; admin routes 403 for CTV
 
 ## Me / LOB Scope (v2)

@@ -51,17 +51,26 @@ Consequences:
 **Consequences:** No /consultations page.
 
 ### DEC-20260519-08 (D8): Cosmetic lock TTL
-**Decision:** 6 months from last related activity (engine only).
+**Decision:** 6 months from last related activity. Superseded/clarified for CTV by DEC-20260605-01: timer resets from latest CTV-bearing appointment or CTV-bearing service in the same LOB.
 
 ### DEC-20260519-11 (D11): Commission rate storage
-**Decision:** Per-product `commission_rate_percent` (additive on products both DBs; dental defaults 0).
+**Status:** Superseded for CTV by DEC-20260605-01.
+**Decision:** Per-product `commission_rate_percent` (additive on products both DBs; dental defaults 0) remains legacy/mock commission data and is not the CTV commission source of truth.
 
 ### DEC-20260519-12 (D12): Commission earning trigger
-**Decision:** On payment collected. Refunds = negative reversal rows (append-only earnings; original untouched).
+**Status:** Superseded for CTV by DEC-20260605-01.
+**Decision:** Earlier CTV engine trigger was payment collected. Current CTV business rule is service-card-created, full-service-price earnings.
 
 ### DEC-20260519-13 (D13): Commission recipient resolution
-**Decision:** Strict first-match: 1. client.referred_by_ctv_id (CTV wins), 2. cosmetic + active consultation card, 3. dental + salestaffid, 4. none.
-**Consequences:** Engine in commissionEngine.js; called from payment paths.
+**Status:** Superseded for CTV by DEC-20260605-01.
+**Decision:** Earlier D13 strict first-match was: 1. client.referred_by_ctv_id (CTV wins), 2. cosmetic + active consultation card, 3. dental + salestaffid, 4. none.
+**Consequences:** Current CTV recipient resolution starts from the CTV selected on the service card. Appointment CTV ownership affects claim/timer and booking eligibility but does not create commission.
+
+### DEC-20260605-01: CTV referral and commission v3 business logic
+**Status:** Accepted
+**Context:** NK3/TMV TestSprite preparation exposed that older docs and partial code still described payment-collected CTV commission and product-level CTV commission rates. Operator interview on 2026-06-05 clarified the accepted business rules for service-card commission, CTV tiers, claim ownership, payouts, and hierarchy.
+**Decision:** CTV commission is created when a service card with an attached CTV is created. The amount is calculated from the full service price immediately. CTV percentages come from CTV admin tier config, with levels 0-2 active by default and levels 3-4 configurable/disabled unless activated. Missing or disabled uplines earn nothing; the company keeps those percentages. Product/service `commission_rate_percent` is legacy mock data and must not drive CTV commission. CTV claim locks are per LOB and reset from latest CTV-bearing appointment or service. CTV booking is appointment-only and never creates service cards or commission. Admin can change CTV ownership on appointment cards and service cards; paid-out CTV earnings block delete/refund/cancel/reassignment. Combined Dental+Cosmetic payouts use LOB-local payout rows linked by a shared `payout_group_id` and receipt URL. Full rule set lives in `docs/business-logic/ctv-referral-commission.md`.
+**Consequences:** Existing code paths that still create CTV earnings from payment collection or product-level rates are implementation gaps. Future CTV work must update the business-logic doc, product-map CTV and earnings domains, invariants, tests, and TestSprite plan together.
 
 ### DEC-20260519-14 (D14): CTV role
 **Decision:** `is_ctv` flag on users. CTV users redirect to /ctv on login, 403 on all admin routes. Gated by ctv.* perms.

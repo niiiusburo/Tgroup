@@ -148,20 +148,26 @@ export default function CtvDashboard() {
     if (activeTab === 'me') return t('header.meTitle', { defaultValue: isVietnamese ? 'Tài khoản' : 'Account' });
     return t('title');
   }, [activeTab, isVietnamese, t]);
+  const isAccountTab = activeTab === 'me';
+  const effectiveHeaderHidden = !isAccountTab && isHeaderHidden;
 
   return (
     <main className="min-h-screen bg-[#f7f5f2] text-gray-900">
       <div className="mx-auto min-h-screen w-full max-w-[430px] bg-[#fbfaf8] pb-24 shadow-xl shadow-gray-200/70">
-        <div className="sticky top-0 z-20 px-3 pt-3">
+        <div className={cn('px-3 pt-3', isAccountTab ? 'relative z-10' : 'sticky top-0 z-20')}>
           <motion.header
             data-testid="ctv-motion-header"
-            data-scroll-state={isHeaderHidden ? 'hidden' : 'visible'}
+            data-scroll-state={effectiveHeaderHidden ? 'hidden' : 'visible'}
             aria-label={t('header.portalMenu')}
             initial={false}
             animate={
               shouldReduceMotion
                 ? { opacity: 1, scale: 1, y: 0 }
-                : { opacity: isHeaderHidden ? 0 : 1, scale: isHeaderHidden ? 0.98 : 1, y: isHeaderHidden ? -112 : 0 }
+                : {
+                    opacity: effectiveHeaderHidden ? 0 : 1,
+                    scale: effectiveHeaderHidden ? 0.98 : 1,
+                    y: effectiveHeaderHidden ? -112 : 0,
+                  }
             }
             transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 520, damping: 42, mass: 0.7 }}
             onFocusCapture={() => setIsHeaderHidden(false)}
@@ -238,7 +244,7 @@ export default function CtvDashboard() {
               onRetry={() => void loadHierarchy()}
             />
           ) : null}
-          {activeTab === 'me' ? <CtvMeTab profile={profile} /> : null}
+          {activeTab === 'me' ? <CtvMeTab profile={profile} onProfileUpdated={setProfile} /> : null}
         </section>
 
         <CtvReferModal

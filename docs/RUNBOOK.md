@@ -36,6 +36,38 @@
    - If new permissions added, confirm they are in `group_permissions` seed or UI.
 6. **Nginx timeout check:**
    - If exports changed, confirm `proxy_read_timeout 300s` in production nginx.
+7. **Save round-trip smoke (two-DB persistence gate):**
+   - Run the NK3 save round-trip harness (see below) whenever a create/edit
+     path or the cosmetic LOB write logic changed. It catches the bug class
+     where a form looks saved but silently drops a row/scope (e.g. a CTV
+     scoped dental+cosmetic that fails to write the dental auth row).
+
+## Save Round-Trip Smoke Harness
+
+`scripts/nk3-only/nk3-save-roundtrip-smoke.py` drives the real create endpoints
+against the local two-DB stack (`tdental_demo` + `tcosmetic_demo` on 5433), then
+reads each written row back out of **both** physical databases and asserts what
+actually persisted. It is the durable guard against the "save dropped my data"
+class of bug — most importantly the two-DB Cosmetic LOB v2 split where a
+dental+cosmetic CTV must land in BOTH DBs and a cosmetic-only selection must
+still create the dental auth row. It is local-only and self-cleaning (every
+fixture it creates is deleted, and a unique marker lets a crashed run be swept).
+Exit code is 0 (all pass) or 1 (any fail) so it slots into a pre-deploy gate.
+
+```bash
+# 1. Start the API locally with cosmetic mirrors enabled (separate shell):
+cd api && TZ=Asia/Ho_Chi_Minh JWT_SECRET=devsecret \
+    COSMETIC_LOB_ENABLED=true PORT=3002 node src/server.js
+
+# 2. Run the harness (forges an admin JWT from a discovered admin-group member):
+JWT_SECRET=devsecret python3 scripts/nk3-only/nk3-save-roundtrip-smoke.py
+# Expected tail: "4/4 save round-trip checks passed", exit 0.
+```
+
+It is verified to FAIL (exit 1) if the dental-forcing logic in
+`api/src/routes/ctv.js` regresses — i.e. it reproduces and catches the original
+reported CTV bug. Add new `test_*` functions as more create/edit surfaces need
+round-trip coverage (one assertion per persistence invariant).
 
 ## Deploy Steps
 
@@ -96,25 +128,40 @@ Expected fields:
 docker exec -i tgroup-db pg_isready -U postgres -d tdental_demo
 ```
 
-### Production Database Backup
-NK production runs a root crontab backup on the VPS at 12:00 Vietnam time
-(`05:00 UTC` on the current server timezone). The job calls:
+### Daily Database Backups
+The VPS root crontab runs read-only `pg_dump` backups for the live/smoke
+databases from the `tgroup-db` PostgreSQL 16 container. The shared script is:
 
 ```bash
 /opt/tgroup/scripts/backup-nk-db.sh
 ```
 
-The script dumps `tdental_demo` from `tgroup-db` into
-`/opt/tgroup/backups/nk-db-daily/` as a compressed PostgreSQL custom-format
-dump, writes a `.sha256` checksum, and keeps only the latest 3 `.dump` files.
-Manual verification:
+The script creates compressed PostgreSQL custom-format dumps, writes `.sha256`
+checksums, and keeps the latest 7 dump sets for each configured database. It
+does not restore, import, truncate, or modify database rows.
+
+| Database | Schedule (Vietnam time) | VPS backup directory | Local download directory |
+|---|---:|---|---|
+| `tdental_demo` | 12:00 | `/opt/tgroup/backups/nk-db-daily/` | `backups/nk-db-daily/` |
+| `tdental_smoketest` | 12:15 | `/opt/tgroup/backups/nk3-dental-smoketest-db-daily/` | `backups/nk3-dental-smoketest-db-daily/` |
+| `tcosmetic_smoketest` | 12:30 | `/opt/tgroup/backups/nk3-cosmetic-db-daily/` | `backups/nk3-cosmetic-db-daily/` |
+
+Manual verification for one target:
 
 ```bash
-backup=$(ls -1 /opt/tgroup/backups/nk-db-daily/nk-tdental_demo-*.dump | sort | tail -1)
+backup_dir=/opt/tgroup/backups/nk-db-daily
+db_name=tdental_demo
+backup=$(ls -1 "${backup_dir}/nk-${db_name}-"*.dump | sort | tail -1)
 sha256sum -c "${backup}.sha256"
 docker exec -i tgroup-db pg_restore -l < "$backup" | head -20
-crontab -l | grep -A1 "NK production database backup"
+find "${backup_dir}" -maxdepth 1 -type f -name "nk-${db_name}-*.dump" | wc -l
+crontab -l | grep -E "tdental_demo|tdental_smoketest|tcosmetic_smoketest"
 ```
+
+The Codex daily backup verification automation verifies all three targets,
+checks checksums and archive readability, downloads the newest verified dump and
+checksum for each target to the matching local directory above, and keeps the
+latest 7 local dump sets.
 
 ### Face Service
 ```bash

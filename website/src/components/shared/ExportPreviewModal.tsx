@@ -35,19 +35,19 @@ export function ExportPreviewModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center">
+    <div className="fixed inset-0 z-[120] flex items-end justify-center p-0 sm:items-center sm:p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative flex max-h-[calc(100dvh-0.75rem)] min-h-0 w-full max-w-md flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200 sm:max-h-[90dvh] sm:rounded-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-gray-100 px-5 py-4 sm:px-6">
           <h3 className="text-base font-semibold text-gray-900">{t('previewTitle')}</h3>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
+          <button type="button" onClick={onClose} aria-label={t('close')} className="grid h-10 w-10 shrink-0 place-items-center rounded-lg transition-colors hover:bg-gray-100">
             <X className="w-4 h-4 text-gray-500" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 space-y-4">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">
           {loading && (
             <div className="flex items-center justify-center gap-2 py-8 text-gray-500">
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -115,14 +115,16 @@ export function ExportPreviewModal({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-2 px-6 py-4 bg-gray-50 border-t border-gray-100">
+        <div className="flex shrink-0 justify-end gap-2 border-t border-gray-100 bg-gray-50 px-5 py-4 sm:px-6" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
           <button
+            type="button"
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
           >
             {t('close')}
           </button>
           <button
+            type="button"
             onClick={handleDownload}
             disabled={downloading || loading || !!error || !preview || preview.rowCount === 0 || preview.exceedsMax}
             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"

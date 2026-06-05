@@ -2,7 +2,7 @@
 
 > Database entity map: relationships, writers, readers, endpoints, and frontend surfaces.
 
-> Migration inventory: 53 SQL files under `api/migrations/` as of 2026-05-17 local file inventory. Duplicate numeric prefixes exist, so treat filename order as inventory, not a strict linear version sequence.
+> Migration inventory: 53 SQL files under `api/migrations/` as of 2026-05-17 local file inventory. Duplicate numeric prefixes exist, so treat filename order as inventory, not a strict linear version sequence. Legacy `008_data_migration_from_tdental*.sql` files are destructive manual reconstruction scripts and must be blocked by their break-glass guards on protected NK3/local DB names.
 
 ## Legend
 

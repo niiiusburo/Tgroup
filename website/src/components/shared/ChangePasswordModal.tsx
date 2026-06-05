@@ -79,15 +79,15 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
   }
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[70] flex items-end justify-center p-0 sm:items-center sm:p-4">
       <div
         className="absolute inset-0 bg-black/40"
         onClick={handleClose}
         aria-hidden="true" />
       
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+      <div className="relative flex max-h-[calc(100dvh-0.75rem)] min-h-0 w-full max-w-md flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl animate-in zoom-in-95 duration-200 sm:max-h-[90dvh] sm:rounded-2xl">
         {/* Header */}
-        <div className="relative px-6 py-5 bg-primary">
+        <div className="relative shrink-0 px-5 py-4 bg-primary sm:px-6 sm:py-5">
           <div className="relative flex items-start justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white/20 rounded-xl">
@@ -101,6 +101,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
             <button
               type="button"
               onClick={handleClose}
+              aria-label={t('close')}
               className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors">
               <X className="w-5 h-5 text-white" />
             </button>
@@ -108,7 +109,11 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-5 sm:p-6"
+          style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+        >
           {success ? (
             <div className="flex flex-col items-center gap-3 py-6 text-center">
               <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center">

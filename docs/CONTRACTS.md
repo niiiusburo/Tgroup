@@ -28,6 +28,10 @@
 | v1.0.13 | 2026-06-01 | CTV booking contract corrected: phone lookup may prefill an available existing client's name; `POST /api/ctv/bookings` creates/reclaims the client and writes an appointment only, never a service card or Referral Start saleorder. |
 | v1.0.14 | 2026-06-01 | CTV booking appointment service metadata clarified: if no service is selected, the appointment defaults to the configured Referral Start product on `appointments.productid`; selected services still override the default. |
 | v1.0.15 | 2026-06-01 | Service-line reversal contract clarified: `DELETE /api/SaleOrderLines/:id` is permissioned as customer edit + payment void, blocks paid-out CTV commissions, and only auto-voids linked payments when allocations are single-invoice and still unpaid. |
+| v1.0.16 | 2026-06-02 | Public CTV landing booking contract added: no-login `/api/ctv-public/*` lookup, service catalog, and booking endpoints resolve the CTV by phone and preserve appointment-only booking semantics. |
+| v1.0.17 | 2026-06-02 | Public CTV signup contract added: `/ctv/join` can create a new CTV under either a referral code or an active upline CTV phone submitted from the final signup field. |
+| v1.0.18 | 2026-06-02 | CTV self account settings contract added: `/api/ctv/me` now returns the DB-backed self profile, `PATCH /api/ctv/me` updates the CTV display name, and `POST /api/ctv/me/password` verifies current password before writing a new bcrypt hash. |
+| v1.0.19 | 2026-06-02 | Public CTV phone verification contract added: `/api/ctv-public/ctv-lookup` lets public booking and public signup verify typed CTV phone numbers before submit. |
 
 ---
 
@@ -35,7 +39,7 @@
 
 Cosmetic LOB mirror rule: when the frontend passes `lob: 'cosmetic'` to `apiFetch`, the client routes the same endpoint under `/api/cosmetic/*`. Mirrored handlers must run behind `requireLobScope('cosmetic')`, `attachCosmeticDb`, `runWithLob('cosmetic')`, and `cosmetic.access`, then read/write `tcosmetic_demo` through request-scoped `getQuery(req)` or ALS-aware `query()`. Dental remains the default legacy `/api/*` path.
 
-CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referrals`, `GET /api/ctv/client-journeys`, `GET /api/ctv/hierarchy`, `GET /api/ctv/client-lookup`, and `GET /api/ctv/me` are mounted behind `ctv.dashboard.view` and are scoped to the authenticated CTV identity unless the route explicitly allows admin-assisted CTV creation/booking. Authenticated non-CTV staff must not receive another CTV's self data.
+CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referrals`, `GET /api/ctv/client-journeys`, `GET /api/ctv/hierarchy`, `GET /api/ctv/client-lookup`, `GET/PATCH /api/ctv/me`, and `POST /api/ctv/me/password` are mounted behind `ctv.dashboard.view` and are scoped to the authenticated CTV identity unless the route explicitly allows admin-assisted CTV creation/booking. Authenticated non-CTV staff must not receive or mutate another CTV's self data.
 
 Admin CTV list rule: `GET /api/Ctvs` and `GET /api/cosmetic/Ctvs` return CTV identity rows with `source`, `legacy_code`, and `created_via`. Cosmetic mode filters to CTV rows whose `lob_scope` includes `cosmetic`; `source='legacy_ctv'` is derived from `created_via LIKE 'legacy_ctv_import%'`.
 
@@ -83,6 +87,37 @@ When `COSMETIC_LOB_ENABLED=true`, login resolves identity from Dental first, the
 ### 1.1A CTV Self Portal
 
 All `/api/ctv/*` routes require `Authorization: Bearer <token>` and are self-scoped to `partners.id` from the authenticated CTV user. CTV aggregation is intentionally composed in API code with `getDb('dental')` and `getDb('cosmetic')`; no cross-database SQL join is allowed.
+
+#### GET /api/ctv/me
+**Response 200:**
+```ts
+{
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: 'CTV';
+}
+```
+The route reads the authenticated CTV partner row from Dental first, then Cosmetic. Frontend consumers mask phone/email before display.
+
+#### PATCH /api/ctv/me
+**Request:** `{ name: string }`.
+**Response 200:** same shape as `GET /api/ctv/me`.
+The route trims/collapses whitespace, rejects blank names and names over 120 characters, and updates only the authenticated CTV's `partners.name` row by UUID in Dental/Cosmetic when present.
+**Errors:** `400 P_NAME_REQUIRED`, `400 P_NAME_TOO_LONG`, `404 P_CTV_NOT_FOUND`.
+
+#### POST /api/ctv/me/password
+**Request:**
+```ts
+{
+  currentPassword: string;
+  newPassword: string; // min 6 chars
+}
+```
+**Response 200:** `{ success: true }`.
+The route verifies the current password against bcrypt first, then the gated legacy CTV password fallback only for imported CTV rows. On success it writes a new bcrypt `password_hash` to the authenticated CTV's mirrored Dental/Cosmetic rows when present.
+**Errors:** `400 P_PASSWORD_REQUIRED`, `400 P_PASSWORD_TOO_SHORT`, `401 P_PASSWORD_NOT_SET`, `401 P_CURRENT_PASSWORD_INVALID`, `404 P_CTV_NOT_FOUND`.
 
 #### GET /api/ctv/client-journeys
 **Response 200:**
@@ -169,7 +204,52 @@ When an existing partner row is accepted or reclaimed, the route updates that sa
 ```
 Both camelCase and snake_case fields are part of the compatibility contract for the refreshed CTV booking sheet.
 
-### 1.1B Admin CTV Management
+### 1.1B Public CTV Landing Booking And Signup
+
+The public Tâm landing route opens the CTV refer-client sheet and public CTV signup without requiring a logged-in session. These endpoints are mounted before the normal `/api` auth gate and must stay narrow: booking resolves the owning CTV by submitted phone number, runs the same active-claim gate, and creates only a partner/customer row plus an appointment; signup resolves the parent/upline CTV by referral code or submitted CTV phone before creating a CTV partner row.
+
+#### GET /api/ctv-public/client-lookup
+**Query:** `phone` required; `lob` defaults to `dental`; optional `ctvPhone` identifies the CTV context.
+**Response 200:** same shape as `GET /api/ctv/client-lookup`: `{ exists, lob, clientId?, name?, claimed?, claimedByMe?, ownerName?, expiresAt? }`.
+
+#### GET /api/ctv-public/ctv-lookup
+**Query:** `phone` required.
+**Response 200:** `{ exists: boolean; name: string | null }`.
+This route is read-only and returns only whether the submitted phone resolves to an active, non-deleted CTV from Dental. It powers live verification for the public booking `ctvPhone` field and the public signup `uplinePhone` field before either form submits.
+**Errors:** `400 VALIDATION`.
+
+#### GET /api/ctv-public/services
+**Query:** `lob` defaults to `dental`.
+**Response 200:** `{ lob, services: Array<{ id: string; name: string; price: number | null; category?: { id: string; name: string | null } | null }> }`.
+
+#### POST /api/ctv-public/bookings
+**Request:** `ctvPhone`, `phone`, `lob`, `date`, optional `clientId`, `name`, `time`, `companyId`, `productId`, `note`.
+**Response 201:** `{ clientId: string; appointmentId: string }`.
+**Errors:** `400 VALIDATION`, `400 B_CLIENT_CLAIMED`, `404 P_CTV_NOT_FOUND`.
+This public route MUST NOT create `saleorders` or `saleorderlines`; selected service metadata remains on `appointments.productid`.
+
+#### GET /api/ctv-public/refcode/:code
+**Response 200:** `{ ok: true; uplineId: string; uplineName: string | null }`.
+**Errors:** `404 U_INVALID_CODE`.
+This route reveals only the resolved CTV display identity for the public join page.
+
+#### POST /api/ctv-public/join
+**Request:**
+```ts
+{
+  code?: string;        // referral-link signup, e.g. CTV-ABCDEF
+  uplinePhone?: string; // direct landing signup; preferred when both fields are present
+  name: string;
+  phone: string;
+  email: string;
+  password: string;     // min 6 chars
+}
+```
+**Response 201:** `{ ok: true; id: string; name: string; uplineName: string | null }`.
+**Errors:** `400 VALIDATION`, `400 U_WEAK_PASSWORD`, `400 U_UPLINE_REQUIRED`, `400 U_DUPLICATE_PHONE`, `400 U_DUPLICATE_EMAIL`, `404 U_INVALID_CODE`, `404 U_INVALID_UPLINE`.
+When `uplinePhone` is provided, the route resolves an active non-deleted `partners.is_ctv=true` row by phone and uses that CTV as `referred_by_ctv_id`. When only `code` is provided, it keeps the existing referral-code behavior. The new CTV inherits the upline's LOB scope.
+
+### 1.1C Admin CTV Management
 
 #### PUT /api/Ctvs/:id and PUT /api/cosmetic/Ctvs/:id
 Admin-only full edit for an existing CTV.

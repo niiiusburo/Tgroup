@@ -175,6 +175,78 @@ router.patch('/:id', requireAuth, async (req, res) => {
 });
 
 /**
+ * POST /api/Ctvs/:id/move  Body: { uplineId | null }  — §12 admin hierarchy move.
+ * Admin-only. A CTV may be moved ONLY when it is fresh: no referred customers, no
+ * CTV-attached services, and no earnings — in EITHER LOB. Updates referred_by_ctv_id in
+ * both DBs and writes an automatic audit_logs row (no free-text reason required).
+ */
+router.post('/:id/move', requireAuth, async (req, res) => {
+  const { employeeId } = req.user || {};
+  if (!employeeId) return res.status(401).json({ error: 'No token' });
+  if (!(await isAdminCaller(employeeId, req.user?.authLob || 'dental'))) {
+    return res.status(403).json({ error: { code: 'S_FORBIDDEN', message: 'Admin only' } });
+  }
+
+  const { id } = req.params;
+  const uplineId = (req.body && (req.body.uplineId || req.body.upline_id)) || null;
+  if (uplineId && uplineId === id) {
+    return res.status(400).json({ error: { code: 'U_SELF_UPLINE', message: 'A CTV cannot be its own upline' } });
+  }
+
+  const safeQuery = async (db, sql, params) => {
+    try { return await db.queryRows(sql, params); } catch (_e) { return []; }
+  };
+
+  try {
+    const dental = getDb('dental');
+    const cosmetic = getDb('cosmetic');
+
+    // Fresh-CTV guard — no referred customers, services, or earnings in EITHER LOB.
+    const activityCount = async (db) => {
+      const r = await safeQuery(db, 'SELECT COUNT(*)::int AS n FROM dbo.partners WHERE referred_by_ctv_id = $1', [id]);
+      const o = await safeQuery(db, 'SELECT COUNT(*)::int AS n FROM dbo.saleorders WHERE ctv_id = $1', [id]);
+      const e = await safeQuery(db, 'SELECT COUNT(*)::int AS n FROM dbo.earnings WHERE recipient_partner_id = $1', [id]);
+      return (r[0]?.n || 0) + (o[0]?.n || 0) + (e[0]?.n || 0);
+    };
+    const activity = (await activityCount(dental)) + (await activityCount(cosmetic));
+    if (activity > 0) {
+      return res.status(409).json({
+        error: { code: 'B_CTV_HAS_ACTIVITY', message: 'CTV has referrals, services, or earnings and cannot be moved', activity },
+      });
+    }
+
+    if (uplineId) {
+      const u = await safeQuery(dental, 'SELECT id FROM dbo.partners WHERE id = $1 AND is_ctv = true LIMIT 1', [uplineId]);
+      if (!u[0]) return res.status(404).json({ error: { code: 'U_INVALID_UPLINE', message: 'Upline CTV not found' } });
+    }
+
+    const cur = await safeQuery(dental, 'SELECT referred_by_ctv_id FROM dbo.partners WHERE id = $1 AND is_ctv = true', [id]);
+    if (!cur[0]) return res.status(404).json({ error: { code: 'S_NOT_FOUND', message: 'CTV not found' } });
+    const oldUpline = cur[0].referred_by_ctv_id || null;
+
+    const moveSql = 'UPDATE dbo.partners SET referred_by_ctv_id = $1, lastupdated = now() WHERE id = $2 AND is_ctv = true RETURNING id';
+    await dental.queryRows(moveSql, [uplineId, id]);
+    try { await cosmetic.queryRows(moveSql, [uplineId, id]); } catch (_e) { /* cosmetic row may not exist */ }
+
+    // Automatic audit trail (canonical: dental).
+    try {
+      await dental.queryRows(
+        `INSERT INTO dbo.audit_logs (entity_type, entity_id, action, old_value, new_value, created_by)
+         VALUES ('ctv', $1, 'move', $2, $3, $4)`,
+        [id, oldUpline, uplineId, employeeId]
+      );
+    } catch (auditErr) {
+      console.error('[Ctvs move audit] error:', auditErr.message);
+    }
+
+    return res.json({ ok: true, id, oldUpline, newUpline: uplineId });
+  } catch (e) {
+    console.error('[Ctvs POST /:id/move] error:', e.message);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
  * PUT /api/Ctvs/:id  Body: { name?, phone?, email?, password? }
  * Admin-only full edit of a CTV's profile fields. Any subset of fields may be
  * supplied; only the provided ones are updated. A non-empty password is

@@ -168,6 +168,53 @@ describe('permissionService', () => {
         expect(getQuery).not.toHaveBeenCalled();
       });
     });
+
+    // Regression (NK3): CTV partner rows were stamped with a staff tier_id ("Editor"),
+    // which made groupId truthy and SKIPPED the is_ctv auto-grant. Those CTVs then
+    // inherited Editor's staff perms (which lack ctv.dashboard.view) -> 403 on the whole
+    // CTV portal, AND held payment.edit/appointments.add (privilege escalation).
+    // A CTV is never a staff member: is_ctv must grant the CTV self-perms regardless of tier_id.
+    describe('CTV self-permissions (is_ctv users)', () => {
+      it('grants CTV self-perms even when a staff tier_id is stamped on the row', async () => {
+        const homeQ = jest.fn()
+          .mockResolvedValueOnce([{ tier_id: '11111111-0000-0000-0000-000000000003', group_name: 'Editor', is_ctv: true }]);
+        getQuery.mockReturnValueOnce(homeQ);
+
+        const result = await resolveEffectivePermissions('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', 'dental');
+
+        expect(result.groupName).toBe('CTV');
+        expect(result.effectivePermissions).toEqual([
+          'ctv.dashboard.view', 'ctv.commission.view.self', 'ctv.referrals.view.self',
+        ]);
+        // Must NOT inherit staff group permissions
+        expect(result.effectivePermissions).not.toContain('payment.edit');
+        expect(result.effectivePermissions).not.toContain('appointments.add');
+        // Only the partner lookup runs for a CTV (no group/override/location queries)
+        expect(homeQ).toHaveBeenCalledTimes(1);
+      });
+
+      it('grants CTV self-perms to an is_ctv user with null tier_id', async () => {
+        const homeQ = jest.fn()
+          .mockResolvedValueOnce([{ tier_id: null, group_name: null, is_ctv: true }]);
+        getQuery.mockReturnValueOnce(homeQ);
+
+        const result = await resolveEffectivePermissions('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', 'dental');
+        expect(result.effectivePermissions).toContain('ctv.dashboard.view');
+      });
+
+      it('does NOT grant CTV perms to a non-CTV staff member (regular group resolution)', async () => {
+        const homeQ = jest.fn()
+          .mockResolvedValueOnce([{ tier_id: 'group-1', group_name: 'Editor', is_ctv: false }])
+          .mockResolvedValueOnce([{ permission: 'payment.edit' }])
+          .mockResolvedValueOnce([])
+          .mockResolvedValueOnce([]);
+        getQuery.mockReturnValueOnce(homeQ);
+
+        const result = await resolveEffectivePermissions('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', 'dental');
+        expect(result.effectivePermissions).toContain('payment.edit');
+        expect(result.effectivePermissions).not.toContain('ctv.dashboard.view');
+      });
+    });
   });
 
   describe('hasPermission', () => {

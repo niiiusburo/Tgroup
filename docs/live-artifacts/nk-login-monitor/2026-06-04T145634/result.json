@@ -1,0 +1,48 @@
+{
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/2026-06-04T145634",
+  "primaryAccount": "t@clinic.vn",
+  "primaryResult": {
+    "stillLogin": false,
+    "url": "https://nk.2checkin.com/",
+    "text": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Tổng quan All Locations 2 Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Hẹn mới Lịch trình ngày Tất cả · 67 Đang chờ · 11 Đang khám · 0 Hoàn thành · 56 Đang chờ ▾ 4h 20m 45s * TRẦN THỊ THỦY TIÊN - ĐÃ UP BÁC SĨ 12 · 10:40 KIỂM TRA VIS BỊ SƯNG + TL - TA BÁO CSKH MUA NƯỚC CHO BN Đang chờ ▾ 4h 9m 43s * VĂN THỊ NGỌC HUYỀN-ĐÃ UP B"
+  },
+  "fallbackAccount": "t@clinic.com",
+  "fallbackResult": null,
+  "screens": [
+    {
+      "name": "dashboard",
+      "label": "Tổng quan",
+      "expectedHref": "/",
+      "finalUrl": "https://nk.2checkin.com/",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/2026-06-04T145634/dashboard.png",
+      "bodyChars": 20418,
+      "textStart": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Tổng quan All Locations 2 Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Hẹn mới Lịch trình ngày Tất cả · 67 Đang chờ · 11 Đang khám · 0 Hoàn thành · 56 Đang chờ ▾ 4h 20m 47s * TRẦN THỊ THỦY TIÊN - ĐÃ UP BÁC SĨ 12 · 10:40 KIỂM ",
+      "obviousIssue": false,
+      "events": []
+    },
+    {
+      "name": "calendar",
+      "label": "Calendar",
+      "expectedHref": "/calendar",
+      "finalUrl": "https://nk.2checkin.com/calendar",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/2026-06-04T145634/calendar.png",
+      "bodyChars": 58661,
+      "textStart": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Lịch All Locations 2 Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Lịch hẹn Quản lý lịch hẹn khám bệnh Ngày Tuần Tháng Thứ Năm, 4 tháng 6, 2026 Hôm nay Xuất dữ liệu Bộ lọc Hẹn mới Thứ Năm, 4 tháng 6 603 Lịch hẹn 07:00 07:30 08",
+      "obviousIssue": false,
+      "events": []
+    },
+    {
+      "name": "customers",
+      "label": "Customers",
+      "expectedHref": "/customers",
+      "finalUrl": "https://nk.2checkin.com/customers",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/2026-06-04T145634/customers.png",
+      "bodyChars": 2140,
+      "textStart": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Khách hàng All Locations 2 Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Khách hàng 37017 patients · 36980 active Xuất dữ liệu Add Customer All Status Active Inactive Pending CODE CUSTOMER PHONE EMAIL LOCATION STATUS LAST VISI",
+      "obviousIssue": false,
+      "events": []
+    }
+  ],
+  "globalEvents": [],
+  "loginSucceeded": true
+}

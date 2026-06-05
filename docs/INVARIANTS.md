@@ -43,6 +43,12 @@
 **Enforced by:** `api/src/routes/payments.js` paid-out guards, `api/src/services/serviceReversal.js`, and `DELETE /api/SaleOrderLines/:id` requiring both `customers.edit` and `payment.void`.
 **Cite when:** Editing service deletion, sale-order residuals, `payment_allocations`, payouts, earnings statuses, or CTV commission reversal logic.
 
+### INV-003C — CTV Service Card Commission Trigger
+**Rule:** CTV commission MUST be created when a service card with an attached CTV is created. The commission base is the full service price immediately, not the paid amount or collected payment amount. CTV percentages MUST come from CTV tier config, not product-level `commission_rate_percent`. CTV booking remains appointment-only and MUST NOT create commission.
+**Rationale:** NK3 CTV business logic pays CTVs when the client activates a service. Payment timing and deposits are customer-accounting events, not the CTV earning trigger.
+**Enforced by:** Accepted business logic in `docs/business-logic/ctv-referral-commission.md`. Existing payment-collected/product-rate code paths are implementation gaps until the service-card-created engine is implemented.
+**Cite when:** Editing service creation, saleorderlines, CTV tier config, commissionEngine, CTV bookings, payout selection, or product/service commission fields.
+
 ### INV-004 — Deposit Category Heuristic Stability
 **Rule:** If a payment has `method !== 'deposit'` and `method !== 'mixed'`, has no `service_id`, has no `deposit_used`, and has no allocations, it MUST be classified as `payment_category = 'deposit'` and `deposit_type = 'deposit'`.
 **Rationale:** This heuristic is the primary way deposits are identified in the absence of explicit flags. Changing it retroactively reclassifies historical payments.
@@ -229,6 +235,7 @@
 
 | Date | ID | Action | Commit / PR |
 |---|---|---|---|
+| 2026-06-05 | INV-003C | Added CTV service-card-created commission trigger invariant | pending |
 | 2026-06-01 | INV-022 | Added appointment-only invariant for CTV booking flow | pending |
 | 2026-05-28 | INV-008C | Added import-marker-gated legacy CTV password and phone/ref-code login fallback invariant | pending |
 | 2026-05-13 | INV-001..INV-020 | Initial invariant set created | feat/complete-documentation-stack |

@@ -3,6 +3,13 @@ const { query: legacyQuery, getQuery } = require('../../db');
 const { getVietnamToday, getVietnamYear } = require('../../lib/dateUtils');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
 const { setCustomerReferrer } = require('../../services/customerReferrer');
+const { createEarningsForServiceCard } = require('../../services/commissionEngine');
+
+// INV-003C (Wave 2): when enabled, CTV commission is born at service-card creation on the
+// FULL price. Gated to NK3 via CTV_SERVICE_CARD_COMMISSION so NK/NK2 keep the pay-as-paid model.
+function serviceCardCommissionEnabled() {
+  return process.env.CTV_SERVICE_CARD_COMMISSION === 'true' || process.env.CTV_SERVICE_CARD_COMMISSION === '1';
+}
 
 async function createSaleOrder(req, res) {
   try {
@@ -77,13 +84,14 @@ async function createSaleOrder(req, res) {
     );
 
     if (productid) {
+      const lineId = crypto.randomUUID();
       await q(
         `INSERT INTO saleorderlines (
           id, orderid, productid, productname, employeeid, assistantid,
           productuomqty, pricetotal, tooth_numbers, tooth_comment, isdeleted
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
         [
-          crypto.randomUUID(),
+          lineId,
           id,
           productid,
           productname || null,
@@ -96,6 +104,34 @@ async function createSaleOrder(req, res) {
           false,
         ],
       );
+
+      // INV-003C: a service card with an attached CTV earns commission at creation, on the
+      // FULL price. A commission hiccup must not fail service creation — the engine is
+      // idempotent, so a later retry/backfill recovers.
+      if (serviceCardCommissionEnabled() && ctv_id) {
+        try {
+          // Resolve the product's real name + category so the braces override (§5) can match.
+          let prodName = productname || null;
+          let categoryName = null;
+          if (productid) {
+            const meta = await q(
+              'SELECT p.name AS pname, pc.name AS cname FROM products p LEFT JOIN productcategories pc ON pc.id = p.categid WHERE p.id = $1',
+              [productid],
+            );
+            if (meta && meta[0]) {
+              prodName = meta[0].pname || prodName;
+              categoryName = meta[0].cname || null;
+            }
+          }
+          await createEarningsForServiceCard({
+            serviceLine: { id: lineId, ctv_id, price: amounttotal || 0, client_id: partnerid, productName: prodName, categoryName },
+            lob: req.lob || 'dental',
+            run: q,
+          });
+        } catch (commissionErr) {
+          console.error('[createSaleOrder] service-card commission error:', commissionErr.message);
+        }
+      }
     }
 
     // Assign the chosen CTV as the customer's commission referrer (assign-only no-op

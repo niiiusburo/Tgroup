@@ -10,6 +10,551 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: CTV referral/commission spec — Wave 1 (public signup) 2026-06-05
+Feature/edit name: Public CTV signup — root CTV (no upline) + optional email, per `docs/business-logic/ctv-referral-commission.md` §12.
+Branch: nk3-deploy. Backend `api/src/routes/ctvPublic.js` (`POST /join`); frontend `website/src/pages/CTV/JoinCtv.tsx`.
+Flags (NK3 only): `CTV_PUBLIC_ROOT_SIGNUP=true` (api env), `VITE_CTV_PUBLIC_ROOT_SIGNUP=true` (web build).
+
+Execution checks:
+- [x] PASS: api `ctvPublicJoin.test.js` — root CTV (referred_by_ctv_id NULL, flag on) + email-optional (NULL, no dup-email query) + NK/NK2 upline-required regression. 23/23 green.
+- [x] PASS: web `JoinCtv.test.tsx` — submits without email; existing flows intact. 6/6 green.
+- [x] PASS: `tsc --noEmit` clean.
+- [x] PASS: Live on https://tmv.2checkin.com — deployed api+web to /opt/tgroup-nk3, flags set, migration 055 applied to tdental_nk3+tcosmetic_nk3. Root signup (no upline) → 201 root CTV in BOTH DBs (referred_by NULL, active, scope dental+cosmetic). Email-optional passes validation.
+- [x] PASS: Wave 2 (INV-003C) LIVE — service card @ full price 1,000,000 with CTV → earnings born immediately L0=240000 (24% of FULL price), status pending, payment_id NULL. Service-card model active (CTV_SERVICE_CARD_COMMISSION=true).
+
+---
+
+# TestSprite Plan: NK3 CTV/booking bug-hunt fixes 2026-06-05
+Feature/edit name: Six root-caused NK3 defect fixes (split-brain join, no-branch booking, password cross-LOB verify, commission paidList, dead /me, modal reset).
+Branch: nk3-deploy. Backend `api/src/routes/ctvPublic.js`, `api/src/routes/ctv.js`, `api/src/services/ctvSelfProfile.js`; frontend `ExportDateRangeModal.tsx`, `CtvRecruitModal.tsx`.
+
+Changed API routes / data flow:
+- `POST /api/ctv-public/join` — now all-or-nothing across dental+cosmetic; dental row rolled back on cosmetic failure (`500 E_CTV_CREATE_FAILED`).
+- `POST /api/ctv-public/bookings` — returns `400 E_NO_COMPANIES` when no branch is configured (instead of opaque 500).
+- `POST /api/ctv/me/password` — current password must verify against every LOB hash before any update.
+- `GET /api/ctv/commission-summary` — Paid tab no longer lists pending reversals.
+- `GET /api/ctv/me` — single owner (`ctvProfileRoutes`); duplicate removed from `ctv.js`.
+
+Execution checks:
+- [x] PASS: API CTV jest suites (ctvPublicJoin, ctvBookings, ctvSelfProfile, ctvRouteGating, ctvPublic, ctvCreateLobScope) — 30/30 green after fixes.
+- [x] PASS: Web modal suites (ExportDateRangeModal, CtvRecruitModal) incl. reset-on-reopen — 4/4 green.
+- [x] PASS: `tsc --noEmit` clean (0 errors).
+- [ ] PENDING: Live read-only re-verify on https://tmv.2checkin.com that `/api/ctv-public/bookings` with a valid branch still returns 201 (do NOT exercise destructive CRUD).
+- [ ] PENDING: Pre-existing failures to triage separately — commissionEngine v3 stale-mock test, saleOrderLines pool mock, cosmeticLobGuards, Landing useLocation/Router test, flaky Calendar click (NOT caused by these fixes).
+
+---
+
+# TestSprite Plan: Live production read-only MCP smoke run 2026-06-05
+Feature/edit name: TestSprite MCP execution recovery and read-only live smoke coverage
+Branch: current local dirty branch. Target is live `https://tmv.2checkin.com` through `website/.testsprite/config.json`; no live CRUD is approved for this pass.
+
+Changed URLs / API routes / data flow:
+- URLs/API routes changed: none.
+- URLs to test read-only: `/login`, `/overview`, `/customers`, `/employees`, `/calendar`, `/payments`, `/settings/permissions`.
+- Data flow: authenticate with admin credentials, navigate/view protected pages, use search/navigation controls only.
+
+Affected data flows:
+- Admin JWT login via `/api/auth/login`.
+- Read-only page data loading for customer, employee, calendar, payment, and permission views.
+
+User roles:
+- Full admin account `t@clinic.vn` on live production; destructive tests are explicitly excluded unless separately approved.
+
+Happy paths:
+- Valid admin login reaches protected overview.
+- Guarded pages render without server errors.
+- Customer search and calendar date navigation work without saving records.
+
+Edge cases:
+- Invalid login remains rejected.
+- Logout clears session.
+- TestSprite must not create/edit/delete customers, employees, appointments, payments, permissions, services, CTV rows, bookings, or commission data.
+
+Regressions:
+- No live production database rows are created, edited, deleted, allocated, paid, or confirmed by this run.
+- Existing TestSprite stale MCP processes should not cause the bound tool call to time out.
+
+Setup data and login state:
+- TestSprite account: Starter plan, account `jasonleyoutu@gmail.com`.
+- Project path for MCP tools: `/Users/thuanle/Documents/TamTMV/Tgrouptest/website`.
+- Config path: `website/.testsprite/config.json`.
+
+Execution verification:
+- [x] PASS: Authority gate passed before run.
+- [x] PASS: TestSprite tool binding is available in the current Codex session.
+- [x] PASS: TestSprite account check returned Starter plan with 400 credits.
+- [x] PASS: Stale-process inspection found 34 TestSprite processes, including 12 PPID 1 orphan plugin nodes; cleanup held because no explicit process-kill approval was given.
+- [x] PASS: Repaired generated TestSprite artifacts for execution: flattened `website/testsprite_tests/testsprite_frontend_test_plan.json` and used localhost preview because the runner tunnels only localhost endpoints.
+- [x] PASS: Built and served `website` locally on `http://localhost:5175/` with `VITE_API_URL=https://tmv.2checkin.com/api`; TestSprite pre-flight and tunnel probes both passed.
+- [x] PASS: Read-only TestSprite run executed safe IDs only; 9/10 selected cases passed in TestSprite SSE status.
+- [ ] FAIL: `TS-031 Calendar date navigation` stayed `processing` with no TestSprite result URL, so the runner never wrote `website/testsprite_tests/tmp/test_results.json` or `raw_report.md`.
+- [x] PASS: Partial report saved at `website/testsprite_tests/testsprite-mcp-test-report.md` with the 9 passing TestSprite result URLs and the `TS-031` blocker.
+
+---
+
+# TestSprite Plan: NK3 Cosmetic CSV appointment import 2026-06-04
+Feature/edit name: NK3 Cosmetic CSV appointment recovery; deposits remain review-only
+Branch: current local dirty branch. Planned live target is NK3 only: `https://tmv.2checkin.com`, DB `tcosmetic_smoketest`. No Dental production or `nk.2checkin.com` data write.
+
+Changed URLs / API routes / data flow:
+- URLs/API routes changed: none.
+- Browser URLs verified after approval/import: `https://tmv.2checkin.com/calendar`, `https://tmv.2checkin.com/customers`.
+- Data source: `/Users/thuanle/Documents/TamTMV/ctv2checkin/database/database_check_trung_khach_hang_tham_my.csv`.
+- Target data flow: insert-only Cosmetic `partners` and `appointments` rows in `tcosmetic_smoketest`; deposit/payment candidates were classified for review but not imported in this pass.
+
+Affected data flows:
+- Cosmetic customer matching by canonical Vietnamese phone key.
+- Cosmetic calendar appointment creation from CSV rows with valid `Ngày hẹn làm`.
+- Cosmetic payment/deposit candidate creation from `Cọc` only after status classification excludes refunded/transferred/used deposits.
+
+User roles:
+- Admin/staff with Cosmetic LOB access.
+- QA/Verification checking live NK3 Cosmetic after any approved import.
+
+Happy paths:
+- CSV rows with existing Cosmetic customer phone keys attach to the matching partner.
+- CSV rows whose phone is missing in Cosmetic create a customer row only after dry-run review.
+- Valid appointment-date rows appear on Cosmetic calendar with branch, service text, closer, and notes preserved.
+- Deposit/payment candidates remain review-only until a separate approval/import pass.
+
+Edge cases:
+- Placeholder `01/01/2001`, blank, and invalid appointment dates are excluded from appointment insert.
+- Refund, chargeback, transferred, and already-used deposit statuses are excluded from active deposit import.
+- Duplicate phone rows create multiple appointments/payments under one customer, not duplicate customers.
+- Current live June 2026 NK3 cosmetic appointments must be preserved.
+
+Regressions:
+- No Dental/NK production tables are touched.
+- No existing `tcosmetic_smoketest` rows are truncated or overwritten.
+- Import must be rehearsed/dry-run before live write and backed up before execution.
+
+Setup data and login state:
+- Target: `https://tmv.2checkin.com`, Cosmetic LOB.
+- DB: `tcosmetic_smoketest` on VPS `dokploy/root@76.13.16.68`.
+- Current target backup: `backups/db-sync/nk3-tcosmetic_smoketest-before-csv-appointments-import-20260604_174135.dump`.
+- Source CSV SHA256: `3ee3109706b8b096abea48bd3f3e3acdebe9a693ec661161c0bf953757c655b6`.
+
+Execution verification:
+- [x] PASS: Preflight target backup saved locally before any import.
+- [x] PASS: CSV parsed as 11,377 data rows with 4,385 valid appointment-date candidates.
+- [x] PASS: Canonical phone-key comparison shows 11,120 CSV rows match existing Cosmetic partners and 246 rows need customer-create review.
+- [x] PASS: Deposit candidates classified by status; refund/transfer/used statuses are excluded from active deposit import.
+- [x] PASS: Read-only live comparison after recovery still targets `tcosmetic_smoketest` only; live counts are appointments=72, saleorders=3,953, saleorderlines=3,952, payments=5,587, customers=12,408, products=208.
+- [x] PASS: Current CSV appointment comparison found 4,385 appointment candidates and 0 duplicates by same customer phone + appointment date/time against live; CSV has 0 appointment rows for 2026-06-04 while live already has 4.
+- [x] PASS: Current stricter phone-key pass matched 11,088 CSV rows to live Cosmetic customers, with 278 rows needing customer-create review and 11 rows without a usable phone.
+- [x] PASS: Service/order review found 1,045 CSV rows marked `Đã đến làm`; 1,015 match existing Cosmetic customers, but only 28 have exact/high-confidence product matches, 338 need product mapping review, and 644 are unmapped.
+- [x] PASS: Deposit review found 1,908 active candidates and 105 refund/transfer/used exclusions; only 551 active candidates match an existing payment by phone + amount + entry date, while 390 do not match any existing payment by phone + amount.
+- [x] PASS: First explicit user confirmation received for live NK3 appointment recovery; live write still held for the required second confirmation.
+- [x] PASS: Fresh live-target backup saved locally at `backups/db-sync/nk3-tcosmetic_smoketest-before-csv-appointments-import-20260604_174135.dump`, size 3.3M, SHA256 `d9a70b1fce78275668aa78fecec6bd894a0dda2e04c2fed93f6696807f64058b`.
+- [x] PASS: Rehearsal on scratch DB `codex_csv_appt_rehearsal_20260604_174135b` inserted 126 missing customer partners and 4,385 appointments, skipped 0 existing appointments, and left 0 required appointment fields null.
+- [x] PASS: Rehearsal appointment state distribution was scheduled=3,249, done=1,045, cancelled=91; appointment years were 2022=182, 2023=336, 2024=408, 2025=3,421, 2026=37, 2035=1.
+- [x] PASS: Second explicit user confirmation received immediately before the live write.
+- [x] PASS: Live import committed to `tcosmetic_smoketest` only with insert-only SQL: inserted 126 missing customer partners and 4,385 appointments, skipped 0 existing appointments, and committed final live counts appointments=4,457 and customers=12,534.
+- [x] PASS: Live validation found 0 required imported appointment fields null; imported appointment states are scheduled=3,249, done=1,045, cancelled=91.
+- [x] PASS: Live validation preserved current-day data: CSV had 0 rows for 2026-06-04 and live still has 4 appointments for 2026-06-04 after import.
+- [x] PASS: Adjacent DB safety check found 0 `CSV_IMPORT_NK3_APPTS_20260604` appointment markers and 0 `CSVAPPT-%` customer markers in `tdental_smoketest` and `tdental_demo`.
+- [x] PASS: Live API verification returned Cosmetic appointments `totalItems=4457` from `/api/cosmetic/Appointments?startDate=2026-01-01&endDate=2026-12-31`.
+- [x] PASS: Live browser screenshot verification saved `docs/live-artifacts/nk3-cosmetic-csv-appointments-import/2026-06-04T1741/01-calendar-cosmetic-after-csv-import.png` and `docs/live-artifacts/nk3-cosmetic-csv-appointments-import/2026-06-04T1741/02-customers-cosmetic-after-csv-import.png`.
+
+---
+
+# TestSprite Plan: TGroup daily database backup coverage 2026-06-04
+Feature/edit name: Daily VPS backup and local download verification for `tdental_demo`, `tdental_smoketest`, and `tcosmetic_smoketest`
+Branch: current local dirty branch. Live/smoke targets are backup-export only on `root@76.13.16.68`, container `tgroup-db`. No database restore, import, truncate, or row write.
+
+Changed URLs / API routes / data flow:
+- URLs/API routes changed: none.
+- VPS scheduler changed: root crontab on `76.13.16.68` now has daily entries for `tdental_demo` at 12:00, `tdental_smoketest` at 12:15, and `tcosmetic_smoketest` at 12:30 Vietnam time.
+- Data flow: `tgroup-db` `pg_dump` exports each database to its matching VPS backup directory; Codex daily verification downloads the newest verified dump and checksum to the matching local backup directory.
+
+Affected data flows:
+- Read-only database export of `tdental_demo`, `tdental_smoketest`, and `tcosmetic_smoketest`.
+- VPS-side retention keeps latest 7 matching `nk-<db>-*.dump` files per database.
+- Local download retention keeps latest 7 matching `nk-<db>-*.dump` sets per database.
+
+User roles:
+- Infra/Release operator verifying cron and backup health.
+- QA/Verification running daily backup verification.
+
+Happy paths:
+- Cron contains exactly one backup line for each target database.
+- Manual run creates a non-empty custom-format dump and `.sha256` sidecar.
+- `sha256sum -c` succeeds on the newest VPS dump.
+- `pg_restore -l` via Postgres 16 can read the newest VPS dump.
+- Local download copy checksum matches the VPS checksum.
+
+Edge cases:
+- Retention deletes only older matching dump/checksum pairs in the same target directory and never touches `/opt/tgroup/backups/db-sync/` or `/opt/tgroup/backups/db-auto/`.
+- Same-day manual backups are allowed after data recovery so the latest dump includes the recovered rows before the next cron window.
+- If the VPS scheduled backup is missing or failed, the Codex daily verification reports it before creating any fallback dump.
+
+Regressions:
+- No `DROP`, `TRUNCATE`, restore, import, or live DB write is part of this backup automation.
+- Backup jobs for one DB must not remove or overwrite another DB's dump files.
+
+Setup data and login state:
+- VPS: `root@76.13.16.68`.
+- Container: `tgroup-db`.
+- DB/directories:
+  - `tdental_demo`: VPS `/opt/tgroup/backups/nk-db-daily/`, local `backups/nk-db-daily/`.
+  - `tdental_smoketest`: VPS `/opt/tgroup/backups/nk3-dental-smoketest-db-daily/`, local `backups/nk3-dental-smoketest-db-daily/`.
+  - `tcosmetic_smoketest`: VPS `/opt/tgroup/backups/nk3-cosmetic-db-daily/`, local `backups/nk3-cosmetic-db-daily/`.
+
+Execution verification:
+- [x] PASS: VPS crontab has exactly one active line for each target database with 7-dump retention.
+- [x] PASS: Manual export created fresh non-empty dumps: `nk-tdental_demo-20260604_234526.dump` (49,910,548 bytes), `nk-tdental_smoketest-20260604_234536.dump` (4,033,899 bytes), and `nk-tcosmetic_smoketest-20260604_234538.dump` (3,924,191 bytes).
+- [x] PASS: VPS checksum verification succeeded for the newest dump of each target.
+- [x] PASS: `pg_restore -l` read each newest dump and listed the expected source database names `tdental_demo`, `tdental_smoketest`, and `tcosmetic_smoketest`.
+- [x] PASS: Local download saved each newest dump/checksum and local checksum verification succeeded in `backups/nk-db-daily/`, `backups/nk3-dental-smoketest-db-daily/`, and `backups/nk3-cosmetic-db-daily/`.
+- [x] PASS: Codex daily backup verification automation now verifies/downloads all three targets and keeps latest 7 local dump sets per target.
+- [ ] PENDING: Next scheduled run confirms the 12:00/12:15/12:30 Vietnam cron jobs create fresh dumps without manual fallback.
+
+---
+
+# TestSprite Plan: NK3 Cosmetic insert-only historical data recovery 2026-06-04
+Feature/edit name: NK3 Cosmetic appointment/order/payment recovery plus destructive legacy migration guard
+Branch: current local dirty branch. Live target was NK3 only: `https://tmv.2checkin.com`, DB `tcosmetic_smoketest`. No Dental production or `nk.2checkin.com` data write.
+
+Changed URLs / API routes / data flow:
+- Browser URL to verify: `https://tmv.2checkin.com/calendar` in Cosmetic LOB.
+- Browser URL to verify: `https://tmv.2checkin.com/commission` CTV/admin tabs in Cosmetic LOB.
+- API routes changed: none for runtime. Data changed by insert-only live DB merge into `dbo.appointments`, `dbo.saleorders`, `dbo.saleorderlines`, `dbo.payments`, `dbo.payment_allocations`, and `dbo.earnings`.
+- Migration guard changed: `api/migrations/008_data_migration_from_tdental*.sql` now aborts unless destructive break-glass session settings are explicitly supplied.
+
+Affected data flows:
+- Cosmetic historical appointments should reappear without removing new June 3/4 appointments.
+- Cosmetic service/payment/allocation/earnings history should exist again for restored historical rows.
+- New CTV signups and admin-created CTV rows after the May 29 backup must remain present.
+
+User roles:
+- Admin/staff with Cosmetic LOB access.
+- CTV admin/manager using commission and CTV hierarchy screens.
+
+Happy paths:
+- Cosmetic calendar shows historical appointments restored from before the June 3/4 wipe.
+- Cosmetic still shows the 4 newer live appointments that existed before the merge.
+- Cosmetic CTV/admin views still include new CTV rows created after the May 29 backup.
+- Payments/service history pages can load restored saleorders, saleorderlines, payments, allocations, and earnings without 500s.
+
+Edge cases:
+- No duplicate appointment/order/payment UUIDs should be created.
+- New partners/products created after the May 29 backup must not be overwritten.
+- Legacy destructive `008_data_migration_from_tdental*` files must refuse to run without the break-glass guard.
+
+Regressions:
+- Dental and NK production data must remain untouched.
+- `POST /api/ctv-public/bookings` and `/ctv/join` must still create new rows after recovery.
+- CTV commission reversal/delete guards must still block paid-out commission mutations.
+
+Setup data and login state:
+- Target: `https://tmv.2checkin.com`, Cosmetic LOB.
+- Current backup path: `backups/recovery-20260604-133742/`.
+- Source backup path: `backups/ctvlegacy/full-hierarchy-20260529-153624/vps-tcosmetic_smoketest-before-full-hierarchy-repair-20260529-153624.dump`.
+
+Execution verification:
+- [x] PASS: Fresh current backups were taken before the live merge: local `backups/recovery-20260604-133742/`.
+- [x] PASS: Rehearsal DB confirmed final expected counts before live write: appointments 72, saleorders 3953, saleorderlines 3952, payments 5587, payment_allocations 3848, earnings 5.
+- [x] PASS: Live merge used insert-only transaction and copied 3953 saleorders, 5587 payments, 3952 saleorderlines, 68 appointments, 3848 payment_allocations, and 5 earnings.
+- [x] PASS: Live post-merge counts match expected recovery counts and old probe rows missing from live = 0 for restored tables.
+- [x] PASS: New rows were preserved: 119 partners and 11 products not in the May 29 backup remain present; new CTV-related partner rows were queried after merge.
+- [ ] PENDING: Browser verify Cosmetic calendar historical appointments visible on `tmv.2checkin.com`.
+- [ ] PENDING: Browser verify Cosmetic CTV/admin pages still show new CTV signups and no server errors.
+
+---
+
+# TestSprite Plan: NK3 public no-login signup + booking live 2026-06-03
+Feature/edit name: ctv.thammyvientam.com layer — book + CTV signup without login, login → tmv
+Branch: nk3-deploy. NK3 redeploy (api+web v0.32.101) + migration 054 on both smoketest DBs + public-booking companyid default fix (`api/src/routes/ctvPublic.js`) + `/welcome?book=1` deep-link (`Landing.tsx`).
+
+Checks (all verified live against tmv.2checkin.com / ctv.thammyvientam.com):
+- [x] PASS: Public API live - `/api/ctv-public/services` + `/ctv-lookup` now 200 (were 401 on stale build).
+- [x] PASS: CTV signup no-login - `/ctv/join` renders the full form (name/phone/email/password + manual CTV referrer); `POST /ctv-public/join` → 201, persists with upline.
+- [x] PASS: Booking no-login 1-click - `/welcome?book=1` auto-opens the orange "Giới thiệu khách" sheet; live CTV verify shows "CTV hợp lệ"; UI submit succeeds.
+- [x] PASS: Booking persists - `POST /ctv-public/bookings` (cosmetic+dental) → 201 with company + ctv_id attribution (AP000001 verified, test rows cleaned).
+- [x] PASS: companyid default - booking no longer 500s on null companyid; defaults to LOB primary company.
+- [x] PASS: Login → tmv - landing "Đăng Nhập" (/ctv) → tmv.2checkin.com/login.
+
+# TestSprite Plan: ctv.thammyvientam.com landing CTA hrefs fixed 2026-06-03
+Feature/edit name: Landing buttons point to live SPA routes (signup/login/booking no longer dead)
+Branch: nk3-deploy. VPS static-landing edit (`/var/www/ctv-thammyvientam-landing/index.html`) plus matching repo fix in `website/src/pages/Landing/Landing.tsx`. No API route, backend data, or database change.
+
+Changed URLs / API routes / data flow:
+- Static landing `ctv.thammyvientam.com/`: button hrefs `/booking`→`/welcome`, `/ctv/signup`→`/ctv/join`, `/ctv/portal`→`/ctv`. All non-root paths 301-forward to `tmv.2checkin.com`.
+- React port `/welcome` (Landing.tsx): login CTA href `/ctv/portal`→`/ctv`.
+- API routes changed: none. Data flow changed: none.
+
+Checks:
+- [x] PASS: Live landing serves corrected hrefs - `curl https://ctv.thammyvientam.com/` shows `/welcome`, `/ctv/join`, `/ctv`.
+- [x] PASS: Each CTA resolves to a real SPA route - `/welcome`,`/ctv/join`,`/ctv` each 301→tmv.2checkin.com and return HTTP 200 (no catch-all `*`→`/` bounce).
+- [x] PASS: Landing unit test - `npx vitest run src/pages/Landing/Landing.test.tsx` (3 passed), login href asserts `/ctv`.
+- [ ] PENDING: In-browser click-through render of all 3 buttons on a logged-out session - blocked: WebBridge had no open browser window.
+
+# TestSprite Plan: Mobile modal scroll and close-button fit 2026-06-02
+Feature/edit name: CTV and calendar mobile dialogs keep close/actions reachable
+Branch: nk3-deploy. Local-first website-only change; no API route, backend data, database sync, or VPS data replacement.
+
+Changed URLs / API routes / data flow:
+- URL changed: `/ctv` CTV portal. The `Giới thiệu khách` and `Tuyển CTV` sheets now keep the X close button in a non-scrolling header while the long form body scrolls inside the mobile viewport.
+- URL changed: `/calendar` export date range modal. The modal now opens as a constrained mobile sheet with internal scroll and reachable close/cancel/apply controls.
+- URL covered: `/calendar` quick-add appointment form remains on the shared `FormShell` pattern with fixed header/footer and internal body scroll.
+- API routes changed: none.
+- Data flow changed: none; submitted payloads and date strings are unchanged.
+
+User roles:
+- Authenticated CTV using `/ctv` on mobile Safari/Chrome.
+- Staff/admin with appointment export permission using `/calendar`.
+- Staff/admin with appointment add permission using `/calendar` quick-add.
+
+Happy paths:
+- Opening `/ctv` `Giới thiệu khách` on a phone viewport shows the X, date field, and submit flow; after scrolling down, the X remains visible.
+- Opening `/ctv` `Tuyển CTV` on a phone viewport shows the X and submit flow; after scrolling down, the X remains visible.
+- Opening `/calendar` export date range on a phone viewport shows the X, cancel, and apply controls while the date range body scrolls.
+- Opening `/calendar` quick-add and its appointment date picker keeps the modal header close button and footer submit/cancel reachable.
+
+Edge cases / regressions:
+- Date pickers must remain in-flow and must not render native `type=date` inputs.
+- The page behind an open modal must not be the only scroll container needed to reach modal controls.
+- Vietnamese labels must fit in the modal header/buttons without overlapping icons.
+- Bottom browser chrome/safe-area padding must not cover submit/apply/cancel buttons.
+
+Setup/login state:
+- Use a CTV login token for live `/ctv` verification, or Playwright route mocks for local modal-fit screenshots.
+- Use a staff/admin user with `appointments.add`, `appointments.edit`, and `appointments.export` for live `/calendar`, or Playwright route mocks locally.
+- Capture screenshot evidence for CTV refer sheet scrolled, CTV recruit sheet scrolled, calendar export modal, and calendar quick-add date picker.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `/ctv` Refer Client sheet X remains visible after scrolling the form body on a mobile viewport.
+- [ ] PENDING: Verify `/ctv` Recruit CTV sheet X remains visible after scrolling the form body on a mobile viewport.
+- [ ] PENDING: Verify `/calendar` export date range modal keeps X/cancel/apply reachable on a mobile viewport.
+- [ ] PENDING: Verify `/calendar` quick-add appointment date picker keeps header close and footer actions reachable on a mobile viewport.
+- [ ] PENDING: Verify no native `type=date` input appears in the changed mobile modal flows.
+
+---
+
+# TestSprite Plan: Public CTV phone live verification 2026-06-02
+Feature/edit name: Public booking and signup verify CTV phone numbers while typing
+Branch: nk3-deploy. Local-first website/API change; no database sync, no VPS data replacement.
+
+Changed URLs / API routes / data flow:
+- URL changed: `/welcome` public booking modal. The `Số điện thoại CTV` field now live-verifies the typed phone before submit.
+- URL changed: `/ctv/join` public signup page. The `CTV giới thiệu` upline phone field now live-verifies the typed phone before direct signup.
+- API route added: `GET /api/ctv-public/ctv-lookup?phone=...` returns `{ exists, name }` for active, non-deleted CTV rows.
+- Data flow changed: both public forms call the lookup while typing and block submit when the typed CTV phone is missing, still checking, or not found.
+- Data flow invariant: the lookup is read-only and must not create appointments, partners, payments, earnings, payouts, sessions, or permissions.
+
+User roles:
+- Public visitor on `/welcome` with no login.
+- Public visitor on `/ctv/join` with no login.
+- Existing active CTV whose phone number is used for booking attribution or signup upline.
+
+Happy paths:
+- Typing a valid active CTV phone in `/welcome` booking shows a verified CTV status and allows public booking submit.
+- Typing a valid active CTV phone in `/ctv/join` shows a verified upline status and allows direct CTV signup.
+- Referral-link signup `/ctv/join?ref=CTV-XXXXXX` still works without typing an upline phone.
+
+Edge cases / regressions:
+- Unknown CTV phone in `/welcome` booking shows not-found status and blocks `POST /api/ctv-public/bookings`.
+- Unknown upline CTV phone in `/ctv/join` shows not-found status and blocks `POST /api/ctv-public/join`.
+- While the lookup is still checking, both submit buttons must surface a wait/verification message instead of writing.
+- Existing customer phone lookup/name prefill in the booking sheet still works.
+
+Setup/login state:
+- No login required.
+- Test data needed: one active `partners.is_ctv=true` CTV phone and one unknown phone.
+- Capture screenshot evidence for both `/welcome` booking modal and `/ctv/join` with verified CTV status visible.
+
+TestSprite execution items:
+- [x] PASS: Verify `/welcome` booking CTV phone shows verified status for a known active CTV - local Playwright/Chrome screenshot `docs/live-artifacts/ctv-public-phone-verify/01-booking-ctv-phone-verified.png` shows `CTV hợp lệ: CTV Parent Verified`.
+- [x] PASS: Verify `/welcome` booking blocks unknown CTV phone before `POST /api/ctv-public/bookings` - `npm --prefix website test -- src/components/ctv/CtvReferModal.test.tsx` covers the no-submit block and passed.
+- [x] PASS: Verify `/ctv/join` upline CTV phone shows verified status for a known active CTV - local Playwright/Chrome screenshot `docs/live-artifacts/ctv-public-phone-verify/02-signup-upline-phone-verified.png` shows `CTV hợp lệ: CTV Parent Verified`.
+- [x] PASS: Verify `/ctv/join` blocks unknown upline CTV phone before `POST /api/ctv-public/join` - `npm --prefix website test -- src/pages/CTV/JoinCtv.test.tsx` covers the no-submit block and passed.
+- [x] PASS: Verify existing customer phone lookup/name prefill still works in public booking mode - `npm --prefix website test -- src/components/ctv/CtvReferModal.test.tsx` kept the public client lookup/name prefill regression passing.
+
+---
+
+# TestSprite Plan: CTV Tôi self profile and password settings 2026-06-02
+Feature/edit name: `/ctv` Tôi tab self-service account settings
+Branch: nk3-deploy. Local-first website/API change; no database sync, no VPS data replacement.
+
+Changed URLs / API routes / data flow:
+- URL changed: `/ctv` CTV portal, Tôi tab. Adds two account cards: display-name save and password change.
+- API route changed: `GET /api/ctv/me` now returns the DB-backed authenticated CTV partner profile instead of only JWT echo data.
+- API route added: `PATCH /api/ctv/me` accepts `{ name }`, trims/collapses whitespace, and updates only the authenticated CTV partner row by UUID in Dental/Cosmetic when present.
+- API route added: `POST /api/ctv/me/password` accepts `{ currentPassword, newPassword }`, verifies the current bcrypt or gated legacy CTV password, and writes a new bcrypt `password_hash` to mirrored CTV rows.
+- Data flow invariant: CTV self-service routes never accept another CTV id, never expose password hashes, and stay behind JWT auth + `ctv.dashboard.view` + `is_ctv`.
+
+User roles:
+- Authenticated CTV using the `/ctv` portal.
+- Admin/staff should remain blocked from CTV self routes even with broad admin permissions because they are not `is_ctv`.
+
+Happy paths:
+- CTV opens `/ctv`, taps Tôi, sees existing profile/referral code plus editable `Tên hiển thị`.
+- Saving a valid display name calls `PATCH /api/ctv/me`, shows success, and refreshes the visible greeting/profile name without reload.
+- Filling current password, new password, and confirm password calls `POST /api/ctv/me/password`, clears password fields, and shows success.
+- Existing language toggle, notification row, referral code copy, and logout still work.
+
+Edge cases / regressions:
+- Blank display name is rejected client-side and by API `P_NAME_REQUIRED`.
+- Name longer than 120 characters returns `P_NAME_TOO_LONG`.
+- Missing password fields are rejected client-side and by API `P_PASSWORD_REQUIRED`.
+- New password shorter than 6 chars is rejected client-side and by API `P_PASSWORD_TOO_SHORT`.
+- Mismatched confirmation is rejected client-side without API call.
+- Wrong current password returns `P_CURRENT_PASSWORD_INVALID`.
+- Non-CTV authenticated staff hitting self routes receive `S_CTV_ONLY`.
+- Mobile view must not overlap cards, fields, fixed bottom nav, or Safari browser chrome.
+
+Setup/login state:
+- Need a valid CTV login token for `/ctv` interactive verification, or Playwright route mocks that provide CTV API responses.
+- No database sync or production data replacement involved.
+- Capture screenshot evidence of the Tôi tab with both account cards visible.
+
+TestSprite execution items:
+- [x] PASS: Verify `/ctv` Tôi tab screenshot shows display-name and password cards without overlap on mobile - Playwright/Chrome saved `docs/live-artifacts/ctv-self-settings/01-ctv-toi-account-settings.png`; overlap probe returned `[]`.
+- [x] PASS: Verify display-name save updates visible profile/greeting without reload - Playwright mocked `PATCH /api/ctv/me`, screenshot shows `CTV Local Updated` plus `Đã cập nhật tên.`; Vitest asserts the API call and state update.
+- [ ] PENDING: Verify blank display name blocks before API call.
+- [x] PASS: Verify password submit calls API only when current/new/confirm are valid and matching - Playwright filled all three fields and saw `Đã đổi mật khẩu.`; Vitest asserts `POST /api/ctv/me/password` payload.
+- [ ] PENDING: Verify wrong current password surfaces API error.
+- [ ] PENDING: Verify non-CTV staff cannot read or mutate `/api/ctv/me`.
+
+---
+
+# TestSprite Plan: Public landing CTV signup with manual upline phone 2026-06-02
+Feature/edit name: `/welcome` Đăng Ký CTV loads `/ctv/join` public signup with `CTV giới thiệu` phone field
+Branch: nk3-deploy. Local-first website/API change; no database sync, no VPS data replacement.
+
+Changed URLs / API routes / data flow:
+- URL changed: `/welcome` public Tâm landing page. `Đăng Ký CTV` now navigates to `/ctv/join` instead of `/ctv/signup`.
+- URL changed: `/ctv/join` public signup page. Direct visitors without `?ref=CTV-...` can use the form and must provide a final `CTV giới thiệu` phone field.
+- API route changed: `POST /api/ctv-public/join` now accepts `{ code?, uplinePhone?, name, phone, email, password }`.
+- Data flow changed: public signup resolves the new CTV's parent from `uplinePhone` when present, otherwise from referral `code`, then creates the new CTV under that resolved active CTV.
+- Data flow invariant: public signup must not create appointments, saleorders, payments, earnings, payouts, or session/permission state.
+
+User roles:
+- Public visitor on `/welcome` with no login.
+- New CTV registering through `/ctv/join`.
+- Existing active CTV whose phone number is used as the upline.
+- Admin/staff verifying the new CTV appears under the correct upline later.
+
+Happy paths:
+- `/welcome` renders the Tâm landing page and clicking `Đăng Ký CTV` loads `/ctv/join`.
+- `/ctv/join` without a referral link shows the signup form and final `CTV giới thiệu` phone field instead of an invalid-link stop state.
+- Submitting valid signup details plus a valid active CTV phone creates the new CTV under that upline.
+- `/ctv/join?ref=CTV-XXXXXX` still resolves the referral-link upline and can submit without manually typing an upline phone.
+
+Edge cases / regressions:
+- Missing referral code and missing upline phone returns `U_UPLINE_REQUIRED` and creates no partner.
+- Unknown upline phone returns `U_INVALID_UPLINE` and creates no partner.
+- Duplicate new CTV phone/email still returns `U_DUPLICATE_PHONE`/`U_DUPLICATE_EMAIL`.
+- Weak password still returns `U_WEAK_PASSWORD`.
+- Existing public booking flow on `/welcome` remains unchanged: `Đặt Lịch Cho Khách` opens the no-login booking sheet.
+
+Setup/login state:
+- No login required for `/welcome` or `/ctv/join`.
+- Test data needed: one active `partners.is_ctv=true` CTV phone for the desired upline.
+- Capture screenshot evidence of `/ctv/join` showing the final `CTV giới thiệu` field before deploy sign-off.
+
+TestSprite execution items:
+- [x] PASS: Verify `/welcome` `Đăng Ký CTV` navigates to `/ctv/join` - local Playwright/Chrome asserted the CTA href and clicked through successfully.
+- [x] PASS: Verify `/ctv/join` no-ref page shows the final `CTV giới thiệu` phone field and does not show an invalid-link stop state - screenshot captured at `docs/live-artifacts/ctv-public-signup/01-public-ctv-signup-upline-field.png`.
+- [ ] PENDING: Verify public signup with a valid upline CTV phone creates the new CTV under that existing CTV.
+- [ ] PENDING: Verify missing upline input blocks with `U_UPLINE_REQUIRED`.
+- [ ] PENDING: Verify unknown upline phone blocks with `U_INVALID_UPLINE`.
+- [ ] PENDING: Verify referral-link signup `/ctv/join?ref=CTV-XXXXXX` still works without a manually typed upline phone.
+
+---
+
+# TestSprite Plan: Public landing no-login CTV booking 2026-06-02
+Feature/edit name: `/welcome` Đặt Lịch Cho Khách opens public CTV booking sheet
+Branch: nk3-deploy. Local-first website/API change; no database sync, no VPS data replacement.
+
+Changed URLs / API routes / data flow:
+- URL changed: `/welcome` public Tâm landing page. `Đặt Lịch Cho Khách` now opens the booking sheet in-place instead of navigating to `/booking`.
+- API routes added: `GET /api/ctv-public/client-lookup`, `GET /api/ctv-public/services`, `POST /api/ctv-public/bookings`.
+- Data flow changed: public visitor enters customer phone first; lookup may populate an existing available customer name; visitor enters CTV phone; submit resolves an active CTV by phone and creates/reclaims the customer plus one appointment in the selected LOB.
+- Data flow invariant: public booking must not create `saleorders`, `saleorderlines`, payments, earnings, or payouts.
+
+User roles:
+- Public visitor on `/welcome` with no login.
+- CTV whose phone number is used for attribution.
+- Admin/staff verifying the accepted client later in Dental or Cosmetic customer/appointment views.
+
+Happy paths:
+- `/welcome` renders the Tâm landing page and clicking `Đặt Lịch Cho Khách` opens the `Giới thiệu khách` modal without login.
+- The modal shows the top notice `Type in the phone number to verify first.`
+- Customer phone field appears before name and receives focus first.
+- Existing available customer phone lookup fills the name field.
+- Public submit with valid CTV phone creates a booking through `POST /api/ctv-public/bookings`.
+- Selected service stays on `appointments.productid`; omitted service uses Referral Start when configured.
+
+Edge cases / regressions:
+- Unknown CTV phone returns `P_CTV_NOT_FOUND` and does not create any rows.
+- Active claim owned by another CTV returns `B_CLIENT_CLAIMED`.
+- Claimed-by-same CTV lookup shows `claimedByMe` and still allows booking.
+- Existing partner accepted through public booking becomes `customer=true`.
+- Signup/login CTAs on `/welcome` remain `/ctv/signup` and `/ctv/portal`.
+- Authenticated `/ctv` refer modal still works without requiring the CTV phone field.
+
+Setup/login state:
+- No login required for `/welcome`.
+- Test data needed: one active `partners.is_ctv=true` CTV phone and at least one available existing customer phone in the chosen LOB.
+- Capture screenshot evidence of the opened public booking sheet before deploy sign-off.
+
+TestSprite execution items:
+- [x] PASS: Verify `/welcome` screenshot with landing page and booking modal open - local Chrome/Playwright captured `docs/live-artifacts/ctv-public-booking/01-welcome-public-booking-modal.png`.
+- [x] PASS: Verify customer phone is first and notice text is visible - screenshot shows `Type in the phone number to verify first.`, first form label `Số điện thoại`, CTV phone field, and submit button.
+- [ ] PENDING: Verify name autofills after an available phone lookup using live/local API test data.
+- [ ] PENDING: Verify public booking submit with valid CTV phone creates only partner/customer + appointment rows.
+- [ ] PENDING: Verify unknown CTV phone blocks with `P_CTV_NOT_FOUND`.
+- [ ] PENDING: Verify another-CTV active claim blocks with `B_CLIENT_CLAIMED`.
+- [ ] PENDING: Verify authenticated `/ctv` refer modal has no CTV phone field and still submits through `/api/ctv/bookings`.
+
+---
+
+# TestSprite Plan: ctv.thammyvientam.com landing retained + NK3 forwarding 2026-06-02
+Feature/edit name: CTV public domain nginx split routing
+Branch: nk3-deploy. Live VPS nginx/static-file change; no database sync, no backend data writes, no website bundle rebuild.
+
+Changed URLs / API routes / data flow:
+- URL retained: `https://ctv.thammyvientam.com/` remains the public Tâm landing page.
+- Static URL retained: `https://ctv.thammyvientam.com/static/*` is served directly by nginx from `/var/www/ctv-thammyvientam-landing` so the logo/favicon assets load without the old CTV app upstream.
+- URLs changed: all non-root `ctv.thammyvientam.com` paths now 301 to NK3 `https://tmv.2checkin.com$request_uri`, including `/booking`, `/ctv/signup`, `/ctv/portal`, and arbitrary deep links.
+- API routes changed: none.
+- Data flow changed: public browser navigation only; no CTV app API, TGClinic API, or database writes are introduced.
+
+User roles:
+- Public visitor clicking the landing page CTAs.
+- CTV visitor using the login/signup links.
+- Admin/staff not affected unless they manually visit the public CTV host.
+
+Happy paths:
+- Opening `https://ctv.thammyvientam.com/` still shows the Tâm landing page with logo and three CTA buttons.
+- Landing page static assets load from `ctv.thammyvientam.com/static/*`.
+- Clicking `Đặt Lịch Cho Khách` forwards from `/booking` to `https://tmv.2checkin.com/booking`.
+- Clicking `Đăng Ký CTV` forwards from `/ctv/signup` to `https://tmv.2checkin.com/ctv/signup`.
+- Clicking `Đăng Nhập` forwards from `/ctv/portal` to `https://tmv.2checkin.com/ctv/portal`.
+- Query strings are preserved, e.g. `/booking?source=verify` -> `https://tmv.2checkin.com/booking?source=verify`.
+
+Edge cases / regressions:
+- `/` and `/index.html` must not forward away from the landing page.
+- `/static/images/tam-logo-group.png` must not forward to NK3.
+- HTTPS certificate remains valid for `ctv.thammyvientam.com`.
+- `nginx -t` passes before reload.
+- NK3 target `https://tmv.2checkin.com` remains reachable.
+
+Setup/login state:
+- No login required for the `ctv.thammyvientam.com` landing and redirect checks.
+- Use live browser/screenshot verification after nginx reload.
+
+TestSprite execution items:
+- [x] PASS: Verify `https://ctv.thammyvientam.com/` screenshot still shows the Tâm landing page - Playwright screenshot `output/playwright/ctv-thammyvientam-forward-20260602/01-landing-static.png`.
+- [x] PASS: Verify `https://ctv.thammyvientam.com/static/images/tam-logo-group.png?v=1778133986` returns 200 image content - curl returned `200 image/png 249558`.
+- [x] PASS: Verify `/booking?source=verify` returns 301 to `https://tmv.2checkin.com/booking?source=verify` - curl returned exact Location; browser then reached NK3 `/login` because the app route is protected.
+- [x] PASS: Verify `/ctv/signup` returns 301 to `https://tmv.2checkin.com/ctv/signup` - curl returned exact Location.
+- [x] PASS: Verify `/ctv/portal` returns 301 to `https://tmv.2checkin.com/ctv/portal` - curl returned exact Location.
+- [x] PASS: Capture browser screenshot evidence for the landing page and forwarded NK3 route - screenshots `01-landing-static.png` and `02-forwarded-booking-nk3-login.png`.
+
+---
+
 # TestSprite Plan: Shared no-overlap DatePicker calendar controls 2026-06-02
 Feature/edit name: Mobile-safe shared DatePicker redesign across CTV, calendar, reports, payments, customers, and service forms
 Branch: nk3-deploy. Local-first frontend verification; no backend data writes and no VPS/database sync involved.
@@ -2806,3 +3351,131 @@ Execution verification:
 - [x] PASS: Customers `/customers` loaded through visible navigation with nonblank content and no visible error; screenshot `output/playwright/nk-login-monitor-20260602-000500/redacted-safe/02-customers-privacy-redacted.png`.
 - [x] PASS: Calendar `/calendar` loaded through visible navigation with nonblank content and no visible error; screenshot `output/playwright/nk-login-monitor-20260602-000500/redacted-safe/03-calendar-privacy-redacted.png`.
 - [x] PASS: Monitor result recorded 0 API errors, 0 console errors, and 0 page errors.
+
+---
+
+# TestSprite Plan: NK3 Extracted PRD 2026-06-05
+
+Feature/edit name: Code-grounded TestSprite PRD extraction for tmv.2checkin.com / NK3
+
+Changed URLs and API routes:
+- Documentation only: `/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/PRD-extracted.md`
+- Target site for generated tests: `https://tmv.2checkin.com`
+- UI/API surfaces to test are enumerated in `docs/PRD-extracted.md`; no runtime route changed.
+
+Affected data flows:
+- No production/local data mutation from this extraction.
+- TestSprite should use the PRD's feature entries and open questions to decide executable versus skipped assertions.
+
+User roles:
+- Public visitor.
+- Staff/admin with route permissions.
+- Cosmetic-scoped staff.
+- CTV user.
+
+Happy paths:
+- Use PRD entries `AUTH-1` through `AVATAR-1` to generate tests for working and partial features.
+- Prioritize `/welcome`, `/ctv/join`, `/ctv`, `/calendar`, `/customers`, `/payment`, `/commission`, and `/service-catalog` for NK3 Cosmetic.
+
+Edge cases:
+- Treat PRD `STATUS: partial|broken|unknown` features as guarded tests or expected-failure notes, not green-path assertions.
+- Assert avatar selection as missing/broken unless the user answers the avatar open question.
+- Confirm Cosmetic flag/LOB access before running `/api/cosmetic/*` expectations.
+
+Regressions:
+- Do not create wallet, payout, payment, service, appointment, or CTV data on live without explicit test data setup.
+- Do not test USDT/crypto funding because no source-backed rule exists in this codebase.
+
+Setup data and login state:
+- Target: `https://tmv.2checkin.com`, NK3 Cosmetic.
+- Needs: admin/staff account with Cosmetic and relevant permissions; CTV account for `/ctv`; public CTV phone for `/welcome` booking; test customer/client phones safe for mutation only if approved.
+
+TestSprite execution items:
+- [ ] PENDING: Import `docs/PRD-extracted.md` into TestSprite as the source PRD.
+- [ ] PENDING: Resolve OPEN QUESTIONS 1-22 before turning partial/broken surfaces into pass/fail assertions.
+
+---
+
+# TestSprite Plan: NK3 CTV Business Logic Addendum 2026-06-05
+
+Feature/edit name: CTV referral and commission business-logic authority doc from operator interview
+
+Changed URLs and API routes:
+- Documentation only: `/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/business-logic/ctv-referral-commission.md`
+- Cross-linked docs: `BEHAVIOR.md`, `DECISIONS.md`, `docs/INVARIANTS.md`, `product-map/domains/ctv.yaml`, `product-map/domains/earnings-commissions.yaml`, `product-map/business-logic/commission-rules.md`
+- Runtime URLs/API routes changed: none.
+
+Affected data flows:
+- Future CTV service-card commission generation.
+- CTV claim/timer eligibility.
+- CTV booking appointment-only flow.
+- Admin service/appointment CTV reassignment.
+- CTV tier config, braces override, payouts, hierarchy moves, and customer deposit wallet history.
+
+User roles:
+- Public CTV signup visitor.
+- CTV portal user.
+- Admin/staff creating service cards, appointments, payments, payouts, and CTV hierarchy changes.
+
+Happy paths:
+- Service card with selected CTV creates CTV earnings from full service price immediately using tier config.
+- CTV booking creates appointment only and no commission.
+- Public signup without upline creates active root/top-level CTV; signup with upline attaches under that CTV.
+- Admin payout can be Dental-only, Cosmetic-only, or combined with linked LOB payout rows.
+
+Edge cases:
+- Service card without selected CTV creates no CTV earnings even if customer has appointment owner.
+- Disabled or missing uplines get no money; company keeps missing percentages.
+- Paid-out CTV earnings block cancel/delete/refund/service CTV reassignment.
+- Dental Braces/Orthodontics override is planned and must not be asserted as current working code.
+- Avatar selection remains not implemented/skipped for NK3 TestSprite.
+
+Regressions:
+- Do not use product/service `commission_rate_percent` as CTV commission source.
+- Do not use payment-collected timing as the accepted CTV earning trigger.
+- Do not let Dental claim locks block Cosmetic claims or Cosmetic locks block Dental claims.
+- Do not add payment edit workflow; correction is delete/void plus new payment.
+
+Setup data and login state:
+- Target: `https://tmv.2checkin.com`, default Cosmetic LOB unless Dental-specific Braces testing is explicitly requested.
+- Needs dedicated mutation-safe test CTV/customer/service records before any live create/delete/refund/payout assertions.
+
+TestSprite execution items:
+- [ ] PENDING: Import `docs/business-logic/ctv-referral-commission.md` as business-rule context beside `docs/PRD-extracted.md`.
+- [ ] PENDING: Treat rows marked `target`, `planned`, or `gap` as expected implementation gaps until code is updated.
+- [ ] PENDING: Use `INV-003C` for future CTV service-card commission tests.
+
+---
+
+# TestSprite Plan: CTV spec Wave 8 — remove staff payment edit 2026-06-05
+Feature: §9/gap#11 — payments are corrected by delete/void + new, not edited. Flags: PAYMENT_EDIT_DISABLED (api), VITE_PAYMENT_EDIT_DISABLED (web).
+- [x] PASS: LIVE on tmv.2checkin.com — PATCH /api/Payments/:id returns 405 B_PAYMENT_EDIT_DISABLED; GET/list still 200; CustomerProfile edit-deposit button hidden.
+
+---
+
+# TestSprite Plan: CTV spec Wave 5 — Braces override (Dental-only) 2026-06-05
+Feature: §5 — braces/ortho services use a separate higher tier (full price). Flag BRACES_OVERRIDE_ENABLED. Migration 056 (braces_commission_level_config, tdental_nk3 only).
+- [x] PASS: LIVE on tmv.2checkin.com — dental braces card @1,000,000 → earnings L0=300000 (30% braces), vs 24% standard for non-braces. Detection by name OR category (incl. VN "Niềng răng" category); fixed a real category-detection miss found in live test.
+
+---
+
+# TestSprite Plan: CTV spec Wave 4 — Combined payouts (backend) 2026-06-05
+Feature: §10 — combined payout = one LOB-local row in Dental + Cosmetic linked by payout_group_id + shared receipt. Migration 057.
+- [x] PASS: LIVE on tmv.2checkin.com — POST /api/Payouts/combined created payout rows in tdental_nk3 AND tcosmetic_nk3 with the SAME payout_group_id (1587d680) + identical receipt; earnings marked paid. Partial-failure path returns 409/partial.
+- [ ] PENDING (UI): CTV portal one-combined-row (expandable) + admin All-filter combined view — payout_group_id is now exposed on GET /api/Payouts for the UI to group.
+- [ ] NOTE (separate bug): X-LOB request header is ignored on POST /api/SaleOrders (cosmetic create ran in dental) — pre-existing, not part of this spec.
+
+---
+
+# TestSprite Plan: CTV spec Wave 6 — Hierarchy move (backend) 2026-06-05
+Feature: §12 — admin moves a CTV's upline only when fresh (no referrals/services/earnings); auto audit log. Migration 058 (audit_logs).
+- [x] PASS: LIVE on tmv.2checkin.com — POST /api/Ctvs/:id/move on a FRESH CTV → 200, referred_by_ctv_id updated both DBs + audit_logs 'move' row. Moving a CTV WITH activity → 409 B_CTV_HAS_ACTIVITY (guard works). Admin-only (403 otherwise).
+- [ ] PENDING (UI): drag-and-drop hierarchy tree in the admin CTV portal (CtvHierarchyPanel) wired to POST /:id/move.
+
+---
+
+# TestSprite Plan: CTV spec Waves 4/6/7 UI — browser-verified 2026-06-05
+- [x] PASS: W6 drag-drop (commission → CTV tab) LIVE — 213 draggable CTV rows + drag hint; drop re-parents via POST /Ctvs/:id/move (Playwright screenshot /tmp/nk3_W6_ctv_mgmt.png).
+- [x] PASS: W7 deposit history (/payment) LIVE — customer selector (9 opts) + deposit-wallet history panel with transactions, no edit button (Playwright /tmp/nk3_W7_v2.png).
+- [x] PASS: W4 combined-payout display (commission → Chi trả, LOB=All) LIVE — one 'Combined' row, per-LOB breakdown ↳dental 240k/↳cosmetic 240k, total 480k (Playwright /tmp/nk3_W4_combined.png).
+- ALL 8 waves of docs/business-logic/ctv-referral-commission.md now up and running + verified on tmv.2checkin.com.

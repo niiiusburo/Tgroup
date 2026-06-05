@@ -58,6 +58,7 @@ const publicTelemetryErrorRoutes = require('./routes/publicTelemetryErrors');
 const ipAccessRoutes = require('./routes/ipAccess');
 const exportsRoutes = require('./routes/exports');
 const ctvRoutes = require('./routes/ctv');
+const ctvProfileRoutes = require('./routes/ctvProfile');
 const ctvsRoutes = require('./routes/ctvs');
 const earningsRoutes = require('./routes/earnings');
 const payoutsRoutes = require('./routes/payouts');
@@ -277,6 +278,7 @@ if (COSMETIC_FLAG) {
     });
   });
 }
+app.use('/api/ctv', requirePermission('ctv.dashboard.view'), ctvProfileRoutes);
 app.use('/api/ctv', requirePermission('ctv.dashboard.view'), ctvRoutes);
 
 app.get('/api/health', async (_req, res) => {

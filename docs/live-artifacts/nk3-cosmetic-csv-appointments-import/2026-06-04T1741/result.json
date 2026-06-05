@@ -1,0 +1,32 @@
+{
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-cosmetic-csv-appointments-import/2026-06-04T1741",
+  "loginSucceeded": true,
+  "calendar": {
+    "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-cosmetic-csv-appointments-import/2026-06-04T1741/01-calendar-cosmetic-after-csv-import.png",
+    "textHasCalendar": true,
+    "textHasCosmetic": true,
+    "textPreview": "TD\nPHÒNG KHÁM\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\nBÁO CÁO\nBảng điều khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\nQUẢN TRỊ\nCài đặt\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nLịch\nCosmetic\nAll Locations\nLịch hẹn\n\nQuản lý lịch hẹn khám bệnh\n\nNgày\nTuần\nTháng\nThứ Năm, 4 tháng 6, 2026\nHôm nay\nXuất dữ liệu\nBộ lọc\nHẹn mới\nThứ Năm, 4 tháng 6\n4 Lịch hẹn\n07:00\n07:30\n08:00\n08:30\n09:00\n2 Lịch hẹn\nĐang hẹn\ntest\n0921828212\n09:00 · 30 phút"
+  },
+  "customers": {
+    "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-cosmetic-csv-appointments-import/2026-06-04T1741/02-customers-cosmetic-after-csv-import.png",
+    "textHasCustomers": true,
+    "textHasCosmetic": true,
+    "textPreview": "TD\nPHÒNG KHÁM\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\nBÁO CÁO\nBảng điều khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\nQUẢN TRỊ\nCài đặt\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nKhách hàng\nCosmetic\nAll Locations\n\nCó vấn đề?\n\nNhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc.\n\nKhách hàng\n\n12528 patients · 12528 active\n\nXuất dữ liệu\nAdd Customer\nAll Status\nActive\nInactive\nPending\nCODE\n\t\nCUSTOMER\n\t\nPHONE\n\t\nEMAIL\n\t\nLOCAT"
+  },
+  "apiResult": {
+    "ok": true,
+    "url": "/api/cosmetic/Appointments?startDate=2026-01-01&endDate=2026-12-31",
+    "status": 200,
+    "count": 4457,
+    "totalItems": 4457,
+    "attempts": [
+      {
+        "url": "/api/cosmetic/Appointments?startDate=2026-01-01&endDate=2026-12-31",
+        "status": 200,
+        "ok": true,
+        "sample": "{\"offset\":0,\"limit\":20,\"totalItems\":4457,\"items\":[{\"id\":\"56fdfd6c-7ca7-458e-95d8-9af7d393c1af\",\"name\":\"AP004453\",\"date\":\"2035-03-15T17:00:00.000Z\",\"time\":\"13:00\",\"datetimeappointment\":\"2035-03-16T06:00:00.000Z\",\"dateappointmentreminder\":null,\"timeexpected\":30,\"note\":\"[CSV_IMPORT_NK3_APPTS_20260604 r"
+      }
+    ]
+  },
+  "networkErrors": []
+}

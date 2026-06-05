@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, CalendarDays } from 'lucide-react';
 import { DatePicker } from '@/components/ui/DatePicker';
@@ -44,6 +44,14 @@ export function ExportDateRangeModal({
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [activePreset, setActivePreset] = useState<PresetKey | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setDateFrom('');
+      setDateTo('');
+      setActivePreset(null);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -102,22 +110,22 @@ export function ExportDateRangeModal({
   const canApply = activePreset !== null || (dateFrom && dateTo);
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center" role="dialog" aria-modal="true" aria-label={t('selectDateRange', 'Chọn khoảng thởi gian')}>
+    <div className="fixed inset-0 z-[120] flex items-end justify-center p-0 sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label={t('selectDateRange', 'Chọn khoảng thởi gian')}>
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative flex max-h-[calc(100dvh-0.75rem)] min-h-0 w-full max-w-sm flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200 sm:max-h-[90dvh] sm:rounded-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-gray-100 px-5 py-4 sm:px-6">
           <div className="flex items-center gap-2">
-            <CalendarDays className="w-5 h-5 text-primary" />
-            <h3 className="text-base font-semibold text-gray-900">{t('selectDateRange', 'Chọn khoảng thởi gian')}</h3>
+            <CalendarDays className="h-5 w-5 shrink-0 text-primary" />
+            <h3 className="text-base font-semibold leading-snug text-gray-900">{t('selectDateRange', 'Chọn khoảng thởi gian')}</h3>
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
-            <X className="w-4 h-4 text-gray-500" />
+          <button type="button" onClick={onClose} aria-label={t('close', 'Đóng')} className="grid h-10 w-10 shrink-0 place-items-center rounded-lg transition-colors hover:bg-gray-100">
+            <X className="h-4 w-4 text-gray-500" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 space-y-4">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">
           {/* Presets */}
           <div className="grid grid-cols-3 gap-2">
             {PRESETS.map((preset) => (
@@ -169,14 +177,16 @@ export function ExportDateRangeModal({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-2 px-6 py-4 bg-gray-50 border-t border-gray-100">
+        <div className="flex shrink-0 justify-end gap-2 border-t border-gray-100 bg-gray-50 px-5 py-4 sm:px-6" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
           <button
+            type="button"
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
           >
             {t('cancel', 'Hủy')}
           </button>
           <button
+            type="button"
             onClick={handleApply}
             disabled={!canApply}
             className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"

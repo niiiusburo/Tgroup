@@ -271,13 +271,172 @@ async function triggerCommissionEngine(serviceLineId, clientId, partnerId, lob, 
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// INV-003C: SERVICE-CARD-CREATED earnings (Wave 2, flag CTV_SERVICE_CARD_COMMISSION)
+//
+// Earnings are born the moment a service card (saleorderline) with an attached CTV is
+// CREATED, on the FULL service price — NOT at payment time and NOT on the paid amount.
+// These rows carry NO payment_id (requires migration 055 making earnings.payment_id
+// nullable). Idempotent per (service_line_id, recipient_partner_id, level) WHERE
+// payment_id IS NULL. These functions are additive and isolated from the legacy
+// pay-as-paid path above, which stays the default until the flag is enabled per-env.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Normalize the various call styles into a single `(sql, params) => Promise<rows>` runner. */
+function _runnerFor({ run = null, lob = null, txClient = null, injectedGetDb = null }) {
+  if (run) return run;
+  if (txClient) return (sql, p) => txClient.query(sql, p).then((r) => r.rows);
+  const db = _getDb(lob, injectedGetDb);
+  return (sql, p) => db.queryRows(sql, p);
+}
+
+/** Cycle-guarded upline walk (level 0 = the attached CTV), runner-based. */
+async function _walkChainRun(startPartnerId, run) {
+  if (!startPartnerId) return [];
+  const chain = [];
+  const visited = new Set([startPartnerId]);
+  let currentId = startPartnerId;
+  let level = 0;
+  while (currentId && level < 5) {
+    chain.push({ level, partner_id: currentId });
+    const rows = await run('SELECT referred_by_ctv_id FROM dbo.partners WHERE id = $1', [currentId]);
+    const next = rows && rows[0] ? rows[0].referred_by_ctv_id : null;
+    if (!next || visited.has(next)) break;
+    visited.add(next);
+    currentId = next;
+    level += 1;
+  }
+  return chain;
+}
+
+/** enabled level -> share_percent, runner-based. */
+async function _shareMapRun(run) {
+  const rows = await run('SELECT level, share_percent, enabled FROM dbo.commission_level_config ORDER BY level', []);
+  const map = new Map();
+  for (const c of rows || []) {
+    if (c && c.enabled !== false && c.level != null) {
+      map.set(Number(c.level), parseFloat(c.share_percent || 0) || 0);
+    }
+  }
+  return map;
+}
+
+// ── §5 Braces Override (Dental-only, flag BRACES_OVERRIDE_ENABLED) ──
+const BRACES_NAME_RE = /brace|braces|niềng\s*răng/i;
+
+/**
+ * A service is Braces/Orthodontics by category or name. The keyword regex is applied to BOTH
+ * the product name AND the category name, so a Vietnamese clinic whose braces category is
+ * literally "Niềng răng" is detected even when individual product names ("Niềng Mắc Cài …") omit
+ * the full "niềng răng" phrase.
+ */
+function isBracesService(productName, categoryName) {
+  const cat = String(categoryName || '').trim().toLowerCase();
+  if (cat === 'braces' || cat === 'orthodontics') return true;
+  return BRACES_NAME_RE.test(String(productName || '')) || BRACES_NAME_RE.test(String(categoryName || ''));
+}
+
+/** enabled level -> share_percent from the BRACES tier config, runner-based. */
+async function _bracesShareMapRun(run) {
+  const rows = await run('SELECT level, share_percent, enabled FROM dbo.braces_commission_level_config ORDER BY level', []);
+  const map = new Map();
+  for (const c of rows || []) {
+    if (c && c.enabled !== false && c.level != null) {
+      map.set(Number(c.level), parseFloat(c.share_percent || 0) || 0);
+    }
+  }
+  return map;
+}
+
+const SERVICE_CARD_INSERT_SQL = `
+  INSERT INTO dbo.earnings (
+    client_id, recipient_partner_id, payment_id, service_line_id,
+    source, level, amount, status, earned_at
+  )
+  SELECT $1, $2, NULL, $3, 'ctv', $4, $5, 'pending', now()
+  WHERE NOT EXISTS (
+    SELECT 1 FROM dbo.earnings
+    WHERE service_line_id = $3 AND recipient_partner_id = $2
+      AND COALESCE(level, -1) = COALESCE($4, -1) AND payment_id IS NULL
+  )
+  RETURNING id, amount, level, recipient_partner_id
+`;
+
+/**
+ * Create pending earnings for a freshly-created service card at its FULL price.
+ * @param {object} args.serviceLine {id, ctv_id, price, client_id}
+ *   id        = saleorderline uuid (earnings.service_line_id, FK)
+ *   ctv_id    = the saleorder's attached CTV (level 0)
+ *   price     = FULL service price (saleorderlines.pricetotal / saleorders.amounttotal)
+ *   client_id = the customer partner id
+ * @param {function} [args.run] LOB-bound (sql,params)=>rows. Else built from lob/txClient/getDb.
+ */
+async function createEarningsForServiceCard({ serviceLine, lob = null, run = null, txClient = null, getDb: injectedGetDb = null }) {
+  if (!serviceLine) return [];
+  const ctvId = serviceLine.ctv_id;
+  const serviceLineId = serviceLine.id;
+  const clientId = serviceLine.client_id;
+  const base = serviceLine.price != null ? parseFloat(serviceLine.price) : 0;
+  // Guard: explicit CTV + real line + real client + positive full price (no CTV → no commission).
+  if (!ctvId || !serviceLineId || !clientId || !(base > 0)) return [];
+
+  const exec = _runnerFor({ run, lob, txClient, injectedGetDb });
+  // §5: a DENTAL braces service uses the separate braces tier config (same full-price basis).
+  const bracesEnabled = process.env.BRACES_OVERRIDE_ENABLED === 'true' || process.env.BRACES_OVERRIDE_ENABLED === '1';
+  const useBraces = bracesEnabled && lob === 'dental' && isBracesService(serviceLine.productName, serviceLine.categoryName);
+  const shareByLevel = useBraces ? await _bracesShareMapRun(exec) : await _shareMapRun(exec);
+  if (shareByLevel.size === 0) return [];
+
+  const chain = await _walkChainRun(ctvId, exec);
+  const created = [];
+  for (const link of chain) {
+    const share = shareByLevel.get(link.level);
+    if (!share || share <= 0) continue; // disabled / unconfigured level → no payout, no redistribution
+    const amount = Math.round(base * (share / 100) * 100) / 100;
+    if (amount <= 0) continue;
+    const rows = await exec(SERVICE_CARD_INSERT_SQL, [clientId, link.partner_id, serviceLineId, link.level, amount]);
+    if (rows && rows[0]) created.push(rows[0]);
+  }
+  return created;
+}
+
+/**
+ * Reverse a service card's PENDING (unpaid) earnings when the service is cancelled/deleted/
+ * refunded BEFORE payout. Marks them status='reversed' (these rows were never realized, so no
+ * negative offset row is needed — which also avoids colliding with the service-card unique index).
+ * Paid-out earnings (status='paid' or payout_id set) are left untouched — INV-003B/INV-003C lock.
+ * Idempotent: a second call finds no 'pending' rows.
+ */
+async function reverseServiceCardEarnings({ serviceLineId, lob = null, run = null, txClient = null, getDb: injectedGetDb = null }) {
+  if (!serviceLineId) return [];
+  const exec = _runnerFor({ run, lob, txClient, injectedGetDb });
+  const rows = await exec(
+    `UPDATE dbo.earnings
+        SET status = 'reversed'
+      WHERE service_line_id = $1
+        AND payment_id IS NULL
+        AND status = 'pending'
+        AND amount > 0
+      RETURNING id, amount, level, recipient_partner_id`,
+    [serviceLineId]
+  );
+  return rows || [];
+}
+
 module.exports = {
   createEarningsForPayment,
   reverseOnRefund,
   backfillEarningsForClient,
   triggerCommissionEngine,
+  // INV-003C service-card model (Wave 2)
+  createEarningsForServiceCard,
+  reverseServiceCardEarnings,
+  // §5 braces override (Wave 5)
+  isBracesService,
   // internal (tests)
   _walkCtvChain,
   _linesForPayment,
   _getCommissionLevelConfig,
+  _walkChainRun,
+  _shareMapRun,
 };

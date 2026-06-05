@@ -1,0 +1,169 @@
+[
+  {
+    "id": "TS-001",
+    "title": "Admin login and redirect",
+    "description": "Test that admin can login with correct credentials and be redirected to overview",
+    "category": "Authentication",
+    "priority": "High",
+    "targetPage": "/login",
+    "steps": [
+      "fill email",
+      "fill password",
+      "submit"
+    ],
+    "expectedResult": "User is logged in and redirected to /overview"
+  },
+  {
+    "id": "TS-002",
+    "title": "Invalid login rejection",
+    "description": "Test that invalid credentials are rejected with error message",
+    "category": "Authentication",
+    "priority": "High",
+    "targetPage": "/login",
+    "steps": [
+      "fill wrong email",
+      "fill wrong password",
+      "submit"
+    ],
+    "expectedResult": "Error message displayed, no redirect"
+  },
+  {
+    "id": "TS-003",
+    "title": "Logout clears session",
+    "description": "Test that logout button clears session and redirects to login",
+    "category": "Authentication",
+    "priority": "High",
+    "targetPage": "/overview",
+    "steps": [
+      "click logout"
+    ],
+    "expectedResult": "Session cleared, redirected to /login"
+  },
+  {
+    "id": "TS-010",
+    "title": "Customer list page loads",
+    "description": "Test that /customers page loads and displays customer list",
+    "category": "Customer Management",
+    "priority": "High",
+    "targetPage": "/customers",
+    "steps": [
+      "navigate to customers"
+    ],
+    "expectedResult": "Customer list displayed with search functionality"
+  },
+  {
+    "id": "TS-011",
+    "title": "Customer search works",
+    "description": "Test accent-insensitive search for Vietnamese names",
+    "category": "Customer Management",
+    "priority": "High",
+    "targetPage": "/customers",
+    "steps": [
+      "type search query",
+      "verify results"
+    ],
+    "expectedResult": "Results match search query regardless of diacritics"
+  },
+  {
+    "id": "TS-012",
+    "title": "Create new customer",
+    "description": "Test customer creation form with valid data",
+    "category": "Customer Management",
+    "priority": "High",
+    "targetPage": "/customers",
+    "steps": [
+      "click add",
+      "fill form",
+      "save"
+    ],
+    "expectedResult": "New customer created and visible in list"
+  },
+  {
+    "id": "TS-013",
+    "title": "Edit existing customer",
+    "description": "Test editing customer details",
+    "category": "Customer Management",
+    "priority": "High",
+    "targetPage": "/customers",
+    "steps": [
+      "select customer",
+      "edit details",
+      "save"
+    ],
+    "expectedResult": "Customer details updated"
+  },
+  {
+    "id": "TS-020",
+    "title": "Employee list page loads",
+    "description": "Test that /employees page loads and displays employee list",
+    "category": "Employee Management",
+    "priority": "Medium",
+    "targetPage": "/employees",
+    "steps": [
+      "navigate to employees"
+    ],
+    "expectedResult": "Employee list displayed with search"
+  },
+  {
+    "id": "TS-021",
+    "title": "Create new employee",
+    "description": "Test employee creation with permission group",
+    "category": "Employee Management",
+    "priority": "Medium",
+    "targetPage": "/employees",
+    "steps": [
+      "click add",
+      "fill form",
+      "save"
+    ],
+    "expectedResult": "New employee created with assigned permissions"
+  },
+  {
+    "id": "TS-030",
+    "title": "Calendar page loads",
+    "description": "Test that /calendar page loads and displays appointments",
+    "category": "Calendar",
+    "priority": "High",
+    "targetPage": "/calendar",
+    "steps": [
+      "navigate to calendar"
+    ],
+    "expectedResult": "Calendar view displayed with appointments"
+  },
+  {
+    "id": "TS-031",
+    "title": "Calendar date navigation",
+    "description": "Test navigating between dates",
+    "category": "Calendar",
+    "priority": "High",
+    "targetPage": "/calendar",
+    "steps": [
+      "click next/prev date"
+    ],
+    "expectedResult": "Calendar updates to show selected date"
+  },
+  {
+    "id": "TS-040",
+    "title": "Payment history page loads",
+    "description": "Test that /payments page loads and displays payment history",
+    "category": "Payments",
+    "priority": "Medium",
+    "targetPage": "/payments",
+    "steps": [
+      "navigate to payments"
+    ],
+    "expectedResult": "Payment history list displayed"
+  },
+  {
+    "id": "TS-050",
+    "title": "Permission matrix loads",
+    "description": "Test that permission matrix page loads correctly",
+    "category": "Permissions",
+    "priority": "Medium",
+    "targetPage": "/settings/permissions",
+    "steps": [
+      "navigate to permissions"
+    ],
+    "expectedResult": "Permission groups and matrix displayed"
+  }
+]

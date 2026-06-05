@@ -5,6 +5,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import i18n from '@/i18n';
 import { renderWithProviders } from '@/test/test-utils';
 import CtvDashboard from './CtvDashboard';
+import { changeCtvSelfPassword, updateCtvSelfProfile } from '@/lib/api';
 import type { CtvHierarchyResponse, CtvReferralResponse } from '@/lib/api/ctv';
 
 
@@ -124,7 +125,18 @@ vi.mock('@/lib/api', () => ({
     phone: '',
     role: 'CTV',
   })),
+  updateCtvSelfProfile: vi.fn(async () => ({
+    id: 'ctv-1',
+    name: 'CTV Demo Updated',
+    email: 'ctv-demo@clinic.vn',
+    phone: '',
+    role: 'CTV',
+  })),
+  changeCtvSelfPassword: vi.fn(async () => ({ success: true })),
 }));
+
+const mockUpdateCtvSelfProfile = vi.mocked(updateCtvSelfProfile);
+const mockChangeCtvSelfPassword = vi.mocked(changeCtvSelfPassword);
 
 describe('CtvDashboard', () => {
   beforeAll(async () => {
@@ -141,6 +153,8 @@ describe('CtvDashboard', () => {
     localStorage.setItem('tg-lang', 'vi');
     Object.defineProperty(window, 'scrollY', { configurable: true, value: 0 });
     void i18n.changeLanguage('vi');
+    mockUpdateCtvSelfProfile.mockClear();
+    mockChangeCtvSelfPassword.mockClear();
   });
 
   async function prepareCtvLanguage(lang: 'en' | 'vi') {
@@ -180,6 +194,7 @@ describe('CtvDashboard', () => {
 
     const header = screen.getByTestId('ctv-motion-header');
     expect(header).toHaveAttribute('data-scroll-state', 'visible');
+    expect(header.parentElement).toHaveClass('sticky');
     expect(screen.getByRole('group', { name: /quick ctv actions/i })).toHaveClass('rounded-full');
 
     setScrollY(140);
@@ -253,5 +268,36 @@ describe('CtvDashboard', () => {
     expect(dropdown).toHaveClass('top-full');
     expect(dropdown).not.toHaveClass('bottom-full');
     expect(screen.getByRole('button', { name: /tiếng việt/i })).toBeVisible();
+  });
+
+  it('lets a CTV update their name and password from the Tôi tab', async () => {
+    await prepareCtvLanguage('vi');
+    localStorage.setItem('tgclinic_token', 'test-token');
+    const user = userEvent.setup();
+    renderWithProviders(<CtvDashboard />);
+
+    await waitFor(() => expect(screen.getAllByText('Xin chào, CTV Demo')[0]).toBeVisible());
+
+    await user.click(screen.getByRole('button', { name: /^tôi$/i }));
+    expect(screen.getByTestId('ctv-motion-header').parentElement).toHaveClass('relative');
+    const nameInput = screen.getByLabelText('Tên hiển thị');
+    await user.clear(nameInput);
+    await user.type(nameInput, 'CTV Demo Updated');
+    await user.click(screen.getByRole('button', { name: /lưu tên/i }));
+
+    await waitFor(() => expect(mockUpdateCtvSelfProfile).toHaveBeenCalledWith({ name: 'CTV Demo Updated' }));
+    expect(screen.getAllByText('CTV Demo Updated')[0]).toBeVisible();
+    expect(screen.getByText('Đã cập nhật tên.')).toBeVisible();
+
+    await user.type(screen.getByLabelText('Mật khẩu hiện tại'), 'old-secret');
+    await user.type(screen.getByLabelText('Mật khẩu mới'), 'new-secret');
+    await user.type(screen.getByLabelText('Nhập lại mật khẩu mới'), 'new-secret');
+    await user.click(screen.getByRole('button', { name: /đổi mật khẩu/i }));
+
+    await waitFor(() => expect(mockChangeCtvSelfPassword).toHaveBeenCalledWith({
+      currentPassword: 'old-secret',
+      newPassword: 'new-secret',
+    }));
+    expect(screen.getByText('Đã đổi mật khẩu.')).toBeVisible();
   });
 });

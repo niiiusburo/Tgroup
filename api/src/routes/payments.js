@@ -133,8 +133,15 @@ router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema)
     // Each allocation (payment -> saleorder) earns commission for the saleorder's attached
     // CTV (saleorders.ctv_id) + their upline chain, applied to the ALLOCATED (paid) amount.
     // No CTV on the service => no commission. Non-fatal: payment tx continues on error.
+    //
+    // INV-003C (Wave 2): when the service-card model is enabled, earnings are already born at
+    // FULL price when the service card is created — paying must NOT create more (double-count).
+    const serviceCardModel =
+      process.env.CTV_SERVICE_CARD_COMMISSION === 'true' || process.env.CTV_SERVICE_CARD_COMMISSION === '1';
     try {
-      const engineLines = await _linesForPayment(row.id, { queryRows: (sql, p) => rowsFrom(client, sql, p) });
+      const engineLines = serviceCardModel
+        ? []
+        : await _linesForPayment(row.id, { queryRows: (sql, p) => rowsFrom(client, sql, p) });
       if (engineLines.length > 0) {
         await createEarningsForPayment({
           payment: row,
@@ -249,6 +256,17 @@ router.post("/refund", requirePermission('payment.refund'), async (req, res) => 
 
 // PATCH /api/Payments/:id - Update payment
 router.patch("/:id", requirePermission('payment.add'), validate(PaymentUpdateSchema), async (req, res) => {
+  // Spec §9 (gap #11): direct payment edit is a legacy/internal gap, NOT a supported correction
+  // workflow. The correction path is delete/void + create a new payment. Gated to NK3 via
+  // PAYMENT_EDIT_DISABLED so NK/NK2 keep the legacy edit until migration.
+  if (process.env.PAYMENT_EDIT_DISABLED === 'true' || process.env.PAYMENT_EDIT_DISABLED === '1') {
+    return res.status(405).json({
+      error: {
+        code: 'B_PAYMENT_EDIT_DISABLED',
+        message: 'Payments cannot be edited. Delete/void the payment and create a new, correct payment.',
+      },
+    });
+  }
   try {
     const q = getQuery(req);
     const { id } = req.params;

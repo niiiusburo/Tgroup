@@ -62,6 +62,8 @@ export interface PayoutRow {
   created_by_name?: string | null;
   earnings_count: number;
   created_at?: string;
+  // §10: set when this payout is one leg of a combined Dental+Cosmetic payout.
+  payout_group_id?: string | null;
 }
 
 export interface PayoutsResponse {

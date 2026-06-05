@@ -3,6 +3,29 @@
 -- Uses dblink to connect old DB (tdental@172.17.0.1:54323) from demo DB
 -- ============================================================================
 
+-- SAFETY GUARD: this file drops/recreates and truncates core data tables.
+-- It is a manual reconstruction script, not an auto-applied migration.
+-- To run in an isolated restore DB, set:
+--   SET tgroup.allow_destructive_tdental_import = '1';
+--   SET tgroup.legacy_import_password_hash = '<approved bcrypt hash>';
+-- Protected live/smoketest DB names require the extra break-glass setting:
+--   SET tgroup.allow_live_destructive_tdental_import = '1';
+DO $$
+BEGIN
+  IF current_setting('tgroup.allow_destructive_tdental_import', true) IS DISTINCT FROM '1' THEN
+    RAISE EXCEPTION 'Refusing to run destructive legacy TDental import migration on %. Set tgroup.allow_destructive_tdental_import=1 only in an isolated restore database after backup confirmation.', current_database();
+  END IF;
+
+  IF current_database() IN ('tdental_demo', 'tdental_smoketest', 'tcosmetic_demo', 'tcosmetic_smoketest')
+    AND current_setting('tgroup.allow_live_destructive_tdental_import', true) IS DISTINCT FROM '1' THEN
+    RAISE EXCEPTION 'Refusing destructive legacy TDental import on protected database %. Use an isolated probe DB or set the live break-glass flag only after explicit approval.', current_database();
+  END IF;
+
+  IF NULLIF(current_setting('tgroup.legacy_import_password_hash', true), '') IS NULL THEN
+    RAISE EXCEPTION 'Refusing legacy TDental import without tgroup.legacy_import_password_hash. Do not hardcode password hashes in migration files.';
+  END IF;
+END $$;
+
 -- 1. Enable dblink extension
 CREATE EXTENSION IF NOT EXISTS dblink;
 
@@ -714,9 +737,9 @@ FROM ranked
 WHERE dbo.partners.id = ranked.id
   AND (dbo.partners.email IS NULL OR TRIM(dbo.partners.email) = '');
 
--- Set password_hash to bcrypt('123456') for ALL employee partners
+-- Set approved password_hash for ALL employee partners.
 UPDATE dbo.partners
-SET password_hash = '$2b$10$SqoPEI/FaDN3bXdFkImpdefUOYTEY.r90htnxgvt/M11LwlI8ztEO'
+SET password_hash = current_setting('tgroup.legacy_import_password_hash')
 WHERE employee = true;
 
 -- ============================================================================

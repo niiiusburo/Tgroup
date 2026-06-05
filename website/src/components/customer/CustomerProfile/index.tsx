@@ -45,7 +45,11 @@ export function CustomerProfile(props: OrchestratorProps) {
   const canUploadHealthCheckups = hasPermission('external_checkups.upload');
   const canAddPayment = hasPermission('payment.add');
   const canRefundPayment = hasPermission('payment.refund');
-  const canEditPayment = hasPermission('payment.edit');
+  // Spec §9 (gap #11): the payment/deposit edit workflow is removed on NK3 (corrections =
+  // delete + new). Gated to NK3 via the baked VITE flag so NK/NK2 keep the legacy edit.
+  const paymentEditDisabled =
+    import.meta.env.VITE_PAYMENT_EDIT_DISABLED === 'true' || import.meta.env.VITE_PAYMENT_EDIT_DISABLED === '1';
+  const canEditPayment = hasPermission('payment.edit') && !paymentEditDisabled;
   const canVoidPayment = hasPermission('payment.void');
   const canReregisterFace = hasPermission('customers.edit');
 

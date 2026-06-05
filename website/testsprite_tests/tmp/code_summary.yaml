@@ -1,0 +1,100 @@
+project:
+  name: tgclinic-website
+  type: Frontend Web Application
+  version: 0.32.101
+
+techStack:
+  frontend:
+    framework: React 18
+    language: TypeScript
+    buildTool: Vite
+    uiLibrary: Custom components with Tailwind CSS
+    stateManagement: React Context + Hooks
+    routing: React Router v6
+    i18n: i18next
+  testing:
+    unitTesting: Vitest
+    e2eTesting: Playwright
+  dependencies:
+    - react
+    - react-dom
+    - react-router-dom
+    - i18next
+    - framer-motion
+    - tailwindcss
+    - fontsource/inter
+    - zod
+
+features:
+  authentication:
+    - Admin login with email/password
+    - Session management
+    - Role-based access control
+  customerManagement:
+    - Customer CRUD operations
+    - Customer search with accent-insensitive matching
+    - Customer profile viewing
+    - Customer deletion with confirmation
+  employeeManagement:
+    - Employee CRUD operations
+    - Employee search
+    - Permission group assignment
+  appointmentCalendar:
+    - Calendar views (day, week, month)
+    - Appointment creation and editing
+    - Doctor/CTV assignment
+    - Status management
+  paymentProcessing:
+    - Payment history
+    - Payment allocation
+    - VietQR integration
+  permissionControl:
+    - Permission matrix management
+    - Permission groups
+    - Role-based permissions
+  serviceCatalog:
+    - Service listing
+    - Service editing
+    - Category management
+  reportGeneration:
+    - Report views
+    - Export functionality (Excel)
+  settings:
+    - Business unit configuration
+    - Location settings
+    - API configuration
+  ctvModule:
+    - CTV (Consultant) management
+    - CTV hierarchy
+    - Commission tracking
+  cosmeticLOB:
+    - Line of business switching
+    - Cosmetic services
+    - Cosmetic client management
+
+keyComponents:
+  pages:
+    - Login
+    - Overview
+    - Customers
+    - Employees
+    - Calendar
+    - Commission
+    - Payments
+    - ServiceCatalog
+    - Reports
+    - Settings
+    - CTV
+  sharedComponents:
+    - Layout/Sidebar
+    - DataTable
+    - Modal
+    - Form inputs
+    - DatePicker
+    - SearchBar
+  hooks:
+    - useAuth
+    - useCustomerProfile
+    - useServices
+    - useOverviewAppointments
+    - useExport
