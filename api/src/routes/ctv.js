@@ -549,6 +549,29 @@ router.get('/client-journeys', requireAuth, async (req, res) => {
  *
  * Body: { name, phone, email, password, referred_by_ctv_id? }
  * Auth: requireAuth + (is_ctv=true OR admin permission)
+ *
+ * @crossref:domain[ctv-creation]
+ * Backend endpoint: POST /api/ctv (authed CTV recruit or admin create)
+ *
+ * Absolute path references (SSOT + consumers + governance):
+ *   SSOT: /Users/thuanle/Documents/TamTMV/Tgrouptest/website/src/components/shared/CtvCreationForm/
+ *   Call sites:
+ *     - /Users/thuanle/Documents/TamTMV/Tgrouptest/website/src/components/commission/CtvManagementTab.tsx (AddCtvModal, mode 'admin', uses createCtv)
+ *     - /Users/thuanle/Documents/TamTMV/Tgrouptest/website/src/components/ctv/CtvRecruitModal.tsx (mode 'portal-recruit', uses createCtv)
+ *     - /Users/thuanle/Documents/TamTMV/Tgrouptest/website/src/pages/CTV/JoinCtv.tsx (mode 'public-join' uses joinCtv; parity maintained)
+ *   Governance: /Users/thuanle/Documents/TamTMV/Tgrouptest/AGENTS.md §5.1 (CTV / Identity Domain SSOT Enforcement)
+ *   Product map: /Users/thuanle/Documents/TamTMV/Tgrouptest/product-map/domains/ctv.yaml (creation subsection)
+ *   Types/contract: /Users/thuanle/Documents/TamTMV/Tgrouptest/website/src/lib/api/ctv.ts (CreateCtvInput, createCtv, CtvJoinInput parity for public path)
+ *
+ * Invariants (must match SSOT + public join path; see AGENTS.md §5.1):
+ *   - Email OPTIONAL (only name/phone/password required; duplicate-email guard runs ONLY if email supplied; stores NULL when blank/omitted).
+ *   - lob_scope: dental is ALWAYS forced + prepended (Array.from(new Set(['dental', ...]))); ensures login works against dental partners; cosmetic is additive.
+ *   - Cross-DB atomic: always write dental row (for auth), write cosmetic only if scoped; on partial failure the caller sees E_CTV_CREATE_FAILED (note: current impl does not auto-rollback on Promise.all fail here, unlike explicit rollback in ctvPublic join).
+ *   - Auth/perms: is_ctv or ctv.manage; uses permissionService + isCtvUser from ctvHelpers.
+ *   - Errors: VALIDATION, U_DUPLICATE_PHONE (cross both DBs), U_DUPLICATE_EMAIL (only if supplied), S_CTV_CREATE_FORBIDDEN.
+ *
+ * @crossref:uses[./ctvHelpers (isCtvUser), ../services/permissionService (resolveEffectivePermissions for admin), ../db (getDb dual), local safeQueryRows for dual-DB dup checks + inserts]
+ * @crossref:used-in[authed CTV create flows (admin Add CTV + portal recruit); complements public /ctv-public/join]
  */
 router.post('/', requireAuth, async (req, res) => {
   const { employeeId } = req.user || {};
@@ -574,11 +597,14 @@ router.post('/', requireAuth, async (req, res) => {
 
   const { name, phone, email, password, lob_scope: bodyScope, referred_by_ctv_id: bodyReferredBy } = req.body || {};
 
-  if (!name || !phone || !email || !password) {
+  if (!name || !phone || !password) {
     return res.status(400).json({
-      error: { code: 'VALIDATION', message: 'Missing required fields: name, phone, email, password' },
+      error: { code: 'VALIDATION', message: 'Missing required fields: name, phone, password' },
     });
   }
+  // email is optional (consistent with public /ctv-public/join and recent spec for CTV self-signup);
+  // store as NULL if blank (skips dup check, allows root CTVs without email).
+  // [enhanced per task with @crossref block above; see also "Email is OPTIONAL (spec §12)" in ctvPublic.js]
 
   // Normalize requested LOB scope; dental is always included so the CTV can
   // authenticate (login resolves against the default/dental partners table).
@@ -601,13 +627,15 @@ router.post('/', requireAuth, async (req, res) => {
       return res.status(400).json({ error: { code: 'U_DUPLICATE_PHONE', message: 'Phone number already exists' } });
     }
 
-    const emailCheckSql = `SELECT id FROM dbo.partners WHERE LOWER(email) = LOWER($1) LIMIT 1`;
-    const [dEmails, cEmails] = await Promise.all([
-      safeQueryRows(dentalDb, emailCheckSql, [email]),
-      safeQueryRows(cosmeticDb, emailCheckSql, [email]),
-    ]);
-    if (dEmails.length > 0 || cEmails.length > 0) {
-      return res.status(400).json({ error: { code: 'U_DUPLICATE_EMAIL', message: 'Email already exists' } });
+    if (email) {
+      const emailCheckSql = `SELECT id FROM dbo.partners WHERE LOWER(email) = LOWER($1) LIMIT 1`;
+      const [dEmails, cEmails] = await Promise.all([
+        safeQueryRows(dentalDb, emailCheckSql, [email]),
+        safeQueryRows(cosmeticDb, emailCheckSql, [email]),
+      ]);
+      if (dEmails.length > 0 || cEmails.length > 0) {
+        return res.status(400).json({ error: { code: 'U_DUPLICATE_EMAIL', message: 'Email already exists' } });
+      }
     }
 
     const bcrypt = require('bcryptjs');
@@ -633,7 +661,7 @@ router.post('/', requireAuth, async (req, res) => {
         false, false, $8, $8
       ) RETURNING id, name, phone, email, is_ctv, lob_scope, referred_by_ctv_id, active, datecreated
     `;
-    const params = [id, name, phone, email, passwordHash, lobScope, referredById, now];
+    const params = [id, name, phone, email || null, passwordHash, lobScope, referredById, now];
 
     // Always create the auth row in dental (default DB); mirror into cosmetic
     // only when the CTV is scoped there, so cosmetic earnings can FK to them.

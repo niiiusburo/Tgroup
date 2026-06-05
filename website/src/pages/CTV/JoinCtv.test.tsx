@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -31,6 +31,10 @@ describe('JoinCtv', () => {
     vi.mocked(lookupPublicCtvByPhone).mockResolvedValue({ exists: true, name: 'Parent CTV' });
   });
 
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it('renders direct public signup without requiring a referral code', () => {
     renderJoin();
 
@@ -38,6 +42,17 @@ describe('JoinCtv', () => {
     expect(screen.getByLabelText(/CTV giới thiệu/i)).toBeInTheDocument();
     expect(screen.queryByText(/Liên kết giới thiệu không hợp lệ/i)).not.toBeInTheDocument();
     expect(resolveCtvRefCode).not.toHaveBeenCalled();
+  });
+
+  it('shows the required signup fields and marks email as optional', () => {
+    renderJoin();
+
+    expect(screen.getByText(/Bắt buộc: họ tên, số điện thoại và mật khẩu/i)).toBeInTheDocument();
+    expect(screen.getByText(/Email không bắt buộc/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Họ tên$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Số điện thoại của bạn/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Mật khẩu$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Email/i)).not.toBeRequired();
   });
 
   it('submits direct public signup with uplinePhone', async () => {
@@ -113,6 +128,28 @@ describe('JoinCtv', () => {
         uplinePhone: '0909000000',
       });
     });
+  });
+
+  it('allows root CTV signup without email or CTV giới thiệu when NK3 root signup is enabled', async () => {
+    vi.stubEnv('VITE_CTV_PUBLIC_ROOT_SIGNUP', 'true');
+    renderJoin();
+
+    expect(screen.getByText(/Không bắt buộc.*CTV cấp gốc/i)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(/^Họ tên$/i), { target: { value: 'Root CTV' } });
+    fireEvent.change(screen.getByLabelText(/Số điện thoại của bạn/i), { target: { value: '0123456789' } });
+    fireEvent.change(screen.getByLabelText(/^Mật khẩu$/i), { target: { value: 'secret1' } });
+    fireEvent.click(screen.getByRole('button', { name: /Tạo tài khoản CTV/i }));
+
+    await waitFor(() => {
+      expect(joinCtv).toHaveBeenCalledWith({
+        name: 'Root CTV',
+        phone: '0123456789',
+        email: '',
+        password: 'secret1',
+        code: '',
+      });
+    });
+    expect(lookupPublicCtvByPhone).not.toHaveBeenCalled();
   });
 
   it('requires upline phone when no valid referral code is available', async () => {

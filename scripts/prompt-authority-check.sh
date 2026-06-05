@@ -108,6 +108,30 @@ if contains_any "frontend" "ui" "page" "screen" "modal" "form" "button" "layout"
   add_doc "docs/WORKFLOWS.md"
   add_doc "docs/TEST-MATRIX.md"
   add_doc "testbright.md"
+
+  # CTV / Identity Domain SSOT enforcement (hard block, per root AGENTS.md §5.1).
+  # Looks for files containing createCtv|joinCtv|AddCtv|RecruitCtv|JoinCtv (or equivalent
+  # creation entrypoints) but NOT importing/using CtvCreationForm (or the hook). Legitimate
+  # consumers (the 3 call sites) contain *both* so pass. Runs as part of the "frontend changed"
+  # inference (forms/modals/components trigger it) on every prompt via the authority gate.
+  if command -v rg >/dev/null 2>&1; then
+    violators=$(rg -l \
+      --glob '!**/*.test.*' \
+      --glob '!**/CtvCreationForm/**' \
+      --glob '!**/node_modules/**' \
+      'createCtv|joinCtv|AddCtv|RecruitCtv|JoinCtv' website/src 2>/dev/null | while read -r f; do
+        if ! rg -q 'CtvCreationForm|useCtvCreationForm' "$f" 2>/dev/null; then
+          printf '%s\n' "$f"
+        fi
+      done | head -10)
+    if [ -n "$violators" ]; then
+      echo "BLOCKED: new CTV creation logic must use the shared domain in components/shared/CtvCreationForm per AGENTS.md CTV SSOT rule. See @crossref in existing."
+      echo "Violating file(s):"
+      printf '  - %s\n' "$violators"
+      echo "Co-update all 3+ consumers + backend validation + product-map/domains/ctv.yaml + tests in same commit (see AGENTS.md §5.1 + §16)."
+      exit 1
+    fi
+  fi
 fi
 
 if contains_any "api" "backend" "route" "endpoint" "request" "response" "contract" "client" "hook"; then

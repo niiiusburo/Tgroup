@@ -9,13 +9,25 @@ import {
   moveCtv,
   setCtvActive,
   updateCtv,
-  type CreateCtvInput,
   type CtvHierarchyResponse,
   type CtvRecord,
   type UpdateCtvInput,
 } from '@/lib/api/ctv';
+import { useCtvCreationForm } from '@/components/shared/CtvCreationForm';
+import { CtvCreationForm } from '@/components/shared/CtvCreationForm';
 import { ApiError } from '@/lib/api/core';
 import { CtvHierarchyPanel } from '@/components/ctv/CtvHierarchyPanel';
+
+/**
+ * CtvManagementTab (and nested AddCtvModal / EditCtvModal) — admin CTV list + create/edit.
+ * AddCtvModal now uses shared CtvCreationForm domain (mode 'admin').
+ * This ensures admin create, portal-recruit, and public-join share validation, email-optional rule,
+ * LOB dental-forced, specific per-field errors, and payload shape.
+ *
+ * @crossref:used-in[admin /commission or CTV mgmt tab for "Add CTV"]
+ * @crossref:uses[shared/CtvCreationForm (SSOT), createCtv from @/lib/api/ctv, useBusinessUnit for LOB context]
+ * @crossref:domain[ctv-creation — primary admin call site; see also CtvRecruitModal + JoinCtv]
+ */
 
 const TABLE_COL_COUNT = 8;
 
@@ -216,39 +228,30 @@ interface AddCtvModalProps {
 function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
   const { t } = useTranslation('common');
   const { t: tc } = useTranslation('commission');
-  const [input, setInput] = useState<CreateCtvInput>({
-    name: '',
-    phone: '',
-    email: '',
-    password: '',
-    lob_scope: ['dental'],
+
+  const formApi = useCtvCreationForm({
+    config: { mode: 'admin' },
+    onSubmit: async (payload) => {
+      await createCtv({
+        name: payload.name,
+        phone: payload.phone,
+        email: payload.email || undefined,
+        password: payload.password,
+        lob_scope: payload.lob_scope,
+      });
+    },
   });
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async () => {
-    setSubmitting(true);
-    setError(null);
-    try {
-      await createCtv(input);
-      onSuccess();
-    } catch (err) {
-      const message = err instanceof ApiError ? err.message : 'Failed to create CTV';
-      setError(message);
-    } finally {
-      setSubmitting(false);
+  // Auto-close + notify parent on success (replaces prior local success state + setTimeout in render).
+  useEffect(() => {
+    if (formApi.success) {
+      const id = setTimeout(() => {
+        formApi.clearSuccess();
+        onSuccess();
+      }, 800);
+      return () => clearTimeout(id);
     }
-  };
-
-  const handleToggleLob = (lob: string) => {
-    if (lob === 'dental') return; // always required for CTV auth row
-    setInput({
-      ...input,
-      lob_scope: input.lob_scope?.includes(lob)
-        ? input.lob_scope.filter((l) => l !== lob)
-        : [...(input.lob_scope || []), lob],
-    });
-  };
+  }, [formApi.success, formApi.clearSuccess, onSuccess]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -260,95 +263,22 @@ function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
           </button>
         </div>
 
-        <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-1">{tc('ctv.name')}</label>
-            <input
-              type="text"
-              value={input.name}
-              onChange={(e) => setInput({ ...input, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-              placeholder={tc('ctv.namePlaceholder')}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-1">{tc('ctv.phone')}</label>
-            <input
-              type="tel"
-              value={input.phone}
-              onChange={(e) => setInput({ ...input, phone: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-              placeholder={tc('ctv.phonePlaceholder')}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-1">{tc('ctv.email')}</label>
-            <input
-              type="email"
-              value={input.email}
-              onChange={(e) => setInput({ ...input, email: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-              placeholder={tc('ctv.emailPlaceholder')}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-1">{t('password', { ns: 'auth' })}</label>
-            <input
-              type="password"
-              value={input.password}
-              onChange={(e) => setInput({ ...input, password: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-              placeholder={tc('ctv.passwordPlaceholder')}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">{tc('ctv.lobScope')}</label>
-            <div className="space-y-2">
-              {['dental', 'cosmetic'].map((lob) => (
-                <label key={lob} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={input.lob_scope?.includes(lob) || false}
-                    onChange={() => handleToggleLob(lob)}
-                    disabled={lob === 'dental'}
-                    className="w-4 h-4 rounded border-gray-300 text-primary disabled:opacity-60"
-                  />
-                  <span className="text-sm text-gray-700 capitalize">{lob}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {error && (
-          <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-            <p className="text-red-700 text-sm">{error}</p>
-          </div>
-        )}
-
-        <div className="flex gap-3 justify-end pt-4 border-t border-gray-200">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            {t('cancel')}
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={submitting || !input.name || !input.email || !input.password}
-            className={`px-4 py-2 text-sm rounded-lg font-medium transition-colors ${
-              submitting || !input.name || !input.email || !input.password
-                ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                : 'bg-primary text-white hover:bg-primary-dark'
-            }`}
-          >
-            {submitting ? t('loading') : t('save')}
-          </button>
-        </div>
+        <CtvCreationForm
+          hookResult={formApi}
+          labels={{
+            name: tc('ctv.name'),
+            phone: tc('ctv.phone'),
+            email: tc('ctv.email'),
+            password: t('password', { ns: 'auth' }),
+            lobs: tc('ctv.lobScope'),
+            submit: t('save'),
+            submitting: t('loading'),
+          }}
+          showLobs
+          onCancel={onClose}
+          submitLabel={t('save')}
+          className="space-y-3"
+        />
       </div>
     </div>
   );

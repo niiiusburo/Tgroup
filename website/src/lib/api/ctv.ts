@@ -139,7 +139,7 @@ export function fetchCtvCommissionSummary() {
 export interface CreateCtvInput {
   name: string;
   phone: string;
-  email: string;
+  email?: string;
   password: string;
   lob_scope?: string[];
   referred_by_ctv_id?: string;
@@ -330,7 +330,7 @@ export interface CtvJoinInput {
   readonly uplinePhone?: string;
   readonly name: string;
   readonly phone: string;
-  readonly email: string;
+  readonly email?: string;
   readonly password: string;
 }
 

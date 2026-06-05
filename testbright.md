@@ -10,6 +10,40 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: CTV public sign-up required fields clarity 2026-06-05
+Feature/edit name: Public CTV sign-up page copy + validation proof. `/ctv/join` must not require email, and NK3 root CTV sign-up must allow no CTV giới thiệu phone when the root-signup flag is enabled.
+Branch: nk3-deploy. Files: `website/src/pages/CTV/JoinCtv.tsx`, `website/src/pages/CTV/JoinCtv.test.tsx`, shared CTV form domain.
+
+Changed URLs / API routes / data flow:
+- URL: `/ctv/join` on NK3 web (`https://tmv.2checkin.com/ctv/join`) and static landing redirects from `https://ctv.thammyvientam.com`.
+- API route: existing `POST /api/ctv-public/join`; no schema change. Payload continues to require name, phone, password; `email` may be blank; `code` may be blank only when NK3 root sign-up is enabled.
+
+Affected roles and data flows:
+- Role: unauthenticated CTV applicant.
+- Happy path: applicant sees required-field copy, fills name + phone + password, leaves email blank, optionally leaves CTV giới thiệu blank on NK3 root sign-up, and account creation submits.
+- Edge cases: email blank must not block submit; email input must not have browser `required`; no-upline still blocked when root flag is off; unknown typed CTV phone blocks submit.
+- Regressions: referral-code signup, manual upline phone signup, backend duplicate-email checks only when email is supplied, portal/admin shared CTV form behavior.
+
+Execution checks:
+- [x] PASS: TDD red confirmed page did not yet show required-field copy.
+- [x] PASS: `NODE_OPTIONS=--max-old-space-size=8192 npm --prefix website test -- src/pages/CTV/JoinCtv.test.tsx` — 8/8 green, including email-optional and NK3 root sign-up with no CTV giới thiệu phone.
+- [x] PASS: Shared CTV frontend bundle `NODE_OPTIONS=--max-old-space-size=8192 npm --prefix website test -- src/components/shared/CtvCreationForm/useCtvCreationForm.test.tsx src/components/shared/CtvCreationForm/CtvCreationForm.test.tsx src/components/commission/CtvManagementTab.test.tsx src/components/ctv/CtvRecruitModal.test.tsx src/pages/CTV/JoinCtv.test.tsx` — 34/34 green; CtvRecruitModal close/reopen no longer OOMs.
+- [x] PASS: Targeted backend CTV suites `JWT_SECRET=test-secret NODE_ENV=test npx jest src/routes/__tests__/ctvPublicJoin.test.js src/routes/__tests__/ctvCreateLobScope.test.js src/routes/__tests__/ctvBookings.test.js src/__tests__/ctvRouteGating.test.js src/services/__tests__/ctvSelfProfile.test.js src/services/__tests__/commissionEngineServiceCard.test.js --runInBand --no-coverage` — 43/43 green.
+- [ ] PENDING: Live browser screenshot after NK3 redeploy showing `/ctv/join` copy and optional email state.
+
+# TestSprite Plan: Shared CTV creation hook (useCtvCreationForm) 2026-06-05
+Feature/edit name: Extracted shared hook + types + tests for the 3 CTV creation UIs (admin AddCtvModal, portal CtvRecruitModal, public JoinCtv). TDD, per AGENTS/website/agents, immutable, config-driven (email optional default, LOB dental forced), per-field errors, clean payload, i18n ctv ns.
+Branch: current. Files: website/src/components/shared/CtvCreationForm/* , i18n updates, changelogs, package bump to 0.32.104.
+Execution checks:
+- [x] PASS: New hook unit tests (renderHook) 12/12 green (initial, immutable sets, toggleLob invariants, validation core+per-field+email optional, pw min6, clean payload omit email, success/isSubmitting/reset, public-join lobs internal).
+- [x] PASS: `npm test -- .../useCtvCreationForm.test.tsx` PASS.
+- [x] PASS: `cd website && npx tsc --noEmit` (no new errors from hook/types; checked via focused run).
+- [x] PASS: Authority gate (`scripts/prompt-authority-check.sh`) PASS; all required docs read (AGENTS/ARCH/DESIGN/BEHAVIOR/DECISIONS + 5 LOB/ctv product-map yamls + schema-map + unknowns + website/agents+design + ctv.json + 3 consumers + api/ctv + hooks/useFormValidation + Ctv* examples).
+- [x] PASS: No new files without necessity; i18n/CHANGELOG/testbright bumped as mandatory for frontend feature; module <500 lines.
+- [x] PASS: Presentational CtvCreationForm implemented + basic test (structure, border-red-500 per-field, slots beforeLobs/children/afterSubmit, labels, onCancel, submit wiring to hook, LOB checkboxes). 10/10 vitest green. tsc clean. Barrel updated. (The 3 consumers wiring + re-run of their tests is separate follow-up step.)
+- [x] DONE (0.32.106): All 3 consumers (CtvManagementTab AddCtvModal, CtvRecruitModal, JoinCtv) wired to shared CtvCreationForm + useCtvCreationForm (modes + slots + labels). Email optional + specific per-field errors + red borders (fixes the reported generic "Vui lòng nhập đầy đủ thông tin" + email forced on the recruit form). @crossref + SSOT enforcement (AGENTS §5.1 + prompt gate + website/agents + ctv.yaml creation + README + CONTRACTS + TEST-MATRIX + dual CHANGELOGs + version). Backend routes + ctvHelpers have @crossref. All relevant tests green (shared/consumers 34/34, backend CTV 43/43, JoinCtv 8/8 including visible required-field guidance + no-email/root-no-referrer); tsc clean; verify:docs PASS; authority gate PASS. Breadcrumbs ensure future logic changes propagate. (Manual browser create flows on local 5175 with t@clinic.vn + live NK3/TMV verification remain per Claude.md rule.)
+- [ ] PENDING: Full e2e on /ctv/join + recruit sheet + admin /commission CTV tab after wiring.
+
 # TestSprite Plan: CTV referral/commission spec — Wave 1 (public signup) 2026-06-05
 Feature/edit name: Public CTV signup — root CTV (no upline) + optional email, per `docs/business-logic/ctv-referral-commission.md` §12.
 Branch: nk3-deploy. Backend `api/src/routes/ctvPublic.js` (`POST /join`); frontend `website/src/pages/CTV/JoinCtv.tsx`.
@@ -3479,3 +3513,49 @@ Feature: §12 — admin moves a CTV's upline only when fresh (no referrals/servi
 - [x] PASS: W7 deposit history (/payment) LIVE — customer selector (9 opts) + deposit-wallet history panel with transactions, no edit button (Playwright /tmp/nk3_W7_v2.png).
 - [x] PASS: W4 combined-payout display (commission → Chi trả, LOB=All) LIVE — one 'Combined' row, per-LOB breakdown ↳dental 240k/↳cosmetic 240k, total 480k (Playwright /tmp/nk3_W4_combined.png).
 - ALL 8 waves of docs/business-logic/ctv-referral-commission.md now up and running + verified on tmv.2checkin.com.
+
+---
+
+# TestSprite Plan: NK3 post-redeploy read-only verification 2026-06-05
+Feature/edit name: NK3 v0.32.101 redeploy smoke — public CTV signup/booking, Cosmetic admin pages, and deploy health.
+
+Changed URLs and API routes checked:
+- `https://tmv.2checkin.com/version.json` reports `0.32.101`; commit metadata is `unknown`.
+- `https://tmv.2checkin.com/api/health` returns healthy with DB and face-service checks true.
+- `https://ctv.thammyvientam.com/` renders CTA links to `/welcome?book=1`, `/ctv/join`, and `/ctv`.
+- `https://tmv.2checkin.com/ctv/join` renders the no-login CTV signup form.
+- `https://tmv.2checkin.com/welcome?book=1` opens the public customer referral booking sheet.
+- Authenticated Cosmetic pages checked read-only: `/?lob=cosmetic`, `/customers?lob=cosmetic`, `/calendar?lob=cosmetic`, `/commission?lob=cosmetic`, `/payment?lob=cosmetic`.
+- Public API route checked read-only: `GET /api/ctv-public/services` returned 200; `GET /api/ctv-public/ctv-lookup?phone=0000000000` returned `{ exists:false }`.
+
+Affected data flows:
+- Public CTV signup display only; no live CTV created in this verification.
+- Public appointment booking display only; no live booking submitted in this verification.
+- Cosmetic admin read flows for dashboard, customers, calendar, commission, and payment.
+- NK3 database schema read-only check: `appointments.ctv_id` exists on both `tdental_nk3` and `tcosmetic_nk3`; service-card earnings idempotency index exists on both DBs.
+
+User roles:
+- Public visitor on the Tâm landing and no-login CTV signup/booking routes.
+- Authenticated admin/staff with Cosmetic LOB access.
+
+Happy paths:
+- Landing CTA hrefs resolve to real TMV routes instead of dead paths.
+- CTV signup form loads without requiring login and shows name, phone, optional email, password, and referrer phone fields.
+- `/welcome?book=1` opens the booking/referral sheet immediately.
+- Cosmetic dashboard, customers, calendar, commission, and payment pages render with no browser-captured API 4xx/5xx errors.
+
+Edge cases and regressions:
+- Do not treat live `gitCommit: unknown` as commit-level proof; use version/build-time/container start plus screenshots until build args are fixed.
+- Keep checks read-only unless mutation-safe CTV/customer/payment records are explicitly approved.
+- API logs still contain legacy endpoint errors for `commissions`, `accountjournals`, and a customer-receipts column mismatch; authenticated pages checked here did not surface them, but TestSprite should watch those routes separately.
+
+Setup data and login state:
+- Target: `https://tmv.2checkin.com`, default Cosmetic LOB.
+- Browser evidence: `website/output/playwright/nk3-redeploy-check-20260605T111600Z/` and `website/output/playwright/nk3-auth-readonly-check-20260605T111833Z/`.
+- VPS evidence: `tgroup-nk3-web` started `2026-06-05T07:08:32Z`; `tgroup-nk3-api` started `2026-06-05T06:36:32Z`.
+
+TestSprite execution items:
+- [x] PASS: Public route and API read-only smoke for v0.32.101 redeploy.
+- [x] PASS: Authenticated Cosmetic read-only smoke across dashboard/customers/calendar/commission/payment.
+- [ ] PENDING: Separate mutation-safe TestSprite run for public signup submit and booking submit using approved disposable data.
+- [ ] PENDING: Fix deploy build metadata so `version.json` reports the actual git commit and branch.

@@ -1,5 +1,87 @@
 [
   {
+    "version": "0.32.106",
+    "date": "2026-06-05",
+    "commit": "ctv-creation-ssot-unify-enforce",
+    "highlights": "Unified the three CTV creation/signup paths (admin AddCtvModal, portal CtvRecruitModal, public JoinCtv) into one reusable shared domain (CtvCreationForm + useCtvCreationForm). Email now optional everywhere (consistent with admin + public spec; per-field red borders + specific errors replace generic \"Vui lòng nhập đầy đủ thông tin\"). Added @crossref breadcrumbs + SSOT enforcement (new AGENTS.md §5.1 + prompt gate block + website/agents.md + product-map/domains/ctv.yaml creation subsection + co-located README). Backend ctv.js already optional + dup guards skip blank email. All three consumers now delegate; tests green; tsc clean. Bumped to 0.32.106.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Fixed: CTV recruit/join forms required email (image case) + used generic required banner. Now email optional + specific per-field errors + red borders on the exact missing field (e.g. partial email).",
+          "Fixed: public /ctv/join now explicitly tells CTVs that only name, phone, and password are required; email is optional, and NK3 root signup works with no email and no CTV giới thiệu phone.",
+          "Fixed: CtvRecruitModal close/reopen reset no longer depends on the whole hook result object, preventing a closed-modal render loop and Vitest worker OOM.",
+          "Fixed: duplication across admin/portal/public CTV create flows (no breadcrumb effect). All now share the SSOT module so logic changes surface in all places."
+        ]
+      },
+      {
+        "title": "Architecture / Enforcement",
+        "items": [
+          "New: root AGENTS.md §5.1 \"CTV / Identity Domain SSOT Enforcement\" (mandatory shared use, @crossref, atomic co-update of 3 consumers + backend + product-map + tests + CHANGELOG on any domain change; violation = failed task per §16).",
+          "New: prompt-authority-check.sh hard block (rg scan for createCtv/joinCtv verbs without the shared import in frontend/src; exits 1 with message).",
+          "New: website/agents.md CTV Creation Domain SSOT subsection (frontend rules + \"before adding new create-CTV form...\").",
+          "New: product-map/domains/ctv.yaml \"creation:\" subsection (SSOT path, 3 call sites, invariants, before_new_surface gate).",
+          "New: website/src/components/shared/CtvCreationForm/README.md (full contract, modes, examples, \"cannot overlook\" rules + cross-link to AGENTS §5.1).",
+          "Added ids + htmlFor to shared Field for a11y + robust label queries (tests now pass for JoinCtv getByLabelText).",
+          "All three paths + shared now carry accurate @crossref:used-in/uses/domain[ctv-creation] comments."
+        ]
+      },
+      {
+        "title": "Refactors",
+        "items": [
+          "Wired CtvRecruitModal, CtvManagementTab (AddCtvModal), and JoinCtv to shared hook + CtvCreationForm (with beforeLobs slot for public upline gate, showLobs=false for public, labels per ns). Cleaned duplicate legacy code, dead handlers, unused imports.",
+          "Updated lib/api/ctv.ts CreateCtvInput / CtvJoinInput email?: string (was required).",
+          "Backend api/src/routes/ctv.js: email optional in validate + dup check only if supplied + store NULL; matches ctvPublic.js.",
+          "Shared hook now exports via barrel; Field enhanced."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.105",
+    "date": "2026-06-05",
+    "commit": "ctv-creation-form-presentational",
+    "highlights": "Presentational CtvCreationForm component implemented (uses the prior useCtvCreationForm hook; prop-driven, no internal state/validate). Orange focus/rounded-xl fidelity to recruit/join UIs + border-red-500 per-field errors + internal Field reuse + slots (beforeLobs/children/afterSubmit) + labels partial + showLobs/onCancel. Co-located basic vitest (10/10). Barrel + subdir index. Bumped to 0.32.105.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "New: website/src/components/shared/CtvCreationForm/CtvCreationForm.tsx (named export, CtvCreationFormProps, @crossref).",
+          "New barrel: CtvCreationForm/index.ts + added to shared/index.ts for easy import.",
+          "Basic component test: CtvCreationForm.test.tsx (structure, error borders, setters, toggle, submit, slots, cancel, labels)."
+        ]
+      },
+      {
+        "title": "Refactors",
+        "items": [
+          "Completes the shared CTV creation surface (hook was previous step). Ready for wiring into AddCtvModal, CtvRecruitModal, JoinCtv."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.104",
+    "date": "2026-06-05",
+    "commit": "shared-ctv-creation-hook",
+    "highlights": "Shared frontend hook useCtvCreationForm extracted for the 3 CTV creation surfaces (admin, portal-recruit, public-join). Config-driven, per-field errors, immutable, email optional by default, dental LOB forced, clean payloads, TDD with 12/12 vitest renderHook tests.",
+    "sections": [
+      {
+        "title": "Refactors",
+        "items": [
+          "New shared: website/src/components/shared/CtvCreationForm/{types.ts, useCtvCreationForm.ts, useCtvCreationForm.test.tsx}.",
+          "Added i18n keys under ctv:forms.createCtv.* (vi/en) for reusable per-field + core errors.",
+          "Bumped website/package.json to 0.32.104; updated public/CHANGELOG.json + docs/CHANGELOG.md + testbright.md."
+        ]
+      },
+      {
+        "title": "Tests",
+        "items": [
+          "Full unit coverage via renderHook for modes, validation (core + per-field), LOB toggle invariants, clean payload (email omit), success/isSubmitting/reset, i18n messages."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.103",
     "date": "2026-06-05",
     "commit": "nk3-deploy-edit-ctv-lob",

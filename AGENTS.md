@@ -106,6 +106,31 @@ Allowed exceptions:
 - Auto-generated files where splitting harms maintainability.
 - Translation JSON files and static data files.
 
+## 5.1 CTV / Identity Domain SSOT Enforcement
+
+**The shared `website/src/components/shared/CtvCreationForm/` (CtvCreationForm presentational component + useCtvCreationForm config-driven hook + types + barrel) is the *single source of truth* (SSOT) for *any and all* CTV account creation UI or flows.**
+
+- **Mandatory use:** Any UI, page, modal, sheet, drawer, form, or flow that creates CTV accounts — whether admin ("Add CTV"), logged-in CTV portal recruit/refer, public unauthenticated self-signup/join (with or without `?ref=` or manual upline), future variants, or embedded surfaces — **MUST** import and delegate to `CtvCreationForm` (strictly prop-driven via `hookResult`) + `useCtvCreationForm` (pass `config: { mode: 'admin' | 'portal-recruit' | 'public-join' }` + `onSubmit` that wraps the appropriate `createCtv`/`joinCtv` + page-specific extras like upline). Never inline duplicate form fields, validation, LOB checkboxes, error UI (red borders + `border-red-500`), payload building, or state. Before adding a *new* create-CTV form or modal anywhere: import from the shared (direct or via `@/components/shared` barrel) and extend the hook config (new mode or `requireEmail`) if the context differs. Do not duplicate.
+
+- **`@crossref` required (non-negotiable):** The SSOT module itself *and every call site* **MUST** carry (and keep updated on every edit) accurate `@crossref:used-in[...]`, `@crossref:uses[...]`, and `@crossref:domain[ctv-creation ...]` comments tracing the SSOT + the three canonical consumers + backend. See current examples in `CtvCreationForm.tsx`, `CtvManagementTab.tsx`, `CtvRecruitModal.tsx`, and `JoinCtv.tsx`.
+
+- **Atomic co-update on *any* domain change (non-negotiable):** On *any* change to the CTV creation domain (hook validation/payload/LOB/email logic, error messages, i18n `forms.createCtv.*` keys, form UI/Field/slot behavior, types/config/modes, success/reset handling, or related contracts), **all of the following must be updated in the exact same commit**:
+  - All 3+ consumers/call sites (current canonical set: `website/src/components/commission/CtvManagementTab.tsx` (AddCtvModal, mode 'admin'), `website/src/components/ctv/CtvRecruitModal.tsx` (mode 'portal-recruit'), `website/src/pages/CTV/JoinCtv.tsx` (mode 'public-join' + page-specific upline/beforeLobs/rootSignup gate); plus any future ones).
+  - Backend validation, auth, LOB normalization, duplicate guards (phone always; email only if supplied), cross-DB all-or-nothing writes + rollback, and error codes in `api/src/routes/ctv.js` (POST /ctv) *and* `api/src/routes/ctvPublic.js` (POST /join).
+  - `product-map/domains/ctv.yaml` (the "creation" subsection + any impacted writes/endpoints/impact_tests).
+  - Affected tests (hook/form unit tests + surface integration tests for the consumers).
+  - `website/src/lib/api/ctv.ts` (CreateCtvInput / CtvJoinInput / callers) if shapes or docs shift.
+  - `docs/CHANGELOG.md` (with version bump in `website/package.json` per §8) + any other authority per the Documentation Enforcement Rule (§16).
+  This is an explicit extension of §16: the task is **incomplete** (and treated as failed/rollback-required) without the full co-update in one commit.
+
+- **Violation = task failed:** Introducing, leaving, or editing around duplicated CTV creation logic (files containing `createCtv|joinCtv|AddCtv|RecruitCtv|JoinCtv` (or equivalent new-form patterns) but *not* importing/using the shared `CtvCreationForm` + hook) is a hard violation of this SSOT. The prompt gate (`scripts/prompt-authority-check.sh`), pre-commit, and CI will block. Per §16, such a commit "is treated as failed and rolled back." The authority gate runs on *every* prompt (via hook or `npm run verify:prompt`).
+
+- **Invariants to preserve (client + server):** Email optional (default; clean payload omits if falsy/blank; backend skips dup query + stores NULL; UI shows "(không bắt buộc)" note via labels). `lob_scope` *always* forces `'dental'` (hook initial values + toggle guard + `normalizeLobs`; backend always prepends for the auth row + dental DB write). Core required: name + phone + password (>=6 chars). Per-field + form errors for live red borders + disabled submit. Specific error codes: `VALIDATION`, `U_DUPLICATE_PHONE`, `U_DUPLICATE_EMAIL`, `U_WEAK_PASSWORD`, `U_UPLINE_REQUIRED` (public, unless root enabled), `S_CTV_CREATE_FORBIDDEN`, `E_CTV_CREATE_FAILED` (cross-DB). Payloads are trimmed + normalized with dental. Success/reset orchestration is caller-driven.
+
+- **Rationale + cross-links:** CTV creation is high-blast (public/portal/admin + two-DB partners/earnings + auth login + LOB). Duplication has caused repeated drift (email, LOB, errors, writes). See `website/agents.md` (frontend rules + "before adding..."), the `README.md` inside `CtvCreationForm/`, `product-map/domains/ctv.yaml` (creation subsection), current `@crossref` comments, backend routes, `docs/INVARIANTS.md` / `USE-CASES.md` as applicable, and §16 (doc + CHANGELOG enforcement). Update *this* subsection on any governance delta.
+
+CTV/LOB changes must also continue to follow §3 (product-map + two-DB + LOB discipline) + read the 5 split domains.
+
 ## 6. Frontend Rules
 
 For frontend work:

@@ -43,6 +43,8 @@ All dental endpoints have exact cosmetic mirrors:
 
 **CTV commission referrer on service/appointment writes:** `POST/PATCH /api/SaleOrders` and `POST/PUT /api/Appointments` (and cosmetic mirrors) accept an optional `ctv_id` (UUID). When present it assigns that CTV as the customer's `partners.referred_by_ctv_id` (D13 priority #1 for earnings attribution) via `services/customerReferrer.setCustomerReferrer`. **Assign-only**: a null/empty/invalid `ctv_id` is a no-op and never clears an existing referrer. The CTV must exist as an `is_ctv=true`, active, non-deleted partner in the request's LOB DB (validated server-side; cross-LOB / unknown ids are rejected to avoid later earnings FK failures). Reads (`GET /api/SaleOrders`, `/SaleOrders/lines`, `/SaleOrders/:id`, `GET/POST/PUT /api/Appointments`) return the customer's current `ctv_id` for selector pre-fill.
 
+**CTV account creation (SSOT):** `POST /api/ctv` (admin) and `POST /api/ctv-public/join` (public/portal) now have `email` optional in the contract (client types `email?: string`; backend accepts blank/omitted, skips duplicate-email check for blank, stores NULL; clean payload from SSOT omits falsy email). All creation UIs (admin AddCtv, CtvRecruitModal, public JoinCtv) delegate to the shared `CtvCreationForm`/`useCtvCreationForm` domain (see AGENTS.md §5.1, product-map/domains/ctv.yaml creation subsection, and the three @crossref sites). This eliminates prior duplication (email requirement + generic "Vui lòng nhập đầy đủ thông tin" errors) and provides the breadcrumb effect.
+
 When `COSMETIC_LOB_ENABLED=false` the entire family returns 503.
 
 ## CTV Dashboard & Commission API (`/api/ctv`) — CTV role only (is_ctv + ctv.* permissions)

@@ -227,6 +227,15 @@
       "submit": "Create CTV account",
       "submitting": "Creating...",
       "success": "CTV created successfully!"
+    },
+    "createCtv": {
+      "coreRequired": "Please enter full name, phone number and password.",
+      "nameRequired": "Please enter full name.",
+      "phoneRequired": "Please enter phone number.",
+      "emailRequired": "Please enter email.",
+      "passwordRequired": "Please enter password.",
+      "passwordMin": "Password must be at least 6 characters.",
+      "lobsRequired": "Select at least one service line"
     }
   }
 }

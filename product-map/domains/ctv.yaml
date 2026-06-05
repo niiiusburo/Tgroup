@@ -81,6 +81,26 @@ ui_surfaces:
   - /welcome public landing: Đặt Lịch Cho Khách opens the refer-client sheet without login, asks for customer phone first, then name, then CTV phone, live-verifies that CTV phone through /api/ctv-public/ctv-lookup, and submits through /api/ctv-public/bookings only when the CTV exists.
   - /welcome public landing: Đăng Ký CTV loads /ctv/join without login; visitors can enter an upline CTV phone/referral code to attach below an existing CTV, or omit upline to create an active root/top-level CTV. Phone and password are required; email is optional and must be clear in the UI.
   - Admin CTV hierarchy target surface: drag-and-drop hierarchy tree for moving uplines/downlines, allowed only for fresh CTVs with no referred customer, service, or earning activity, with automatic audit log.
+creation:
+  ssot_module: website/src/components/shared/CtvCreationForm/
+  description: |
+    SSOT (hook + presentational form + types) for *all* CTV account creation UIs/flows.
+    Config-driven (modes: admin | portal-recruit | public-join). Strictly prop-driven.
+    See co-located README.md + root AGENTS.md §5.1 (CTV / Identity Domain SSOT Enforcement).
+    @crossref maintained in SSOT + call sites on every edit.
+  call_sites:
+    - website/src/components/commission/CtvManagementTab.tsx (AddCtvModal, mode: 'admin', uses createCtv wrapper + labels from 'commission'/'common' ns)
+    - website/src/components/ctv/CtvRecruitModal.tsx (mode: 'portal-recruit', uses createCtv + CtvModalSheet, labels from 'ctv' ns)
+    - website/src/pages/CTV/JoinCtv.tsx (mode: 'public-join', uses joinCtv wrapper + uplinePhone gate + beforeLobs slot + rootSignupEnabled VITE flag; labels mostly hardcoded + emailOptional note)
+  invariants:
+    - email optional by default (converged); omitted from clean CtvCreatePayload if falsy/blank (no dup-check); UI note via labels.emailOptional; backend stores NULL.
+    - lob_scope: dental *always forced* (hook initial + toggle guard + normalizeLobs; backend always includes + uses for dental auth row + writes). Cosmetic additive/optional.
+    - required core: name, phone, password (min length 6). Per-field errors + form errors drive red borders + canSubmit/disable.
+    - specific errors (client+server parity): VALIDATION (missing), U_DUPLICATE_PHONE, U_DUPLICATE_EMAIL (only if supplied), U_WEAK_PASSWORD, U_UPLINE_REQUIRED (public unless root enabled), S_CTV_CREATE_FORBIDDEN, E_CTV_CREATE_FAILED (cross-DB atomicity failure).
+    - clean payload: trimmed strings; lob_scope normalized with dental; onSubmit caller adds page-specific (code/uplinePhone/referred_by).
+    - All changes to this domain require atomic same-commit updates to: the 3 call sites + backend (ctv.js + ctvPublic.js) + this yaml + tests + CHANGELOG + @crossref (per AGENTS.md §5.1 + §16). Violation = task failed.
+  before_new_surface: |
+    Before adding any new create-CTV form or modal: import { CtvCreationForm, useCtvCreationForm } (or from shared barrel) and extend config if needed. Never duplicate.
 shared_types:
   - website/src/lib/api/ctv.ts : CtvCommissionSummary, CtvReferral, CommissionRow (with lob tag)
   - api/src/routes/ctv.js payload contracts

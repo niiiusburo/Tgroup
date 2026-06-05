@@ -66,6 +66,17 @@ website/
 3. **No deep nesting**: Maximum 3 levels of component folders.
 4. **Barrel exports**: Each folder should export its public API via `index.ts`.
 
+## CTV Creation Domain SSOT (MANDATORY — see root AGENTS.md §5.1)
+
+The shared `components/shared/CtvCreationForm/` (CtvCreationForm + useCtvCreationForm hook + types, exported via shared index or direct) **is the single source of truth for every CTV account creation UI or flow** (admin AddCtvModal in CtvManagementTab, portal CtvRecruitModal, public JoinCtv page, or any future surface).
+
+- **Mandatory:** Import and use the shared form + hook for *any* create-CTV UI. Config-driven (`mode: 'admin' | 'portal-recruit' | 'public-join'`); prop-driven presentational only. Extend hook config (or add slots via `beforeLobs`/`children`/`labels`) for context needs rather than forking. **Before adding a new create-CTV form or modal, import from shared and extend the hook config if needed.** Never duplicate fields, validation, LOB dental-forced logic, per-field red `border-red-500` errors, payload cleaning (email optional/omitted), or submit handling.
+- **`@crossref` required:** Maintain (and update on every edit) `@crossref:used-in[...]`, `@crossref:uses[...]`, and `@crossref:domain[ctv-creation]` comments in the SSOT *and at every call site*.
+- **Atomic updates:** Any change to the domain requires co-updating all 3+ consumers + backend validation + `product-map/domains/ctv.yaml` (creation subsection) + tests + `docs/CHANGELOG.md` (with version bump) in the *same commit*. Violation = task failed per root AGENTS.md §16 (Documentation Enforcement Rule).
+- Invariants (preserve exactly): email optional (with note), dental always forced + present in lob_scope, name/phone/password required (pw >=6), clean trimmed payload, specific error codes + per-field UI, cross-DB safety on backend.
+
+See root `AGENTS.md` §5.1 for the full permanent rule, the `README.md` co-located in `CtvCreationForm/`, and the three call sites for examples. This is non-negotiable for identity/creation surfaces.
+
 ---
 
 ## Component Architecture

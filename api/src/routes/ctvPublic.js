@@ -397,7 +397,31 @@ router.post('/join', async (req, res) => {
   const email = rawEmail == null ? '' : String(rawEmail).trim();
   const uplinePhone = normalizePhone(rawUplinePhone || rawUplinePhoneSnake);
 
-  // Email is OPTIONAL (spec §12): only name, phone, and password are required.
+  /**
+   * @crossref:domain[ctv-creation]
+   * Backend endpoint: POST /api/ctv-public/join (public/portal CTV self-signup)
+   *
+   * Absolute path references (SSOT + consumers + governance):
+   *   SSOT: /Users/thuanle/Documents/TamTMV/Tgrouptest/website/src/components/shared/CtvCreationForm/
+   *   Call sites:
+   *     - /Users/thuanle/Documents/TamTMV/Tgrouptest/website/src/components/commission/CtvManagementTab.tsx (AddCtvModal, mode 'admin')
+   *     - /Users/thuanle/Documents/TamTMV/Tgrouptest/website/src/components/ctv/CtvRecruitModal.tsx (mode 'portal-recruit')
+   *     - /Users/thuanle/Documents/TamTMV/Tgrouptest/website/src/pages/CTV/JoinCtv.tsx (mode 'public-join' + upline/beforeLobs/root gate)
+   *   Governance: /Users/thuanle/Documents/TamTMV/Tgrouptest/AGENTS.md §5.1 (CTV / Identity Domain SSOT Enforcement)
+   *   Product map: /Users/thuanle/Documents/TamTMV/Tgrouptest/product-map/domains/ctv.yaml (creation subsection)
+   *   Types/contract: /Users/thuanle/Documents/TamTMV/Tgrouptest/website/src/lib/api/ctv.ts (CtvJoinInput, joinCtv, CreateCtvInput parity)
+   *
+   * Invariants (client+server; see AGENTS.md §5.1 and product-map ctv.yaml):
+   *   - Email OPTIONAL: only name + phone + password required (dup email check ONLY if supplied; store NULL if blank/omitted; clean payload from SSOT omits falsy email).
+   *   - lob_scope: dental ALWAYS forced/normalized into array (backend prepends for dental auth row + writes); cosmetic additive.
+   *   - Cross-DB atomic writes (dental always + cosmetic if scoped) with explicit rollback DELETE on partial failure (E_CTV_CREATE_FAILED).
+   *   - Specific error codes: VALIDATION, U_DUPLICATE_PHONE, U_DUPLICATE_EMAIL (only-if-supplied), U_WEAK_PASSWORD, U_UPLINE_REQUIRED (unless root), E_CTV_CREATE_FAILED.
+   *
+   * This is the public counterpart to the authed POST /api/ctv create path in ctv.js.
+   * @crossref:uses[shared/CtvCreationForm (SSOT), joinCtv wrapper in JoinCtv.tsx, resolveUpline/resolveCtvByPhone local helpers here, getDb('dental'|'cosmetic') + safeRows for dual-DB]
+   * @crossref:used-in[public unauthed CTV join flow; also portal-recruit via CtvRecruitModal calling createCtv which is the other route]
+   */
+  // Email is OPTIONAL (spec §12): only name, phone, and password are required.  [enhanced with @crossref per AGENTS.md §5.1; see block above]
   if (!name || !phone || !password) {
     return res.status(400).json({ error: { code: 'VALIDATION', message: 'Missing required fields: name, phone, password' } });
   }

@@ -227,6 +227,15 @@
       "submit": "Tạo tài khoản CTV",
       "submitting": "Đang tạo...",
       "success": "Tạo CTV thành công!"
+    },
+    "createCtv": {
+      "coreRequired": "Vui lòng nhập họ tên, số điện thoại và mật khẩu.",
+      "nameRequired": "Vui lòng nhập họ tên.",
+      "phoneRequired": "Vui lòng nhập số điện thoại.",
+      "emailRequired": "Vui lòng nhập email.",
+      "passwordRequired": "Vui lòng nhập mật khẩu.",
+      "passwordMin": "Mật khẩu phải có ít nhất 6 ký tự.",
+      "lobsRequired": "Chọn ít nhất một lĩnh vực"
     }
   }
 }

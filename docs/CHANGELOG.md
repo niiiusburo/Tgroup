@@ -2,6 +2,37 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.106] — 2026-06-05
+### CTV Creation Unification + Permanent SSOT Enforcement (non-overlookable)
+- Unified the three CTV/"Codex" signup/create processes (admin portal Add CTV in CtvManagementTab, unauthed public no-sign-in JoinCtv, logged-in CTV portal recruit via CtvRecruitModal) into **one reusable domain** (`website/src/components/shared/CtvCreationForm/` + `useCtvCreationForm` hook). All three now delegate (config modes + onSubmit wrappers for page extras like upline/code; beforeLobs slot for public gate; showLobs=false for public to preserve prior UX).
+- **Fixed the reported image bug:** the recruit form required email + showed only generic "Vui lòng nhập đầy đủ thông tin" (no per-field). Now email optional everywhere (UI note via labels.emailOptional in public; converged with admin/public spec + backend); specific per-field errors + red `border-red-500` on the exact missing/partial field (e.g. the "thuan" email case); core form error for the group message like "Vui lòng nhập họ tên, số điện thoại và mật khẩu.". Matches the "admin does not require email" behavior.
+- **Public CTV signup clarity:** `/ctv/join` now explicitly tells the CTV that only họ tên, số điện thoại, and mật khẩu are required; email is marked optional and the NK3 root-signup path is tested with no email and no CTV giới thiệu phone.
+- **Portal recruit modal stability:** fixed the close/reopen reset effect so the shared form no longer loops on a closed `CtvRecruitModal`; the modal suite now passes without worker OOM.
+- **Breadcrumb effect (@crossref):** Added/updated accurate `@crossref:used-in[...]`, `@crossref:uses[...]`, `@crossref:domain[ctv-creation]` in the SSOT module + all three call sites + README. Logic change in hook/form now visibly surfaces in all places.
+- **Permanent enforcement so "this rule is enforced... cannot overlook" (AGENTS.md architect-level):**
+  - New root `AGENTS.md` §5.1 "CTV / Identity Domain SSOT Enforcement" (mandatory shared use for any future create-CTV surface; @crossref required; atomic same-commit co-update of 3 consumers + backend validation (ctv.js + ctvPublic.js) + product-map/domains/ctv.yaml creation subsection + tests + CHANGELOG + version; violation = task failed + rollback per §16).
+  - Hard block in `scripts/prompt-authority-check.sh` (rg scan for createCtv|joinCtv verbs without the shared import → exit 1 + message citing §5.1 + §16; runs on every prompt via the authority gate).
+  - Frontend rules in `website/agents.md` (CTV Creation Domain SSOT subsection + "before adding a new create-CTV form or modal, import from shared...").
+  - `product-map/domains/ctv.yaml` new `creation:` subsection (SSOT path, call sites, invariants, before_new_surface gate).
+  - Co-located `website/src/components/shared/CtvCreationForm/README.md` (full contract, modes, examples, "cannot overlook" rules, cross-links).
+  - Also enhanced shared `Field` with id + htmlFor for a11y + robust test queries (JoinCtv getByLabelText now works; tests green).
+- Backend already consistent (ctv.js updated in cutover for optional email + dup guard only-if-supplied + NULL store; ctvPublic.js had the spec comment already).
+- Types: `website/src/lib/api/ctv.ts` CreateCtvInput/CtvJoinInput email now `?`.
+- Version bump + both CHANGELOGs (website/public + docs/) per Claude.md + AGENTS §8 + §16.
+- All per authority (read AGENTS.md + product-map/ctv + schema + 5 LOB split domains + prompt gate + Claude verification rule + shared/ SSOT + immutability + @crossref + TDD tests + local-first). Spun parallel agents for audit + enforcement drafting + breadcrumbs.
+
+## [0.32.105] — 2026-06-05
+### Added / Refactors
+- **Presentational CtvCreationForm component.** Implemented `website/src/components/shared/CtvCreationForm/CtvCreationForm.tsx` (named export + `CtvCreationFormProps`). Strictly prop-driven using the prior `useCtvCreationForm` hookResult (no state/validate inside). Reuses internal `Field` (fidelity to recruit modal) + simple labels/inputs. Exact orange focus (`focus:ring-2 focus:ring-orange-500`), `rounded-xl px-4 py-3 border-gray-200` match to CtvRecruitModal/JoinCtv/CtvReferModal. Per-field `border-red-500` (spec) + error text on name/phone/email/password/lob_scope. Slots: `beforeLobs`, `children`, `afterSubmit`; `labels?` (partial), `showLobs?`, `onCancel?`, `submitLabel?`. Added subdir barrel + export in shared/index.ts. Includes basic co-located vitest (10/10 passing: values, error classes, setters, toggle, submit, slots, cancel, labels). Bumped website to 0.32.105; updated public/CHANGELOG + docs/CHANGELOG + testbright. @crossref added. — subagent (followed website/agents.md component rules, read hook+types+3 consumers+design+ctv product-map before write, authority gate + tsc + tests passed).
+### Docs
+- Updated `website/public/CHANGELOG.json`, `docs/CHANGELOG.md`, `testbright.md`, `website/package.json`.
+
+## [0.32.104] — 2026-06-05
+### Refactors
+- **Shared CTV creation form hook (useCtvCreationForm) implemented as designed.** New config-driven hook at `website/src/components/shared/CtvCreationForm/useCtvCreationForm.ts` (co-located types + full vitest renderHook suite). Supports admin / portal-recruit / public-join modes. Email optional by default (falsy omitted from clean payload). Per-field errors for red highlights (name/phone/email/password/lobs). Immutable updates only. LOB: dental always forced/included (toggle cannot remove it), cosmetic optional. Password min 6. Reusable i18n 'ctv' errors (core "Vui lòng nhập họ tên, số điện thoại và mật khẩu." + per-field). onSubmit injected (no fetches/side effects inside). reset + success + isSubmitting exposed. Full @crossref. 12/12 tests pass. Bumped website to 0.32.104. Added keys to ctv.json (vi/en). Updated CHANGELOGs + testbright.md. — subagent (TDD, authority gate followed, product-map ctv+LOB domains read).
+### Docs
+- Updated `testbright.md`, `docs/CHANGELOG.md`, `website/public/CHANGELOG.json`, `website/package.json`.
+
 ## [0.32.103] — 2026-06-05 (nk3-deploy)
 ### Fixed
 - **Admin CTV edit now exposes LOB scope choice (dental/cosmetic) for parity with create on NK3.** The Edit CTV modal was missing the `lob_scope` checkboxes present in Add CTV (and the list table already rendered per-CTV scopes), even though create always forces 'dental' (auth row) + optional cosmetic mirror, and NK3 relies on correct two-DB CTV scoping for earnings/referrals. Now `EditCtvModal` (and hardened `AddCtvModal`) shows the choice with 'dental' always required/disabled per invariant; payload includes `lob_scope`; backend `PUT /Ctvs/:id` accepts it, normalizes, and creates the cosmetic mirror row when scope is newly added. Updated `UpdateCtvInput`, adjusted payload tests (still green), bumped `website/package.json` to 0.32.103, and synced both CHANGELOGs. Addresses the direct logical error reported with the edit modal screenshot. — @grok (synthesizing parallel agent audits of NK3 CTV/LOB surfaces)

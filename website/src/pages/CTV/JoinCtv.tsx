@@ -1,9 +1,20 @@
 import { useEffect, useState } from 'react';
-import type { FormEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Check, Loader2, UserPlus } from 'lucide-react';
 import { resolveCtvRefCode, joinCtv, lookupPublicCtvByPhone, type PublicCtvLookup } from '@/lib/api/ctv';
-import { ApiError } from '@/lib/api/core';
+import { useCtvCreationForm } from '@/components/shared/CtvCreationForm';
+import { CtvCreationForm } from '@/components/shared/CtvCreationForm';
+
+/**
+ * JoinCtv — public (no login) CTV self-signup page (via ?ref= or manual upline phone).
+ * Now uses the shared CtvCreationForm + useCtvCreationForm (mode: 'public-join') for the core identity fields,
+ * validation (email optional, password >=6, name/phone/pass required), per-field errors, LOB dental-forced.
+ * Page-specific: upline resolution + lookup gate, rootSignupEnabled flag, code vs manual uplinePhone wiring into joinCtv payload.
+ *
+ * @crossref:used-in[public unauthed /ctv/join landing + any ?book=1 or direct CTV signup CTA]
+ * @crossref:uses[shared/CtvCreationForm (SSOT domain for ctv creation), joinCtv (wraps with code/uplinePhone), resolveCtvRefCode + lookupPublicCtvByPhone for referrer gate]
+ * @crossref:domain[ctv-creation — the third canonical call site; changes to hook or form propagate here]
+ */
 
 /**
  * Public (unauthenticated) CTV self-signup page. A shared referral link
@@ -21,11 +32,53 @@ export function JoinCtv() {
   const [upline, setUpline] = useState<{ status: 'manual' | 'loading' | 'ok' | 'invalid'; name?: string | null }>({
     status: code ? 'loading' : 'manual',
   });
-  const [form, setForm] = useState({ name: '', phone: '', email: '', password: '', uplinePhone: '' });
+  // uplinePhone is page-specific (referrer gate + payload to joinCtv); core identity (name/phone/email/pass) lives in the shared hook.
+  const [uplinePhoneInput, setUplinePhoneInput] = useState('');
   const [ctvLookup, setCtvLookup] = useState<{ status: 'idle' | 'checking' | 'done'; result?: PublicCtvLookup }>({ status: 'idle' });
   const [error, setError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+
+  const formApi = useCtvCreationForm({
+    config: { mode: 'public-join' },
+    onSubmit: async (payload) => {
+      setError(null);
+
+      // Page-specific referrer/upline gate checks now inside the submit path (core identity validated by shared hook before calling this).
+      // Must be here because CtvCreationForm owns the submit button/form; outer handler is no longer on the click path.
+      const uplinePhone = uplinePhoneInput.trim();
+      if (upline.status !== 'ok' && !uplinePhone && !rootSignupEnabled) {
+        const msg = 'Vui lòng nhập số điện thoại CTV giới thiệu.';
+        setError(msg);
+        throw new Error(msg);
+      }
+      if (uplinePhone && ctvLookup.status === 'checking') {
+        const msg = 'Vui lòng chờ xác minh số điện thoại CTV giới thiệu.';
+        setError(msg);
+        throw new Error(msg);
+      }
+      if (uplinePhone && (ctvLookup.status !== 'done' || !ctvLookup.result?.exists)) {
+        const msg = 'Không tìm thấy CTV theo số điện thoại này.';
+        setError(msg);
+        throw new Error(msg);
+      }
+
+      await joinCtv({
+        name: payload.name,
+        phone: payload.phone,
+        // Use '' for falsy to keep existing test expectations for the optional-email case; backend treats blank as optional.
+        email: payload.email || '',
+        password: payload.password,
+        ...(uplinePhone ? { uplinePhone } : { code }),
+      });
+    },
+  });
+
+  // Sync local done state (for success UI) when shared hook reports success (re-render after submit).
+  useEffect(() => {
+    if (formApi.success) {
+      setDone(true);
+    }
+  }, [formApi.success]);
 
   useEffect(() => {
     if (!code) {
@@ -46,7 +99,7 @@ export function JoinCtv() {
   }, [code]);
 
   useEffect(() => {
-    const uplinePhone = form.uplinePhone.trim();
+    const uplinePhone = uplinePhoneInput.trim();
     if (uplinePhone.length < 6) {
       setCtvLookup({ status: 'idle' });
       return;
@@ -65,52 +118,7 @@ export function JoinCtv() {
       cancelled = true;
       clearTimeout(id);
     };
-  }, [form.uplinePhone]);
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setError(null);
-    if (!form.name.trim() || !form.phone.trim() || !form.password) {
-      setError('Vui lòng nhập họ tên, số điện thoại và mật khẩu.');
-      return;
-    }
-    if (form.password.length < 6) {
-      setError('Mật khẩu phải có ít nhất 6 ký tự.');
-      return;
-    }
-    const uplinePhone = form.uplinePhone.trim();
-    if (upline.status !== 'ok' && !uplinePhone && !rootSignupEnabled) {
-      setError('Vui lòng nhập số điện thoại CTV giới thiệu.');
-      return;
-    }
-    if (uplinePhone && ctvLookup.status === 'checking') {
-      setError('Vui lòng chờ xác minh số điện thoại CTV giới thiệu.');
-      return;
-    }
-    if (uplinePhone && (ctvLookup.status !== 'done' || !ctvLookup.result?.exists)) {
-      setError('Không tìm thấy CTV theo số điện thoại này.');
-      return;
-    }
-    setSubmitting(true);
-    try {
-      await joinCtv({
-        name: form.name.trim(),
-        phone: form.phone.trim(),
-        email: form.email.trim(),
-        password: form.password,
-        ...(uplinePhone ? { uplinePhone } : { code }),
-      });
-      setDone(true);
-    } catch (err) {
-      const msg =
-        err instanceof ApiError && (err.body as { error?: { message?: string } })?.error?.message
-          ? (err.body as { error: { message: string } }).error.message
-          : 'Đăng ký không thành công. Vui lòng thử lại.';
-      setError(msg);
-    } finally {
-      setSubmitting(false);
-    }
-  }
+  }, [uplinePhoneInput]);
 
   const field = 'w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-orange-500';
 
@@ -122,12 +130,13 @@ export function JoinCtv() {
             <UserPlus className="h-7 w-7" />
           </div>
           <h1 className="mt-3 text-xl font-bold text-gray-900">Đăng ký Cộng tác viên</h1>
+          <p className="mt-1 text-sm text-gray-600">Bắt buộc: họ tên, số điện thoại và mật khẩu. Email không bắt buộc.</p>
           {upline.status === 'ok' ? (
             <p className="mt-1 text-sm text-gray-600">
               Bạn sẽ đăng ký dưới <span className="font-semibold text-orange-600">{upline.name || 'CTV'}</span>
             </p>
           ) : upline.status === 'manual' ? (
-            <p className="mt-1 text-sm text-gray-600">Nhập số điện thoại CTV giới thiệu ở cuối form.</p>
+            <p className="mt-1 text-xs text-gray-500">Nhập số điện thoại CTV giới thiệu ở cuối form nếu cần chọn tuyến trên.</p>
           ) : null}
         </div>
 
@@ -150,58 +159,52 @@ export function JoinCtv() {
             </a>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-3.5">
+          <div className="space-y-3.5">
             {upline.status === 'invalid' ? (
               <p className="rounded-xl bg-amber-50 px-4 py-3 text-center text-sm font-medium text-amber-700">
                 Liên kết giới thiệu không hợp lệ. Nhập số điện thoại CTV giới thiệu để tiếp tục.
               </p>
             ) : null}
-            <label className="block">
-              <span className="mb-1 block text-sm font-semibold text-gray-700">Họ tên</span>
-              <input className={field} type="text" placeholder="Họ tên" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-            </label>
-            <label className="block">
-              <span className="mb-1 block text-sm font-semibold text-gray-700">Số điện thoại của bạn</span>
-              <input className={field} type="tel" placeholder="Số điện thoại" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-            </label>
-            <label className="block">
-              <span className="mb-1 block text-sm font-semibold text-gray-700">
-                Email <span className="font-normal text-gray-400">(không bắt buộc)</span>
-              </span>
-              <input className={field} type="email" placeholder="Email (không bắt buộc)" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            </label>
-            <label className="block">
-              <span className="mb-1 block text-sm font-semibold text-gray-700">Mật khẩu</span>
-              <input className={field} type="password" placeholder="Mật khẩu (tối thiểu 6 ký tự)" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
-            </label>
-            <label className="block">
-              <span className="mb-1 block text-sm font-semibold text-gray-700">CTV giới thiệu</span>
-              <input
-                className={field}
-                type="tel"
-                placeholder="Số điện thoại CTV giới thiệu"
-                value={form.uplinePhone}
-                onChange={(e) => setForm({ ...form, uplinePhone: e.target.value })}
-              />
-              <JoinCtvPhoneCheck lookup={ctvLookup} />
-              <span className="mt-1 block text-xs text-gray-500">
-                {upline.status === 'ok'
-                  ? 'Để trống để dùng CTV từ liên kết giới thiệu.'
-                  : rootSignupEnabled
-                    ? 'Không bắt buộc — để trống để đăng ký làm CTV cấp gốc.'
-                    : 'Bắt buộc khi đăng ký từ nút Đăng Ký CTV trên landing.'}
-              </span>
-            </label>
+
+            <CtvCreationForm
+              hookResult={formApi}
+              labels={{
+                name: 'Họ tên',
+                phone: 'Số điện thoại của bạn',
+                email: 'Email',
+                password: 'Mật khẩu',
+                lobs: 'Lĩnh vực hoạt động',
+                submit: 'Tạo tài khoản CTV',
+                submitting: 'Đang tạo...',
+                emailOptional: '(không bắt buộc)',
+              }}
+              showLobs={false}
+              beforeLobs={
+                <label className="block">
+                  <span className="mb-1 block text-sm font-semibold text-gray-700">CTV giới thiệu</span>
+                  <input
+                    className={field}
+                    type="tel"
+                    placeholder="Số điện thoại CTV giới thiệu"
+                    value={uplinePhoneInput}
+                    onChange={(e) => setUplinePhoneInput(e.target.value)}
+                  />
+                  <JoinCtvPhoneCheck lookup={ctvLookup} />
+                  <span className="mt-1 block text-xs text-gray-500">
+                    {upline.status === 'ok'
+                      ? 'Để trống để dùng CTV từ liên kết giới thiệu.'
+                      : rootSignupEnabled
+                        ? 'Không bắt buộc — để trống để đăng ký làm CTV cấp gốc.'
+                        : 'Bắt buộc khi đăng ký từ nút Đăng Ký CTV trên landing.'}
+                  </span>
+                </label>
+              }
+              submitLabel="Tạo tài khoản CTV"
+              className="space-y-3.5"
+            />
+
             {error ? <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">{error}</p> : null}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-500 py-3 text-sm font-bold text-white shadow-lg shadow-orange-500/25 disabled:opacity-60"
-            >
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {submitting ? 'Đang tạo...' : 'Tạo tài khoản CTV'}
-            </button>
-          </form>
+          </div>
         )}
       </div>
     </div>
