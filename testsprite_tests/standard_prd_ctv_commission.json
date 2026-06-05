@@ -1,0 +1,293 @@
+{
+  "meta": {
+    "project": "TMV / NK3 — CTV Referral & Commission",
+    "date": "2026-06-05",
+    "prepared_by": "Source-grounded from docs/business-logic/ctv-referral-commission.md + GAP-ANALYSIS (8-wave delivery)",
+    "target_url": "https://tmv.2checkin.com",
+    "login": { "email": "t@clinic.vn", "password": "123123" },
+    "scope_note": "NK3 / tmv.2checkin.com ONLY. All money-path behavior is feature-flag gated; NK and NK2 still run the legacy model. Active NK3 flags: CTV_PUBLIC_ROOT_SIGNUP, CTV_SERVICE_CARD_COMMISSION, BRACES_OVERRIDE_ENABLED, PAYMENT_EDIT_DISABLED."
+  },
+  "product_overview": "CTV (collaborator/referrer) referral and multi-level commission for a two-LOB dental + cosmetic clinic. A CTV referral generates commission the moment a service card is created (on the FULL service price, via tier config — not at payment time, not on the paid amount, not on legacy product commission_rate_percent). Admins manage CTV hierarchy, reassign service-card ownership with a paid-out lock, run separate or combined Dental+Cosmetic payouts, and review per-customer deposit wallet history. Public visitors can self-register as a root CTV. This PRD covers the 8-wave delivery (W1–W8) shipped to NK3 and verifies each behavior end-to-end on the live site.",
+  "core_goals": [
+    "Let a visitor self-register as a CTV — as a root CTV when no upline is given, or under an upline when an upline phone/referral code is given — with email optional.",
+    "Create CTV commission at service-card creation on the full service price using tier config (Level 0/1/2 active by default; 3/4 configurable-but-disabled), with a Dental-only Braces override at higher rates.",
+    "Let admins reassign the CTV on a service card before payout (reverse old pending + create new pending), and block reassignment/refund once commission is paid out.",
+    "Let admins run payouts separately per LOB or combined across Dental + Cosmetic (paired rows linked by payout_group_id, shared receipt), shown as one expandable combined row.",
+    "Let admins move a CTV in the hierarchy via drag-and-drop, only when the CTV is fresh (no referral/service/earning activity), writing an audit log.",
+    "Show per-customer deposit wallet history on the admin payment page, and remove the staff payment-edit workflow in favor of delete-plus-new corrections."
+  ],
+  "features": [
+    {
+      "name": "W1 — Public CTV signup with root path + optional email",
+      "description": "Public signup (/ctv/join → POST /api/ctv-public/join). When no upline phone/referral code is entered, a root/top-level CTV is created (referred_by NULL, active immediately). When an upline phone/code is entered, the new CTV is attached under that upline. Phone + password are required; email is optional and the form states so. Duplicate phone/email belonging to an existing CTV is blocked. An existing customer signing up creates a separate CTV row (the customer row is not converted).",
+      "user_flows": [
+        "Navigate to /ctv/join -> Enter a unique TESTSPRITE phone + password -> Leave upline and email blank -> Submit -> See success / portal access; a root CTV is created (no upline).",
+        "Navigate to /ctv/join -> Confirm the email field is visibly marked optional (label/helper text) and submitting with email blank succeeds.",
+        "Navigate to /ctv/join -> Enter a phone that already belongs to a CTV -> Submit -> See a duplicate/blocked error and no new CTV created.",
+        "Navigate to /ctv/join -> Enter a valid upline phone or referral code + a unique TESTSPRITE phone + password -> Submit -> New CTV is attached under that upline (not root)."
+      ]
+    },
+    {
+      "name": "W2/W5 — Service-card commission on full price + tier config + Braces override",
+      "description": "Creating a service card (saleorder/saleorderline) with an attached CTV creates CTV earnings IMMEDIATELY on the FULL service price via tier config — Level 0 direct, Level 1/2 uplines — independent of any payment. The payment-time commission path is disabled while CTV_SERVICE_CARD_COMMISSION is on (no double counting). A service card with NO CTV selected creates no commission. Appointment-only CTV bookings create no commission. Dental Braces/Orthodontics services (category 'Braces'/'Orthodontics'/'Niềng răng' OR name containing 'brace'/'braces'/'niềng răng') use a separate, higher Braces tier (e.g. L0 30%, L1 5%, L2 2.5%).",
+      "user_flows": [
+        "Log in as admin -> Open a TESTSPRITE customer -> Add a service card with a known price and an attached CTV -> Save -> Navigate to /commission Earnings -> Confirm an earnings row exists for that CTV (Level 0) computed from the FULL service price, plus upline rows for any enabled Level 1/2.",
+        "Log in as admin -> Add a service card with NO CTV attached -> Save -> Confirm NO new commission/earnings row is created for it.",
+        "Log in as admin -> Add a Dental Braces/Orthodontics service (category 'Niềng răng' or name containing 'niềng răng'/'brace') with an attached CTV -> Save -> Confirm the Level 0 earning uses the higher Braces rate (~30% of full price), not the normal tier rate.",
+        "Log in as admin -> Open /commission Earnings -> Confirm earnings created from service cards show service-card provenance (not tied to a payment) and reflect full-price basis."
+      ]
+    },
+    {
+      "name": "W3 — Admin service-card CTV reassignment with paid-out lock",
+      "description": "Admin can change the CTV on a service card BEFORE payout (PATCH /api/SaleOrders/:id with ctv_id): the old pending commission is reversed and new pending commission is created immediately for the new CTV and its uplines. If any related CTV commission has already been paid out, reassignment (and refund/delete) is blocked with HTTP 409 B_COMMISSION_PAID_OUT.",
+      "user_flows": [
+        "Log in as admin -> Open a service card whose commission is still pending (not paid out) -> Change its attached CTV to a different CTV -> Save -> Confirm the old CTV's pending earning is reversed and a new pending earning exists for the new CTV (and uplines).",
+        "Log in as admin -> Attempt to change the CTV on a service card whose commission has already been paid out -> Confirm the action is blocked with a 409 / B_COMMISSION_PAID_OUT error and the ownership does not change."
+      ]
+    },
+    {
+      "name": "W4 — Separate or combined Dental+Cosmetic payouts",
+      "description": "Admin can run payouts separately by LOB or combined across Dental + Cosmetic. A combined payout (POST /api/Payouts/combined) atomically creates one LOB-local payout row in Dental and one in Cosmetic, linked by the same payout_group_id, sharing the same receipt/proof URL. The admin Payouts view exposes an 'All / Combined' LOB option that shows one combined row (expandable into the Dental/Cosmetic legs); the Dental and Cosmetic filters each show the matching LOB-local leg.",
+      "user_flows": [
+        "Log in as admin -> Navigate to /commission -> Open the Payouts (Chi trả) tab -> Confirm the LOB selector offers an 'All / Combined (Tất cả)' option alongside Dental and Cosmetic.",
+        "Log in as admin -> In the Payouts tab choose the combined/All option -> Confirm existing combined payouts render as a single row that expands into Dental and Cosmetic legs sharing one payout_group_id and one receipt.",
+        "Log in as admin -> Switch the filter to Dental, then to Cosmetic -> Confirm each shows only its matching LOB-local leg of the combined payout."
+      ]
+    },
+    {
+      "name": "W6 — Admin drag-and-drop CTV hierarchy move with no-activity guard + audit",
+      "description": "The admin CTV management view (/commission → CTV tab) renders CTV rows as draggable; dropping one CTV onto another re-parents it (POST /api/Ctvs/:id/move, dual-DB referred_by update + audit_logs row). A move is allowed ONLY when the CTV is fresh — no referred customers, no sale orders, no earnings in either DB. Moving a CTV that has activity is blocked with 409 B_CTV_HAS_ACTIVITY.",
+      "user_flows": [
+        "Log in as admin -> Navigate to /commission -> Open the CTV tab -> Confirm CTV rows are draggable (drag affordance/hint visible).",
+        "Log in as admin -> Drag a fresh CTV (no referrals/services/earnings) onto another CTV -> Drop -> Confirm it is re-parented under the target (upline updated) with a success state.",
+        "Log in as admin -> Attempt to drag a CTV that has referral/service/earning activity onto a new upline -> Confirm the move is blocked with a 409 / B_CTV_HAS_ACTIVITY message and the hierarchy is unchanged."
+      ]
+    },
+    {
+      "name": "W7 — Per-customer deposit wallet history on admin /payment",
+      "description": "The admin payment page (/payment) exposes a customer selector/search; after selecting one customer it renders that customer's deposit wallet history (top-ups, refunds, deposit-used-for-service/payment, and void/deleted correction rows) via GET /api/Payments/deposits + deposit-usage — mirroring the customer-profile Payment History tab. This is the customer deposit wallet, not the CTV portal wallet.",
+      "user_flows": [
+        "Log in as admin -> Navigate to /payment -> Locate the customer selector ('Lịch sử ví nạp của khách hàng' / deposit-history customer dropdown) -> Select/search a customer with deposit activity -> Confirm their deposit wallet history renders (top-ups / refunds / usage).",
+        "Log in as admin -> On /payment with a customer selected -> Confirm deposit history rows have NO inline edit affordance (corrections are delete + new, per W8)."
+      ]
+    },
+    {
+      "name": "W8 — Payment-edit removal (delete-plus-new correction)",
+      "description": "The staff payment-edit workflow is removed from the UI; corrections are made by deleting/voiding the incorrect payment and creating a new correct one. The direct PATCH /api/Payments/:id endpoint returns HTTP 405 B_PAYMENT_EDIT_DISABLED while PAYMENT_EDIT_DISABLED is on. Payment delete/void still reverses earnings unless paid-out commission blocks it.",
+      "user_flows": [
+        "Log in as admin -> Navigate to /payment and to a customer profile Payment History -> Confirm there is NO edit button on payment/deposit rows (delete/void only).",
+        "Send PATCH /api/Payments/:id against an existing payment -> Confirm the API responds 405 with code B_PAYMENT_EDIT_DISABLED (edit not a supported correction path).",
+        "Log in as admin -> Delete/void a non-paid-out payment -> Confirm it is removed/voided and its related earnings are reversed."
+      ]
+    },
+    {
+      "name": "W-SEC — CTV self password change verifies every LOB hash (secondary)",
+      "description": "Secondary, CTV-portal-only: when a CTV changes their own password, the current password is verified against EVERY LOB hash before any hash is updated, preventing a cross-LOB account takeover. Requires a CTV login (e.g. the W1-created root CTV); not exercisable with the admin account alone.",
+      "user_flows": [
+        "Log in to the CTV portal as a CTV that exists in both Dental and Cosmetic -> Change password with the correct current password -> Confirm success and that login works on both LOBs.",
+        "Log in to the CTV portal -> Attempt to change password with a WRONG current password -> Confirm it is rejected and no LOB hash is changed."
+      ]
+    }
+  ],
+  "code_summary": {
+    "version": "1",
+    "type": "fullstack",
+    "tech_stack": [
+      "TypeScript",
+      "React 18",
+      "Vite",
+      "React Router",
+      "i18next (EN/VI)",
+      "Tailwind CSS",
+      "Express API backend",
+      "PostgreSQL (isolated tdental_nk3 + tcosmetic_nk3)"
+    ],
+    "feature_flags_nk3": [
+      "CTV_PUBLIC_ROOT_SIGNUP=true (+ VITE_CTV_PUBLIC_ROOT_SIGNUP baked into web build)",
+      "CTV_SERVICE_CARD_COMMISSION=true",
+      "BRACES_OVERRIDE_ENABLED=true",
+      "PAYMENT_EDIT_DISABLED=true"
+    ],
+    "routes": [
+      { "path": "/ctv/join", "file": "website/src/pages/CTV/JoinCtv.tsx", "auth_required": false, "description": "Public CTV signup (W1): root path when no upline, email optional." },
+      { "path": "/commission", "file": "website/src/pages/Commission.tsx", "auth_required": true, "description": "Commission surface guarded by commission.view. Hosts Earnings/Payouts tabs (W2/W3/W4) and CTV management tab (W6)." },
+      { "path": "/payment", "file": "website/src/pages/Payment.tsx", "auth_required": true, "description": "Admin payments; hosts per-customer deposit wallet history selector (W7) and no payment-edit affordance (W8)." },
+      { "path": "/customers/:id", "file": "website/src/pages/Customers/CustomerProfileContent.tsx", "auth_required": true, "description": "Customer profile; service-card create/edit with CTV attachment (W2/W3) and Payment History deposit tab." }
+    ],
+    "features": [
+      {
+        "name": "W1 — Public CTV root signup + optional email",
+        "description": "Root CTV when no upline; upline-attached otherwise; email optional; duplicate-phone block; existing customer creates a separate CTV row.",
+        "files": [
+          "api/src/routes/ctvPublic.js",
+          "website/src/pages/CTV/JoinCtv.tsx",
+          "website/src/i18n/locales/en/ctv.json",
+          "website/src/i18n/locales/vi/ctv.json"
+        ],
+        "entry_route": "/ctv/join",
+        "user_interactions": [
+          "Enter phone + password (required)",
+          "Leave upline blank to create a root CTV",
+          "Leave email blank (optional)",
+          "Enter an upline phone / referral code to attach under an upline",
+          "Submit signup"
+        ],
+        "api_calls": [
+          { "method": "POST", "endpoint": "/api/ctv-public/join" },
+          { "method": "GET", "endpoint": "/api/ctv-public/ctv-lookup" },
+          { "method": "GET", "endpoint": "/api/ctv-public/refcode/:code" }
+        ],
+        "auth_required": false
+      },
+      {
+        "name": "W2/W5 — Service-card commission + Braces override",
+        "description": "Earnings born at service-card creation on full price via tier config; Braces (Dental) uses higher braces tier; no CTV => no commission; payment-time path disabled when flag on.",
+        "files": [
+          "api/src/services/commissionEngine.js",
+          "api/src/routes/saleOrders/createSaleOrder.js",
+          "api/src/routes/payments.js",
+          "api/migrations/055_earnings_service_card_created.sql",
+          "api/migrations/056_braces_commission_config.sql"
+        ],
+        "entry_route": "/customers/:id",
+        "user_interactions": [
+          "Add a service card with an attached CTV at a known full price",
+          "Add a service card with no CTV (expect no commission)",
+          "Add a Dental Braces/Orthodontics service with a CTV (expect braces rate)",
+          "Inspect resulting earnings on /commission"
+        ],
+        "api_calls": [
+          { "method": "POST", "endpoint": "/api/SaleOrders" },
+          { "method": "GET", "endpoint": "/api/Earnings" },
+          { "method": "GET", "endpoint": "/api/CommissionConfig" }
+        ],
+        "auth_required": true
+      },
+      {
+        "name": "W3 — Service-card CTV reassignment + paid-out lock",
+        "description": "Reassign CTV before payout reverses old pending and creates new pending; paid-out commission blocks reassignment with 409 B_COMMISSION_PAID_OUT.",
+        "files": [
+          "api/src/routes/saleOrders/updateSaleOrder.js",
+          "api/src/services/commissionEngine.js"
+        ],
+        "entry_route": "/customers/:id",
+        "user_interactions": [
+          "Change the CTV on a pending-commission service card",
+          "Attempt to change the CTV on a paid-out service card (expect 409)"
+        ],
+        "api_calls": [
+          { "method": "PATCH", "endpoint": "/api/SaleOrders/:id" },
+          { "method": "GET", "endpoint": "/api/Earnings" }
+        ],
+        "auth_required": true
+      },
+      {
+        "name": "W4 — Combined Dental+Cosmetic payouts",
+        "description": "Combined payout creates paired Dental + Cosmetic rows linked by payout_group_id with shared receipt; admin All filter shows one expandable combined row.",
+        "files": [
+          "api/src/routes/payouts.js",
+          "api/migrations/057_payout_group_id.sql",
+          "website/src/components/commission/EarningsPayoutsTabs.tsx",
+          "website/src/lib/api/commission.ts"
+        ],
+        "entry_route": "/commission",
+        "user_interactions": [
+          "Open Payouts (Chi trả) tab",
+          "Select the All / Combined LOB option",
+          "Expand a combined payout into Dental/Cosmetic legs",
+          "Switch to Dental / Cosmetic filters to see each leg"
+        ],
+        "api_calls": [
+          { "method": "GET", "endpoint": "/api/Payouts" },
+          { "method": "POST", "endpoint": "/api/Payouts/combined" },
+          { "method": "PATCH", "endpoint": "/api/Payouts/:id" }
+        ],
+        "auth_required": true
+      },
+      {
+        "name": "W6 — Drag-drop CTV hierarchy move",
+        "description": "Draggable CTV rows; drop re-parents fresh CTVs (dual-DB referred_by + audit_logs); CTVs with activity blocked 409 B_CTV_HAS_ACTIVITY.",
+        "files": [
+          "website/src/components/commission/CtvManagementTab.tsx",
+          "api/src/routes/ctvs.js",
+          "api/migrations/058_audit_logs.sql",
+          "website/src/lib/api/ctv.ts"
+        ],
+        "entry_route": "/commission",
+        "user_interactions": [
+          "Open the CTV tab",
+          "Drag a fresh CTV row onto another CTV",
+          "Attempt to drag a CTV that has activity (expect block)"
+        ],
+        "api_calls": [
+          { "method": "GET", "endpoint": "/api/Ctvs" },
+          { "method": "GET", "endpoint": "/api/Ctvs/:id/hierarchy" },
+          { "method": "POST", "endpoint": "/api/Ctvs/:id/move" }
+        ],
+        "auth_required": true
+      },
+      {
+        "name": "W7 — Admin deposit wallet history",
+        "description": "Per-customer deposit wallet history on /payment via a customer selector, mirroring the customer-profile Payment History tab.",
+        "files": [
+          "website/src/pages/Payment.tsx",
+          "website/src/components/payment/CustomerDeposits.tsx",
+          "website/src/hooks/useDeposits.ts"
+        ],
+        "entry_route": "/payment",
+        "user_interactions": [
+          "Locate the deposit-history customer selector",
+          "Select/search a customer with deposit activity",
+          "Confirm wallet history renders (top-ups/refunds/usage)"
+        ],
+        "api_calls": [
+          { "method": "GET", "endpoint": "/api/Payments/deposits" },
+          { "method": "GET", "endpoint": "/api/Payments/deposit-usage" }
+        ],
+        "auth_required": true
+      },
+      {
+        "name": "W8 — Payment-edit removal",
+        "description": "No payment-edit UI; PATCH /api/Payments/:id returns 405 B_PAYMENT_EDIT_DISABLED; corrections are delete/void + new.",
+        "files": [
+          "api/src/routes/payments.js",
+          "website/src/components/payment/CustomerDeposits.tsx",
+          "website/src/hooks/useDeposits.ts"
+        ],
+        "entry_route": "/payment",
+        "user_interactions": [
+          "Confirm no edit button on payment/deposit rows",
+          "Call PATCH /api/Payments/:id and expect 405",
+          "Delete/void a non-paid-out payment and confirm earnings reverse"
+        ],
+        "api_calls": [
+          { "method": "PATCH", "endpoint": "/api/Payments/:id" },
+          { "method": "DELETE", "endpoint": "/api/Payments/:id" }
+        ],
+        "auth_required": true
+      }
+    ],
+    "known_limitations": [
+      {
+        "issue": "LIVE PRODUCTION DATA. tmv.2checkin.com is a real environment. Service-card creation, payouts, CTV moves, and payment delete/void mutate real rows and real commission money. Use TESTSPRITE-prefixed test customers/CTVs, prefer read-only affordance checks where possible, and clean up any created test data. Do not run payout 'pay' actions against real CTV earnings.",
+        "location": "https://tmv.2checkin.com",
+        "impact": "Autonomous tests can create real earnings/payouts if they complete money-path submits. Gate destructive flows behind explicit test data."
+      },
+      {
+        "issue": "Commission model is SWITCHED on NK3 (CTV_SERVICE_CARD_COMMISSION=true). New commission is created at service-card creation on full price, NOT at payment time. Tests asserting payment-time commission will fail by design.",
+        "location": "api/src/services/commissionEngine.js, createSaleOrder.js, payments.js",
+        "impact": "Expected-behavior change vs legacy NK/NK2. Assert service-card-time, full-price earnings."
+      },
+      {
+        "issue": "Known bug: the X-LOB header is ignored on POST /api/SaleOrders, so Cosmetic service cards currently attribute commission to the Dental DB. Cosmetic-side commission attribution will look wrong until this LOB-routing bug is fixed (separate from this spec).",
+        "location": "api/src/routes/saleOrders/createSaleOrder.js (LOB routing)",
+        "impact": "Cosmetic service-card commission lands in tdental_nk3. Verify dental-side first; treat cosmetic attribution as a known caveat."
+      },
+      {
+        "issue": "W-SEC (CTV self password change) requires a CTV portal login, not the admin account. Use the W1-created root CTV to exercise it; skip if no CTV credentials are available.",
+        "location": "api/src/services/ctvSelfProfile.js",
+        "impact": "Not reachable with t@clinic.vn admin alone."
+      }
+    ]
+  }
+}
