@@ -14,6 +14,26 @@ Each entry:
 
 ---
 
+## FM-20260601-03: Deleted Cosmetic Service Still Shows as Customer Debt
+
+- **Symptom:** Staff deletes a Cosmetic service card, but the customer profile still shows the deleted service amount in `Outstanding` / `Công nợ`.
+- **Root Cause:** `DELETE /api/SaleOrderLines/:id` soft-deletes the last active service line and parent saleorder, but `GET /api/CustomerBalance/:id` summed `saleorders.residual` without filtering `isdeleted=false`.
+- **Fix:** Customer balance residual SQL now excludes soft-deleted saleorders before summing outstanding debt.
+- **Prevention:** CustomerBalance regression tests assert the residual query filters `COALESCE(isdeleted, false) = false`, and profile balance changes must cite INV-023.
+- **Related:** INV-023, UC-009, WF-003.
+
+---
+
+## FM-20260601-02: CTV Booking Updates Client But No Appointment Appears
+
+- **Symptom:** A CTV submits a referral booking, the client row is accepted/reclaimed, but no "Referral Start" appointment card appears on the calendar.
+- **Root Cause:** The CTV portal did not send `companyId`, while `dbo.appointments.companyid` is non-null. The route updated `dbo.partners` before inserting the appointment, then the appointment insert failed on the null `companyid` constraint.
+- **Fix:** Resolve the appointment company from request `companyId`, CTV JWT `companyId`, or the selected LOB's active company fallback before any partner mutation. The fallback prefers real clinic locations over QA/test/verify fixture rows. If no company exists, return `400 B_COMPANY_REQUIRED` and leave the client untouched.
+- **Prevention:** CTV booking tests must assert appointment inserts carry non-null `companyid`, company fallback deprioritizes fixture locations, and no-company failures do not insert/update partners.
+- **Related:** INV-022, WF-015, UC-022.
+
+---
+
 ## FM-20260601-01: CTV Booking Creates Service Card Instead of Appointment-Only Booking
 
 - **Symptom:** A CTV submits a referral booking and the client immediately appears as if they already received service because a "Referral Start" saleorder/service card exists.

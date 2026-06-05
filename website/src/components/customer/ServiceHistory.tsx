@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Stethoscope } from 'lucide-react';
 import type { CustomerService } from '@/types/customer';
@@ -15,6 +15,7 @@ import { resolveServiceFinancials } from './ServiceHistoryUtils';
 interface ServiceHistoryProps {
   readonly services: readonly CustomerService[];
   readonly limit?: number;
+  readonly focusedServiceId?: string | null;
   readonly payments?: readonly PaymentWithAllocations[];
   readonly onEditService?: (service: CustomerService) => void;
   readonly onDeleteService?: (service: CustomerService) => void;
@@ -26,6 +27,7 @@ interface ServiceHistoryProps {
 export function ServiceHistory({
   services,
   limit,
+  focusedServiceId,
   payments,
   onEditService,
   onDeleteService,
@@ -35,7 +37,18 @@ export function ServiceHistory({
 }: ServiceHistoryProps) {
   const { t } = useTranslation('services');
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const displayServices = limit ? services.slice(0, limit) : services;
+  const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
+  const displayServices = useMemo(() => (limit ? services.slice(0, limit) : services), [limit, services]);
+
+  useEffect(() => {
+    if (!focusedServiceId) return;
+    const serviceExists = displayServices.some((service) => service.id === focusedServiceId);
+    if (!serviceExists) return;
+    setExpandedId(focusedServiceId);
+    window.requestAnimationFrame(() => {
+      rowRefs.current[focusedServiceId]?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    });
+  }, [displayServices, focusedServiceId]);
 
   const totalCost = services
     .filter((s) => s.status !== 'cancelled')
@@ -99,8 +112,10 @@ export function ServiceHistory({
               return (
                 <ServiceHistoryRow
                   key={svc.id}
+                  rowRef={(node) => { rowRefs.current[svc.id] = node; }}
                   service={svc}
                   isExpanded={isExpanded}
+                  isFocused={focusedServiceId === svc.id}
                   payments={payments}
                   onToggle={() => setExpandedId(isExpanded ? null : svc.id)}
                   onEditService={onEditService}

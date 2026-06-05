@@ -80,9 +80,9 @@
 **Cite when:** Editing CTV booking, partner phone lookup, referral claim, or admin customer search behavior.
 
 ### INV-022 — CTV Booking Is Appointment-Only
-**Rule:** `POST /api/ctv/bookings` MUST create or reclaim the client and write `dbo.appointments` only. It MUST NOT create `dbo.saleorders` or `dbo.saleorderlines`; a selected service, or the configured Referral Start product when no service is selected, is metadata on `appointments.productid` until clinic staff convert the visit into an actual service card.
+**Rule:** `POST /api/ctv/bookings` MUST create or reclaim the client and write `dbo.appointments` only. It MUST NOT create `dbo.saleorders` or `dbo.saleorderlines`; a selected service, or the configured Referral Start product when no service is selected, is metadata on `appointments.productid` until clinic staff convert the visit into an actual service card. The route must resolve a non-null `appointments.companyid` from request/JWT/selected-LOB fallback before mutating `dbo.partners`.
 **Rationale:** A booking is a scheduled appointment, not proof that the client already visited or received treatment. Creating a service card at booking time corrupts journey stage, service history, and operational status.
-**Enforced by:** `api/src/routes/ctv.js`, `api/src/routes/__tests__/ctvBookings.test.js`, and `api/src/services/referralClaim.js` using the booking appointment as a claim anchor.
+**Enforced by:** `api/src/routes/ctv.js`, `api/src/services/ctvBookingCompany.js`, `api/src/routes/__tests__/ctvBookings.test.js`, and `api/src/services/referralClaim.js` using the booking appointment as a claim anchor.
 **Cite when:** Editing CTV booking, referral claim windows, service-card creation, appointment creation, or CTV journey stage logic.
 
 ---
@@ -134,6 +134,12 @@
 ---
 
 ## Money & Payment Invariants
+
+### INV-023 — Customer Outstanding Balance Excludes Deleted Receivables
+**Rule:** Customer balance calculations MUST exclude soft-deleted service orders (`dbo.saleorders.isdeleted = true`) from `outstanding_balance`.
+**Rationale:** Deleting the last active service line soft-deletes the parent sale order. Keeping its residual in profile balance makes staff see phantom debt for a service that was removed.
+**Enforced by:** `api/src/routes/customerBalance.js` and `api/src/routes/__tests__/customerBalance.lob.test.js`.
+**Cite when:** Editing customer balance, service-line deletion, saleorder residuals, payment allocation displays, or customer profile financial cards.
 
 ### INV-010 — Payment Allocation Immutability
 **Rule:** Once a payment allocation row is created in `dbo.payment_allocations`, the API does NOT support updating or deleting it via a PATCH/PUT on the payment. Changing a payment's `amount` does NOT recalculate allocations.
@@ -236,6 +242,7 @@
 | Date | ID | Action | Commit / PR |
 |---|---|---|---|
 | 2026-06-05 | INV-003C | Added CTV service-card-created commission trigger invariant | pending |
+| 2026-06-01 | INV-023 | Added customer balance deleted-receivable invariant | pending |
 | 2026-06-01 | INV-022 | Added appointment-only invariant for CTV booking flow | pending |
 | 2026-05-28 | INV-008C | Added import-marker-gated legacy CTV password and phone/ref-code login fallback invariant | pending |
 | 2026-05-13 | INV-001..INV-020 | Initial invariant set created | feat/complete-documentation-stack |

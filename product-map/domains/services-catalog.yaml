@@ -73,7 +73,7 @@ shared_types:
 dependencies:
   - dbo.products must remain compatible with saleorderlines/dotkhamsteps FKs
   - product delete blocked if linked saleorderlines or dotkhamsteps exist
-  - Sale order treatment records use `/api/SaleOrders/lines`; `/api/SaleOrderLines/:id` soft-deletes a line and soft-deletes the parent order when it was the last active line.
+  - Sale order treatment records use `/api/SaleOrders/lines`; `/api/SaleOrderLines/:id` soft-deletes a line and soft-deletes the parent order when it was the last active line. Customer balance must ignore that soft-deleted parent order.
 affected_by:
   - Schema changes to dbo.products (price fields, canorderlab, active)
   - Dead unmounted route api/src/routes/services.js must not be revived accidentally

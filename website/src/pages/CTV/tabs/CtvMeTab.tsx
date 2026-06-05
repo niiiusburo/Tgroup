@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, Copy, LogOut } from 'lucide-react';
+import { Check, Copy, ExternalLink, LogOut, Share2 } from 'lucide-react';
 
 import { LanguageToggle } from '@/components/shared/LanguageToggle';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,11 +23,35 @@ export function CtvMeTab({ profile, onProfileUpdated }: CtvMeTabProps) {
   const referralCode = `CTV-${referralSource.slice(0, 6).toUpperCase()}`;
   // Shareable self-signup link: whoever opens it registers as a CTV UNDER this person.
   const joinLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/ctv/join?ref=${referralCode}`;
+  const displayJoinLink = joinLink.replace(/^https?:\/\//, '');
+
+  function markCopied() {
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1800);
+  }
+
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(joinLink);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
+      markCopied();
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  async function handleShare() {
+    try {
+      const shareNavigator = navigator as Navigator & { share?: (data: ShareData) => Promise<void> };
+      if (shareNavigator.share) {
+        await shareNavigator.share({
+          title: t('me.referralLink'),
+          text: t('me.copyCodeHint'),
+          url: joinLink,
+        });
+        return;
+      }
+      await navigator.clipboard.writeText(joinLink);
+      markCopied();
     } catch {
       setCopied(false);
     }
@@ -46,22 +70,52 @@ export function CtvMeTab({ profile, onProfileUpdated }: CtvMeTabProps) {
       </section>
 
       <section className="mt-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
-        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{t('me.referralCode')}</p>
-        <div className="mt-3 flex items-center gap-2">
-          <div className="min-w-0 flex-1 rounded-xl bg-gray-50 px-4 py-3 font-mono text-sm font-semibold tracking-wider text-gray-800">
-            {referralCode}
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{t('me.referralLink')}</p>
+            <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-orange-600">
+              {t('me.referralCodeLabel')}: {referralCode}
+            </p>
           </div>
+          {copied ? <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-600">{t('actions.linkCopied')}</span> : null}
+        </div>
+        <div className="mt-3 flex items-center gap-2">
+          <a
+            href={joinLink}
+            target="_blank"
+            rel="noreferrer"
+            className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl bg-orange-50 px-4 py-3 text-left text-sm font-semibold text-gray-900 ring-1 ring-orange-100 transition hover:bg-orange-100"
+            title={joinLink}
+          >
+            <span className="truncate">{displayJoinLink}</span>
+            <ExternalLink className="h-4 w-4 shrink-0 text-orange-500" />
+          </a>
+          <button
+            type="button"
+            onClick={handleShare}
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-orange-600 shadow-sm ring-1 ring-orange-100 transition-colors hover:bg-orange-50"
+            aria-label={t('actions.shareLink')}
+            title={t('actions.shareLink')}
+          >
+            <Share2 className="h-5 w-5" />
+          </button>
           <button
             type="button"
             onClick={handleCopy}
-            className="grid h-11 w-11 place-items-center rounded-xl bg-orange-50 text-orange-600 transition-colors hover:bg-orange-100"
-            aria-label={t('actions.copy')}
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-orange-600 shadow-sm ring-1 ring-orange-100 transition-colors hover:bg-orange-50"
+            aria-label={t('actions.copyLink')}
+            title={t('actions.copyLink')}
           >
             {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
           </button>
         </div>
+        <div className="mt-3 rounded-2xl bg-gray-50 px-4 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-medium text-gray-500">{t('me.referralCode')}</span>
+            <span className="font-mono text-sm font-semibold tracking-wider text-gray-800">{referralCode}</span>
+          </div>
+        </div>
         <p className="mt-2 text-[11px] text-gray-400">{t('me.copyCodeHint')}</p>
-        {copied ? <p className="mt-1 text-xs font-medium text-emerald-600">{t('actions.copied')}</p> : null}
       </section>
 
       <CtvAccountSettings displayName={displayName} onProfileUpdated={onProfileUpdated} />

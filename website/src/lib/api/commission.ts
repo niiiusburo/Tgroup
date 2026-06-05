@@ -30,6 +30,7 @@ export interface EarningsRow {
   client_name?: string;
   recipient_partner_id: string;
   recipient_name?: string;
+  service_line_id?: string | null;
   product_id?: string;
   product_name?: string;
   source?: string;

@@ -144,8 +144,9 @@ sequenceDiagram
 - New `payments` row with `payment_category='deposit'`.
 - New `payment_allocations` rows.
 - `saleorders.residual` reduced (never below 0).
+- If a mistaken service line is later removed and the parent saleorder is soft-deleted, `GET /api/CustomerBalance/:id` excludes that saleorder residual from `outstanding_balance`.
 
-**Invariants:** INV-003, INV-004, INV-010, INV-011, INV-012.
+**Invariants:** INV-003, INV-004, INV-010, INV-011, INV-012, INV-023.
 **Failure modes:**
 - Stale residual (paid via other channel) → over-charge risk.
 - Concurrent deposits → race condition on residual (no row lock currently).
@@ -624,7 +625,12 @@ sequenceDiagram
     API->>DB: Resolve existing partner by clientId or phone
     alt active claim owned by another CTV
         API-->>FE: 400 B_CLIENT_CLAIMED
-    else new client
+    else no company can be resolved
+        API-->>FE: 400 B_COMPANY_REQUIRED
+    else valid booking
+        API->>DB: Resolve appointment company from body, JWT, or selected LOB fallback
+    end
+    alt new client
         API->>DB: INSERT partners { customer=true, referred_by_ctv_id=CTV }
     else existing accepted partner
         API->>DB: UPDATE partners SET customer=true, referred_by_ctv_id=CTV
@@ -638,7 +644,7 @@ sequenceDiagram
 **Data state transitions:**
 - Existing accepted partner row keeps the same UUID and gets `customer=true`.
 - `partners.referred_by_ctv_id` points to the submitting CTV.
-- New appointment row is created in the selected LOB database with `productid` set to the selected service, or the configured Referral Start product when no service was selected.
+- New appointment row is created in the selected LOB database with non-null `companyid` and `productid` set to the selected service, or the configured Referral Start product when no service was selected.
 - No `saleorders` or `saleorderlines` service card is created by this booking flow.
 - The CTV sheet initializes `date` to `Asia/Ho_Chi_Minh` today so mobile users do not submit an empty required appointment date.
 
@@ -693,3 +699,32 @@ sequenceDiagram
 
 **Invariants:** INV-003, INV-003A, INV-003B, INV-010.
 **Traceability:** Related UC: UC-012, UC-012A. Contracts/routes: `DELETE /api/SaleOrderLines/:id`, `DELETE /api/cosmetic/SaleOrderLines/:id`, `POST /api/Payments/:id/void`. Data/tables: `dbo.saleorderlines`, `dbo.saleorders`, `dbo.payments`, `dbo.payment_allocations`, `dbo.earnings`, `dbo.payouts`. Tests: `api/src/services/__tests__/serviceReversal.test.js`, `api/src/services/__tests__/commissionEngine.test.js`. Product-map domains: `payments-deposits`, `earnings-commissions`, `services-catalog`.
+
+---
+
+## WF-017 — Admin CTV Commission Drilldown Navigation
+
+**Trigger:** Admin reviews `/commission` CTV workflow tabs and needs to inspect a related client or service before taking the next action.
+
+```mermaid
+sequenceDiagram
+    actor A as Admin / Staff
+    participant C as Commission UI
+    participant P as Customer Profile
+    participant R as Customer Records
+
+    A->>C: Open /commission?tab=newClients&lob=cosmetic
+    C-->>A: Render five-step breadcrumb rail and New Clients rows
+    A->>C: Click client name
+    C->>P: Navigate /customers/:id?tab=profile&from=commission&returnTab=newClients&lob=cosmetic
+    P-->>A: Show profile with return trail to Commission > New Clients
+    A->>P: Return via trail or browser back
+    P->>C: Restore /commission?tab=newClients&lob=cosmetic
+    A->>C: Open /commission?tab=earnings or payouts and click service
+    C->>R: Navigate /customers/:id?tab=records&serviceLineId=:lineId&from=commission&returnTab=earnings
+    R-->>A: Expand, highlight, and scroll the matching service row into view
+```
+
+**Data state transitions:** None. This workflow is read-only navigation over existing CTV, customer, earning, and service-line records.
+
+**Traceability:** Related UC: UC-023. Contracts/routes: `GET /api/Earnings`, `GET /api/Payouts`, `GET /api/Partners/:id`, `GET /api/SaleOrderLines`. Data/tables: `dbo.partners`, `dbo.earnings`, `dbo.saleorderlines`, `dbo.payouts`. Invariants: INV-017. Tests: `website/src/components/commission/CommissionNavigation.test.ts`, `website/src/components/commission/NewClientsTab.test.tsx`, `website/src/components/commission/EarningsPayoutsTabs.test.tsx`, `website/src/components/customer/ServiceHistory.test.tsx`. Product-map domains: `ctv`, `earnings-commissions`, `customers-partners`, `services-catalog`.

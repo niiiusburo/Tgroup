@@ -55,6 +55,7 @@ export interface RecordsTabProps {
   services: readonly CustomerService[];
   loadingServices: boolean;
   payments: readonly PaymentWithAllocations[];
+  focusedServiceId?: string | null;
   onCreateService: () => void;
   onEditService: (service: CustomerService) => void;
   onDeleteService?: (service: CustomerService) => void;
@@ -86,6 +87,7 @@ export interface OrchestratorProps {
   appointments: readonly ApiAppointment[];
   services?: readonly CustomerService[];
   loadingServices?: boolean;
+  focusedServiceId?: string | null;
   employees?: readonly Employee[];
   depositList?: DepositTransaction[];
   usageHistory?: DepositTransaction[];

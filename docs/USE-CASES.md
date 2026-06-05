@@ -190,8 +190,9 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Alternate flows:**
   - **AF-1 Service not in catalog:** Must create service first (UC-041 analog).
   - **AF-2 Tooth picker missing data:** Validation fails for multi-tooth services.
-- **Postconditions:** SaleOrder created; appointment linked; revenue recognized.
-- **Invariants touched:** INV-003 (residual non-negative on any immediate payment), INV-017 (dense list).
+  - **AF-3 Remove mistaken service card:** Staff deletes a service line through `DELETE /api/SaleOrderLines/:id`; when it was the last active line, the parent saleorder is soft-deleted and its residual must disappear from `GET /api/CustomerBalance/:id`.
+- **Postconditions:** SaleOrder created; appointment linked; revenue recognized. If the service card is later removed, profile outstanding balance excludes the removed card.
+- **Invariants touched:** INV-003 (residual non-negative on any immediate payment), INV-017 (dense list), INV-023 (deleted receivables excluded from customer balance).
 
 ---
 
@@ -444,13 +445,36 @@ When a use case is created or materially edited, add one compact `Traceability` 
   1. Actor enters phone, target LOB, appointment date, optional service, and optional note.
   2. Frontend calls `GET /api/ctv/client-lookup?phone=<phone>&lob=<lob>` to show whether the phone exists and whether an active claim blocks the booking; if an available existing client has a name, the frontend pre-fills the name input.
   3. Actor submits → `POST /api/ctv/bookings`.
-  4. Backend resolves an existing partner by `clientId` or phone, or creates a new customer row in the selected LOB database.
-  5. If an existing partner row is accepted, backend sets `customer = true` and `referred_by_ctv_id = actor` before creating the appointment.
-  6. Backend creates the appointment only, validating the optional product against the selected LOB catalog and storing it on `appointments.productid`; if no product is selected, the appointment uses the configured Referral Start product as its booking purpose.
+  4. Backend resolves an existing partner by `clientId` or phone.
+  5. Backend validates the optional product and resolves a non-null appointment company from request `companyId`, JWT `companyId`, or the selected LOB fallback before changing the partner row.
+  6. Backend creates a new customer row or accepts the existing partner row; existing rows get `customer = true` and `referred_by_ctv_id = actor`.
+  7. Backend creates the appointment only, storing the selected service on `appointments.productid`; if no product is selected, the appointment uses the configured Referral Start product as its booking purpose.
 - **Alternate flows:**
   - **AF-1 Claimed by another CTV:** API returns `400 B_CLIENT_CLAIMED` with owner/expires fields; no appointment is created.
   - **AF-2 Unknown product or cross-LOB product:** API drops `productId` to null and still creates the booking.
   - **AF-3 Existing employee/staff partner becomes a client:** The same partner identity is kept and `customer = true` makes the row visible in `/customers`.
-- **Postconditions:** The accepted client is searchable in admin Customers for the same LOB; appointment exists with selected service metadata or Referral Start default; no service card is created; the CTV claim/referrer pointer is updated.
+  - **AF-4 No company in selected LOB:** API returns `400 B_COMPANY_REQUIRED` before creating or updating the partner.
+- **Postconditions:** The accepted client is searchable in admin Customers for the same LOB; appointment exists with selected service metadata or Referral Start default and non-null `companyid`; no service card is created; the CTV claim/referrer pointer is updated.
 - **Invariants touched:** INV-001 (UUID identity), INV-002 (appointment name), INV-006 (search), INV-021 (CTV booking customer visibility), INV-022 (CTV booking appointment-only).
 - **Traceability:** Related WF: WF-015. Contracts/routes: `GET /api/ctv/client-lookup`, `POST /api/ctv/bookings`, `GET /api/Partners`. Data/tables: `dbo.partners`, `dbo.appointments`. Tests: `api/src/routes/__tests__/ctvBookings.test.js`, `api/src/services/__tests__/referralClaim.test.js`, `website/src/components/ctv/CtvReferModal.test.tsx`. Product-map domains: `ctv`, `cosmetic`, `cosmetic-clients`, `customers-partners`, `appointments-calendar`.
+
+---
+
+## UC-023 — Admin Navigates CTV Commission Work Without Losing Context
+
+- **Actor:** Admin or staff member with commission/customer visibility.
+- **Trigger:** `/commission` five-step CTV workflow, especially New Clients, Earnings, and Payouts.
+- **Preconditions:** Actor is authenticated; current LOB is Dental or Cosmetic; commission rows include customer and, where applicable, service-line identifiers.
+- **Main flow:**
+  1. Actor opens `/commission?tab=newClients`, `/commission?tab=earnings`, or `/commission?tab=payouts`.
+  2. The active tab is preserved in the URL and shown in a compact breadcrumb/step rail.
+  3. From New Clients, actor clicks a customer name and lands on `/customers/:id?tab=profile&from=commission&returnTab=newClients&lob=<lob>`.
+  4. From Earnings or Payouts, actor clicks a service and lands on `/customers/:id?tab=records&serviceLineId=<lineId>&from=commission&returnTab=<tab>&lob=<lob>`.
+  5. Customer profile renders a return trail to the originating commission tab; the Records tab expands and highlights the target service row when a service-line id is present.
+- **Alternate flows:**
+  - **AF-1 Missing client id:** The row renders plain text instead of a broken profile link.
+  - **AF-2 Missing service_line_id:** The service name remains visible but does not navigate to an unknown service row.
+  - **AF-3 Mobile viewport:** Rows render as stacked cards with the same drilldown targets and date context.
+- **Postconditions:** No data is mutated; staff can return to the same CTV workflow step with LOB context preserved.
+- **Invariants touched:** INV-017 (dense list navigation/scroll context), INV-016 (i18n labels).
+- **Traceability:** Related WF: WF-017. Contracts/routes: `GET /api/Earnings`, `GET /api/Payouts`, `GET /api/Partners/:id`, `GET /api/SaleOrderLines`. Data/tables: `dbo.partners`, `dbo.earnings`, `dbo.saleorderlines`, `dbo.payouts`. Tests: `website/src/components/commission/CommissionNavigation.test.ts`, `website/src/components/commission/NewClientsTab.test.tsx`, `website/src/components/commission/EarningsPayoutsTabs.test.tsx`, `website/src/components/customer/ServiceHistory.test.tsx`. Product-map domains: `ctv`, `earnings-commissions`, `customers-partners`, `services-catalog`.

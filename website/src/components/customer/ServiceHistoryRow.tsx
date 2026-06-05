@@ -10,8 +10,10 @@ import { RecordDateBadge } from './RecordDateBadge';
 import { DoctorCtvTrail } from '@/components/shared';
 
 interface ServiceHistoryRowProps {
+  readonly rowRef?: (node: HTMLTableRowElement | null) => void;
   readonly service: CustomerService;
   readonly isExpanded: boolean;
+  readonly isFocused?: boolean;
   readonly payments?: readonly PaymentWithAllocations[];
   readonly onToggle: () => void;
   readonly onEditService?: (service: CustomerService) => void;
@@ -26,8 +28,10 @@ const STATUS_DOT_CLASSES: Record<CustomerService['status'], string> = {
 };
 
 export function ServiceHistoryRow({
+  rowRef,
   service,
   isExpanded,
+  isFocused = false,
   payments,
   onToggle,
   onEditService,
@@ -44,7 +48,8 @@ export function ServiceHistoryRow({
   return (
     <React.Fragment>
       <tr
-        className={`transition-colors cursor-pointer ${isExpanded ? 'bg-primary/5' : 'hover:bg-gray-50'}`}
+        ref={rowRef}
+        className={`transition-colors cursor-pointer ${isFocused ? 'bg-orange-50 ring-1 ring-inset ring-orange-200' : isExpanded ? 'bg-primary/5' : 'hover:bg-gray-50'}`}
         onClick={() => hasPayment && onToggle()}
       >
         <td className="py-3 pr-4 align-top whitespace-nowrap">

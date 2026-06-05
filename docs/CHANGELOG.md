@@ -18,6 +18,7 @@
   - Also enhanced shared `Field` with id + htmlFor for a11y + robust test queries (JoinCtv getByLabelText now works; tests green).
 - Backend already consistent (ctv.js updated in cutover for optional email + dup guard only-if-supplied + NULL store; ctvPublic.js had the spec comment already).
 - Types: `website/src/lib/api/ctv.ts` CreateCtvInput/CtvJoinInput email now `?`.
+- Merge resolution for NK3 deploy preserved the no-email `/ctv/join` signup rule while retaining selected-LOB appointment-company fallback for CTV bookings, `/ctv` Me-tab invite-link share/copy actions, and admin `/commission?tab=` drilldown navigation from `origin/nk3-deploy`. Landing tests now wrap `Landing` in a router because the merged page reads `useSearchParams`.
 - Version bump + both CHANGELOGs (website/public + docs/) per Claude.md + AGENTS §8 + §16.
 - All per authority (read AGENTS.md + product-map/ctv + schema + 5 LOB split domains + prompt gate + Claude verification rule + shared/ SSOT + immutability + @crossref + TDD tests + local-first). Spun parallel agents for audit + enforcement drafting + breadcrumbs.
 

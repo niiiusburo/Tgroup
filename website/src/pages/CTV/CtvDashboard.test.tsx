@@ -206,6 +206,33 @@ describe('CtvDashboard', () => {
     await waitFor(() => expect(header).toHaveAttribute('data-scroll-state', 'visible'));
   });
 
+  it('shows a shareable CTV invite link on the Me tab and copies the full join URL', async () => {
+    await prepareCtvLanguage('vi');
+    localStorage.setItem('tgclinic_token', 'test-token');
+    const writeText = vi.fn(async () => undefined);
+    const user = userEvent.setup();
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+    renderWithProviders(<CtvDashboard />);
+
+    await waitFor(() => expect(screen.getAllByText('Xin chào, CTV Demo')[0]).toBeVisible());
+    await user.click(screen.getByRole('button', { name: /^tôi$/i }));
+
+    expect(screen.getByText('Liên kết mời CTV')).toBeVisible();
+    const inviteLinkText = screen.getByText(/\/ctv\/join\?ref=CTV-/i);
+    const inviteLink = inviteLinkText.closest('a');
+    expect(inviteLink).not.toBeNull();
+    const href = inviteLink?.getAttribute('href');
+    expect(href).toContain('/ctv/join?ref=CTV-');
+
+    await user.click(screen.getByRole('button', { name: /sao chép liên kết mời ctv/i }));
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(href));
+    await waitFor(() => expect(screen.getByText('Đã sao chép liên kết')).toBeVisible());
+  });
+
   it('keeps tracking on one bottom Theo dõi label and searches accent-insensitively', async () => {
     await prepareCtvLanguage('vi');
     localStorage.setItem('tgclinic_token', 'test-token');

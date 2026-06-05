@@ -17,6 +17,7 @@ Branch: nk3-deploy. Files: `website/src/pages/CTV/JoinCtv.tsx`, `website/src/pag
 Changed URLs / API routes / data flow:
 - URL: `/ctv/join` on NK3 web (`https://tmv.2checkin.com/ctv/join`) and static landing redirects from `https://ctv.thammyvientam.com`.
 - API route: existing `POST /api/ctv-public/join`; no schema change. Payload continues to require name, phone, password; `email` may be blank; `code` may be blank only when NK3 root sign-up is enabled.
+- Merge/deploy guard: keep upstream NK3 `POST /api/ctv/bookings` selected-LOB company fallback, `/ctv` Me-tab invite-link share/copy behavior, and admin `/commission?tab=` drilldowns while preserving the `/ctv/join` no-email rule.
 
 Affected roles and data flows:
 - Role: unauthenticated CTV applicant.
@@ -29,6 +30,9 @@ Execution checks:
 - [x] PASS: `NODE_OPTIONS=--max-old-space-size=8192 npm --prefix website test -- src/pages/CTV/JoinCtv.test.tsx` — 8/8 green, including email-optional and NK3 root sign-up with no CTV giới thiệu phone.
 - [x] PASS: Shared CTV frontend bundle `NODE_OPTIONS=--max-old-space-size=8192 npm --prefix website test -- src/components/shared/CtvCreationForm/useCtvCreationForm.test.tsx src/components/shared/CtvCreationForm/CtvCreationForm.test.tsx src/components/commission/CtvManagementTab.test.tsx src/components/ctv/CtvRecruitModal.test.tsx src/pages/CTV/JoinCtv.test.tsx` — 34/34 green; CtvRecruitModal close/reopen no longer OOMs.
 - [x] PASS: Targeted backend CTV suites `JWT_SECRET=test-secret NODE_ENV=test npx jest src/routes/__tests__/ctvPublicJoin.test.js src/routes/__tests__/ctvCreateLobScope.test.js src/routes/__tests__/ctvBookings.test.js src/__tests__/ctvRouteGating.test.js src/services/__tests__/ctvSelfProfile.test.js src/services/__tests__/commissionEngineServiceCard.test.js --runInBand --no-coverage` — 43/43 green.
+- [x] PASS: Merge-expanded frontend suite `NODE_OPTIONS=--max-old-space-size=8192 npm --prefix website test -- src/components/shared/CtvCreationForm/useCtvCreationForm.test.tsx src/components/shared/CtvCreationForm/CtvCreationForm.test.tsx src/components/commission/CtvManagementTab.test.tsx src/components/ctv/CtvRecruitModal.test.tsx src/pages/CTV/JoinCtv.test.tsx src/components/ctv/CtvReferModal.test.tsx src/pages/Landing/Landing.test.tsx src/pages/CTV/CtvDashboard.test.tsx src/components/commission/CommissionNavigation.test.ts src/components/commission/NewClientsTab.test.tsx src/components/commission/EarningsPayoutsTabs.test.tsx` — 63/63 green after wrapping `Landing` tests in `MemoryRouter`.
+- [x] PASS: Merge-expanded backend suite `JWT_SECRET=test-secret NODE_ENV=test npx jest src/routes/__tests__/ctvPublicJoin.test.js src/routes/__tests__/ctvCreateLobScope.test.js src/routes/__tests__/ctvBookings.test.js src/services/__tests__/ctvBookingCompany.test.js src/__tests__/ctvRouteGating.test.js src/services/__tests__/ctvSelfProfile.test.js src/services/__tests__/commissionEngineServiceCard.test.js --runInBand --no-coverage` — 48/48 green.
+- [x] PASS: Build + security gate `npm --prefix website run build` passed; scoped Semgrep `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off ...` scanned 51 tracked files with 0 findings / 0 blocking.
 - [ ] PENDING: Live browser screenshot after NK3 redeploy showing `/ctv/join` copy and optional email state.
 
 # TestSprite Plan: Shared CTV creation hook (useCtvCreationForm) 2026-06-05

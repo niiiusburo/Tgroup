@@ -9,6 +9,7 @@ import { ExportMenu } from '@/components/shared/ExportMenu';
 import { ExportPreviewModal } from '@/components/shared/ExportPreviewModal';
 import { ExportDateRangeModal } from '@/components/calendar/ExportDateRangeModal';
 import { formatCommissionDate, formatCommissionDateRange } from './dateFormatting';
+import { ClientProfileLink, CommissionTabHeader, ServiceDrilldownLink } from './CommissionNavigation';
 
 function formatVnd(value: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value || 0);
@@ -85,9 +86,18 @@ function EarningsTab() {
     untilPrefix: t('date.untilPrefix'),
     locale: i18n.language,
   });
+  const countText = loading || error ? undefined : t('earnings.count', { count: rows.length });
 
   return (
     <div className="bg-white rounded-xl shadow-card p-6 space-y-4">
+      <CommissionTabHeader
+        tab="earnings"
+        count={countText}
+        description={t('earnings.description')}
+        previousTab="newClients"
+        nextTab="payouts"
+      />
+
       <div className="flex flex-wrap gap-3 items-end justify-between">
         <div className="flex gap-3">
           <label className="text-sm text-gray-600">{t('earnings.status')}
@@ -126,18 +136,64 @@ function EarningsTab() {
       {error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">{error}</div>}
       {exporter.error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">{exporter.error}</div>}
       {loading ? <div className="p-8 text-center text-gray-500">{t('earnings.loading')}</div> : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div className="space-y-3">
+          <div className="grid gap-3 md:hidden">
+            {rows.map((row) => (
+              <article key={`${row.lob}-${row.id}`} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <ClientProfileLink clientId={row.client_id} name={row.client_name || row.client_id} returnTab="earnings" lob={row.lob} className="text-base" />
+                    <div className="mt-1">
+                      <ServiceDrilldownLink
+                        clientId={row.client_id}
+                        serviceLineId={row.service_line_id}
+                        serviceName={row.product_name}
+                        returnTab="earnings"
+                        lob={row.lob}
+                        className="text-sm"
+                      />
+                    </div>
+                  </div>
+                  <span className="rounded-full bg-gray-50 px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-gray-200">
+                    {row.status}
+                  </span>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <div className="text-xs font-semibold uppercase text-gray-400">{t('earnings.ctv')}</div>
+                    <div className="mt-0.5 font-medium text-gray-800">{row.recipient_name || row.recipient_partner_id}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-semibold uppercase text-gray-400">{t('earnings.amount')}</div>
+                    <div className="mt-0.5 font-bold text-gray-900">{formatVnd(row.amount)}</div>
+                  </div>
+                  <div className="text-gray-600">{row.lob}</div>
+                  <div className="text-right text-gray-600">{formatCommissionDate(row.earned_at || row.created_at, i18n.language)}</div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto md:block">
+            <table className="w-full min-w-[980px] text-sm">
             <thead className="bg-gray-50 border-y border-gray-200"><tr>
               <th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.ctv')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.client')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.service')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.lob')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.level')}</th><th className="text-right px-4 py-3 font-medium text-gray-600">{t('earnings.amount')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.earnedAt')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('earnings.status')}</th>
             </tr></thead>
             <tbody className="divide-y divide-gray-200">
               {rows.map((row) => <tr key={`${row.lob}-${row.id}`} className="hover:bg-gray-50">
-                <td className="px-4 py-3 font-medium text-gray-900">{row.recipient_name || row.recipient_partner_id}</td><td className="px-4 py-3 text-gray-700">{row.client_name || row.client_id || '-'}</td><td className="px-4 py-3 text-gray-700">{row.product_name || '-'}</td><td className="px-4 py-3 text-gray-700">{row.lob}</td><td className="px-4 py-3 text-gray-700">{row.level ?? '-'}</td><td className="px-4 py-3 text-right font-semibold">{formatVnd(row.amount)}</td><td className="px-4 py-3 text-gray-700">{formatCommissionDate(row.earned_at || row.created_at, i18n.language)}</td><td className="px-4 py-3 text-gray-700">{row.status}</td>
+                <td className="px-4 py-3 font-medium text-gray-900">{row.recipient_name || row.recipient_partner_id}</td>
+                <td className="px-4 py-3 text-gray-700">
+                  <ClientProfileLink clientId={row.client_id} name={row.client_name || row.client_id} returnTab="earnings" lob={row.lob} />
+                </td>
+                <td className="px-4 py-3 text-gray-700">
+                  <ServiceDrilldownLink clientId={row.client_id} serviceLineId={row.service_line_id} serviceName={row.product_name} returnTab="earnings" lob={row.lob} />
+                </td>
+                <td className="px-4 py-3 text-gray-700">{row.lob}</td><td className="px-4 py-3 text-gray-700">{row.level ?? '-'}</td><td className="px-4 py-3 text-right font-semibold">{formatVnd(row.amount)}</td><td className="px-4 py-3 text-gray-700">{formatCommissionDate(row.earned_at || row.created_at, i18n.language)}</td><td className="px-4 py-3 text-gray-700">{row.status}</td>
               </tr>)}
               {rows.length === 0 && <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-500">{t('earnings.noEarnings')}</td></tr>}
             </tbody>
           </table>
+          </div>
         </div>
       )}
       <ExportDateRangeModal isOpen={dateModalOpen} onClose={() => setDateModalOpen(false)} onApply={handleDateApply} />
@@ -158,49 +214,9 @@ function PayoutsTab() {
   const { t: tc } = useTranslation('common');
   const businessUnit = useBusinessUnitOptional();
   const [payouts, setPayouts] = useState<PayoutRow[]>([]);
-  // §10: merge combined payouts (rows sharing payout_group_id across LOBs) into one row,
-  // expandable into the per-LOB legs. Single-LOB payouts pass through unchanged.
-  const payoutGroups = useMemo(() => {
-    const byGroup = new Map<string, PayoutRow[]>();
-    const singles: PayoutRow[] = [];
-    for (const p of payouts) {
-      if (p.payout_group_id) {
-        const arr = byGroup.get(p.payout_group_id) || [];
-        arr.push(p);
-        byGroup.set(p.payout_group_id, arr);
-      } else {
-        singles.push(p);
-      }
-    }
-    const merged = [
-      ...Array.from(byGroup.values()).map((rows) => ({
-        key: `g-${rows[0].payout_group_id}`,
-        combined: rows.length > 1,
-        cycleLabel: rows[0].cycle_label,
-        lobs: rows.map((r) => r.lob),
-        total: rows.reduce((s, r) => s + r.total_amount, 0),
-        count: rows.reduce((s, r) => s + r.earnings_count, 0),
-        paidAt: rows[0].paid_at,
-        receiptRow: rows[0],
-        legs: rows,
-      })),
-      ...singles.map((p) => ({
-        key: `${p.lob}-${p.id}`,
-        combined: false,
-        cycleLabel: p.cycle_label,
-        lobs: [p.lob] as ('dental' | 'cosmetic')[],
-        total: p.total_amount,
-        count: p.earnings_count,
-        paidAt: p.paid_at,
-        receiptRow: p,
-        legs: [p],
-      })),
-    ];
-    return merged.sort((a, b) => new Date(b.paidAt || 0).getTime() - new Date(a.paidAt || 0).getTime());
-  }, [payouts]);
   const [pending, setPending] = useState<EarningsRow[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
-  const [lob, setLob] = useState<'all' | 'dental' | 'cosmetic'>(
+  const [lob, setLob] = useState<'dental' | 'cosmetic'>(
     businessUnit?.currentLOB === 'cosmetic' ? 'cosmetic' : 'dental'
   );
   const [cycleLabel, setCycleLabel] = useState('');
@@ -216,7 +232,7 @@ function PayoutsTab() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const exportFilters = useMemo(
-    () => ({ lob: lob === 'all' ? 'dental' : lob, dateFrom: dateFrom || undefined, dateTo: dateTo || undefined }),
+    () => ({ lob, dateFrom: dateFrom || undefined, dateTo: dateTo || undefined }),
     [lob, dateFrom, dateTo]
   );
   // ctv-payouts builder queries both LOB DBs → force the plain /api/Exports mount.
@@ -226,10 +242,12 @@ function PayoutsTab() {
     setDateFrom(from);
     setDateTo(to);
     setDateModalOpen(false);
+    handleLoad(lob, { dateFrom: from, dateTo: to });
   };
   const clearDates = () => {
     setDateFrom('');
     setDateTo('');
+    handleLoad(lob, { dateFrom: '', dateTo: '' });
   };
   const dateLabel = formatCommissionDateRange(dateFrom, dateTo, {
     allLabel: t('newClients.allDates'),
@@ -238,28 +256,24 @@ function PayoutsTab() {
     locale: i18n.language,
   });
 
-  const handleLoad = async (currentLob?: 'all' | 'dental' | 'cosmetic') => {
+  const handleLoad = async (currentLob?: 'dental' | 'cosmetic', override?: { dateFrom?: string; dateTo?: string }) => {
     setLoading(true); setError(null);
     try {
       const lobToUse = currentLob ?? lob;
-      if (lobToUse === 'all') {
-        // §10 All filter: fetch BOTH LOB DBs so combined payouts (shared payout_group_id)
-        // merge into one row. Pending earnings default to dental for the create flow.
-        const [dPay, cPay, dEarn] = await Promise.all([
-          fetchPayouts({ lob: 'dental', limit: 50 }),
-          fetchPayouts({ lob: 'cosmetic', limit: 50 }),
-          fetchEarnings({ lob: 'dental', status: 'pending', limit: 200 }),
-        ]);
-        setPayouts([...(dPay.items || []), ...(cPay.items || [])]);
-        setPending(dEarn.items || []);
-      } else {
-        const [payoutData, earningsData] = await Promise.all([
-          fetchPayouts({ lob: lobToUse, limit: 50 }),
-          fetchEarnings({ lob: lobToUse, status: 'pending', limit: 200 }),
-        ]);
-        setPayouts(payoutData.items || []);
-        setPending(earningsData.items || []);
-      }
+      const fromToUse = override?.dateFrom ?? dateFrom;
+      const toToUse = override?.dateTo ?? dateTo;
+      const [payoutData, earningsData] = await Promise.all([
+        fetchPayouts({ lob: lobToUse, limit: 50 }),
+        fetchEarnings({
+          lob: lobToUse,
+          status: 'pending',
+          dateFrom: fromToUse || undefined,
+          dateTo: toToUse || undefined,
+          limit: 200,
+        }),
+      ]);
+      setPayouts(payoutData.items || []);
+      setPending(earningsData.items || []);
       setSelected([]);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to load payouts');
@@ -298,7 +312,7 @@ function PayoutsTab() {
         const uploadRes = await uploadPayoutReceipt(receiptFile);
         receiptUrl = uploadRes.url;
       }
-      await createPayout({ lob: lob === 'all' ? 'dental' : lob, earningIds: selected, cycleLabel, notes: notes || undefined, receipt_url: receiptUrl });
+      await createPayout({ lob, earningIds: selected, cycleLabel, notes: notes || undefined, receipt_url: receiptUrl });
       setCycleLabel('');
       setNotes('');
       setReceiptFile(null);
@@ -312,12 +326,12 @@ function PayoutsTab() {
     }
   };
 
-  const attachReceipt = async (payoutId: string, file: File, payoutLob: 'dental' | 'cosmetic') => {
+  const attachReceipt = async (payoutId: string, file: File) => {
     setSubmitting(true);
     setError(null);
     try {
       const uploadRes = await uploadPayoutReceipt(file);
-      await updatePayoutReceipt(payoutId, uploadRes.url, payoutLob);
+      await updatePayoutReceipt(payoutId, uploadRes.url, lob);
       await handleLoad();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to attach receipt');
@@ -329,14 +343,16 @@ function PayoutsTab() {
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-xl shadow-card p-6 space-y-4">
+        <CommissionTabHeader
+          tab="payouts"
+          count={loading || error ? undefined : t('payouts.pendingCount', { count: pending.length })}
+          description={t('payouts.description')}
+          previousTab="earnings"
+        />
+
         <div className="flex flex-wrap gap-3 items-end justify-between">
           <label className="text-sm text-gray-600">{t('payouts.lob')}
-            <select
-              value={lob}
-              onChange={(e) => { const v = e.target.value as 'all' | 'dental' | 'cosmetic'; setLob(v); handleLoad(v); }}
-              className="block mt-1 px-3 py-2 border rounded-lg"
-            >
-              <option value="all">{t('payouts.allLobs', { defaultValue: 'Tất cả (Combined)' })}</option>
+            <select value={lob} onChange={(e) => setLob(e.target.value as any)} className="block mt-1 px-3 py-2 border rounded-lg">
               <option value="cosmetic">Cosmetic</option><option value="dental">Dental</option>
             </select>
           </label>
@@ -382,9 +398,9 @@ function PayoutsTab() {
         )}
         {loading ? <div className="p-8 text-center text-gray-500">{tc('loading')}</div> : (
           <div className="overflow-x-auto max-h-80">
-            <table className="w-full text-sm"><thead className="bg-gray-50 border-y border-gray-200"><tr><th className="px-4 py-3" /><th className="text-left px-4 py-3 font-medium text-gray-600">{t('payouts.ctv')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('payouts.client')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('payouts.earnedAt')}</th><th className="text-right px-4 py-3 font-medium text-gray-600">{t('payouts.amount')}</th></tr></thead><tbody className="divide-y divide-gray-200">
-              {pending.map((e) => <tr key={e.id}><td className="px-4 py-3"><input type="checkbox" checked={selected.includes(e.id)} onChange={(ev) => setSelected((s) => ev.target.checked ? [...s, e.id] : s.filter((id) => id !== e.id))} /></td><td className="px-4 py-3">{e.recipient_name || e.recipient_partner_id}</td><td className="px-4 py-3">{e.client_name || '-'}</td><td className="px-4 py-3 text-gray-700">{formatCommissionDate(e.earned_at || e.created_at, i18n.language)}</td><td className="px-4 py-3 text-right font-semibold">{formatVnd(e.amount)}</td></tr>)}
-              {pending.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-500">{t('payouts.noPending')}</td></tr>}
+            <table className="w-full min-w-[760px] text-sm"><thead className="bg-gray-50 border-y border-gray-200"><tr><th className="px-4 py-3" /><th className="text-left px-4 py-3 font-medium text-gray-600">{t('payouts.ctv')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('payouts.client')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('payouts.service')}</th><th className="text-left px-4 py-3 font-medium text-gray-600">{t('payouts.earnedAt')}</th><th className="text-right px-4 py-3 font-medium text-gray-600">{t('payouts.amount')}</th></tr></thead><tbody className="divide-y divide-gray-200">
+              {pending.map((e) => <tr key={e.id}><td className="px-4 py-3"><input type="checkbox" checked={selected.includes(e.id)} onChange={(ev) => setSelected((s) => ev.target.checked ? [...s, e.id] : s.filter((id) => id !== e.id))} /></td><td className="px-4 py-3">{e.recipient_name || e.recipient_partner_id}</td><td className="px-4 py-3"><ClientProfileLink clientId={e.client_id} name={e.client_name || e.client_id} returnTab="payouts" lob={e.lob} /></td><td className="px-4 py-3"><ServiceDrilldownLink clientId={e.client_id} serviceLineId={e.service_line_id} serviceName={e.product_name} returnTab="payouts" lob={e.lob} /></td><td className="px-4 py-3 text-gray-700">{formatCommissionDate(e.earned_at || e.created_at, i18n.language)}</td><td className="px-4 py-3 text-right font-semibold">{formatVnd(e.amount)}</td></tr>)}
+              {pending.length === 0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-500">{t('payouts.noPending')}</td></tr>}
             </tbody></table>
           </div>
         )}
@@ -393,35 +409,21 @@ function PayoutsTab() {
         <div className="px-6 py-4 font-semibold text-gray-900">{t('payouts.recentCycles')}</div>
         <table className="w-full text-sm">
           <tbody className="divide-y divide-gray-200">
-            {payoutGroups.map((g) => (
-              <tr key={g.key}>
+            {payouts.map((p) => (
+              <tr key={`${p.lob}-${p.id}`}>
                 <td className="px-6 py-3">
                   <div className="flex items-center gap-3">
                     <div>
-                      <div className="font-medium flex items-center gap-2">
-                        {g.cycleLabel}
-                        {g.combined && (
-                          <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-700">
-                            {t('payouts.combined', { defaultValue: 'Combined' })}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-xs text-gray-500">{g.lobs.join(' + ')} · {t('payouts.earningsCount', { count: g.count })} · {g.paidAt ? formatCommissionDate(g.paidAt, i18n.language) : '-'}</div>
-                      {g.combined && (
-                        <div className="mt-1 space-y-0.5">
-                          {g.legs.map((leg) => (
-                            <div key={`${leg.lob}-${leg.id}`} className="text-[11px] text-gray-400">↳ {leg.lob}: {formatVnd(leg.total_amount)}</div>
-                          ))}
-                        </div>
-                      )}
+                      <div className="font-medium">{p.cycle_label}</div>
+                      <div className="text-xs text-gray-500">{p.lob} · {t('payouts.earningsCount', { count: p.earnings_count })} · {p.paid_at ? formatCommissionDate(p.paid_at, i18n.language) : '-'}</div>
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-3 text-right font-semibold">{formatVnd(g.total)}</td>
+                <td className="px-6 py-3 text-right font-semibold">{formatVnd(p.total_amount)}</td>
                 <td className="px-6 py-3">
-                  {g.receiptRow.receipt_url ? (
-                    <a href={getUploadUrl(g.receiptRow.receipt_url)} target="_blank" rel="noreferrer" className="inline-block">
-                      <img src={getUploadUrl(g.receiptRow.receipt_url)} alt="Receipt" className="h-10 w-10 rounded border border-gray-200 object-cover hover:ring-2 hover:ring-primary/30" />
+                  {p.receipt_url ? (
+                    <a href={getUploadUrl(p.receipt_url)} target="_blank" rel="noreferrer" className="inline-block">
+                      <img src={getUploadUrl(p.receipt_url)} alt="Receipt" className="h-10 w-10 rounded border border-gray-200 object-cover hover:ring-2 hover:ring-primary/30" />
                     </a>
                   ) : (
                     <label className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 cursor-pointer">
@@ -432,7 +434,7 @@ function PayoutsTab() {
                         className="hidden"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          if (file) attachReceipt(g.receiptRow.id, file, g.receiptRow.lob);
+                          if (file) attachReceipt(p.id, file);
                           e.target.value = '';
                         }}
                       />
@@ -441,7 +443,7 @@ function PayoutsTab() {
                 </td>
               </tr>
             ))}
-            {payoutGroups.length === 0 && <tr><td className="px-6 py-8 text-center text-gray-500">{t('payouts.noCycles')}</td></tr>}
+            {payouts.length === 0 && <tr><td className="px-6 py-8 text-center text-gray-500">{t('payouts.noCycles')}</td></tr>}
           </tbody>
         </table>
       </div>

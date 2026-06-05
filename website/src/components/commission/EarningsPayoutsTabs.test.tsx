@@ -5,8 +5,10 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { ReactElement } from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
+import { MemoryRouter } from 'react-router-dom';
 import { EarningsTab, PayoutsTab } from './EarningsPayoutsTabs';
 import type { BusinessUnitContextValue } from '@/contexts/BusinessUnitContext';
 
@@ -27,6 +29,7 @@ const mockEarnings = {
       recipient_partner_id: 'p1',
       client_name: 'Client 1',
       client_id: 'c1',
+      service_line_id: 'line-1',
       product_name: 'Service A',
       lob: 'cosmetic' as const,
       level: 1,
@@ -82,6 +85,10 @@ vi.mock('@/contexts/BusinessUnitContext', () => ({
 import { fetchEarnings, fetchPayouts } from '@/lib/api/commission';
 import { useBusinessUnitOptional } from '@/contexts/BusinessUnitContext';
 
+function renderWithRouter(ui: ReactElement) {
+  return render(<MemoryRouter>{ui}</MemoryRouter>);
+}
+
 describe('EarningsPayoutsTabs LOB Sync', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -104,7 +111,7 @@ describe('EarningsPayoutsTabs LOB Sync', () => {
       const fetchEarningsMock = fetchEarnings as any;
       fetchEarningsMock.mockClear();
 
-      render(<EarningsTab />);
+      renderWithRouter(<EarningsTab />);
 
       // First render calls with default 'dental', then useEffect updates to 'cosmetic'
       await waitFor(() => {
@@ -125,7 +132,7 @@ describe('EarningsPayoutsTabs LOB Sync', () => {
       const fetchEarningsMock = fetchEarnings as any;
       fetchEarningsMock.mockClear();
 
-      render(<EarningsTab />);
+      renderWithRouter(<EarningsTab />);
 
       await waitFor(() => {
         const lastCall = fetchEarningsMock.mock.calls[fetchEarningsMock.mock.calls.length - 1];
@@ -138,13 +145,32 @@ describe('EarningsPayoutsTabs LOB Sync', () => {
       const fetchEarningsMock = fetchEarnings as any;
       fetchEarningsMock.mockClear();
 
-      render(<EarningsTab />);
+      renderWithRouter(<EarningsTab />);
 
       await waitFor(() => {
         expect(fetchEarningsMock).toHaveBeenCalled();
         const lastCall = fetchEarningsMock.mock.calls[0];
         expect(lastCall?.[0]).toEqual(expect.objectContaining({ lob: 'dental' }));
       });
+    });
+
+    it('links earning clients and services back into the customer profile flow', async () => {
+      const mockBusinessUnit: BusinessUnitContextValue = {
+        currentLOB: 'cosmetic',
+        setCurrentLOB: vi.fn(),
+        availableLOBs: ['cosmetic'],
+        isMultiLOBUser: false,
+        isCosmeticEnabled: true,
+      };
+      (useBusinessUnitOptional as any).mockReturnValue(mockBusinessUnit);
+
+      renderWithRouter(<EarningsTab />);
+
+      const clientLinks = await screen.findAllByRole('link', { name: /Client 1/i });
+      expect(clientLinks[0]).toHaveAttribute('href', '/customers/c1?tab=profile&from=commission&returnTab=earnings&lob=cosmetic');
+
+      const serviceLinks = await screen.findAllByRole('link', { name: /Service A/i });
+      expect(serviceLinks[0]).toHaveAttribute('href', '/customers/c1?tab=records&from=commission&serviceLineId=line-1&returnTab=earnings&lob=cosmetic');
     });
   });
 
@@ -161,7 +187,7 @@ describe('EarningsPayoutsTabs LOB Sync', () => {
       const fetchPayoutsMock = fetchPayouts as any;
       fetchPayoutsMock.mockClear();
 
-      render(<PayoutsTab />);
+      renderWithRouter(<PayoutsTab />);
 
       await waitFor(() => {
         const lastCall = fetchPayoutsMock.mock.calls[fetchPayoutsMock.mock.calls.length - 1];
@@ -181,7 +207,7 @@ describe('EarningsPayoutsTabs LOB Sync', () => {
       const fetchPayoutsMock = fetchPayouts as any;
       fetchPayoutsMock.mockClear();
 
-      render(<PayoutsTab />);
+      renderWithRouter(<PayoutsTab />);
 
       await waitFor(() => {
         const lastCall = fetchPayoutsMock.mock.calls[fetchPayoutsMock.mock.calls.length - 1];
@@ -194,7 +220,7 @@ describe('EarningsPayoutsTabs LOB Sync', () => {
       const fetchPayoutsMock = fetchPayouts as any;
       fetchPayoutsMock.mockClear();
 
-      render(<PayoutsTab />);
+      renderWithRouter(<PayoutsTab />);
 
       await waitFor(() => {
         expect(fetchPayoutsMock).toHaveBeenCalled();
@@ -217,7 +243,7 @@ describe('EarningsPayoutsTabs LOB Sync', () => {
       fetchPayoutsMock.mockClear();
       fetchEarningsMock.mockClear();
 
-      render(<PayoutsTab />);
+      renderWithRouter(<PayoutsTab />);
 
       await waitFor(() => {
         // Check the last calls (after useEffect updates)

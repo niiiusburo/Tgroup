@@ -8,6 +8,7 @@ export function RecordsTab({
   profile,
   services,
   loadingServices,
+  focusedServiceId,
   payments,
   onCreateService,
   onEditService,
@@ -51,6 +52,7 @@ export function RecordsTab({
       ) : (
         <ServiceHistory
           services={services}
+          focusedServiceId={focusedServiceId}
           payments={payments}
           onEditService={onEditService}
           onDeleteService={onDeleteService}

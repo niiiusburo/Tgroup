@@ -98,9 +98,9 @@
     ]
   },
   {
-    "version": "0.32.93",
+    "version": "0.32.96",
     "date": "2026-06-02",
-    "commit": "d96a4edc",
+    "commit": "pending",
     "highlights": "CTV 6-month eligibility countdown bar + Doctor→CTV breadcrumb. A client's link to a CTV is now a computed, non-destructive status anchored on the most recent CTV-bearing appointment or service, shown as a color-shifting bar on the customer profile and CTV portal.",
     "sections": [
       {
