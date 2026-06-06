@@ -27,13 +27,13 @@ const customerReceiptsRoutes = require('./routes/customerReceipts');
 const dotKhamsRoutes = require('./routes/dotKhams');
 const accountPaymentsRoutes = require('./routes/accountPayments');
 const cashbooksRoutes = require('./routes/cashbooks');
-const receiptsRoutes = require('./routes/receipts');
-const journalsRoutes = require('./routes/journals');
-const stockPickingsRoutes = require('./routes/stockPickings');
+// const receiptsRoutes = require('./routes/receipts');        // DEAD ROUTE (500) — disabled 2026-06-06
+// const journalsRoutes = require('./routes/journals');         // DEAD ROUTE (500) — disabled 2026-06-06
+// const stockPickingsRoutes = require('./routes/stockPickings'); // DEAD ROUTE (500) — disabled 2026-06-06
 // const crmTasksRoutes = require('./routes/crmTasks'); // DEAD ROUTE: crmTasks.js queries non-existent dbo.crmtasks (HTTP 500)
-const commissionsRoutes = require('./routes/commissions');
+// const commissionsRoutes = require('./routes/commissions');  // DEAD ROUTE (500) — disabled 2026-06-06
 const commissionConfigRoutes = require('./routes/commissionConfig');
-const hrPayslipsRoutes = require('./routes/hrPayslips');
+// const hrPayslipsRoutes = require('./routes/hrPayslips');     // DEAD ROUTE (500) — disabled 2026-06-06
 const employeesRoutes = require('./routes/employees');
 const productsRoutes = require('./routes/products');
 const productCategoriesRoutes = require('./routes/productCategories');
@@ -179,17 +179,25 @@ app.use('/api/CustomerReceipts', customerReceiptsRoutes);
 app.use('/api/DotKhams', dotKhamsRoutes);
 app.use('/api/AccountPayments', accountPaymentsRoutes);
 app.use('/api/CashBooks', cashbooksRoutes);
-app.use('/api/Receipts', receiptsRoutes);
-app.use('/api/AccountJournals', journalsRoutes);
-app.use('/api/StockPickings', stockPickingsRoutes);
+// DEAD ROUTES (HTTP 500 for all users on NK3 — underlying tables/columns do not exist; 0 frontend references).
+// Disabled 2026-06-06 to stop 500s. Re-enable only after the backing schema is created.
+//   /api/Receipts        → "column cr.partnerid does not exist"
+//   /api/AccountJournals → "relation accountjournals does not exist"
+//   /api/StockPickings   → "relation stockpickings does not exist"
+// app.use('/api/Receipts', receiptsRoutes);
+// app.use('/api/AccountJournals', journalsRoutes);
+// app.use('/api/StockPickings', stockPickingsRoutes);
 // app.use('/api/CrmTasks', crmTasksRoutes); // DEAD ROUTE: crmTasks.js queries non-existent dbo.crmtasks (HTTP 500). Matches the dead Services route.
-app.use('/api/Commissions', commissionsRoutes);
+// DEAD ROUTE (HTTP 500): legacy "commissions" table does not exist on NK3 (superseded by the
+// v3 per-service earnings model). 0 frontend references. Disabled 2026-06-06.
+// app.use('/api/Commissions', commissionsRoutes);
 app.use('/api/CommissionConfig', commissionConfigRoutes);
 app.use('/api/Ctvs', ctvsRoutes);
 app.use('/api/Earnings', earningsRoutes);
 app.use('/api/Payouts', payoutsRoutes);
 app.use('/api/NewClients', newClientsRoutes);
-app.use('/api/HrPayslips', hrPayslipsRoutes);
+// DEAD ROUTE (HTTP 500): "relation hrpayslips does not exist" on NK3. 0 frontend references. Disabled 2026-06-06.
+// app.use('/api/HrPayslips', hrPayslipsRoutes);
 app.use('/api/Employees', employeesRoutes);
 app.use('/api/Products', productsRoutes);
 app.use('/api/ProductCategories', productCategoriesRoutes);
