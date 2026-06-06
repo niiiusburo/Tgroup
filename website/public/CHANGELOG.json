@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.32.108",
+    "date": "2026-06-06",
+    "commit": "ctv-new-clients-cosmetic-mirror",
+    "highlights": "Added the Cosmetic mirror for the CTV referred-client revenue and COM audit endpoint: /api/cosmetic/NewClients now resolves as Cosmetic-only and returns the same revenue/paid/COM/missing-COM fields as /api/NewClients?lob=cosmetic.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Made /api/cosmetic/NewClients a real NK3/TMV endpoint and forced it to Cosmetic scope from the route context.",
+          "Kept /api/NewClients?lob=all|dental|cosmetic unchanged for the admin cross-LOB audit."
+        ]
+      },
+      {
+        "title": "Tests",
+        "items": [
+          "Added route coverage proving the Cosmetic mirror cannot be widened by a lob=all query."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.107",
     "date": "2026-06-06",
     "commit": "ctv-referral-commission-inheritance",

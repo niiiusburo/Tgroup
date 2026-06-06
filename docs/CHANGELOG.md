@@ -2,6 +2,14 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.108] — 2026-06-06
+### Fixed
+- Added the NK3/TMV Cosmetic mirror `GET /api/cosmetic/NewClients` and forced it to `lob=cosmetic` from the `/api/cosmetic/*` route context, so the documented referral revenue/COM audit endpoint is real and cannot be widened by `?lob=all`.
+
+### Docs / Tests
+- Updated `docs/CONTRACTS.md`, `docs/TEST-MATRIX.md`, `product-map/contracts/api-index.md`, `website/public/CHANGELOG.json`, and `testbright.md`.
+- Added `api/src/routes/__tests__/newClientsRoute.test.js` for top-level `?lob=` behavior and Cosmetic mirror scoping.
+
 ## [0.32.107] — 2026-06-06
 ### Fixed
 - Fixed NK3/TMV CTV referral commission loss: new service cards now inherit the customer's active recorded `referred_by_ctv_id` when staff leaves the CTV selector blank, persist that id to `saleorders.ctv_id`, and create full-service-price CTV earnings immediately per `INV-003C`.

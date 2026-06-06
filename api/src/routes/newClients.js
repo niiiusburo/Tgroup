@@ -1,10 +1,10 @@
 'use strict';
 
 /**
- * newClients.js — Admin "New Clients" list (referral-only leads not yet converted).
- * Mounted at /api/NewClients. Reads BOTH dental and cosmetic DBs in the API layer
- * (via newClientsQuery); never performs cross-DB SQL. Admin-gated like the earnings
- * ledger so the same admins who see Thu nhập / Chi trả see this.
+ * newClients.js — Admin "New Clients" referral revenue/COM audit.
+ * Mounted at /api/NewClients and /api/cosmetic/NewClients. The top-level route
+ * can read one or both LOB DBs based on ?lob=; the cosmetic mirror forces req.lob
+ * so /api/cosmetic/NewClients stays cosmetic-only.
  *
  * @crossref:used-by[website/src/components/commission/NewClientsTab.tsx]
  */
@@ -27,6 +27,7 @@ async function adminOrPerm(employeeId, perm, authLob = 'dental') {
 }
 
 // GET /api/NewClients?lob=all|dental|cosmetic&date_from=&date_to=&limit=&offset=
+// GET /api/cosmetic/NewClients?date_from=&date_to=&limit=&offset=
 router.get('/', requireAuth, async (req, res) => {
   const { employeeId } = req.user || {};
   if (!employeeId) return res.status(401).json({ error: 'No token' });
@@ -36,7 +37,7 @@ router.get('/', requireAuth, async (req, res) => {
 
   try {
     const result = await listNewClients({
-      lob: req.query.lob,
+      lob: req.lob || req.query.lob,
       // apiFetch snake-cases query params (dateFrom -> date_from); accept both.
       dateFrom: req.query.date_from || req.query.dateFrom || '',
       dateTo: req.query.date_to || req.query.dateTo || '',

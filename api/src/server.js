@@ -254,6 +254,7 @@ if (COSMETIC_FLAG) {
   cosmeticRouter.use('/CustomerSources', customerSourcesRoutes);
   cosmeticRouter.use('/CommissionConfig', commissionConfigRoutes);
   cosmeticRouter.use('/Ctvs', ctvsRoutes);
+  cosmeticRouter.use('/NewClients', newClientsRoutes);
   cosmeticRouter.use('/Permissions', permissionsRoutes);
   cosmeticRouter.use('/AccountPayments', accountPaymentsRoutes);
   // cosmeticRouter.use('/CrmTasks', crmTasksRoutes); // DEAD ROUTE: crmTasks.js queries non-existent dbo.crmtasks (HTTP 500)

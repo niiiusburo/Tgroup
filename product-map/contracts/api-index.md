@@ -89,6 +89,7 @@ CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin ro
 | GET | `/api/CommissionConfig`, `/api/cosmetic/CommissionConfig` | Auth | — | `{ levels: [{level,label,enabled,share_percent}], defaultReferralPercent }` |
 | PUT | `/api/CommissionConfig`, `/api/cosmetic/CommissionConfig` | admin (`commission.config.manage`/`*`) | `{ levels[], defaultReferralPercent }` | Upserts config; enabled-sum > 100 → 400 `B_LEVEL_SUM_EXCEEDS_100` |
 | GET | `/api/NewClients` | admin (`commissions.view.team`/`*`) | `?lob=all\|dental\|cosmetic&date_from=&date_to=&limit=&offset=` | Referral audit list across requested LOB DBs: `{ items: [{ id, name, phone, email, referred_at, referring_ctv_id, referring_ctv_name, referring_ctv_phone, lob, service_count, service_line_count, service_total, paid_total, earnings_count, commissioned_service_line_count, commission_total, service_missing_ctv_count, missing_commission, commission_status }], totalItems, limit, offset }`. Converted referrals remain visible; report is read-only. |
+| GET | `/api/cosmetic/NewClients` | admin + `cosmetic.access` + Cosmetic LOB scope | `?date_from=&date_to=&limit=&offset=` | Cosmetic mirror of the referral audit. Forces `lob=cosmetic` from the `/api/cosmetic/*` route context even if a query attempts `lob=all`; same response shape as `/api/NewClients`. |
 
 ## Earnings & Payouts (`/api/Earnings`, `/api/Payouts`) — admin / `commissions.*`
 
