@@ -83,6 +83,16 @@ export interface NewClientRow {
   referring_ctv_id?: string;
   referring_ctv_name: string;
   referring_ctv_phone: string;
+  service_count: number;
+  service_line_count: number;
+  service_total: number;
+  paid_total: number;
+  earnings_count: number;
+  commissioned_service_line_count: number;
+  commission_total: number;
+  service_missing_ctv_count: number;
+  missing_commission: boolean;
+  commission_status: 'lead' | 'missing_commission' | 'commission_recorded' | string;
   lob: 'dental' | 'cosmetic';
 }
 

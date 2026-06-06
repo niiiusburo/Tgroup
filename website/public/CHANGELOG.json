@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.32.107",
+    "date": "2026-06-06",
+    "commit": "ctv-referral-commission-inheritance",
+    "highlights": "Fixed CTV referral commission loss for referred clients: service cards now inherit the customer's recorded CTV when the service form is saved without a selected CTV, and the New Clients commission tab now shows referral revenue, paid totals, COM totals, and missing-COM status.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "New service cards for referred clients inherit the active recorded CTV referrer and create full-price CTV earnings immediately.",
+          "Admin New Clients no longer hides converted referrals; it now shows service revenue, paid total, COM total, and whether COM is missing."
+        ]
+      },
+      {
+        "title": "Tests",
+        "items": [
+          "Added targeted backend regression coverage for service-card CTV inheritance and New Clients revenue/COM aggregation.",
+          "Updated the New Clients UI test to cover revenue and missing-COM display."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.106",
     "date": "2026-06-05",
     "commit": "ctv-creation-ssot-unify-enforce",

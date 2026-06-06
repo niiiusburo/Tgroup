@@ -44,9 +44,9 @@
 **Cite when:** Editing service deletion, sale-order residuals, `payment_allocations`, payouts, earnings statuses, or CTV commission reversal logic.
 
 ### INV-003C — CTV Service Card Commission Trigger
-**Rule:** CTV commission MUST be created when a service card with an attached CTV is created. The commission base is the full service price immediately, not the paid amount or collected payment amount. CTV percentages MUST come from CTV tier config, not product-level `commission_rate_percent`. CTV booking remains appointment-only and MUST NOT create commission.
+**Rule:** CTV commission MUST be created when a service card with an attached CTV is created. If the create-service payload does not include `ctv_id`, the backend MUST inherit the customer partner's active `referred_by_ctv_id` and persist that inherited CTV on `saleorders.ctv_id` before creating full-price earnings. The commission base is the full service price immediately, not the paid amount or collected payment amount. CTV percentages MUST come from CTV tier config, not product-level `commission_rate_percent`. CTV booking remains appointment-only and MUST NOT create commission.
 **Rationale:** NK3 CTV business logic pays CTVs when the client activates a service. Payment timing and deposits are customer-accounting events, not the CTV earning trigger.
-**Enforced by:** Accepted business logic in `docs/business-logic/ctv-referral-commission.md`. Existing payment-collected/product-rate code paths are implementation gaps until the service-card-created engine is implemented.
+**Enforced by:** `api/src/routes/saleOrders/createSaleOrder.js`, `api/src/services/commissionEngine.js`, `api/src/routes/saleOrders/__tests__/createSaleOrderReferralCtv.test.js`, and accepted business logic in `docs/business-logic/ctv-referral-commission.md`.
 **Cite when:** Editing service creation, saleorderlines, CTV tier config, commissionEngine, CTV bookings, payout selection, or product/service commission fields.
 
 ### INV-004 — Deposit Category Heuristic Stability

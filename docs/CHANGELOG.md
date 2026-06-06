@@ -2,6 +2,15 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.107] — 2026-06-06
+### Fixed
+- Fixed NK3/TMV CTV referral commission loss: new service cards now inherit the customer's active recorded `referred_by_ctv_id` when staff leaves the CTV selector blank, persist that id to `saleorders.ctv_id`, and create full-service-price CTV earnings immediately per `INV-003C`.
+- Expanded `/api/NewClients`, the admin `/commission?tab=newClients` table, and the New Clients Excel export from lead-only callbacks into a referral revenue/COM audit: converted referrals stay visible with service total, paid total, COM total, and a missing-COM status badge.
+
+### Docs / Tests
+- Updated `docs/business-logic/ctv-referral-commission.md`, `docs/INVARIANTS.md`, `docs/CONTRACTS.md`, `docs/TEST-MATRIX.md`, `product-map/domains/ctv.yaml`, `product-map/domains/earnings-commissions.yaml`, and `testbright.md`.
+- Added targeted regression coverage: `api/src/routes/saleOrders/__tests__/createSaleOrderReferralCtv.test.js`, expanded `api/src/services/__tests__/newClientsQuery.test.js`, and updated `website/src/components/commission/NewClientsTab.test.tsx`.
+
 ## [0.32.106] — 2026-06-05
 ### CTV Creation Unification + Permanent SSOT Enforcement (non-overlookable)
 - Unified the three CTV/"Codex" signup/create processes (admin portal Add CTV in CtvManagementTab, unauthed public no-sign-in JoinCtv, logged-in CTV portal recruit via CtvRecruitModal) into **one reusable domain** (`website/src/components/shared/CtvCreationForm/` + `useCtvCreationForm` hook). All three now delegate (config modes + onSubmit wrappers for page extras like upline/code; beforeLobs slot for public gate; showLobs=false for public to preserve prior UX).

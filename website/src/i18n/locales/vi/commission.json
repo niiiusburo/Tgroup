@@ -28,17 +28,25 @@
   "newClients": {
     "lob": "Lĩnh vực",
     "dateRange": "Khoảng thời gian",
-    "description": "Theo dõi khách được giới thiệu trước khi chuyển đổi và mở thẳng hồ sơ từ từng dòng.",
+    "description": "Theo dõi khách được giới thiệu, doanh thu dịch vụ và COM CTV đã ghi nhận từ từng dòng.",
     "allDates": "Tất cả",
     "refresh": "Làm mới",
     "loading": "Đang tải khách hàng mới...",
     "loadError": "Không thể tải danh sách khách hàng mới",
-    "empty": "Chưa có khách hàng mới nào (khách được CTV giới thiệu nhưng chưa dùng dịch vụ).",
+    "empty": "Chưa có khách nào được CTV giới thiệu.",
     "count": "{{count}} khách hàng",
     "client": "Khách hàng",
     "phone": "Số điện thoại",
     "ctv": "CTV giới thiệu",
-    "referredAt": "Ngày giới thiệu"
+    "referredAt": "Ngày giới thiệu",
+    "serviceTotal": "Doanh thu",
+    "paidTotal": "Đã thu",
+    "commissionTotal": "COM",
+    "status": "Trạng thái COM",
+    "statusLead": "Chưa chuyển đổi",
+    "statusMissing": "Thiếu COM",
+    "statusRecorded": "Đã ghi nhận COM",
+    "serviceCount": "{{count}} dịch vụ"
   },
   "config": {
     "globalReferralPercent": "Tỷ lệ giới thiệu mặc định",

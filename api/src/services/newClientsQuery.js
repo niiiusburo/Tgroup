@@ -3,16 +3,16 @@
 /**
  * newClientsQuery.js — shared query for the admin "New Clients" surface.
  *
- * A "New Client" is a referral-only lead: a customer a CTV referred who has NOT
- * yet converted to a real (paid) service, so clinic staff can phone them to book.
+ * A "New Client" is a CTV-referred customer. The surface starts as a callback
+ * lead list, then remains the admin referral-performance audit once the client
+ * converts so staff can see service revenue and CTV commission side by side.
  *
  * The predicate mirrors the CTV journey's "referred" stage (stage 1):
  *   - referred_by_ctv_id IS NOT NULL (a CTV brought them in)
  *   - they are a customer, not a CTV, not deleted
- *   - NO sale-order line with pricetotal > 0. The "Referral Start" anchor card
- *     (services/referralCard.js) is written with pricetotal = 0, so > 0 cleanly
- *     excludes it while catching any real priced treatment line.
- *   - NO payment with amount > 0 (they have not paid us yet)
+ *   - service/revenue/commission totals are left-joined aggregates, not filters.
+ *     The "Referral Start" anchor card (services/referralCard.js) is written
+ *     with pricetotal = 0, so > 0 cleanly excludes it from service revenue.
  *
  * Clients live in exactly one LOB database (the refer flow writes to getDb(lob)
  * only), so we query each requested LOB DB independently and concat — no cross-DB
@@ -28,6 +28,11 @@ function toRows(result) {
   if (Array.isArray(result)) return result;
   if (result && result.rows) return result.rows;
   return [];
+}
+
+function toNumber(value) {
+  const parsed = Number(value || 0);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 async function queryRows(db, sql, params = []) {
@@ -54,20 +59,6 @@ function buildWhere(filters) {
     params.push(filters.dateTo);
   }
 
-  // Exclude clients who already have a real (priced) service line.
-  conditions.push(`NOT EXISTS (
-    SELECT 1 FROM dbo.saleorders so
-    JOIN dbo.saleorderlines sol ON sol.orderid = so.id
-    WHERE so.partnerid = c.id
-      AND COALESCE(sol.isdeleted, false) = false
-      AND COALESCE(sol.pricetotal, 0) > 0
-  )`);
-
-  // Exclude clients who have already paid us anything.
-  conditions.push(`NOT EXISTS (
-    SELECT 1 FROM payments p WHERE p.customer_id = c.id AND p.amount > 0
-  )`);
-
   return { where: conditions.join(' AND '), params, nextIdx: idx };
 }
 
@@ -77,11 +68,52 @@ async function listForLob(lob, filters) {
   let idx = nextIdx;
 
   const rows = await queryRows(db, `
+    WITH service_agg AS (
+      SELECT
+        so.partnerid AS client_id,
+        COUNT(DISTINCT so.id) FILTER (WHERE COALESCE(sol.pricetotal, 0) > 0) AS service_count,
+        COUNT(DISTINCT sol.id) FILTER (WHERE COALESCE(sol.pricetotal, 0) > 0) AS service_line_count,
+        COALESCE(SUM(CASE WHEN COALESCE(sol.pricetotal, 0) > 0 THEN COALESCE(sol.pricetotal, 0) ELSE 0 END), 0) AS service_total,
+        COUNT(DISTINCT so.id) FILTER (
+          WHERE COALESCE(sol.pricetotal, 0) > 0 AND so.ctv_id IS NULL
+        ) AS service_missing_ctv_count
+      FROM dbo.saleorders so
+      JOIN dbo.saleorderlines sol ON sol.orderid = so.id
+      WHERE COALESCE(so.isdeleted, false) = false
+        AND COALESCE(sol.isdeleted, false) = false
+      GROUP BY so.partnerid
+    ),
+    paid_agg AS (
+      SELECT partnerid AS client_id, COALESCE(SUM(COALESCE(totalpaid, 0)), 0) AS paid_total
+      FROM dbo.saleorders
+      WHERE COALESCE(isdeleted, false) = false
+      GROUP BY partnerid
+    ),
+    earning_agg AS (
+      SELECT
+        client_id,
+        COUNT(*) FILTER (WHERE COALESCE(status, 'pending') <> 'reversed') AS earnings_count,
+        COUNT(DISTINCT service_line_id) FILTER (WHERE service_line_id IS NOT NULL AND COALESCE(status, 'pending') <> 'reversed') AS commissioned_service_line_count,
+        COALESCE(SUM(CASE WHEN COALESCE(status, 'pending') <> 'reversed' THEN COALESCE(amount, 0) ELSE 0 END), 0) AS commission_total
+      FROM dbo.earnings
+      GROUP BY client_id
+    )
     SELECT c.id, c.name, c.phone, c.email, c.datecreated AS referred_at,
            c.referred_by_ctv_id AS referring_ctv_id,
-           r.name AS referring_ctv_name, r.phone AS referring_ctv_phone
+           r.name AS referring_ctv_name, r.phone AS referring_ctv_phone,
+           COALESCE(sa.service_count, 0) AS service_count,
+           COALESCE(sa.service_line_count, 0) AS service_line_count,
+           COALESCE(sa.service_total, 0) AS service_total,
+           COALESCE(pa.paid_total, 0) AS paid_total,
+           COALESCE(ea.earnings_count, 0) AS earnings_count,
+           COALESCE(ea.commissioned_service_line_count, 0) AS commissioned_service_line_count,
+           COALESCE(ea.commission_total, 0) AS commission_total,
+           COALESCE(sa.service_missing_ctv_count, 0) AS service_missing_ctv_count
     FROM dbo.partners c
     LEFT JOIN dbo.partners r ON r.id = c.referred_by_ctv_id
+    LEFT JOIN service_agg sa ON sa.client_id = c.id
+    LEFT JOIN paid_agg pa ON pa.client_id = c.id
+    LEFT JOIN earning_agg ea ON ea.client_id = c.id
     WHERE ${where}
     ORDER BY c.datecreated DESC NULLS LAST
     LIMIT $${idx++} OFFSET $${idx++}
@@ -94,17 +126,34 @@ async function listForLob(lob, filters) {
   );
 
   return {
-    rows: rows.map((row) => ({
-      id: row.id,
-      name: row.name || '',
-      phone: row.phone || '',
-      email: row.email || '',
-      referred_at: row.referred_at,
-      referring_ctv_id: row.referring_ctv_id,
-      referring_ctv_name: row.referring_ctv_name || '',
-      referring_ctv_phone: row.referring_ctv_phone || '',
-      lob,
-    })),
+    rows: rows.map((row) => {
+      const serviceCount = toNumber(row.service_count);
+      const serviceLineCount = toNumber(row.service_line_count);
+      const commissionedLineCount = toNumber(row.commissioned_service_line_count);
+      const commissionTotal = toNumber(row.commission_total);
+      const missingCommission = serviceLineCount > commissionedLineCount;
+      return {
+        id: row.id,
+        name: row.name || '',
+        phone: row.phone || '',
+        email: row.email || '',
+        referred_at: row.referred_at,
+        referring_ctv_id: row.referring_ctv_id,
+        referring_ctv_name: row.referring_ctv_name || '',
+        referring_ctv_phone: row.referring_ctv_phone || '',
+        service_count: serviceCount,
+        service_line_count: serviceLineCount,
+        service_total: toNumber(row.service_total),
+        paid_total: toNumber(row.paid_total),
+        earnings_count: toNumber(row.earnings_count),
+        commissioned_service_line_count: commissionedLineCount,
+        commission_total: commissionTotal,
+        service_missing_ctv_count: toNumber(row.service_missing_ctv_count),
+        missing_commission: missingCommission,
+        commission_status: serviceLineCount === 0 ? 'lead' : missingCommission ? 'missing_commission' : 'commission_recorded',
+        lob,
+      };
+    }),
     count: parseInt(countRows[0]?.count || '0', 10),
   };
 }

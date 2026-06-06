@@ -9,7 +9,7 @@ summary: |
   Shows pending/paid, LOB-tagged activity, referred clients across LOBs, split bars, etc. per visual companion. D13 recipient resolution powers the rows.
   CTV is the only surface that intentionally crosses the two DBs (composition in API, no SQL JOIN).
   CTV v3 business authority lives in docs/business-logic/ctv-referral-commission.md:
-  CTV booking is appointment-only; CTV earnings are created from service cards with attached CTVs, based on full service price, using CTV tier config.
+  CTV booking is appointment-only; CTV earnings are created from service cards with selected or inherited customer referrer CTVs, based on full service price, using CTV tier config.
   Claim locks are per LOB, not cross-LOB. Public signup can create a root/top-level CTV when no upline is supplied.
 owns:
   - api/src/routes/ctv.js and ctv* helper modules (commission-summary + client-journeys cross-DB aggregators using getDb on both)
@@ -38,7 +38,7 @@ writes:
   - POST /api/ctv-public/bookings (public landing no-login booking; resolves active CTV by submitted CTV phone, then uses the same claim/reclaim + appointment-only write path)
   - PATCH /api/Ctvs/:id or /api/cosmetic/Ctvs/:id (admin suspend/reactivate; mirrors active flag to cosmetic row if present)
   - api/scripts/import-legacy-ctvs.js after explicit DB confirmation (mirrors safe legacy CTV identities into dental + cosmetic partners with identical UUIDs; skips ambiguous matches)
-  - earnings target behavior: written when a service card with attached CTV is created, based on full service price and CTV tier config; older payment-path commissionEngine behavior is an implementation gap for CTV
+  - earnings target behavior: written when a service card with selected CTV is created, or when no CTV is selected but the customer partner has an active recorded `referred_by_ctv_id`; based on full service price and CTV tier config; older payment-path commissionEngine behavior is a compatibility gap for CTV
   - admin service-card CTV reassignment target behavior: before payout, reverse old pending CTV earnings and create new pending CTV earnings; after payout, block reassignment
   - admin appointment-card CTV reassignment target behavior: change ownership/claim owner without commission money movement
 tables:
@@ -76,7 +76,7 @@ ui_surfaces:
     - Me: profile, visible /ctv/join?ref=CTV-... invite link with share/copy-link actions, self display-name form, self password form, current language label, logout
   - Hard redirect on login for partners.is_ctv=true (before any admin mount)
   - 403 guards on all / (admin) routes for CTV
-  - /commission admin five-step CTV flow (Config, CTV, New Clients, Earnings, Payouts) with URL-backed breadcrumb rail, clean date labels, profile drilldowns from New Clients, and LOB-aware export/payment surfaces
+  - /commission admin five-step CTV flow (Config, CTV, New Clients, Earnings, Payouts) with URL-backed breadcrumb rail, clean date labels, profile drilldowns from New Clients, referral revenue/COM audit totals, missing-COM badges, and LOB-aware export/payment surfaces
   - /commission > CTV tab (admin only; LOB-aware list with source badges so legacy imports are visibly distinguishable)
   - /welcome public landing: Đặt Lịch Cho Khách opens the refer-client sheet without login, asks for customer phone first, then name, then CTV phone, live-verifies that CTV phone through /api/ctv-public/ctv-lookup, and submits through /api/ctv-public/bookings only when the CTV exists.
   - /welcome public landing: Đăng Ký CTV loads /ctv/join without login; visitors can enter an upline CTV phone/referral code to attach below an existing CTV, or omit upline to create an active root/top-level CTV. Phone and password are required; email is optional and must be clear in the UI.
@@ -129,11 +129,11 @@ impact_tests:
   - CTV Tôi tab changes passwords only after current-password verification, rejects short/mismatched new passwords client-side, and never exposes password hashes
   - POST /api/ctv/bookings resolves non-null appointment companyid, creates dbo.appointments without creating saleorders or saleorderlines, defaulting omitted service metadata to Referral Start when configured
   - POST /api/ctv/clients blocks re-registration when the same phone is actively claimed in the selected LOB by a different CTV; Dental and Cosmetic locks do not cross-block each other
-  - Service-card CTV assignment creates full-service-price tier earnings immediately; service-card CTV reassignment before payout reverses/recreates pending earnings; paid-out earnings block reassignment
+  - Service-card CTV assignment creates full-service-price tier earnings immediately; service-card creation inherits the customer's active recorded referral CTV when the submitted `ctv_id` is blank; service-card CTV reassignment before payout reverses/recreates pending earnings; paid-out earnings block reassignment
   - Appointment-card CTV reassignment changes ownership without commission movement and preserves the existing timer anchor
   - Admin CTV hierarchy tree blocks moving CTVs with any referred customer, service, or earning activity and logs allowed moves automatically
   - Admin /commission five-tab flow keeps date filters legible and shows earned dates before payout selection
-  - Admin /commission?tab=newClients links client names to /customers/:id with a return trail back to the New Clients tab while keeping phone numbers as tel: links
+  - Admin /commission?tab=newClients links client names to /customers/:id with a return trail back to the New Clients tab while keeping phone numbers as tel: links and showing service revenue, paid total, COM total, and missing-COM state
 risk_level: high (only cross-DB surface)
 notes:
   - "D13 live demo: seed a CTV partner + referred patient + collected payment in dental and/or cosmetic; verify earnings row + CTV dashboard shows it."

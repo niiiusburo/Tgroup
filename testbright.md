@@ -10,6 +10,40 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: CTV referred-client revenue and COM audit 2026-06-06
+Feature/edit name: NK3/TMV CTV referred-client service-card commission inheritance and New Clients revenue/COM audit.
+Branch: `nk3-deploy`. Version: `0.32.107`.
+
+Changed URLs / API routes / data flow:
+- URL changed: `/commission?tab=newClients&lob=cosmetic` now shows referred clients with service revenue, paid total, COM total, and COM status instead of hiding converted referrals.
+- API changed: `GET /api/NewClients` / `GET /api/cosmetic/NewClients` response now includes `service_count`, `service_total`, `paid_total`, `commission_total`, `missing_commission`, and `commission_status`.
+- API changed: `POST /api/SaleOrders` / `POST /api/cosmetic/SaleOrders` now inherits the customer's active `partners.referred_by_ctv_id` when the create-service payload has no valid `ctv_id`, persists it to `saleorders.ctv_id`, and triggers full-price CTV earnings.
+- Export changed: `new-clients` Excel export includes service revenue, paid total, COM total, and COM status.
+- Data flow: public/CTV referral booking remains appointment-only; commission is created only when staff creates the service card.
+
+Affected roles and data flows:
+- Role: CTV whose referred client later starts a clinic service.
+- Role: Admin/staff creating a service card from the customer profile or services flow.
+- Role: Commission admin using `/commission` > New Clients and Excel export to audit referral revenue and COM.
+- Happy path: referred Cosmetic client with no manually selected service-card CTV still saves `saleorders.ctv_id` from the customer's recorded referrer and creates pending CTV earnings on full service price.
+- Happy path: New Clients keeps the referred client visible after conversion and shows nonzero revenue/COM totals.
+- Edge cases: customer has no active recorded referrer -> no inherited CTV and no CTV earnings; disabled/deleted CTV referrer is ignored; existing explicit selected CTV still wins; historical rows with missing COM are displayed as `missing_commission` without automatic ledger mutation.
+- Regressions: CTV booking must not create saleorders/earnings; paid-out lock and service-card reassignment behavior must remain intact; Dental and Cosmetic DBs must stay isolated.
+
+Setup data and login state:
+- Target LOB default: Cosmetic on `https://tmv.2checkin.com`.
+- Login: admin/staff with commission view and service-create access.
+- Existing live issue evidence: Cosmetic had referred service rows where `saleorders.ctv_id` or service-card earnings were missing; this fix is forward-only and does not backfill historical money rows without explicit approval.
+
+Execution checks:
+- [x] PASS: Frontend unit `npm --prefix website test -- src/components/commission/NewClientsTab.test.tsx`.
+- [x] PASS: Backend unit `cd api && JWT_SECRET=test npx jest --runInBand --runTestsByPath src/routes/saleOrders/__tests__/createSaleOrderReferralCtv.test.js src/services/__tests__/newClientsQuery.test.js`.
+- [x] PASS: Semgrep scoped security/data-flow scan `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off api/src/routes/saleOrders/createSaleOrder.js api/src/routes/saleOrders/updateSaleOrder.js api/src/services/newClientsQuery.js api/src/services/exports/builders/newClientsExport.js website/src/components/commission/NewClientsTab.tsx website/src/lib/api/commission.ts` - 0 findings / 0 blocking.
+- [ ] PENDING: Local or live browser screenshot of `/commission?tab=newClients&lob=cosmetic` showing revenue/COM/missing-COM columns.
+- [ ] PENDING: Deploy live NK3/TMV v0.32.107 and verify `/api/NewClients?lob=cosmetic` includes service/COM fields.
+
+---
+
 # TestSprite Plan: CTV public sign-up required fields clarity 2026-06-05
 Feature/edit name: Public CTV sign-up page copy + validation proof. `/ctv/join` must not require email, and NK3 root CTV sign-up must allow no CTV giới thiệu phone when the root-signup flag is enabled.
 Branch: nk3-deploy. Files: `website/src/pages/CTV/JoinCtv.tsx`, `website/src/pages/CTV/JoinCtv.test.tsx`, shared CTV form domain.

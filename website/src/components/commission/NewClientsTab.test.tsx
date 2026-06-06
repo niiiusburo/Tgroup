@@ -73,6 +73,16 @@ describe('NewClientsTab', () => {
           referred_at: '2026-06-01T09:00:00.000Z',
           referring_ctv_name: 'THuan Le',
           referring_ctv_phone: '0989460997',
+          service_count: 1,
+          service_line_count: 1,
+          service_total: 4000000,
+          paid_total: 1000000,
+          earnings_count: 0,
+          commissioned_service_line_count: 0,
+          commission_total: 0,
+          service_missing_ctv_count: 1,
+          missing_commission: true,
+          commission_status: 'missing_commission',
           lob: 'cosmetic',
         },
       ],
@@ -94,5 +104,7 @@ describe('NewClientsTab', () => {
 
     const phoneLinks = screen.getAllByRole('link', { name: /0123123123/i });
     expect(phoneLinks[0]).toHaveAttribute('href', 'tel:0123123123');
+    expect(screen.getAllByText((text) => text.includes('4,000,000') || text.includes('4.000.000'))[0]).toBeInTheDocument();
+    expect(screen.getAllByText('newClients.statusMissing')[0]).toBeInTheDocument();
   });
 });

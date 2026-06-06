@@ -33,7 +33,7 @@ Legacy admin commission configuration in `product-map/business-logic/commission-
 | Amount basis | Commission is calculated from the full service price immediately, not from amount paid, deposit paid, or collected cash. | target |
 | Appointment-only booking | CTV booking creates or reclaims a customer and creates an appointment only. It does not create a service card and does not create commission. | current invariant |
 | Appointment selected service | Service selected during CTV booking is appointment intent only. It can be stored on `appointments.productid`, including Referral Start fallback, but it is not a commissionable sale. | current invariant |
-| Service with no selected CTV | If staff creates a service card without a CTV selected on that service card, no CTV commission is created, even when the customer has an appointment owner. | target |
+| Service with no selected CTV | If staff creates a service card without a CTV selected, the backend uses the customer partner's active `referred_by_ctv_id` as the service CTV, saves it to `saleorders.ctv_id`, and creates full-price CTV earnings. If the customer has no active recorded referrer, no CTV commission is created. | current invariant |
 
 ## 4. Tier Rates
 
@@ -143,7 +143,7 @@ Legacy admin commission configuration in `product-map/business-logic/commission-
 
 ## 14. Implementation Gaps To Close
 
-- Replace payment-collected CTV earnings behavior with service-card-created, full-service-price earnings.
+- Keep service-card-created CTV earnings as the primary CTV trigger; legacy payment-collected CTV paths remain only for older compatibility/backfill cases until fully retired.
 - Remove legacy CTV dependency on product/service `commission_rate_percent`.
 - Add tier config as the only CTV rate source, including Level 0-4 enablement.
 - Add Dental-only Braces tier override config and service matching.

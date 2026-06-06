@@ -1,10 +1,9 @@
 'use strict';
 
 /**
- * newClientsQuery — admin "New Clients" list (referral-only leads).
- * The SQL predicate (referred_by_ctv_id set, no priced saleorderline, no payment) is
- * validated live against the real schema; these tests cover the cross-LOB JS aggregation:
- * per-LOB tagging, dedup by id, date-desc sort, single-LOB scoping, and date-filter params.
+ * newClientsQuery — admin "New Clients" list (CTV-referred clients).
+ * These tests cover the cross-LOB JS aggregation: per-LOB tagging, dedup by id,
+ * date-desc sort, single-LOB scoping, date-filter params, and revenue/COM shape.
  */
 
 // Per-LOB canned data + a recording of the SQL/params each pool received.
@@ -18,7 +17,7 @@ function makePool(lob) {
   return {
     queryRows: jest.fn(async (sql, params = []) => {
       calls[lob].push({ sql, params });
-      if (/COUNT\(\*\)/.test(sql)) {
+      if (/SELECT COUNT\(\*\) AS count FROM dbo\.partners c/.test(sql)) {
         return [{ count: String(lob === 'dental' ? dentalCount : cosmeticCount) }];
       }
       return lob === 'dental' ? dentalRows : cosmeticRows;
@@ -51,6 +50,14 @@ function row(id, lob, referredAt, extra = {}) {
     referred_by_ctv_id: 'ctv-1',
     referring_ctv_name: 'CTV One',
     referring_ctv_phone: '0911',
+    service_count: 0,
+    service_line_count: 0,
+    service_total: 0,
+    paid_total: 0,
+    earnings_count: 0,
+    commissioned_service_line_count: 0,
+    commission_total: 0,
+    service_missing_ctv_count: 0,
     ...extra,
   };
 }
@@ -103,8 +110,17 @@ describe('listNewClients — cross-LOB aggregation', () => {
     expect(res.items.map((r) => r.id)).toEqual(['new', 'old']);
   });
 
-  test('shapes rows with phone + referring CTV fields for staff callbacks', async () => {
-    dentalRows = [row('d1', 'dental', '2026-05-10T00:00:00Z')];
+  test('shapes rows with phone, referring CTV, revenue, and COM audit fields', async () => {
+    dentalRows = [row('d1', 'dental', '2026-05-10T00:00:00Z', {
+      service_count: '1',
+      service_line_count: '2',
+      service_total: '4000000',
+      paid_total: '1000000',
+      earnings_count: '1',
+      commissioned_service_line_count: '1',
+      commission_total: '960000',
+      service_missing_ctv_count: '1',
+    })];
     dentalCount = 1;
 
     const res = await listNewClients({ lob: 'dental', limit: 100 });
@@ -114,6 +130,16 @@ describe('listNewClients — cross-LOB aggregation', () => {
       phone: '090000d1',
       referring_ctv_name: 'CTV One',
       referring_ctv_phone: '0911',
+      service_count: 1,
+      service_line_count: 2,
+      service_total: 4000000,
+      paid_total: 1000000,
+      earnings_count: 1,
+      commissioned_service_line_count: 1,
+      commission_total: 960000,
+      service_missing_ctv_count: 1,
+      missing_commission: true,
+      commission_status: 'missing_commission',
       lob: 'dental',
     });
   });
@@ -134,7 +160,7 @@ describe('listNewClients — LOB scoping & date filters', () => {
     dentalCount = 0;
     await listNewClients({ lob: 'dental', dateFrom: '2026-05-01', dateTo: '2026-05-31', limit: 100 });
 
-    const listSql = calls.dental.find((c) => !/COUNT\(\*\)/.test(c.sql));
+    const listSql = calls.dental.find((c) => !/SELECT COUNT\(\*\) AS count FROM dbo\.partners c/.test(c.sql));
     expect(listSql.sql).toMatch(/c\.datecreated::date >= \$1/);
     expect(listSql.sql).toMatch(/c\.datecreated::date <= \$2/);
     expect(listSql.params.slice(0, 2)).toEqual(['2026-05-01', '2026-05-31']);
@@ -142,15 +168,16 @@ describe('listNewClients — LOB scoping & date filters', () => {
     expect(listSql.sql).not.toMatch(/AT TIME ZONE/);
   });
 
-  test('predicate excludes CTVs, deleted, priced services and prior payments', async () => {
+  test('predicate scopes to referred customers without hiding converted clients', async () => {
     dentalCount = 0;
     await listNewClients({ lob: 'dental', limit: 100 });
 
-    const listSql = calls.dental.find((c) => !/COUNT\(\*\)/.test(c.sql)).sql;
+    const listSql = calls.dental.find((c) => !/SELECT COUNT\(\*\) AS count FROM dbo\.partners c/.test(c.sql)).sql;
     expect(listSql).toMatch(/referred_by_ctv_id IS NOT NULL/);
     expect(listSql).toMatch(/COALESCE\(c\.is_ctv, false\) = false/);
     expect(listSql).toMatch(/COALESCE\(c\.isdeleted, false\) = false/);
-    expect(listSql).toMatch(/pricetotal, 0\) > 0/);
-    expect(listSql).toMatch(/p\.amount > 0/);
+    expect(listSql).toMatch(/service_agg AS/);
+    expect(listSql).toMatch(/earning_agg AS/);
+    expect(listSql).not.toMatch(/NOT EXISTS/);
   });
 });

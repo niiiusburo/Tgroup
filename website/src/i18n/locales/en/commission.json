@@ -28,17 +28,25 @@
   "newClients": {
     "lob": "Field",
     "dateRange": "Date range",
-    "description": "Follow referred clients before they convert, then open their profile directly from the row.",
+    "description": "Track referred clients, service revenue, and recorded CTV commission from each row.",
     "allDates": "All",
     "refresh": "Refresh",
     "loading": "Loading new clients...",
     "loadError": "Could not load new clients",
-    "empty": "No new clients yet (CTV-referred leads without a paid service).",
+    "empty": "No CTV-referred clients yet.",
     "count": "{{count}} clients",
     "client": "Client",
     "phone": "Phone",
     "ctv": "Referred by",
-    "referredAt": "Referred on"
+    "referredAt": "Referred on",
+    "serviceTotal": "Revenue",
+    "paidTotal": "Paid",
+    "commissionTotal": "COM",
+    "status": "COM status",
+    "statusLead": "Not converted",
+    "statusMissing": "Missing COM",
+    "statusRecorded": "COM recorded",
+    "serviceCount": "{{count}} services"
   },
   "config": {
     "globalReferralPercent": "Default referral percent",

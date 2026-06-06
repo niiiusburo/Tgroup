@@ -37,6 +37,7 @@
 | v1.0.22 | 2026-06-02 | CTV self account settings contract added: `/api/ctv/me` now returns the DB-backed self profile, `PATCH /api/ctv/me` updates the CTV display name, and `POST /api/ctv/me/password` verifies current password before writing a new bcrypt hash. |
 | v1.0.23 | 2026-06-02 | Public CTV phone verification contract added: `/api/ctv-public/ctv-lookup` lets public booking and public signup verify typed CTV phone numbers before submit. |
 | v1.0.24 | 2026-06-05 | CTV creation (admin + portal + public-join) contract clarified + unified: `email` is optional on `POST /api/ctv` (admin create) and `POST /api/ctv-public/join` (public/portal); backend accepts blank/omitted, skips duplicate-email check, and stores NULL; client types `CreateCtvInput`/`CtvJoinInput` use `email?: string`; clean payload from the SSOT omits falsy email. See `website/src/components/shared/CtvCreationForm/`, AGENTS.md §5.1, and `product-map/domains/ctv.yaml` creation subsection. |
+| v1.0.25 | 2026-06-06 | Admin New Clients contract expanded: `/api/NewClients` now returns every CTV-referred customer in the selected LOB scope, including converted referrals, with service revenue, paid total, COM total, and missing-COM status fields for referral commission audit. |
 
 ---
 
@@ -49,6 +50,37 @@ CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referr
 Admin CTV list rule: `GET /api/Ctvs` and `GET /api/cosmetic/Ctvs` return CTV identity rows with `source`, `legacy_code`, and `created_via`. Cosmetic mode filters to CTV rows whose `lob_scope` includes `cosmetic`; `source='legacy_ctv'` is derived from `created_via LIKE 'legacy_ctv_import%'`.
 
 Admin commission navigation rule: `/commission?tab=config|ctvs|newClients|earnings|payouts&lob=<lob>` preserves the active CTV workflow step in the URL. `GET /api/Earnings` rows consumed by the admin UI may include `service_line_id?: string | null`; when present, the frontend may link to `/customers/:client_id?tab=records&serviceLineId=:service_line_id&from=commission&returnTab=earnings|payouts&lob=<lob>`. The link is read-only navigation only; it must not change earning status, payout status, payment state, or service-line data.
+
+Admin New Clients rule: `GET /api/NewClients?lob=all|dental|cosmetic&date_from=&date_to=&limit=&offset=` is admin/`commissions.view.team` gated and returns CTV-referred customers, not only unconverted leads. The date filter applies to the customer referral timestamp (`partners.datecreated`). The response shape is:
+```ts
+{
+  items: Array<{
+    id: string;
+    name: string;
+    phone: string;
+    email: string;
+    referred_at?: string;
+    referring_ctv_id?: string;
+    referring_ctv_name: string;
+    referring_ctv_phone: string;
+    lob: 'dental' | 'cosmetic';
+    service_count: number;
+    service_line_count: number;
+    service_total: number;
+    paid_total: number;
+    earnings_count: number;
+    commissioned_service_line_count: number;
+    commission_total: number;
+    service_missing_ctv_count: number;
+    missing_commission: boolean;
+    commission_status: 'lead' | 'missing_commission' | 'commission_recorded' | string;
+  }>;
+  totalItems: number;
+  limit: number;
+  offset: number;
+}
+```
+The endpoint is read-only. The admin UI and `new-clients` Excel export may use these totals to flag referred clients with service revenue but missing COM; they must not mutate earnings, payouts, payments, saleorders, or partners from this report.
 
 ### 1.1 Auth
 

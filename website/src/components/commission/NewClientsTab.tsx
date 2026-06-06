@@ -23,6 +23,12 @@ import { ClientProfileLink, CommissionTabHeader } from './CommissionNavigation';
 
 const LOB_LABELS: Record<string, string> = { dental: 'Nha khoa', cosmetic: 'Thẩm mỹ' };
 
+function statusClass(status: NewClientRow['commission_status']) {
+  if (status === 'missing_commission') return 'bg-red-50 text-red-700 ring-red-200';
+  if (status === 'commission_recorded') return 'bg-emerald-50 text-emerald-700 ring-emerald-200';
+  return 'bg-gray-50 text-gray-600 ring-gray-200';
+}
+
 export function NewClientsTab() {
   const { t, i18n } = useTranslation('commission');
   const { t: tc } = useTranslation('common');
@@ -94,6 +100,23 @@ export function NewClientsTab() {
     locale: i18n.language,
   });
   const countText = loading || error ? undefined : t('newClients.count', { count: rows.length });
+  const moneyFormatter = useMemo(
+    () => new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', {
+      style: 'currency',
+      currency: 'VND',
+      maximumFractionDigits: 0,
+    }),
+    [i18n.language],
+  );
+  const formatMoney = useCallback((value: number | undefined) => moneyFormatter.format(value || 0), [moneyFormatter]);
+  const statusLabel = useCallback(
+    (status: NewClientRow['commission_status']) => {
+      if (status === 'missing_commission') return t('newClients.statusMissing');
+      if (status === 'commission_recorded') return t('newClients.statusRecorded');
+      return t('newClients.statusLead');
+    },
+    [t],
+  );
 
   return (
     <div className="bg-white rounded-xl shadow-card p-6 space-y-4">
@@ -208,13 +231,28 @@ export function NewClientsTab() {
                     <div className="mt-0.5 font-medium">{row.referring_ctv_name || '-'}</div>
                     {row.referring_ctv_phone && <div className="text-xs text-gray-400">{row.referring_ctv_phone}</div>}
                   </div>
+                  <div className="grid grid-cols-2 gap-2 rounded-lg bg-gray-50 p-2 text-xs">
+                    <div>
+                      <span className="font-semibold uppercase text-gray-400">{t('newClients.serviceTotal')}</span>
+                      <div className="mt-0.5 font-semibold text-gray-800">{formatMoney(row.service_total)}</div>
+                    </div>
+                    <div>
+                      <span className="font-semibold uppercase text-gray-400">{t('newClients.commissionTotal')}</span>
+                      <div className="mt-0.5 font-semibold text-gray-800">{formatMoney(row.commission_total)}</div>
+                    </div>
+                    <div className="col-span-2">
+                      <span className={`inline-flex rounded-full px-2 py-1 font-semibold ring-1 ${statusClass(row.commission_status)}`}>
+                        {statusLabel(row.commission_status)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </article>
             ))}
           </div>
 
           <div className="hidden overflow-x-auto md:block">
-            <table className="w-full min-w-[760px] text-sm">
+            <table className="w-full min-w-[1100px] text-sm">
             <thead className="bg-gray-50 border-y border-gray-200">
               <tr>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t('newClients.client')}</th>
@@ -222,6 +260,10 @@ export function NewClientsTab() {
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t('newClients.ctv')}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t('newClients.lob')}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{t('newClients.referredAt')}</th>
+                <th className="text-right px-4 py-3 font-medium text-gray-600">{t('newClients.serviceTotal')}</th>
+                <th className="text-right px-4 py-3 font-medium text-gray-600">{t('newClients.paidTotal')}</th>
+                <th className="text-right px-4 py-3 font-medium text-gray-600">{t('newClients.commissionTotal')}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t('newClients.status')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -248,6 +290,19 @@ export function NewClientsTab() {
                   </td>
                   <td className="px-4 py-3 text-gray-700">{LOB_LABELS[row.lob] || row.lob}</td>
                   <td className="px-4 py-3 text-gray-700">{formatCommissionDate(row.referred_at, i18n.language)}</td>
+                  <td className="px-4 py-3 text-right font-medium text-gray-800">{formatMoney(row.service_total)}</td>
+                  <td className="px-4 py-3 text-right text-gray-700">{formatMoney(row.paid_total)}</td>
+                  <td className="px-4 py-3 text-right font-semibold text-gray-900">{formatMoney(row.commission_total)}</td>
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${statusClass(row.commission_status)}`}>
+                      {statusLabel(row.commission_status)}
+                    </span>
+                    {row.service_count > 0 && (
+                      <span className="mt-1 block text-xs text-gray-400">
+                        {t('newClients.serviceCount', { count: row.service_count })}
+                      </span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

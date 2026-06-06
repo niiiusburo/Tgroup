@@ -156,6 +156,7 @@ async function updateSaleOrder(req, res) {
       for (const l of freshLines) {
         await createEarningsForServiceCard({
           serviceLine: { id: l.id, ctv_id: scReassign.newCtv, price: l.pricetotal, client_id: scReassign.customerId },
+          lob: req.lob || 'dental',
           run: q,
         });
       }
