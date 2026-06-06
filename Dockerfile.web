@@ -10,6 +10,15 @@ ARG VITE_COSMETIC_LOB_ENABLED=false
 ENV VITE_COSMETIC_LOB_ENABLED=${VITE_COSMETIC_LOB_ENABLED}
 ARG VITE_DEFAULT_LOB=dental
 ENV VITE_DEFAULT_LOB=${VITE_DEFAULT_LOB}
+# §9 payment-edit removal: when 'true', the customer profile hides the deposit/payment
+# edit button (correction path is delete + new payment). Must be baked into
+# .env.production.local below or Vite won't see it (build ARG/ENV alone is not enough).
+ARG VITE_PAYMENT_EDIT_DISABLED=false
+ENV VITE_PAYMENT_EDIT_DISABLED=${VITE_PAYMENT_EDIT_DISABLED}
+# §12 public CTV root signup: when 'true', JoinCtv allows creating a root CTV with no upline.
+# Also must be baked below (was set as a compose build arg but never written to .env.production.local).
+ARG VITE_CTV_PUBLIC_ROOT_SIGNUP=false
+ENV VITE_CTV_PUBLIC_ROOT_SIGNUP=${VITE_CTV_PUBLIC_ROOT_SIGNUP}
 # Pass real git SHA into the bundle so /version.json reports the actual
 # commit deployed. Without this, version.json says "unknown" and there is
 # no way to verify whether a container was built from a clean git tree.
@@ -17,7 +26,7 @@ ARG GIT_SHA=unknown
 ARG GIT_BRANCH=unknown
 ENV GIT_SHA=${GIT_SHA}
 ENV GIT_BRANCH=${GIT_BRANCH}
-RUN printf 'VITE_API_URL=%s\nVITE_COSMETIC_LOB_ENABLED=%s\nVITE_DEFAULT_LOB=%s\n' "${VITE_API_URL}" "${VITE_COSMETIC_LOB_ENABLED}" "${VITE_DEFAULT_LOB}" > .env.production.local \
+RUN printf 'VITE_API_URL=%s\nVITE_COSMETIC_LOB_ENABLED=%s\nVITE_DEFAULT_LOB=%s\nVITE_PAYMENT_EDIT_DISABLED=%s\nVITE_CTV_PUBLIC_ROOT_SIGNUP=%s\n' "${VITE_API_URL}" "${VITE_COSMETIC_LOB_ENABLED}" "${VITE_DEFAULT_LOB}" "${VITE_PAYMENT_EDIT_DISABLED}" "${VITE_CTV_PUBLIC_ROOT_SIGNUP}" > .env.production.local \
   && cat .env.production.local
 RUN npm run build
 
