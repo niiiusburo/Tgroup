@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[integrations]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/telemetry]
+ * @crossref:uses[product-map/domains/integrations.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * Telemetry route — version events + error collection for AutoDebugger
  * @crossref:used-in[api/src/server.js]
  */
@@ -283,7 +288,10 @@ router.post('/version', async (req, res) => {
 
   try {
     await query(
-      `INSERT INTO version_events (event, from_version, to_version, trigger, timestamp, user_agent, ip_address)
+      // Qualify as public.* — version_events lives in the public schema (migration 037),
+      // but DB connections force search_path=dbo, so an unqualified name resolves to a
+      // non-existent dbo.version_events and the insert 500s ("db_write_failed").
+      `INSERT INTO public.version_events (event, from_version, to_version, trigger, timestamp, user_agent, ip_address)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
       [event, from || '', to || '', trigger || '', timestamp || Date.now(), userAgent || '', ip]
     );

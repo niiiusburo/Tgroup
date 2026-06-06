@@ -151,6 +151,10 @@ const PUBLIC_PATHS = new Set([
   '/api/IpAccess/check',
   '/api/ipaccess/check',
   '/api/health',
+  // Fire-and-forget version-update telemetry (POSTed via keepalive fetch with no auth header,
+  // often on page unload / pre-login). Self-protected: IP rate-limit (10/min) + strict event
+  // allow-list in routes/telemetry.js. Public like /api/telemetry/errors; was 401-spamming + losing events.
+  '/api/telemetry/version',
 ]);
 
 app.use('/api', (req, res, next) => {
