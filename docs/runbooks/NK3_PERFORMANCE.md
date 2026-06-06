@@ -43,8 +43,10 @@ Fix is **server-scoped** inside `/etc/nginx/sites-enabled/tmv.2checkin.com` (NK3
     gzip_min_length 1024;
     gzip_types text/plain text/css application/json application/javascript application/x-javascript text/xml application/xml application/xml+rss text/javascript image/svg+xml;
 ```
-Apply: `nginx -t && nginx -s reload`. This is a **host** edit (not in repo) — re-apply if the host nginx is rebuilt.
-Backup: `/opt/tgroup-nk3/app/.perf-bak/tmv.2checkin.com.bak`.
+Apply: `nginx -t && nginx -s reload`.
+**Tracked copy of the full config (reproducible source of truth):** `deploy/nginx/tmv.2checkin.com.conf` —
+to restore on a fresh host: `cp deploy/nginx/tmv.2checkin.com.conf /etc/nginx/sites-enabled/tmv.2checkin.com && nginx -t && nginx -s reload`.
+Backup of pre-gzip config: `/opt/tgroup-nk3/app/.perf-bak/tmv.2checkin.com.bak`.
 
 ## Results (before → after)
 | Metric | Before | After |
