@@ -51,3 +51,36 @@ TDD: extend website/src/lib/api/commission.lob.test.ts. NOTE: only mirrored rout
 ## Test baseline (pre-work)
 api: 971 pass / 7 fail — all pre-existing & environmental (commissionEngine, authResponseShape,
 saleOrderLines = need live DB; faceServiceModelUrls = network; feedbackAttachments = setup). None mine.
+
+---
+## STATUS (2026-06-06, end of autonomous pass)
+
+DONE & LIVE-VERIFIED on NK3 (committed):
+- CTV portal 403 fix (permissionService is_ctv→ctv.*) — 1d8e44b6
+- Cross-LOB PHI gate (dentalLobGate) — 4e616a3a
+- Migration 059 (CTV never staff tier) — applied both DBs
+- P1 dead-route cleanup (Commissions/Receipts/AccountJournals/StockPickings/HrPayslips → 404) — 9d158506
+- P2b FK earnings.payout_id (migration 060) — applied both DBs — 85dbbb61
+- INV-008F (dental LOB gate) + INV-008G (CTV tier_id-independent) — 2fefb97a
+
+FINAL LIVE MATRIX (all expected):
+  /api/Partners      admin200 cos403 ctv403   (PHI gate)
+  /api/Appointments  admin200 cos403 ctv403
+  /api/cosmetic/Partners admin200 cos200 ctv403 (mirror)
+  /api/ctv/commission-summary admin403 cos403 ctv200 (CTV-self only, by design)
+  /api/Commissions   404/404/404 (dead route cleaned)
+  CTV create (POST /api/ctv as CTV): 201
+Tests: dentalLobGate 7/7 + permissionService 22/22 green. api baseline 971 pass (7 pre-existing env failures).
+
+REJECTED via evidence (would have broken things or non-issues):
+- Gating Earnings/Payouts (already admin-perm-gated; use ?lob; no mirror → threading would 404 the earnings tab)
+- Disabled-level CHECK constraint (engine already excludes disabled levels)
+- Most FE LOB-threading "gaps" (fetchCtvOptions/fetchCtvs already thread lob; ?lob works for admins)
+- schema/migration drift (none; schema consistent)
+
+DEFERRED (low impact; need a web rebuild or risky; documented for a future release):
+- P3 Reports.tsx LOB threading (admin-in-cosmetic sees dental reports — edge case)
+- P4a cosmetic.json i18n namespace
+- P4b CtvLinkBar ≤7d urgency icon
+- P2a 3 null-level pending cosmetic earnings (legacy/seed; backfill risks mis-assigning money levels)
+- locations.edit perm enforce/remove; permission constants enum; earnings/payout audit logging
