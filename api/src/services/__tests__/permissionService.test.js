@@ -13,11 +13,15 @@ const {
   V2_LOB_PERMISSIONS,
   ADMIN_GROUP_ID,
   isAdminPermissionState,
+  _clearPermissionCache,
 } = require('../permissionService');
 
 beforeEach(() => {
   query.mockReset();
   getQuery.mockReset();
+  // The resolver now memoizes by (employeeId, authLob); tests reuse ids with
+  // different mock data, so clear the cache between cases to keep them isolated.
+  _clearPermissionCache();
 });
 
 describe('permissionService', () => {
