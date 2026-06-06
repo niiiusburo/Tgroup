@@ -131,6 +131,18 @@
 **Enforced by:** `api/src/middleware/lob.js`, `/api/cosmetic` mount order in `api/src/server.js`, `api/src/middleware/__tests__/lob.test.js`, and route-specific mirror tests such as `api/src/routes/__tests__/newClientsRoute.test.js`.
 **Cite when:** Editing `attachCosmeticDb`, `attachLobDb`, `/api/cosmetic/*` mounts, mirror routes, or LOB override behavior.
 
+### INV-008F — Legacy Dental Routes Are LOB-Gated (Symmetric to the Cosmetic Mirror)
+**Rule:** The un-prefixed legacy dental data routes that the `/api/cosmetic/*` mirror exposes (Partners, Appointments, Payments, SaleOrders, SaleOrderLines, Products, ProductCategories, Employees, Companies, Reports, DashboardReports, CustomerBalance, CustomerReceipts, CustomerSources, CommissionConfig, Ctvs, NewClients, Permissions, AccountPayments, DotKhams, MonthlyPlans, ExternalCheckups) MUST be guarded by `requireLobScope('dental')`. A token without `dental` in `lob_scope` (cosmetic-only staff, CTV) MUST receive `403 S_LOB_FORBIDDEN`, NOT dental data.
+**Rationale:** Before this gate only the cosmetic mirror was LOB-gated; the dental side relied on the frontend LOB pin (INV-008A) for isolation, so a crafted cosmetic-only/CTV token could read the full dental patient list (PHI) via `GET /api/Partners`, bypassing the UI. INV-008A is FE defense; this is the matching backend hard gate. Admins (both scopes) and dental staff pass; cross-cutting routes (Auth, Feedback, telemetry, face, settings, Places, SystemPreferences) are NOT gated.
+**Enforced by:** `api/src/middleware/dentalLobGate.js` (mounted on `/api` after `requireAuth` in `api/src/server.js`) and `api/src/middleware/__tests__/dentalLobGate.test.js`.
+**Cite when:** Adding/removing a legacy dental route mount, editing the cosmetic mirror set, or changing `lob_scope`/`requireLobScope` behavior. Keep the gated set in sync with the cosmetic mirror in `server.js`.
+
+### INV-008G — CTV Permissions Are tier_id-Independent
+**Rule:** A partner with `is_ctv = true` MUST resolve to exactly `['ctv.dashboard.view', 'ctv.commission.view.self', 'ctv.referrals.view.self']` (group "CTV") and MUST NOT inherit any staff permission group — even when a staff `tier_id` is erroneously stamped on the row. CTV rows MUST NOT carry a staff `tier_id`.
+**Rationale:** A bulk tier-assignment (migration 031 / merge_employee_permissions) swept CTVs — which are `employee = true` for login — into the "Editor" staff group. That skipped the CTV self-perm auto-grant (which only fired when `tier_id` was NULL) → 403 on the whole `/ctv` portal, AND leaked staff perms (`payment.edit`, `appointments.add`) to external vendors.
+**Enforced by:** `api/src/services/permissionService.js` (`is_ctv` short-circuit before the group branch), `api/src/services/__tests__/permissionService.test.js` ("CTV self-permissions"), and migration `api/migrations/059_ctv_never_staff_tier.sql`.
+**Cite when:** Editing permission resolution, CTV creation, bulk tier-assignment scripts/migrations, or partner imports.
+
 ### INV-009 — Location Scope Frontend-Only Filter
 **Rule:** Backend list routes generally do NOT enforce location scope. The frontend `LocationContext` is responsible for filtering by `companyid`.
 **Rationale:** Backend location scoping was historically inconsistent; frontend filtering is the current operational contract.
@@ -247,6 +259,7 @@
 
 | Date | ID | Action | Commit / PR |
 |---|---|---|---|
+| 2026-06-06 | INV-008F, INV-008G | Added dental-route LOB gate + CTV-perms-tier_id-independent invariants | 4e616a3a |
 | 2026-06-06 | INV-008E | Added fixed Cosmetic route-prefix boundary invariant | pending |
 | 2026-06-05 | INV-003C | Added CTV service-card-created commission trigger invariant | pending |
 | 2026-06-01 | INV-023 | Added customer balance deleted-receivable invariant | pending |
