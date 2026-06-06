@@ -39,12 +39,13 @@
 | v1.0.24 | 2026-06-05 | CTV creation (admin + portal + public-join) contract clarified + unified: `email` is optional on `POST /api/ctv` (admin create) and `POST /api/ctv-public/join` (public/portal); backend accepts blank/omitted, skips duplicate-email check, and stores NULL; client types `CreateCtvInput`/`CtvJoinInput` use `email?: string`; clean payload from the SSOT omits falsy email. See `website/src/components/shared/CtvCreationForm/`, AGENTS.md §5.1, and `product-map/domains/ctv.yaml` creation subsection. |
 | v1.0.25 | 2026-06-06 | Admin New Clients contract expanded: `/api/NewClients` now returns every CTV-referred customer in the selected LOB scope, including converted referrals, with service revenue, paid total, COM total, and missing-COM status fields for referral commission audit. |
 | v1.0.26 | 2026-06-06 | Cosmetic mirror added for Admin New Clients: `/api/cosmetic/NewClients` is equivalent to `/api/NewClients?lob=cosmetic` and forces Cosmetic scope even if a query tries `lob=all`. |
+| v1.0.27 | 2026-06-06 | Cosmetic route-prefix boundary hardened: every `/api/cosmetic/*` route ignores query/header LOB overrides such as `?lob=all` or `X-LOB: dental` and always runs with `req.lob='cosmetic'`, Cosmetic DB context, and `runWithLob('cosmetic')`. Cross-LOB admin reads must use top-level `/api/*` routes that explicitly accept `lob`. |
 
 ---
 
 ## 1. API Contracts
 
-Cosmetic LOB mirror rule: when the frontend passes `lob: 'cosmetic'` to `apiFetch`, the client routes the same endpoint under `/api/cosmetic/*`. Mirrored handlers must run behind `requireLobScope('cosmetic')`, `attachCosmeticDb`, `runWithLob('cosmetic')`, and `cosmetic.access`, then read/write `tcosmetic_demo` through request-scoped `getQuery(req)` or ALS-aware `query()`. Dental remains the default legacy `/api/*` path.
+Cosmetic LOB mirror rule: when the frontend passes `lob: 'cosmetic'` to `apiFetch`, the client routes the same endpoint under `/api/cosmetic/*`. Mirrored handlers must run behind `requireLobScope('cosmetic')`, fixed `attachCosmeticDb`, `runWithLob('cosmetic')`, and `cosmetic.access`, then read/write `tcosmetic_demo` through request-scoped `getQuery(req)` or ALS-aware `query()`. `/api/cosmetic/*` ignores `?lob=` and `X-LOB` overrides by contract; cross-LOB admin reads must use a top-level `/api/*` route that explicitly accepts `lob`. Dental remains the default legacy `/api/*` path.
 
 CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referrals`, `GET /api/ctv/client-journeys`, `GET /api/ctv/hierarchy`, `GET /api/ctv/client-lookup`, `GET/PATCH /api/ctv/me`, and `POST /api/ctv/me/password` are mounted behind `ctv.dashboard.view` and are scoped to the authenticated CTV identity unless the route explicitly allows admin-assisted CTV creation/booking. Authenticated non-CTV staff must not receive or mutate another CTV's self data.
 
@@ -52,7 +53,7 @@ Admin CTV list rule: `GET /api/Ctvs` and `GET /api/cosmetic/Ctvs` return CTV ide
 
 Admin commission navigation rule: `/commission?tab=config|ctvs|newClients|earnings|payouts&lob=<lob>` preserves the active CTV workflow step in the URL. `GET /api/Earnings` rows consumed by the admin UI may include `service_line_id?: string | null`; when present, the frontend may link to `/customers/:client_id?tab=records&serviceLineId=:service_line_id&from=commission&returnTab=earnings|payouts&lob=<lob>`. The link is read-only navigation only; it must not change earning status, payout status, payment state, or service-line data.
 
-Admin New Clients rule: `GET /api/NewClients?lob=all|dental|cosmetic&date_from=&date_to=&limit=&offset=` and `GET /api/cosmetic/NewClients?date_from=&date_to=&limit=&offset=` are admin/`commissions.view.team` gated and return CTV-referred customers, not only unconverted leads. The top-level route may read the requested LOB scope; the Cosmetic mirror always forces `lob=cosmetic` from the route context. The date filter applies to the customer referral timestamp (`partners.datecreated`). The response shape is:
+Admin New Clients rule: `GET /api/NewClients?lob=all|dental|cosmetic&date_from=&date_to=&limit=&offset=` and `GET /api/cosmetic/NewClients?date_from=&date_to=&limit=&offset=` are admin/`commissions.view.team` gated and return CTV-referred customers, not only unconverted leads. The top-level route may read the requested LOB scope; the Cosmetic mirror always forces `lob=cosmetic` from the route context and ignores query/header LOB overrides such as `?lob=all` or `X-LOB: dental`. The date filter applies to the customer referral timestamp (`partners.datecreated`). The response shape is:
 ```ts
 {
   items: Array<{

@@ -24,7 +24,7 @@
 | GET | `/api/me/lob-scope` | Auth | — | `{ lob_scope: string[], is_ctv: boolean, default_lob }` |
 | (augmented) | `GET /api/Auth/me` | Auth | — | User payload now includes `lob_scope[]` and `is_ctv` (affects login redirect and header toggle visibility) |
 
-Note: All existing routes are now implicitly under a selected LOB via BusinessUnitContext. Cosmetic routes live under `/api/cosmetic/*` prefix and are distinct from dental.
+Note: All existing routes are now implicitly under a selected LOB via BusinessUnitContext. Cosmetic routes live under `/api/cosmetic/*` prefix and are distinct from dental. The `/api/cosmetic/*` prefix is fixed Cosmetic scope: query/header LOB overrides are ignored there, and cross-LOB reads must use top-level routes such as `/api/NewClients?lob=all`.
 
 ## Cosmetic (`/api/cosmetic/*`) — mirrors of all dental routes (gated by requireLobScope('cosmetic') + cosmetic.access)
 
@@ -40,6 +40,7 @@ All dental endpoints have exact cosmetic mirrors:
 - `GET /api/cosmetic/DotKhams` etc.
 - All report/export endpoints under cosmetic prefix when LOB=cosmetic
 - Auth gates: requireLobScope('cosmetic') returns 403 S_LOB_FORBIDDEN when missing; plus permission strings (cosmetic.access etc.)
+- Route context: `/api/cosmetic/*` forces Cosmetic DB context and ignores `?lob=` / `X-LOB` overrides; top-level routes own explicit `lob=all|dental|cosmetic` behavior.
 
 **CTV commission referrer on service/appointment writes:** `POST/PATCH /api/SaleOrders` and `POST/PUT /api/Appointments` (and cosmetic mirrors) accept an optional `ctv_id` (UUID). When present it assigns that CTV as the customer's `partners.referred_by_ctv_id` (D13 priority #1 for earnings attribution) via `services/customerReferrer.setCustomerReferrer`. For service-card creation only, a null/empty/invalid `ctv_id` inherits the customer's active recorded `partners.referred_by_ctv_id`, persists it to `saleorders.ctv_id`, and triggers full-price CTV earnings when `CTV_SERVICE_CARD_COMMISSION=true`; if no active recorded referrer exists, no CTV is attached. Existing appointment/create assign paths remain assign-only and never clear an existing referrer. The CTV must exist as an `is_ctv=true`, active, non-deleted partner in the request's LOB DB (validated server-side; cross-LOB / unknown ids are rejected to avoid later earnings FK failures). Reads (`GET /api/SaleOrders`, `/SaleOrders/lines`, `/SaleOrders/:id`, `GET/POST/PUT /api/Appointments`) return the customer's current `ctv_id` for selector pre-fill.
 

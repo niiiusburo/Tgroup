@@ -3,7 +3,7 @@
 const { getDb, runWithLob } = require('../db');
 
 /**
- * attachLobDb(lob) middleware factory for Cosmetic LOB v2.
+ * attachLobDb(lob) middleware factory for explicit LOB-aware routes.
  * Sets req.lob and req.db (the correct Pool with queryRows helper) on the request.
  * Wraps downstream with runWithLob(lob, ...) so that the dynamic legacy `query()` export
  * (which calls getCurrentLob() from ALS) targets tcosmetic_demo for ALL handlers under the mount.
@@ -20,6 +20,7 @@ const { getDb, runWithLob } = require('../db');
  * Pool.connect() sites still require explicit `req.db ? req.db.connect() : pool.connect()` fix.
  *
  * Also supports explicit ?lob= or X-LOB header for future /api/dental/* explicit if needed.
+ * Do not use this override-enabled factory for fixed mirror prefixes such as /api/cosmetic/*.
  */
 function attachLobDb(defaultLob = 'cosmetic') {
   return (req, res, next) => {
@@ -45,8 +46,17 @@ function attachLobDb(defaultLob = 'cosmetic') {
 }
 
 /**
- * Convenience: always cosmetic DB for the cosmetic router subtree.
+ * Fixed cosmetic DB for the /api/cosmetic/* router subtree.
+ *
+ * Query/header overrides are intentionally ignored here. A cosmetic URL is a hard
+ * routing boundary, so /api/cosmetic/* must not be able to switch to dental or
+ * "all" through ?lob= or X-LOB.
  */
-const attachCosmeticDb = attachLobDb('cosmetic');
+const attachCosmeticDb = (req, _res, next) => {
+  const lob = 'cosmetic';
+  req.lob = lob;
+  req.db = getDb(lob);
+  runWithLob(lob, next);
+};
 
 module.exports = { attachLobDb, attachCosmeticDb };

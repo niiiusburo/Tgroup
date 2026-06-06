@@ -125,6 +125,12 @@
 **Enforced by:** `api/src/routes/auth.js` and `api/tests/loginRateLimiter.test.js`.
 **Cite when:** Editing login lookup, `/api/Auth/me`, LOB auth payloads, or cosmetic employee creation.
 
+### INV-008E — Cosmetic Route Prefix Is Fixed Scope
+**Rule:** Every `/api/cosmetic/*` route MUST force `req.lob = 'cosmetic'`, use the Cosmetic DB pool, and ignore `?lob=` or `X-LOB` overrides. Cross-LOB reads such as `lob=all` must live on explicit top-level admin routes, not on the Cosmetic mirror prefix.
+**Rationale:** A route prefix is a permission and data-boundary signal. Allowing query/header overrides under `/api/cosmetic/*` can widen a mirror route into Dental or all-LOB data after the Cosmetic access gate has already been selected.
+**Enforced by:** `api/src/middleware/lob.js`, `/api/cosmetic` mount order in `api/src/server.js`, `api/src/middleware/__tests__/lob.test.js`, and route-specific mirror tests such as `api/src/routes/__tests__/newClientsRoute.test.js`.
+**Cite when:** Editing `attachCosmeticDb`, `attachLobDb`, `/api/cosmetic/*` mounts, mirror routes, or LOB override behavior.
+
 ### INV-009 — Location Scope Frontend-Only Filter
 **Rule:** Backend list routes generally do NOT enforce location scope. The frontend `LocationContext` is responsible for filtering by `companyid`.
 **Rationale:** Backend location scoping was historically inconsistent; frontend filtering is the current operational contract.
@@ -241,6 +247,7 @@
 
 | Date | ID | Action | Commit / PR |
 |---|---|---|---|
+| 2026-06-06 | INV-008E | Added fixed Cosmetic route-prefix boundary invariant | pending |
 | 2026-06-05 | INV-003C | Added CTV service-card-created commission trigger invariant | pending |
 | 2026-06-01 | INV-023 | Added customer balance deleted-receivable invariant | pending |
 | 2026-06-01 | INV-022 | Added appointment-only invariant for CTV booking flow | pending |

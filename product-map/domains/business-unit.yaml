@@ -8,6 +8,7 @@ summary: |
   Header LOBSelector placed next to FilterByLocation; selection persisted in localStorage; triggers keyed remount of main content subtree to prevent stale dental/cosmetic data.
   All data hooks and API clients become LOB-aware: resolve to /api/cosmetic/* or legacy dental paths based on context + flag via getDb(lob) / getQuery(req).
   dental.access / cosmetic.access are soft gates; lob_scope is the hard gate via requireLobScope(lob) middleware.
+  /api/cosmetic/* is a fixed Cosmetic route boundary and ignores query/header LOB overrides; cross-LOB reads must use explicit top-level APIs.
   Two physical DBs (tdental_demo + tcosmetic_demo on 5433); no cross-DB JOINs.
 owns:
   - website/src/contexts/BusinessUnitContext.tsx
@@ -57,6 +58,7 @@ impact_tests:
 risk_level: high
 notes:
   - "Physical DB isolation invariant: BusinessUnitContext only selects which pool + route prefix; never mixes data. getQuery(req) in handlers provides the right pool transparently."
+  - "Fixed mirror invariant: /api/cosmetic/* always sets req.lob=cosmetic and ignores ?lob= / X-LOB overrides; do not mount cross-LOB reads under the Cosmetic prefix."
   - "Per PLAN + migration 047: partners is the identity table for LOB scope (deviation from early v2 spec's 'users' and 'clients' concepts; documented in DECISIONS.md and MIGRATIONS.md)."
   - "cosmetic.yaml is the parent LOB domain; this is the cross-cutting context mechanism."
   - "Update AGENTS.md, ARCHITECTURE.md, product-map when adding new LOB-aware surfaces."

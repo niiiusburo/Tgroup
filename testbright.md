@@ -12,12 +12,13 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 # TestSprite Plan: CTV referred-client revenue and COM audit 2026-06-06
 Feature/edit name: NK3/TMV CTV referred-client service-card commission inheritance and New Clients revenue/COM audit.
-Branch: `nk3-deploy`. Version: `0.32.108`.
+Branch: `nk3-deploy`. Version: `0.32.109`.
 
 Changed URLs / API routes / data flow:
 - URL changed: `/commission?tab=newClients&lob=cosmetic` now shows referred clients with service revenue, paid total, COM total, and COM status instead of hiding converted referrals.
 - API changed: `GET /api/NewClients` / `GET /api/cosmetic/NewClients` response now includes `service_count`, `service_total`, `paid_total`, `commission_total`, `missing_commission`, and `commission_status`.
 - API changed: `/api/cosmetic/NewClients` is mounted as a Cosmetic-only mirror and forces `lob=cosmetic` even if a request includes `?lob=all`.
+- API changed: `/api/cosmetic/*` ignores `?lob=` and `X-LOB` overrides, so the Cosmetic mirror route cannot widen to Dental/all-LOB data after the Cosmetic gate.
 - API changed: `POST /api/SaleOrders` / `POST /api/cosmetic/SaleOrders` now inherits the customer's active `partners.referred_by_ctv_id` when the create-service payload has no valid `ctv_id`, persists it to `saleorders.ctv_id`, and triggers full-price CTV earnings.
 - Export changed: `new-clients` Excel export includes service revenue, paid total, COM total, and COM status.
 - Data flow: public/CTV referral booking remains appointment-only; commission is created only when staff creates the service card.
@@ -40,9 +41,12 @@ Execution checks:
 - [x] PASS: Frontend unit `npm --prefix website test -- src/components/commission/NewClientsTab.test.tsx`.
 - [x] PASS: Backend unit `cd api && JWT_SECRET=test npx jest --runInBand --runTestsByPath src/routes/saleOrders/__tests__/createSaleOrderReferralCtv.test.js src/services/__tests__/newClientsQuery.test.js`.
 - [x] PASS: Backend route unit `cd api && JWT_SECRET=test npx jest --runInBand --runTestsByPath src/routes/__tests__/newClientsRoute.test.js` - Cosmetic mirror forces `lob=cosmetic`.
-- [x] PASS: Semgrep scoped security/data-flow scan `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off api/src/server.js api/src/routes/newClients.js api/src/routes/__tests__/newClientsRoute.test.js api/src/routes/saleOrders/createSaleOrder.js api/src/routes/saleOrders/updateSaleOrder.js api/src/services/newClientsQuery.js api/src/services/exports/builders/newClientsExport.js website/src/components/commission/NewClientsTab.tsx website/src/lib/api/commission.ts` - 0 findings / 0 blocking.
+- [x] PASS: Backend middleware unit `cd api && JWT_SECRET=test npx jest --runInBand --runTestsByPath src/middleware/__tests__/lob.test.js` - Cosmetic prefix ignores query/header LOB overrides while generic LOB routes keep explicit override behavior.
+- [x] PASS: Backend combined route/unit set `cd api && JWT_SECRET=test npx jest --runInBand --runTestsByPath src/middleware/__tests__/lob.test.js src/routes/__tests__/newClientsRoute.test.js src/routes/saleOrders/__tests__/createSaleOrderReferralCtv.test.js src/services/__tests__/newClientsQuery.test.js` - 4 suites / 12 tests passed.
+- [x] PASS: Semgrep scoped security/data-flow scan `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off api/src/middleware/lob.js api/src/middleware/__tests__/lob.test.js api/src/server.js api/src/routes/newClients.js api/src/routes/__tests__/newClientsRoute.test.js api/src/routes/saleOrders/createSaleOrder.js api/src/routes/saleOrders/updateSaleOrder.js api/src/services/newClientsQuery.js api/src/services/exports/builders/newClientsExport.js website/src/components/commission/NewClientsTab.tsx website/src/lib/api/commission.ts` - 0 findings / 0 blocking.
+- [x] PASS: Production build `npm --prefix website run build` - passed with existing Vite dynamic import/chunk-size warnings.
 - [ ] PENDING: Local or live browser screenshot of `/commission?tab=newClients&lob=cosmetic` showing revenue/COM/missing-COM columns.
-- [ ] PENDING: Deploy live NK3/TMV v0.32.108 and verify `/api/NewClients?lob=cosmetic` plus `/api/cosmetic/NewClients` include service/COM fields.
+- [ ] PENDING: Deploy live NK3/TMV v0.32.109 and verify `/api/NewClients?lob=cosmetic` plus `/api/cosmetic/NewClients?lob=all` include service/COM fields with Cosmetic-only route context.
 
 ---
 

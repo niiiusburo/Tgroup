@@ -2,6 +2,14 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.109] — 2026-06-06
+### Fixed
+- Hardened the NK3/TMV Cosmetic route boundary: `/api/cosmetic/*` now always runs in Cosmetic DB context and ignores query/header LOB overrides such as `?lob=all` or `X-LOB: dental`, preserving `INV-008E` and keeping `/api/cosmetic/NewClients` Cosmetic-only.
+
+### Docs / Tests
+- Updated `docs/CONTRACTS.md`, `docs/INVARIANTS.md`, `docs/TEST-MATRIX.md`, `product-map/contracts/api-index.md`, `product-map/domains/business-unit.yaml`, `website/public/CHANGELOG.json`, and `testbright.md`.
+- Added `api/src/middleware/__tests__/lob.test.js` to lock generic override behavior separately from the fixed Cosmetic mirror behavior.
+
 ## [0.32.108] — 2026-06-06
 ### Fixed
 - Added the NK3/TMV Cosmetic mirror `GET /api/cosmetic/NewClients` and forced it to `lob=cosmetic` from the `/api/cosmetic/*` route context, so the documented referral revenue/COM audit endpoint is real and cannot be widened by `?lob=all`.

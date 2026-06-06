@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.32.109",
+    "date": "2026-06-06",
+    "commit": "ctv-cosmetic-route-boundary",
+    "highlights": "Hardened the Cosmetic API route boundary so /api/cosmetic/* always stays in Cosmetic DB context and ignores query/header LOB overrides; /api/cosmetic/NewClients?lob=all now remains a Cosmetic-only referral revenue and COM audit.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Fixed /api/cosmetic/NewClients?lob=all returning a LOB validation error by making the Cosmetic prefix ignore lob query/header overrides.",
+          "Kept cross-LOB reads on the top-level /api/NewClients?lob=all route only."
+        ]
+      },
+      {
+        "title": "Tests",
+        "items": [
+          "Added middleware coverage for fixed Cosmetic prefix behavior and preserved generic LOB override behavior."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.108",
     "date": "2026-06-06",
     "commit": "ctv-new-clients-cosmetic-mirror",
