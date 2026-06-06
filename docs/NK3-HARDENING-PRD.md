@@ -84,3 +84,21 @@ DEFERRED (low impact; need a web rebuild or risky; documented for a future relea
 - P4b CtvLinkBar ≤7d urgency icon
 - P2a 3 null-level pending cosmetic earnings (legacy/seed; backfill risks mis-assigning money levels)
 - locations.edit perm enforce/remove; permission constants enum; earnings/payout audit logging
+
+---
+## WAVE COMPLETION (2026-06-07, against ctv-referral-commission spec)
+
+Verified current state of all 8 spec waves (peers had advanced 4/6/7 since the gap analysis):
+- Wave 1 (public root signup): implemented; FE flag VITE_CTV_PUBLIC_ROOT_SIGNUP was NOT baked → fixed in Dockerfile.web bake (commit 14501135) + rebuilt.
+- Wave 2 (service-card commission INV-003C): ✅ (prior).
+- Wave 3 (admin reassignment §8): ✅ (prior).
+- Wave 4 (combined payouts §10): ✅ VERIFIED — payouts unit 7/7; POST /api/Payouts/combined creates per-LOB legs in own txns, FOR UPDATE pending-only lock (paid-out safe), shared payout_group_id+receipt; live validation 400.
+- Wave 5 (braces §5): ✅ (prior).
+- Wave 6 (hierarchy move §12): ✅ VERIFIED LIVE — POST /api/Ctvs/:id/move updates referred_by in BOTH DBs + writes audit_logs (dental); no-activity guard returns 409 B_CTV_HAS_ACTIVITY. Tested with throwaway CTV, cleaned up (0 orphans).
+- Wave 7 (deposit history §11): ✅ VERIFIED — /api/Payments/deposits + deposit-usage 200; customer profile Payment tab renders 4 deposit rows live.
+- Wave 8 (payment-edit removal §9): ✅ FIXED + VERIFIED — flag VITE_PAYMENT_EDIT_DISABLED was configured in compose but NOT baked by Dockerfile.web (Vite gotcha). Fixed bake (commit 14501135), rebuilt web. Live DOM: 0 deposit-edit buttons across 4 deposit rows; 8 "Delete payment" buttons remain (spec-correct delete+new correction path). /payment page never passed onEditDeposit.
+
+3 null-level cosmetic earnings: DECISION = leave as-is (documented). They are legacy source='ctv' payment-time rows (pre-v3), each the only earning on its payment (no sibling level to infer), service-line→saleorder CTV link empty → level unreconstructable. Pending + inert. Backfilling would fabricate money-path data; voiding could drop a real obligation. Needs operator confirmation before any mutation. NOT auto-mutated (DB-safety).
+
+Tests: api 55/55 on touched suites (dentalLobGate, permissionService, payouts, ctvsEdit); full baseline 971 pass / 7 pre-existing env failures. Final live matrix all green (PHI gate 403, admin 200, dead routes 404, telemetry 200, combined-payout 400).
+NOT done (out of NK3 scope / needs approval): NK2/NK promotion; cosmetic.json i18n + CtvLinkBar icon (optional polish).
