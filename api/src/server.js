@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { requireAuth, requirePermission, requireLobScope } = require('./middleware/auth');
+const { dentalLobGate } = require('./middleware/dentalLobGate');
 const { attachCosmeticDb } = require('./middleware/lob');
 const { enforceIpAccess } = require('./middleware/ipAccess');
 const { errorHandler } = require('./middleware/errorHandler');
@@ -157,6 +158,12 @@ app.use('/api', (req, res, next) => {
   if (PUBLIC_PATHS.has(fullPath)) return next();
   return requireAuth(req, res, next);
 });
+
+// LOB hard gate for the legacy dental routes (symmetric to the /api/cosmetic/* mirror's
+// requireLobScope('cosmetic')). Closes the cross-LOB hole where a cosmetic-only/CTV token
+// could read dental data (incl. patient PHI via /api/Partners) directly, bypassing the
+// frontend LOB pin (INV-008A). Cross-cutting routes pass through; see middleware/dentalLobGate.js.
+app.use('/api', dentalLobGate);
 
 // Routes
 // LEGACY: /api/Account duplicates /api/Auth — verify no external clients use this
