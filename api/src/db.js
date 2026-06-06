@@ -27,9 +27,18 @@ function createPool(connectionString) {
   if (!connectionString) {
     throw new Error('Database connection string is required for pool');
   }
+  // Pool sizing is env-driven so we can tune per environment without code changes.
+  // Default max stays 10 (pg default) so non-NK3 envs are unchanged. NK3 raises
+  // DB_POOL_MAX to relieve connection-pool starvation under concurrent page fan-out.
+  // NOTE: total connections = workers * pools(2: dental+cosmetic) * max must stay
+  // under postgres max_connections (100). With WEB_CONCURRENCY>1, size DB_POOL_MAX down.
   const pool = new Pool({
     connectionString,
-    options: '-c search_path=dbo'
+    options: '-c search_path=dbo',
+    max: parseInt(process.env.DB_POOL_MAX || '10', 10),
+    min: parseInt(process.env.DB_POOL_MIN || '0', 10),
+    idleTimeoutMillis: parseInt(process.env.DB_POOL_IDLE_MS || '15000', 10),
+    connectionTimeoutMillis: parseInt(process.env.DB_POOL_CONN_TIMEOUT_MS || '5000', 10),
   });
   pool.queryRows = async function queryRows(text, params) {
     const result = await this.query(text, params);

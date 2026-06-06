@@ -113,10 +113,13 @@ export function FeedbackWidget() {
         /* swallow — bad network or perms; leave previous count */
       }
     };
-    refresh();
+    // Defer the initial unread fetch off the critical path so this non-urgent
+    // badge doesn't contend with page-critical XHRs during first load.
+    const initialTimer = window.setTimeout(refresh, 1500);
     const id = window.setInterval(refresh, 45_000);
     return () => {
       cancelled = true;
+      window.clearTimeout(initialTimer);
       window.clearInterval(id);
     };
   }, [user]);

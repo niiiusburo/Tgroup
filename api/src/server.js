@@ -1,4 +1,26 @@
 require('dotenv').config();
+
+// --- Clustering (perf, opt-in) ---------------------------------------------
+// A single Node process serializes concurrent requests on one event loop. When
+// WEB_CONCURRENCY>1, fork N workers (capped at CPU count) so a page's 6-15 parallel
+// XHRs run across workers. Default 1 = current single-process behavior (zero change).
+// IMPORTANT: total DB connections = workers * 2 pools (dental+cosmetic) * DB_POOL_MAX
+// must stay under postgres max_connections (100) — size DB_POOL_MAX down when clustering.
+const cluster = require('cluster');
+const os = require('os');
+const _clusterWorkers = parseInt(process.env.WEB_CONCURRENCY || process.env.NODE_CLUSTER_WORKERS || '1', 10);
+const _isPrimary = cluster.isPrimary !== undefined ? cluster.isPrimary : cluster.isMaster;
+if (_clusterWorkers > 1 && _isPrimary) {
+  const n = Math.min(_clusterWorkers, os.cpus().length || _clusterWorkers);
+  console.log(`[cluster] primary ${process.pid} starting ${n} workers`);
+  for (let i = 0; i < n; i++) cluster.fork();
+  cluster.on('exit', (worker, code, signal) => {
+    console.error(`[cluster] worker ${worker.process.pid} exited (code=${code} sig=${signal}); restarting`);
+    cluster.fork();
+  });
+  return; // primary only supervises; workers fall through and run the server below
+}
+
 const path = require('path');
 const express = require('express');
 const cors = require('cors');

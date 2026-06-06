@@ -60,7 +60,39 @@ function isAdminPermissionState(permissionState) {
  *   locations: Array<{id:string, name:string}>
  * }>}
  */
+// In-memory permission cache (perf): requireAuth resolves permissions on EVERY
+// request, so a page firing 6-15 concurrent XHRs re-runs this 6-15x for the same
+// (employeeId, authLob). We cache the in-flight PROMISE keyed on the only two
+// inputs, so concurrent callers share one resolution and repeat calls within the
+// TTL skip the DB entirely. TTL is short (default 5s) so permission edits propagate
+// quickly; set PERM_CACHE_TTL_MS=0 to disable (tests). A rejected resolve is evicted
+// so failures are never cached.
+const PERM_CACHE = new Map();
+const PERM_CACHE_TTL_MS = parseInt(process.env.PERM_CACHE_TTL_MS || '5000', 10);
+
 async function resolveEffectivePermissions(employeeId, authLob) {
+  if (PERM_CACHE_TTL_MS <= 0) {
+    return _resolveEffectivePermissionsUncached(employeeId, authLob);
+  }
+  const key = `${employeeId}::${authLob || 'dental'}`;
+  const hit = PERM_CACHE.get(key);
+  if (hit && (Date.now() - hit.ts) < PERM_CACHE_TTL_MS) {
+    return hit.promise;
+  }
+  const promise = _resolveEffectivePermissionsUncached(employeeId, authLob);
+  PERM_CACHE.set(key, { ts: Date.now(), promise });
+  promise.catch(() => {
+    const cur = PERM_CACHE.get(key);
+    if (cur && cur.promise === promise) PERM_CACHE.delete(key);
+  });
+  return promise;
+}
+
+function _clearPermissionCache() {
+  PERM_CACHE.clear();
+}
+
+async function _resolveEffectivePermissionsUncached(employeeId, authLob) {
   // Resolve against the caller's home DB explicitly when known; otherwise keep the
   // legacy dynamic query() so existing callers/tests are unaffected.
   const q = (authLob === 'dental' || authLob === 'cosmetic') ? getQuery(authLob) : query;
@@ -176,4 +208,5 @@ module.exports = {
   V2_LOB_PERMISSIONS,
   ADMIN_GROUP_ID,
   isAdminPermissionState,
+  _clearPermissionCache,
 };
