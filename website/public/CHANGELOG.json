@@ -1,5 +1,66 @@
 [
   {
+    "version": "0.32.112",
+    "date": "2026-06-07",
+    "commit": "nk3-perf-quickwins",
+    "highlights": "NK3 performance: server-side concurrency contention eliminated (DB pool sizing, API clustering, permission caching) and the delivery layer compressed (gzip), roughly halving admin page loads. Frontend feedback badge fetch deferred off the critical path.",
+    "sections": [
+      {
+        "title": "Performance",
+        "items": [
+          "API: env-driven DB connection pool sizing + opt-in clustering (WEB_CONCURRENCY) so concurrent page XHRs no longer serialize (6-concurrent 465ms -> 27ms server-side).",
+          "Auth: in-flight permission-resolution cache so a page's concurrent /me calls share one DB resolution (/Auth/me 702ms -> 5ms).",
+          "Delivery: server-scoped gzip on tmv.2checkin.com (JS bundle -69%, large JSON -87%); page / 1914ms -> 975ms, /services 2301ms -> 1175ms.",
+          "Frontend: FeedbackWidget unread-count fetch deferred 1.5s off the critical path."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.111",
+    "date": "2026-06-06",
+    "commit": "nk3-sitewide-crossref-breadcrumbs",
+    "highlights": "Added the NK3 site-wide @crossref breadcrumb effect across page, module, API client, route, service, middleware, and migration surfaces, with route parity and strict P0 endpoint/function guards.",
+    "sections": [
+      {
+        "title": "Governance",
+        "items": [
+          "Added file-level @crossref:domain / @crossref:used-in / @crossref:uses breadcrumbs across the NK3 source surfaces.",
+          "Added stricter endpoint/function breadcrumbs for high-blast CTV, commission, payment, payout, service-card, and live-repair files."
+        ]
+      },
+      {
+        "title": "Tests",
+        "items": [
+          "Added scripts/verify-crossrefs.js and wired it into npm run verify:governance.",
+          "Added crossrefBreadcrumbs.test.ts to lock App route markers and reciprocal page breadcrumbs."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.110",
+    "date": "2026-06-06",
+    "commit": "nk3-ctv-integrity-repair",
+    "highlights": "Added the NK3-only CTV integrity repair planner and live repair script, then repaired tmv.2checkin.com CTV identity, referral, service-card earning, orphan payout, and migration-ledger drift after fresh Dental/Cosmetic backups.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Restored CTV 0972020908 as a CTV-only auth identity and normalized CTV Dental/Cosmetic mirror rows so the account can add/refer CTV and clients from the live /ctv portal.",
+          "Backfilled the valid Cosmetic service-card CTV earning gap, soft-cancelled the invalid Dental orphan service row, repaired one orphan paid earning, and reconciled the NK3 schema_migrations ledger."
+        ]
+      },
+      {
+        "title": "Tests",
+        "items": [
+          "Added TDD coverage for the NK3 CTV repair planner, service-card gap decisions, and migration-ledger targets.",
+          "Verified live /ctv with screenshots plus disposable add-CTV and refer-client API writes that were immediately cleaned up."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.109",
     "date": "2026-06-06",
     "commit": "ctv-cosmetic-route-boundary",
