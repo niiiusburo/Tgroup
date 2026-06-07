@@ -221,7 +221,8 @@ function PayoutsTab() {
   const [payouts, setPayouts] = useState<PayoutRow[]>([]);
   const [pending, setPending] = useState<EarningsRow[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
-  const [lob, setLob] = useState<'dental' | 'cosmetic'>(
+  const nk3MultiLob = businessUnit?.isCosmeticEnabled === true;
+  const [lob, setLob] = useState<'all' | 'dental' | 'cosmetic'>(
     businessUnit?.currentLOB === 'cosmetic' ? 'cosmetic' : 'dental'
   );
   const [cycleLabel, setCycleLabel] = useState('');
@@ -261,23 +262,29 @@ function PayoutsTab() {
     locale: i18n.language,
   });
 
-  const handleLoad = async (currentLob?: 'dental' | 'cosmetic', override?: { dateFrom?: string; dateTo?: string }) => {
+  const handleLoad = async (currentLob?: 'all' | 'dental' | 'cosmetic', override?: { dateFrom?: string; dateTo?: string }) => {
     setLoading(true); setError(null);
     try {
       const lobToUse = currentLob ?? lob;
       const fromToUse = override?.dateFrom ?? dateFrom;
       const toToUse = override?.dateTo ?? dateTo;
-      const [payoutData, earningsData] = await Promise.all([
-        fetchPayouts({ lob: lobToUse, limit: 50 }),
-        fetchEarnings({
-          lob: lobToUse,
-          status: 'pending',
-          dateFrom: fromToUse || undefined,
-          dateTo: toToUse || undefined,
-          limit: 200,
-        }),
-      ]);
-      setPayouts(payoutData.items || []);
+      const earningsLob = lobToUse === 'all' ? 'all' : lobToUse;
+      const payoutFetches = lobToUse === 'all'
+        ? await Promise.all([
+            fetchPayouts({ lob: 'dental', limit: 50 }),
+            fetchPayouts({ lob: 'cosmetic', limit: 50 }),
+          ])
+        : [await fetchPayouts({ lob: lobToUse, limit: 50 })];
+      const earningsData = await fetchEarnings({
+        lob: earningsLob,
+        status: 'pending',
+        dateFrom: fromToUse || undefined,
+        dateTo: toToUse || undefined,
+        limit: 200,
+      });
+      const mergedPayouts = payoutFetches.flatMap((data) => data.items || [])
+        .sort((a, b) => new Date(b.created_at || b.paid_at || 0).getTime() - new Date(a.created_at || a.paid_at || 0).getTime());
+      setPayouts(mergedPayouts);
       setPending(earningsData.items || []);
       setSelected([]);
     } catch (err) {
@@ -307,8 +314,16 @@ function PayoutsTab() {
     }
   };
 
+  const selectedLobs = useMemo(
+    () => new Set(pending.filter((e) => selected.includes(e.id)).map((e) => e.lob)),
+    [pending, selected],
+  );
+  const payoutLob = lob === 'all'
+    ? (selectedLobs.size === 1 ? [...selectedLobs][0] : null)
+    : lob;
+
   const runPayout = async () => {
-    if (!cycleLabel || selected.length === 0) return;
+    if (!cycleLabel || selected.length === 0 || !payoutLob) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -317,7 +332,7 @@ function PayoutsTab() {
         const uploadRes = await uploadPayoutReceipt(receiptFile);
         receiptUrl = uploadRes.url;
       }
-      await createPayout({ lob, earningIds: selected, cycleLabel, notes: notes || undefined, receipt_url: receiptUrl });
+      await createPayout({ lob: payoutLob, earningIds: selected, cycleLabel, notes: notes || undefined, receipt_url: receiptUrl });
       setCycleLabel('');
       setNotes('');
       setReceiptFile(null);
@@ -331,12 +346,12 @@ function PayoutsTab() {
     }
   };
 
-  const attachReceipt = async (payoutId: string, file: File) => {
+  const attachReceipt = async (payoutId: string, file: File, payoutLob: 'dental' | 'cosmetic') => {
     setSubmitting(true);
     setError(null);
     try {
       const uploadRes = await uploadPayoutReceipt(file);
-      await updatePayoutReceipt(payoutId, uploadRes.url, lob);
+      await updatePayoutReceipt(payoutId, uploadRes.url, payoutLob);
       await handleLoad();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to attach receipt');
@@ -357,8 +372,10 @@ function PayoutsTab() {
 
         <div className="flex flex-wrap gap-3 items-end justify-between">
           <label className="text-sm text-gray-600">{t('payouts.lob')}
-            <select value={lob} onChange={(e) => setLob(e.target.value as any)} className="block mt-1 px-3 py-2 border rounded-lg">
-              <option value="cosmetic">{tc('lob.cosmetic')}</option><option value="dental">{tc('lob.dental')}</option>
+            <select value={lob} onChange={(e) => setLob(e.target.value as 'all' | 'dental' | 'cosmetic')} className="block mt-1 px-3 py-2 border rounded-lg">
+              {nk3MultiLob && <option value="all">{tc('all')}</option>}
+              <option value="cosmetic">{tc('lob.cosmetic')}</option>
+              <option value="dental">{tc('lob.dental')}</option>
             </select>
           </label>
           <div className="flex items-center gap-2">
@@ -384,7 +401,7 @@ function PayoutsTab() {
           <label className="text-sm text-gray-600">{t('payouts.cycleLabel')}
             <input value={cycleLabel} onChange={(e) => setCycleLabel(e.target.value)} placeholder={t('payouts.cyclePlaceholder')} className="block mt-1 w-full px-3 py-2 border rounded-lg" />
           </label>
-          <button onClick={runPayout} disabled={!cycleLabel || selected.length === 0 || submitting} className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium disabled:bg-gray-300">
+          <button onClick={runPayout} disabled={!cycleLabel || selected.length === 0 || submitting || !payoutLob} className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium disabled:bg-gray-300">
             {submitting ? t('payouts.processing') : t('payouts.paySelected', { count: selected.length, amount: formatVnd(totalSelected) })}
           </button>
         </div>
@@ -439,7 +456,7 @@ function PayoutsTab() {
                         className="hidden"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          if (file) attachReceipt(p.id, file);
+                          if (file) attachReceipt(p.id, file, p.lob);
                           e.target.value = '';
                         }}
                       />

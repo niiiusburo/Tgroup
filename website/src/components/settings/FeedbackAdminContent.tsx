@@ -11,6 +11,7 @@ import {
   updateFeedbackStatus,
   deleteFeedbackThread,
 } from '@/lib/api';
+import { ApiError } from '@/lib/api/core';
 import type { AdminFeedbackThread, FeedbackMessage, FeedbackStatus } from '@/types/feedback';
 import {
   FeedbackAdminDetailModal,
@@ -60,6 +61,7 @@ export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentPr
   const [autoHostMode, setAutoHostMode] = useState<AutoHostMode>(() => (getCurrentFeedbackHost() ? 'current' : 'all'));
   const [threads, setThreads] = useState<AdminFeedbackThread[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
   const [modalThreadId, setModalThreadId] = useState<string | null>(null);
@@ -81,15 +83,22 @@ export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentPr
 
   const loadThreads = useCallback(async (source?: FeedbackSource, host?: string) => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await fetchAllFeedback({ source, host });
       setThreads(res.items);
     } catch (err) {
       console.error('Failed to load admin feedback:', err);
+      if (err instanceof ApiError && err.status === 403) {
+        setLoadError(t('feedbackAdmin.permissionDenied', { ns: 'settings' }));
+      } else {
+        setLoadError(t('feedbackAdmin.loadError', { ns: 'settings' }));
+      }
+      setThreads([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   function handleSelect(id: string, selected: boolean) {
     if (!canEdit) return;
@@ -521,12 +530,21 @@ export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentPr
         </div>
       </div>
 
+      {loadError && (
+        <div
+          role="alert"
+          className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+        >
+          {loadError}
+        </div>
+      )}
+
       <DataTable
         columns={columns}
         data={threads}
         keyExtractor={(row) => row.id}
         pageSize={20}
-        emptyMessage={t('feedbackAdmin.noFeedback', { ns: 'settings' })}
+        emptyMessage={loadError ? '' : t('feedbackAdmin.noFeedback', { ns: 'settings' })}
         selection={canEdit ? {
           selectedIds,
           onSelect: handleSelect,

@@ -114,6 +114,23 @@ backend_permissions:
       - POST /api/Permissions/groups
       - PUT /api/Permissions/groups/:groupId
       - PUT /api/Permissions/employees/:employeeId
+  - string: feedback.view
+    routes:
+      - GET /api/Feedback/all
+      - GET /api/Feedback/all/:threadId
+    note: Legacy fallback permissions.view also grants read access.
+  - string: feedback.reply
+    routes:
+      - POST /api/Feedback/all/:threadId/reply
+    note: Legacy fallback permissions.edit also grants reply access.
+  - string: feedback.edit
+    routes:
+      - PATCH /api/Feedback/all/:threadId/status
+    note: Legacy fallback permissions.edit also grants status edits.
+  - string: feedback.delete
+    routes:
+      - DELETE /api/Feedback/all/:threadId
+    note: Legacy fallback permissions.edit also grants delete access.
   - string: permissions.view
     routes:
       - GET /api/Permissions/groups
@@ -121,10 +138,16 @@ backend_permissions:
       - GET /api/Permissions/resolve/:employeeId
       - GET /api/Feedback/all
       - GET /api/Feedback/all/:threadId
+    note: Legacy fallback for feedback admin read routes.
+  - string: permissions.edit
+    routes:
+      - POST /api/Permissions/groups
+      - PUT /api/Permissions/groups/:groupId
+      - PUT /api/Permissions/employees/:employeeId
       - POST /api/Feedback/all/:threadId/reply
       - PATCH /api/Feedback/all/:threadId/status
       - DELETE /api/Feedback/all/:threadId
-    note: Feedback admin routes use requireAdmin, which allows System Administrator or effective permissions.view.
+    note: Legacy fallback for feedback admin mutation routes.
   - string: reports.view
     routes:
       - POST /api/Reports/*

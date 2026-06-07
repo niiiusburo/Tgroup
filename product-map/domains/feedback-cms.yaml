@@ -59,7 +59,7 @@ shared_types:
   - website/src/types/feedback.ts
   - website/src/types/website.ts
 dependencies:
-  - Auth & Permissions (user routes require global auth; admin routes use requireAdmin, which allows System Administrator or effective permissions.view)
+  - Auth & Permissions (user routes require global auth; admin routes use requireFeedbackPermission via permissionService — Super Admin, feedback.view/reply/edit/delete, with legacy permissions.view/edit fallback)
   - file upload via multer + sharp
 affected_by:
   - Changes to feedback attachment size limits

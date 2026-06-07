@@ -229,6 +229,34 @@ describe('EarningsPayoutsTabs LOB Sync', () => {
       });
     });
 
+    it('shows the combined LOB filter only when cosmetic LOB is enabled (NK3)', async () => {
+      (useBusinessUnitOptional as any).mockReturnValue({
+        currentLOB: 'cosmetic',
+        setCurrentLOB: vi.fn(),
+        availableLOBs: ['dental', 'cosmetic'],
+        isMultiLOBUser: true,
+        isCosmeticEnabled: true,
+      });
+
+      renderWithRouter(<PayoutsTab />);
+
+      expect(screen.getByRole('option', { name: 'all' })).toBeInTheDocument();
+    });
+
+    it('hides the combined LOB filter when cosmetic LOB is disabled (NK/NK2)', async () => {
+      (useBusinessUnitOptional as any).mockReturnValue({
+        currentLOB: 'dental',
+        setCurrentLOB: vi.fn(),
+        availableLOBs: ['dental'],
+        isMultiLOBUser: false,
+        isCosmeticEnabled: false,
+      });
+
+      renderWithRouter(<PayoutsTab />);
+
+      expect(screen.queryByRole('option', { name: 'all' })).not.toBeInTheDocument();
+    });
+
     it('should fetch both payouts and pending earnings with same lob', async () => {
       const mockBusinessUnit: BusinessUnitContextValue = {
         currentLOB: 'cosmetic',

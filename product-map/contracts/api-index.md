@@ -9,6 +9,12 @@
 
 ---
 
+## Source Traceability Breadcrumbs
+
+Every API route file, frontend API client, service function, middleware file, and migration in the NK3 coverage set must carry the site-wide `@crossref` breadcrumb triad back to its product-map domain, test matrix, and TestSprite plan. High-blast CTV/earnings/payment/payout/service-card/referral paths must also carry explicit `@crossref:endpoint[...]` or `@crossref:function[...]` markers for the owned endpoint or business function.
+
+This 2026-06-06 breadcrumb pass did not add, remove, or reshape API endpoints, payload fields, auth semantics, status codes, or database writes. It only added source-level traceability and the `npm run verify:crossrefs` governance check.
+
 ## Auth (`/api/Auth`)
 
 | Method | Path | Auth | Body | Response |
@@ -355,11 +361,11 @@ Export permissions are defined by `api/src/services/exports/exportRegistry.js`: 
 | GET | `/my` | Auth | — | User's threads |
 | GET | `/my/:threadId` | Auth | — | Thread messages |
 | POST | `/my/:threadId/reply` | Auth | FormData | Reply created |
-| GET | `/all` | Admin (`System Administrator` group or effective `permissions.view`) | `?source=manual\|auto` | All threads |
-| GET | `/all/:threadId` | Admin (`System Administrator` group or effective `permissions.view`) | — | Thread messages |
-| POST | `/all/:threadId/reply` | Admin (`System Administrator` group or effective `permissions.view`) | FormData | Admin reply |
-| PATCH | `/all/:threadId/status` | Admin (`System Administrator` group or effective `permissions.view`) | `{ status: pending\|in_progress\|resolved\|ignored }` | Thread status updated |
-| DELETE | `/all/:threadId` | Admin (`System Administrator` group or effective `permissions.view`) | — | Thread deleted |
+| GET | `/all` | `feedback.view` or `permissions.view` (Super Admin via permissionService) | `?source=manual\|auto` | All threads |
+| GET | `/all/:threadId` | `feedback.view` or `permissions.view` | — | Thread messages |
+| POST | `/all/:threadId/reply` | `feedback.reply` or `permissions.edit` | FormData | Admin reply |
+| PATCH | `/all/:threadId/status` | `feedback.edit` or `permissions.edit` | `{ status: pending\|in_progress\|resolved\|ignored }` | Thread status updated |
+| DELETE | `/all/:threadId` | `feedback.delete` or `permissions.edit` | — | Thread deleted |
 
 Attachment persistence contract: feedback create/reply routes accept file-only messages (`content = ''`), commit message rows and `feedback_attachments` rows in one explicit DB transaction, clean uploaded files on missing-thread or insert failure, and delete physical files only after `DELETE /all/:threadId` commits. Stored attachment filenames must match the generated UUID image filename allowlist before physical deletion.
 

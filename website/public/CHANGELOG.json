@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.32.116",
+    "date": "2026-06-08",
+    "commit": "db7abac4",
+    "highlights": "NK3 fixes: Feedback admin page loads for Super Admin, cosmetic customer delete LOB routing, cosmetic Earnings/Payouts API mirrors, and combined Payouts All tab.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Feedback: replace legacy requireAdmin (employee_permissions) with permissionService — fixes 403 on /feedback for t@clinic.vn on tmv.2checkin.com.",
+          "Customers: pass currentLOB into soft/hard delete so cosmetic deletes hit /api/cosmetic/Partners.",
+          "Commission: mount /api/cosmetic/Earnings and /api/cosmetic/Payouts when COSMETIC_LOB_ENABLED; Payouts All tab when cosmetic LOB is on."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "feedback adminPermissions, earningsRoute, cosmeticLobGuards, EarningsPayoutsTabs, partners.lob regression tests."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.117",
+    "date": "2026-06-07",
+    "commit": "face-id-liveness-antispoofing",
+    "highlights": "Face ID passive liveness / anti-spoofing (MiniFASNet) added to the local face engine — blocks printed/screen-photo spoofs at recognize and register. Off by default and fail-open (never blocks check-in) until calibrated with real clinic captures.",
+    "sections": [
+      {
+        "title": "Security",
+        "items": [
+          "face-service: MiniFASNet (source-verified Silent-Face) passive anti-spoofing via cv2.dnn; gates POST /embed on the detected face.",
+          "API: /api/face/recognize and /api/face/register return SPOOF_DETECTED (HTTP 422) when liveness is enabled and a spoof is detected (embedding is never stored).",
+          "Fail-open: missing models or inference errors never block check-in. Enable via FACE_LIVENESS_ENABLED after calibrating FACE_LIVENESS_THRESHOLD with real captures.",
+          "Frontend: localized spoof message (customers:faceRecognition.spoofDetected)."
+        ]
+      },
+      {
+        "title": "Tests",
+        "items": [
+          "face-service/tests/test_liveness.py: crop geometry, softmax aggregation, threshold, fail-open, and cv2-backed live/spoof verdicts (13 passing)."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.112",
     "date": "2026-06-07",
     "commit": "nk3-perf-quickwins",

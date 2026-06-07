@@ -1,9 +1,18 @@
 'use strict';
 
 /**
+ * @crossref:domain[earnings-commissions]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/earnings]
+ * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * earnings.js — Admin earnings ledger for CTV/MLM commissions.
- * Mounted at /api/Earnings. Reads BOTH dental and cosmetic DBs in the API layer;
+ * Mounted at /api/Earnings and /api/cosmetic/Earnings (NK3 mirror).
+ * Top-level route reads BOTH dental and cosmetic DBs when ?lob=all.
+ * Cosmetic mirror forces req.lob so /api/cosmetic/Earnings stays cosmetic-only.
  * never performs cross-DB SQL joins.
+ * @crossref:endpoint[GET /api/Earnings]
+ * @crossref:uses[api/src/services/commissionEngine.js, product-map/domains/earnings-commissions.yaml, docs/business-logic/ctv-referral-commission.md]
  */
 
 const express = require('express');
@@ -113,7 +122,9 @@ router.get('/', requireAuth, async (req, res) => {
 
   try {
     const { limit, offset } = parseLimitOffset(req.query);
-    const lob = req.query.lob === 'dental' || req.query.lob === 'cosmetic' ? req.query.lob : 'all';
+    const lob = req.lob === 'cosmetic' || req.lob === 'dental'
+      ? req.lob
+      : (req.query.lob === 'dental' || req.query.lob === 'cosmetic' ? req.query.lob : 'all');
     const filters = {
       limit,
       offset,

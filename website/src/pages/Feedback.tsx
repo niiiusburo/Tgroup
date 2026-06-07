@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[feedback-cms]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Feedback]
+ * @crossref:uses[product-map/domains/feedback-cms.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * Feedback Admin Page
  * @crossref:route[/feedback]
  * @crossref:used-in[App]
@@ -14,7 +19,11 @@ import { useAuth } from '@/contexts/AuthContext';
 export function Feedback() {
   const { t } = useTranslation('feedback');
   const { hasPermission } = useAuth();
-  const canEditFeedback = hasPermission('permissions.edit');
+  const canEditFeedback =
+    hasPermission('feedback.edit')
+    || hasPermission('feedback.delete')
+    || hasPermission('feedback.reply')
+    || hasPermission('permissions.edit');
   return (
     <div className="space-y-6">
       <PageHeader

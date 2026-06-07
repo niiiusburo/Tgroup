@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[feedback-cms]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/feedback/attachments]
+ * @crossref:uses[product-map/domains/feedback-cms.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');

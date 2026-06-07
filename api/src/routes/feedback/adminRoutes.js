@@ -1,10 +1,15 @@
 'use strict';
 
+/**
+ * @crossref:domain[feedback-cms]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/feedback/adminRoutes]
+ * @crossref:uses[product-map/domains/feedback-cms.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const express = require('express');
 const fs = require('fs');
 const { query, pool } = require('../../db');
 const { requireAuth } = require('../../middleware/auth');
-const { requireAdmin } = require('./admin');
+const { requireFeedbackPermission } = require('./admin');
 const { getVietnamNow } = require('../../lib/dateUtils');
 const {
   upload,
@@ -53,7 +58,7 @@ function buildThreadFilters({ source, host }) {
  * GET /api/Feedback/all
  * Admin-only: returns all threads, optionally filtered by source and host.
  */
-router.get('/all', requireAuth, requireAdmin, async (req, res) => {
+router.get('/all', requireAuth, requireFeedbackPermission('view'), async (req, res) => {
   try {
     const { source, host } = req.query;
     const { whereClause, params } = buildThreadFilters({ source, host });
@@ -108,7 +113,7 @@ router.get('/all', requireAuth, requireAdmin, async (req, res) => {
  * GET /api/Feedback/all/:threadId
  * Admin-only: returns full thread with all messages.
  */
-router.get('/all/:threadId', requireAuth, requireAdmin, async (req, res) => {
+router.get('/all/:threadId', requireAuth, requireFeedbackPermission('view'), async (req, res) => {
   try {
     const { threadId } = req.params;
 
@@ -181,7 +186,7 @@ router.get('/all/:threadId', requireAuth, requireAdmin, async (req, res) => {
  * POST /api/Feedback/all/:threadId/reply
  * Admin-only: append a message to the thread.
  */
-router.post('/all/:threadId/reply', requireAuth, requireAdmin, upload.array('files', 5), async (req, res) => {
+router.post('/all/:threadId/reply', requireAuth, requireFeedbackPermission('reply'), upload.array('files', 5), async (req, res) => {
   const client = await pool.connect();
   let transactionStarted = false;
   try {
@@ -247,7 +252,7 @@ router.post('/all/:threadId/reply', requireAuth, requireAdmin, upload.array('fil
  * PATCH /api/Feedback/all/:threadId/status
  * Admin-only: update thread status.
  */
-router.patch('/all/:threadId/status', requireAuth, requireAdmin, async (req, res) => {
+router.patch('/all/:threadId/status', requireAuth, requireFeedbackPermission('edit'), async (req, res) => {
   try {
     const { threadId } = req.params;
     const { status } = req.body;
@@ -276,7 +281,7 @@ router.patch('/all/:threadId/status', requireAuth, requireAdmin, async (req, res
  * DELETE /api/Feedback/all/:threadId
  * Admin-only: permanently delete a thread and all associated data.
  */
-router.delete('/all/:threadId', requireAuth, requireAdmin, async (req, res) => {
+router.delete('/all/:threadId', requireAuth, requireFeedbackPermission('delete'), async (req, res) => {
   const client = await pool.connect();
   let transactionStarted = false;
   let attachmentsToDelete = [];

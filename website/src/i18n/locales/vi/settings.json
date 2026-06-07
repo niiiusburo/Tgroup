@@ -13,6 +13,8 @@
     "status": "Trạng thái",
     "submittedAt": "Thời gian gửi",
     "noFeedback": "Không có phản hồi",
+    "loadError": "Không thể tải phản hồi. Vui lòng thử lại.",
+    "permissionDenied": "Bạn không có quyền xem phản hồi.",
     "deleteError": "Xóa một số phản hồi thất bại. Vui lòng thử lại."
   },
   "timezone": "Múi giờ",

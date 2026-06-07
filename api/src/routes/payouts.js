@@ -1,8 +1,14 @@
 'use strict';
 
 /**
+ * @crossref:domain[earnings-commissions]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/payouts]
+ * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * payouts.js — Admin CTV payout cycles + receipt photo.
- * Mounted at /api/Payouts. Each payout is scoped to ONE LOB (dental | cosmetic):
+ * Mounted at /api/Payouts and /api/cosmetic/Payouts (NK3 mirror).
+ * Each payout is scoped to ONE LOB (dental | cosmetic):
  * the payout row and the earnings it settles live in that LOB's database.
  * No cross-DB SQL — the LOB is chosen per request (query/body) and resolves the pool.
  *
@@ -14,6 +20,8 @@
  *
  * @crossref:implements[Gap 1 manual payout cycles + receipt photo]
  * @crossref:used-by[website/src/components/commission/EarningsPayoutsTabs.tsx PayoutsTab]
+ * @crossref:endpoint[GET /api/Payouts, POST /api/Payouts, POST /api/Payouts/combined, PATCH /api/Payouts/:id]
+ * @crossref:uses[product-map/domains/earnings-commissions.yaml, website/src/components/commission/EarningsPayoutsTabs.tsx]
  */
 
 const path = require('path');
@@ -144,7 +152,7 @@ router.get('/', requireAuth, requirePayoutPermission, async (req, res) => {
     if (req.query.lob && !normalizeLob(req.query.lob)) {
       return res.status(400).json({ error: { code: 'U_INVALID_LOB', message: 'lob must be "dental" or "cosmetic"' } });
     }
-    const lob = normalizeLob(req.query.lob) || 'cosmetic';
+    const lob = normalizeLob(req.lob) || normalizeLob(req.query.lob) || 'cosmetic';
     const { limit, offset } = parseLimitOffset(req.query);
     const db = getDb(lob);
 
@@ -179,7 +187,7 @@ router.get('/', requireAuth, requirePayoutPermission, async (req, res) => {
 // POST /api/Payouts  { lob, earningIds[], cycleLabel, notes?, receipt_url? }
 router.post('/', requireAuth, requirePayoutPermission, async (req, res) => {
   const { lob: rawLob, earningIds, cycleLabel, notes, receipt_url: receiptUrl } = req.body || {};
-  const lob = normalizeLob(rawLob);
+  const lob = normalizeLob(req.lob) || normalizeLob(rawLob);
 
   if (!lob) {
     return res.status(400).json({ error: { code: 'U_INVALID_LOB', message: 'lob must be "dental" or "cosmetic"' } });
@@ -346,7 +354,7 @@ router.patch('/:id', requireAuth, requirePayoutPermission, async (req, res) => {
   if (rawLob && !normalizeLob(rawLob)) {
     return res.status(400).json({ error: { code: 'U_INVALID_LOB', message: 'lob must be "dental" or "cosmetic"' } });
   }
-  const lob = normalizeLob(rawLob) || 'cosmetic';
+  const lob = normalizeLob(req.lob) || normalizeLob(rawLob) || 'cosmetic';
 
   if (!receiptUrl || typeof receiptUrl !== 'string') {
     return res.status(400).json({ error: { code: 'U_INVALID_INPUT', message: 'receipt_url is required' } });

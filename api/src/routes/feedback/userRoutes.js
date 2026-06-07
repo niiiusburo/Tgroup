@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[feedback-cms]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/feedback/userRoutes]
+ * @crossref:uses[product-map/domains/feedback-cms.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const express = require('express');
 const { query, pool } = require('../../db');
 const { requireAuth } = require('../../middleware/auth');
@@ -29,7 +34,7 @@ const router = express.Router();
 router.get('/unread-count', requireAuth, async (req, res) => {
   try {
     const employeeId = req.user.employeeId;
-    const userIsAdmin = await isAdmin(employeeId);
+    const userIsAdmin = await isAdmin(employeeId, req.user?.authLob || 'dental');
 
     if (userIsAdmin) {
       const rows = await query(

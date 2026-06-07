@@ -2,6 +2,54 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.117] — 2026-06-07
+### Added (NK3 — Face ID security)
+- **Face ID passive liveness / anti-spoofing** — added MiniFASNet (source-verified Silent-Face) to the **local** face engine, run via OpenCV `cv2.dnn` (no new dependency). New `face-service/liveness.py` gates `POST /embed`: when `FACE_LIVENESS_ENABLED=true`, a printed/screen-photo spoof returns `SPOOF_DETECTED` (HTTP 422) from `/api/face/recognize` and `/api/face/register`, so a spoof never matches or enrolls. **Default off** and **fail-open** — a missing/unloadable model or inference error never blocks check-in (Face ID spec: "engine failures must not block normal workflows"). Enable only after calibrating `FACE_LIVENESS_THRESHOLD` (default 0.5) with real clinic captures. — @agent — closes the "no liveness" gap where a printed/on-screen photo matched a real customer; spec Non-Goals (payment auth, legal ID verification) unchanged.
+- Liveness models bake into the face-service image as a best-effort build-time download (`QingHeYang/Silent-Face-Anti-Spoofing-onnx`); `/health` and `/embed` now report liveness availability; the Node face client surfaces `liveness`; frontend shows localized `customers:faceRecognition.spoofDetected`.
+
+### Docs / Tests
+- Added `face-service/tests/test_liveness.py` (13 passing: crop geometry, softmax aggregation, threshold, fail-open, and cv2-backed live/spoof verdicts) and 2 hook tests for the `SPOOF_DETECTED` mapping.
+- Updated `docs/CONTRACTS.md` (v1.0.29: `liveness` on `/embed`, `SPOOF_DETECTED` 422), `product-map/domains/integrations.yaml`, the Face ID design spec addendum, `.env.example`, `docker-compose.yml`, and `face-service/Dockerfile`.
+
+## [0.32.116] — 2026-06-08
+### Fixed (NK3 — Feedback admin page)
+- **Feedback admin 403 for Super Admin** — replaced legacy `requireAdmin` (`employee_permissions` table) with `requireFeedbackPermission` backed by `permissionService.resolveEffectivePermissions` (tier_id model). Super Admin and users with `feedback.view` or `permissions.view` can load `/feedback`; mutations accept scoped `feedback.reply` / `feedback.edit` / `feedback.delete` with `permissions.edit` fallback. — @agent — live NK3 bug on `tmv.2checkin.com` (403 "Admin access required").
+- **Feedback load error UX** — `FeedbackAdminContent` shows a permission/load error banner instead of a silent empty table on API failure.
+
+## [0.32.115] — 2026-06-07
+### Fixed (NK3-only — gated by `COSMETIC_LOB_ENABLED` / `VITE_COSMETIC_LOB_ENABLED`)
+- **Cosmetic API mirrors for commission admin** — mount `/api/cosmetic/Earnings` and `/api/cosmetic/Payouts` on the existing cosmetic router (same NK3 flag gate as other mirrors). Cosmetic mirror forces `req.lob='cosmetic'` so `?lob=all` cannot widen to dental. Top-level `/api/Earnings` and `/api/Payouts` unchanged for NK/NK2.
+- **Payouts tab combined LOB filter** — when `isCosmeticEnabled` (NK3 builds only), Payouts tab shows **All** and merges dental+cosmetic payout history client-side; NK/NK2 builds without the flag keep per-LOB only.
+
+## [0.32.114] — 2026-06-07
+### Fixed
+- **Cosmetic customer delete LOB routing** — `Customers.tsx` now passes `currentLOB` into `softDeletePartner` / `hardDeletePartner` so Cosmetic soft/hard delete hits `/api/cosmetic/Partners/:id/*` instead of the dental-only path (live NK3 bug: silent 404). Regression lock in `partners.lob.test.ts`. — @agent — INV-008x apiFetch LOB prefix.
+
+## [0.32.113] — 2026-06-07
+### Docs / Tests
+- Added the **NK3 → NK2 pre-port smoke harness** for the cosmetic-LOB / CTV promotion. `scripts/verify-migration-additivity.js` (`npm run verify:migrations`) statically audits the migration delta (`047–061`) and fails on any destructive op against a pre-existing dental table — currently `58 SAFE · 4 REVIEW · 0 HIGH`. `scripts/nk3-to-nk2-preport-gates.py` (`npm run preport:gates`) runs all five local gates: additivity, the `049_widen` `partners.created_via` CHECK re-validation pre-check, a real-data clone re-apply (proves 0 dental columns removed), the cosmetic flag-guard jest, and the live two-DB CTV round-trip. Local run: **6 PASS / 0 FAIL**. — @agent — local-only promotion prep; no NK2/NK changes. Honors governance "local only, NK2 later".
+- Added `docs/runbooks/NK3_TO_NK2_PROMOTION.md` — the NK3→NK2→NK promotion playbook (delta inventory, safety model, gate table, the one genuine `049_widen` per-target risk + pre-check query, flag-off-first NK2/NK steps, rollback, and per-target definition of done).
+- Fixed a babel-jest parse regression that silently broke **all 10 API test suites** which `require('../src/server')` (Face ID route, health, auth, payments, telemetry, appointments, sale orders, feedback): the Jun-7 cluster perf change added a top-level `return` to `api/src/server.js` (valid in Node's CommonJS wrapper, but babel-jest rejects it as "'return' outside of function"). Added `api/babel.config.js` (test-only; `allowReturnOutsideFunction`) so babel-jest parses the real server bootstrap, and set `JWT_SECRET` before the server require in `api/tests/faceRecognition.test.js` per the existing repo pattern. Restores the Face ID backend suite to **322 passing** (route + integration tests runnable again) plus 34 frontend. — @agent — test infra only, no runtime/website change, no version bump.
+
+## [0.32.111] — 2026-06-06
+### Added
+- Added the NK3 site-wide `@crossref` breadcrumb effect across frontend page/module/API-client surfaces, backend route/service/middleware surfaces, and canonical migration SQL files. Each covered file now carries `@crossref:domain[...]`, `@crossref:used-in[...]`, and `@crossref:uses[...]` breadcrumbs back to product-map domains, `docs/TEST-MATRIX.md`, and `testbright.md`.
+- Added strict endpoint/function breadcrumbs for high-blast CTV, earnings, payment, payout, service-card, referral-claim, CTV hierarchy/profile/password, commission-engine, service-reversal, and NK3 live-repair files.
+
+### Docs / Tests
+- Added `scripts/verify-crossrefs.js`, `npm run verify:crossrefs`, and wired `verify:governance` to fail if NK3 breadcrumb coverage or strict P0 endpoint/function markers drift.
+- Added `website/src/__tests__/crossrefBreadcrumbs.test.ts` to lock App route markers to reciprocal page breadcrumbs, and documented the standard in `docs/CROSSREF-BREADCRUMBS.md`, `AGENTS.md`, `website/agents.md`, `docs/TEST-MATRIX.md`, `product-map/test-matrix.md`, and `testbright.md`.
+
+## [0.32.110] — 2026-06-06
+### Fixed
+- Repaired live NK3 CTV identity/referral drift for account `0972020908`: cleared the Dental CTV auth row's `customer=true`, normalized Dental/Cosmetic CTV mirror scopes/flags, inserted the missing Dental auth row for the active Cosmetic-only CTV with an existing password hash, and normalized inactive Cosmetic-only empty CTV scope rows. This preserves the CTV identity invariant in `product-map/domains/ctv.yaml` and restores the ability to add/recruit CTVs and refer clients from `/ctv`.
+- Repaired live NK3 CTV earning drift: backfilled the valid Cosmetic service-card CTV earning from full service price per `INV-003C`, soft-cancelled the invalid Dental service-card gap with missing foreign-key targets instead of inventing money, and changed the orphan paid earning with a missing payout row back to pending with `payout_id=NULL`.
+- Reconciled the NK3 migration ledger for already-present schema shape after fresh backups: Dental now records 055/056/057/058 and Cosmetic records 055/057 in `dbo.schema_migrations`.
+
+### Docs / Tests
+- Added `api/src/services/nk3CtvIntegrityRepair.js`, `api/src/services/__tests__/nk3CtvIntegrityRepair.test.js`, and `scripts/nk3-only/nk3-live-ctv-integrity-repair.js` for repeatable dry-run/apply planning against `tdental_nk3` and `tcosmetic_nk3`.
+- Updated `docs/TEST-MATRIX.md`, `docs/MIGRATIONS.md`, `product-map/domains/ctv.yaml`, `product-map/domains/earnings-commissions.yaml`, `product-map/test-matrix.md`, `website/public/CHANGELOG.json`, `website/package.json`, and `testbright.md`.
+
 ## [0.32.109] — 2026-06-06
 ### Fixed
 - Hardened the NK3/TMV Cosmetic route boundary: `/api/cosmetic/*` now always runs in Cosmetic DB context and ignores query/header LOB overrides such as `?lob=all` or `X-LOB: dental`, preserving `INV-008E` and keeping `/api/cosmetic/NewClients` Cosmetic-only.
@@ -28,6 +76,9 @@
 - Added targeted regression coverage: `api/src/routes/saleOrders/__tests__/createSaleOrderReferralCtv.test.js`, expanded `api/src/services/__tests__/newClientsQuery.test.js`, and updated `website/src/components/commission/NewClientsTab.test.tsx`.
 
 ## [0.32.106] — 2026-06-05
+### Tests
+- Added `TC060_TestSprite_MCP_CTV_commission_artifacts.py` and wired it into both TestSprite runners so NK3 TestSprite MCP config, CTV commission PRD/results/report cleanup proof, known X-LOB caveat, and screenshot artifacts are verified as a first-class regression guard. No runtime version bump: test/docs-only change.
+
 ### CTV Creation Unification + Permanent SSOT Enforcement (non-overlookable)
 - Unified the three CTV/"Codex" signup/create processes (admin portal Add CTV in CtvManagementTab, unauthed public no-sign-in JoinCtv, logged-in CTV portal recruit via CtvRecruitModal) into **one reusable domain** (`website/src/components/shared/CtvCreationForm/` + `useCtvCreationForm` hook). All three now delegate (config modes + onSubmit wrappers for page extras like upline/code; beforeLobs slot for public gate; showLobs=false for public to preserve prior UX).
 - **Fixed the reported image bug:** the recruit form required email + showed only generic "Vui lòng nhập đầy đủ thông tin" (no per-field). Now email optional everywhere (UI note via labels.emailOptional in public; converged with admin/public spec + backend); specific per-field errors + red `border-red-500` on the exact missing/partial field (e.g. the "thuan" email case); core form error for the group message like "Vui lòng nhập họ tên, số điện thoại và mật khẩu.". Matches the "admin does not require email" behavior.

@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 import { useState, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,6 +14,7 @@ import {
 import { resolvePartnerKey, type PartnerResolveCandidate } from "@/lib/api/partners";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBusinessUnit } from "@/contexts/BusinessUnitContext";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useLocations } from "@/hooks/useLocations";
 import type { ProfileTab } from "@/components/customer/CustomerProfile";
@@ -38,6 +44,7 @@ import { useCustomerDetailController } from "./Customers/useCustomerDetailContro
 
 export function Customers() {
   const { t } = useTranslation("customers");
+  const { currentLOB } = useBusinessUnit();
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -251,9 +258,9 @@ export function Customers() {
     setDeleteError(null);
     try {
       if (deleteDialog.mode === "hard") {
-        await hardDeletePartner(deleteDialog.customerId);
+        await hardDeletePartner(deleteDialog.customerId, currentLOB);
       } else {
-        await softDeletePartner(deleteDialog.customerId);
+        await softDeletePartner(deleteDialog.customerId, currentLOB);
       }
       setDeleteDialog(null);
       navigate("/customers");

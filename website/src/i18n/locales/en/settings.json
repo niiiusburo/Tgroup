@@ -13,6 +13,8 @@
     "status": "Status",
     "submittedAt": "Submitted At",
     "noFeedback": "No feedback submissions",
+    "loadError": "Could not load feedback. Please try again.",
+    "permissionDenied": "You do not have permission to view feedback submissions.",
     "deleteError": "Failed to delete some feedback items. Please try again."
   },
   "timezone": "Timezone",
