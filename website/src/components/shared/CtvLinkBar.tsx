@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { AlertTriangle } from 'lucide-react';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -42,6 +43,8 @@ export function CtvLinkBar({ ctvName, anchorAt, expiresAt, active, eligible, com
   const remainingDays = expMs != null ? Math.max(0, Math.round((expMs - nowMs) / MS_PER_DAY)) : null;
   const fraction = ctvLinkBarFraction(anchorAt, expiresAt, nowMs);
   const isExpired = !active || eligible || (remainingDays != null && remainingDays <= 0);
+  // Urgency: the claim is about to lapse (within a week) but is still active.
+  const isUrgent = !isExpired && remainingDays != null && remainingDays <= 7;
 
   // Color band by remaining time (mirrors StatusBadge palette).
   let fill = 'bg-emerald-500';
@@ -64,7 +67,10 @@ export function CtvLinkBar({ ctvName, anchorAt, expiresAt, active, eligible, com
         <span className="truncate font-medium text-gray-700">
           {t('link.ctvLabel', 'CTV')}: <strong>{ctvName || '—'}</strong>
         </span>
-        <span className={isExpired ? 'text-gray-500' : 'text-gray-600'}>{label}</span>
+        <span className={`inline-flex items-center gap-1 ${isExpired ? 'text-gray-500' : isUrgent ? 'font-semibold text-red-600' : 'text-gray-600'}`}>
+          {isUrgent && <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden="true" />}
+          {label}
+        </span>
       </div>
       <div className={`h-1.5 w-full overflow-hidden rounded-full ${track}`} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(fraction * 100)}>
         <div className={`h-full rounded-full transition-[width] duration-500 motion-reduce:transition-none ${fill}`} style={{ width: `${Math.round(fraction * 100)}%` }} />

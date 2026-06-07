@@ -6,6 +6,10 @@
   "states": {
     "loading": "Loading..."
   },
+  "lob": {
+    "dental": "Dental",
+    "cosmetic": "Cosmetic"
+  },
   "actions": "Actions",
   "table": {
     "noData": "No data available",

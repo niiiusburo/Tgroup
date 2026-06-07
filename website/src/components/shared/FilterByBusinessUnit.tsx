@@ -1,5 +1,6 @@
 import { Stethoscope, Sparkles, ChevronDown } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { BusinessUnit } from '@/contexts/BusinessUnitContext';
 
 /**
@@ -34,6 +35,9 @@ export function FilterByBusinessUnit({
 }: FilterByBusinessUnitProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation('common');
+  // Localized LOB label, falling back to the English constant if a key is missing.
+  const lobLabel = (lob: BusinessUnit) => t(`lob.${lob}`, LOB_LABELS[lob]);
 
   const CurrentIcon = LOB_ICONS[current] ?? Stethoscope;
 
@@ -61,10 +65,10 @@ export function FilterByBusinessUnit({
         "
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        aria-label={LOB_LABELS[current]}
+        aria-label={lobLabel(current)}
       >
         <CurrentIcon className="w-4 h-4 text-gray-400" />
-        <span className="hidden sm:inline">{LOB_LABELS[current]}</span>
+        <span className="hidden sm:inline">{lobLabel(current)}</span>
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
@@ -94,7 +98,7 @@ export function FilterByBusinessUnit({
                 aria-selected={isActive}
               >
                 <Icon className="w-4 h-4 text-gray-400" />
-                <span>{LOB_LABELS[lob]}</span>
+                <span>{lobLabel(lob)}</span>
               </button>
             );
           })}

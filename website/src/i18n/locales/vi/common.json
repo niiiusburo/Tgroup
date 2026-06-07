@@ -6,6 +6,10 @@
   "states": {
     "loading": "Đang tải..."
   },
+  "lob": {
+    "dental": "Nha khoa",
+    "cosmetic": "Thẩm mỹ"
+  },
   "actions": "Thao tác",
   "table": {
     "noData": "Không có dữ liệu",

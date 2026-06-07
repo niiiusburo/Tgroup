@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 commission and CTV admin surface: website/src/components/commission/NewClientsTab]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * NewClientsTab — Admin "New Clients" surface (commission page).
  * Lists referral-only leads: clients a CTV referred who have NOT yet converted to
  * a paid service, so staff can phone them to book. Shows phone + referring CTV.
@@ -143,8 +148,8 @@ export function NewClientsTab() {
               className="block mt-1 px-3 py-2 border rounded-lg"
             >
               <option value="all">{tc('all')}</option>
-              <option value="dental">Dental</option>
-              <option value="cosmetic">Cosmetic</option>
+              <option value="dental">{tc('lob.dental')}</option>
+              <option value="cosmetic">{tc('lob.cosmetic')}</option>
             </select>
           </label>
           <div className="text-sm text-gray-600">

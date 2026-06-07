@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[earnings-commissions]
+ * @crossref:used-in[NK3 commission and CTV admin surface: website/src/components/commission/EarningsPayoutsTabs]
+ * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CalendarDays } from 'lucide-react';
@@ -111,8 +116,8 @@ function EarningsTab() {
           <label className="text-sm text-gray-600">{t('earnings.lob')}
             <select value={lob} onChange={(e) => setLob(e.target.value as any)} className="block mt-1 px-3 py-2 border rounded-lg">
               <option value="all">{tc('all')}</option>
-              <option value="dental">Dental</option>
-              <option value="cosmetic">Cosmetic</option>
+              <option value="dental">{tc('lob.dental')}</option>
+              <option value="cosmetic">{tc('lob.cosmetic')}</option>
             </select>
           </label>
           <div className="text-sm text-gray-600">
@@ -353,7 +358,7 @@ function PayoutsTab() {
         <div className="flex flex-wrap gap-3 items-end justify-between">
           <label className="text-sm text-gray-600">{t('payouts.lob')}
             <select value={lob} onChange={(e) => setLob(e.target.value as any)} className="block mt-1 px-3 py-2 border rounded-lg">
-              <option value="cosmetic">Cosmetic</option><option value="dental">Dental</option>
+              <option value="cosmetic">{tc('lob.cosmetic')}</option><option value="dental">{tc('lob.dental')}</option>
             </select>
           </label>
           <div className="flex items-center gap-2">
