@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[auth]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/auth]
+ * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');

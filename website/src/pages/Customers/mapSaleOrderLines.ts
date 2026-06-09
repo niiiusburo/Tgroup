@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/mapSaleOrderLines]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { formatInTimezone } from "@/lib/dateUtils";
 import type { ApiSaleOrderLine } from "@/lib/api/saleOrders";
 import type { CustomerService } from "@/types/customer";

@@ -28,14 +28,14 @@ export function useCtvLocale() {
       return new Intl.DateTimeFormat(dateLocale, { month: 'short', day: 'numeric', year: 'numeric' }).format(d);
     },
     formatCurrency: (amount: number | null | undefined) => formatVND(amount),
-    getLobLabel: (lob: 'dental' | 'cosmetic') => t(`lobs.${lob}`, { defaultValue: lob }),
+    getLobLabel: (lob: 'dental' | 'cosmetic') => t(`lobs.${lob}`),
     getServiceStatusLabel: (status: string) => {
       if (status === 'paid') return t('serviceStatus.paid');
       if (status === 'reversed') return t('serviceStatus.reversed');
       return t('serviceStatus.pending');
     },
     getStepLabel: (step: 'referred' | 'visited' | 'serviced' | 'paid') => t(`steps.${step}`),
-    unknownService: () => t('unknownService', { defaultValue: 'Service' }),
-    unknownClient: () => t('unknownClient', { defaultValue: 'Client' }),
+    unknownService: () => t('unknownService'),
+    unknownClient: () => t('unknownClient'),
   };
 }

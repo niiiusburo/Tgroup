@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/useCustomerPaymentActions]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useCallback } from 'react';
 import type { PaymentFormData } from '@/components/payment/PaymentForm';
 import type { UseCustomerPaymentsResult } from '@/hooks/useCustomerPayments';

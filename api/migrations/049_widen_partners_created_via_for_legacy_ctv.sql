@@ -1,3 +1,6 @@
+-- @crossref:domain[ctv]
+-- @crossref:used-in[NK3 schema migration: api/migrations/049_widen_partners_created_via_for_legacy_ctv]
+-- @crossref:uses[product-map/domains/ctv.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Cosmetic LOB v2 / legacy CTV import
 -- Widen partners.created_via so import markers such as
 -- legacy_ctv_import_20260528 can be stored without truncation.

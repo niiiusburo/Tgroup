@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/CTV/tabs/CtvCommissionTab]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 

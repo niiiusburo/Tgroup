@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[earnings-commissions]
+ * @crossref:used-in[NK3 frontend API client: website/src/lib/api/commission]
+ * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * commission.ts — API client for commission configuration (admin)
  * Calls /api/CommissionConfig
  */

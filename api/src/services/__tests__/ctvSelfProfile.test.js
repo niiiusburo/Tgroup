@@ -39,6 +39,7 @@ describe('ctvSelfProfile service', () => {
       email: 'ctv@example.com',
       phone: '0909000000',
       role: 'CTV',
+      isLive: false,
     });
     expect(dentalDb.queryRows).toHaveBeenCalledWith(expect.stringContaining('UPDATE dbo.partners'), ['CTV New Name', 'ctv-1']);
     expect(cosmeticDb.queryRows).toHaveBeenCalledWith(expect.stringContaining('UPDATE dbo.partners'), ['CTV New Name', 'ctv-1']);

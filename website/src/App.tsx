@@ -1,5 +1,10 @@
+/**
+ * @crossref:domain[settings-system]
+ * @crossref:used-in[NK3 route graph root: website/src/App]
+ * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '@/components/Layout';
 import { LocationProvider } from '@/contexts/LocationContext';
@@ -39,6 +44,8 @@ const ServiceCatalog = lazy(() => import('@/pages/ServiceCatalog').then(m => ({ 
 const CtvDashboard = lazy(() => import('@/pages/CTV/CtvDashboard'));
 const Landing = lazy(() => import('@/pages/Landing').then(m => ({ default: m.Landing })));
 const JoinCtv = lazy(() => import('@/pages/CTV/JoinCtv').then(m => ({ default: m.JoinCtv })));
+const VerifyDiscount = lazy(() => import('@/pages/VerifyDiscount'));
+const CtvDiscountLanding = lazy(() => import('@/pages/CtvDiscountLanding'));
 
 /**
  * Access Denied page — shown when authenticated but lacking permission
@@ -132,15 +139,40 @@ function CTVRouteGuard({ children }: { children: React.ReactNode }) {
  * LoginRoute — redirects authenticated users away from /login
  */
 function LoginRoute() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const returnTo =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('returnTo')
+      : null;
+  const safeReturn =
+    returnTo && returnTo.startsWith('/') && !returnTo.startsWith('//') ? returnTo : '/';
+  const isCtv = user?.is_ctv === true || user?.isCtv === true;
+
   if (isLoading) return <AuthLoading />;
-  if (isAuthenticated) return <Navigate to="/" replace />;
+  if (isAuthenticated) {
+    if (isCtv) return <Navigate to="/ctv" replace />;
+    return <Navigate to={safeReturn} replace />;
+  }
   return <Login />;
 }
 
 function AppRoutes({ children }: { readonly children: React.ReactNode }) {
   const { currentLOB } = useBusinessUnit();
   return <Routes key={currentLOB}>{children}</Routes>;
+}
+
+/** Avoid admin Layout splat redirect stealing public CTV / verify routes. */
+function AdminCatchAllRedirect() {
+  const { pathname } = useLocation();
+  if (
+    pathname.startsWith('/ctv/') ||
+    pathname === '/verify-discount' ||
+    pathname === '/welcome' ||
+    pathname === '/login'
+  ) {
+    return null;
+  }
+  return <Navigate to="/" replace />;
 }
 
 /**
@@ -171,11 +203,25 @@ function App() {
             <Suspense fallback={<div className="flex items-center justify-center h-screen text-gray-500">Loading...</div>}>
               <AppRoutes>
                 {/* Public routes */}
+                {/* @crossref:route[path="/login", component=LoginRoute] */}
                 <Route path="/login" element={<LoginRoute />} />
                 {/* @crossref:route[path="/welcome", component=Landing] — public Tâm Group landing (ported from CTV app) */}
                 <Route path="/welcome" element={<Landing />} />
-                {/* Public CTV self-signup via referral link (/ctv/join?ref=CTV-XXXXXX) */}
-                <Route path="/ctv/join" element={<JoinCtv />} />
+                {/* @crossref:route[path="/verify-discount"] — staff scans CTV voucher QR */}
+                <Route path="/verify-discount" element={<VerifyDiscount />} />
+                {/* @crossref:route[path="/ctv/*"] — CTV portal + public join + fan discount landing */}
+                <Route path="/ctv" element={<Outlet />}>
+                  <Route path="join" element={<JoinCtv />} />
+                  <Route path="discount/:shortCode" element={<CtvDiscountLanding />} />
+                  <Route
+                    index
+                    element={
+                      <CTVRouteGuard>
+                        <CtvDashboard />
+                      </CTVRouteGuard>
+                    }
+                  />
+                </Route>
                 {import.meta.env.DEV && (
                   <Route path="/test/address" element={<AddressAutocompleteTest />} />
                 )}
@@ -304,6 +350,7 @@ function App() {
               }
             />
 
+            {/* @crossref:route[path="/reports", component=ReportsShell] */}
             {/* Reports section with nested sub-pages */}
             <Route
               path={ROUTES.REPORTS}
@@ -314,13 +361,21 @@ function App() {
               }
             >
               <Route index element={<Navigate to={ROUTES.REPORTS_DASHBOARD} replace />} />
+              {/* @crossref:route[path="/reports/dashboard", component=ReportsDashboard] */}
               <Route path="dashboard" element={<ProtectedRoute path="/reports/dashboard"><ReportsDashboard /></ProtectedRoute>} />
+              {/* @crossref:route[path="/reports/revenue", component=ReportsRevenue] */}
               <Route path="revenue" element={<ProtectedRoute path="/reports/revenue"><ReportsRevenue /></ProtectedRoute>} />
+              {/* @crossref:route[path="/reports/appointments", component=ReportsAppointments] */}
               <Route path="appointments" element={<ProtectedRoute path="/reports/appointments"><ReportsAppointments /></ProtectedRoute>} />
+              {/* @crossref:route[path="/reports/doctors", component=ReportsDoctors] */}
               <Route path="doctors" element={<ProtectedRoute path="/reports/doctors"><ReportsDoctors /></ProtectedRoute>} />
+              {/* @crossref:route[path="/reports/customers", component=ReportsCustomers] */}
               <Route path="customers" element={<ProtectedRoute path="/reports/customers"><ReportsCustomers /></ProtectedRoute>} />
+              {/* @crossref:route[path="/reports/locations", component=ReportsLocations] */}
               <Route path="locations" element={<ProtectedRoute path="/reports/locations"><ReportsLocations /></ProtectedRoute>} />
+              {/* @crossref:route[path="/reports/services", component=ReportsServices] */}
               <Route path="services" element={<ProtectedRoute path="/reports/services"><ReportsServices /></ProtectedRoute>} />
+              {/* @crossref:route[path="/reports/employees", component=ReportsEmployees] */}
               <Route path="employees" element={<ProtectedRoute path="/reports/employees"><ReportsEmployees /></ProtectedRoute>} />
               <Route path="*" element={<Navigate to={ROUTES.REPORTS_DASHBOARD} replace />} />
             </Route>
@@ -365,19 +420,9 @@ function App() {
               }
             />
 
-            {/* @crossref:catch-all-route[redirects to Overview] */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* @crossref:catch-all-route[redirects to Overview; skips public CTV + verify paths] */}
+            <Route path="*" element={<AdminCatchAllRedirect />} />
           </Route>
-
-          {/* CTV Portal — bypasses admin Layout */}
-          <Route
-            path="/ctv"
-            element={
-              <CTVRouteGuard>
-                <CtvDashboard />
-              </CTVRouteGuard>
-            }
-          />
               </AppRoutes>
             </Suspense>
           </BusinessUnitProvider>

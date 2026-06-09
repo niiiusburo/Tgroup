@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[employees-hr]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/employees/locationScopes]
+ * @crossref:uses[product-map/domains/employees-hr.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const { query } = require('../../db');
 
 async function attachLocationScopes(items) {

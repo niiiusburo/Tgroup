@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[services-catalog]
+ * @crossref:used-in[NK3 frontend API client: website/src/lib/api/products]
+ * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { apiFetch, type PaginatedResponse } from './core';
 
 // ─── Products (Services Catalog) ──────────────────────────────────

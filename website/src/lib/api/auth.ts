@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[auth]
+ * @crossref:used-in[NK3 frontend API client: website/src/lib/api/auth]
+ * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { apiFetch } from './core';
 
 // ─── Auth ─────────────────────────────────────────────────────────

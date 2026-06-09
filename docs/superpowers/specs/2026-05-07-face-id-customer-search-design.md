@@ -465,3 +465,33 @@ Performance:
 - Camera automation may not be reliable in TestSprite/Playwright; mocked API browser tests may be required.
 - Model files should not be committed accidentally if they are downloaded locally.
 - Existing dirty worktree should be cleaned or isolated before implementation begins.
+
+## Addendum 2026-06-07 — Passive Liveness / Anti-Spoofing
+
+The original V1 had no liveness check, so a printed or on-screen photo matched and
+enrolled identically to a real person. This addendum adds passive anti-spoofing on
+the **local** provider.
+
+- **Model:** Silent-Face MiniFASNet (two variants, scales 2.7 and 4.0), run via OpenCV
+  `cv2.dnn` — no new Python dependency. Source-verified preprocessing: per-model square
+  crop centered on the face box, BGR `float32` in `[0,255]` NCHW (no `/255`), summed
+  softmax over both models, `label==1` is real; the calibratable score is the averaged
+  REAL-class probability. ONNX exports from `QingHeYang/Silent-Face-Anti-Spoofing-onnx`.
+- **Where:** `face-service/liveness.py`; gate wired into `POST /embed` in
+  `face-service/main.py`. Models baked into the image as a best-effort build download.
+- **Config:** `FACE_LIVENESS_ENABLED` (default **false**), `FACE_LIVENESS_THRESHOLD`
+  (default `0.5`).
+- **Fail-open invariant:** missing/unloadable models or inference errors never block a
+  capture — consistent with "engine failures must not block normal customer workflows".
+- **Contract:** `/embed` returns a `liveness` object; `/api/face/recognize` and
+  `/api/face/register` return `SPOOF_DETECTED` (HTTP 422) when enabled and a spoof is
+  detected. Frontend shows the localized `customers:faceRecognition.spoofDetected`.
+- **Calibration (required before enabling in production):** capture a small set of real
+  live faces plus print/screen spoofs from the actual clinic camera, sweep
+  `FACE_LIVENESS_THRESHOLD`, and pick the value that rejects spoofs without rejecting real
+  customers. Only then set `FACE_LIVENESS_ENABLED=true`. This satisfies the original
+  "threshold must be calibrated before production release" risk.
+- **Non-Goals unchanged:** this is identification anti-spoofing for staff-assisted search
+  and enrollment, not payment authorization or legal identity verification.
+- **Tests:** `face-service/tests/test_liveness.py` (crop geometry, softmax aggregation,
+  threshold, fail-open, and cv2-backed live/spoof verdicts).

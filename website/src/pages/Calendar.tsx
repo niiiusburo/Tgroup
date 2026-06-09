@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[appointments-calendar]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Calendar]
+ * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useState, useCallback, useMemo, useEffect } from 'react';

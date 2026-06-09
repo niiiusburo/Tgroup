@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[employees-hr]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/employees]
+ * @crossref:uses[product-map/domains/employees-hr.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const express = require('express');
 const { query: legacyQuery, getQuery } = require('../db');
 const { requirePermission } = require('../middleware/auth');

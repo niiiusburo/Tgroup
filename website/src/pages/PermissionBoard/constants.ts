@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[auth]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/PermissionBoard/constants]
+ * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import type { EmployeePermission } from '@/lib/api';
 
 export const MODULES = [

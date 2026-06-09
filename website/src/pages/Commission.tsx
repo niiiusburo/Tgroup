@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[earnings-commissions]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Commission]
+ * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * Commission Page — Admin commission configuration and CTV management
  * @crossref:route[/commission]
  * @crossref:used-in[App, Employees, Reports]
@@ -13,6 +18,7 @@ import { fetchCommissionConfig, saveCommissionConfig, type CommissionConfig, typ
 import { ApiError } from '@/lib/api/core';
 import { EarningsTab, PayoutsTab } from '@/components/commission/EarningsPayoutsTabs';
 import { CtvManagementTab } from '@/components/commission/CtvManagementTab';
+import { DiscountCodesAdminTab } from '@/components/commission/DiscountCodesAdminTab';
 import { NewClientsTab } from '@/components/commission/NewClientsTab';
 import { CommissionFlowTabs, type CommissionTabType } from '@/components/commission/CommissionFlowTabs';
 import { isCommissionTab } from '@/components/commission/CommissionNavigation';
@@ -41,9 +47,9 @@ export function Commission() {
 
       <CommissionFlowTabs activeTab={activeTab} onChange={setActiveTab} />
 
-      {/* Tab content */}
       {activeTab === 'config' && <ConfigTab />}
       {activeTab === 'ctvs' && <CtvManagementTab />}
+      {activeTab === 'discountCodes' && <DiscountCodesAdminTab />}
       {activeTab === 'newClients' && <NewClientsTab />}
       {activeTab === 'earnings' && <EarningsTab />}
       {activeTab === 'payouts' && <PayoutsTab />}

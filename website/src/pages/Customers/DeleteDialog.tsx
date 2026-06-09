@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/DeleteDialog]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useTranslation } from 'react-i18next';
 
 interface DeleteDialogProps {

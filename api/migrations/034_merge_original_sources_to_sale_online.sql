@@ -1,3 +1,6 @@
+-- @crossref:domain[settings-system]
+-- @crossref:used-in[NK3 schema migration: api/migrations/034_merge_original_sources_to_sale_online]
+-- @crossref:uses[product-map/domains/settings-system.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration: Merge original pre-031 customer source names into Sale Online
 -- For databases where 031_update_customer_sources.sql was never applied.
 -- Replaces: Google, Khác, Bảo hiểm, Facebook, Giới thiệu, Đi ngang qua, Website

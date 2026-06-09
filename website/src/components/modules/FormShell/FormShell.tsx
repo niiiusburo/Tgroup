@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[settings-system]
+ * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/FormShell/FormShell]
+ * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * FormShell — Unified modal shell for all TG Clinic form modals.
  *
  * This component provides the canonical TG Clinic modal wrapper:

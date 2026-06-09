@@ -1,5 +1,12 @@
 'use strict';
 
+/**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 backend service function: api/src/services/ctvNetwork]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:function[buildCtvNetwork, buildCtvHierarchy, getCtvHierarchy]
+ * @crossref:uses[api/src/routes/ctv.js, website/src/pages/CTV/tabs/CtvNetworkTab.tsx, product-map/domains/earnings-commissions.yaml]
+ */
 // Fallback override shares (%) an upline earns from a downline member that many levels
 // below them — used only when dbo.commission_level_config is unavailable. Mirrors the
 // migration-049 seed (L1 14.5 / L2 7.3 / L3 3.6 / L4 1.8). Level 0 (self) is excluded

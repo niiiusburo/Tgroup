@@ -75,7 +75,7 @@ describe('CtvReferModal', () => {
 
     fireEvent.change(nameInput, { target: { value: 'thuan test' } });
     fireEvent.change(phoneInput, { target: { value: '0123123123' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Cosmetic' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Thẩm mỹ' }));
     fireEvent.click(screen.getByRole('button', { name: /giới thiệu khách/i }));
 
     await waitFor(() => expect(mockedCreateBooking).toHaveBeenCalledTimes(1));
@@ -102,7 +102,7 @@ describe('CtvReferModal', () => {
     const { container } = renderReferModal();
     const [phoneInput, nameInput] = Array.from(container.querySelectorAll('input')) as HTMLInputElement[];
 
-    fireEvent.click(screen.getByRole('button', { name: 'Cosmetic' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Thẩm mỹ' }));
     fireEvent.change(phoneInput, { target: { value: '0123123123' } });
 
     await waitFor(() => expect(mockedLookupClientByPhone).toHaveBeenCalledWith('0123123123', 'cosmetic'));
@@ -122,7 +122,7 @@ describe('CtvReferModal', () => {
     const { container } = renderReferModal();
     const [phoneInput, nameInput] = Array.from(container.querySelectorAll('input')) as HTMLInputElement[];
 
-    fireEvent.click(screen.getByRole('button', { name: 'Cosmetic' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Thẩm mỹ' }));
     fireEvent.change(phoneInput, { target: { value: '0999888777' } });
 
     await waitFor(() => expect(mockedLookupClientByPhone).toHaveBeenCalledWith('0999888777', 'cosmetic'));
@@ -161,7 +161,7 @@ describe('CtvReferModal', () => {
     fireEvent.change(phoneInput, { target: { value: '0123123123' } });
     fireEvent.change(nameInput, { target: { value: 'Public Client' } });
     fireEvent.change(ctvPhoneInput, { target: { value: '0909000000' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Cosmetic' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Thẩm mỹ' }));
 
     await waitFor(() => expect(mockedLookupPublicCtvByPhone).toHaveBeenCalledWith('0909000000'));
     expect(await screen.findByText(/CTV hợp lệ: Parent CTV/i)).toBeInTheDocument();

@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[reports-analytics]
+ * @crossref:used-in[NK3 backend service function: api/src/services/exports/builders/servicesExport]
+ * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const { query } = require('../../../db');
 const { createWorkbook, populateDataSheet, populateSummarySheet, toVNDate } = require('../exportWorkbook');
 

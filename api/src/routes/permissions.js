@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[auth]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/permissions]
+ * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const express = require('express');
 const { getQuery } = require('../db');
 const { requirePermission } = require('../middleware/auth');

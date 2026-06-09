@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 backend service function: api/src/services/referralCard]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const crypto = require('crypto');
 const { getDb: defaultGetDb } = require('../db');
 const { getVietnamYear } = require('../lib/dateUtils');

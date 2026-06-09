@@ -1,3 +1,6 @@
+-- @crossref:domain[payments-deposits]
+-- @crossref:used-in[NK3 schema migration: api/migrations/003_payment_allocations]
+-- @crossref:uses[product-map/domains/payments-deposits.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Payment allocation ledger: one payment can be split across multiple invoices
 CREATE TABLE IF NOT EXISTS payment_allocations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

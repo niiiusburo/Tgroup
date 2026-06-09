@@ -1,3 +1,6 @@
+-- @crossref:domain[payments-deposits]
+-- @crossref:used-in[NK3 schema migration: api/migrations/014_payment_per_record]
+-- @crossref:uses[product-map/domains/payments-deposits.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration: Make payments strictly per-record (single saleorder or dotkham)
 -- Step 1: Add record linkage columns to payments
 ALTER TABLE payments

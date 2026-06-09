@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import i18n from '@/i18n';
 import { CtvCreationForm, type CtvCreationFormProps } from './CtvCreationForm';
 import type { UseCtvCreationFormResult, CtvCreationFormValues, CtvCreationErrors } from './types';
 
@@ -44,7 +45,8 @@ function renderForm(props: Partial<CtvCreationFormProps> = {}) {
 }
 
 describe('CtvCreationForm (presentational, uses hookResult only)', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('vi');
     vi.clearAllMocks();
   });
 
@@ -102,8 +104,8 @@ describe('CtvCreationForm (presentational, uses hookResult only)', () => {
     });
     renderForm({ hookResult: hook });
 
-    const dentalCb = screen.getByRole('checkbox', { name: 'dental' });
-    const cosmeticCb = screen.getByRole('checkbox', { name: 'cosmetic' });
+    const dentalCb = screen.getByRole('checkbox', { name: 'Nha khoa' });
+    const cosmeticCb = screen.getByRole('checkbox', { name: 'Thẩm mỹ' });
 
     expect(dentalCb).toBeDisabled();
     expect(cosmeticCb).not.toBeDisabled();

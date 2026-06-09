@@ -1,3 +1,6 @@
+-- @crossref:domain[payments-deposits]
+-- @crossref:used-in[NK3 schema migration: api/migrations/006_dotkham_payment_allocations]
+-- @crossref:uses[product-map/domains/payments-deposits.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 SET search_path = dbo, public;
 
 -- Remove any partially-created column first

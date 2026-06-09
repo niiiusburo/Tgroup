@@ -1,3 +1,6 @@
+-- @crossref:domain[business-unit]
+-- @crossref:used-in[NK3 schema migration: api/migrations/006_fix_location_scope_column]
+-- @crossref:uses[product-map/domains/business-unit.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Fix employee_location_scope column name for environments created with the old schema
 DO $$
 BEGIN

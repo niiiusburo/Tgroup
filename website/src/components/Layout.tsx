@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[settings-system]
+ * @crossref:used-in[NK3 app shell and navigation root: website/src/components/Layout]
+ * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useState, useEffect, useRef } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { PermissionDebugger } from '@/components/debug/PermissionDebugger';

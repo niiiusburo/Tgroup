@@ -1,3 +1,6 @@
+-- @crossref:domain[settings-system]
+-- @crossref:used-in[NK3 schema migration: api/migrations/041_add_performance_indexes]
+-- @crossref:uses[product-map/domains/settings-system.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration 041: Add performance indexes for large tables (post-TDental migration)
 -- Tables have grown 10-100x after TDental data import:
 --   partners: 35K, appointments: 222K, payments: 62K, saleorders: 61K, saleorderlines: 63K

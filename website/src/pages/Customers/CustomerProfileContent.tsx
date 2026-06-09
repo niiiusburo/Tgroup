@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/CustomerProfileContent]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { CustomerProfile } from '@/components/customer';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
 import type { CustomerProfileProps, ProfileTab } from '@/components/customer/CustomerProfile';

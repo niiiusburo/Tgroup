@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 frontend API client: website/src/lib/api/ctvSelf]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { apiFetch } from './core';
 import { maskEmail, maskPhone } from '@/lib/pii';
 
@@ -7,6 +12,7 @@ export interface CtvProfile {
   readonly email: string;
   readonly phone: string;
   readonly role: string;
+  readonly isLive?: boolean;
 }
 
 export interface UpdateCtvSelfProfileInput {

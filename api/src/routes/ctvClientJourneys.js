@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/ctvClientJourneys]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const { getDb } = require('../db');
 const { safeQueryRows } = require('./ctvHelpers');
 

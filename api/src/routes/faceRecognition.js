@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[integrations]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/faceRecognition]
+ * @crossref:uses[product-map/domains/integrations.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const express = require('express');
 const multer = require('multer');
 const crypto = require('crypto');
@@ -98,7 +103,7 @@ router.post('/register', requirePermission('customers.edit'), upload.single('ima
       sampleCount = result.sampleCount;
       status = { lastRegisteredAt: result.faceRegisteredAt };
     } else {
-      const { embedding, model, quality } = await getEmbedding(req.file.buffer, req.file.mimetype);
+      const { embedding, model, quality, liveness } = await getEmbedding(req.file.buffer, req.file.mimetype);
       const imageSha256 = sha256Hex(req.file.buffer);
       const createdBy = req.user?.id || null;
 
@@ -108,6 +113,9 @@ router.post('/register', requirePermission('customers.edit'), upload.single('ima
       sampleId = result.sampleId;
       sampleCount = result.sampleCount;
       status = await getFaceStatus(partnerId);
+      if (liveness && liveness.available) {
+        console.log(`[FaceRegister] liveness live=${liveness.isLive} score=${liveness.score} partner=${partnerId}`);
+      }
     }
     const duration = Date.now() - start;
     console.log(`[FaceRegister] partner=${partnerId} sample=${sampleId} count=${sampleCount} duration=${duration}ms`);

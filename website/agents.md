@@ -77,6 +77,12 @@ The shared `components/shared/CtvCreationForm/` (CtvCreationForm + useCtvCreatio
 
 See root `AGENTS.md` §5.1 for the full permanent rule, the `README.md` co-located in `CtvCreationForm/`, and the three call sites for examples. This is non-negotiable for identity/creation surfaces.
 
+## Site-Wide Crossref Breadcrumbs
+
+Every NK3 page, workspace module, CTV/commission surface, and `website/src/lib/api/*` client must keep the file-level `@crossref:domain[...]`, `@crossref:used-in[...]`, and `@crossref:uses[...]` triad current. Route-level pages must also stay paired with `@crossref:route[...]` markers in `website/src/App.tsx`, enforced by `website/src/__tests__/crossrefBreadcrumbs.test.ts`.
+
+Run `npm run verify:crossrefs` after adding, moving, or renaming frontend pages/modules/API clients. See root `AGENTS.md` §5.2 and `docs/CROSSREF-BREADCRUMBS.md`.
+
 ---
 
 ## Component Architecture

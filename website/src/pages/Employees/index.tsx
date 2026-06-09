@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[employees-hr]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Employees/index]
+ * @crossref:uses[product-map/domains/employees-hr.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 import { useState } from 'react';
 import { UserCog, Search, X } from 'lucide-react';

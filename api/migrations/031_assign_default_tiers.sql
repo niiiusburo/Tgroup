@@ -1,3 +1,6 @@
+-- @crossref:domain[settings-system]
+-- @crossref:used-in[NK3 schema migration: api/migrations/031_assign_default_tiers]
+-- @crossref:uses[product-map/domains/settings-system.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration 031: Assign default tiers to employees with NULL tier_id
 -- Based on jobtitle and isdoctor flag from dbo.partners
 --

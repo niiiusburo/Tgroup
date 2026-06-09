@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[feedback-cms]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/websitePages]
+ * @crossref:uses[product-map/domains/feedback-cms.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * Website Pages API Routes
  * CMS page management with SEO support
  */

@@ -84,6 +84,24 @@ CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin ro
 | GET | `/api/ctv-public/refcode/:code` | Public | — | `{ ok, uplineId, uplineName }` for referral-link signup. Unknown/malformed codes return `404 U_INVALID_CODE`. |
 | POST | `/api/ctv-public/join` | Public | `{ code?, uplinePhone?, name, phone, email, password }` | 201 `{ ok, id, name, uplineName }`. Direct `/ctv/join` signup resolves an active non-deleted parent CTV by `uplinePhone`; referral links may use `code`. Missing parent input returns `400 U_UPLINE_REQUIRED`; unknown phone returns `404 U_INVALID_UPLINE`; duplicate identity and weak password guards still apply. |
 
+## CTV Discount QR (`/api/discount-codes`) — NK3 KOL parity
+
+Mounted at `/api/discount-codes`. Public fan endpoints bypass the global `/api` `requireAuth` gate via `isPublicApiPath` in `api/src/middleware/publicApiPaths.js`. Frontend public fetches use absolute `API_URL` from `website/src/lib/api/core.ts` (not Vite-relative `/api`). Fan share link: `/ctv/discount/:shortCode` where `shortCode` is `CTV-{first6 of partner UUID}`; voucher QR encodes staff `/verify-discount?code=…`.
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/api/discount-codes/landing/:shortCode` | Public | — | `{ success, ctv: { id, name, shortCode, isLive, discountValue, discountType, expiryDays } }`; 404 when CTV not found |
+| GET | `/api/discount-codes/check-existing` | Public | `?ctvId=` | `{ success, hasCode, code?, isExisting, discountValue, discountType, ctvName?, message? }` — reuses visitor session code when present |
+| POST | `/api/discount-codes/generate` | Public (fan `{ ctvId }`) or CTV portal (`forceNew: true`, JWT) | `{ ctvId?, visitorName?, visitorPhone?, forceNew? }` | `{ success, code, isExisting, discountValue, discountType, discountLabel?, expiresAt?, ctvName?, shortCode?, message? }` |
+| GET | `/api/discount-codes/mine` | CTV self | `?status=&startDate=&endDate=&page=&limit=` | `{ success, codes[], pagination }` — **Mã của tôi** history |
+| GET | `/api/discount-codes/stats` | CTV self | — | `{ success, stats: { totalCodes, usedCodes, claimedCodes, checkedInCodes, conversionRate } }` |
+| POST | `/api/discount-codes/ensure` | CTV self | — | `{ code, discountValue, discountType, status, expiresAt? }` — legacy single-code ensure |
+| GET | `/api/discount-codes/lookup` | Staff (non-CTV) | `?code=` | `{ found, valid?, code, status?, discountValue?, discountType?, discountLabel?, ctvName?, expiresAt?, message? }` |
+| GET | `/api/discount-codes/client-search` | Staff | `?phone=&lob=dental\|cosmetic&code=` | `{ exists, lob, clientId?, name?, phone?, claimed?, claimedByMe?, ownerName?, expiresAt?, hasService? }` — claim ownership vs code's `ctv_partner_id` |
+| POST | `/api/discount-codes/verify` | Staff | `{ code, customerPhone, customerLob, customerPartnerId?, customerName?, createIfMissing? }` | `{ valid, code, status?, discountLabel?, ctvName?, customerName?, customerLob?, message?, usedAt? }`; may reclaim `referred_by_ctv_id` then mark `status='used'` |
+
+Staff routes return `403 S_STAFF_REQUIRED` when the JWT belongs to a CTV user. Data store: `dbo.ctv_discount_codes` (dental DB only; migrations 062–063).
+
 ## Admin CTV & Commission config
 
 | Method | Path | Auth | Body / Query | Response |

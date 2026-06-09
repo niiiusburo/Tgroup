@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[reports-analytics]
+ * @crossref:used-in[NK3 frontend API client: website/src/lib/api/exports]
+ * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { apiFetch, API_URL } from './core';
 
 export interface ExportPreviewResponse {

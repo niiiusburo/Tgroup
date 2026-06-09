@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[settings-system]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Overview]
+ * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 import { useCallback, useState } from 'react';
 import { PatientCheckIn } from '@/components/modules/PatientCheckIn';

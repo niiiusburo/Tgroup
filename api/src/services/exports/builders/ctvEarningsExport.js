@@ -1,6 +1,11 @@
 'use strict';
 
 /**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 backend service function: api/src/services/exports/builders/ctvEarningsExport]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * ctvEarningsExport.js — Excel export for the "Thu nhập" (CTV earnings) tab.
  * Mirrors routes/earnings.js listForLob across both LOB DBs (no cross-DB SQL).
  */

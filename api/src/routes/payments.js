@@ -1,3 +1,10 @@
+/**
+ * @crossref:domain[payments-deposits]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/payments]
+ * @crossref:uses[product-map/domains/payments-deposits.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:endpoint[POST /api/Payments, POST /api/Payments/refund, DELETE /api/Payments/:id, POST /api/Payments/:id/void]
+ * @crossref:uses[api/src/services/commissionEngine.js, api/src/routes/payments/readHandlers.js, product-map/business-logic/payment-allocation.md]
+ */
 const express = require("express");
 const router = express.Router();
 const { query: legacyQuery, pool, getQuery } = require("../db");
@@ -153,6 +160,24 @@ router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema)
       }
     } catch (earningsErr) {
       console.error('[earnings hook] non-fatal error during payment create (tx continues):', earningsErr && earningsErr.message);
+    }
+
+    // === QR discount code auto-complete ===
+    // When a customer with a checked-in discount code makes a payment,
+    // mark the code as used and link it to this payment.
+    try {
+      await client.query(
+        `UPDATE dbo.ctv_discount_codes
+            SET status = 'used',
+                used_at = now(),
+                payment_id = $2
+          WHERE customer_partner_id = $1
+            AND status = 'checked_in'
+          RETURNING code`,
+        [customer_id, row.id]
+      );
+    } catch (qrErr) {
+      console.error('[qr-discount hook] non-fatal error during payment create:', qrErr && qrErr.message);
     }
 
     await client.query("COMMIT");

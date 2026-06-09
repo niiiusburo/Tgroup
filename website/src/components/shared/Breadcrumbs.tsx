@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[settings-system]
+ * @crossref:used-in[NK3 visual breadcrumb component: website/src/components/shared/Breadcrumbs]
+ * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 import { useTranslation } from 'react-i18next';

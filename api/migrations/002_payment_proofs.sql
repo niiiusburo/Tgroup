@@ -1,3 +1,6 @@
+-- @crossref:domain[payments-deposits]
+-- @crossref:used-in[NK3 schema migration: api/migrations/002_payment_proofs]
+-- @crossref:uses[product-map/domains/payments-deposits.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 CREATE TABLE IF NOT EXISTS payment_proofs (
   id SERIAL PRIMARY KEY,
   payment_id INTEGER,

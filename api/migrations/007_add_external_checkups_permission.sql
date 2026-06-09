@@ -1,3 +1,6 @@
+-- @crossref:domain[auth]
+-- @crossref:used-in[NK3 schema migration: api/migrations/007_add_external_checkups_permission]
+-- @crossref:uses[product-map/domains/auth.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration: Add external_checkups.view permission to all existing permission groups
 -- This ensures backward compatibility so existing roles can view health checkup images.
 -- Admins can later revoke this permission from specific groups via Settings → Roles.

@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/CustomerFormModal]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { AddCustomerForm } from '@/components/forms/AddCustomerForm';
 import type { CapturedFaceImages } from '@/components/shared/faceCaptureProfile';
 import type { CustomerFormData } from '@/data/mockCustomerForm';

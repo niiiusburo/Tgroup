@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[settings-system]
+ * @crossref:used-in[NK3 route and navigation constants: website/src/constants/index]
+ * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * TG Clinic Shared Constants
  * @crossref:used-in[ALL_COMPONENTS]
  * @crossref:used-in[ROUTES, PAGES, UI_COMPONENTS]

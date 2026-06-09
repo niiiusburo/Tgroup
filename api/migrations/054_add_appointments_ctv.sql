@@ -1,3 +1,6 @@
+-- @crossref:domain[ctv]
+-- @crossref:used-in[NK3 schema migration: api/migrations/054_add_appointments_ctv]
+-- @crossref:uses[product-map/domains/ctv.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- 054_add_appointments_ctv.sql
 -- Per-appointment CTV attribution (eligibility window v1).
 --

@@ -1,5 +1,12 @@
 'use strict';
 
+/**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 backend service function: api/src/services/legacyCtvPassword]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:function[canUseLegacyCtvPassword, verifyLegacyCtvPassword]
+ * @crossref:uses[api/src/routes/auth.js, api/src/services/loginIdentifier.js, product-map/domains/auth.yaml]
+ */
 const crypto = require('crypto');
 
 const LEGACY_CTV_IMPORT_PREFIX = 'legacy_ctv_import';

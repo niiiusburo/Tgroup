@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[settings-system]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/account]
+ * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 // DEPRECATED: Use /api/Auth/login instead. This endpoint did not verify passwords.
 const express = require('express');
 

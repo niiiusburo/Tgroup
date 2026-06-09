@@ -1,3 +1,6 @@
+-- @crossref:domain[services-catalog]
+-- @crossref:used-in[NK3 schema migration: api/migrations/032_add_sourceid_to_saleorders]
+-- @crossref:uses[product-map/domains/services-catalog.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration: Add sourceid to saleorders and stop using it on partners
 BEGIN;
 

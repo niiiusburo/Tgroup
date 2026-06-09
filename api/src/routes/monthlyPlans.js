@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[payments-deposits]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/monthlyPlans]
+ * @crossref:uses[product-map/domains/payments-deposits.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * Monthly Plans API Routes
  * Handles monthly payment plan CRUD and installment management
  */

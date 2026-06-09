@@ -113,9 +113,9 @@
 **Enforced by:** `website/src/App.tsx` route guards and `website/src/__tests__/ProtectedRoute.ctv.test.tsx`.
 **Cite when:** Editing CTV auth payloads, `/ctv` route guards, login redirects, or admin route protection.
 
-### INV-008C — Legacy CTV Password Fallback Is Import-Marker Gated
-**Rule:** Legacy phone/ref-code login and salted SHA-256 password verification may only run for partner rows where `is_ctv === true` and `created_via` starts with `legacy_ctv_import`. A successful legacy-password login must immediately replace the stored hash with bcrypt. Staff, admin, customer, and non-imported CTV accounts remain email-login/bcrypt-only.
-**Rationale:** Imported CTVs need continuity from the legacy portal, but widening legacy hash support to normal accounts would weaken the authentication boundary.
+### INV-008C — CTV Login: Phone Lookup For All CTVs; Legacy Password Fallback Import-Marker Gated
+**Rule:** The `/api/Auth/login` partner *lookup* resolves by email for any staff/admin/customer, and additionally by phone/ref-code for any active `is_ctv = true` partner (so CTVs created via admin "Add CTV" or public self-signup — phone + bcrypt password, **email optional** — can authenticate). The salted SHA-256 *legacy password* fallback, however, may run ONLY for rows where `is_ctv === true` and `created_via` starts with `legacy_ctv_import`, and a successful legacy-password login must immediately replace the stored hash with bcrypt. Every account — CTV included — still requires its correct bcrypt password; non-CTV accounts remain email-login-only.
+**Rationale:** CTVs are created with phone + password and an *optional* email (AGENTS.md §5.1), so gating the phone/ref *lookup* to `legacy_ctv_import` made every admin/public-created CTV unable to log in (401), blocking the entire `/ctv` portal. Widening only the lookup keeps the auth boundary intact: bcrypt is still required for all (`bcrypt.compare` runs first for everyone), and legacy SHA-256 hash support stays restricted to imported rows via `canUseLegacyCtvPassword`.
 **Enforced by:** `api/src/services/loginIdentifier.js`, `api/src/services/legacyCtvPassword.js`, and the `/api/Auth/login` lookup/password verification flow.
 **Cite when:** Editing auth login, CTV imports, password hash storage, or partner migration scripts.
 
@@ -261,6 +261,7 @@
 |---|---|---|---|
 | 2026-06-06 | INV-008F, INV-008G | Added dental-route LOB gate + CTV-perms-tier_id-independent invariants | 4e616a3a |
 | 2026-06-06 | INV-008E | Added fixed Cosmetic route-prefix boundary invariant | pending |
+| 2026-06-07 | INV-008C | Amended: phone/ref login lookup widened to all active is_ctv CTVs (admin/public-created can log in); legacy SHA-256 password fallback stays import-marker gated; bcrypt required for all | pending |
 | 2026-06-05 | INV-003C | Added CTV service-card-created commission trigger invariant | pending |
 | 2026-06-01 | INV-023 | Added customer balance deleted-receivable invariant | pending |
 | 2026-06-01 | INV-022 | Added appointment-only invariant for CTV booking flow | pending |

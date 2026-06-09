@@ -1,3 +1,6 @@
+-- @crossref:domain[earnings-commissions]
+-- @crossref:used-in[NK3 schema migration: api/migrations/051_add_payout_receipt]
+-- @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration 051: Add receipt columns to dbo.payouts
 -- Applies to both dental and cosmetic DBs.
 -- Guarded by to_regclass check for demo DBs without schema_migrations tracking.

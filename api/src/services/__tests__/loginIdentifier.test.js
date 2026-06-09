@@ -21,7 +21,7 @@ describe('loginIdentifier', () => {
     expect(queryFn).not.toHaveBeenCalled();
   });
 
-  it('looks up email plus imported legacy CTV phone/ref code only', async () => {
+  it('looks up email plus ANY active CTV phone/ref code (not just legacy imports)', async () => {
     const queryFn = jest.fn().mockResolvedValue([{ id: 'ctv-1' }]);
 
     const rows = await findLoginPartner(queryFn, ' 098 946 0997 ');
@@ -32,7 +32,7 @@ describe('loginIdentifier', () => {
     expect(params).toEqual(['098 946 0997', '0989460997']);
     expect(sql).toContain('LOWER(p.email) = LOWER($1)');
     expect(sql).toContain('p.is_ctv = true');
-    expect(sql).toContain("COALESCE(p.created_via, '') LIKE 'legacy_ctv_import%'");
+    expect(sql).not.toContain('legacy_ctv_import');
     expect(sql).toContain("regexp_replace(COALESCE(p.phone, ''), '\\D', '', 'g')");
     expect(sql).toContain("LOWER(COALESCE(p.ref, '')) = LOWER($1)");
   });

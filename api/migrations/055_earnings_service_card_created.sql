@@ -1,3 +1,6 @@
+-- @crossref:domain[earnings-commissions]
+-- @crossref:used-in[NK3 schema migration: api/migrations/055_earnings_service_card_created]
+-- @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- 055_earnings_service_card_created.sql
 -- Wave 2 of docs/business-logic/ctv-referral-commission.md (INV-003C).
 --

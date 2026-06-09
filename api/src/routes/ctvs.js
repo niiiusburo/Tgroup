@@ -1,6 +1,11 @@
 'use strict';
 
 /**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/ctvs]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * ctvs.js — Admin CTV management (list + suspend/reactivate).
  * Mounted at /api/Ctvs (admin-scoped). Read-only listing + active-flag toggle.
  * Distinct from /api/ctv (the CTV-facing self portal).
@@ -54,7 +59,7 @@ router.get('/', requireAuth, async (req, res) => {
 
   try {
     const sql = `
-      SELECT p.id, p.name, p.phone, p.email, p.lob_scope, p.active,
+      SELECT p.id, p.name, p.phone, p.email, p.lob_scope, p.active, p.is_live,
              p.referred_by_ctv_id, p.ref AS legacy_code, p.created_via,
              CASE
                WHEN p.created_via LIKE 'legacy_ctv_import%' THEN 'legacy_ctv'
@@ -272,11 +277,11 @@ router.put('/:id', requireAuth, async (req, res) => {
   const phone = typeof body.phone === 'string' ? body.phone.trim() : undefined;
   const email = typeof body.email === 'string' ? body.email.trim() : undefined;
   const password = typeof body.password === 'string' ? body.password : undefined;
+  const is_live = typeof body.is_live === 'boolean' ? body.is_live : undefined;
   // lob_scope for admin edit of CTV participation in LOBs (cosmetic earnings etc.)
   const lob_scope = Array.isArray(body.lob_scope)
     ? Array.from(new Set(['dental', ...body.lob_scope.filter((l) => typeof l === 'string' && ['dental', 'cosmetic'].includes(l))]))
     : undefined;
-
   // Provided fields must be non-empty. Crucially, email/phone are login identifiers:
   // a non-legacy CTV can ONLY log in by email, so blanking it would lock them out
   // permanently. To leave a field unchanged, OMIT it — never send an empty string.
@@ -296,7 +301,7 @@ router.put('/:id', requireAuth, async (req, res) => {
     return res.status(400).json({ error: { code: 'U_WEAK_PASSWORD', message: 'Password must be at least 6 characters' } });
   }
 
-  const hasUpdate = name !== undefined || phone !== undefined || email !== undefined || !!password || lob_scope !== undefined;
+  const hasUpdate = name !== undefined || phone !== undefined || email !== undefined || !!password || lob_scope !== undefined || is_live !== undefined;
   if (!hasUpdate) {
     return res.status(400).json({ error: { code: 'VALIDATION', message: 'No fields to update' } });
   }
@@ -352,13 +357,14 @@ router.put('/:id', requireAuth, async (req, res) => {
       addSet('password_hash', await bcrypt.hash(password, 10));
     }
     if (lob_scope !== undefined) addSet('lob_scope', lob_scope);
+    if (is_live !== undefined) addSet('is_live', is_live);
     sets.push('lastupdated = now()');
     params.push(id);
 
     const updateSql = `
       UPDATE dbo.partners SET ${sets.join(', ')}
       WHERE id = $${params.length} AND is_ctv = true
-      RETURNING id, name, phone, email, lob_scope, active, referred_by_ctv_id, created_via
+      RETURNING id, name, phone, email, lob_scope, active, is_live, referred_by_ctv_id, created_via
     `;
 
     const dRows = await dentalDb.queryRows(updateSql, params);

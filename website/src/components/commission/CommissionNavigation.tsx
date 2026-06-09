@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[earnings-commissions]
+ * @crossref:used-in[NK3 commission and CTV admin surface: website/src/components/commission/CommissionNavigation]
+ * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { Link } from 'react-router-dom';
 import { ArrowLeft, BadgeDollarSign, ChevronRight, ExternalLink, Stethoscope, UserRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +12,7 @@ import type { CommissionTabType } from './CommissionFlowTabs';
 
 export type CommissionLob = 'dental' | 'cosmetic' | 'all';
 
-export const COMMISSION_TABS: readonly CommissionTabType[] = ['config', 'ctvs', 'newClients', 'earnings', 'payouts'];
+export const COMMISSION_TABS: readonly CommissionTabType[] = ['config', 'ctvs', 'discountCodes', 'newClients', 'earnings', 'payouts'];
 
 export function isCommissionTab(value: string | null | undefined): value is CommissionTabType {
   return Boolean(value && COMMISSION_TABS.includes(value as CommissionTabType));

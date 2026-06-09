@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/partners/readHandlers]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const { query: legacyQuery, getQuery } = require('../../db');
 const { applyPartnerListFilters } = require('./listFilters');
 const { applyPartnerSearchFilter } = require('./searchFilters');

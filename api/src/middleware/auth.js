@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[auth]
+ * @crossref:used-in[NK3 API middleware: api/src/middleware/auth]
+ * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const jwt = require('jsonwebtoken');
 const { resolveEffectivePermissions } = require('../services/permissionService');
 

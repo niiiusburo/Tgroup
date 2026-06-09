@@ -1,3 +1,6 @@
+-- @crossref:domain[earnings-commissions]
+-- @crossref:used-in[NK3 schema migration: api/migrations/049_add_commission_level_config]
+-- @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- 049_add_commission_level_config.sql
 -- MLM Commission Level Configuration
 -- Date: 2026-05-22

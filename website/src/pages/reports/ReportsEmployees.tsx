@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[reports-analytics]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/reports/ReportsEmployees]
+ * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useOutletContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { UserCog, Stethoscope, Users, Building2 } from 'lucide-react';

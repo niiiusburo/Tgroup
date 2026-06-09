@@ -1,3 +1,6 @@
+-- @crossref:domain[services-catalog]
+-- @crossref:used-in[NK3 schema migration: api/migrations/016_saleorder_status_audit]
+-- @crossref:uses[product-map/domains/services-catalog.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration: Add sale order status audit logging and state constraint
 -- ============================================================================
 

@@ -1,3 +1,10 @@
+/**
+ * @crossref:domain[services-catalog]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/saleOrders/updateSaleOrder]
+ * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:function[updateSaleOrder -> service-card CTV reassignment/reversal guard]
+ * @crossref:uses[api/src/services/customerReferrer.js, api/src/services/commissionEngine.js, product-map/domains/earnings-commissions.yaml]
+ */
 const crypto = require('crypto');
 const { query: legacyQuery, getQuery } = require('../../db');
 const { calculateSaleOrderPaymentStateFromAllocations } = require('../../lib/saleOrderTotals');

@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/CTV/tabs/CtvAccountSettings]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { type FormEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LockKeyhole, Save } from 'lucide-react';
@@ -15,13 +20,13 @@ interface PasswordForm {
   confirmPassword: string;
 }
 
-function getErrorMessage(err: unknown) {
-  if (err instanceof Error) return err.message;
-  return 'Please try again.';
-}
-
 export function CtvAccountSettings({ displayName, onProfileUpdated }: CtvAccountSettingsProps) {
   const { t } = useTranslation('ctv');
+
+  function getErrorMessage(err: unknown) {
+    if (err instanceof Error) return err.message;
+    return t('errors.genericRetry');
+  }
   const [nameValue, setNameValue] = useState(displayName);
   const [nameStatus, setNameStatus] = useState<string | null>(null);
   const [nameError, setNameError] = useState<string | null>(null);

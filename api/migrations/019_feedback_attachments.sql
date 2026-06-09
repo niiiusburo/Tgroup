@@ -1,3 +1,6 @@
+-- @crossref:domain[feedback-cms]
+-- @crossref:used-in[NK3 schema migration: api/migrations/019_feedback_attachments]
+-- @crossref:uses[product-map/domains/feedback-cms.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Feedback message attachments
 
 CREATE TABLE IF NOT EXISTS dbo.feedback_attachments (

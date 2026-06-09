@@ -2,7 +2,9 @@
 
 > Database entity map: relationships, writers, readers, endpoints, and frontend surfaces.
 
-> Migration inventory: 53 SQL files under `api/migrations/` as of 2026-05-17 local file inventory. Duplicate numeric prefixes exist, so treat filename order as inventory, not a strict linear version sequence. Legacy `008_data_migration_from_tdental*.sql` files are destructive manual reconstruction scripts and must be blocked by their break-glass guards on protected NK3/local DB names.
+> Migration inventory: 67 SQL files under `api/migrations/` as of 2026-06-06 local file inventory, through `058_audit_logs.sql`. Duplicate numeric prefixes exist, so treat filename order as inventory, not a strict linear version sequence. Legacy `008_data_migration_from_tdental*.sql` files are destructive manual reconstruction scripts and must be blocked by their break-glass guards on protected NK3/local DB names.
+>
+> 2026-06-06 crossref breadcrumb pass: canonical migration files received SQL comment breadcrumbs only. No schema DDL/DML, table shape, endpoint payload, reader, writer, or blast-radius mapping changed.
 
 ## Legend
 

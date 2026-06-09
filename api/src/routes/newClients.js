@@ -1,6 +1,11 @@
 'use strict';
 
 /**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/newClients]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * newClients.js — Admin "New Clients" referral revenue/COM audit.
  * Mounted at /api/NewClients and /api/cosmetic/NewClients. The top-level route
  * can read one or both LOB DBs based on ?lob=; the cosmetic mirror forces req.lob

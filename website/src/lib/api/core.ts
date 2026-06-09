@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[settings-system]
+ * @crossref:used-in[NK3 frontend API client: website/src/lib/api/core]
+ * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * API Client core - fetch wrapper, error handling, and shared types
  * @crossref:used-in[lib/api/* domain modules]
  */

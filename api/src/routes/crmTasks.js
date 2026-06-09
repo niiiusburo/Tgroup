@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[settings-system]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/crmTasks]
+ * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const express = require('express');
 const { query } = require('../db');
 const { addAccentInsensitiveSearchCondition } = require('../utils/search');

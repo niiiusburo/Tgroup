@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[integrations]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/externalCheckups]
+ * @crossref:uses[product-map/domains/integrations.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const express = require('express');
 const multer = require('multer');
 const { requireAuth, requirePermission } = require('../middleware/auth');

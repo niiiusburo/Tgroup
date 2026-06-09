@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[auth]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/PermissionBoard/MatrixView]
+ * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useTranslation } from 'react-i18next';
 import type { PermissionGroup } from '@/lib/api';
 import { MODULES, PERMISSION_DESCRIPTIONS } from './constants';

@@ -1,3 +1,6 @@
+-- @crossref:domain[feedback-cms]
+-- @crossref:used-in[NK3 schema migration: api/migrations/019_feedback_auto_errors]
+-- @crossref:uses[product-map/domains/feedback-cms.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration 019: Link AutoDebugger errors to Feedback system
 -- Add source column + error_event_id FK to feedback_threads
 

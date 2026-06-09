@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[appointments-calendar]
+ * @crossref:used-in[NK3 backend service function: api/src/services/exports/builders/appointmentsExport]
+ * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const { query } = require('../../../db');
 const { createWorkbook, populateDataSheet, populateSummarySheet, toVNDate } = require('../exportWorkbook');
 

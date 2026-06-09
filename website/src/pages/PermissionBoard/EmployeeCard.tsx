@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[employees-hr]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/PermissionBoard/EmployeeCard]
+ * @crossref:uses[product-map/domains/employees-hr.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import type { PermissionGroup, EmployeePermission } from '@/lib/api';
 import { ExpandableText } from '@/components/shared/ExpandableText';
 import { getInitials, getRoleLabel } from './constants';

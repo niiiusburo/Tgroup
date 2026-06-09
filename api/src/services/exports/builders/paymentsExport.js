@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[payments-deposits]
+ * @crossref:used-in[NK3 backend service function: api/src/services/exports/builders/paymentsExport]
+ * @crossref:uses[product-map/domains/payments-deposits.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const { query } = require('../../../db');
 const { createWorkbook, populateDataSheet, populateSummarySheet, toVNDate } = require('../exportWorkbook');
 

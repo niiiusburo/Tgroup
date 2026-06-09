@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/partners/listFilters]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 function applyPartnerListFilters({ query, conditions, params, paramIdx }) {
   let nextParamIdx = paramIdx;
   const { companyId, company_id: companyIdSnake, status } = query;

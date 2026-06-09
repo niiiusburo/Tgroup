@@ -1,3 +1,6 @@
+-- @crossref:domain[payments-deposits]
+-- @crossref:used-in[NK3 schema migration: api/migrations/015_deposit_receipts]
+-- @crossref:uses[product-map/domains/payments-deposits.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration: Add deposit receipt tracking and refund support
 -- Adds receipt_number, deposit_type to payments and a receipt_sequences table
 

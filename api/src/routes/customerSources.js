@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/customerSources]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * Customer Sources API Routes
  * CRUD for customer acquisition sources
  */

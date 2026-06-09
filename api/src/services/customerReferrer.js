@@ -1,6 +1,11 @@
 'use strict';
 
 /**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 backend service function: api/src/services/customerReferrer]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * customerReferrer.js — assign a CTV (Cộng tác viên) as a customer's commission referrer.
  *
  * The commission engine (commissionEngine.js, D13 priority #1) attributes paid-service

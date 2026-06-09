@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[auth]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/PermissionBoard/ArchitectureView]
+ * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import type { PermissionGroup, EmployeePermission } from '@/lib/api';

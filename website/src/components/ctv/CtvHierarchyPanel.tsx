@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 CTV portal and referral surface: website/src/components/ctv/CtvHierarchyPanel]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useMemo, useState } from 'react';
 import {
   ArrowDown,

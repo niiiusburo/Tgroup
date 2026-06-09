@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 frontend API client: website/src/lib/api/customerBalance]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { apiFetch } from './core';
 
 // ─── Customer Balance ─────────────────────────────────────────────

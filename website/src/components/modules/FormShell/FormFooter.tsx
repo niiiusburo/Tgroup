@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[settings-system]
+ * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/FormShell/FormFooter]
+ * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * FormFooter — Footer buttons for TG Clinic modal forms.
  *
  * Provides the canonical footer pattern:

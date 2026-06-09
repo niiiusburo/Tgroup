@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[settings-system]
+ * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/FormShell/FormHeader]
+ * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * FormHeader — Orange gradient header for TG Clinic modal forms.
  *
  * Provides the canonical header pattern:

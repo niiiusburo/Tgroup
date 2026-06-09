@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
+import i18n from '@/i18n';
 import { JoinCtv } from './JoinCtv';
 import { joinCtv, lookupPublicCtvByPhone, resolveCtvRefCode } from '@/lib/api/ctv';
 
@@ -20,7 +21,9 @@ function renderJoin(initialEntry = '/ctv/join') {
 }
 
 describe('JoinCtv', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    localStorage.setItem('tg-lang', 'vi');
+    await i18n.changeLanguage('vi');
     vi.clearAllMocks();
     vi.mocked(joinCtv).mockResolvedValue({
       ok: true,

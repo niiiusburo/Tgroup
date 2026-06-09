@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, ChevronDown, ChevronRight, Loader, Pencil, Plus, Search, Users, X } from 'lucide-react';
+import { AlertCircle, Check, ChevronDown, ChevronRight, KeyRound, Loader, Pencil, Plus, Search, Users, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import {
@@ -29,7 +29,7 @@ import { CtvHierarchyPanel } from '@/components/ctv/CtvHierarchyPanel';
  * @crossref:domain[ctv-creation — primary admin call site; see also CtvRecruitModal + JoinCtv]
  */
 
-const TABLE_COL_COUNT = 8;
+const TABLE_COL_COUNT = 9;
 
 // Combining diacritical marks (U+0300–U+036F). Built from an ASCII string so the
 // source contains no invisible combining characters.
@@ -74,13 +74,14 @@ interface CtvRowProps {
   ctv: CtvRecord;
   onStatusChange: () => void;
   onEdit: (ctv: CtvRecord) => void;
+  onResetPassword: (ctv: CtvRecord) => void;
   // §12 drag-drop hierarchy: drag a CTV row onto another to re-parent it under that CTV.
   draggedCtvId: string | null;
   onDragStartCtv: (id: string | null) => void;
   onMoveCtv: (draggedId: string, targetId: string) => void;
 }
 
-function CtvRow({ ctv, onStatusChange, onEdit, draggedCtvId, onDragStartCtv, onMoveCtv }: CtvRowProps) {
+function CtvRow({ ctv, onStatusChange, onEdit, onResetPassword, draggedCtvId, onDragStartCtv, onMoveCtv }: CtvRowProps) {
   const { t: tc } = useTranslation('commission');
   const [toggling, setToggling] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -172,6 +173,17 @@ function CtvRow({ ctv, onStatusChange, onEdit, draggedCtvId, onDragStartCtv, onM
         <td className="px-4 py-3">
           <span
             className={`px-2 py-1 text-xs rounded-full font-medium ${
+              ctv.is_live
+                ? 'bg-amber-100 text-amber-800'
+                : 'bg-gray-100 text-gray-600'
+            }`}
+          >
+            {ctv.is_live ? tc('ctv.isLive') : '-'}
+          </span>
+        </td>
+        <td className="px-4 py-3">
+          <span
+            className={`px-2 py-1 text-xs rounded-full font-medium ${
               ctv.active
                 ? 'bg-green-100 text-green-700'
                 : 'bg-gray-100 text-gray-600'
@@ -181,13 +193,21 @@ function CtvRow({ ctv, onStatusChange, onEdit, draggedCtvId, onDragStartCtv, onM
           </span>
         </td>
         <td className="px-4 py-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => onEdit(ctv)}
               className="flex items-center gap-1 px-3 py-1 text-sm rounded transition-colors bg-blue-50 text-blue-700 hover:bg-blue-100"
             >
               <Pencil className="w-3.5 h-3.5" />
               {tc('ctv.edit')}
+            </button>
+            <button
+              onClick={() => onResetPassword(ctv)}
+              className="flex items-center gap-1 px-3 py-1 text-sm rounded transition-colors bg-amber-50 text-amber-700 hover:bg-amber-100"
+              title={tc('ctv.resetPassword')}
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              {tc('ctv.resetPassword')}
             </button>
             <button
               onClick={handleToggleStatus}
@@ -228,31 +248,48 @@ interface AddCtvModalProps {
 function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
   const { t } = useTranslation('common');
   const { t: tc } = useTranslation('commission');
-
+  const [createdCtv, setCreatedCtv] = useState<CtvRecord | null>(null);
+  const [createdPassword, setCreatedPassword] = useState('');
+  const [copiedAll, setCopiedAll] = useState(false);
   const formApi = useCtvCreationForm({
     config: { mode: 'admin' },
     onSubmit: async (payload) => {
-      await createCtv({
+      const ctv = await createCtv({
         name: payload.name,
         phone: payload.phone,
         email: payload.email || undefined,
         password: payload.password,
         lob_scope: payload.lob_scope,
       });
+      setCreatedCtv(ctv);
+      setCreatedPassword(payload.password);
     },
   });
-
-  // Auto-close + notify parent on success (replaces prior local success state + setTimeout in render).
+  // Auto-close only when credentials were NOT revealed (fallback guard).
   useEffect(() => {
-    if (formApi.success) {
+    if (formApi.success && !createdCtv) {
       const id = setTimeout(() => {
         formApi.clearSuccess();
         onSuccess();
       }, 800);
       return () => clearTimeout(id);
     }
-  }, [formApi.success, formApi.clearSuccess, onSuccess]);
-
+  }, [formApi.success, createdCtv, formApi.clearSuccess, onSuccess]);
+  const handleCopyAll = async () => {
+    if (!createdCtv) return;
+    const text = [
+      `${tc('ctv.loginUrl')}: https://tmv.2checkin.com/login`,
+      `${tc('ctv.loginWith')}: ${createdCtv.phone || createdCtv.email || ''}`,
+      `${tc('ctv.newTempPassword')}: ${createdPassword}`,
+    ].join('\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedAll(true);
+      setTimeout(() => setCopiedAll(false), 2000);
+    } catch {
+      /* ignore clipboard errors */
+    }
+  };
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md space-y-4">
@@ -262,23 +299,68 @@ function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
             <X className="w-5 h-5" />
           </button>
         </div>
-
-        <CtvCreationForm
-          hookResult={formApi}
-          labels={{
-            name: tc('ctv.name'),
-            phone: tc('ctv.phone'),
-            email: tc('ctv.email'),
-            password: t('password', { ns: 'auth' }),
-            lobs: tc('ctv.lobScope'),
-            submit: t('save'),
-            submitting: t('loading'),
-          }}
-          showLobs
-          onCancel={onClose}
-          submitLabel={t('save')}
-          className="space-y-3"
-        />
+        {createdCtv ? (
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="mx-auto w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mb-3">
+                <Check className="w-7 h-7 text-emerald-600" />
+              </div>
+              <h4 className="text-lg font-semibold text-gray-900">{tc('ctv.credentialTitle')}</h4>
+              <p className="text-sm text-gray-600">{tc('ctv.credentialSubtitle')}</p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">{tc('ctv.name')}:</span>
+                <span className="font-medium text-gray-900">{createdCtv.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">{tc('ctv.phone')}:</span>
+                <span className="font-medium text-gray-900">{createdCtv.phone || '-'}</span>
+              </div>
+              {createdCtv.email && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">{tc('ctv.email')}:</span>
+                  <span className="font-medium text-gray-900">{createdCtv.email}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-gray-500">{tc('ctv.newTempPassword')}:</span>
+                <span className="font-mono font-bold text-gray-900">{createdPassword}</span>
+              </div>
+            </div>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={handleCopyAll}
+                className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+              >
+                {copiedAll ? tc('ctv.copied') : tc('ctv.copyAll')}
+              </button>
+              <button
+                onClick={() => { formApi.reset(); onSuccess(); }}
+                className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                {tc('ctv.done')}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <CtvCreationForm
+            hookResult={formApi}
+            labels={{
+              name: tc('ctv.name'),
+              phone: tc('ctv.phone'),
+              email: tc('ctv.email'),
+              password: t('password', { ns: 'auth' }),
+              lobs: tc('ctv.lobScope'),
+              submit: t('save'),
+              submitting: t('loading'),
+            }}
+            showLobs
+            onCancel={onClose}
+            submitLabel={t('save')}
+            className="space-y-3"
+          />
+        )}
       </div>
     </div>
   );
@@ -298,6 +380,7 @@ function EditCtvModal({ ctv, onClose, onSuccess }: EditCtvModalProps) {
   const [phone, setPhone] = useState(ctv.phone || '');
   const [email, setEmail] = useState(ctv.email || '');
   const [password, setPassword] = useState('');
+  const [isLive, setIsLive] = useState(ctv.is_live === true);
   const [lobScope, setLobScope] = useState<string[]>(() => {
     const s = ctv.lob_scope || [];
     return Array.from(new Set(['dental', ...s]));
@@ -312,7 +395,7 @@ function EditCtvModal({ ctv, onClose, onSuccess }: EditCtvModalProps) {
       // Only send fields the admin actually filled in. Sending an empty phone/email
       // would be rejected by the API (they are login identifiers), which would make
       // a CTV that has no phone/email on record impossible to edit at all.
-      const payload: UpdateCtvInput = { name: name.trim(), lob_scope: lobScope };
+      const payload: UpdateCtvInput = { name: name.trim(), lob_scope: lobScope, is_live: isLive };
       if (phone.trim()) payload.phone = phone.trim();
       if (email.trim()) payload.email = email.trim();
       if (password.trim()) payload.password = password;
@@ -393,6 +476,28 @@ function EditCtvModal({ ctv, onClose, onSuccess }: EditCtvModalProps) {
             <p className="mt-1 text-xs text-gray-500">{tc('ctv.newPasswordHint')}</p>
           </div>
 
+          <div className="flex items-center justify-between rounded-lg border border-gray-200 p-3">
+            <div>
+              <span className="block text-sm font-medium text-gray-900">{tc('ctv.isLive')}</span>
+              <span className="text-xs text-gray-500">{tc('ctv.isLiveHint')}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsLive((v) => !v)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                isLive ? 'bg-green-600' : 'bg-gray-300'
+              }`}
+              aria-pressed={isLive}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  isLive ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
+
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">{tc('ctv.lobScope')}</label>
             <div className="space-y-2">
@@ -441,7 +546,106 @@ function EditCtvModal({ ctv, onClose, onSuccess }: EditCtvModalProps) {
     </div>
   );
 }
+interface ResetPasswordModalProps {
+  ctv: CtvRecord;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+function ResetPasswordModal({ ctv, onClose, onSuccess }: ResetPasswordModalProps) {
+  const { t } = useTranslation('common');
+  const { t: tc } = useTranslation('commission');
+  const { currentLOB } = useBusinessUnit();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
+  const generateTempPassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    let pw = '';
+    for (let i = 0; i < 8; i++) pw += chars.charAt(Math.floor(Math.random() * chars.length));
+    return pw;
+  };
+
+  const handleReset = async () => {
+    const pw = generateTempPassword();
+    setLoading(true);
+    setError(null);
+    try {
+      await updateCtv(ctv.id, { password: pw }, currentLOB);
+      setResult(pw);
+      onSuccess();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : tc('ctv.updateError'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyPassword = async () => {
+    if (!result) return;
+    try {
+      await navigator.clipboard.writeText(result);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900">{tc('ctv.resetPassword')}</h3>
+        {!result ? (
+          <>
+            <p className="text-sm text-gray-600">
+              {tc('ctv.resetPasswordConfirm', { name: ctv.name })}
+            </p>
+            {error && <p className="text-red-600 text-sm">{error}</p>}
+            <div className="flex gap-3 justify-end pt-2">
+              <button
+                onClick={onClose}
+                className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                {t('cancel')}
+              </button>
+              <button
+                onClick={handleReset}
+                disabled={loading}
+                className="px-4 py-2 text-sm bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 transition-colors"
+              >
+                {loading ? t('loading') : tc('ctv.resetPasswordAction')}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-green-700">{tc('ctv.resetPasswordSuccess')}</p>
+            <div className="bg-amber-50 rounded-lg p-3">
+              <p className="text-xs text-amber-700 mb-1">{tc('ctv.newTempPassword')}</p>
+              <p className="text-lg font-mono font-bold text-amber-900 select-all">{result}</p>
+            </div>
+            <div className="flex gap-3 justify-end pt-2">
+              <button
+                onClick={copyPassword}
+                className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                {copied ? tc('ctv.copied') : tc('ctv.copyAll')}
+              </button>
+              <button
+                onClick={onClose}
+                className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+              >
+                {tc('ctv.done')}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
 export function CtvManagementTab() {
   const { t } = useTranslation('common');
   const { t: tc } = useTranslation('commission');
@@ -451,6 +655,7 @@ export function CtvManagementTab() {
   const [error, setError] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCtv, setEditingCtv] = useState<CtvRecord | null>(null);
+  const [resettingCtv, setResettingCtv] = useState<CtvRecord | null>(null);
   const [search, setSearch] = useState('');
   // §12 drag-drop hierarchy move state.
   const [draggedCtvId, setDraggedCtvId] = useState<string | null>(null);
@@ -458,7 +663,6 @@ export function CtvManagementTab() {
   const [moveInfo, setMoveInfo] = useState<string | null>(null);
 
   const legacyCount = useMemo(() => (ctvs || []).filter(isLegacyCtv).length, [ctvs]);
-
   const filtered = useMemo(() => {
     const list = ctvs || [];
     const query = normalizeText(search).trim();
@@ -606,6 +810,7 @@ export function CtvManagementTab() {
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('ctv.lob')}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('ctv.upline')}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('ctv.source')}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('ctv.isLive')}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('ctv.status')}</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('ctv.action')}</th>
               </tr>
@@ -617,6 +822,7 @@ export function CtvManagementTab() {
                   ctv={ctv}
                   onStatusChange={() => handleLoad()}
                   onEdit={setEditingCtv}
+                  onResetPassword={setResettingCtv}
                   draggedCtvId={draggedCtvId}
                   onDragStartCtv={setDraggedCtvId}
                   onMoveCtv={handleMoveCtv}
@@ -640,6 +846,13 @@ export function CtvManagementTab() {
           ctv={editingCtv}
           onClose={() => setEditingCtv(null)}
           onSuccess={() => { handleLoad(); setEditingCtv(null); }}
+        />
+      )}
+      {resettingCtv && (
+        <ResetPasswordModal
+          ctv={resettingCtv}
+          onClose={() => setResettingCtv(null)}
+          onSuccess={() => { handleLoad(); setResettingCtv(null); }}
         />
       )}
     </div>

@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[settings-system]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Website]
+ * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { Globe, FileText, Palette, Search, LayoutList } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useWebsiteData } from '@/hooks/useWebsiteData';

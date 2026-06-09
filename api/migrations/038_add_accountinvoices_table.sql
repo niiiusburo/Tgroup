@@ -1,3 +1,6 @@
+-- @crossref:domain[settings-system]
+-- @crossref:used-in[NK3 schema migration: api/migrations/038_add_accountinvoices_table]
+-- @crossref:uses[product-map/domains/settings-system.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration 038: Create accountinvoices table
 -- Fixes 500 error on /api/DotKhams when LEFT JOINing accountinvoices
 -- This table is populated by the TDental delta sync; we create the minimal

@@ -9,6 +9,8 @@ owns:
   - api/src/services/faceEngineClient.js
   - api/src/services/comprefaceClient.js (legacy fallback)
   - api/src/services/faceMatchEngine.js
+  - face-service/main.py (FastAPI: YuNet detect + SFace embed + liveness gate)
+  - face-service/liveness.py (MiniFASNet passive anti-spoofing)
   - website/src/components/customer/CustomerCameraWidget.tsx
   - website/src/components/shared/FaceCaptureModal.tsx
   - website/src/components/modules/PatientCheckIn.tsx
@@ -18,6 +20,8 @@ reads:
   - api/src/db.js
   - process.env.FACE_SERVICE_URL
   - process.env.FACE_RECOGNITION_PROVIDER
+  - process.env.FACE_LIVENESS_ENABLED
+  - process.env.FACE_LIVENESS_THRESHOLD
   - process.env.COMPREFACE_URL
   - process.env.COMPREFACE_API_KEY
   - process.env.HOSOONLINE_BASE_URL
@@ -36,6 +40,7 @@ endpoints:
   - POST /api/face/register
   - POST /api/face/re-register
   - GET  /api/face/status/:partnerId
+  - GET  /api/cross-lob-probe (admin lob.crossview; powers the Face ID cross-LOB chooser)
   - GET  /api/ExternalCheckups/images/:imageName
   - GET  /api/ExternalCheckups/:customerCode
   - POST /api/ExternalCheckups/:customerCode/patient
@@ -60,12 +65,17 @@ affected_by:
 impact_tests:
   - website/src/hooks/__tests__/useFaceRecognition.test.ts
   - api/tests/faceRecognition.test.js
+  - face-service/tests/test_liveness.py
+  - api/tests/crossLobProbe.test.js
+  - website/src/components/shared/GlobalFaceIdButton.test.tsx
   - api/src/routes/__tests__/externalCheckups.test.js
   - website/src/components/customer/AuthenticatedCheckupImage.test.tsx
 risk_level: medium
 notes:
   - `FACE_RECOGNITION_PROVIDER=local` uses the Python FastAPI face-service with OpenCV YuNet (detection) and SFace (128-dim embedding extraction).
   - `FACE_RECOGNITION_PROVIDER=compreface` uses CompreFace recognition subjects keyed by `partners.id`; TGClinic still updates `partners.face_subject_id` and `face_registered_at`.
+  - Liveness / anti-spoofing (local provider only): `face-service/liveness.py` runs MiniFASNet (source-verified Silent-Face) via cv2.dnn on the detected face box. Gated by `FACE_LIVENESS_ENABLED` (default off) + `FACE_LIVENESS_THRESHOLD` (default 0.5, the averaged REAL-class probability bar). Fails open — a missing/unloadable model or inference error never blocks check-in. A spoof verdict returns `SPOOF_DETECTED` (HTTP 422) from `/api/face/recognize` and `/api/face/register` (embedding is not computed/stored). Models bake into the face-service image as a best-effort build-time download; enable only after calibrating the threshold with real clinic captures.
+  - Cross-LOB chooser: after `/api/face/recognize` matches in the current LOB, if the caller has `lob.crossview` and the customer has a phone, `GlobalFaceIdButton` calls `GET /api/cross-lob-probe` (soft phone match of the other LOB pool). If the customer also exists in the other LOB, the quick-scan popover shows a chooser (open current LOB via in-app navigate, or the other LOB via a `?lob=` deep link in a new tab) instead of auto-navigating. Non-crossview employees and phone-less matches navigate straight to the current-LOB record. The probe was restored after being dropped in the cosmetic-LOB merge (also fixes the ProfileHeader badge).
   - Compreface services are defined in docker-compose.yml but are not required for core app startup.
   - "Hosoonline is currently mixed-contract: login credentials take precedence for image reads (`Authorization: Bearer <token>` plus access_token cookie); `HOSOONLINE_API_KEY` / `X-API-Key` remains as fallback for older patient health-checkup endpoints."
   - The current observed Hosoonline website contract logs in through `/api/auth/login`, searches appointment media through `/api/appointments/search?q=<customerCode>&page=<page>`, and fetches bytes through `/api/appointments/image/:imageName`.

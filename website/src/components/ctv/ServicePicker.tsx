@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 CTV portal and referral surface: website/src/components/ctv/ServicePicker]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronDown, Layers, Search, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';

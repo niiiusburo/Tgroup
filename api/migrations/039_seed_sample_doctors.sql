@@ -1,3 +1,6 @@
+-- @crossref:domain[settings-system]
+-- @crossref:used-in[NK3 schema migration: api/migrations/039_seed_sample_doctors]
+-- @crossref:uses[product-map/domains/settings-system.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration: Seed sample doctors for local development
 -- Only inserts if employees view returns fewer than 3 rows
 DO $$

@@ -1,11 +1,16 @@
 /**
+ * @crossref:domain[auth]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Login]
+ * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * Login Page - TG Clinic authentication screen
  * @crossref:used-in[App]
  * @crossref:uses[AuthContext.login]
  */
 
 import { useState, useEffect, useRef, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
@@ -41,12 +46,15 @@ export function Login() {
   const { t } = useTranslation('auth');
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get('returnTo');
   const mountedRef = useRef(true);
 
   const [identifier, setIdentifier] = useState(() => getSavedLogin());
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showForgotHint, setShowForgotHint] = useState(false);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -68,7 +76,9 @@ export function Login() {
       // Only save login identifier (not password) for prefill convenience.
       saveLogin(identifier);
 
-      navigate('/', { replace: true });
+      const safeReturn =
+        returnTo && returnTo.startsWith('/') && !returnTo.startsWith('//') ? returnTo : '/';
+      navigate(safeReturn, { replace: true });
     } catch (err: unknown) {
       if (!mountedRef.current) return;
       if (err instanceof Error) {
@@ -148,6 +158,18 @@ export function Login() {
                 placeholder="••••••••"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-colors"
               />
+              <button
+                type="button"
+                onClick={() => setShowForgotHint((s) => !s)}
+                className="self-end text-xs text-primary hover:text-primary-dark font-medium transition-colors"
+              >
+                {t('forgotPassword')}
+              </button>
+              {showForgotHint && (
+                <p className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
+                  {t('forgotPasswordHint')}
+                </p>
+              )}
             </div>
 
             <button

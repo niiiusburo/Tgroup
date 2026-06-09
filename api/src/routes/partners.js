@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/partners]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const express = require('express');
 const { requirePermission } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');

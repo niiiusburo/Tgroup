@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[appointments-calendar]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/appointments/helpers]
+ * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const { query: legacyQuery, getQuery } = require('../../db');
 
 const VALID_STATES = ['draft', 'scheduled', 'confirmed', 'arrived', 'in Examination', 'in-progress', 'done', 'cancelled'];

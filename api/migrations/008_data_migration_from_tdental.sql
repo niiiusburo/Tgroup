@@ -1,3 +1,6 @@
+-- @crossref:domain[settings-system]
+-- @crossref:used-in[NK3 schema migration: api/migrations/008_data_migration_from_tdental]
+-- @crossref:uses[product-map/domains/settings-system.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- ============================================================================
 -- Migration: Full data migration from old tdental DB to tdental_demo DB
 -- Uses dblink to connect old DB (tdental@172.17.0.1:54323) from demo DB

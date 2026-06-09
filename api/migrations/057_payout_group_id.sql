@@ -1,3 +1,6 @@
+-- @crossref:domain[earnings-commissions]
+-- @crossref:used-in[NK3 schema migration: api/migrations/057_payout_group_id]
+-- @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- 057_payout_group_id.sql
 -- Wave 4 of docs/business-logic/ctv-referral-commission.md (§10 Combined Payouts).
 --

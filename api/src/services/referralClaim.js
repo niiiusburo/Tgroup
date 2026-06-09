@@ -1,5 +1,12 @@
 'use strict';
 
+/**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 backend service function: api/src/services/referralClaim]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:function[computeClaim, computeCtvLink, getCtvLinkStatus, getReferralClaimStatus]
+ * @crossref:uses[api/src/routes/ctv.js, api/src/routes/ctvPublic.js, product-map/domains/cosmetic-clients.yaml]
+ */
 const { getDb: defaultGetDb } = require('../db');
 
 const WINDOW_MONTHS = 6;

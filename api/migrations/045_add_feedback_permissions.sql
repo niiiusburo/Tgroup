@@ -1,3 +1,6 @@
+-- @crossref:domain[auth]
+-- @crossref:used-in[NK3 schema migration: api/migrations/045_add_feedback_permissions]
+-- @crossref:uses[product-map/domains/auth.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration: Add scoped feedback admin permissions to the super-admin group.
 -- Other groups can be granted these explicitly from the permission board.
 

@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[integrations]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/publicTelemetryErrors]
+ * @crossref:uses[product-map/domains/integrations.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const crypto = require('crypto');
 const express = require('express');
 const rateLimit = require('express-rate-limit');

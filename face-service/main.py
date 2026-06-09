@@ -11,6 +11,8 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 from PIL import Image
 
+from liveness import LivenessDetector
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("face-service")
 
@@ -23,6 +25,12 @@ RECOGNIZER_PATH = os.path.join(MODEL_DIR, "face_recognition_sface_2021dec.onnx")
 DETECTOR_SCORE_THRESHOLD = float(os.environ.get("DETECTOR_SCORE_THRESHOLD", "0.5"))
 QUALITY_THRESHOLD = float(os.environ.get("DETECTION_THRESHOLD", "0.85"))
 INPUT_SIZE = (320, 320)  # YuNet default
+# Liveness / anti-spoofing (passive MiniFASNet). Default OFF — enable only after
+# calibrating LIVENESS_THRESHOLD with real clinic captures (Face ID spec: thresholds
+# must be calibrated before production). Gate fails open when models are absent.
+LIVENESS_ENABLED = os.environ.get("LIVENESS_ENABLED", "false").strip().lower() == "true"
+LIVENESS_THRESHOLD = float(os.environ.get("LIVENESS_THRESHOLD", "0.5"))
+_liveness = LivenessDetector(MODEL_DIR, LIVENESS_THRESHOLD)
 
 # ─── Model loading ──────────────────────────────────────────────────────────
 _detector = None
@@ -102,6 +110,7 @@ def health():
                 "recognizer": "sface",
                 "version": "opencv-sface-2021",
             },
+            "liveness": {"available": _liveness.available, "enabled": LIVENESS_ENABLED},
         }
     except Exception as exc:
         logger.error("Health check failed: %s", exc)
@@ -218,6 +227,27 @@ async def embed(image: UploadFile = File(...)):
         [x_nt, y_nt],
     ], dtype=np.float32)
 
+    # ── Liveness / anti-spoofing gate (fail-open) ─────────────────────────────
+    # bbox is (x, y, w, h) of the detected face. _liveness.assess() returns None
+    # when liveness is unavailable (models absent / inference error); we only ever
+    # BLOCK on an explicit spoof verdict while the gate is enabled.
+    liveness_result = None
+    if LIVENESS_ENABLED:
+        liveness_result = _liveness.assess(img, (x, y, fw, fh))
+        if liveness_result is not None and not liveness_result["isLive"]:
+            logger.info(
+                "[liveness] SPOOF_DETECTED score=%.4f label=%s",
+                liveness_result["score"], liveness_result["label"],
+            )
+            return JSONResponse(
+                status_code=422,
+                content={
+                    "error": "SPOOF_DETECTED",
+                    "message": "Liveness check failed; present a live face to the camera",
+                    "liveness": liveness_result,
+                },
+            )
+
     try:
         embedding = _extract_embedding(img, face_box)
     except Exception as exc:
@@ -244,4 +274,5 @@ async def embed(image: UploadFile = File(...)):
                 "height": round(fh, 1),
             },
         },
+        "liveness": liveness_result if liveness_result is not None else {"available": False, "enabled": LIVENESS_ENABLED},
     }

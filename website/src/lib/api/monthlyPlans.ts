@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[payments-deposits]
+ * @crossref:used-in[NK3 frontend API client: website/src/lib/api/monthlyPlans]
+ * @crossref:uses[product-map/domains/payments-deposits.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { apiFetch } from './core';
 
 // ─── Monthly Plans ────────────────────────────────────────────────

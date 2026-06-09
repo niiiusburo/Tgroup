@@ -1,3 +1,6 @@
+-- @crossref:domain[settings-system]
+-- @crossref:used-in[NK3 schema migration: api/migrations/037_version_events]
+-- @crossref:uses[product-map/domains/settings-system.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 CREATE TABLE IF NOT EXISTS version_events (
   id SERIAL PRIMARY KEY,
   event VARCHAR(64) NOT NULL,

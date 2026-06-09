@@ -1,3 +1,6 @@
+-- @crossref:domain[payments-deposits]
+-- @crossref:used-in[NK3 schema migration: api/migrations/046_split_payment_and_hoso_permissions]
+-- @crossref:uses[product-map/domains/payments-deposits.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Split coarse payment and Hosoonline permissions into safer action-level grants.
 -- Super Admin/Admin keep destructive payment and upload access. Assistant-facing
 -- roles keep online-record upload access, but patient creation stays restricted.

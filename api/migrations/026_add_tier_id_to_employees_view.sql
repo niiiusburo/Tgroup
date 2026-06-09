@@ -1,3 +1,6 @@
+-- @crossref:domain[employees-hr]
+-- @crossref:used-in[NK3 schema migration: api/migrations/026_add_tier_id_to_employees_view]
+-- @crossref:uses[product-map/domains/employees-hr.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Recreate the employees view to include tier_id
 BEGIN;
 

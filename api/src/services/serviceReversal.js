@@ -1,5 +1,12 @@
 'use strict';
 
+/**
+ * @crossref:domain[services-catalog]
+ * @crossref:used-in[NK3 backend service function: api/src/services/serviceReversal]
+ * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:function[reverseServiceLine -> service reversal, paid-earning guard, payment allocation guard]
+ * @crossref:uses[api/src/services/commissionEngine.js, api/src/routes/saleOrderLines.js, product-map/domains/payments-deposits.yaml]
+ */
 const { reverseOnRefund } = require('./commissionEngine');
 
 class ServiceReversalError extends Error {

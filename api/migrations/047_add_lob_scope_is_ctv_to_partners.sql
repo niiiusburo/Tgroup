@@ -1,3 +1,6 @@
+-- @crossref:domain[ctv]
+-- @crossref:used-in[NK3 schema migration: api/migrations/047_add_lob_scope_is_ctv_to_partners]
+-- @crossref:uses[product-map/domains/ctv.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- 047_add_lob_scope_is_ctv_to_partners.sql
 -- Cosmetic LOB v2 (D5, D14) — per decision to use partners (not users) as auth source
 -- Additive only: extend partners table with LOB scoping and CTV flag.

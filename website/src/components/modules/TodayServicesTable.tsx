@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[services-catalog]
+ * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/TodayServicesTable]
+ * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * TodayServicesTable - Zone 2: Services performed today
  * @crossref:used-in[Overview]
  *

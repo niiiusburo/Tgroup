@@ -19,7 +19,8 @@ owns:
   - website/src/lib/i18n/ctv.ts
   - website/src/components/ctv/* (LOB pills, split bars, bottom nav)
   - Login redirect logic in AuthContext / ProtectedRoute / LoginRoute
-  - api/src/services/loginIdentifier.js (legacy CTV phone/ref-code login lookup gated by created_via marker)
+  - api/src/services/loginIdentifier.js (CTV phone/ref-code login lookup for ALL active is_ctv partners; legacy SHA-256 password fallback still created_via-gated — see INV-008C)
+  - api/src/services/nk3CtvIntegrityRepair.js + scripts/nk3-only/nk3-live-ctv-integrity-repair.js (NK3-only live integrity planner/repair for CTV identity mirrors after fresh DB backups)
 reads:
   - tdental_demo.dbo.partners (is_ctv flag for role gating; referred_by_ctv_id for referred clients)
   - tdental_demo.dbo.earnings (CTV's rows via recipient_partner_id; D13 source)
@@ -34,7 +35,7 @@ writes:
   - POST /api/ctv/bookings (create or reclaim referred client after resolving a selected-LOB appointment company, preferring real clinic fallback locations over QA/test fixture rows; mark accepted existing partners as customer-visible, create appointment only in selected LOB DB; selected service or Referral Start default stays on appointments.productid and does not create a service card)
   - PATCH /api/ctv/me (authenticated CTV self-service display name update; mirrors the CTV partner row by UUID when present in Dental/Cosmetic)
   - POST /api/ctv/me/password (authenticated CTV self-service password update after current-password verification; writes bcrypt password_hash to mirrored CTV rows)
-  - POST /api/ctv-public/join (public landing no-login CTV signup; resolves the parent CTV from a referral code or submitted upline CTV phone when present, or creates an active root/top-level CTV when no upline is supplied)
+  - PUT /api/Ctvs/:id (admin edit: name, phone, email, password, lob_scope, is_live; mirrors to cosmetic row if present)
   - POST /api/ctv-public/bookings (public landing no-login booking; resolves active CTV by submitted CTV phone, then uses the same claim/reclaim + appointment-only write path)
   - PATCH /api/Ctvs/:id or /api/cosmetic/Ctvs/:id (admin suspend/reactivate; mirrors active flag to cosmetic row if present)
   - api/scripts/import-legacy-ctvs.js after explicit DB confirmation (mirrors safe legacy CTV identities into dental + cosmetic partners with identical UUIDs; skips ambiguous matches)
@@ -47,6 +48,7 @@ tables:
   - tcosmetic_demo.dbo.earnings (identical)
   - tdental_demo.dbo.payouts
   - tcosmetic_demo.dbo.payouts
+  - tdental_demo.dbo.ctv_discount_codes (discount QR codes; dental DB only; append usage audit)
 endpoints:
   - GET /api/ctv/commission-summary (auth: is_ctv + ctv.commission.view.self; returns aggregates + per-LOB breakdown + recent rows with source)
   - GET /api/ctv/referrals (self referred partners/clients + status + earned)
@@ -66,6 +68,15 @@ endpoints:
   - POST /api/ctv-public/join (public CTV signup; body accepts code or uplinePhone plus name, phone, optional email, password; target allows root CTV creation when code/uplinePhone are omitted)
   - GET /api/Ctvs and GET /api/cosmetic/Ctvs (admin CTV list; cosmetic mount filters Cosmetic-scoped rows and returns source/legacy_code/created_via)
   - GET /api/ctv/* (gated)
+  - GET /api/discount-codes/landing/:shortCode (public fan landing preview; no auth; resolves CTV by CTV-{idPrefix})
+  - GET /api/discount-codes/check-existing?ctvId= (public fan dedup by cookie + visitor IP; read-only)
+  - POST /api/discount-codes/generate (public fan claim OR authenticated CTV portal forceNew; optional auth)
+  - GET /api/discount-codes/mine (CTV self code history)
+  - GET /api/discount-codes/stats (CTV aggregate code stats)
+  - GET /api/discount-codes/lookup?code= (staff preview)
+  - GET /api/discount-codes/client-search?phone=&lob=&code= (staff LOB-specific client lookup; mirrors /api/ctv/client-lookup vs issuing CTV)
+  - POST /api/discount-codes/verify (staff marks code used; reclaim/create client under issuing CTV)
+  - POST /api/discount-codes/ensure (legacy CTV short-code upsert; backward compatible)
 ui_surfaces:
   - /ctv (full bypass of admin Layout/sidebar; mobile-first with bottom nav 4 tabs; also usable desktop; EN/VI switcher in the CTV header)
     - Header: compact orange motion pill; hides on downward scroll, returns on upward scroll/focus, and groups Refer Client + Recruit CTV as a smaller pill action menu.
@@ -74,6 +85,25 @@ ui_surfaces:
     - Commission: Pending/Paid segmented; earnings list (client, service, amount, LOB pill)
     - Tracking: referred clients by stage (referred, visited, serviced, paid) with LOB pills and earned/estimated commission context
     - Me: profile, visible /ctv/join?ref=CTV-... invite link with share/copy-link actions, self display-name form, self password form, current language label, logout
+    - Referral/QR tab (Giới thiệu/QR): sub-tabs Mạng lưới + Mã QR. Mode A share link `/ctv/discount/CTV-{idPrefix}` (fan claims code on landing). Mode B per-click voucher PNG with staff-verify QR. Mã của tôi history panel.
+  - /ctv/discount/:shortCode (public fan landing; claim → voucher QR encoding /verify-discount?code=)
+  - /verify-discount (staff scan flow; staff login required; LOB-first client lookup + verify)
+discount_qr:
+  description: |
+    NK3 KOL-parity CTV discount QR (Giới thiệu/QR tab). Codes stored in tdental_demo.dbo.ctv_discount_codes only.
+    Two tiers driven by `partners.is_live` + `systempreferences` settings (migration 064):
+      - LIVE: `discount.live_percent` / `discount.live_expiry_days` / `discount.live_slogan` (default 30% / 60 days).
+      - NON-LIVE: `discount.nonlive_percent` / `discount.nonlive_expiry_days` / `discount.nonlive_slogan` (default 10% / 30 days).
+    Admin toggles `is_live` per CTV via Edit CTV modal; mirrors to both DBs.
+    Settings are read at code-generation time and locked into the code row (snapshot).
+    Earnings on verify: deferred (Phase 2 — see website/public/inter.html S9).
+  modes:
+    link_share: CTV copies/shares `/ctv/discount/CTV-{idPrefix}`; fan opens landing and taps claim to receive personal code + QR.
+    voucher_png: CTV taps generate/download; each click creates a new code; QR encodes staff verify URL.
+  staff_verify:
+    auth: staff only (CTV accounts blocked with S_STAFF_REQUIRED)
+    client_rules: LOB picker first, then phone lookup in that LOB; same claim gate as CTV refer/booking vs issuing CTV from code; reclaim referred_by_ctv_id on verify; createIfMissing when new in LOB.
+  public_api_gate: landing, check-existing, and fan POST /generate bypass global requireAuth via isPublicApiPath (api/src/middleware/publicApiPaths.js).
   - Hard redirect on login for partners.is_ctv=true (before any admin mount)
   - 403 guards on all / (admin) routes for CTV
   - /commission admin five-step CTV flow (Config, CTV, New Clients, Earnings, Payouts) with URL-backed breadcrumb rail, clean date labels, profile drilldowns from New Clients, referral revenue/COM audit totals, missing-COM badges, and LOB-aware export/payment surfaces
@@ -110,10 +140,11 @@ dependencies:
   - BusinessUnitContext (not used by CTV; they have no scope)
 affected_by:
   - commissionEngine changes (D13 order or earnings shape)
-  - Auth me/login augmentation, including legacy CTV phone/ref-code lookup boundaries
+  - Auth me/login augmentation; CTV phone/ref-code login lookup now covers all active is_ctv partners (INV-008C; legacy SHA-256 fallback stays import-marker gated)
   - Any partners column rename
 impact_tests:
   - CTV login lands on /ctv, 403 on admin
+  - Non-legacy CTV (created_via='admin_create'/'self_signup', phone + bcrypt password, no email) authenticates via POST /api/Auth/login and a wrong password is rejected (INV-008C)
   - Admin /commission CTV tab shows legacy source badges for rows with `created_via LIKE 'legacy_ctv_import%'`
   - Legacy CTV import dry-run reports planned/skipped counts and writes an audit before any confirmed DB write
   - commission-summary returns live aggregated numbers from both DB earnings tables for the CTV's recipient_partner_id
@@ -132,8 +163,13 @@ impact_tests:
   - Service-card CTV assignment creates full-service-price tier earnings immediately; service-card creation inherits the customer's active recorded referral CTV when the submitted `ctv_id` is blank; service-card CTV reassignment before payout reverses/recreates pending earnings; paid-out earnings block reassignment
   - Appointment-card CTV reassignment changes ownership without commission movement and preserves the existing timer anchor
   - Admin CTV hierarchy tree blocks moving CTVs with any referred customer, service, or earning activity and logs allowed moves automatically
-  - Admin /commission five-tab flow keeps date filters legible and shows earned dates before payout selection
-  - Admin /commission?tab=newClients links client names to /customers/:id with a return trail back to the New Clients tab while keeping phone numbers as tel: links and showing service revenue, paid total, COM total, and missing-COM state
+  - Staff /verify-discount blocks CTV login, requires LOB + phone, reclaims client under issuing CTV on verify
+  - Admin Edit CTV modal toggles `is_live`; after save, the CTV's next QR code generation uses live tier settings
+  - CTV portal QR tab shows live-tier preview when `isLive=true` (higher discount %, longer expiry)
+  - NK3-only CTV integrity repair dry-run returns zero planned SQL after apply for Dental/Cosmetic CTV identity mirrors, active Cosmetic-only CTV dental-auth insertion, inactive Cosmetic-only scope normalization, and account `0972020908` CTV-only auth flags
+  - Public fan landing `/ctv/discount/:shortCode` renders without admin Overview redirect; GET /api/discount-codes/landing/:shortCode works without auth token
+  - CTV portal Mã QR link opens fan landing; after claim, voucher QR populates with staff-verify URL
+  - Staff /verify-discount blocks CTV login, requires LOB + phone, reclaims client under issuing CTV on verify
 risk_level: high (only cross-DB surface)
 notes:
   - "D13 live demo: seed a CTV partner + referred patient + collected payment in dental and/or cosmetic; verify earnings row + CTV dashboard shows it."

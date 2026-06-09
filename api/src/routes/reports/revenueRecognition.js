@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[reports-analytics]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/reports/revenueRecognition]
+ * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 // Single source of truth for "service revenue" — matches the Excel revenue-flat
 // export's WHERE clause exactly (see api/src/services/exports/builders/legacyFlatRevenueQuery.js).
 // Any change here flows to: revenue.js, revenueBreakdowns.js, servicesBreakdown.js,

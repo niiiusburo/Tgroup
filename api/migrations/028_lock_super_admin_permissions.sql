@@ -1,3 +1,6 @@
+-- @crossref:domain[auth]
+-- @crossref:used-in[NK3 schema migration: api/migrations/028_lock_super_admin_permissions]
+-- @crossref:uses[product-map/domains/auth.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration: Ensure the system Admin (super admin) group has every single permission.
 -- This locks the super admin role with full access and prevents partial permission gaps.
 

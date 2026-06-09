@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 CTV portal and referral surface: website/src/components/ctv/ReferralFlipCard]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CalendarDays, Check, ExternalLink, Link2, ReceiptText, RotateCcw, Sparkles } from 'lucide-react';
@@ -191,7 +196,7 @@ export function ReferralFlipCard({ referral }: ReferralFlipCardProps) {
                       data-testid="ctv-eligible-banner"
                     >
                       <span aria-hidden="true">⚠</span>
-                      {t('link.portalEligible', 'Đã hết hạn liên kết — khách có thể gắn CTV khác')}
+                      {t('link.portalEligible')}
                     </div>
                   ) : (
                     <CtvLinkBar

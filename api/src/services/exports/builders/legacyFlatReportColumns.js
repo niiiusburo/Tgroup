@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[reports-analytics]
+ * @crossref:used-in[NK3 backend service function: api/src/services/exports/builders/legacyFlatReportColumns]
+ * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const REVENUE_COLUMNS = [
   { key: 'companyName', header: 'Cơ sở' },
   { key: 'customerCode', header: 'Mã Khách hàng', width: 16 },

@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[appointments-calendar]
+ * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/PatientCheckIn]
+ * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * PatientCheckIn - Zone 1: Treatment tracker for arrived patients
  * @crossref:used-in[Overview]
  *

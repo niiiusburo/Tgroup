@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[appointments-calendar]
+ * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/TodayAppointments]
+ * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * TodayAppointments - Zone 3: Today's appointment sidebar
  * @crossref:used-in[Overview]
  *

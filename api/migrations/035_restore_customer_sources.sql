@@ -1,3 +1,6 @@
+-- @crossref:domain[customers-partners]
+-- @crossref:used-in[NK3 schema migration: api/migrations/035_restore_customer_sources]
+-- @crossref:uses[product-map/domains/customers-partners.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration: Restore full list of customer sources
 -- Ensures all 8 business-defined sources exist
 

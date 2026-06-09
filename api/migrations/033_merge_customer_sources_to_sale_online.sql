@@ -1,3 +1,6 @@
+-- @crossref:domain[customers-partners]
+-- @crossref:used-in[NK3 schema migration: api/migrations/033_merge_customer_sources_to_sale_online]
+-- @crossref:uses[product-map/domains/customers-partners.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration: Merge all listed customer sources into "Sale Online"
 -- Replaces: Khách vãng lai, Hotline, Khách cũ, Khách hàng giới thiệu,
 --           Nội bộ giới thiệu, MKT1, ĐNCB

@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/reports/ReportsCustomers]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useOutletContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Users, UserPlus, UserCheck, MapPin } from 'lucide-react';

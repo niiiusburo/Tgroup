@@ -1,3 +1,6 @@
+-- @crossref:domain[auth]
+-- @crossref:used-in[NK3 schema migration: api/migrations/048_grant_lob_permissions_to_admin]
+-- @crossref:uses[product-map/domains/auth.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- 048_grant_lob_permissions_to_admin.sql
 -- Cosmetic LOB v2 Phase 2 — Auto-grant LOB access permissions to Admin group
 -- Date: 2026-05-21

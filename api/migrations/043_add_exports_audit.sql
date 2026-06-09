@@ -1,3 +1,6 @@
+-- @crossref:domain[reports-analytics]
+-- @crossref:used-in[NK3 schema migration: api/migrations/043_add_exports_audit]
+-- @crossref:uses[product-map/domains/reports-analytics.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Audit log for export operations (PRD Section 11)
 CREATE TABLE IF NOT EXISTS dbo.exports_audit (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),

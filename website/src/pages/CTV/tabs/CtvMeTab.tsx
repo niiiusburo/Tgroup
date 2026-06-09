@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/CTV/tabs/CtvMeTab]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Copy, ExternalLink, LogOut, Share2 } from 'lucide-react';
@@ -17,7 +22,7 @@ export function CtvMeTab({ profile, onProfileUpdated }: CtvMeTabProps) {
   const { t } = useTranslation('ctv');
   const [copied, setCopied] = useState(false);
   const displayName = profile?.name || user?.name || t('profileFallback');
-  const email = profile?.email || user?.email || '-';
+  const email = profile?.email || user?.email || t('common.empty');
   const phone = profile?.phone;
   const referralSource = profile?.id || user?.id || '000000';
   const referralCode = `CTV-${referralSource.slice(0, 6).toUpperCase()}`;

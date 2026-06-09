@@ -1,3 +1,6 @@
+-- @crossref:domain[payments-deposits]
+-- @crossref:used-in[NK3 schema migration: api/migrations/004_payment_plan_items]
+-- @crossref:uses[product-map/domains/payments-deposits.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Link monthly plans to specific invoices (scope)
 CREATE TABLE IF NOT EXISTS monthlyplan_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

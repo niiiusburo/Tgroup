@@ -1,5 +1,10 @@
 "use strict";
 
+/**
+ * @crossref:domain[services-catalog]
+ * @crossref:used-in[NK3 backend service function: api/src/services/faceRecognitionRuntime]
+ * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const { healthCheck: faceServiceHealth } = require("./faceEngineClient");
 const { healthCheck: comprefaceHealth } = require("./comprefaceClient");
 

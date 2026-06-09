@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useFaceRecognition } from '../useFaceRecognition';
 import * as api from '@/lib/api';
+import i18n from '@/i18n';
 
 vi.mock('@/lib/api', () => ({
   recognizeFace: vi.fn(),
@@ -181,6 +182,31 @@ describe('useFaceRecognition', () => {
     await waitFor(() => expect(result.current.registerState.status).toBe('error'));
     const state = result.current.registerState as { status: 'error'; message: string };
     expect(state.message).toBe('faceRecognition.registerFailed');
+  });
+
+  it('maps SPOOF_DETECTED to the localized liveness message on recognize', async () => {
+    const spoofErr = Object.assign(new Error('raw service msg'), { code: 'SPOOF_DETECTED' });
+    vi.mocked(api.recognizeFace).mockRejectedValue(spoofErr);
+
+    const { result } = renderHook(() => useFaceRecognition());
+    result.current.recognize(new Blob(['img'])).catch(() => {});
+
+    await waitFor(() => expect(result.current.recognizeState.status).toBe('error'));
+    const state = result.current.recognizeState as { status: 'error'; message: string };
+    // spoof code wins over the raw error message and resolves to the localized key
+    expect(state.message).toBe(i18n.t('faceRecognition.spoofDetected', { ns: 'customers' }));
+    expect(state.message).not.toBe('raw service msg');
+  });
+
+  it('maps SPOOF_DETECTED to the localized liveness message on register', async () => {
+    const spoofErr = Object.assign(new Error('raw service msg'), { code: 'SPOOF_DETECTED' });
+    vi.mocked(api.registerFace).mockRejectedValue(spoofErr);
+
+    const { result } = renderHook(() => useFaceRecognition());
+    await expect(result.current.register('p-1', new Blob(['img']))).rejects.toBe(spoofErr);
+    await waitFor(() => expect(result.current.registerState.status).toBe('error'));
+    const state = result.current.registerState as { status: 'error'; message: string };
+    expect(state.message).toBe(i18n.t('faceRecognition.spoofDetected', { ns: 'customers' }));
   });
 
   it('recognize rethrows API errors after setting error state', async () => {

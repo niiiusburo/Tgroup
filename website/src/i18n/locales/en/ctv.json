@@ -14,6 +14,8 @@
   "hello": "Hi, {{name}}",
   "notifications": "Notifications",
   "language": "Language",
+  "catalog": "Service catalog",
+  "pricing": "Service pricing",
   "quickActions": "Quick CTV actions",
   "header": {
     "brand": "TG CLINIC",
@@ -28,7 +30,7 @@
     "commission": "Commission",
     "referrals": "Track Clients",
     "recruiting": "Invite CTVs",
-    "network": "Network",
+    "network": "Referral/QR",
     "me": "Me"
   },
   "actions": {
@@ -44,9 +46,20 @@
     "saving": "Saving...",
     "changePassword": "Change password"
   },
+  "common": {
+    "emDash": "—",
+    "empty": "—"
+  },
+  "errors": {
+    "genericRetry": "Please try again."
+  },
+  "brandAssets": {
+    "tamGroupAlt": "Tấm Group"
+  },
   "home": {
     "greeting": "Hi, {{name}} 👋",
-    "subtitle": "Your referral commission across Dental & Cosmetic",
+    "subtitle": "Your referral commission across Dental & Aesthetic",
+    "pricingCta": "View service pricing",
     "pendingCommission": "Pending commission",
     "thisMonth": "This month",
     "services": "Services",
@@ -103,6 +116,86 @@
     "pending": "Expected",
     "paid": "Received"
   },
+  "referralQr": {
+    "pageTitle": "Referrals & QR codes",
+    "pageSubtitle": "Track your CTV network or share discount QR codes with friends",
+    "subTabList": "Choose network or QR code",
+    "subTabs": {
+      "network": "Network",
+      "qr": "QR code"
+    }
+  },
+  "qrDiscount": {
+    "currentTier": "Current discount tier",
+    "tierLive": "LIVE",
+    "tierOff": "OFF",
+    "discountPercent": "{{percent}}% off",
+    "discountNow": "{{value}} off now",
+    "yourCodeLabel": "YOUR DISCOUNT CODE",
+    "scanAtDesk": "Staff scan at the desk to verify",
+    "saveCodeNow": "Save code now!",
+    "brandLine": "TG Clinic · Tấm Dental",
+    "shareVoucherTitle": "Discount code",
+    "shareVoucherText": "Save your discount code",
+    "expiryDays": "Valid for {{days}} days after claim",
+    "tierHint": "Shown from your LIVE/OFF status. The % is locked on the code when a friend claims it.",
+    "slogan": "For all beauty services ✨",
+    "modeLinkTitle": "Option 1 — Share link",
+    "modeLinkBody": "Send the link to a friend. When they open it and claim a code, the discount % is locked on that code.",
+    "modeQrTitle": "Option 2 — Download QR image",
+    "modeQrBody": "Client shows the voucher QR. Staff scan with their phone → sign in as staff → enter client phone → verify the code.",
+    "copyLink": "Copy link",
+    "shareLink": "Share",
+    "openPreview": "Open preview",
+    "copied": "Copied",
+    "downloadImage": "Download voucher image",
+    "downloading": "Creating image...",
+    "qrLoading": "Generating QR...",
+    "qrAlt": "CTV discount QR code",
+    "shareTitle": "Discount from {{name}}",
+    "shareText": "{{percent}}% off at TG Clinic — from {{name}}",
+    "generateHint": "Each tap creates a new code (one code = one voucher image).",
+    "generateAndDownload": "Generate code & download image",
+    "downloadFilename": "discount-code-{{code}}.png",
+    "canvasDiscount": "🎁 {{value}} off"
+  },
+  "codeHistory": {
+    "title": "My codes",
+    "subtitle": "Track every code you issued — KOL dashboard parity",
+    "refresh": "Refresh",
+    "total": "Total",
+    "used": "Used",
+    "conversion": "Conversion",
+    "searchPlaceholder": "Search code, name, or phone...",
+    "filterAll": "All",
+    "filterClaimed": "Issued",
+    "filterCheckedIn": "Checked in",
+    "filterUsed": "Used",
+    "filterExpired": "Expired",
+    "loading": "Loading codes...",
+    "empty": "No codes yet — share your link or download a QR voucher.",
+    "anonymous": "Unnamed visitor",
+    "status": {
+      "claimed": "Issued",
+      "generated": "Generated",
+      "active": "Active",
+      "checked_in": "Checked in",
+      "used": "Used",
+      "expired": "Expired",
+      "unknown": "Unknown"
+    }
+  },
+  "discountLanding": {
+    "brand": "TG Clinic",
+    "title": "Offer from {{name}}",
+    "preview": "{{value}} off beauty services",
+    "claimBody": "Tap below to claim your personal discount code — one code per visitor.",
+    "claimCta": "CLAIM DISCOUNT CODE",
+    "claiming": "Generating code...",
+    "instructions": "Show this code or QR at the front desk to redeem the offer.",
+    "notFound": "Invalid link or inactive CTV.",
+    "generateError": "Could not generate a code. Please try again."
+  },
   "hierarchy": {
     "title": "CTV Referral Hierarchy",
     "subtitle": "See the CTVs above and below you in the referral tree",
@@ -149,7 +242,41 @@
   "noSearchBody": "Try a different search or filter.",
   "lobs": {
     "dental": "Dental",
-    "cosmetic": "Cosmetic"
+    "cosmetic": "Aesthetic"
+  },
+  "join": {
+    "title": "Become a CTV Partner",
+    "subtitle": "Required: name, phone, and password. Email is optional.",
+    "uplineFromLink": "You will register under {{name}}",
+    "uplineManualHint": "Enter your referrer's CTV phone at the bottom of the form if you need to choose an upline.",
+    "checkingLink": "Verifying referral link...",
+    "successTitle": "CTV account created!",
+    "successBody": "You can sign in with the phone or email you just registered.",
+    "loginCta": "Sign in",
+    "invalidLink": "Invalid referral link. Enter a referrer CTV phone number to continue.",
+    "uplineLabel": "Referrer CTV",
+    "uplinePlaceholder": "Referrer CTV phone number",
+    "uplineHintFromLink": "Leave blank to use the CTV from your referral link.",
+    "uplineHintRoot": "Optional — leave blank to register as a root-level CTV.",
+    "uplineHintRequired": "Required when signing up from the landing page CTV button.",
+    "uplineChecking": "Verifying CTV phone...",
+    "uplineValid": "Valid CTV: {{name}}",
+    "submit": "Create CTV account",
+    "errors": {
+      "uplineRequired": "Please enter your referrer CTV phone number.",
+      "uplineVerifying": "Please wait while we verify the referrer CTV phone.",
+      "uplineNotFound": "No CTV found for this phone number."
+    },
+    "fields": {
+      "name": "Full name",
+      "phone": "Your phone number",
+      "email": "Email",
+      "password": "Password",
+      "lobs": "Service lines",
+      "submit": "Create CTV account",
+      "submitting": "Creating...",
+      "emailOptional": "(optional)"
+    }
   },
   "serviceStatus": {
     "pending": "Pending",
@@ -182,6 +309,17 @@
   },
   "forms": {
     "close": "Close",
+    "defaults": {
+      "name": "Full name",
+      "phone": "Phone number",
+      "email": "Email",
+      "password": "Password",
+      "lobs": "Service lines",
+      "submit": "Create CTV account",
+      "submitting": "Creating...",
+      "cancel": "Cancel",
+      "emailOptional": "(optional)"
+    },
     "referClient": {
       "title": "Refer a client",
       "phoneFirstNotice": "Type in the phone number to verify first.",
@@ -193,8 +331,6 @@
       "ctvPhonePlaceholder": "Enter CTV phone number",
       "date": "Appointment date",
       "lob": "Service line",
-      "dental": "Dental",
-      "cosmetic": "Cosmetic",
       "submit": "Refer client",
       "submitting": "Sending...",
       "success": "Referred successfully!",

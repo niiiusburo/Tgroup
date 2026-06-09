@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[auth]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/PermissionBoard/PermissionBoard]
+ * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * PermissionBoard - Permission system architecture visualization and management
  * @crossref:used-in[App]
  * @crossref:uses[usePermissionBoard, PermissionGroup as Tier, EmployeePermission]

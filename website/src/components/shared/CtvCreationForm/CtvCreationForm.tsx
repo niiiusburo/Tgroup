@@ -1,5 +1,6 @@
 import React, { type ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type { UseCtvCreationFormResult } from './types';
 
@@ -84,6 +85,7 @@ export function CtvCreationForm({
   afterSubmit,
   className,
 }: CtvCreationFormProps) {
+  const { t } = useTranslation('ctv');
   const {
     values,
     errors,
@@ -106,14 +108,14 @@ export function CtvCreationForm({
   const baseInput =
     'w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-orange-500 text-sm text-gray-900 placeholder:text-gray-400 disabled:bg-gray-50';
 
-  const nameLabel = labels.name ?? 'Họ tên';
-  const phoneLabel = labels.phone ?? 'Số điện thoại';
-  const emailLabel = labels.email ?? 'Email';
-  const passwordLabel = labels.password ?? 'Mật khẩu';
-  const lobsLabel = labels.lobs ?? 'Lĩnh vực hoạt động';
-  const submitText = submitLabel ?? labels.submit ?? 'Tạo tài khoản CTV';
-  const submittingText = labels.submitting ?? 'Đang tạo...';
-  const cancelText = labels.cancel ?? 'Hủy';
+  const nameLabel = labels.name ?? t('forms.defaults.name');
+  const phoneLabel = labels.phone ?? t('forms.defaults.phone');
+  const emailLabel = labels.email ?? t('forms.defaults.email');
+  const passwordLabel = labels.password ?? t('forms.defaults.password');
+  const lobsLabel = labels.lobs ?? t('forms.defaults.lobs');
+  const submitText = submitLabel ?? labels.submit ?? t('forms.defaults.submit');
+  const submittingText = labels.submitting ?? t('forms.defaults.submitting');
+  const cancelText = labels.cancel ?? t('forms.defaults.cancel');
   const emailNote = labels.emailOptional;
 
   const hasCancel = Boolean(onCancel);
@@ -207,9 +209,9 @@ export function CtvCreationForm({
                     onChange={() => toggleLob(lob)}
                     disabled={lob === 'dental'}
                     className="h-4 w-4 accent-orange-500 disabled:cursor-not-allowed disabled:opacity-60"
-                    aria-label={lob}
+                    aria-label={t(`lobs.${lob}`)}
                   />
-                  <span className="text-sm font-medium capitalize text-gray-800">{lob}</span>
+                  <span className="text-sm font-medium text-gray-800">{t(`lobs.${lob}`)}</span>
                 </label>
               );
             })}

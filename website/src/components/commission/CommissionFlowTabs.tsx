@@ -1,14 +1,20 @@
-import { ArrowLeft, BadgeDollarSign, CalendarDays, CheckCircle2, ChevronRight, ReceiptText, Settings2, UserPlus, Users } from 'lucide-react';
+/**
+ * @crossref:domain[earnings-commissions]
+ * @crossref:used-in[NK3 commission and CTV admin surface: website/src/components/commission/CommissionFlowTabs]
+ * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+import { ArrowLeft, BadgeDollarSign, CalendarDays, CheckCircle2, ChevronRight, ReceiptText, Settings2, Tag, UserPlus, Users } from 'lucide-react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { formatCommissionDate } from './dateFormatting';
 
-export type CommissionTabType = 'config' | 'ctvs' | 'newClients' | 'earnings' | 'payouts';
+export type CommissionTabType = 'config' | 'ctvs' | 'discountCodes' | 'newClients' | 'earnings' | 'payouts';
 
 const tabs = [
   { key: 'config', icon: Settings2, color: 'text-slate-700', active: 'border-slate-300 bg-slate-50 text-slate-900' },
   { key: 'ctvs', icon: Users, color: 'text-sky-700', active: 'border-sky-300 bg-sky-50 text-sky-900' },
+  { key: 'discountCodes', icon: Tag, color: 'text-violet-700', active: 'border-violet-300 bg-violet-50 text-violet-900' },
   { key: 'newClients', icon: UserPlus, color: 'text-orange-700', active: 'border-orange-300 bg-orange-50 text-orange-900' },
   { key: 'earnings', icon: BadgeDollarSign, color: 'text-emerald-700', active: 'border-emerald-300 bg-emerald-50 text-emerald-900' },
   { key: 'payouts', icon: ReceiptText, color: 'text-rose-700', active: 'border-rose-300 bg-rose-50 text-rose-900' },

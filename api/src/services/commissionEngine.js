@@ -1,4 +1,11 @@
 /**
+ * @crossref:domain[earnings-commissions]
+ * @crossref:used-in[NK3 backend service function: api/src/services/commissionEngine]
+ * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:function[createEarningsForServiceCard, reverseServiceCardEarnings, createEarningsForPayment, reverseOnRefund]
+ * @crossref:uses[api/src/routes/saleOrders/createSaleOrder.js, api/src/routes/saleOrders/updateSaleOrder.js, api/src/routes/payments.js]
+ */
+/**
  * commissionEngine.js — Per-service CTV commission engine (v3, 2026-06)
  *
  * MODEL (confirmed with product owner 2026-06-01):

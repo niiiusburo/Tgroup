@@ -1,3 +1,6 @@
+-- @crossref:domain[customers-partners]
+-- @crossref:used-in[NK3 schema migration: api/migrations/031_update_customer_sources]
+-- @crossref:uses[product-map/domains/customers-partners.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration: Update customer sources to new business-defined list
 -- Replaces old source names with the new dropdown options
 

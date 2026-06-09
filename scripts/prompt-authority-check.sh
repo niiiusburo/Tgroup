@@ -99,7 +99,7 @@ contains_any() {
   return 1
 }
 
-if contains_any "frontend" "ui" "page" "screen" "modal" "form" "button" "layout" "component" "browser" "visual"; then
+if contains_any "frontend" "ui" "page" "screen" "modal" "form" "button" "layout" "component" "browser" "visual" "breadcrumb" "crossref" "route graph" "traceability"; then
   add_doc "website/agents.md"
   add_doc "website/design.md"
   add_doc "DESIGN.md"
@@ -107,6 +107,7 @@ if contains_any "frontend" "ui" "page" "screen" "modal" "form" "button" "layout"
   add_doc "docs/USE-CASES.md"
   add_doc "docs/WORKFLOWS.md"
   add_doc "docs/TEST-MATRIX.md"
+  add_doc "docs/CROSSREF-BREADCRUMBS.md"
   add_doc "testbright.md"
 
   # CTV / Identity Domain SSOT enforcement (hard block, per root AGENTS.md §5.1).

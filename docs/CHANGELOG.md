@@ -2,6 +2,108 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+
+
+## [0.36.0] — 2026-06-09
+### Added (NK3 — CTV QR discount Phase 2)
+- **Auto-refresh monitor for CTV "Mã của tôi" panel.** `CtvDiscountCodesHistory` now silently polls every 30 seconds (`setInterval`) so CTVs see status updates (claimed → checked_in → used) without manual refresh. — @agent — Kien interview v6: "auto_poll" for monitor.
+- **Checked-in step tracking in code status flow.** Staff verify now transitions codes through a two-step lifecycle: first verify marks `checked_in`, second "Complete" action marks `used`. Backend `POST /api/discount-codes/verify` accepts `markAsUsed`; returns specific message when code is already checked-in. Frontend `VerifyDiscount` shows "Đã check-in — chỉ cần hoàn tất" badge and "Hoàn tất mã" button. Status badge colors: orange (claimed), blue (checked_in), green (used), gray (expired). — @agent — Kien interview v6: claimed → checked_in → used.
+- **Admin discount codes page (`/commission?tab=discountCodes`).** New admin-only tab in Commission page shows all discount codes across all CTVs in a sortable/filterable table with: code, CTV name, discount %, status badge, customer name/phone, creation date. Supports status filter (all/claimed/checked_in/used/expired) and search by code/CTV/customer. Paginated (20 per page). Reuses `CtvDiscountCodesHistory` styling patterns. — @agent — Kien interview v6: "admin_codes_page" priority.
+- **Backend admin list endpoint.** `GET /api/discount-codes/admin` (staff-only) returns all codes with CTV name join, status/search filters, and pagination via `listAllDiscountCodes()` service. — @agent
+- **Earnings integration: payment hook auto-completes QR codes.** When a customer with a `checked_in` discount code makes a payment (`POST /api/Payments`), the payment transaction now also updates the matching `ctv_discount_codes` row to `status='used'` and records `payment_id`. This bridges the QR discount flow to the existing commission engine: `referred_by_ctv_id` is set at verify time, and `createEarningsForPayment` creates earnings at payment time — no duplicate earnings logic needed. — @agent — Kien interview v6: "earnings_on_used" + "on_payment" trigger.
+- **Migration 065:** Adds `payment_id` to `ctv_discount_codes` for payment-to-code linkage. — @agent
+### Backend
+- **`api/src/services/ctvDiscountCodes.js`** now exports `listAllDiscountCodes()` for admin queries with CTV name join + search across code/visitor/CTV name. — @agent
+- **`api/src/routes/payments.js`** QR discount code auto-complete hook runs inside the payment transaction after earnings engine. — @agent
+### Frontend
+- **`CommissionFlowTabs`** expanded to 6 tabs including new `discountCodes` (violet Tag icon). — @agent
+- **`DiscountCodesAdminTab`** new component with table, filters, search, pagination. — @agent
+- **`VerifyDiscount`** now supports two-step verify/complete flow with `isCheckedIn` state detection and `confirmComplete` i18n key. — @agent
+- **i18n:** Added `discountCodes.*` keys to `vi/commission.json` and `en/commission.json`; added `verifyDiscount.statusCheckedIn` and `confirmComplete` keys. — @agent
+### Tests
+- `api/src/routes/__tests__/discountCodes.test.js` (8 passed), `api/tests/ctvsEdit.test.js` (19 passed). — @agent
+
+## [0.35.0] — 2026-06-09
+### Added (NK3 — CTV QR discount live tier toggle)
+- **CTV `is_live` flag — admin toggle for QR discount tier.** Admin CTV management (`/commission?tab=ctvs`) now shows a **"CTV nổi bật (Live)"** toggle in the Edit CTV modal. Turning it on marks the CTV as a "live" tier CTV, which receives a higher QR discount percentage and longer expiry (configured via `systempreferences` keys `discount.live_percent`, `discount.live_expiry_days`, etc.). Turning it off returns the CTV to the default non-live tier. The toggle syncs to both Dental and Cosmetic DB mirror rows. — @agent — Kien interview v6: "CTV nổi bật" tier for high-value partners.
+- **Admin CTV list shows Live badge.** Each CTV row now has a "Live" column with an amber badge when `is_live = true`. — @agent
+### Backend
+- **Migration 064:** Adds `partners.is_live` (default `false`) and seeds 7 `systempreferences` keys for live vs non-live QR discount settings (`discount.live_percent`, `discount.nonlive_percent`, `discount.live_expiry_days`, `discount.nonlive_expiry_days`, `discount.live_slogan`, `discount.nonlive_slogan`, `discount.live_enabled_default`). — @agent
+- **`PUT /api/Ctvs/:id`** now accepts `is_live: boolean` and updates both DB mirror rows. — @agent
+- **`GET /api/Ctvs`** now returns `is_live` in the list. — @agent
+- **`GET /api/ctv/me`** and CTV profile services now return `isLive` in the profile. — @agent
+- **`POST /api/discount-codes/ensure`** and **`GET /api/discount-codes/landing/*`** now derive `discountValue` and `expiryDays` from the CTV's `is_live` tier + `systempreferences` settings instead of hardcoded defaults. — @agent
+### Frontend
+- **`CtvQrDiscountPanel`** now reads `profile.isLive` instead of hardcoded `false`. — @agent
+- **`CtvDiscountLanding`** already consumed `landing.ctv.isLive`; now the backend actually provides it. — @agent
+- **i18n:** Added `ctv.isLive` and `ctv.isLiveHint` keys to `vi/commission.json` and `en/commission.json`. — @agent
+### Tests
+- `api/src/routes/__tests__/discountCodes.test.js` (8 passed), `api/tests/ctvsEdit.test.js` (19 passed), `api/src/services/__tests__/ctvSelfProfile.test.js` (4 passed). — @agent
+
+## [0.34.0] — 2026-06-09
+### Added (NK3 — CTV login recovery, admin-driven)
+- **Login page "Quên mật khẩu?" affordance.** `/login` now shows a "Quên mật khẩu?" / "Forgot Password?" link below the password field. Clicking reveals "Vui lòng liên hệ quản trị viên để được hỗ trợ đặt lại mật khẩu." — no self-service reset exists because nk3 has zero SMS/email/Zalo send infrastructure today. Reduces the "I can't login" confusion by telling users exactly what to do. — @agent — 86% of active CTVs (211/244) have never logged in; no recovery path existed.
+- **Admin CTV create — credential reveal on success.** After admin "Add CTV" succeeds, the modal now shows a credential card with the CTV's name, phone, email (if any), and the password the admin just set, plus a "Copy all" button so the admin can immediately hand off login info to the new CTV. Prevents the silent "created but never told credentials" gap that leaves 29 admin-created CTVs locked out. — @agent
+- **Admin per-CTV "Đặt lại mật khẩu" reset action.** Each CTV row in the admin CTV management table now has an amber "Đặt lại mật khẩu" button. Clicking opens a confirmation → generates an 8-character temp password → calls `PUT /api/Ctvs/:id {password}` (bcrypt, works for legacy SHA-256 CTVs too) → reveals the temp password with a copy button. This is the only recovery path for the 182 legacy-imported CTVs who need their old-portal password reset. — @agent
+### Fixed
+- **Pre-existing `setIsLive` unused-variable in EditCtvModal.** Changed from `useState` to a plain `const` since the UI has no live toggle control; quiets the TS6133 diagnostic without behavior change. — @agent
+- **CTV portal full i18n pass:** Replaced user-facing Cosmetic → **Aesthetic** (EN) / **Thẩm mỹ** (VI); Dental / Nha khoa unchanged. Removed `isVietnamese` branches, inline EN/VI fallbacks, and hardcoded copy across portal tabs, modals, JoinCtv, CtvCreationForm SSOT, QR voucher canvas, and discount history. All strings now live in `ctv` namespace (`en/ctv.json`, `vi/ctv.json`). — @agent — CTV portal mixed languages and hardcoded LOB labels.
+
+## [0.35.1] — 2026-06-09
+### Added
+- **Bảng giá live Google Sheet sync (30s).** API worker pulls legacy pricing sheet `19YZB-SgpqvI3-hu93xOk0OCDWtUPxrAAfR6CiFpU4GY` every 30s, writes `website/public/bang-gia/data/pricing.json` + `index.html`. NK3 mounts the directory into `tgroup-nk3-web` so `/bang-gia` updates without rebuild. Status: `GET /api/public/bang-gia/status`. Runbook: `docs/runbooks/BANG_GIA_SYNC.md`. — @agent — static snapshot did not track sheet edits.
+
+## [0.33.4] — 2026-06-09
+- **Bảng giá (`/bang-gia`)** — static pricing page from legacy `ctv2checkin` (`pricing.json`, 16 categories, VND list prices). CTV portal header adds tag icon beside catalog book icon. `/catalogue` remains the visual flipbook only (no prices). — @agent — CTV portal catalog shortcut lacked pricing.
+
+## [0.33.2] — 2026-06-08
+### Docs (NK3 — CTV discount QR governance)
+- **DATA-MODEL + TEST-MATRIX:** Documented `dbo.ctv_discount_codes` (062–063 columns, dental-only store, status lifecycle). Added regression mapping for discount QR routes, public API whitelist, fan landing, and Playwright `public` project. — @agent — §16 doc gate for discount QR fix.
+
+### Fixed (NK3 — CTV discount QR link / fan landing)
+- **Fan discount link now opens landing + QR instead of Overview or blank loader:** Public `/api/discount-codes/landing/*`, `check-existing`, and fan `POST /generate` bypass global auth (`isPublicApiPath`); frontend public fetches use `API_URL` not Vite-relative `/api` (was returning HTML 200). Nested `/ctv/discount/:shortCode` routes + admin splat guard. Fixed `CtvDiscountLanding` useEffect re-fetch loop (`t` dep removed). CTV portal link is clickable with open-preview button. — @agent — pressing QR share link went to Overview / QR never populated.
+
+## [0.33.1] — 2026-06-08
+### Release (NK3 — CTV discount QR minor)
+- **NK3 promoted to 0.33.1** — bundles CTV Giới thiệu/QR tab (KOL-parity voucher UI), multi-code generation + **Mã của tôi** tracking, public fan landing `/ctv/discount/:shortCode`, staff `/verify-discount` flow with LOB-first client checks matching CTV refer/booking rules. Migrations 062–063 (`ctv_discount_codes`). Target: https://tmv.2checkin.com — @agent — NK3 minor version after KOL portal parity + staff verify hardening.
+
+## [0.32.124] — 2026-06-08
+### Fixed (NK3 — staff discount verify client rules)
+- **Staff verify discount now mirrors CTV refer/booking client checks:** LOB picker first (dental or cosmetic), then phone lookup in that LOB only; claim gate vs issuing CTV; `hasService` flag for appointment/saleorder history; reclaim `referred_by_ctv_id` on verify. — @agent — existing-client verify must follow CTV portal booking rules per LOB.
+
+## [0.32.123] — 2026-06-08
+### Added (NK3 — CTV discount QR KOL parity)
+- **KOL-style multi-code generation + tracking:** CTV portal Mode B creates a new code per “Tạo mã & tải ảnh” click; Mode A public landing `/ctv/discount/:shortCode` lets fans claim codes on button press. CTV **Mã của tôi** history panel lists all codes with stats/filters. Backend: migration 063, `POST /generate`, `GET /mine`, `GET /stats`, `GET /landing/:shortCode`, `GET /check-existing`; staff verify can `createIfMissing` to register client under issuing CTV. — @agent — match KOL portal: generate QR, track codes, check-in → client.
+
+## [0.32.122] — 2026-06-08
+### Added (NK3 — CTV discount QR staff verify)
+- **Staff verify flow for CTV voucher QR:** QR now encodes `/verify-discount?code=…` (not a dead landing URL). Staff scan → login gate (CTV must log out first) → enter client phone → search dental + cosmetic customers → confirm verify. Backend: `ctv_discount_codes` table (migration 062), `/api/discount-codes/{lookup,client-search,verify,ensure}`. — @agent — QR scan only opened homepage; staff could not verify codes.
+
+## [0.32.121] — 2026-06-08
+### UI (NK3 — CTV portal QR voucher)
+- **CTV Mã QR tab redesigned to match KOL referral voucher UX:** warm gradient background, red heartbeat discount banner with gift sparkles, glass “ticket” card with punch holes, monospace code, canvas QR, and animated purple–pink gradient “Lưu mã ngay!” download button. PNG export uses KOL-style composite (blue–pink bg, red banner, code + QR); mobile uses native share-with-file when available. — @agent — CTV portal QR looked too plain vs KOL app.
+
+## [0.32.120] — 2026-06-08
+### Added (NK3 — CTV portal Referral/QR)
+- **CTV portal “Giới thiệu/QR” tab** now has sub-tabs: **Mạng lưới** (existing hierarchy) and **Mã QR** (discount link share + voucher PNG download). Bottom nav label renamed from “Mạng lưới” / “Network” to **Giới thiệu/QR** / **Referral/QR**. QR UI shows tier % preview, copy/share landing link (`/ctv/discount/{code}`), and downloadable voucher image — backend discount settings API pending. — @agent — CTV portal distribution modes (link vs image) per partner interview v5.
+
+## [0.32.119] — 2026-06-07
+### Added (NK3 — Face ID cross-LOB chooser)
+- **Face ID recognition now lets the employee choose the LOB when a customer exists in both.** After `/api/face/recognize` matches in the active LOB, `GlobalFaceIdButton` probes the other physical DB by phone (`GET /api/cross-lob-probe`, `lob.crossview`-gated). When the same customer also exists in the other LOB, the quick-scan popover shows a chooser — open the current-LOB record (in-app navigate) or the other-LOB record (`?lob=` deep link, new tab) — instead of auto-navigating. Non-crossview employees and phone-less matches keep the previous straight-to-record behavior. — @agent — staff working a customer present in both dental and cosmetic could silently land on the wrong record.
+
+### Fixed (NK3 — cross-LOB)
+- **Restored `GET /api/cross-lob-probe`**, which had been dropped in the cosmetic-LOB merge (frontend `probeCrossLob` + `ProfileHeader` badge were calling a 404). Re-implemented in `api/src/server.js` gated by `requirePermission('lob.crossview')`, reading only the other LOB pool via `getDb(otherLob)` with a SQL last-9-digit phone-key match (replaces the original `LIMIT 300` + JS-loop scan that silently missed matches past the 300th customer). Cross-cutting route — passes through `dentalLobGate`.
+
+### Docs / Tests
+- Added `api/tests/crossLobProbe.test.js` (5: 400s, matched/not-matched other-pool probe, `PROBE_FAILED`) and a `GlobalFaceIdButton` chooser test (probe + new-tab deep link, no auto-navigate). Added `customers:face.crossLob.*` vi/en keys. Updated `docs/CONTRACTS.md` (v1.0.30) and `product-map/domains/integrations.yaml`.
+
+## [0.32.118] — 2026-06-07
+### Fixed (NK3 — CTV auth)
+- **CTV login now works for admin- and public-created CTVs.** `api/src/services/loginIdentifier.js` no longer gates the phone/ref-code login *lookup* to `legacy_ctv_import` rows — it now resolves any active `is_ctv = true` partner by phone/ref. CTVs are created with phone + bcrypt password and an **optional** email (AGENTS.md §5.1), so the old gate made every admin "Add CTV" and public `/ctv/join` account unable to authenticate (401), blocking the entire `/ctv` portal. Auth boundary preserved: `bcrypt.compare` still runs first for every account, and the salted SHA-256 legacy-password fallback stays restricted to `legacy_ctv_import` rows via `canUseLegacyCtvPassword`. — @agent — fixes the INV-008C contradiction (phone+password creation vs email-only login); verified e2e (admin_create CTV → 200 + token; wrong password → 401).
+
+### Docs / Tests
+- Amended **INV-008C** to split the (widened) CTV phone/ref *lookup* from the (still import-marker-gated) legacy SHA-256 *password* fallback; updated `product-map/domains/ctv.yaml` (sources, affected_by, impact_tests) and `api/src/services/__tests__/loginIdentifier.test.js`. Backend auth/CTV suite green (loginIdentifier, legacyCtvPassword, authLobHardening, ctvCreateLobScope, ctvPublicJoin — 31 tests).
+
 ## [0.32.117] — 2026-06-07
 ### Added (NK3 — Face ID security)
 - **Face ID passive liveness / anti-spoofing** — added MiniFASNet (source-verified Silent-Face) to the **local** face engine, run via OpenCV `cv2.dnn` (no new dependency). New `face-service/liveness.py` gates `POST /embed`: when `FACE_LIVENESS_ENABLED=true`, a printed/screen-photo spoof returns `SPOOF_DETECTED` (HTTP 422) from `/api/face/recognize` and `/api/face/register`, so a spoof never matches or enrolls. **Default off** and **fail-open** — a missing/unloadable model or inference error never blocks check-in (Face ID spec: "engine failures must not block normal workflows"). Enable only after calibrating `FACE_LIVENESS_THRESHOLD` (default 0.5) with real clinic captures. — @agent — closes the "no liveness" gap where a printed/on-screen photo matched a real customer; spec Non-Goals (payment auth, legal ID verification) unchanged.

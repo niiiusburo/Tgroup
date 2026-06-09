@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[employees-hr]
+ * @crossref:used-in[NK3 frontend API client: website/src/lib/api/employees]
+ * @crossref:uses[product-map/domains/employees-hr.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { apiFetch, type PaginatedResponse } from './core';
 
 // ─── Employees ────────────────────────────────────────────────────

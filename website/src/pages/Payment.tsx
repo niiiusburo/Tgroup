@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[payments-deposits]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Payment]
+ * @crossref:uses[product-map/domains/payments-deposits.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 /**
  * Payment Page - Deposit wallet, payment form, outstanding balances, and payment history

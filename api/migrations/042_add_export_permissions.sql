@@ -1,3 +1,6 @@
+-- @crossref:domain[reports-analytics]
+-- @crossref:used-in[NK3 schema migration: api/migrations/042_add_export_permissions]
+-- @crossref:uses[product-map/domains/reports-analytics.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration: Add operational Excel export permissions
 -- Grants to all existing permission groups so admins can configure access via Settings -> Roles.
 

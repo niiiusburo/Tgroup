@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[settings-system]
+ * @crossref:used-in[NK3 API middleware: api/src/middleware/errorHandler]
+ * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * Global error handler middleware for Express
  * Catches unhandled route errors and sends them to the error_events table.
  * @crossref:used-in[api/src/server.js]

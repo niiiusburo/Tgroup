@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 CTV portal and referral surface: website/src/components/ctv/CtvReferModal]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -150,7 +155,7 @@ export function CtvReferModal({ open, onClose, onSuccess, publicMode = false }: 
 
   if (!open) return null;
 
-  const lobLabel = t(`forms.referClient.${form.lob}`);
+  const lobLabel = t(`lobs.${form.lob}`);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -169,7 +174,7 @@ export function CtvReferModal({ open, onClose, onSuccess, publicMode = false }: 
       return;
     }
     if (lookup.status === 'done' && lookup.result?.claimed) {
-      setError(t('forms.referClient.errorClaimed', { owner: lookup.result.ownerName || '—' }));
+        setError(t('forms.referClient.errorClaimed', { owner: lookup.result.ownerName || t('common.emDash') }));
       return;
     }
     setLoading(true);
@@ -199,7 +204,7 @@ export function CtvReferModal({ open, onClose, onSuccess, publicMode = false }: 
     } catch (err) {
       const code = err instanceof ApiError ? err.code : undefined;
       if (code === 'B_CLIENT_CLAIMED') {
-        const owner = (err instanceof ApiError && (err.body as { error?: { ownerName?: string } })?.error?.ownerName) || '—';
+        const owner = (err instanceof ApiError && (err.body as { error?: { ownerName?: string } })?.error?.ownerName) || t('common.emDash');
         setError(t('forms.referClient.errorClaimed', { owner }));
       } else if (code === 'P_CTV_NOT_FOUND') {
         setError(t('forms.referClient.errorCtvNotFound'));
@@ -239,7 +244,7 @@ export function CtvReferModal({ open, onClose, onSuccess, publicMode = false }: 
                         : 'text-gray-600'
                     )}
                   >
-                    {t(`forms.referClient.${l}`)}
+                    {t(`lobs.${l}`)}
                   </button>
                 ))}
               </div>
@@ -360,7 +365,7 @@ function PhoneCheck({
     return <p className="mt-1.5 text-xs font-medium text-emerald-600">{t('forms.referClient.checkNew', { lob: lobLabel })}</p>;
   }
   if (r.claimed) {
-    return <p className="mt-1.5 text-xs font-bold text-amber-600">{t('forms.referClient.checkClaimed', { lob: lobLabel, owner: r.ownerName || '—' })}</p>;
+    return <p className="mt-1.5 text-xs font-bold text-amber-600">{t('forms.referClient.checkClaimed', { lob: lobLabel, owner: r.ownerName || t('common.emDash') })}</p>;
   }
   if (r.claimedByMe) {
     return <p className="mt-1.5 text-xs font-medium text-orange-600">{t('forms.referClient.checkYours', { lob: lobLabel, name: r.name || '' })}</p>;
@@ -385,7 +390,7 @@ function CtvPhoneCheck({
     );
   }
   if (lookup.result?.exists) {
-    return <p className="mt-1.5 text-xs font-semibold text-emerald-600">{t('forms.referClient.ctvFound', { name: lookup.result.name || 'CTV' })}</p>;
+    return <p className="mt-1.5 text-xs font-semibold text-emerald-600">{t('forms.referClient.ctvFound', { name: lookup.result.name || t('profileFallback') })}</p>;
   }
   return <p className="mt-1.5 text-xs font-semibold text-red-600">{t('forms.referClient.ctvNotFound')}</p>;
 }

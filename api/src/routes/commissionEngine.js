@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[earnings-commissions]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/commissionEngine]
+ * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const express = require('express');
 // NOTE: this router is intentionally NOT mounted in server.js — it is a manual/admin
 // commission-replay tool kept for debugging. It previously imported `requireAdminScope`

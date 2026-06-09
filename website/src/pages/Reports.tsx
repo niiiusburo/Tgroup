@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[reports-analytics]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Reports]
+ * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * Reports Page — Shell with nested routing for 8 report sub-pages.
  * Provides shared filters (date range, location) and renders <Outlet /> for child routes.
  */

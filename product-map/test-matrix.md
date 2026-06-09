@@ -12,6 +12,7 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 
 | Test File | Domain | What It Tests |
 |-----------|--------|---------------|
+| `__tests__/crossrefBreadcrumbs.test.ts` | Traceability / Governance | Locks NK3 App route `@crossref:route[...]` markers to reciprocal page-level breadcrumb triads, plus route/navigation spine coverage. |
 | `__tests__/appointment-form-edit.test.tsx` | Appointments | Appointment form edit flow, state persistence |
 | `__tests__/customer-deep-link.test.tsx` | Customers | Deep linking to customer profile from external URL |
 | `__tests__/i18n-toggle.test.ts` | Settings/i18n | Language toggle logic and key resolution |
@@ -111,6 +112,12 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 | `vps-timezone-check.spec.ts` | Settings | VPS timezone verification |
 | `vps-verification.spec.ts` | Cross-domain | General VPS verification suite |
 
+## TestSprite MCP / Live NK3 Artifacts
+
+| Test File | Domain | What It Tests |
+|-----------|--------|---------------|
+| `testsprite_tests/TC060_TestSprite_MCP_CTV_commission_artifacts.py` | CTV / Earnings / TestSprite MCP | Verifies `website/.testsprite/config.json` stays pointed at NK3 TMV, the CTV commission PRD exists, the W1-W8 TestSprite-style result set is green, cleanup/caveat text remains in `REPORT.md`, and the screenshot evidence files are valid PNGs. |
+
 ## API Tests (`api/tests/*.test.js`)
 
 | Test File | Domain | What It Tests |
@@ -130,6 +137,7 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 | `telemetry.test.js` | Settings/Telemetry | Telemetry error ingestion, deduplication, management updates, fix attempts, and stats |
 | `telemetryAuth.test.js` | Settings/Telemetry | Public-only error ingestion and auth-required telemetry management routes |
 | `readRoutePermissions.test.js` | Auth/Permissions | Backend route permission declarations, including scoped feedback admin actions |
+| `src/services/__tests__/nk3CtvIntegrityRepair.test.js` | CTV / Earnings / Data Repair | NK3-only repair planner for CTV Dental/Cosmetic identity mirrors, active Cosmetic-only CTV dental auth insertion, inactive scope normalization, service-card earning gap decisions, and migration-ledger targets. |
 | `src/routes/reports/__tests__/cashFlow.test.js` | Reports/Payments | UC-013/WF-013: `CON-Reports-CashFlowSummary`; cash-flow aggregation rules for service collections, deposits, refunds, deposit usage, voided rows, timezone-safe date buckets, route mounting, and scoped location rejection |
 | `src/routes/reports/__tests__/revenueRecognition.test.js` | Reports/Payments | UC-013/WF-013: `CON-Reports-RevenueSummary` plus trend/doctor/category revenue; posted service payment allocations, deposit exclusion, allocation proration, and payment-date recognition |
 | `src/routes/reports/__tests__/servicesBreakdown.test.js` | Reports/Services | UC-013/WF-013: `CON-Reports-ServicesBreakdown`; category/source revenue from posted payment allocations instead of listed service prices or raw order totals |

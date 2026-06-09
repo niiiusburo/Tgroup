@@ -1,3 +1,6 @@
+-- @crossref:domain[earnings-commissions]
+-- @crossref:used-in[NK3 schema migration: api/migrations/056_braces_commission_config]
+-- @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- 056_braces_commission_config.sql
 -- Wave 5 of docs/business-logic/ctv-referral-commission.md (§5 Braces Override, Dental-only).
 --

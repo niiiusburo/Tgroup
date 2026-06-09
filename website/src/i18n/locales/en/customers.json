@@ -144,7 +144,14 @@
     "multipleFaces": "More than one face detected",
     "faceServiceUnavailable": "Face service is unavailable",
     "registered": "Face ID",
-    "registeredOn": "Face registered: {{date}}"
+    "registeredOn": "Face registered: {{date}}",
+    "crossLob": {
+      "prompt": "This customer exists in both lines of business. Open which record?",
+      "lob": {
+        "dental": "Dental",
+        "cosmetic": "Cosmetic"
+      }
+    }
   },
   "dialog": {
     "addReferrer": "Add new referrer",
@@ -292,7 +299,8 @@
   },
   "faceRecognition": {
     "registerFailed": "Face registration failed",
-    "recognizeFailed": "Face recognition failed"
+    "recognizeFailed": "Face recognition failed",
+    "spoofDetected": "Liveness check failed — please present a live face to the camera"
   },
   "states": {
     "loading": "Loading patients..."

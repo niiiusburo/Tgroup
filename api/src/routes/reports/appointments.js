@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[appointments-calendar]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/reports/appointments]
+ * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');

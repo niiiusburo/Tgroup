@@ -40,6 +40,10 @@
 | v1.0.25 | 2026-06-06 | Admin New Clients contract expanded: `/api/NewClients` now returns every CTV-referred customer in the selected LOB scope, including converted referrals, with service revenue, paid total, COM total, and missing-COM status fields for referral commission audit. |
 | v1.0.26 | 2026-06-06 | Cosmetic mirror added for Admin New Clients: `/api/cosmetic/NewClients` is equivalent to `/api/NewClients?lob=cosmetic` and forces Cosmetic scope even if a query tries `lob=all`. |
 | v1.0.27 | 2026-06-06 | Cosmetic route-prefix boundary hardened: every `/api/cosmetic/*` route ignores query/header LOB overrides such as `?lob=all` or `X-LOB: dental` and always runs with `req.lob='cosmetic'`, Cosmetic DB context, and `runWithLob('cosmetic')`. Cross-LOB admin reads must use top-level `/api/*` routes that explicitly accept `lob`. |
+| v1.0.28 | 2026-06-06 | Site-wide crossref breadcrumb governance added for API route/client contract surfaces. No request or response payload shapes changed; touched API and client files now carry source-traceability breadcrumbs, and high-blast endpoints/functions carry explicit `@crossref:endpoint[...]` or `@crossref:function[...]` markers enforced by `npm run verify:crossrefs`. |
+| v1.0.29 | 2026-06-07 | Face ID liveness / anti-spoofing contract added (local provider): face-service `POST /embed` returns a `liveness` object; `/api/face/recognize` and `/api/face/register` can return `SPOOF_DETECTED` (HTTP 422) when `FACE_LIVENESS_ENABLED=true` and the capture is judged a spoof. Default off + fail-open, so existing payloads are unchanged when disabled/unavailable. |
+| v1.0.30 | 2026-06-07 | Restored `GET /api/cross-lob-probe` (admin-only `lob.crossview` soft phone-identity probe of the other LOB pool; dropped in the cosmetic-LOB merge, breaking the ProfileHeader cross-LOB badge). Now also powers the Face ID cross-LOB chooser: when a recognized customer exists in both LOBs, the quick-scan popover offers a choice instead of auto-navigating. |
+| v1.0.31 | 2026-06-08 | CTV discount QR contracts (NK3): public fan landing `/api/discount-codes/landing/:shortCode`, `check-existing`, and fan `POST /generate` bypass global auth; staff `/lookup`, `/client-search`, `/verify` require staff (not CTV); CTV `/mine` + `/stats` require self CTV. Frontend public fetches use `API_URL` from `core.ts` (not relative `/api` on Vite). |
 
 ---
 
@@ -47,7 +51,11 @@
 
 Cosmetic LOB mirror rule: when the frontend passes `lob: 'cosmetic'` to `apiFetch`, the client routes the same endpoint under `/api/cosmetic/*`. Mirrored handlers must run behind `requireLobScope('cosmetic')`, fixed `attachCosmeticDb`, `runWithLob('cosmetic')`, and `cosmetic.access`, then read/write `tcosmetic_demo` through request-scoped `getQuery(req)` or ALS-aware `query()`. `/api/cosmetic/*` ignores `?lob=` and `X-LOB` overrides by contract; cross-LOB admin reads must use a top-level `/api/*` route that explicitly accepts `lob`. Dental remains the default legacy `/api/*` path.
 
+Source-traceability breadcrumb rule: API route files, frontend API clients, service functions, middleware, and migrations must keep a file-level `@crossref:domain[...]`, `@crossref:used-in[...]`, and `@crossref:uses[...]` triad that links the source file back to its product-map domain and test matrix. High-blast CTV/earnings/payment/payout/service-card/referral paths must also keep explicit `@crossref:endpoint[...]` or `@crossref:function[...]` markers for the owned endpoints or business functions. This is a documentation/verification contract only; v1.0.28 did not change any request fields, response fields, status codes, auth semantics, or database writes.
+
 CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referrals`, `GET /api/ctv/client-journeys`, `GET /api/ctv/hierarchy`, `GET /api/ctv/client-lookup`, `GET/PATCH /api/ctv/me`, and `POST /api/ctv/me/password` are mounted behind `ctv.dashboard.view` and are scoped to the authenticated CTV identity unless the route explicitly allows admin-assisted CTV creation/booking. Authenticated non-CTV staff must not receive or mutate another CTV's self data.
+
+CTV discount QR rule (NK3): Public fan endpoints `GET /api/discount-codes/landing/:shortCode`, `GET /api/discount-codes/check-existing?ctvId=`, and unauthenticated fan `POST /api/discount-codes/generate` (body `{ ctvId }`) bypass the global `/api` `requireAuth` gate via `isPublicApiPath`. Authenticated CTV portal generation uses the same `POST /generate` with `forceNew: true` and `generationSource: 'ctv_portal'`. Staff endpoints `GET /lookup`, `GET /client-search`, and `POST /verify` require a non-CTV staff token (`S_STAFF_REQUIRED` when `is_ctv`). CTV self endpoints `GET /mine` and `GET /stats` require CTV self auth. `POST /verify` accepts `{ code, customerPhone, customerLob, customerPartnerId?, customerName?, createIfMissing? }`; when `customerPartnerId` is supplied, reclaim `referred_by_ctv_id` to the code's issuing CTV before marking `status='used'`. `GET /client-search` mirrors `GET /api/ctv/client-lookup` but compares claim ownership against the discount code's `ctv_partner_id`. Codes live in `tdental_demo.dbo.ctv_discount_codes` only. Default discount: 10% / 30 days / non-live until admin LIVE tier ships.
 
 Admin CTV list rule: `GET /api/Ctvs` and `GET /api/cosmetic/Ctvs` return CTV identity rows with `source`, `legacy_code`, and `created_via`. Cosmetic mode filters to CTV rows whose `lob_scope` includes `cosmetic`; `source='legacy_ctv'` is derived from `created_via LIKE 'legacy_ctv_import%'`.
 
@@ -679,16 +687,35 @@ Cosmetic mirror: `DELETE /api/cosmetic/SaleOrderLines/:id` uses the same contrac
 Provider behavior:
 - `FACE_RECOGNITION_PROVIDER=local` sends captures to `FACE_SERVICE_URL` for SFace embeddings and stores vectors in `dbo.customer_face_embeddings`.
 - `FACE_RECOGNITION_PROVIDER=compreface` sends captures to CompreFace, uses `partners.id` as the CompreFace subject, and keeps `partners.face_subject_id` / `face_registered_at` as TGClinic status.
+- Passive liveness / anti-spoofing (MiniFASNet, source-verified Silent-Face) runs on the **local** provider only, gated by `FACE_LIVENESS_ENABLED` (default **off**) with `FACE_LIVENESS_THRESHOLD` (default 0.5). It **fails open**: when the liveness models are absent or inference errors, the capture is allowed through. The internal face-service `POST /embed` response additionally carries `liveness: { available: true; isLive: boolean; score: number; label: number; value: number; threshold: number } | { available: false; enabled: boolean }`.
 
 Face error responses:
 ```ts
 {
-  error: 'NO_FACE' | 'MULTIPLE_FACES' | 'LOW_QUALITY' | 'MODEL_NOT_READY' | 'ENGINE_ERROR' | string;
+  error: 'NO_FACE' | 'MULTIPLE_FACES' | 'LOW_QUALITY' | 'SPOOF_DETECTED' | 'MODEL_NOT_READY' | 'ENGINE_ERROR' | string;
   message: string;
 }
 ```
 - `NO_FACE` is HTTP 422 when the local provider or CompreFace cannot detect a face in the submitted image.
 - Frontend capture callers must keep the camera modal open on `NO_FACE`, show "Không phát hiện khuôn mặt" / "Face not detected", and dismiss capture only through an explicit close/cancel action.
+- `SPOOF_DETECTED` is HTTP 422 from the local provider when liveness is enabled and the capture is judged a spoof (printed/screen photo). It gates both `/api/face/recognize` and `/api/face/register` (the embedding is never computed/stored for a spoof). Frontend surfaces the localized `customers:faceRecognition.spoofDetected` message.
+
+#### GET /api/cross-lob-probe
+Admin-only (permission `lob.crossview`) soft phone-identity probe across the two physical DBs. Restored after being dropped in the cosmetic-LOB merge.
+**Query:** `phone=<string>&lob=dental|cosmetic` (the caller's current LOB).
+**Response 200:**
+```ts
+{
+  matched: boolean;
+  otherLob: 'dental' | 'cosmetic';   // the probed LOB (opposite of `lob`)
+  otherId?: string;                  // partner id in the other LOB (when matched)
+  otherName?: string;
+  matchedPhone?: string;
+}
+```
+- Reads only the **other** LOB pool via `getDb(otherLob)`; matches on the last 9 phone digits (`RIGHT(REGEXP_REPLACE(phone,'\D','','g'),9)`, normalizing VN 84/0 prefixes). `400` on missing/invalid params; `500 { error: { code: 'PROBE_FAILED' } }` on DB error.
+- Cross-cutting route (passes through `dentalLobGate`); gated solely by `requirePermission('lob.crossview')`.
+- Consumers: the cross-LOB profile badge (`ProfileHeader`) and the **Face ID cross-LOB chooser** — when `/api/face/recognize` matches a customer who also exists in the other LOB, the quick-scan popover shows a chooser (open in current LOB, or the other LOB via a `?lob=` deep link in a new tab) instead of auto-navigating.
 
 ---
 
@@ -1007,5 +1034,8 @@ export const PaymentBaseSchema = z.object({
 
 | Date | Version | Change | Commit |
 |---|---|---|---|
+| 2026-06-06 | v1.0.28 | Added source-traceability breadcrumb contract markers for API/client/service surfaces; no payload shape changes. | pending |
+| 2026-06-07 | v1.0.29 | Added Face ID liveness gate contract: `liveness` field on face-service `/embed`, new `SPOOF_DETECTED` 422 error code on recognize/register (local provider, default off, fail-open). | pending |
+| 2026-06-07 | v1.0.30 | Restored `GET /api/cross-lob-probe` contract + documented the Face ID cross-LOB chooser consumer. | pending |
 | 2026-05-17 | v1.0.1 | Aligned API contracts with live payment enum, reports endpoints, and export registry routes. | pending |
 | 2026-05-13 | v1.0.0 | Initial contract freeze | feat/complete-documentation-stack |

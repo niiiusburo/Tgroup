@@ -91,12 +91,29 @@ const hierarchyResponse: CtvHierarchyResponse = {
   totals: { uplineCount: 1, downlineCount: 1, directDownlineCount: 1 },
 };
 
+vi.mock('qrcode', () => ({
+  default: {
+    toCanvas: vi.fn().mockResolvedValue(undefined),
+    toDataURL: vi.fn().mockResolvedValue('data:image/png;base64,test'),
+  },
+}));
+
 vi.mock('@/lib/api', () => ({
   fetchMe: vi.fn(async () => ({
-    id: 'ctv-1',
-    name: 'CTV Demo',
-    email: 'ctv-demo@clinic.vn',
-    is_ctv: true,
+    user: {
+      id: 'ctv-1',
+      name: 'CTV Demo',
+      email: 'ctv-demo@clinic.vn',
+      companyId: 'company-1',
+      companyName: 'TG Clinic',
+      is_ctv: true,
+    },
+    permissions: {
+      groupId: '',
+      groupName: 'CTV',
+      effectivePermissions: [],
+      locations: [],
+    },
   })),
   fetchCtvReferrals: vi.fn(async () => referralsResponse),
   fetchCtvHierarchy: vi.fn(async () => hierarchyResponse),
@@ -180,7 +197,7 @@ describe('CtvDashboard', () => {
     expect(screen.getByRole('button', { name: /^home$/i })).toBeVisible();
     expect(screen.getByRole('button', { name: /commission/i })).toBeVisible();
     expect(screen.getByRole('button', { name: /track clients/i })).toBeVisible();
-    expect(screen.getByRole('button', { name: /^network$/i })).toBeVisible();
+    expect(screen.getByRole('button', { name: /referral\/qr/i })).toBeVisible();
     expect(screen.getByRole('button', { name: /^me$/i })).toBeVisible();
   });
 
@@ -269,15 +286,67 @@ describe('CtvDashboard', () => {
 
     await waitFor(() => expect(screen.getAllByText('Xin chào, CTV Demo')[0]).toBeVisible());
 
-    await waitFor(() => expect(screen.getByRole('button', { name: /mạng lưới/i })).toBeVisible());
-    await user.click(screen.getByRole('button', { name: /mạng lưới/i }));
+    await waitFor(() => expect(screen.getByRole('button', { name: /giới thiệu\/qr/i })).toBeVisible());
+    await user.click(screen.getByRole('button', { name: /giới thiệu\/qr/i }));
 
-    await waitFor(() => expect(screen.getAllByText('Hệ thống giới thiệu CTV')[0]).toBeVisible());
+    await waitFor(() => expect(screen.getAllByText('Giới thiệu & mã QR')[0]).toBeVisible());
+    await user.click(screen.getByRole('tab', { name: /mạng lưới/i }));
+
+    await waitFor(() => expect(screen.getAllByText('Tuyến trên')[0]).toBeVisible());
     expect(screen.getAllByText('Tuyến trên')[0]).toBeVisible();
     expect(screen.getByText('Leader CTV')).toBeVisible();
     expect(screen.getAllByText('Tuyến dưới')[0]).toBeVisible();
     expect(screen.getByText('Junior CTV')).toBeVisible();
     expect(screen.queryByRole('searchbox', { name: /tìm khách giới thiệu/i })).not.toBeInTheDocument();
+  });
+
+  it('shows the QR discount sub-tab with share link and download actions', async () => {
+    await prepareCtvLanguage('vi');
+    localStorage.setItem('tgclinic_token', 'test-token');
+    const user = userEvent.setup();
+    renderWithProviders(<CtvDashboard />);
+
+    await waitFor(() => expect(screen.getAllByText('Xin chào, CTV Demo')[0]).toBeVisible());
+
+    await user.click(screen.getByRole('button', { name: /giới thiệu\/qr/i }));
+    await waitFor(() => expect(screen.getAllByText('Giới thiệu & mã QR')[0]).toBeVisible());
+
+    await user.click(screen.getByRole('tab', { name: /mã qr/i }));
+
+    await waitFor(() => expect(screen.getByText('Cách 1 — Gửi link')).toBeVisible());
+    expect(screen.getByText('Cách 2 — Tải ảnh QR')).toBeVisible();
+    expect(screen.getByText(/\/ctv\/discount\/CTV-/i)).toBeVisible();
+    expect(screen.getByRole('link', { name: /mở thử link/i })).toHaveAttribute(
+      'href',
+      expect.stringMatching(/\/ctv\/discount\/CTV-/)
+    );
+    expect(screen.getByRole('button', { name: /tạo mã & tải ảnh/i })).toBeVisible();
+  });
+
+  it('shows a prominent pricing button on the CTV home overview', async () => {
+    await prepareCtvLanguage('en');
+    localStorage.setItem('tgclinic_token', 'test-token');
+    renderWithProviders(<CtvDashboard />);
+
+    await waitFor(() => expect(screen.getAllByText('Hi, CTV Demo')[0]).toBeVisible());
+
+    const pricingCta = screen.getByRole('link', { name: /view service pricing/i });
+    expect(pricingCta).toHaveAttribute('href', '/bang-gia');
+    expect(pricingCta.className).toMatch(/py-4/);
+  });
+
+  it('shows legacy catalog and pricing links beside the language toggle', async () => {
+    await prepareCtvLanguage('en');
+    localStorage.setItem('tgclinic_token', 'test-token');
+    renderWithProviders(<CtvDashboard />);
+
+    await waitFor(() => expect(screen.getAllByText('Hi, CTV Demo')[0]).toBeVisible());
+
+    const catalogLink = screen.getByRole('link', { name: /service catalog/i });
+    expect(catalogLink).toHaveAttribute('href', '/catalogue');
+
+    const pricingLink = screen.getByRole('link', { name: /^service pricing$/i });
+    expect(pricingLink).toHaveAttribute('href', '/bang-gia');
   });
 
   it('opens the LanguageToggle dropdown below the CTV header', async () => {

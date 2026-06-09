@@ -1,3 +1,6 @@
+-- @crossref:domain[payments-deposits]
+-- @crossref:used-in[NK3 schema migration: api/migrations/017_monthlyplan_constraints]
+-- @crossref:uses[product-map/domains/payments-deposits.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Invariant: monthlyPlan.amount.downPayment-less-than-total (CRITICAL)
 -- Idempotent; 017 because 016_saleorder_status_audit.sql exists.
 

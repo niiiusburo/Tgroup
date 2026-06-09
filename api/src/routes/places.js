@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[integrations]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/places]
+ * @crossref:uses[product-map/domains/integrations.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const express = require('express');
 const router = express.Router();
 const { requireAuth } = require('../middleware/auth');

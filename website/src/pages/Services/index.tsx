@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[services-catalog]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Services/index]
+ * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 /**
  * Services Management Page

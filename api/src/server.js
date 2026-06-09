@@ -78,10 +78,13 @@ const feedbackRoutes = require('./routes/feedback');
 const reportsRoutes = require('./routes/reports');
 const telemetryRoutes = require('./routes/telemetry');
 const publicTelemetryErrorRoutes = require('./routes/publicTelemetryErrors');
+const publicBangGiaRoutes = require('./routes/publicBangGia');
+const { startPricingSyncWorker } = require('./services/pricingSyncWorker');
 const ipAccessRoutes = require('./routes/ipAccess');
 const exportsRoutes = require('./routes/exports');
 const ctvRoutes = require('./routes/ctv');
 const ctvProfileRoutes = require('./routes/ctvProfile');
+const discountCodesRoutes = require('./routes/discountCodes');
 const ctvsRoutes = require('./routes/ctvs');
 const earningsRoutes = require('./routes/earnings');
 const payoutsRoutes = require('./routes/payouts');
@@ -164,24 +167,13 @@ app.use('/api/telemetry/errors', publicTelemetryErrorRoutes);
 
 // Public (unauthenticated) CTV self-signup via referral link — mounted BEFORE the /api auth gate.
 app.use('/api/ctv-public', require('./routes/ctvPublic'));
+app.use('/api/public/bang-gia', publicBangGiaRoutes);
 
-const PUBLIC_PATHS = new Set([
-  '/api/Auth/login',
-  '/api/auth/login',
-  '/api/Account/Login',
-  '/api/account/login',
-  '/api/IpAccess/check',
-  '/api/ipaccess/check',
-  '/api/health',
-  // Fire-and-forget version-update telemetry (POSTed via keepalive fetch with no auth header,
-  // often on page unload / pre-login). Self-protected: IP rate-limit (10/min) + strict event
-  // allow-list in routes/telemetry.js. Public like /api/telemetry/errors; was 401-spamming + losing events.
-  '/api/telemetry/version',
-]);
+const { isPublicApiPath } = require('./middleware/publicApiPaths');
 
 app.use('/api', (req, res, next) => {
   const fullPath = req.originalUrl.split('?')[0];
-  if (PUBLIC_PATHS.has(fullPath)) return next();
+  if (isPublicApiPath(fullPath, req.method)) return next();
   return requireAuth(req, res, next);
 });
 
@@ -199,6 +191,41 @@ app.use('/api', dentalLobGate);
 app.use('/api/IrConfigParameters', configRoutes);
 app.use('/api/Companies', companiesRoutes);
 app.use('/api/Partners', partnersRoutes);
+
+// ─── Cross-LOB identity probe (D6 / lob.crossview) ───────────────────────────
+// Admin-only soft phone match across the two physical DBs. Cross-cutting (not in
+// dentalLobGate's scoped set, so it passes through), and reads the OTHER LOB pool by
+// design via getDb(). Powers the "also a {dental|cosmetic} client" profile badge AND
+// the Face ID cross-LOB chooser. Restored after being dropped in the cosmetic-LOB merge.
+app.get('/api/cross-lob-probe', requirePermission('lob.crossview'), async (req, res) => {
+  const { phone, lob } = req.query || {};
+  if (!phone || (lob !== 'dental' && lob !== 'cosmetic')) {
+    return res.status(400).json({ error: { code: 'BAD_REQUEST', message: 'phone and lob=dental|cosmetic required' } });
+  }
+  const otherLob = lob === 'dental' ? 'cosmetic' : 'dental';
+  // Soft phone key: last 9 significant digits (handles VN 84/0 prefix variants).
+  const key = String(phone).replace(/\D/g, '').slice(-9);
+  if (!key) return res.json({ matched: false, otherLob });
+  try {
+    const { getDb } = require('./db');
+    const rows = await getDb(otherLob).queryRows(
+      `SELECT id, name, phone FROM dbo.partners
+       WHERE customer = true AND isdeleted = false
+         AND phone IS NOT NULL AND phone <> ''
+         AND RIGHT(REGEXP_REPLACE(phone, '\\D', '', 'g'), 9) = $1
+       LIMIT 1`,
+      [key]
+    );
+    const r = rows && rows[0];
+    if (r) {
+      return res.json({ matched: true, otherLob, otherId: r.id, otherName: r.name, matchedPhone: r.phone });
+    }
+    return res.json({ matched: false, otherLob });
+  } catch (err) {
+    console.error('cross-lob-probe error:', err);
+    return res.status(500).json({ error: { code: 'PROBE_FAILED' } });
+  }
+});
 app.use('/api/SaleOrders', saleOrdersRoutes);
 app.use('/api/Appointments', appointmentsRoutes);
 app.use('/api/CustomerReceipts', customerReceiptsRoutes);
@@ -324,6 +351,7 @@ if (COSMETIC_FLAG) {
 }
 app.use('/api/ctv', requirePermission('ctv.dashboard.view'), ctvProfileRoutes);
 app.use('/api/ctv', requirePermission('ctv.dashboard.view'), ctvRoutes);
+app.use('/api/discount-codes', discountCodesRoutes);
 
 app.get('/api/health', async (_req, res) => {
   const checks = { db: false, faceService: false };
@@ -395,5 +423,6 @@ module.exports = app;
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`TG Clinic API running on http://localhost:${PORT}`);
+    startPricingSyncWorker();
   });
 }

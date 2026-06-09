@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[settings-system]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Relationships]
+ * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * Relationships Page — Permission matrix and entity relationship map
  * @crossref:route[/relationships]
  * @crossref:used-in[App]

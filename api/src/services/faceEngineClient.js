@@ -1,5 +1,10 @@
 "use strict";
 
+/**
+ * @crossref:domain[services-catalog]
+ * @crossref:used-in[NK3 backend service function: api/src/services/faceEngineClient]
+ * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const FACE_SERVICE_URL = process.env.FACE_SERVICE_URL || "http://face-service:8000";
 
 class FaceEngineError extends Error {
@@ -32,6 +37,7 @@ async function getEmbedding(imageBuffer, mimeType) {
     embedding: data.embedding,
     model: data.model,
     quality: data.quality,
+    liveness: data.liveness,
   };
 }
 

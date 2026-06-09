@@ -1,3 +1,6 @@
+-- @crossref:domain[settings-system]
+-- @crossref:used-in[NK3 schema migration: api/migrations/058_audit_logs]
+-- @crossref:uses[product-map/domains/settings-system.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- 058_audit_logs.sql
 -- Wave 6 of docs/business-logic/ctv-referral-commission.md (§12 hierarchy management).
 --

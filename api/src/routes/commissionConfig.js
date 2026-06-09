@@ -1,6 +1,11 @@
 'use strict';
 
 /**
+ * @crossref:domain[earnings-commissions]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/commissionConfig]
+ * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * commissionConfig.js — MLM commission level config (admin).
  * GET  /api/CommissionConfig  (any authed user) → { levels[], defaultReferralPercent }
  * PUT  /api/CommissionConfig  (admin only)      → upsert levels + default; enabled sum must be <= 100

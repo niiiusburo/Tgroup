@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[appointments-calendar]
+ * @crossref:used-in[NK3 frontend API client: website/src/lib/api/appointments]
+ * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { apiFetch, type PaginatedResponse } from './core';
 
 // ─── Appointments ─────────────────────────────────────────────────

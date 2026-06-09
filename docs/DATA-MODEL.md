@@ -9,9 +9,11 @@
 ## Schema Statistics
 
 - **Tables / Views:** Baseline schema plus migration-added objects; verify the target database for an exact live count before sync/deploy decisions.
-- **Migrations:** 53 canonical SQL files in `api/migrations/`; 2 supplemental SQL files in `api/src/db/migrations/` need consolidation or an explicit runbook decision.
+- **Migrations:** 67 canonical SQL files in `api/migrations/`; 2 supplemental SQL files in `api/src/db/migrations/` need consolidation or an explicit runbook decision.
 - **Schema:** `dbo`
 - **Date handling:** `types.setTypeParser(1082, (val) => val)` returns DATE as plain `YYYY-MM-DD` strings. API process runs with `TZ=Asia/Ho_Chi_Minh`.
+
+**Traceability-only migration update (2026-06-06):** The site-wide crossref breadcrumb pass added SQL comment breadcrumbs to canonical migration files so they can be traced back to product-map domains, `docs/MIGRATIONS.md`, `docs/TEST-MATRIX.md`, and `testbright.md`. It did not add, remove, reorder, or alter any migration DDL/DML statements and did not change the live data model.
 
 ---
 
@@ -152,6 +154,38 @@ erDiagram
 **Cascade rules:**
 - `ON DELETE RESTRICT` implied by application logic (soft delete preferred).
 - Hard delete cascades to `appointments`, `saleorders`, `payments`, `dotkhams`, `feedback_threads`, `hr_payslips` only if explicitly implemented in route handler.
+
+---
+
+#### `dbo.ctv_discount_codes` (CTV discount QR vouchers — dental DB only)
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | uuid | PK, DEFAULT `gen_random_uuid()` |
+| `code` | varchar(32) | UNIQUE NOT NULL |
+| `ctv_partner_id` | uuid | NOT NULL; FK → `partners.id` (issuing CTV) |
+| `discount_value` | numeric(12,2) | NOT NULL, DEFAULT 10 |
+| `discount_type` | varchar(16) | NOT NULL, DEFAULT `percent` |
+| `status` | varchar(16) | NOT NULL; CHECK (`active`, `claimed`, `generated`, `checked_in`, `used`, `expired`) |
+| `expires_at` | timestamptz | |
+| `created_at` | timestamptz | NOT NULL, DEFAULT `now()` |
+| `used_at` | timestamptz | set when staff verifies |
+| `used_by_staff_id` | uuid | staff partner id |
+| `used_by_staff_name` | text | |
+| `customer_partner_id` | uuid | client claimed at verify |
+| `customer_lob` | varchar(16) | `dental` or `cosmetic` |
+| `customer_phone` | text | |
+| `customer_name` | text | |
+| `visitor_ip` | text | fan landing visitor (063) |
+| `visitor_name` | text | optional fan name (063) |
+| `claimed_at` | timestamptz | fan claimed on landing (063) |
+| `checked_in_at` | timestamptz | reserved for future check-in step (063) |
+| `generation_source` | varchar(24) | e.g. `ctv_portal`, `fan_landing` (063) |
+
+**Indexes:** `(ctv_partner_id)`, `(status)`, `(ctv_partner_id, created_at DESC)`.
+
+**Behavior:** Canonical store is **dental/auth DB only** (`tdental_demo` / NK3 `tdental_nk3`). CTV portal Mode B (`forceNew`) and public fan landing Mode A (`POST /generate` with `{ ctvId }`) append rows here. QR encodes staff `/verify-discount?code=…`; fan share link is `/ctv/discount/:shortCode` (short code derived from CTV partner id, not this table's `code` column). Staff `POST /verify` may reclaim `partners.referred_by_ctv_id` to the issuing CTV before marking `status='used'`. No cross-DB writes.
+
+**Migrations:** `062_ctv_discount_codes.sql`, `063_ctv_discount_codes_kol_parity.sql`.
 
 ---
 
@@ -556,7 +590,7 @@ If `dbo.customer_face_embeddings` exists and the local provider is active, the e
 ## Migration Inventory
 
 - Canonical root index: `docs/MIGRATIONS.md`.
-- Canonical migration directory: `api/migrations/` (53 SQL files, through `046_split_payment_and_hoso_permissions.sql`).
+- Canonical migration directory: `api/migrations/` (67 SQL files, through `058_audit_logs.sql`).
 - Supplemental migration directory: `api/src/db/migrations/` (2 SQL files: `003_add_payment_category.sql`, `046_customer_face_embeddings.sql`).
 - Runbook status: `docs/RUNBOOK.md` and `docs/runbooks/DEPLOYMENT.md` both use `api/migrations/*.sql` as the canonical deploy loop. Supplemental files under `api/src/db/migrations/` require explicit review, consolidation, or manual execution when a change depends on them.
 - Safety status: destructive legacy TDental import migrations (`008_data_migration_from_tdental*.sql`) are protected by SQL-session break-glass guards. They must not run against `tdental_demo`, `tdental_smoketest`, `tcosmetic_demo`, or `tcosmetic_smoketest` unless an isolated backup/compare plan has been approved, the destructive/live guard settings are intentionally supplied, and the legacy import password hash is supplied through `tgroup.legacy_import_password_hash` instead of being hardcoded in the file.

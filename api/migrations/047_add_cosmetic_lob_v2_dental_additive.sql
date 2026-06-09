@@ -1,3 +1,6 @@
+-- @crossref:domain[business-unit]
+-- @crossref:used-in[NK3 schema migration: api/migrations/047_add_cosmetic_lob_v2_dental_additive]
+-- @crossref:uses[product-map/domains/business-unit.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- 047_add_cosmetic_lob_v2_dental_additive.sql
 -- Cosmetic Line of Business v2 — Phase 0/2 initial additive migration
 -- Date: 2026-05-19

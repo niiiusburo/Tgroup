@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[services-catalog]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/ServiceCatalog]
+ * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * Service Catalog Page — "Thông tin sản phẩm" with service groups sidebar + services table
  * @crossref:route[/website]
  * @crossref:uses[fetchProducts, fetchProductCategories, fetchCompanies]

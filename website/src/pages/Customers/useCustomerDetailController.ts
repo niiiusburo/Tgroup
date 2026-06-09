@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/useCustomerDetailController]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { fetchSaleOrderLines } from '@/lib/api';
 import type { Customer } from '@/hooks/useCustomers';

@@ -131,6 +131,16 @@ Allowed exceptions:
 
 CTV/LOB changes must also continue to follow §3 (product-map + two-DB + LOB discipline) + read the 5 split domains.
 
+## 5.2 Site-Wide Crossref Breadcrumb Effect
+
+NK3 source files that act as pages, modules, API clients, Express routes, backend services, middleware, or migrations must carry source breadcrumbs:
+
+- `@crossref:domain[...]` points to the product-map domain.
+- `@crossref:used-in[...]` names the NK3 surface or caller category.
+- `@crossref:uses[...]` points to the relevant product-map/doc/test authority.
+
+High-blast route/function files must also include `@crossref:route[...]`, `@crossref:endpoint[...]`, or `@crossref:function[...]`. The gate is `npm run verify:crossrefs`, and it is included in `npm run verify:governance`. Update breadcrumbs in the same change whenever moving routes, changing domain ownership, adding pages/modules/API clients/routes/services/migrations, or changing CTV/LOB/commission/payment/service-card behavior. See `docs/CROSSREF-BREADCRUMBS.md`.
+
 ## 6. Frontend Rules
 
 For frontend work:

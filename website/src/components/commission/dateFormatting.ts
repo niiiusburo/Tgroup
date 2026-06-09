@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[earnings-commissions]
+ * @crossref:used-in[NK3 commission and CTV admin surface: website/src/components/commission/dateFormatting]
+ * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const VIETNAM_TIME_ZONE = 'Asia/Ho_Chi_Minh';
 
 function toDate(value?: string | Date | null): Date | null {

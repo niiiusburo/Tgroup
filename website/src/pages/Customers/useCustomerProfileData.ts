@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/useCustomerProfileData]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useMemo } from 'react';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
 import type { Customer } from '@/hooks/useCustomers';

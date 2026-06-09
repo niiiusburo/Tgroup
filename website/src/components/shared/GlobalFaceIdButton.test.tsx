@@ -6,7 +6,10 @@ import { fetchPartners, registerFace } from '@/lib/api';
 const navigateMock = vi.fn();
 const recognizeMock = vi.fn();
 const resetMock = vi.fn();
-let recognizeState: { status: 'idle' | 'no_match' } = { status: 'idle' };
+type MockMatch = { partnerId: string; name: string; code: string; phone: string | null; confidence: number };
+let recognizeState: { status: 'idle' | 'no_match' | 'success'; match?: MockMatch } = { status: 'idle' };
+let canCrossView = false;
+const probeCrossLobMock = vi.fn();
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
@@ -33,6 +36,14 @@ vi.mock('@/contexts/BusinessUnitContext', () => ({
 vi.mock('@/lib/api', () => ({
   fetchPartners: vi.fn(),
   registerFace: vi.fn(),
+}));
+
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => ({ hasPermission: (p: string) => (p === 'lob.crossview' ? canCrossView : true) }),
+}));
+
+vi.mock('@/lib/api/partners', () => ({
+  probeCrossLob: (...args: unknown[]) => probeCrossLobMock(...args),
 }));
 
 vi.mock('@/components/shared/FaceCaptureModal', () => ({
@@ -70,6 +81,8 @@ describe('GlobalFaceIdButton', () => {
     vi.mocked(registerFace).mockReset();
     navigateMock.mockReset();
     resetMock.mockReset();
+    canCrossView = false;
+    probeCrossLobMock.mockReset();
   });
 
   it('registers a no-match auto-captured face to a searched customer', async () => {
@@ -139,5 +152,32 @@ describe('GlobalFaceIdButton', () => {
     expect(screen.getByText('Mock capture')).toBeInTheDocument();
     // And the quick face button should still be visible
     expect(screen.getByRole('button', { name: /Quét nhanh khuôn mặt/i })).toBeInTheDocument();
+  });
+
+  it('shows the cross-LOB chooser when the recognized customer exists in both LOBs', async () => {
+    canCrossView = true;
+    const match = { partnerId: 'cos-1', name: 'Alice', code: 'C1', phone: '0901234567', confidence: 0.97 };
+    recognizeState = { status: 'success', match };
+    recognizeMock.mockResolvedValue({ match, candidates: [] });
+    probeCrossLobMock.mockResolvedValue({ matched: true, otherLob: 'dental', otherId: 'den-9', otherName: 'Alice' });
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+
+    render(<GlobalFaceIdButton />);
+    fireEvent.click(screen.getByRole('button', { name: /Quét nhanh khuôn mặt/i }));
+    fireEvent.click(await screen.findByText('Mock capture'));
+
+    // Probes the other LOB by phone and does NOT auto-navigate.
+    await waitFor(() => expect(probeCrossLobMock).toHaveBeenCalledWith('0901234567', 'cosmetic'));
+    expect(await screen.findByText(/cả hai mảng/i)).toBeInTheDocument();
+    expect(navigateMock).not.toHaveBeenCalled();
+
+    // Choosing the OTHER LOB opens its record in a new tab via the ?lob= deep link.
+    fireEvent.click(screen.getByText('Nha khoa'));
+    expect(openSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/customers/den-9?lob=dental'),
+      '_blank',
+      expect.any(String),
+    );
+    openSpy.mockRestore();
   });
 });

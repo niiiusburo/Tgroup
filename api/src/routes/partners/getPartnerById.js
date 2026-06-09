@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/partners/getPartnerById]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const { query, getQuery } = require('../../db');
 
 const PARTNER_BY_ID_SQL = `SELECT

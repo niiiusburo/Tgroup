@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[services-catalog]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/saleOrders/updateSaleOrderState]
+ * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const crypto = require('crypto');
 const { query: legacyQuery, getQuery } = require('../../db');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');

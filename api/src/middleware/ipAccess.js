@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[settings-system]
+ * @crossref:used-in[NK3 API middleware: api/src/middleware/ipAccess]
+ * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * IP Access Control Middleware
  * Enforces IP-based access restrictions before authentication
  */

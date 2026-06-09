@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   recognizeFace,
   registerFace,
@@ -8,6 +9,18 @@ import {
   type FaceStatusResult,
 } from '@/lib/api';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
+
+/**
+ * Map a Face ID API error to a user-facing message. The anti-spoofing gate
+ * returns code SPOOF_DETECTED (HTTP 422); surface a localized message for it,
+ * otherwise fall back to the raw error message or a translated fallback key.
+ */
+function resolveFaceError(err: unknown, t: (key: string) => string, fallbackKey: string): string {
+  const code = (err as { code?: string } | null)?.code;
+  if (code === 'SPOOF_DETECTED') return t('faceRecognition.spoofDetected');
+  // Preserve existing fallback contract (raw key for non-Error); only spoof is localized here.
+  return err instanceof Error ? err.message : fallbackKey;
+}
 
 type RecognitionState =
   | { status: 'idle' }
@@ -35,6 +48,7 @@ export function useFaceRecognition() {
   const [registerState, setRegisterState] = useState<RegisterState>({ status: 'idle' });
   const [reregisterState, setReregisterState] = useState<ReregisterState>({ status: 'idle' });
   const [faceStatus, setFaceStatus] = useState<FaceStatusResult | null>(null);
+  const { t } = useTranslation('customers');
 
   const recognize = useCallback(async (image: Blob) => {
     setRecognizeState({ status: 'processing' });
@@ -49,11 +63,11 @@ export function useFaceRecognition() {
       }
       return result;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'faceRecognition.recognizeFailed';
+      const message = resolveFaceError(err, t, 'faceRecognition.recognizeFailed');
       setRecognizeState({ status: 'error', message });
       throw err;
     }
-  }, [currentLOB]);
+  }, [currentLOB, t]);
 
   const register = useCallback(async (partnerId: string, image: Blob, source?: string) => {
     setRegisterState({ status: 'processing' });
@@ -62,11 +76,11 @@ export function useFaceRecognition() {
       setRegisterState({ status: 'success', sampleCount: result.sampleCount });
       return result;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'faceRecognition.registerFailed';
+      const message = resolveFaceError(err, t, 'faceRecognition.registerFailed');
       setRegisterState({ status: 'error', message });
       throw err;
     }
-  }, [currentLOB]);
+  }, [currentLOB, t]);
 
   const loadFaceStatus = useCallback(async (partnerId: string) => {
     try {
@@ -86,11 +100,11 @@ export function useFaceRecognition() {
       setReregisterState({ status: 'success', sampleCount: result.sampleCount });
       return result;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'faceRecognition.reregisterFailed';
+      const message = resolveFaceError(err, t, 'faceRecognition.reregisterFailed');
       setReregisterState({ status: 'error', message });
       throw err;
     }
-  }, [currentLOB]);
+  }, [currentLOB, t]);
 
   const reset = useCallback(() => {
     setRecognizeState({ status: 'idle' });

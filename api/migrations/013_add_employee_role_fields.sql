@@ -1,3 +1,6 @@
+-- @crossref:domain[employees-hr]
+-- @crossref:used-in[NK3 schema migration: api/migrations/013_add_employee_role_fields]
+-- @crossref:uses[product-map/domains/employees-hr.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration: Add employee role fields to dbo.partners
 -- These fields are needed by POST/PUT /api/Employees to persist role flags and HR data.
 -- The employees VIEW was updated to pass through these real columns instead of deriving from jobtitle.

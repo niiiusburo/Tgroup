@@ -1,3 +1,6 @@
+-- @crossref:domain[settings-system]
+-- @crossref:used-in[NK3 schema migration: api/migrations/008_data_migration_from_tdental_v3]
+-- @crossref:uses[product-map/domains/settings-system.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- ============================================================================
 -- Migration v3: Full data migration from old tdental DB to fresh tdental_demo DB
 -- ============================================================================

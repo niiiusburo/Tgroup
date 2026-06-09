@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/CTV/tabs/CtvTrackingTab]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { AlertCircle, ListChecks, RefreshCw, Search } from 'lucide-react';

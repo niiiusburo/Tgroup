@@ -65,6 +65,7 @@ ui_surfaces:
   - /commission?tab=earnings and /commission?tab=payouts admin views; earning and pending-payout service links open /customers/:id?tab=records&serviceLineId=:lineId&from=commission for audit context before staff pay out
 jobs:
   - Target CTV engine: service-card create/reassign/cancel/delete/refund creates positive/reversal CTV earnings based on full service price and tier config
+  - NK3-only integrity repair: backfill only valid paymentless service-card CTV earning gaps after fresh backups; soft-cancel invalid service-card gaps with missing customer/product references; repair orphan paid earnings by returning them to pending without deleting history
   - Current partial commissionEngine: payment collect/refund
   - auto-consultation lifecycle on cosmetic appt
 shared_types:
@@ -93,6 +94,7 @@ impact_tests:
   - D13 priority verified in unit tests (ctv > consultation > salestaff)
   - Legacy commission rules tables never written by v2 engine
   - Admin earnings/payout rows with service_line_id link to the matching customer Records tab and focus the service row without mutating earnings or payout state
+  - NK3-only integrity repair planner classifies invalid service-card gaps as soft-cancel, valid gaps as full-price CTV earning backfill, and orphan paid earnings with missing payout rows as pending/no-payout repair
 risk_level: high (money movement)
 notes:
   - "EARNINGS vs LEGACY COMMISSIONS: earnings is the transactional append-only attribution log. Legacy commissions/* are the old rules/config tables and product commission_rate_percent is legacy mock data for CTV. See product-map/business-logic/commission-rules.md, docs/business-logic/ctv-referral-commission.md, and DECISIONS.md."

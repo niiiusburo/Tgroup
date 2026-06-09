@@ -35,6 +35,7 @@ EXISTING_TESTS = [
     ("TC016", "TC016_Payment_page_renders_without_submitting_money_actions.py", "Payment page renders without submitting money actions"),
     ("TC017", "TC017_Service_catalog_page_renders_and_searchfilter_works.py", "Service catalog page renders and search/filter works"),
     ("TC018", "TC018_Settings_page_renders_but_does_not_save_changes.py", "Settings page renders but does not save changes"),
+    ("TC060", "TC060_TestSprite_MCP_CTV_commission_artifacts.py", "TestSprite MCP CTV commission artifacts/config/results/screenshots"),
 ]
 
 # Pending tests from testbright.md that need new scripts

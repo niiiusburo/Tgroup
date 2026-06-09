@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 frontend API client: website/src/lib/api/ctv]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { apiFetch } from './core';
 import { maskPhone, maskEmail } from '@/lib/pii';
 
@@ -153,6 +158,7 @@ export interface CtvRecord {
   lob_scope?: string[];
   active?: boolean;
   is_ctv?: boolean;
+  is_live?: boolean;
   referred_by_ctv_id?: string | null;
   upline_name?: string | null;
   legacy_code?: string | null;
@@ -208,7 +214,6 @@ export async function fetchCtvs(
     params: status ? { status } : undefined,
   });
 }
-
 export interface UpdateCtvInput {
   name?: string;
   phone?: string;
@@ -217,6 +222,8 @@ export interface UpdateCtvInput {
   password?: string;
   /** lob_scope to assign to this CTV (e.g. ['dental'], ['dental','cosmetic']). 'dental' is always forced by backend for auth. */
   lob_scope?: string[];
+  /** Admin toggle for CTV LIVE/OFF QR discount tier. */
+  is_live?: boolean;
 }
 
 /** Admin: edit a CTV's profile fields (name, phone, email, password) and/or lob_scope. */

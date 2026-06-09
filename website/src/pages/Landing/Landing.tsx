@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[settings-system]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Landing/Landing]
+ * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 

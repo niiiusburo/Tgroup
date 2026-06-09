@@ -37,6 +37,7 @@ TEST_REGISTRY = [
     ("TC022", "TC022_Services_route_permission.py", "Services route permission", "Permissions"),
     ("TC030", "TC030_Calendar_Excel_session_token.py", "Calendar Excel with session token", "Calendar"),
     ("TC031", "TC031_Accent_insensitive_search.py", "Accent-insensitive search", "Search"),
+    ("TC060", "TC060_TestSprite_MCP_CTV_commission_artifacts.py", "TestSprite MCP CTV commission artifacts", "TestSprite"),
 ]
 
 

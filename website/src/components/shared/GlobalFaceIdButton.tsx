@@ -7,6 +7,8 @@ import { useFaceRecognition } from '@/hooks/useFaceRecognition';
 import { fetchPartners, registerFace } from '@/lib/api';
 import type { ApiPartner } from '@/lib/api';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { probeCrossLob, type CrossLobProbeResult } from '@/lib/api/partners';
 
 /**
  * Global Face ID quick-search button.
@@ -21,6 +23,8 @@ export function GlobalFaceIdButton() {
   const { t } = useTranslation('customers');
   const navigate = useNavigate();
   const { currentLOB } = useBusinessUnit();
+  const { hasPermission } = useAuth();
+  const canCrossView = hasPermission('lob.crossview');
   const containerRef = useRef<HTMLDivElement>(null);
   const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -35,6 +39,8 @@ export function GlobalFaceIdButton() {
   const [selectedCustomer, setSelectedCustomer] = useState<ApiPartner | null>(null);
   const [registering, setRegistering] = useState(false);
   const [registerError, setRegisterError] = useState<string | null>(null);
+  // Cross-LOB chooser: set when the recognized customer also exists in the other LOB.
+  const [crossLobMatch, setCrossLobMatch] = useState<CrossLobProbeResult | null>(null);
 
   const { recognizeState, recognize, reset } = useFaceRecognition();
 
@@ -46,22 +52,37 @@ export function GlobalFaceIdButton() {
     setSelectedCustomer(null);
     setRegistering(false);
     setRegisterError(null);
+    setCrossLobMatch(null);
     reset();
   }, [reset]);
 
   const handleCapture = useCallback(
     async (image: Blob) => {
       setRegisterError(null);
+      setCrossLobMatch(null);
       const result = await recognize(image);
       setShowCapture(false);
       setShowPopover(true);
       setCapturedImage(image);
       if (result.match) {
+        // If the recognized customer also exists in the other LOB, let the employee
+        // choose which record to open instead of auto-navigating (lob.crossview only).
+        if (canCrossView && result.match.phone) {
+          try {
+            const probe = await probeCrossLob(result.match.phone, currentLOB);
+            if (probe.matched) {
+              setCrossLobMatch(probe);
+              return;
+            }
+          } catch {
+            /* probe failure is non-fatal: fall through to the normal single-LOB navigate */
+          }
+        }
         navigate(`/customers/${result.match.partnerId}`);
         setTimeout(dismiss, 800);
       }
     },
-    [recognize, navigate, dismiss]
+    [recognize, navigate, dismiss, canCrossView, currentLOB]
   );
 
   // Click-outside to dismiss the popover.
@@ -78,6 +99,19 @@ export function GlobalFaceIdButton() {
 
   const handlePickCandidate = (partnerId: string) => {
     navigate(`/customers/${partnerId}`);
+    dismiss();
+  };
+
+  const openInCurrentLob = (partnerId: string) => {
+    navigate(`/customers/${partnerId}`);
+    dismiss();
+  };
+
+  const openInOtherLob = (probe: CrossLobProbeResult) => {
+    if (!probe.matched || !probe.otherId || !probe.otherLob) return;
+    // ?lob= is read only at provider init, so the other LOB must open in a fresh tab
+    // (matches the ProfileHeader cross-LOB badge) — this also preserves the current LOB context.
+    window.open(`/customers/${probe.otherId}?lob=${probe.otherLob}`, '_blank', 'noopener,noreferrer');
     dismiss();
   };
 
@@ -112,7 +146,10 @@ export function GlobalFaceIdButton() {
       navigate(`/customers/${selectedCustomer.id}`);
       dismiss();
     } catch (err) {
-      const message = err instanceof Error ? err.message : t('faceRecognition.registerFailed');
+      const code = (err as { code?: string } | null)?.code;
+      const message = code === 'SPOOF_DETECTED'
+        ? t('faceRecognition.spoofDetected')
+        : (err instanceof Error ? err.message : t('faceRecognition.registerFailed'));
       setRegisterError(message);
     } finally {
       setRegistering(false);
@@ -163,7 +200,7 @@ export function GlobalFaceIdButton() {
             </div>
           )}
 
-          {recognizeState.status === 'success' && (
+          {recognizeState.status === 'success' && !crossLobMatch?.matched && (
             <div className="flex items-center gap-2 py-2 text-sm text-emerald-700">
               <UserCheck className="w-4 h-4" />
               <div className="flex flex-col leading-tight">
@@ -173,6 +210,34 @@ export function GlobalFaceIdButton() {
                   {recognizeState.match.phone ? ` · ${recognizeState.match.phone}` : ''}
                 </span>
               </div>
+            </div>
+          )}
+
+          {recognizeState.status === 'success' && crossLobMatch?.matched && (
+            <div className="space-y-1.5">
+              <p className="text-[11px] text-gray-500">
+                {t('face.crossLob.prompt', 'This customer exists in both lines of business. Open which record?')}
+              </p>
+              <button
+                type="button"
+                onClick={() => openInCurrentLob(recognizeState.match.partnerId)}
+                className="w-full flex items-center justify-between gap-2 px-2.5 py-2 text-left text-sm rounded-lg border border-orange-200 bg-orange-50 hover:bg-orange-100"
+              >
+                <span className="font-medium text-gray-800 truncate">{recognizeState.match.name}</span>
+                <span className="text-[10px] font-semibold uppercase text-orange-600">
+                  {t(`face.crossLob.lob.${currentLOB}`, currentLOB)}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => openInOtherLob(crossLobMatch)}
+                className="w-full flex items-center justify-between gap-2 px-2.5 py-2 text-left text-sm rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100"
+              >
+                <span className="font-medium text-gray-800 truncate">{crossLobMatch.otherName || recognizeState.match.name}</span>
+                <span className="text-[10px] font-semibold uppercase text-blue-600">
+                  {crossLobMatch.otherLob ? t(`face.crossLob.lob.${crossLobMatch.otherLob}`, crossLobMatch.otherLob) : ''}
+                </span>
+              </button>
             </div>
           )}
 

@@ -66,6 +66,8 @@ services:
     restart: unless-stopped
     environment:
       DETECTION_THRESHOLD: ${FACE_DETECTION_THRESHOLD:-0.6}
+      LIVENESS_ENABLED: ${FACE_LIVENESS_ENABLED:-false}
+      LIVENESS_THRESHOLD: ${FACE_LIVENESS_THRESHOLD:-0.5}
     ports:
       - "${FACE_SERVICE_BIND_HOST:-127.0.0.1}:${FACE_SERVICE_HOST_PORT:-8001}:8000"
     healthcheck:

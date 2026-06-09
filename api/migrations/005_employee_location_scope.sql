@@ -1,3 +1,6 @@
+-- @crossref:domain[employees-hr]
+-- @crossref:used-in[NK3 schema migration: api/migrations/005_employee_location_scope]
+-- @crossref:uses[product-map/domains/employees-hr.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Employee location scope junction table: multi-branch assignment
 CREATE TABLE IF NOT EXISTS dbo.employee_location_scope (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

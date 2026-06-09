@@ -1,3 +1,6 @@
+-- @crossref:domain[customers-partners]
+-- @crossref:used-in[NK3 schema migration: api/migrations/021_partner_unique_constraints]
+-- @crossref:uses[product-map/domains/customers-partners.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration 021: Unique constraints on partners.phone and partners.email
 -- ============================================================================
 -- Purpose  : Enforce data integrity by preventing duplicate phone numbers and

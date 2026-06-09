@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/useCustomerFormActions]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * Form submission and edit-data preparation for the AddCustomerForm
  * @crossref:used-in[Customers]
  */

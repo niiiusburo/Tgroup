@@ -3,6 +3,8 @@
  * Uses getDb('dental') + getDb('cosmetic') to query dbo.earnings + partners for the authed is_ctv user's employeeId (recipient_partner_id).
  * No mocks, no stubs. Data is 100% from DB via engine-written rows (referred_by_ctv_id path).
  * Mounted at /api/ctv (gated by ctv.dashboard.view perm + requireAuth).
+ * @crossref:endpoint[GET /api/ctv/commission-summary, GET /api/ctv/referrals, GET /api/ctv/client-journeys, POST /api/ctv, POST /api/ctv/clients, POST /api/ctv/bookings]
+ * @crossref:uses[api/src/services/referralClaim.js, api/src/services/ctvNetwork.js, api/src/services/ctvBookingCompany.js, product-map/domains/ctv.yaml]
  */
 const express = require('express');
 const { requireAuth } = require('../middleware/auth');

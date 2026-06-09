@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[business-unit]
+ * @crossref:used-in[NK3 API middleware: api/src/middleware/lob]
+ * @crossref:uses[product-map/domains/business-unit.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const { getDb, runWithLob } = require('../db');
 
 /**

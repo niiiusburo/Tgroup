@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[payments-deposits]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/receipts]
+ * @crossref:uses[product-map/domains/payments-deposits.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const express = require('express');
 const { query } = require('../db');
 const { addAccentInsensitiveSearchCondition } = require('../utils/search');

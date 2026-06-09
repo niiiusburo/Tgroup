@@ -76,11 +76,29 @@ Current inventory from disk:
 | 045 | `045_add_feedback_permissions.sql` | Seeds feedback permissions | Permission seed inserts | Delete seeded feedback permissions | 2026-04 |
 | 045 | `045_grant_external_checkups_create_to_clinic_roles.sql` | Grants external checkup create permission to clinic roles | Permission seed insert | Delete granted permission rows | 2026-04 |
 | 046 | `046_split_payment_and_hoso_permissions.sql` | Splits payment and treatment-record permission strings | Permission seed inserts | Delete seeded split permissions after replacement mapping | 2026-05 |
-| 047 | `047_cosmetic_lob_v2_base.sql` | Cosmetic LOB v2 base schema + partner fields + earnings table (D13 CTV support) | Creates `earnings` table; adds columns to `partners`, `products` | Drop `earnings` table, restore partner/product schema | 2026-05 |
+| 047 | `047_add_cosmetic_lob_v2_dental_additive.sql` | Cosmetic LOB v2 dental additive fields | Adds LOB/CTV-related partner/product fields | Restore partner/product schema from backup | 2026-05 |
+| 047 | `047_add_lob_scope_is_ctv_to_partners.sql` | Adds LOB scope and CTV identity flags to partners | `ALTER TABLE partners ADD lob_scope`, `is_ctv`, referral fields | Drop added partner columns only after app rollback | 2026-05 |
 | 048 | `048_grant_lob_permissions_to_admin.sql` | Grant cosmetic.access, dental.access, lob.crossview to Admin group (Phase-2) | Permission seed insert | Delete granted permission rows | 2026-05 |
+| 049 | `049_add_commission_level_config.sql` | Adds CTV tier commission configuration | Create/seed `commission_level_config` | Drop table only after engine rollback | 2026-05 |
 | 049 | `049_widen_partners_created_via_for_legacy_ctv.sql` | Widen `partners.created_via` and allow full legacy CTV import markers | `ALTER COLUMN created_via TYPE VARCHAR(64)` + refresh `partners_created_via_check` | Narrow only after confirming no value exceeds 16 chars and no legacy marker remains | 2026-05 |
+| 050 | `050_add_referral_start_product.sql` | Adds Referral Start service fallback for CTV booking | Seed product/category fallback | Delete seeded fallback after booking rollback | 2026-06 |
+| 051 | `051_add_payout_receipt.sql` | Adds payout receipt metadata | `ALTER TABLE payouts ADD receipt_url` and related fields | Drop added payout receipt fields | 2026-06 |
+| 052 | `052_add_saleorder_ctv.sql` | Adds CTV attribution to service cards | `ALTER TABLE saleorders ADD ctv_id` | Drop `saleorders.ctv_id` after code rollback | 2026-06 |
+| 053 | `053_drop_default_referral_percent.sql` | Removes default referral percent dependency | Adjusts referral percentage defaults/config | Restore previous default only after product-rule rollback | 2026-06 |
+| 054 | `054_add_appointments_ctv.sql` | Adds CTV attribution to appointments | `ALTER TABLE appointments ADD ctv_id` | Drop `appointments.ctv_id` after booking rollback | 2026-06 |
+| 055 | `055_earnings_service_card_created.sql` | Adds service-card-created CTV earning support | Service-card earning idempotency/shape updates | Restore from backup before removing constraints/indexes | 2026-06 |
+| 056 | `056_braces_commission_config.sql` | Adds Dental braces/orthodontics CTV tier override config | Dental-only tier config fields/seeds | Remove braces override config after Dental engine rollback | 2026-06 |
+| 057 | `057_payout_group_id.sql` | Links combined Dental+Cosmetic payout rows | Adds `payout_group_id` and related index | Drop field/index after combined payout rollback | 2026-06 |
+| 058 | `058_audit_logs.sql` | Adds audit log support for CTV hierarchy moves | Creates `audit_logs` table/indexes | Drop `audit_logs` after move-feature rollback | 2026-06 |
 
-**Total canonical migrations:** 55 files in `api/migrations/`.
+**Total repository migration SQL files:** 67 files in `api/migrations/`.
+
+| 062 | `062_ctv_discount_codes.sql` | Creates `dbo.ctv_discount_codes` for CTV voucher QR staff verify | `CREATE TABLE ctv_discount_codes (...)` | `DROP TABLE ctv_discount_codes` | NK3 2026-06-08 |
+| 063 | `063_ctv_discount_codes_kol_parity.sql` | Extends discount codes for KOL parity (visitor fields, claimed/generated statuses) | `ALTER TABLE ctv_discount_codes ADD COLUMN ...`; widen status check | Reverse column adds + restore old status check | NK3 2026-06-08 |
+
+## NK3 Ledger Reconciliation Notes
+
+- 2026-06-06: Live NK3 CTV integrity repair reconciled `dbo.schema_migrations` ledger rows for schema shape that already existed after fresh backups. Dental `tdental_nk3` ledger rows inserted: `055_earnings_service_card_created.sql`, `056_braces_commission_config.sql`, `057_payout_group_id.sql`, `058_audit_logs.sql`. Cosmetic `tcosmetic_nk3` ledger rows inserted: `055_earnings_service_card_created.sql`, `057_payout_group_id.sql`. No schema DDL was replayed during this ledger-only reconciliation.
 
 ## Supplemental Migration Files
 

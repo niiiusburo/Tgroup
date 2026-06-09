@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/useCustomerServiceActions]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * Service action callbacks for the customer profile
  * Bridges CustomerProfile service forms to the useServices hook
  * @crossref:used-in[Customers]

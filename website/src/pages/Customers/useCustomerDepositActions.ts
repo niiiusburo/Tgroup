@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/useCustomerDepositActions]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * Deposit action callbacks for the customer profile
  * @crossref:used-in[Customers]
  */

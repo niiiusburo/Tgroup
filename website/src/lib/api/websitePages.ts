@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[feedback-cms]
+ * @crossref:used-in[NK3 frontend API client: website/src/lib/api/websitePages]
+ * @crossref:uses[product-map/domains/feedback-cms.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { apiFetch } from './core';
 
 // ─── Website Pages ────────────────────────────────────────────────

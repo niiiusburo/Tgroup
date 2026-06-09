@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[services-catalog]
+ * @crossref:used-in[NK3 backend service function: api/src/services/larkNotifier]
+ * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const crypto = require('crypto');
 
 const LARK_HOSTS = new Set(['open.larksuite.com', 'open.feishu.cn']);

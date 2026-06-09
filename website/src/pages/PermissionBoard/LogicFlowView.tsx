@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[auth]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/PermissionBoard/LogicFlowView]
+ * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import type { PermissionGroup, EmployeePermission } from '@/lib/api';
 import { getInitials } from './constants';
 import { useTranslation } from 'react-i18next';

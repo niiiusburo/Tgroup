@@ -1,3 +1,6 @@
+-- @crossref:domain[ctv]
+-- @crossref:used-in[NK3 schema migration: api/migrations/050_add_referral_start_product]
+-- @crossref:uses[product-map/domains/ctv.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- 050_add_referral_start_product.sql
 -- Additive + reversible. Both tdental + tcosmetic, schema dbo.
 -- Adds a pointer to the admin-created "Referral Start" product used as the

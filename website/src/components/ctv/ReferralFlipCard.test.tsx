@@ -87,7 +87,7 @@ describe('ReferralFlipCard', () => {
     render(<ReferralFlipCard referral={referral} />);
 
     const flipButton = screen.getByRole('button', { name: /show services for Seed Client - NK3 CTV/i });
-    expect(screen.getAllByText('Cosmetic').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Aesthetic').length).toBeGreaterThan(0);
     expect(screen.getAllByText(/3 services/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText('Expected').length).toBeGreaterThan(0);
 

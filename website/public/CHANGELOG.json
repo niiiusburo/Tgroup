@@ -1,5 +1,194 @@
 [
   {
+    "version": "0.35.1",
+    "date": "2026-06-09",
+    "commit": "pending",
+    "highlights": "NK3 0.35.1 — Bảng giá /bang-gia syncs from Google Sheet every 30 seconds.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Live pricing sync from Google Sheet 19YZB-SgpqvI3-hu93xOk0OCDWtUPxrAAfR6CiFpU4GY every 30s.",
+          "GET /api/public/bang-gia/status for sync health.",
+          "NK3 web mounts live bang-gia directory — no rebuild needed for price updates."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.34.0",
+    "date": "2026-06-09",
+    "commit": "pending",
+    "highlights": "NK3 0.34.0 — CTV login recovery (admin reset + credential reveal) and portal i18n cleanup.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Login page Forgot Password link with admin-contact guidance.",
+          "Admin CTV create shows credential card with copy-all on success.",
+          "Per-CTV admin password reset with temp password reveal."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "CTV portal tabs, modals, JoinCtv, and QR surfaces now use ctv locale keys only.",
+          "English LOB label Cosmetic renamed to Aesthetic; Vietnamese stays Thẩm mỹ."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.33.4",
+    "date": "2026-06-09",
+    "commit": "pending",
+    "highlights": "NK3 0.33.4 — CTV portal adds legacy Bảng giá (/bang-gia) with VND prices; catalog icon stays visual flipbook only.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Static /bang-gia pricing page (16 categories from legacy pricing.json).",
+          "CTV header tag icon opens Bảng giá beside existing catalog book icon."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.33.2",
+    "date": "2026-06-08",
+    "commit": "pending",
+    "highlights": "NK3 0.33.2 — CTV discount QR link fix: fan landing loads, public API works, QR populates after claim.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Fan link /ctv/discount/:shortCode no longer falls through to admin Overview.",
+          "Public discount API (landing, check-existing, generate) works without login token.",
+          "Fixed dev API URL (no more HTML /api stub); landing page stops infinite reload loop.",
+          "CTV portal link is clickable with Open preview button."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added App.publicDiscountRoutes, CtvDiscountLanding, publicApiPaths unit tests.",
+          "Playwright public project for fan landing E2E (no admin auth-setup dependency)."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.33.1",
+    "date": "2026-06-08",
+    "commit": "111cb935",
+    "highlights": "NK3 0.33.1 — CTV discount QR KOL parity: generate/track codes, fan landing, staff verify with LOB booking rules.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "CTV Mã QR tab: link share (Mode A) + per-click voucher download (Mode B).",
+          "Public fan landing /ctv/discount/:shortCode with claim button.",
+          "Mã của tôi code history panel with stats and filters.",
+          "/verify-discount staff flow: scan QR → staff login → LOB + phone → verify."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Staff verify uses LOB-specific client lookup and CTV claim rules (same as refer/booking).",
+          "Existing clients reclaimed under issuing CTV on verify; new clients created when missing in LOB."
+        ]
+      },
+      {
+        "title": "API",
+        "items": [
+          "POST /api/discount-codes/generate, GET /mine, GET /stats, GET /landing/:shortCode.",
+          "Migrations 062–063: dbo.ctv_discount_codes + visitor tracking."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.122",
+    "date": "2026-06-08",
+    "commit": "pending",
+    "highlights": "CTV voucher QR now opens staff verify flow: login gate, client phone search (dental + cosmetic), code verification.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "/verify-discount page for staff scanning CTV voucher QR codes.",
+          "CTV logout prompt when a CTV account scans a verify QR.",
+          "Cross-LOB client phone search on verify screen."
+        ]
+      },
+      {
+        "title": "API",
+        "items": [
+          "POST /api/discount-codes/ensure, GET lookup/client-search, POST verify.",
+          "Migration 062: dbo.ctv_discount_codes."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.121",
+    "date": "2026-06-08",
+    "commit": "pending",
+    "highlights": "CTV Mã QR tab redesigned with KOL-style voucher UI: heartbeat discount banner, glass ticket card, animated download button.",
+    "sections": [
+      {
+        "title": "UI",
+        "items": [
+          "Mã QR panel: KOL-parity voucher card (red banner, glass ticket, QR canvas, Lưu mã ngay! button).",
+          "Voucher PNG export matches KOL composite layout; mobile share-with-file when supported."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.120",
+    "date": "2026-06-08",
+    "commit": "111cb935",
+    "highlights": "CTV portal Referral/QR tab: toggle between network hierarchy and discount QR (share link + download voucher image). Bottom nav renamed to Giới thiệu/QR.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "CTV portal: Giới thiệu/QR bottom tab with sub-tabs Mạng lưới and Mã QR.",
+          "Mã QR panel: copy/share discount landing link and download voucher PNG with visible discount %."
+        ]
+      },
+      {
+        "title": "UI",
+        "items": [
+          "Bottom nav label changed from Mạng lưới / Network to Giới thiệu/QR / Referral/QR."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.119",
+    "date": "2026-06-07",
+    "commit": "face-id-cross-lob-chooser",
+    "highlights": "Face ID recognition now lets staff choose the line of business when a recognized customer exists in both dental and cosmetic, instead of silently opening one record. Also restored the cross-LOB identity probe that powers the profile badge.",
+    "sections": [
+      {
+        "title": "Added",
+        "items": [
+          "Quick Face ID: when a recognized customer also exists in the other LOB (admin lob.crossview), a chooser pops up to open the dental or cosmetic record.",
+          "Other-LOB record opens in a new tab via ?lob= deep link; current-LOB opens in place."
+        ]
+      },
+      {
+        "title": "Fixed",
+        "items": [
+          "Restored GET /api/cross-lob-probe (dropped in the cosmetic-LOB merge), which also fixes the 'also a {dental|cosmetic} client' badge on customer profiles. SQL phone-key match replaces the old LIMIT-300 scan."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.116",
     "date": "2026-06-08",
     "commit": "db7abac4",

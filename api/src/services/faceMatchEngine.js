@@ -1,5 +1,10 @@
 "use strict";
 
+/**
+ * @crossref:domain[services-catalog]
+ * @crossref:used-in[NK3 backend service function: api/src/services/faceMatchEngine]
+ * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const { query, pool } = require("../db");
 
 // Thresholds (environment-configurable). Defaults retuned 2026-05-16:

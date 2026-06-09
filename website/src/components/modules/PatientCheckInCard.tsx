@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[appointments-calendar]
+ * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/PatientCheckInCard]
+ * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useEffect, useRef, useState } from 'react';
 import { Clock, FileText, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';

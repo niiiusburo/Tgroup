@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[earnings-commissions]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/commissions]
+ * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const express = require('express');
 const { query } = require('../db');
 const { addAccentInsensitiveSearchCondition } = require('../utils/search');

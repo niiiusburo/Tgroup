@@ -1,5 +1,12 @@
 'use strict';
 
+/**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 backend service function: api/src/services/ctvSelfProfile]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:function[getCtvSelfProfile, updateCtvSelfProfile, changeCtvSelfPassword]
+ * @crossref:uses[api/src/routes/ctvProfile.js, api/src/services/legacyCtvPassword.js, website/src/pages/CTV/tabs/CtvAccountSettings.tsx]
+ */
 const bcrypt = require('bcryptjs');
 const { getDb } = require('../db');
 const { canUseLegacyCtvPassword, verifyLegacyCtvPassword } = require('./legacyCtvPassword');
@@ -22,6 +29,7 @@ function toProfile(row) {
     email: row.email || '',
     phone: row.phone || '',
     role: 'CTV',
+    isLive: row.is_live === true,
   };
 }
 
@@ -48,7 +56,7 @@ async function queryRows(lob, sql, params) {
 async function findCtvProfileInLob(lob, employeeId) {
   const rows = await queryRows(
     lob,
-    `SELECT id, name, email, phone, password_hash, created_via, is_ctv
+    `SELECT id, name, email, phone, password_hash, created_via, is_ctv, is_live
        FROM dbo.partners
       WHERE id = $1
         AND employee = true

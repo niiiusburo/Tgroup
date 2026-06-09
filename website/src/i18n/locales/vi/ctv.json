@@ -14,6 +14,8 @@
   "hello": "Xin chào, {{name}}",
   "notifications": "Thông báo",
   "language": "Ngôn ngữ",
+  "catalog": "Catalog dịch vụ",
+  "pricing": "Bảng giá dịch vụ",
   "quickActions": "Thao tác CTV nhanh",
   "header": {
     "brand": "TG CLINIC",
@@ -28,7 +30,7 @@
     "commission": "Hoa hồng",
     "referrals": "Theo dõi",
     "recruiting": "Giới thiệu CTV",
-    "network": "Mạng lưới",
+    "network": "Giới thiệu/QR",
     "me": "Tôi"
   },
   "actions": {
@@ -44,9 +46,20 @@
     "saving": "Đang lưu...",
     "changePassword": "Đổi mật khẩu"
   },
+  "common": {
+    "emDash": "—",
+    "empty": "—"
+  },
+  "errors": {
+    "genericRetry": "Vui lòng thử lại."
+  },
+  "brandAssets": {
+    "tamGroupAlt": "Tấm Group"
+  },
   "home": {
+    "pricingCta": "Xem bảng giá dịch vụ",
     "greeting": "Xin chào, {{name}} 👋",
-    "subtitle": "Hoa hồng giới thiệu của bạn qua Dental & Cosmetic",
+    "subtitle": "Hoa hồng giới thiệu của bạn qua Nha khoa & Thẩm mỹ",
     "pendingCommission": "Hoa hồng chờ nhận",
     "thisMonth": "Tháng này",
     "services": "Dịch vụ",
@@ -103,6 +116,86 @@
     "pending": "Dự kiến",
     "paid": "Đã nhận"
   },
+  "referralQr": {
+    "pageTitle": "Giới thiệu & mã QR",
+    "pageSubtitle": "Theo dõi mạng lưới CTV hoặc phát mã giảm giá cho bạn bè",
+    "subTabList": "Chọn mạng lưới hoặc mã QR",
+    "subTabs": {
+      "network": "Mạng lưới",
+      "qr": "Mã QR"
+    }
+  },
+  "qrDiscount": {
+    "currentTier": "Mức giảm hiện tại",
+    "tierLive": "LIVE",
+    "tierOff": "OFF",
+    "discountPercent": "Giảm {{percent}}%",
+    "discountNow": "Giảm ngay {{value}}",
+    "yourCodeLabel": "MÃ GIẢM GIÁ CỦA BẠN",
+    "scanAtDesk": "Nhân viên quét mã tại quầy để xác minh",
+    "saveCodeNow": "Lưu mã ngay!",
+    "brandLine": "TG Clinic · Nha Khoa Tấm",
+    "shareVoucherTitle": "Mã giảm giá",
+    "shareVoucherText": "Lưu mã giảm giá của bạn",
+    "expiryDays": "Có hiệu lực {{days}} ngày sau khi nhận mã",
+    "tierHint": "% hiển thị theo trạng thái LIVE/OFF của bạn. Giá trị chốt trên mã khi khách nhận — không đổi nếu admin sửa cài đặt sau.",
+    "slogan": "Cho tất cả dịch vụ làm đẹp ✨",
+    "modeLinkTitle": "Cách 1 — Gửi link",
+    "modeLinkBody": "Gửi link cho bạn bè. Khi họ mở và bấm nhận mã, hệ thống tạo mã + QR với % đã chốt.",
+    "modeQrTitle": "Cách 2 — Tải ảnh QR",
+    "modeQrBody": "Khách đưa ảnh voucher có QR. Nhân viên quét bằng điện thoại → đăng nhập staff → nhập SĐT khách → xác minh mã.",
+    "copyLink": "Sao chép link",
+    "shareLink": "Chia sẻ",
+    "openPreview": "Mở thử link",
+    "copied": "Đã sao chép",
+    "downloadImage": "Tải ảnh voucher",
+    "downloading": "Đang tạo ảnh...",
+    "qrLoading": "Đang tạo QR...",
+    "qrAlt": "Mã QR giảm giá CTV",
+    "shareTitle": "Nhận giảm giá từ {{name}}",
+    "shareText": "Giảm {{percent}}% khi làm dịch vụ tại TG Clinic — từ {{name}}",
+    "generateHint": "Mỗi lần bấm sẽ tạo một mã mới (1 mã = 1 ảnh voucher).",
+    "generateAndDownload": "Tạo mã & tải ảnh",
+    "downloadFilename": "ma-giam-gia-{{code}}.png",
+    "canvasDiscount": "🎁 Giảm {{value}}"
+  },
+  "codeHistory": {
+    "title": "Mã của tôi",
+    "subtitle": "Theo dõi tất cả mã bạn đã phát — giống KOL dashboard",
+    "refresh": "Làm mới",
+    "total": "Tổng mã",
+    "used": "Đã dùng",
+    "conversion": "Chuyển đổi",
+    "searchPlaceholder": "Tìm mã, tên hoặc SĐT...",
+    "filterAll": "Tất cả",
+    "filterClaimed": "Đã phát",
+    "filterCheckedIn": "Đã check-in",
+    "filterUsed": "Đã dùng",
+    "filterExpired": "Hết hạn",
+    "loading": "Đang tải mã...",
+    "empty": "Chưa có mã nào — hãy chia sẻ link hoặc tạo ảnh QR.",
+    "anonymous": "Khách chưa đặt tên",
+    "status": {
+      "claimed": "Đã phát",
+      "generated": "Đã tạo",
+      "active": "Hoạt động",
+      "checked_in": "Đã check-in",
+      "used": "Đã dùng",
+      "expired": "Hết hạn",
+      "unknown": "Không xác định"
+    }
+  },
+  "discountLanding": {
+    "brand": "TG Clinic",
+    "title": "Ưu đãi từ {{name}}",
+    "preview": "Giảm {{value}} cho dịch vụ làm đẹp",
+    "claimBody": "Bấm nút bên dưới để nhận mã giảm giá cá nhân — mỗi người một mã.",
+    "claimCta": "NHẬN MÃ GIẢM GIÁ",
+    "claiming": "Đang tạo mã...",
+    "instructions": "Đưa mã hoặc QR cho lễ tân khi đến phòng khám để nhận ưu đãi.",
+    "notFound": "Link không hợp lệ hoặc CTV đã ngưng hoạt động.",
+    "generateError": "Không tạo được mã. Vui lòng thử lại."
+  },
   "hierarchy": {
     "title": "Hệ thống giới thiệu CTV",
     "subtitle": "Xem tuyến trên và tuyến dưới trong cây CTV của bạn",
@@ -151,6 +244,40 @@
     "dental": "Nha khoa",
     "cosmetic": "Thẩm mỹ"
   },
+  "join": {
+    "title": "Đăng ký Cộng tác viên",
+    "subtitle": "Bắt buộc: họ tên, số điện thoại và mật khẩu. Email không bắt buộc.",
+    "uplineFromLink": "Bạn sẽ đăng ký dưới {{name}}",
+    "uplineManualHint": "Nhập số điện thoại CTV giới thiệu ở cuối form nếu cần chọn tuyến trên.",
+    "checkingLink": "Đang kiểm tra liên kết...",
+    "successTitle": "Tạo tài khoản CTV thành công!",
+    "successBody": "Bạn có thể đăng nhập bằng số điện thoại hoặc email vừa đăng ký.",
+    "loginCta": "Đăng nhập",
+    "invalidLink": "Liên kết giới thiệu không hợp lệ. Nhập số điện thoại CTV giới thiệu để tiếp tục.",
+    "uplineLabel": "CTV giới thiệu",
+    "uplinePlaceholder": "Số điện thoại CTV giới thiệu",
+    "uplineHintFromLink": "Để trống để dùng CTV từ liên kết giới thiệu.",
+    "uplineHintRoot": "Không bắt buộc — để trống để đăng ký làm CTV cấp gốc.",
+    "uplineHintRequired": "Bắt buộc khi đăng ký từ nút Đăng Ký CTV trên landing.",
+    "uplineChecking": "Đang xác minh số CTV...",
+    "uplineValid": "CTV hợp lệ: {{name}}",
+    "submit": "Tạo tài khoản CTV",
+    "errors": {
+      "uplineRequired": "Vui lòng nhập số điện thoại CTV giới thiệu.",
+      "uplineVerifying": "Vui lòng chờ xác minh số điện thoại CTV giới thiệu.",
+      "uplineNotFound": "Không tìm thấy CTV theo số điện thoại này."
+    },
+    "fields": {
+      "name": "Họ tên",
+      "phone": "Số điện thoại của bạn",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "lobs": "Lĩnh vực hoạt động",
+      "submit": "Tạo tài khoản CTV",
+      "submitting": "Đang tạo...",
+      "emailOptional": "(không bắt buộc)"
+    }
+  },
   "serviceStatus": {
     "pending": "Chờ chi trả",
     "paid": "Đã chi trả",
@@ -182,9 +309,20 @@
   },
   "forms": {
     "close": "Đóng",
+    "defaults": {
+      "name": "Họ tên",
+      "phone": "Số điện thoại",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "lobs": "Lĩnh vực hoạt động",
+      "submit": "Tạo tài khoản CTV",
+      "submitting": "Đang tạo...",
+      "cancel": "Hủy",
+      "emailOptional": "(không bắt buộc)"
+    },
     "referClient": {
       "title": "Giới thiệu khách",
-      "phoneFirstNotice": "Type in the phone number to verify first.",
+      "phoneFirstNotice": "Nhập số điện thoại để xác minh trước.",
       "name": "Họ tên",
       "namePlaceholder": "Tên khách hàng",
       "phone": "Số điện thoại",
@@ -193,8 +331,6 @@
       "ctvPhonePlaceholder": "Nhập số điện thoại CTV",
       "date": "Ngày hẹn",
       "lob": "Lĩnh vực",
-      "dental": "Dental",
-      "cosmetic": "Cosmetic",
       "submit": "Giới thiệu khách",
       "submitting": "Đang gửi...",
       "success": "Giới thiệu thành công!",

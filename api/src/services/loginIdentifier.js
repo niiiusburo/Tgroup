@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[services-catalog]
+ * @crossref:used-in[NK3 backend service function: api/src/services/loginIdentifier]
+ * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 function normalizeLoginIdentifier(value) {
   return String(value || '').trim();
 }
@@ -29,7 +34,6 @@ async function findLoginPartner(queryFn, identifier) {
            OR (
              $2 <> ''
              AND p.is_ctv = true
-             AND COALESCE(p.created_via, '') LIKE 'legacy_ctv_import%'
              AND (
                regexp_replace(COALESCE(p.phone, ''), '\\D', '', 'g') = $2
                OR right(regexp_replace(COALESCE(p.phone, ''), '\\D', '', 'g'), 9) = right($2, 9)

@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[reports-analytics]
+ * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/RevenueChartModule]
+ * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import type { RevenueDataPoint } from '@/types/common';
 

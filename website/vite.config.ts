@@ -46,6 +46,8 @@ function getVersionInfo() {
 }
 
 const versionInfo = getVersionInfo()
+// index.html uses %VITE_APP_VERSION%; set before config load so dev + build both substitute it.
+process.env.VITE_APP_VERSION = versionInfo.version
 console.log('✅ Vite config loading with version:', versionInfo.version)
 
 // https://vitejs.dev/config/

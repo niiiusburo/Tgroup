@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[integrations]
+ * @crossref:used-in[NK3 frontend API client: website/src/lib/api/externalCheckups]
+ * @crossref:uses[product-map/domains/integrations.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { apiFetch, API_URL } from './core';
 
 // ─── External Checkups (hosoonline.com integration) ───────────────

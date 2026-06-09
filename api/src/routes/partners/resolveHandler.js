@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[customers-partners]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/partners/resolveHandler]
+ * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const { query } = require('../../db');
 const { getCtvLinkStatus } = require('../../services/referralClaim');
 

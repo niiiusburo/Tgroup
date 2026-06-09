@@ -1,6 +1,11 @@
 'use strict';
 
 /**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 backend service function: api/src/services/exports/builders/newClientsExport]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * newClientsExport.js — Excel export for the admin "New Clients" tab.
  * Reuses newClientsQuery (both LOB DBs) so the export matches the on-screen list.
  */

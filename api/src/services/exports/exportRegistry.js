@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * @crossref:domain[reports-analytics]
+ * @crossref:used-in[NK3 backend service function: api/src/services/exports/exportRegistry]
+ * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const { buildFilename } = require('./exportWorkbook');
 const serviceCatalogExport = require('./builders/serviceCatalogExport');
 const customersExport = require('./builders/customersExport');

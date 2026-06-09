@@ -1,8 +1,13 @@
+/**
+ * @crossref:domain[ctv]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/CTV/CtvDashboard]
+ * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ComponentType } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Bell, Home, ListChecks, Network, UserRound, Wallet } from 'lucide-react';
+import { Bell, BookOpen, Home, ListChecks, Network, Tag, UserRound, Wallet } from 'lucide-react';
 
 import { LanguageToggle } from '@/components/shared/LanguageToggle';
 import {
@@ -39,7 +44,9 @@ const TABS: Array<{
 ];
 
 export default function CtvDashboard() {
-  const { t, i18n } = useTranslation('ctv');
+  const { t } = useTranslation('ctv');
+  const translateRef = useRef(t);
+  translateRef.current = t;
   const isMountedRef = useRef(true);
   const [activeTab, setActiveTab] = useState<TabKey>('home');
   const [referrals, setReferrals] = useState<CtvReferral[]>([]);
@@ -71,7 +78,11 @@ export default function CtvDashboard() {
       setReferrals(referralsResult.value.referrals);
     } else {
       setReferrals([]);
-      setError(referralsResult.reason instanceof Error ? referralsResult.reason.message : 'CTV data could not load');
+      setError(
+        referralsResult.reason instanceof Error
+          ? referralsResult.reason.message
+          : translateRef.current('errorTitle')
+      );
     }
 
     setSummary(summaryResult.status === 'fulfilled' ? summaryResult.value : null);
@@ -90,7 +101,7 @@ export default function CtvDashboard() {
     } catch (err) {
       if (!isMountedRef.current) return;
       setHierarchy(null);
-      setHierarchyError(err instanceof Error ? err.message : 'Please try again in a few minutes.');
+      setHierarchyError(err instanceof Error ? err.message : translateRef.current('errorBody'));
     } finally {
       if (isMountedRef.current) setIsHierarchyLoading(false);
     }
@@ -133,21 +144,13 @@ export default function CtvDashboard() {
   }, []);
 
   const profileName = profile?.name || t('profileFallback');
-  const isVietnamese = i18n.language?.startsWith('vi');
-  const tabFallbacks: Record<TabKey, string> = {
-    home: isVietnamese ? 'Tổng quan' : 'Home',
-    commission: isVietnamese ? 'Hoa hồng' : 'Commission',
-    tracking: t('tabs.referrals'),
-    network: isVietnamese ? 'Mạng lưới' : 'Network',
-    me: isVietnamese ? 'Tôi' : 'Me',
-  };
   const activeTitle = useMemo(() => {
     if (activeTab === 'home') return t('portal');
-    if (activeTab === 'commission') return t('commission.myCommission', { defaultValue: isVietnamese ? 'Hoa hồng của tôi' : 'My commission' });
-    if (activeTab === 'network') return t('hierarchy.title');
-    if (activeTab === 'me') return t('header.meTitle', { defaultValue: isVietnamese ? 'Tài khoản' : 'Account' });
+    if (activeTab === 'commission') return t('commission.myCommission');
+    if (activeTab === 'network') return t('referralQr.pageTitle');
+    if (activeTab === 'me') return t('header.meTitle');
     return t('title');
-  }, [activeTab, isVietnamese, t]);
+  }, [activeTab, t]);
   const isAccountTab = activeTab === 'me';
   const effectiveHeaderHidden = !isAccountTab && isHeaderHidden;
 
@@ -183,6 +186,22 @@ export default function CtvDashboard() {
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
+                <a
+                  href="/catalogue"
+                  className="grid h-9 w-9 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/25 transition-colors hover:bg-white/25"
+                  aria-label={t('catalog')}
+                  title={t('catalog')}
+                >
+                  <BookOpen className="h-4 w-4" />
+                </a>
+                <a
+                  href="/bang-gia"
+                  className="grid h-9 w-9 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/25 transition-colors hover:bg-white/25"
+                  aria-label={t('pricing')}
+                  title={t('pricing')}
+                >
+                  <Tag className="h-4 w-4" />
+                </a>
                 <div className="[&>div>button]:h-9 [&>div>button]:w-9 [&>div>button]:rounded-full [&>div>button]:bg-white/15 [&>div>button]:text-white [&>div>button]:ring-1 [&>div>button]:ring-white/25 [&>div>button]:hover:bg-white/25 [&>div>button]:hover:text-white">
                   <LanguageToggle compact menuPlacement="below" />
                 </div>
@@ -242,6 +261,8 @@ export default function CtvDashboard() {
               isLoading={isHierarchyLoading}
               error={hierarchyError}
               onRetry={() => void loadHierarchy()}
+              profile={profile}
+              profileName={profileName}
             />
           ) : null}
           {activeTab === 'me' ? <CtvMeTab profile={profile} onProfileUpdated={setProfile} /> : null}
@@ -283,7 +304,7 @@ export default function CtvDashboard() {
                   <span className={cn('grid h-7 w-10 place-items-center rounded-full', active ? 'bg-orange-100' : '')}>
                     <Icon className={cn('h-5 w-5', active ? 'stroke-[2.5]' : '')} />
                   </span>
-                  <span className="max-w-[4.5rem] text-center">{t(labelKey, { defaultValue: tabFallbacks[key] })}</span>
+                  <span className="max-w-[4.5rem] text-center">{t(labelKey)}</span>
                 </button>
               );
             })}

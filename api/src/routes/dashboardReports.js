@@ -1,3 +1,8 @@
+/**
+ * @crossref:domain[reports-analytics]
+ * @crossref:used-in[NK3 Express API route: api/src/routes/dashboardReports]
+ * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
 const express = require('express');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');

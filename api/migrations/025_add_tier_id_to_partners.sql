@@ -1,3 +1,6 @@
+-- @crossref:domain[customers-partners]
+-- @crossref:used-in[NK3 schema migration: api/migrations/025_add_tier_id_to_partners]
+-- @crossref:uses[product-map/domains/customers-partners.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Migration: Add tier_id to partners and seed from existing employee_permissions
 -- This replaces the separate employee_permissions mapping with a direct tier reference.
 

@@ -1,4 +1,9 @@
 /**
+ * @crossref:domain[settings-system]
+ * @crossref:used-in[NK3 SPA page route: website/src/pages/Notifications]
+ * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ */
+/**
  * Notifications Page — Placeholder for SMS/Email notification management
  * @crossref:route[/notifications]
  * @crossref:used-in[App]

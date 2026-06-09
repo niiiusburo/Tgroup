@@ -1,3 +1,6 @@
+-- @crossref:domain[auth]
+-- @crossref:used-in[NK3 schema migration: api/migrations/030_rename_permission_groups]
+-- @crossref:uses[product-map/domains/auth.yaml, docs/MIGRATIONS.md, docs/TEST-MATRIX.md, testbright.md]
 -- Rename permission groups from old dental-specific names to generic tier names
 UPDATE dbo.permission_groups SET name = 'Super Admin', description = 'Full system access (super administrator)' WHERE id = '11111111-0000-0000-0000-000000000001';
 UPDATE dbo.permission_groups SET name = 'Admin', description = 'Clinic administration access' WHERE id = '11111111-0000-0000-0000-000000000002';
