@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Eye, Loader2, Trash2, Bug, Users, Hash, FileCode } from 'lucide-react';
+import { Bug, CheckCircle, Eye, FileCode, Hash, Loader2, Trash2, Users } from 'lucide-react';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusDropdown, type StatusOption } from '@/components/shared/StatusDropdown';
 import { usePasteImage } from '@/hooks/usePasteImage';
@@ -143,6 +143,28 @@ export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentPr
     }
   }
 
+  async function handleResolveSelected() {
+    if (!canEdit) return;
+    if (selectedIds.size === 0) return;
+    const confirmed = window.confirm(
+      `Mark ${selectedIds.size} error${selectedIds.size > 1 ? 's' : ''} as resolved?`
+    );
+    if (!confirmed) return;
+    setDeleting(true);
+    try {
+      await Promise.all(
+        Array.from(selectedIds).map((id) => updateFeedbackStatus(id, 'resolved'))
+      );
+      setSelectedIds(new Set());
+      await loadThreads(activeTab, autoHostMode === 'current' ? currentHost : undefined);
+    } catch (err) {
+      console.error('Failed to resolve errors:', err);
+      alert('Failed to resolve errors');
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   useEffect(() => {
     if (!modalThreadId) {
       setDetail(null);
@@ -251,6 +273,8 @@ export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentPr
       width: '100px',
       render: (row) => {
         const type = row.errorType || 'Unknown';
+        const isActionType = type.startsWith('Action:');
+        const displayType = isActionType ? type.slice(7) : type;
         const colors: Record<string, string> = {
           React: 'bg-blue-50 text-blue-700 ring-blue-600/20',
           API: 'bg-amber-50 text-amber-700 ring-amber-600/20',
@@ -260,10 +284,20 @@ export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentPr
           Console: 'bg-gray-50 text-gray-700 ring-gray-500/20',
           Server: 'bg-rose-50 text-rose-700 ring-rose-600/20',
         };
-        const style = colors[type] || 'bg-gray-50 text-gray-700 ring-gray-500/20';
+        const actionColors: Record<string, string> = {
+          Customers: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+          Payments: 'bg-sky-50 text-sky-700 ring-sky-600/20',
+          Appointments: 'bg-violet-50 text-violet-700 ring-violet-600/20',
+          Employees: 'bg-indigo-50 text-indigo-700 ring-indigo-600/20',
+          Services: 'bg-pink-50 text-pink-700 ring-pink-600/20',
+          CTV: 'bg-cyan-50 text-cyan-700 ring-cyan-600/20',
+        };
+        const style = isActionType
+          ? (actionColors[displayType] || 'bg-gray-50 text-gray-700 ring-gray-500/20')
+          : (colors[type] || 'bg-gray-50 text-gray-700 ring-gray-500/20');
         return (
           <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ${style}`}>
-            {type}
+            {isActionType ? `⚡ ${displayType}` : type}
           </span>
         );
       },
@@ -290,13 +324,26 @@ export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentPr
       key: 'errorOccurrenceCount',
       header: 'Count',
       sortable: true,
-      width: '80px',
-      render: (row) => (
-        <div className="flex items-center gap-1 text-sm text-gray-700">
-          <Hash className="w-3.5 h-3.5 text-gray-400" />
-          {row.errorOccurrenceCount ?? 1}
-        </div>
-      ),
+      width: '100px',
+      render: (row) => {
+        const count = row.errorOccurrenceCount ?? 1;
+        const severity = count >= 10 ? 'critical' : count >= 5 ? 'high' : count >= 2 ? 'medium' : 'low';
+        const severityStyle: Record<string, string> = {
+          critical: 'bg-red-100 text-red-700',
+          high: 'bg-orange-100 text-orange-700',
+          medium: 'bg-amber-100 text-amber-700',
+          low: 'bg-gray-100 text-gray-600',
+        };
+        return (
+          <div className="flex items-center gap-1.5">
+            <Hash className="w-3.5 h-3.5 text-gray-400" />
+            <span className="text-sm text-gray-700">{count}</span>
+            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${severityStyle[severity]}`}>
+              {severity}
+            </span>
+          </div>
+        );
+      },
     },
     {
       key: 'pagePath',
@@ -512,19 +559,36 @@ export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentPr
             </div>
           )}
           {canEdit && selectedIds.size > 0 && (
-            <button
-              type="button"
-              disabled={deleting}
-              onClick={handleDeleteSelected}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {deleting ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Trash2 className="w-4 h-4" />
+            <>
+              {isAutoTab && (
+                <button
+                  type="button"
+                  disabled={deleting}
+                  onClick={handleResolveSelected}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {deleting ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <CheckCircle className="w-4 h-4" />
+                  )}
+                  Resolve {selectedIds.size}
+                </button>
               )}
-              Delete {selectedIds.size}
-            </button>
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={handleDeleteSelected}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {deleting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+                Delete {selectedIds.size}
+              </button>
+            </>
           )}
           {loading && <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />}
         </div>
