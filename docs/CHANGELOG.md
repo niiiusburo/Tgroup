@@ -3,6 +3,17 @@
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
 
+## [Docs] — 2026-06-09
+### Added
+- **TestSprite live-site debugging PRD for NK3/TMV.** Added `docs/PRD-TestSprite-Live-Site-Debugging.md` as a Web Portal handoff spec for `https://tmv.2checkin.com`, separating read-only live exploration from approved disposable mutations and prohibited money/destructive flows. Documentation-only change; no runtime version bump. — @agent — TestSprite live debugging handoff / production safety lanes.
+
+
+## [0.36.1] — 2026-06-09
+### Fixed (NK3 — Auto-detected errors triage)
+- **Bulk-triaged 82 TMV auto-detected feedback threads** (`27 resolved`, `55 ignored`) via `scripts/resolve-auto-feedback-errors.js`; verified live API queue has `0 pending` on `tmv.2checkin.com`. — @agent — INV: telemetry dedup + feedback hygiene.
+- **Stale deploy chunk recovery:** `errorReporter` now auto-reloads once per tab when a dynamic-import chunk 404s after deploy, and suppresses MetaMask / React DOM reconciliation noise from the auto-error pipeline. — @agent
+### Tests
+- `website/src/lib/errorReporter.test.ts` (3 passed). — @agent
 
 ## [0.36.0] — 2026-06-09
 ### Added (NK3 — CTV QR discount Phase 2)
