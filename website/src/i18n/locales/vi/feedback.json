@@ -14,5 +14,13 @@
     "inProgress": "Đang xử lý",
     "resolved": "Đã giải quyết",
     "ignored": "Đã bỏ qua"
+  },
+  "actionError": {
+    "title": "Có lỗi xảy ra",
+    "defaultMessage": "Thao tác không thể hoàn thành. Vui lòng thử lại.",
+    "actionLabel": "Thao tác: {{action}}",
+    "reportButton": "Báo cáo lỗi",
+    "dismissButton": "Bỏ qua",
+    "dismissAria": "Tắt thông báo lỗi"
   }
 }

@@ -267,6 +267,127 @@ router.get('/stats', async (req, res) => {
   }
 });
 
+// ── POST /api/telemetry/action-error ───────────────────────────────
+// Batched silent-failure reports from actionTracker.ts.
+// Each item becomes an error_event + auto feedback_thread (source='auto').
+router.post('/action-error', async (req, res) => {
+  const ip = req.ip || req.socket?.remoteAddress || 'unknown';
+  recordHit(ip);
+  if (isRateLimited(ip, 30)) {
+    return res.status(429).json({ error: 'Rate limited' });
+  }
+  const { items = [] } = req.body;
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: 'items array required' });
+  }
+  if (items.length > 10) {
+    return res.status(400).json({ error: 'max 10 items per batch' });
+  }
+  const results = [];
+  for (const item of items) {
+    const {
+      module = 'Unknown',
+      action = 'unknown',
+      route = '',
+      reason = 'logical_failure',
+      error = '',
+      resultPreview = '',
+      formState = null,
+      metadata = {},
+      durationMs = 0,
+    } = item;
+    const normMsg = String(error || reason)
+      .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, '<UUID>')
+      .replace(/\d{4}-\d{2}-\d{2}/g, '<DATE>')
+      .replace(/\d+/g, '<N>')
+      .slice(0, 200);
+    const fingerprint = crypto
+      .createHash('sha256')
+      .update(`action|${module}|${action}|${reason}|${normMsg}|${route}`)
+      .digest('hex')
+      .slice(0, 64);
+    try {
+      const existing = await query(
+        `SELECT id, status FROM dbo.error_events WHERE fingerprint = $1`,
+        [fingerprint]
+      );
+      if (existing.length > 0) {
+        const row = existing[0];
+        const isResolved = ['fixed', 'deployed', 'won_t_fix'].includes(row.status);
+        await query(
+          `UPDATE dbo.error_events
+           SET last_seen_at = NOW(),
+               occurrence_count = occurrence_count + 1,
+               ${isResolved ? "status = 'new'," : ''}
+               route = COALESCE(NULLIF($1, ''), route),
+               metadata = metadata || $2::jsonb
+           WHERE fingerprint = $3`,
+          [route || '', JSON.stringify({ module, action, reason, formState, metadata, durationMs }), fingerprint]
+        );
+        results.push({ fingerprint, is_duplicate: true, id: row.id });
+        continue;
+      }
+      const result = await query(
+        `INSERT INTO dbo.error_events
+           (fingerprint, error_type, message, stack, component_stack, route,
+            source_file, source_line, api_endpoint, api_method, api_status, api_body,
+            user_agent, ip_address, user_id, location_id, metadata)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+         RETURNING id`,
+        [
+          fingerprint,
+          `Action:${module}`,
+          `[${reason}] ${action}: ${normMsg}`,
+          resultPreview || '',
+          '',
+          route || '',
+          '',
+          null,
+          '',
+          '',
+          null,
+          null,
+          req.headers['user-agent'] || '',
+          ip,
+          null,
+          null,
+          JSON.stringify({ module, action, reason, formState, metadata, durationMs }),
+        ]
+      );
+      const errorEventId = result[0].id;
+      try {
+        const fbResult = await query(
+          `INSERT INTO feedback_threads (source, error_event_id, page_path, status, created_at, updated_at)
+           VALUES ('auto', $1, $2, 'pending', NOW(), NOW()) RETURNING id`,
+          [errorEventId, route || '/']
+        );
+        const fbThreadId = fbResult[0].id;
+        const fbContent = [
+          `Auto-detected Action Error`,
+          `Module: ${module}`,
+          `Action: ${action}`,
+          `Reason: ${reason}`,
+          error ? `Error: ${error}` : '',
+          resultPreview ? `Result: ${resultPreview.slice(0, 500)}` : '',
+          formState ? `Form state:\n${JSON.stringify(formState, null, 2).slice(0, 500)}` : '',
+          durationMs ? `Duration: ${durationMs}ms` : '',
+        ].filter(Boolean).join('\n');
+        await query(
+          `INSERT INTO feedback_messages (thread_id, content, created_at)
+           VALUES ($1, $2, NOW())`,
+          [fbThreadId, fbContent]
+        );
+      } catch (fbErr) {
+        console.error('[Telemetry] Feedback thread creation failed:', fbErr.message);
+      }
+      results.push({ fingerprint, is_duplicate: false, id: errorEventId });
+    } catch (err) {
+      console.error('Action-error insert failed:', err);
+      results.push({ fingerprint, is_duplicate: false, error: 'db_write_failed' });
+    }
+  }
+  return res.json({ ok: true, results });
+});
 // ── POST /api/telemetry/version (existing) ─────────────────────────
 router.post('/version', async (req, res) => {
   const ip = req.ip || req.socket?.remoteAddress;

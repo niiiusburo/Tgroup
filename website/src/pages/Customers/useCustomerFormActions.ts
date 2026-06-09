@@ -14,6 +14,7 @@ import type { ApiPartner } from '@/lib/api/partners';
 import type { CustomerFormData } from '@/data/mockCustomerForm';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
 import type { Customer } from '@/hooks/useCustomers';
+import { useTrackedForm } from '@/hooks/useTrackedForm';
 
 interface UseCustomerFormActionsOptions {
   readonly isEditMode: boolean;
@@ -162,30 +163,41 @@ export function useCustomerFormActions({
       ref: customer.code || '',
     };
   }, [isEditMode, selectedCustomerId, rawPartner, hookProfile, customers]);
-
+  const { isSubmitting: isTrackedSubmitting, toast, submit: trackedSubmit, dismissToast } = useTrackedForm<Customer | void>();
   const handleSubmit = useCallback(
     async (data: CustomerFormData) => {
-      if (isEditMode && selectedCustomerId) {
-        await updateCustomer(selectedCustomerId, data);
-        await refetchProfile();
-        setShowForm(false);
-        setIsEditMode(false);
-      } else {
-        const created = await createCustomer(data);
-        if (pendingFaceImages.length > 0) {
-          try {
-            for (const image of pendingFaceImages) {
-              await registerFace(created.id, image, 'profile_register');
+      const action = isEditMode ? 'updateCustomer' : 'createCustomer';
+      await trackedSubmit(
+        async () => {
+          if (isEditMode && selectedCustomerId) {
+            await updateCustomer(selectedCustomerId, data);
+            await refetchProfile();
+            setShowForm(false);
+            setIsEditMode(false);
+          } else {
+            const created = await createCustomer(data);
+            if (pendingFaceImages.length > 0) {
+              try {
+                for (const image of pendingFaceImages) {
+                  await registerFace(created.id, image, 'profile_register');
+                }
+              } catch (err) {
+                console.error('Post-save face registration failed:', err);
+              }
+              setPendingFaceImages([]);
             }
-          } catch (err) {
-            console.error('Post-save face registration failed:', err);
+            setCreatedCustomerCode(created.code ?? null);
+            setShowForm(false);
+            setIsEditMode(false);
+            return created;
           }
-          setPendingFaceImages([]);
+        },
+        {
+          module: 'Customers',
+          action,
+          formState: { name: data.name, phone: data.phone, email: data.email },
         }
-        setCreatedCustomerCode(created.code ?? null);
-        setShowForm(false);
-        setIsEditMode(false);
-      }
+      );
     },
     [
       isEditMode,
@@ -196,6 +208,7 @@ export function useCustomerFormActions({
       setShowForm,
       setIsEditMode,
       pendingFaceImages,
+      trackedSubmit,
     ],
   );
 
@@ -207,5 +220,8 @@ export function useCustomerFormActions({
     getCustomerCode,
     getEditFormData,
     handleSubmit,
+    toast,
+    dismissToast,
+    isTrackedSubmitting,
   };
 }

@@ -22,6 +22,7 @@ import { LoadingState } from "@/components/shared/LoadingState";
 import { CustomerKeyPicker } from "@/components/customer/CustomerKeyPicker";
 import { CommissionReturnTrail } from "@/components/commission/CommissionNavigation";
 
+import { ActionErrorToast } from '@/components/shared/ActionErrorToast';
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const PROFILE_TABS: readonly ProfileTab[] = ['profile', 'appointments', 'records', 'payment'];
 
@@ -235,6 +236,7 @@ export function Customers() {
     checkupsLoading,
     checkupsError,
     refetchCheckups,
+    toast,
   } = useCustomerDetailController({
     selectedCustomerId,
     customers,
@@ -419,6 +421,13 @@ export function Customers() {
         }}
         onPendingFaceImage={setPendingFaceImage}
       />
+      {toast && (
+        <ActionErrorToast
+          message={toast.message}
+          action={toast.action}
+          onReport={toast.onReport}
+        />
+      )}
     </>
   );
 }

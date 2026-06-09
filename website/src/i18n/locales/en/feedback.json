@@ -14,5 +14,13 @@
     "inProgress": "In Progress",
     "resolved": "Resolved",
     "ignored": "Ignored"
+  },
+  "actionError": {
+    "title": "Something went wrong",
+    "defaultMessage": "The action could not be completed. Please try again.",
+    "actionLabel": "Action: {{action}}",
+    "reportButton": "Report issue",
+    "dismissButton": "Dismiss",
+    "dismissAria": "Dismiss error notification"
   }
 }

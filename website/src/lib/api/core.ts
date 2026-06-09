@@ -201,9 +201,43 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
       body: parsed,
     });
   }
-
   if (res.status === 204) {
     return undefined as T;
   }
-  return res.json();
+  const data = await res.json();
+  // Intercept business-logic failures: HTTP 200 with { success: false }
+  // These are "silent failures" — the request technically succeeded at the
+  // transport layer but the operation was rejected by business rules.
+  if (
+    data !== null &&
+    typeof data === 'object' &&
+    'success' in data &&
+    data.success === false &&
+    'error' in data
+  ) {
+    const bizError = (data as Record<string, unknown>).error as {
+      code?: string;
+      message?: string;
+      field?: string;
+    };
+    if (import.meta.env.PROD) {
+      import('@/lib/silentFailureReporter').then(({ reportApiBusinessError }) => {
+        reportApiBusinessError(
+          endpoint,
+          method,
+          bizError.code || 'BUSINESS_ERROR',
+          bizError.message || 'Business logic rejected the request',
+          data
+        );
+      }).catch(() => {});
+    }
+    throw new ApiError({
+      status: res.status,
+      code: bizError.code || 'BUSINESS_ERROR',
+      field: bizError.field,
+      message: bizError.message || 'Request rejected by server',
+      body: data,
+    });
+  }
+  return data as T;
 }
