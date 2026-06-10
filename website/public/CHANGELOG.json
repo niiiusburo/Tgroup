@@ -2,7 +2,7 @@
   {
     "version": "0.37.3",
     "date": "2026-06-10",
-    "commit": "pending",
+    "commit": "5c907371",
     "highlights": "Remember me for 30 days — checkbox on login extends JWT and persists session.",
     "sections": [
       {
