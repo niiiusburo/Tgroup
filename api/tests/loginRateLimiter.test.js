@@ -173,6 +173,30 @@ describe('login rate limiter', () => {
     expect(meRes.body.user.lob_scope).toEqual(['dental']);
   });
 
+  it('defaults empty lob_scope to authLob on login and /me for cosmetic-only staff', async () => {
+    const app = loadApp({
+      passwordMatches: true,
+      permissions: cosmeticStaffPermissions,
+      lobScope: [],
+      loginLob: 'cosmetic',
+      cosmeticEnabled: true,
+    });
+
+    const loginRes = await request(app)
+      .post('/api/Auth/login')
+      .send({ email: '0362950725@gmail.com', password: '123123' });
+
+    expect(loginRes.status).toBe(200);
+    expect(loginRes.body.user.lob_scope).toEqual(['cosmetic']);
+
+    const meRes = await request(app)
+      .get('/api/Auth/me')
+      .set('Authorization', `Bearer ${loginRes.body.token}`);
+
+    expect(meRes.status).toBe(200);
+    expect(meRes.body.user.lob_scope).toEqual(['cosmetic']);
+  });
+
   it('falls back to the cosmetic auth database for cosmetic-only TMV employees', async () => {
     const app = loadApp({
       passwordMatches: true,

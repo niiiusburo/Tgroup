@@ -1,8 +1,24 @@
 [
   {
+    "version": "0.37.2",
+    "date": "2026-06-10",
+    "commit": "22d257ef",
+    "highlights": "NK3 auth session parity — login and /me share lob_scope resolution; 429 vs 401 login errors.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Cosmetic-only staff with empty lob_scope keep cosmetic access after page refresh.",
+          "Change-password updates the correct auth-source database for cosmetic employees.",
+          "Login page shows a distinct message when rate-limited (429) vs wrong password (401)."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.37.1",
     "date": "2026-06-10",
-    "commit": "6ac9f641",
+    "commit": "873464ca",
     "highlights": "CTV portal recent-activity rows link to client + service in Tracking.",
     "sections": [
       {

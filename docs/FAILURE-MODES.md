@@ -130,6 +130,13 @@ Each entry:
 - **Prevention:** Keep cosmetic-only employee login covered in `api/tests/loginRateLimiter.test.js` and check live DB placement before treating 429 as the root cause.
 - **Related:** `api/src/routes/auth.js`, `product-map/domains/auth.yaml`, `INV-008D`.
 
+### FM-20260610-03 — Login works but refresh drops cosmetic LOB scope
+- **Symptom:** Cosmetic-only TMV staff log in successfully, then lose Cosmetic tab access (or get kicked to login) after a browser refresh; admin `t@clinic.vn` may still work.
+- **Root Cause:** `/api/Auth/login` defaulted empty `lob_scope` to `[authLob]`, but `/api/Auth/me` returned `[]` for the same user. `AuthContext` rehydrates from `/me` on mount, so JWT login scope and refreshed user scope diverged.
+- **Fix:** Extract `api/src/services/authSession.js#resolveEffectiveLobScope` and use it in both login and `/me`; route `change-password` through `getQuery(authLob)`.
+- **Prevention:** Keep `api/tests/loginRateLimiter.test.js` empty-`lob_scope` cosmetic parity case green; login page must surface 429 separately from 401.
+- **Related:** `api/src/services/authSession.js`, `website/src/pages/Login.tsx`, `INV-008D`.
+
 ## FM-20260415-01: Export Downloads Timeout at 60s
 
 - **Symptom:** Large revenue/payment exports fail mid-download with nginx 504 Gateway Timeout.

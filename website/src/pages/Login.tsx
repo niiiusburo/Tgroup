@@ -12,6 +12,7 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { ApiError } from '@/lib/api/core';
 import { useTranslation } from 'react-i18next';
 
 const LOGIN_STORAGE_KEY = 'tgclinic_saved_login';
@@ -81,8 +82,16 @@ export function Login() {
       navigate(safeReturn, { replace: true });
     } catch (err: unknown) {
       if (!mountedRef.current) return;
-      if (err instanceof Error) {
-        setError(err.message.includes('401') ? t('errors.invalidCredentials') : err.message);
+      if (err instanceof ApiError) {
+        if (err.status === 429) {
+          setError(t('errors.rateLimited'));
+        } else if (err.status === 401) {
+          setError(t('errors.invalidCredentials'));
+        } else {
+          setError(err.message);
+        }
+      } else if (err instanceof Error) {
+        setError(err.message);
       } else {
         setError(t('errors.invalidCredentials'));
       }

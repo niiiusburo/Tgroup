@@ -2,6 +2,9 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.37.2] — 2026-06-10 — NK3 auth session parity fix
+- **Login and `/api/Auth/me` now share one `resolveEffectiveLobScope` helper** so cosmetic-only staff with empty `lob_scope` keep `['cosmetic']` after page refresh instead of dropping to `[]` and losing LOB access (INV-008D). `change-password` updates the auth-source DB via `getQuery(authLob)`. Login UI maps 429 rate-limit responses separately from 401 invalid credentials. — @agent — FM-20260610-03
+
 ## [0.37.1] — 2026-06-09 — CTV portal recent-activity drill-down
 - **CTV home “Recent activity” rows now explain and link to the client.** `GET /api/ctv/commission-summary` returns `client_id`, `service_line_id`, and `service_name`; home + commission rows are tappable and open Tracking with the client card flipped to the matching service (INV-003C commission breadcrumb). — @agent
 

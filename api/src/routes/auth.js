@@ -13,23 +13,15 @@ const { requireAuth } = require('../middleware/auth');
 const { resolveEffectivePermissions, isAdminPermissionState } = require('../services/permissionService');
 const { canUseLegacyCtvPassword, verifyLegacyCtvPassword } = require('../services/legacyCtvPassword');
 const { findLoginPartner, normalizeLoginIdentifier } = require('../services/loginIdentifier');
+const {
+  isEmployeeCtv,
+  resolveEffectiveLobScope,
+} = require('../services/authSession');
 
 const router = express.Router();
 
 function isCosmeticAuthEnabled() {
   return process.env.COSMETIC_LOB_ENABLED === 'true';
-}
-
-function getEmployeeLobScope(employee) {
-  if (Array.isArray(employee?.lob_scope)) return employee.lob_scope;
-  if (Array.isArray(employee?.lobScope)) return employee.lobScope;
-  // Always return an array — a null lob_scope (e.g. CTV accounts) must serialize as []
-  // so requireLobScope and the frontend can safely call .includes() on it.
-  return [];
-}
-
-function isEmployeeCtv(employee) {
-  return employee?.is_ctv === true || employee?.isCtv === true;
 }
 
 async function resolvePermissionsForLob(employeeId, lob) {
@@ -147,18 +139,8 @@ router.post('/login', async (req, res) => {
     // Admins implicitly get both LOB scopes so they can access /api/cosmetic/* mirrors
     // without requiring manual lob_scope DB updates for pre-migration admin accounts.
     const isAdmin = isAdminPermissionState(permissions);
-    const adminLobScope = ['dental', 'cosmetic'];
-    const employeeLobScope = getEmployeeLobScope(employee);
     const employeeIsCtv = isEmployeeCtv(employee);
-    // Non-admin staff whose lob_scope is empty/NULL (e.g. accounts created before the create
-    // handler stamped lob_scope) must still be scoped to their HOME LOB (authLob = the DB they
-    // were found in), so a cosmetic employee defaults to cosmetic — NOT dental. CTVs keep [] (no
-    // LOB surface; requireLobScope blocks them). authLob never grants cross-LOB access.
-    const effectiveLobScope = (Array.isArray(employeeLobScope) && employeeLobScope.length > 0)
-      ? employeeLobScope
-      : (isAdmin
-          ? adminLobScope
-          : (employeeIsCtv ? employeeLobScope : [authLob]));
+    const effectiveLobScope = resolveEffectiveLobScope({ employee, isAdmin, authLob });
 
     const tokenPayload = {
       employeeId: employee.id,
@@ -210,13 +192,8 @@ router.get('/me', requireAuth, async (req, res) => {
     const { employee, authLob } = current;
     const permissions = await resolvePermissionsForLob(employeeId, authLob);
 
-    // Admins implicitly get both LOB scopes (same logic as /login)
     const isAdmin = isAdminPermissionState(permissions);
-    const adminLobScope = ['dental', 'cosmetic'];
-    const employeeLobScope = getEmployeeLobScope(employee);
-    const effectiveLobScope = (Array.isArray(employeeLobScope) && employeeLobScope.length > 0)
-      ? employeeLobScope
-      : (isAdmin ? adminLobScope : employeeLobScope);
+    const effectiveLobScope = resolveEffectiveLobScope({ employee, isAdmin, authLob });
 
     return res.json({
       user: {
@@ -254,7 +231,10 @@ router.post('/change-password', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'newPassword must be at least 6 characters' });
     }
 
-    const rows = await query(
+    const authLob = req.user.authLob || req.user.auth_lob || 'dental';
+    const queryFn = getQuery(authLob);
+
+    const rows = await queryFn(
       `SELECT password_hash FROM partners WHERE id = $1 AND employee = true AND isdeleted = false`,
       [employeeId]
     );
@@ -269,7 +249,7 @@ router.post('/change-password', requireAuth, async (req, res) => {
     }
 
     const newHash = await bcrypt.hash(newPassword, 10);
-    await query(
+    await queryFn(
       `UPDATE partners SET password_hash = $1 WHERE id = $2`,
       [newHash, employeeId]
     );
