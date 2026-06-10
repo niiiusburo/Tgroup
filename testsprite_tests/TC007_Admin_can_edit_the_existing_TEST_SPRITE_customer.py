@@ -1,6 +1,8 @@
 import asyncio
 from playwright import async_api
 from playwright.async_api import expect
+import os
+BASE_URL = os.environ.get("TESTSPRITE_BASE_URL", "http://127.0.0.1:5175")
 
 async def run_test():
     pw = None
@@ -31,7 +33,7 @@ async def run_test():
 
         # Interact with the page elements to simulate user flow
         # -> Navigate to http://127.0.0.1:5175
-        await page.goto("http://127.0.0.1:5175")
+        await page.goto(f"{BASE_URL}")
 
         # -> Fill email (element 4) and password (element 5) then click the Đăng nhập button (element 6) to log in.
         frame = context.pages[-1]
@@ -50,7 +52,7 @@ async def run_test():
         await asyncio.sleep(3); await elem.click()
 
         # -> Wait for the login to complete (page to finish loading) and then navigate to /customers.
-        await page.goto("http://127.0.0.1:5175/customers")
+        await page.goto(f"{BASE_URL}/customers")
 
         # -> Search for phone '0983171153' in the customers list and open the matching customer record.
         frame = context.pages[-1]

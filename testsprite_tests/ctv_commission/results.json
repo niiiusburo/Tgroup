@@ -1,0 +1,317 @@
+{
+  "startedAt": "2026-06-05T09:28:09.150Z",
+  "base": "https://tmv.2checkin.com",
+  "mutations": true,
+  "results": [
+    {
+      "id": "AUTH-1",
+      "wave": "Auth",
+      "kind": "api",
+      "mutating": false,
+      "title": "Admin login + /Auth/me returns the session user",
+      "status": "pass",
+      "detail": "user=t@clinic.vn",
+      "ms": 119
+    },
+    {
+      "id": "AUTH-2",
+      "wave": "Auth",
+      "kind": "api",
+      "mutating": false,
+      "title": "Protected endpoint rejects missing token",
+      "status": "pass",
+      "detail": "HTTP 401",
+      "ms": 111
+    },
+    {
+      "id": "W1-API-1",
+      "wave": "W1",
+      "kind": "api",
+      "mutating": false,
+      "title": "Signup rejects empty body with VALIDATION (name/phone/password)",
+      "status": "pass",
+      "detail": "400 VALIDATION",
+      "ms": 99
+    },
+    {
+      "id": "W1-API-2",
+      "wave": "W1",
+      "kind": "api",
+      "mutating": false,
+      "title": "Email optional (no missing-email error) + duplicate phone blocked (no mutation)",
+      "status": "pass",
+      "detail": "blocked HTTP 400 U_DUPLICATE_PHONE",
+      "ms": 112
+    },
+    {
+      "id": "W1-API-3",
+      "wave": "W1",
+      "kind": "api",
+      "mutating": false,
+      "title": "Signup missing password is rejected",
+      "status": "pass",
+      "detail": "400",
+      "ms": 104
+    },
+    {
+      "id": "W1-API-4",
+      "wave": "W1",
+      "kind": "api",
+      "mutating": true,
+      "title": "Root signup (no upline, no email) creates a root CTV",
+      "status": "pass",
+      "detail": "created root ctv id=d720d89f-39c5-4073-bc03-0368f59ce7e6 phone=03991693259",
+      "ms": 207
+    },
+    {
+      "id": "W1-UI-1",
+      "wave": "W1",
+      "kind": "ui",
+      "mutating": false,
+      "title": "/ctv/join renders with email marked optional",
+      "status": "pass",
+      "detail": "email field + optional notice present",
+      "ms": 2023
+    },
+    {
+      "id": "W2-API-1",
+      "wave": "W2",
+      "kind": "api",
+      "mutating": false,
+      "title": "Dental tier config has enabled L0 with positive share; L3 disabled",
+      "status": "pass",
+      "detail": "L0=24% enabled; L3 disabled",
+      "ms": 103
+    },
+    {
+      "id": "W2-API-2",
+      "wave": "W2",
+      "kind": "api",
+      "mutating": false,
+      "title": "Cosmetic tier config returns levels",
+      "status": "pass",
+      "detail": "5 levels",
+      "ms": 107
+    },
+    {
+      "id": "W2-API-3",
+      "wave": "W2",
+      "kind": "api",
+      "mutating": false,
+      "title": "GET /api/Earnings returns items + totals",
+      "status": "pass",
+      "detail": "totalItems=20",
+      "ms": 125
+    },
+    {
+      "id": "W2-API-4",
+      "wave": "W2",
+      "kind": "api",
+      "mutating": false,
+      "title": "POST /api/SaleOrders rejects missing token",
+      "status": "pass",
+      "detail": "HTTP 401",
+      "ms": 99
+    },
+    {
+      "id": "W5-API-1",
+      "wave": "W5",
+      "kind": "api",
+      "mutating": false,
+      "title": "Braces override config surface (DB-backed; probe API)",
+      "status": "pass",
+      "detail": "braces config via /api/CommissionConfig?lob=dental&type=braces",
+      "ms": 104
+    },
+    {
+      "id": "W2-API-5",
+      "wave": "W2",
+      "kind": "api",
+      "mutating": true,
+      "title": "INV-003C: service card with CTV → L0 earning = FULL price × live tier rate (self-cleaning)",
+      "status": "pass",
+      "detail": "paid=0 → L0=296160 = full 1234000×24% (normal); CTV→null ⇒ status=reversed, active net=0",
+      "ms": 2921
+    },
+    {
+      "id": "W3-API-1",
+      "wave": "W3",
+      "kind": "api",
+      "mutating": false,
+      "title": "PATCH /api/SaleOrders/:id requires auth",
+      "status": "pass",
+      "detail": "HTTP 401",
+      "ms": 100
+    },
+    {
+      "id": "W3-API-2",
+      "wave": "W3",
+      "kind": "api",
+      "mutating": false,
+      "title": "PATCH unknown sale order id is handled (no 5xx, no mutation)",
+      "status": "pass",
+      "detail": "HTTP 404 ",
+      "ms": 126
+    },
+    {
+      "id": "W4-API-1",
+      "wave": "W4",
+      "kind": "api",
+      "mutating": false,
+      "title": "GET /api/Payouts (dental) returns items; rows expose payout_group_id field",
+      "status": "pass",
+      "detail": "items=0, payout_group_id field present",
+      "ms": 108
+    },
+    {
+      "id": "W4-API-2",
+      "wave": "W4",
+      "kind": "api",
+      "mutating": false,
+      "title": "GET /api/Payouts (cosmetic) returns 200",
+      "status": "pass",
+      "detail": "items=0",
+      "ms": 109
+    },
+    {
+      "id": "W4-API-3",
+      "wave": "W4",
+      "kind": "api",
+      "mutating": false,
+      "title": "POST /api/Payouts/combined requires auth",
+      "status": "pass",
+      "detail": "HTTP 401",
+      "ms": 104
+    },
+    {
+      "id": "W4-API-4",
+      "wave": "W4",
+      "kind": "api",
+      "mutating": false,
+      "title": "POST /api/Payouts/combined validates body (no mutation on empty)",
+      "status": "pass",
+      "detail": "HTTP 400 U_INVALID_INPUT",
+      "ms": 108
+    },
+    {
+      "id": "W4-UI-1",
+      "wave": "W4",
+      "kind": "ui",
+      "mutating": false,
+      "title": "/commission Payouts tab exposes an All/Combined LOB option",
+      "status": "pass",
+      "detail": "All/Combined option present",
+      "ms": 3857
+    },
+    {
+      "id": "W6-API-1",
+      "wave": "W6",
+      "kind": "api",
+      "mutating": false,
+      "title": "POST /api/Ctvs/:id/move requires auth",
+      "status": "pass",
+      "detail": "HTTP 401",
+      "ms": 101
+    },
+    {
+      "id": "W6-API-2",
+      "wave": "W6",
+      "kind": "api",
+      "mutating": false,
+      "title": "Move unknown CTV id is handled (no 5xx, no mutation)",
+      "status": "pass",
+      "detail": "HTTP 404 S_NOT_FOUND",
+      "ms": 152
+    },
+    {
+      "id": "W6-API-3",
+      "wave": "W6",
+      "kind": "api",
+      "mutating": false,
+      "title": "Activity guard: moving a CTV with downline is blocked 409 B_CTV_HAS_ACTIVITY (no mutation)",
+      "status": "pass",
+      "detail": "409 B_CTV_HAS_ACTIVITY (blocked, no move)",
+      "ms": 234
+    },
+    {
+      "id": "W6-UI-1",
+      "wave": "W6",
+      "kind": "ui",
+      "mutating": false,
+      "title": "/commission CTV tab renders draggable CTV rows",
+      "status": "pass",
+      "detail": "draggable=216, hint=true",
+      "ms": 4155
+    },
+    {
+      "id": "W7-API-1",
+      "wave": "W7",
+      "kind": "api",
+      "mutating": false,
+      "title": "GET /api/Payments/deposits returns items for a customer",
+      "status": "pass",
+      "detail": "HTTP 200",
+      "ms": 110
+    },
+    {
+      "id": "W7-API-2",
+      "wave": "W7",
+      "kind": "api",
+      "mutating": false,
+      "title": "GET /api/Payments/deposit-usage returns 200",
+      "status": "pass",
+      "detail": "HTTP 200",
+      "ms": 120
+    },
+    {
+      "id": "W7-API-3",
+      "wave": "W7",
+      "kind": "api",
+      "mutating": false,
+      "title": "GET /api/Payments/deposits requires auth",
+      "status": "pass",
+      "detail": "HTTP 401",
+      "ms": 103
+    },
+    {
+      "id": "W7-UI-1",
+      "wave": "W7",
+      "kind": "ui",
+      "mutating": false,
+      "title": "/payment exposes the deposit-history customer selector",
+      "status": "pass",
+      "detail": "selector present=true",
+      "ms": 2649
+    },
+    {
+      "id": "W8-API-1",
+      "wave": "W8",
+      "kind": "api",
+      "mutating": false,
+      "title": "PATCH /api/Payments/:id returns 405 B_PAYMENT_EDIT_DISABLED",
+      "status": "pass",
+      "detail": "405 B_PAYMENT_EDIT_DISABLED",
+      "ms": 109
+    },
+    {
+      "id": "W8-API-2",
+      "wave": "W8",
+      "kind": "api",
+      "mutating": false,
+      "title": "PATCH /api/Payments/:id requires auth",
+      "status": "pass",
+      "detail": "HTTP 401",
+      "ms": 106
+    },
+    {
+      "id": "W8-UI-1",
+      "wave": "W8",
+      "kind": "ui",
+      "mutating": false,
+      "title": "/payment deposit history rows have no inline edit affordance",
+      "status": "pass",
+      "detail": "no payment-edit affordance",
+      "ms": 2623
+    }
+  ]
+}

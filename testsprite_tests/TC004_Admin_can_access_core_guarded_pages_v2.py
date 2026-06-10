@@ -3,6 +3,8 @@ TC004 v2: Admin can access core guarded pages - uses href-based navigation.
 """
 import asyncio
 from playwright.async_api import async_playwright
+import os
+BASE_URL = os.environ.get("TESTSPRITE_BASE_URL", "http://127.0.0.1:5175")
 
 PAGES = [
     ("/", "Tổng quan"),
@@ -28,7 +30,7 @@ async def run_test():
         page = await context.new_page()
 
         # Login
-        await page.goto("http://127.0.0.1:5175/login")
+        await page.goto(f"{BASE_URL}/login")
         await page.locator('input[type="email"]').fill("tg@clinic.vn")
         await page.locator('input[type="password"]').fill("123456")
         await page.locator('button[type="submit"]').click()
@@ -37,7 +39,7 @@ async def run_test():
         failures = []
         for path, name in PAGES:
             try:
-                await page.goto(f"http://127.0.0.1:5175{path}")
+                await page.goto(f"{BASE_URL}{path}")
                 await page.wait_for_load_state("networkidle")
                 # Wait longer for React app to initialize auth state
                 await asyncio.sleep(2)

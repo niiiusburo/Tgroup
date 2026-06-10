@@ -4,6 +4,8 @@ Verifies that a user with permissions.view but NOT permissions.edit sees read-on
 """
 import asyncio
 from playwright.async_api import async_playwright
+import os
+BASE_URL = os.environ.get("TESTSPRITE_BASE_URL", "http://127.0.0.1:5175")
 
 async def run_test():
     pw = None
@@ -17,14 +19,14 @@ async def run_test():
 
         # Login as viewer-only user (need to create or use existing)
         # For now, test with admin but verify UI has disabled states
-        await page.goto("http://127.0.0.1:5175/login")
+        await page.goto(f"{BASE_URL}/login")
         await page.locator('input[type="email"]').fill("tg@clinic.vn")
         await page.locator('input[type="password"]').fill("123456")
         await page.locator('button[type="submit"]').click()
         await page.wait_for_url("**/")
 
         # Navigate to permissions
-        await page.goto("http://127.0.0.1:5175/permissions")
+        await page.goto(f"{BASE_URL}/permissions")
         await page.wait_for_load_state("networkidle")
 
         # Check for matrix cells

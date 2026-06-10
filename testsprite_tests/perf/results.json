@@ -1,0 +1,1188 @@
+{
+  "base": "https://tmv.2checkin.com",
+  "today": "2026-06-07",
+  "apiRes": [
+    {
+      "path": "/api/Reports/revenue",
+      "ms": 258,
+      "max": 279,
+      "status": 404,
+      "kb": 0
+    },
+    {
+      "path": "/api/CommissionConfig?lob=dental",
+      "ms": 232,
+      "max": 252,
+      "status": 200,
+      "kb": 0
+    },
+    {
+      "path": "/api/Partners?limit=20",
+      "ms": 184,
+      "max": 187,
+      "status": 200,
+      "kb": 18
+    },
+    {
+      "path": "/api/Partners?limit=50",
+      "ms": 175,
+      "max": 182,
+      "status": 200,
+      "kb": 45
+    },
+    {
+      "path": "/api/DotKhams?limit=20",
+      "ms": 163,
+      "max": 179,
+      "status": 200,
+      "kb": 0
+    },
+    {
+      "path": "/api/NewClients?limit=20",
+      "ms": 152,
+      "max": 176,
+      "status": 200,
+      "kb": 10
+    },
+    {
+      "path": "/api/Ctvs",
+      "ms": 149,
+      "max": 226,
+      "status": 200,
+      "kb": 78
+    },
+    {
+      "path": "/api/Auth/me",
+      "ms": 140,
+      "max": 165,
+      "status": 200,
+      "kb": 1
+    },
+    {
+      "path": "/api/Appointments?date=2026-06-07",
+      "ms": 140,
+      "max": 151,
+      "status": 200,
+      "kb": 4
+    },
+    {
+      "path": "/api/CustomerSources",
+      "ms": 139,
+      "max": 150,
+      "status": 200,
+      "kb": 3
+    },
+    {
+      "path": "/api/Permissions/employees",
+      "ms": 135,
+      "max": 135,
+      "status": 200,
+      "kb": 178
+    },
+    {
+      "path": "/api/Earnings?limit=50",
+      "ms": 126,
+      "max": 132,
+      "status": 200,
+      "kb": 17
+    },
+    {
+      "path": "/api/Products?limit=50",
+      "ms": 125,
+      "max": 129,
+      "status": 200,
+      "kb": 29
+    },
+    {
+      "path": "/api/SystemPreferences",
+      "ms": 124,
+      "max": 125,
+      "status": 200,
+      "kb": 1
+    },
+    {
+      "path": "/api/Appointments?limit=50",
+      "ms": 122,
+      "max": 130,
+      "status": 200,
+      "kb": 4
+    },
+    {
+      "path": "/api/Reports/appointments",
+      "ms": 114,
+      "max": 141,
+      "status": 404,
+      "kb": 0
+    },
+    {
+      "path": "/api/SaleOrders?limit=20",
+      "ms": 113,
+      "max": 123,
+      "status": 200,
+      "kb": 1
+    },
+    {
+      "path": "/api/MonthlyPlans",
+      "ms": 113,
+      "max": 121,
+      "status": 200,
+      "kb": 0
+    },
+    {
+      "path": "/api/Permissions/groups",
+      "ms": 111,
+      "max": 117,
+      "status": 200,
+      "kb": 3
+    },
+    {
+      "path": "/api/Employees?limit=50",
+      "ms": 110,
+      "max": 112,
+      "status": 200,
+      "kb": 28
+    },
+    {
+      "path": "/api/settings",
+      "ms": 108,
+      "max": 113,
+      "status": 404,
+      "kb": 0
+    },
+    {
+      "path": "/api/Payouts?lob=dental&limit=20",
+      "ms": 106,
+      "max": 108,
+      "status": 200,
+      "kb": 0
+    },
+    {
+      "path": "/api/Payments?limit=20",
+      "ms": 103,
+      "max": 104,
+      "status": 200,
+      "kb": 0
+    },
+    {
+      "path": "/api/ProductCategories",
+      "ms": 103,
+      "max": 107,
+      "status": 200,
+      "kb": 4
+    },
+    {
+      "path": "/api/Companies",
+      "ms": 102,
+      "max": 106,
+      "status": 200,
+      "kb": 7
+    },
+    {
+      "path": "/api/SaleOrders/lines?limit=20",
+      "ms": 101,
+      "max": 102,
+      "status": 400,
+      "kb": 0
+    },
+    {
+      "path": "/api/DashboardReports",
+      "ms": 100,
+      "max": 113,
+      "status": 404,
+      "kb": 0
+    },
+    {
+      "path": "/api/Services",
+      "ms": 100,
+      "max": 109,
+      "status": 404,
+      "kb": 0
+    }
+  ],
+  "pageRes": [
+    {
+      "path": "/payment",
+      "wallMs": 1300,
+      "ttfb": 101,
+      "dcl": 119,
+      "load": 120,
+      "fcp": 136,
+      "xhrCount": 10,
+      "xhrTotalKb": 73,
+      "jsKb": 12,
+      "slowXhr": [
+        {
+          "name": "/api/cosmetic/SaleOrders?offset=0&limit=100",
+          "dur": 218,
+          "kb": 11
+        },
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 217,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Payments?type=payments&limit=100&offset=0",
+          "dur": 217,
+          "kb": 14
+        },
+        {
+          "name": "/api/cosmetic/MonthlyPlans",
+          "dur": 216,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 216,
+          "kb": 0
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785667781",
+          "dur": 213,
+          "kb": 48
+        }
+      ]
+    },
+    {
+      "path": "/customers",
+      "wallMs": 1281,
+      "ttfb": 106,
+      "dcl": 126,
+      "load": 127,
+      "fcp": 144,
+      "xhrCount": 7,
+      "xhrTotalKb": 51,
+      "jsKb": 69,
+      "slowXhr": [
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 219,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Partners?offset=0&limit=20",
+          "dur": 166,
+          "kb": 3
+        },
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 113,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 111,
+          "kb": 0
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785664255",
+          "dur": 109,
+          "kb": 48
+        },
+        {
+          "name": "/api/Auth/me",
+          "dur": 107,
+          "kb": 0
+        }
+      ]
+    },
+    {
+      "path": "/reports/dashboard",
+      "wallMs": 1278,
+      "ttfb": 105,
+      "dcl": 124,
+      "load": 125,
+      "fcp": 140,
+      "xhrCount": 7,
+      "xhrTotalKb": 49,
+      "jsKb": 54,
+      "slowXhr": [
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 217,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Reports/dashboard",
+          "dur": 177,
+          "kb": 1
+        },
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 120,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 111,
+          "kb": 0
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785678691",
+          "dur": 108,
+          "kb": 48
+        },
+        {
+          "name": "/api/Auth/me",
+          "dur": 105,
+          "kb": 0
+        }
+      ]
+    },
+    {
+      "path": "/permissions",
+      "wallMs": 1201,
+      "ttfb": 100,
+      "dcl": 121,
+      "load": 121,
+      "fcp": 136,
+      "xhrCount": 8,
+      "xhrTotalKb": 63,
+      "jsKb": 8,
+      "slowXhr": [
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 319,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Permissions/employees",
+          "dur": 313,
+          "kb": 15
+        },
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 215,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Permissions/groups",
+          "dur": 215,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 215,
+          "kb": 0
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785674949",
+          "dur": 210,
+          "kb": 48
+        }
+      ]
+    },
+    {
+      "path": "/service-catalog",
+      "wallMs": 1176,
+      "ttfb": 102,
+      "dcl": 123,
+      "load": 123,
+      "fcp": 144,
+      "xhrCount": 8,
+      "xhrTotalKb": 51,
+      "jsKb": 7,
+      "slowXhr": [
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 320,
+          "kb": 0
+        },
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 219,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/ProductCategories",
+          "dur": 218,
+          "kb": 1
+        },
+        {
+          "name": "/api/cosmetic/Products?offset=0&limit=20&active=true",
+          "dur": 218,
+          "kb": 2
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 216,
+          "kb": 0
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785666573",
+          "dur": 212,
+          "kb": 48
+        }
+      ]
+    },
+    {
+      "path": "/employees",
+      "wallMs": 1176,
+      "ttfb": 101,
+      "dcl": 121,
+      "load": 121,
+      "fcp": 136,
+      "xhrCount": 8,
+      "xhrTotalKb": 49,
+      "jsKb": 8,
+      "slowXhr": [
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 316,
+          "kb": 0
+        },
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 209,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Employees?offset=0&limit=500&active=all",
+          "dur": 209,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 209,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Permissions/groups",
+          "dur": 208,
+          "kb": 1
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785669128",
+          "dur": 205,
+          "kb": 48
+        }
+      ]
+    },
+    {
+      "path": "/services",
+      "wallMs": 1175,
+      "ttfb": 102,
+      "dcl": 120,
+      "load": 121,
+      "fcp": 136,
+      "xhrCount": 6,
+      "xhrTotalKb": 118,
+      "jsKb": 6,
+      "slowXhr": [
+        {
+          "name": "/api/cosmetic/SaleOrders?offset=0&limit=500",
+          "dur": 315,
+          "kb": 70
+        },
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 214,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 213,
+          "kb": 0
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785665364",
+          "dur": 210,
+          "kb": 48
+        },
+        {
+          "name": "/api/Auth/me",
+          "dur": 111,
+          "kb": 0
+        },
+        {
+          "name": "/version.json?t=1780785665361",
+          "dur": 105,
+          "kb": 0
+        }
+      ]
+    },
+    {
+      "path": "/locations",
+      "wallMs": 1169,
+      "ttfb": 100,
+      "dcl": 119,
+      "load": 119,
+      "fcp": 132,
+      "xhrCount": 6,
+      "xhrTotalKb": 48,
+      "jsKb": 7,
+      "slowXhr": [
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 318,
+          "kb": 0
+        },
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 211,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 211,
+          "kb": 0
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785670335",
+          "dur": 208,
+          "kb": 48
+        },
+        {
+          "name": "/api/Auth/me",
+          "dur": 107,
+          "kb": 0
+        },
+        {
+          "name": "/version.json?t=1780785670332",
+          "dur": 99,
+          "kb": 0
+        }
+      ]
+    },
+    {
+      "path": "/commission",
+      "wallMs": 1162,
+      "ttfb": 102,
+      "dcl": 122,
+      "load": 123,
+      "fcp": 136,
+      "xhrCount": 6,
+      "xhrTotalKb": 49,
+      "jsKb": 20,
+      "slowXhr": [
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 212,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/CommissionConfig",
+          "dur": 211,
+          "kb": 1
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 211,
+          "kb": 0
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785671643",
+          "dur": 209,
+          "kb": 48
+        },
+        {
+          "name": "/api/Auth/me",
+          "dur": 105,
+          "kb": 0
+        },
+        {
+          "name": "/version.json?t=1780785671642",
+          "dur": 103,
+          "kb": 0
+        }
+      ]
+    },
+    {
+      "path": "/relationships",
+      "wallMs": 1157,
+      "ttfb": 99,
+      "dcl": 119,
+      "load": 119,
+      "fcp": 136,
+      "xhrCount": 6,
+      "xhrTotalKb": 48,
+      "jsKb": 5,
+      "slowXhr": [
+        {
+          "name": "/CHANGELOG.json?v=1780785676187",
+          "dur": 307,
+          "kb": 48
+        },
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 112,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Permissions/groups",
+          "dur": 111,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 107,
+          "kb": 0
+        },
+        {
+          "name": "/api/Auth/me",
+          "dur": 106,
+          "kb": 0
+        },
+        {
+          "name": "/version.json?t=1780785676184",
+          "dur": 102,
+          "kb": 0
+        }
+      ]
+    },
+    {
+      "path": "/calendar",
+      "wallMs": 1119,
+      "ttfb": 125,
+      "dcl": 144,
+      "load": 145,
+      "fcp": 160,
+      "xhrCount": 6,
+      "xhrTotalKb": 51,
+      "jsKb": 18,
+      "slowXhr": [
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 210,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Appointments?offset=0&limit=3000&date_from=2026-06-07&date_to=2026-06-07+23%3A59%3A59&calendar_mode=true&include_counts=false",
+          "dur": 209,
+          "kb": 3
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785661889",
+          "dur": 206,
+          "kb": 48
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 112,
+          "kb": 0
+        },
+        {
+          "name": "/api/Auth/me",
+          "dur": 107,
+          "kb": 0
+        },
+        {
+          "name": "/version.json?t=1780785661886",
+          "dur": 103,
+          "kb": 0
+        }
+      ]
+    },
+    {
+      "path": "/reports/revenue",
+      "wallMs": 1107,
+      "ttfb": 101,
+      "dcl": 122,
+      "load": 122,
+      "fcp": 136,
+      "xhrCount": 15,
+      "xhrTotalKb": 77,
+      "jsKb": 0,
+      "slowXhr": [
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 339,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Reports/revenue/trend",
+          "dur": 333,
+          "kb": 1
+        },
+        {
+          "name": "/api/cosmetic/Reports/revenue/summary",
+          "dur": 332,
+          "kb": 1
+        },
+        {
+          "name": "/api/cosmetic/Reports/revenue/by-doctor",
+          "dur": 332,
+          "kb": 4
+        },
+        {
+          "name": "/api/cosmetic/Reports/revenue/by-category",
+          "dur": 332,
+          "kb": 1
+        },
+        {
+          "name": "/api/cosmetic/Reports/revenue/by-source",
+          "dur": 329,
+          "kb": 1
+        }
+      ]
+    },
+    {
+      "path": "/reports/appointments",
+      "wallMs": 1091,
+      "ttfb": 109,
+      "dcl": 129,
+      "load": 129,
+      "fcp": 144,
+      "xhrCount": 8,
+      "xhrTotalKb": 50,
+      "jsKb": 0,
+      "slowXhr": [
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 315,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Reports/appointments/trend",
+          "dur": 212,
+          "kb": 1
+        },
+        {
+          "name": "/api/cosmetic/Reports/appointments/summary",
+          "dur": 212,
+          "kb": 1
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785680854",
+          "dur": 208,
+          "kb": 48
+        },
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 204,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 203,
+          "kb": 0
+        }
+      ]
+    },
+    {
+      "path": "/reports/doctors",
+      "wallMs": 1080,
+      "ttfb": 106,
+      "dcl": 125,
+      "load": 126,
+      "fcp": 140,
+      "xhrCount": 7,
+      "xhrTotalKb": 52,
+      "jsKb": 0,
+      "slowXhr": [
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 317,
+          "kb": 0
+        },
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 214,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Reports/doctors/performance",
+          "dur": 213,
+          "kb": 4
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 213,
+          "kb": 0
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785681971",
+          "dur": 209,
+          "kb": 48
+        },
+        {
+          "name": "/api/Auth/me",
+          "dur": 108,
+          "kb": 0
+        }
+      ]
+    },
+    {
+      "path": "/reports/employees",
+      "wallMs": 1072,
+      "ttfb": 101,
+      "dcl": 122,
+      "load": 123,
+      "fcp": 140,
+      "xhrCount": 7,
+      "xhrTotalKb": 61,
+      "jsKb": 0,
+      "slowXhr": [
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 311,
+          "kb": 0
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785685159",
+          "dur": 295,
+          "kb": 48
+        },
+        {
+          "name": "/api/cosmetic/Reports/employees/overview",
+          "dur": 211,
+          "kb": 13
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 110,
+          "kb": 0
+        },
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 108,
+          "kb": 0
+        },
+        {
+          "name": "/api/Auth/me",
+          "dur": 106,
+          "kb": 0
+        }
+      ]
+    },
+    {
+      "path": "/settings",
+      "wallMs": 1068,
+      "ttfb": 101,
+      "dcl": 122,
+      "load": 122,
+      "fcp": 136,
+      "xhrCount": 6,
+      "xhrTotalKb": 49,
+      "jsKb": 17,
+      "slowXhr": [
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 209,
+          "kb": 0
+        },
+        {
+          "name": "/api/SystemPreferences",
+          "dur": 208,
+          "kb": 1
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 208,
+          "kb": 0
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785672756",
+          "dur": 205,
+          "kb": 48
+        },
+        {
+          "name": "/api/Auth/me",
+          "dur": 110,
+          "kb": 0
+        },
+        {
+          "name": "/version.json?t=1780785672753",
+          "dur": 105,
+          "kb": 0
+        }
+      ]
+    },
+    {
+      "path": "/feedback",
+      "wallMs": 1061,
+      "ttfb": 105,
+      "dcl": 123,
+      "load": 124,
+      "fcp": 140,
+      "xhrCount": 6,
+      "xhrTotalKb": 48,
+      "jsKb": 1,
+      "slowXhr": [
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 208,
+          "kb": 0
+        },
+        {
+          "name": "/api/Feedback/all?source=manual",
+          "dur": 208,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 207,
+          "kb": 0
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785673855",
+          "dur": 204,
+          "kb": 48
+        },
+        {
+          "name": "/api/Auth/me",
+          "dur": 106,
+          "kb": 0
+        },
+        {
+          "name": "/version.json?t=1780785673851",
+          "dur": 100,
+          "kb": 0
+        }
+      ]
+    },
+    {
+      "path": "/notifications",
+      "wallMs": 1057,
+      "ttfb": 101,
+      "dcl": 122,
+      "load": 122,
+      "fcp": 136,
+      "xhrCount": 5,
+      "xhrTotalKb": 48,
+      "jsKb": 1,
+      "slowXhr": [
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 211,
+          "kb": 0
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785677380",
+          "dur": 207,
+          "kb": 48
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 105,
+          "kb": 0
+        },
+        {
+          "name": "/api/Auth/me",
+          "dur": 104,
+          "kb": 0
+        },
+        {
+          "name": "/version.json?t=1780785677377",
+          "dur": 100,
+          "kb": 0
+        }
+      ]
+    },
+    {
+      "path": "/reports/services",
+      "wallMs": 1007,
+      "ttfb": 101,
+      "dcl": 122,
+      "load": 123,
+      "fcp": 136,
+      "xhrCount": 7,
+      "xhrTotalKb": 49,
+      "jsKb": 0,
+      "slowXhr": [
+        {
+          "name": "/api/cosmetic/Reports/services/breakdown",
+          "dur": 223,
+          "kb": 1
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 223,
+          "kb": 0
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785684120",
+          "dur": 207,
+          "kb": 48
+        },
+        {
+          "name": "/api/Auth/me",
+          "dur": 112,
+          "kb": 0
+        },
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 112,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 110,
+          "kb": 0
+        }
+      ]
+    },
+    {
+      "path": "/reports/locations",
+      "wallMs": 1000,
+      "ttfb": 102,
+      "dcl": 123,
+      "load": 123,
+      "fcp": 136,
+      "xhrCount": 7,
+      "xhrTotalKb": 49,
+      "jsKb": 0,
+      "slowXhr": [
+        {
+          "name": "/api/cosmetic/Reports/locations/comparison",
+          "dur": 219,
+          "kb": 1
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 219,
+          "kb": 0
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785686274",
+          "dur": 203,
+          "kb": 48
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 112,
+          "kb": 0
+        },
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 111,
+          "kb": 0
+        },
+        {
+          "name": "/api/Auth/me",
+          "dur": 108,
+          "kb": 0
+        }
+      ]
+    },
+    {
+      "path": "/appointments",
+      "wallMs": 997,
+      "ttfb": 99,
+      "dcl": 119,
+      "load": 119,
+      "fcp": 132,
+      "xhrCount": 7,
+      "xhrTotalKb": 48,
+      "jsKb": 0,
+      "slowXhr": [
+        {
+          "name": "/api/cosmetic/Appointments?offset=0&limit=200&date_from=2026-06-07&date_to=2026-06-07T23%3A59%3A59",
+          "dur": 213,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Employees?offset=0&limit=500&active=all",
+          "dur": 213,
+          "kb": 0
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785662916",
+          "dur": 212,
+          "kb": 48
+        },
+        {
+          "name": "/api/Auth/me",
+          "dur": 119,
+          "kb": 0
+        },
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 119,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 118,
+          "kb": 0
+        }
+      ]
+    },
+    {
+      "path": "/reports/customers",
+      "wallMs": 987,
+      "ttfb": 104,
+      "dcl": 122,
+      "load": 122,
+      "fcp": 140,
+      "xhrCount": 7,
+      "xhrTotalKb": 50,
+      "jsKb": 0,
+      "slowXhr": [
+        {
+          "name": "/api/cosmetic/Reports/customers/summary",
+          "dur": 229,
+          "kb": 2
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 229,
+          "kb": 0
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785683088",
+          "dur": 214,
+          "kb": 48
+        },
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 112,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 111,
+          "kb": 0
+        },
+        {
+          "name": "/api/Auth/me",
+          "dur": 106,
+          "kb": 0
+        }
+      ]
+    },
+    {
+      "path": "/",
+      "wallMs": 975,
+      "ttfb": 99,
+      "dcl": 118,
+      "load": 118,
+      "fcp": 132,
+      "xhrCount": 7,
+      "xhrTotalKb": 49,
+      "jsKb": 0,
+      "slowXhr": [
+        {
+          "name": "/api/cosmetic/Appointments?offset=0&limit=200&date_from=2026-06-07&date_to=2026-06-07T23%3A59%3A59",
+          "dur": 206,
+          "kb": 0
+        },
+        {
+          "name": "/api/cosmetic/Employees?offset=0&limit=500&active=all",
+          "dur": 203,
+          "kb": 0
+        },
+        {
+          "name": "/api/Feedback/unread-count",
+          "dur": 194,
+          "kb": 0
+        },
+        {
+          "name": "/api/Auth/me",
+          "dur": 118,
+          "kb": 1
+        },
+        {
+          "name": "/CHANGELOG.json?v=1780785660753",
+          "dur": 107,
+          "kb": 48
+        },
+        {
+          "name": "/api/cosmetic/Companies?offset=0&limit=50",
+          "dur": 105,
+          "kb": 0
+        }
+      ]
+    }
+  ]
+}

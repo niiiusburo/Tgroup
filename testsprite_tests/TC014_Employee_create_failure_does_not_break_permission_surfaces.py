@@ -1,6 +1,8 @@
 import asyncio
 from playwright import async_api
 from playwright.async_api import expect
+import os
+BASE_URL = os.environ.get("TESTSPRITE_BASE_URL", "http://127.0.0.1:5175")
 
 async def run_test():
     pw = None
@@ -31,7 +33,7 @@ async def run_test():
 
         # Interact with the page elements to simulate user flow
         # -> Navigate to http://127.0.0.1:5175
-        await page.goto("http://127.0.0.1:5175")
+        await page.goto(f"{BASE_URL}")
 
         # -> Submit the login form with t@clinic.vn / 123123 to sign in, then after successful login navigate to /employees and /permissions and verify they load (no crash).
         frame = context.pages[-1]
@@ -50,7 +52,7 @@ async def run_test():
         await asyncio.sleep(3); await elem.click()
 
         # -> Wait for the login to finish (or the page to redirect), then open /employees and verify it loads (then /permissions).
-        await page.goto("http://127.0.0.1:5175/employees")
+        await page.goto(f"{BASE_URL}/employees")
 
         # -> Click the 'Quyền hạn' (Permissions) link in the Quản trị section to open the Permissions page and verify it loads without crashing.
         frame = context.pages[-1]
@@ -193,17 +195,17 @@ async def run_test():
         await asyncio.sleep(3); await elem.click()
 
         # -> Wait for the SPA to settle, then navigate to /permissions and wait for it to finish loading so we can verify whether permissions content renders. After that, visit /employees and verify it loads. Then stop and report results.
-        await page.goto("http://127.0.0.1:5175/permissions")
+        await page.goto(f"{BASE_URL}/permissions")
 
         # -> Open /employees to verify the staff list loads (no crash), then reopen /permissions to verify it still loads. Stop and report results.
-        await page.goto("http://127.0.0.1:5175/employees")
+        await page.goto(f"{BASE_URL}/employees")
 
-        await page.goto("http://127.0.0.1:5175/permissions")
+        await page.goto(f"{BASE_URL}/permissions")
 
         # -> Open /employees and confirm the staff list loads (no crash). Then reopen /permissions and confirm it finishes loading and the app has not crashed. Stop and report results.
-        await page.goto("http://127.0.0.1:5175/employees")
+        await page.goto(f"{BASE_URL}/employees")
 
-        await page.goto("http://127.0.0.1:5175/permissions")
+        await page.goto(f"{BASE_URL}/permissions")
 
         # -> Open the Nhân viên (Employees) view to verify the staff list loads, then return to Quyền hạn (Permissions) to verify it still loads. Stop and report results.
         frame = context.pages[-1]

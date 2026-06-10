@@ -4,6 +4,8 @@ Logs in and verifies the dashboard/overview page loads with authenticated layout
 """
 import asyncio
 from playwright.async_api import async_playwright
+import os
+BASE_URL = os.environ.get("TESTSPRITE_BASE_URL", "http://127.0.0.1:5175")
 
 async def run_test():
     pw = None
@@ -16,7 +18,7 @@ async def run_test():
         page = await context.new_page()
 
         # Navigate to login
-        await page.goto("http://127.0.0.1:5175/login")
+        await page.goto(f"{BASE_URL}/login")
 
         # Fill credentials and submit
         await page.locator('input[type="email"]').fill("tg@clinic.vn")

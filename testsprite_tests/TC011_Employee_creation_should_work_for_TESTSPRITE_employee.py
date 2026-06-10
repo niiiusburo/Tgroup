@@ -1,6 +1,8 @@
 import asyncio
 from playwright import async_api
 from playwright.async_api import expect
+import os
+BASE_URL = os.environ.get("TESTSPRITE_BASE_URL", "http://127.0.0.1:5175")
 
 async def run_test():
     pw = None
@@ -31,7 +33,7 @@ async def run_test():
 
         # Interact with the page elements to simulate user flow
         # -> Navigate to http://127.0.0.1:5175
-        await page.goto("http://127.0.0.1:5175")
+        await page.goto(f"{BASE_URL}")
 
         # -> Fill the email and password fields and submit the login form.
         frame = context.pages[-1]
@@ -96,7 +98,7 @@ async def run_test():
 
         # --> Assertions to verify final state
         frame = context.pages[-1]
-        assert await frame.locator("xpath=//*[contains(., 'Thêm nhân viên thành công')]").nth(0).is_visible(), "The application should show Thêm nhân viên thành công after adding the employee"]}}{
+        assert await frame.locator("xpath=//*[contains(., 'Thêm nhân viên thành công')]").nth(0).is_visible(), "The application should show Thêm nhân viên thành công after adding the employee"
         await asyncio.sleep(5)
 
     finally:

@@ -158,11 +158,13 @@ class TestSpriteRunner:
 
         start = time.time()
         try:
+            env = dict(os.environ, TESTSPRITE_BASE_URL=self.target_url)
             proc = await asyncio.create_subprocess_exec(
                 "/opt/homebrew/bin/python3.12", str(script_path),
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
                 cwd=self.test_dir,
+                env=env,
             )
             stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=120)
             duration = time.time() - start
@@ -301,7 +303,12 @@ def main():
     
     args = parser.parse_args()
     
-    target = "http://127.0.0.1:5175" if args.mode == "local" else "https://nk.2checkin.com"
+    # NK3 staging is the live target (tmv.2checkin.com). NK production (nk.2checkin.com)
+    # must NEVER receive Lane-B mutation tests — override only via TESTSPRITE_BASE_URL.
+    target = os.environ.get(
+        "TESTSPRITE_BASE_URL",
+        "http://127.0.0.1:5175" if args.mode == "local" else "https://tmv.2checkin.com",
+    )
     runner = TestSpriteRunner(mode=args.mode, target_url=target)
     
     servers_started = False

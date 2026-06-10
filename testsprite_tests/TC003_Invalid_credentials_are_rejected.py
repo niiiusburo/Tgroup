@@ -1,6 +1,8 @@
 import asyncio
 from playwright import async_api
 from playwright.async_api import expect
+import os
+BASE_URL = os.environ.get("TESTSPRITE_BASE_URL", "http://127.0.0.1:5175")
 
 async def run_test():
     pw = None
@@ -31,10 +33,10 @@ async def run_test():
 
         # Interact with the page elements to simulate user flow
         # -> Navigate to http://127.0.0.1:5175
-        await page.goto("http://127.0.0.1:5175")
+        await page.goto(f"{BASE_URL}")
 
         # -> Navigate to /login (http://127.0.0.1:5175/login) as instructed.
-        await page.goto("http://127.0.0.1:5175/login")
+        await page.goto(f"{BASE_URL}/login")
 
         # -> Fill Email with t@clinic.vn, fill Password with an invalid password, and submit the form to observe authentication error and confirm protected layout is not shown.
         frame = context.pages[-1]

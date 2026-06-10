@@ -4,6 +4,8 @@ TC011 v2: Employee creation for TESTSPRITE employee - rewritten with robust sele
 import asyncio
 from playwright.async_api import async_playwright
 from datetime import datetime
+import os
+BASE_URL = os.environ.get("TESTSPRITE_BASE_URL", "http://127.0.0.1:5175")
 
 TEST_NAME = f"TESTSPRITE EMP {datetime.now().strftime('%Y%m%d%H%M%S')}"
 
@@ -18,14 +20,14 @@ async def run_test():
         page = await context.new_page()
 
         # Login
-        await page.goto("http://127.0.0.1:5175/login")
+        await page.goto(f"{BASE_URL}/login")
         await page.locator('input[type="email"]').fill("tg@clinic.vn")
         await page.locator('input[type="password"]').fill("123456")
         await page.locator('button[type="submit"]').click()
         await page.wait_for_url("**/", timeout=10000)
 
         # Navigate to employees
-        await page.goto("http://127.0.0.1:5175/employees")
+        await page.goto(f"{BASE_URL}/employees")
         await page.wait_for_load_state("networkidle")
 
         # Click Add Employee
