@@ -3,6 +3,9 @@
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
 
+## [Docs] — 2026-06-10 — CTV commission attribution audit (NK3 live)
+- **Verified the no-CTV-no-commission invariant end-to-end on NK3** (code: engine guards + `_linesForPayment` filter + update-clear reversal; 21/21 engine unit tests; live A/B/C scenarios on cosmetic LOB with disposable ZZ_CTVCHECK data). Documented fallback (service created with no CTV for a referred client auto-attaches the referrer) confirmed working as specified in `earnings-commissions.yaml`. Cleaned 5 stale pre-cutover legacy rows (2026-05-20→24, pay-as-paid D13 fallback on no-CTV services, demo clients) by flipping to `status='reversed'`; final audit: 0 active no-CTV earnings lines in both `tdental_nk3` and `tcosmetic_nk3`. Details in testbright.md. — @agent
+
 ## [0.36.3] — 2026-06-10
 ### Fixed (NK3 — QR scan-path live walkthrough found a completion-step bug)
 - **Completing a checked-in code 400'd when the completion screen had the wrong LOB selected.** Live QR walkthrough (decoded QR → staff scan → check-in → reload → "Hoàn tất mã") repro'd it: the verify page defaults LOB to dental, the bound client was cosmetic, so the phone lookup said "new client" and the UI sent `createIfMissing: true` without a name → 400 `customerName is required`. The bound-customer fallback sat *after* the `createIfMissing` branch. Moved it *before* client re-resolution: completion of a `checked_in` code now always prefers `row.customer_partner_id` + `row.customer_lob` and never creates or rebinds a different client (`api/src/routes/discountCodes.js`). — @agent — FM-20260610-02.
