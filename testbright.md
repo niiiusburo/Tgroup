@@ -10,6 +10,64 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: TMV 2Checkin Cosmetic login monitor 2026-06-10 07:02 +07
+Feature/edit name: Recurring live TMV Cosmetic login health monitor; read-only production verification.
+
+Changed URLs / API routes / data flow:
+- URLs changed: none.
+- API routes changed: none.
+- URLs verified read-only: `https://tmv.2checkin.com/`, `https://tmv.2checkin.com/customers`, `https://tmv.2checkin.com/calendar`.
+- Data flow: existing live login only, Cosmetic LOB visibility, protected page loads; no create/edit/delete/submit actions after login.
+
+Affected roles and data flows:
+- Role: Cosmetic admin/staff using `t@clinic.vn`.
+- Happy path: login succeeds, Cosmetic/`Thẩm mỹ` remains visible, three Cosmetic-side navigation screens render nonblank without visible errors.
+- Edge cases: fallback account `t@clinic.com` is only attempted if `t@clinic.vn` cannot log in; Dental must not be selected; random non-API HEAD probes are treated as browser noise only when they do not affect UI or `/api/` calls.
+- Regressions: no API 4xx/5xx, console errors, blank pages, broken UI, or visible error banners during the checked read-only pages.
+
+Setup data and login state:
+- Target: `https://tmv.2checkin.com`.
+- Browser: Playwright with system Chrome channel.
+- Evidence: `docs/live-artifacts/tmv-cosmetic-login-monitor/20260610T000200Z-chrome/`.
+
+Execution checks:
+- [x] PASS: Authority gate passed before run.
+- [x] PASS: `node .tmp/tmv_cosmetic_login_monitor_readonly.cjs` logged in with `t@clinic.vn`; fallback `t@clinic.com` was not needed.
+- [x] PASS: Cosmetic stayed visible on Dashboard `/`, Customers `/customers`, and Calendar `/calendar`.
+- [x] PASS: Dashboard, Customers, and Calendar rendered nonblank with 0 captured API errors, 0 console errors, and 0 visible error messages.
+- [x] PASS: Screenshot evidence captured for Cosmetic header and all three checked screens; one random non-API `HEAD` probe aborted with `net::ERR_ABORTED` and did not affect the UI.
+
+---
+
+# TestSprite Plan: NK 2Checkin login monitor 2026-06-10 07:03 +07
+Feature/edit name: Recurring live NK 2Checkin login health monitor; read-only production verification.
+
+Changed URLs / API routes / data flow:
+- URLs changed: none.
+- API routes changed: none.
+- URLs verified read-only: `https://nk.2checkin.com/`, `https://nk.2checkin.com/calendar`, `https://nk.2checkin.com/customers`.
+- API routes verified read-only: `POST https://nk.2checkin.com/api/Auth/login`.
+- Data flow: existing live login only and protected page loads; no create/edit/delete/submit actions after login.
+
+Affected roles and data flows:
+- Role: NK admin/staff using `t@clinic.vn`.
+- Happy path: primary account logs in, fallback `t@clinic.com` is not needed, Overview/Calendar/Customers render nonblank without visible errors.
+- Edge cases: if Calendar or Customers briefly show loading placeholders, the monitor waits/retries before final evidence; random non-API HEAD probes are browser noise only when they do not affect UI or `/api/` calls.
+- Regressions: no API 4xx/5xx, console errors, page errors, blank screens, broken UI, or visible error banners during checked read-only pages.
+
+Setup data and login state:
+- Target: `https://nk.2checkin.com`.
+- Browser: Playwright with system Chrome channel.
+- Evidence: `docs/live-artifacts/nk-login-monitor/20260610T000300Z/redacted-safe/`.
+
+Execution checks:
+- [x] PASS: Authority gate passed before run.
+- [x] PASS: `NODE_PATH=/Users/thuanle/Documents/TamTMV/Tgrouptest/website/node_modules node .tmp/nk_login_monitor_readonly.cjs` logged in with `t@clinic.vn`; fallback `t@clinic.com` was not needed.
+- [x] PASS: Overview `/`, Calendar `/calendar`, and Customers `/customers` rendered nonblank with expected labels, 0 captured API errors, 0 console errors, and 0 page errors.
+- [x] PASS: Screenshot evidence captured for all three checked screens; one random non-API `HEAD` probe aborted with `net::ERR_ABORTED` and did not affect visible UI.
+
+---
+
 # TestSprite Plan: NK 2Checkin login monitor 2026-06-09 11:10 +07
 Feature/edit name: Recurring live NK 2Checkin login health monitor; read-only production verification plus Calendar settle retry in the local monitor helper.
 
@@ -4211,3 +4269,4 @@ TestSprite execution items:
 - [ ] PENDING: After explicit approval and disposable CTV credentials, run the QR generation case from `TS-LIVE-014` and preserve the generated code, QR screenshot, history screenshot, network status for `POST /api/discount-codes/generate`, and any downloaded/share artifact status.
 - [ ] PENDING: Use TestSprite's report evidence to file live-site debug issues with route, role, LOB, screenshot/video timestamp, failing API request, and classification after quota-safe TestSprite execution is available; local fallback evidence is already saved above.
 - [x] PASS: Root cause of the TS-LIVE-014 QR generation failure found by live repro on `https://tmv.2checkin.com` (instrumented browser click as CTV `ctv-c-0531demo@clinic.vn`): `POST /api/discount-codes/generate` returned 400 because the frontend double-stringified the JSON body (`apiFetch` re-stringifies; express.json strict rejected the top-level string), and the panel swallowed the rejection with no UI feedback. Two further backend bugs found behind it: `fetchCodeRow` dropped the `db` arg (staff lookup/verify always "Mã không tồn tại") and the verify UPDATE failed with `inconsistent types deduced for parameter $9`. All fixed in 0.36.2 (FM-20260610-01) and verified end-to-end locally: generate `CTVDEMOREF-TS5B5A` → QR canvas rendered → staff lookup found:true → check-in → complete `status='used'`. Live NK3 still runs the broken bundle until the next deploy; rerun TS-LIVE-014 after deploying 0.36.2.
+- [x] PASS: TS-LIVE-014 rerun after deploying 0.36.2 (commit a22b1b80) to NK3 only. Live `https://tmv.2checkin.com` as CTV `ctv-c-0531demo@clinic.vn`: "Tạo mã & tải ảnh" click → `POST /api/discount-codes/generate` 200 → new code `CTVC0531DE-BJ6SD9` + voucher QR canvas rendered (screenshot in session). Staff lane verified live with admin `t@clinic.vn`: lookup of `CTVC0531DE-VVCHYV` returned `found:true` (previously "Mã không tồn tại"), check-in 200 (previously 500 `$9`), complete-without-customerPartnerId 200 → `status='used'`. Disposable record for cleanup: cosmetic client `ZZ_QRFIX_VERIFY_20260610` phone `0900777001` bound to consumed code `CTVC0531DE-VVCHYV`. NK (`nk.2checkin.com` 0.32.44) and NK2 untouched; only `tgroup-nk3-api`/`tgroup-nk3-web` rebuilt.

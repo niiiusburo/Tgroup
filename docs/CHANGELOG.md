@@ -18,6 +18,7 @@
 - E2E verified locally (Vite 5175 + API 3002): CTV login → Giới thiệu/QR → Mã QR → generate (`CTVDEMOREF-TS5B5A`, QR canvas rendered) → staff lookup (`found:true`) → check-in (auto-created client) → complete (`status='used'`, staff name stamped).
 ### Docs
 - **NK3 physical DB names recorded.** NK3 (`tmv.2checkin.com`) runs `tdental_nk3` + `tcosmetic_nk3` (per `/opt/tgroup-nk3/.env.nk3`), not `tdental_demo`; documented per-environment names in `product-map/schema-map.md` and an NK3-specific migration loop in `docs/runbooks/DEPLOYMENT.md`. Verified live: `tdental_nk3.dbo.ctv_discount_codes` exists with `generation_source` + `payment_id` and `partners.is_live` (migrations 062–065 already applied) — deploy of 0.36.2 needs no NK3 migration step. — @agent
+- **Deployed 0.36.2 to NK3 only (commit `a22b1b80`) and live-verified.** File-sync deploy to `/opt/tgroup-nk3/app` (pre-deploy backup `app-backup-pre-v0.36.2-qrfix-a22b1b80-20260610T000304Z.tgz`; VPS files checksum-matched `HEAD~1`, no drift), rebuilt `tgroup-nk3-api`/`tgroup-nk3-web`. Live proof on `tmv.2checkin.com`: portal generate 200 + QR rendered (`CTVC0531DE-BJ6SD9`), staff lookup `found:true`, check-in 200, complete-without-customerPartnerId → `used`. NK (0.32.44) and NK2 untouched. Disposable verify record: cosmetic client `ZZ_QRFIX_VERIFY_20260610` / `0900777001`. — @agent
 
 ## [Docs] — 2026-06-09
 ### Added
