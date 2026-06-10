@@ -1,0 +1,91 @@
+{
+  "checkedAt": "2026-06-09T04:04:46.434Z",
+  "baseUrl": "https://nk.2checkin.com",
+  "workedAccount": "t@clinic.vn",
+  "loginSucceeded": true,
+  "loginAttempts": [
+    {
+      "email": "t@clinic.vn",
+      "ok": true,
+      "visibleError": "",
+      "apiErrorsDuringAttempt": [],
+      "finalUrl": "https://nk.2checkin.com/"
+    }
+  ],
+  "version": {
+    "version": "0.32.44",
+    "buildTime": "2026-05-27T04:06:39.953Z",
+    "gitCommit": "ff65634",
+    "gitBranch": "detached-ff65634f",
+    "environment": "development"
+  },
+  "aggregate": {
+    "apiErrors": [],
+    "consoleErrors": [
+      "Failed to load calendar appointments: TypeError: Failed to fetch\n    at Y (https://nk.2checkin.com/assets/index-BmyqfWfk.js:77:4655)\n    at jn (https://nk.2checkin.com/assets/AppointmentFormShell-EBT7gGRA.js:1:900)\n    at kt (https://nk.2checkin.com/assets/Calendar-DfKe7Q6J.js:4:1326)\n    at https://nk.2checkin.com/assets/Calendar-DfKe7Q6J.js:4:2246\n    at https://nk.2checkin.com/assets/Calendar-DfKe7Q6J.js:4:2435\n    at _r (https://nk.2checkin.com/assets/index-BmyqfWfk.js:41:24263)\n    at Hn (h"
+    ],
+    "pageErrors": [],
+    "requestFailures": [
+      "HEAD https://nk.2checkin.com/UGEZI_vD_5p43Rn2CdQnq3oRwRyBYWlogovTpjDHjgbeW8RfmHNoWFUeMVRGHChLJ27DZoSg4M04UyRyTAW9ERtBQ-NZMWNU1RMRxtiS2s2t3Mll2T_LQLSJpLYAw3bqSd4xh5PslAVFv2sMMQ86K56vzBSbBf8eVgfG9uMHvDFVjnl7DS04qT_CorlCFzeq21yxvpxzdnfLSiBNaKVPZ83otJ3d5-5eIrYDIIoQP-IlJT0Jo8dHLjyygxlFc7UCVWas7VYvbUOSno8l1Ece8_j1vV1EbxCJoeByuXgAt_8Rkgya2FyYHWByKZn50LzL_mhg2j6T1xp94eVd-L_M5z_T2zOzvYdkdk5WOvtw4-lLXrNTSKuvq5DRcMnA8uIARXxBfzLZPitPDFwcgA7H9Q0Ex-kBuutXt91uRCEQo9rYNfNC0UXx1X5v1LWWCa-O3odDbGFIrI_rS3bG :: net::ERR_ABORTED",
+      "GET https://nk.2checkin.com/api/Appointments?offset=0&limit=3000&date_from=2026-06-09&date_to=2026-06-09+23%3A59%3A59&calendar_mode=true&include_counts=false :: net::ERR_ABORTED",
+      "HEAD https://nk.2checkin.com/xaZXmKAhZ_Eq9X2fJ6X7PpKuBfrtvYqIrzoNqD2RhvWaXTrzmHKawQtfsK7CDf2oKfqRP7V5C6T6_vc0jxLmc3oEh2btqqn1oi-Ki1N-FtnRPWB-DQs7vt3QqIYMDa2FKqvcmnY_IFND_07zpVaTeLiDnPNSYOUkA7kpt4m2ey9Hce8_dLQhtzhKj-c2FZ4p6i_nkZPQWs2QEvU4ERAiJaHo-KIQoaFZMmmbC_w_k3g4kuOsf4ASnd8RQ5gO0c1c1zcQ4Hw4hkFsJVeWGu2wyLA6SSpRfBEVriGPlLVLPxi8_DNLY_F87wYkxyMfNkBgevdMU1l_V15yk4qy2vZjWth6l6MUyVFZidwQk-opyqVxVywADSRN9eJ1aOF7rFH58-IytgrP67_Mtp0aI_qQBycXMzJJHKFt7nAFQi8SLwHznJ4bnfVBgeqZBBKxlqqUGDY-30R9cyThFLfqKCMJpw :: net::ERR_ABORTED"
+    ]
+  },
+  "screens": [
+    {
+      "name": "Overview",
+      "path": "/",
+      "finalUrl": "https://nk.2checkin.com/",
+      "clickedSelector": "a[href=\"/\"]",
+      "usedFallbackGoto": false,
+      "bodyChars": 433,
+      "blank": false,
+      "visibleError": false,
+      "expectedText": true,
+      "apiErrors": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260609T040421Z/redacted-safe/01-overview.png"
+    },
+    {
+      "name": "Calendar",
+      "path": "/calendar",
+      "finalUrl": "https://nk.2checkin.com/calendar",
+      "clickedSelector": "a[href=\"/calendar\"]",
+      "usedFallbackGoto": false,
+      "bodyChars": 10,
+      "blank": true,
+      "visibleError": false,
+      "expectedText": false,
+      "apiErrors": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260609T040421Z/redacted-safe/02-calendar.png"
+    },
+    {
+      "name": "Customers",
+      "path": "/customers",
+      "finalUrl": "https://nk.2checkin.com/customers",
+      "clickedSelector": "goto:/customers",
+      "usedFallbackGoto": true,
+      "bodyChars": 2349,
+      "blank": false,
+      "visibleError": false,
+      "expectedText": true,
+      "apiErrors": [],
+      "consoleErrors": [
+        "Failed to load calendar appointments: TypeError: Failed to fetch\n    at Y (https://nk.2checkin.com/assets/index-BmyqfWfk.js:77:4655)\n    at jn (https://nk.2checkin.com/assets/AppointmentFormShell-EBT7gGRA.js:1:900)\n    at kt (https://nk.2checkin.com/assets/Calendar-DfKe7Q6J.js:4:1326)\n    at https://nk.2checkin.com/assets/Calendar-DfKe7Q6J.js:4:2246\n    at https://nk.2checkin.com/assets/Calendar-DfKe7Q6J.js:4:2435\n    at _r (https://nk.2checkin.com/assets/index-BmyqfWfk.js:41:24263)\n    at Hn (h"
+      ],
+      "pageErrors": [],
+      "requestFailures": [
+        "GET https://nk.2checkin.com/api/Appointments?offset=0&limit=3000&date_from=2026-06-09&date_to=2026-06-09+23%3A59%3A59&calendar_mode=true&include_counts=false :: net::ERR_ABORTED",
+        "HEAD https://nk.2checkin.com/xaZXmKAhZ_Eq9X2fJ6X7PpKuBfrtvYqIrzoNqD2RhvWaXTrzmHKawQtfsK7CDf2oKfqRP7V5C6T6_vc0jxLmc3oEh2btqqn1oi-Ki1N-FtnRPWB-DQs7vt3QqIYMDa2FKqvcmnY_IFND_07zpVaTeLiDnPNSYOUkA7kpt4m2ey9Hce8_dLQhtzhKj-c2FZ4p6i_nkZPQWs2QEvU4ERAiJaHo-KIQoaFZMmmbC_w_k3g4kuOsf4ASnd8RQ5gO0c1c1zcQ4Hw4hkFsJVeWGu2wyLA6SSpRfBEVriGPlLVLPxi8_DNLY_F87wYkxyMfNkBgevdMU1l_V15yk4qy2vZjWth6l6MUyVFZidwQk-opyqVxVywADSRN9eJ1aOF7rFH58-IytgrP67_Mtp0aI_qQBycXMzJJHKFt7nAFQi8SLwHznJ4bnfVBgeqZBBKxlqqUGDY-30R9cyThFLfqKCMJpw :: net::ERR_ABORTED"
+      ],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260609T040421Z/redacted-safe/03-customers.png"
+    }
+  ],
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260609T040421Z",
+  "safeDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260609T040421Z/redacted-safe"
+}

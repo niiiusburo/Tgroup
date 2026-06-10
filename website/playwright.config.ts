@@ -31,6 +31,16 @@ export default defineConfig({
   },
 
   projects: [
+    // Public routes — no login required (fan discount landing, etc.)
+    {
+      name: 'public',
+      testMatch: /ctv-discount-landing\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: undefined,
+        baseURL: 'http://127.0.0.1:5175',
+      },
+    },
     // Auth setup — runs first, saves login cookies to .auth/admin.json
     {
       name: 'auth-setup',
@@ -48,7 +58,7 @@ export default defineConfig({
         storageState: '.auth/admin.json',
       },
       dependencies: ['auth-setup'],
-      testIgnore: /auth-setup\.spec\.ts/,
+      testIgnore: /auth-setup\.spec\.ts|ctv-discount-landing\.spec\.ts/,
     },
   ],
 });

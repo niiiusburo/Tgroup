@@ -3,6 +3,7 @@
  * @crossref:used-in[NK3 frontend API client: website/src/lib/api/exports]
  * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
  */
+import { getAuthToken } from '@/lib/authToken';
 import { apiFetch, API_URL } from './core';
 
 export interface ExportPreviewResponse {
@@ -38,7 +39,7 @@ export async function downloadExport(
   filters: Record<string, unknown>,
   lob?: 'dental' | 'cosmetic'
 ): Promise<Blob> {
-  const token = localStorage.getItem('tgclinic_token') || '';
+  const token = getAuthToken() || '';
   const lobPrefix = lob === 'cosmetic' ? '/cosmetic' : '';
   const res = await fetch(
     `${API_URL}${lobPrefix}/Exports/${type}/download`,

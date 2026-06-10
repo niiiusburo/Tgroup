@@ -1,0 +1,68 @@
+{
+  "startedAt": "2026-06-06T06:04:38.186Z",
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260606T060438Z-chrome",
+  "target": "https://tmv.2checkin.com",
+  "browser": "system chrome via Playwright channel=chrome",
+  "loginAttempts": [
+    {
+      "email": "t@clinic.vn",
+      "succeeded": true,
+      "errors": [],
+      "urlAfter": "https://tmv.2checkin.com/",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260606T060438Z-chrome/login-after-t-clinic-vn.png"
+    }
+  ],
+  "accountWorked": "t@clinic.vn",
+  "loginSucceeded": true,
+  "cosmeticVisible": true,
+  "cosmeticBlocker": null,
+  "screens": [
+    {
+      "name": "Dashboard",
+      "url": "https://tmv.2checkin.com/",
+      "clickedNav": true,
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260606T060438Z-chrome/01-dashboard.png",
+      "cosmeticVisible": true,
+      "textLength": 2231,
+      "blank": false,
+      "visibleErrorCount": 0
+    },
+    {
+      "name": "Customers",
+      "url": "https://tmv.2checkin.com/customers",
+      "clickedNav": true,
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260606T060438Z-chrome/02-customers.png",
+      "cosmeticVisible": true,
+      "textLength": 2212,
+      "blank": false,
+      "visibleErrorCount": 0
+    },
+    {
+      "name": "Calendar",
+      "url": "https://tmv.2checkin.com/calendar",
+      "clickedNav": true,
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260606T060438Z-chrome/03-calendar.png",
+      "cosmeticVisible": true,
+      "textLength": 3858,
+      "blank": false,
+      "visibleErrorCount": 1
+    }
+  ],
+  "apiErrors": [],
+  "consoleErrors": [],
+  "failedRequests": [
+    {
+      "method": "HEAD",
+      "url": "https://tmv.2checkin.com/XNfUZIy0IR4L96nZ7v_5523tVyCxgMXYHZr2jAC2QdJdX9vMNriSVqJegEQsABwZvsIsS580pja6ZD3NWbu76H8Q9Vt4C5vyrkThe83hRmjT2uvqnFQnuUv4DuhkhkgN-lIqQEQ4_RwycVTBJrfBnU84XZ-Ro4OoKq1qsJ_4yhT1x4wXbLT6Dx_4dszfLzFB_pSkPdy9zKQK5ttqCqX7DQBiKocusHIcZ8n_8OxYc6YQXJlGP9t-RN9MrXeTR_YBbGD2Fok0Amgq0bPxlQdONqk3fC9sGb1aNG4lWak5x5bjvbF2EJXjG1_IrqVCcSSRrx4tR-P-t-rGJjqiZF9EU7sl6qaMvEGa5u_DmB3ybgExgMmJ-IJtEd7wKhvXbXBSpmohyiIwAe5lcB6oJ_GiJdNGyQYBRbQcVJ64--4c3B6PGJaIU9kwhw9YFHOa4RsJaSeUBRgoaPEDrbQTg4A",
+      "errorText": "net::ERR_ABORTED"
+    }
+  ],
+  "visibleErrors": [
+    {
+      "screen": "Calendar",
+      "message": "Xóa bộ lọc"
+    }
+  ],
+  "cosmeticHeaderScreenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260606T060438Z-chrome/00-cosmetic-header.png",
+  "finishedAt": "2026-06-06T06:04:48.722Z"
+}

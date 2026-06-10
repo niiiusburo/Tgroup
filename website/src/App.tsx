@@ -95,6 +95,18 @@ function AuthLoading() {
 }
 
 /**
+ * Build the /login redirect target carrying the current location as returnTo,
+ * so deep-linked protected pages bounce back after login (TC009 regression).
+ * LoginRoute/Login already sanitize returnTo (must start with '/', not '//').
+ */
+function loginRedirectWithReturnTo(): string {
+  if (typeof window === 'undefined') return '/login';
+  const { pathname, search } = window.location;
+  if (!pathname || pathname === '/' || pathname === '/login') return '/login';
+  return `/login?returnTo=${encodeURIComponent(pathname + search)}`;
+}
+
+/**
  * ProtectedRoute — redirects to /login if not authenticated,
  * shows AccessDenied if authenticated but missing permission.
  */
@@ -108,7 +120,7 @@ function ProtectedRoute({ children, path }: ProtectedRouteProps) {
   const isCtv = user?.is_ctv === true || user?.isCtv === true;
 
   if (isLoading) return <AuthLoading />;
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAuthenticated) return <Navigate to={loginRedirectWithReturnTo()} replace />;
 
   // Redirect CTV users to /ctv dashboard before admin routes render.
   if (isCtv) {
@@ -130,7 +142,7 @@ function CTVRouteGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, user } = useAuth();
   const isCtv = user?.is_ctv === true || user?.isCtv === true;
   if (isLoading) return <AuthLoading />;
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAuthenticated) return <Navigate to={loginRedirectWithReturnTo()} replace />;
   if (!isCtv) return <Navigate to="/" replace />;
   return <>{children}</>;
 }

@@ -1,0 +1,40 @@
+{
+  "startedAt": "2026-06-09T04:02:20.748Z",
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260609T040220Z-chrome",
+  "target": "https://tmv.2checkin.com",
+  "browser": "system chrome via Playwright channel=chrome",
+  "loginAttempts": [
+    {
+      "email": "t@clinic.vn",
+      "succeeded": false,
+      "errors": [
+        "1h 44m 24s *"
+      ],
+      "urlAfter": "https://tmv.2checkin.com/",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260609T040220Z-chrome/login-after-t-clinic-vn.png"
+    }
+  ],
+  "accountWorked": null,
+  "loginSucceeded": false,
+  "cosmeticVisible": false,
+  "cosmeticBlocker": null,
+  "screens": [],
+  "apiErrors": [],
+  "consoleErrors": [],
+  "failedRequests": [
+    {
+      "method": "HEAD",
+      "url": "https://tmv.2checkin.com/QsN-ktSCCIQRnqU8CRGAqIAzKNIsu0R2KwUrZ_XIZ7zkm_mH9qZb35l9-Tlit0sRikwm8aYcixkdjmDl9QMt3uCFHP2l7aFEyG2Tq1OOnh89UBsrUZ8JhMINJjtGWYub0WZz3TAEB8boZYnxvIwgJHxrR49KkImyRBsgvuxIVC_4gINx4mCIYLsTFRmq-fQdCbp4IZnnBBkoLy3kwkOOFaWK3JRgSOYcr9K62KuftwzLsr51XQgIUzVb-BoBr0JXNWUKpScqEoHQzbUdbF1RxaxrK9MF2BXepEcnf4mV30bPgxM3u_YXfKUPgDvRU4JTH4H2_4iYZksHFS9ZQxnrUuiWinH8S1gPq7LGWe8G_ILKTXJzAbns8jCjAKEfH_C2qPW4DxZuXLFuB67IrsBUua0FNDhjLCdlk6yBe84APaWhkz632LIDDG-Lnnlz_GYo9p6g0mpXY2tetnypUrg",
+      "errorText": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "url": "https://tmv.2checkin.com/C789swR3qHwTYf-Rfd9pgHDOmkP5gaE9pob93japbpgvs7a660Z-v1ky2Oj2qqn-ad2Ybfzn6h1idVC0a_AoESpGOTGivxhdibqiQF3vOV9WzNy4eLUTBpDDxpKJanURgi3uoQLMTuthP1mJZ_PkqdU7ahYeaVkvYd5PtAY46Y3wfqUmfYtpHCCAV0NFKDwlo_SS8Lp43DWjmfb5Fe7DjpcYRcPmM7-mxRiGKchGY9e2MEM7WCkUqyWMZcDNApSGj20GJPNAe34bV57UPOQxWXk21mj8NyR3BVTUipSqeR3EdOQJdyqFK-DHE9jp2FNCqdvlKMA82WxLF-uD-GdO8PgrrRThECI2jsTOV9bfMrs_mWcvcFPYyIRX0f7zGGR8e0j1SwtY37tW_3zK1Cp65AsC4CZ4pxyGJXISFu6_f5EjyxfsPx5loqp1VS7P4EKSRdWaN6vplP9i0w7dovk",
+      "errorText": "net::ERR_ABORTED"
+    }
+  ],
+  "visibleErrors": [],
+  "cosmeticHeaderScreenshot": null,
+  "finishedAt": "2026-06-09T04:03:07.932Z",
+  "fatalError": "locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#login-identifier, input[type=\"email\"], input[name=\"email\"], input[name=\"identifier\"], input[placeholder*=\"Email\" i], input[placeholder*=\"tgclinic\" i]').first() to be visible\u001b[22m\n\n    at fillLogin (/Users/thuanle/Documents/TamTMV/Tgrouptest/.tmp/tmv_cosmetic_login_monitor_readonly.cjs:119:18)\n    at tryLogin (/Users/thuanle/Documents/TamTMV/Tgrouptest/.tmp/tmv_cosmetic_login_monitor_readonly.cjs:134:9)\n    at async /Users/thuanle/Documents/TamTMV/Tgrouptest/.tmp/tmv_cosmetic_login_monitor_readonly.cjs:261:25"
+}

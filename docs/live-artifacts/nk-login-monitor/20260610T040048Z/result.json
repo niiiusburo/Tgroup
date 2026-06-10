@@ -1,0 +1,85 @@
+{
+  "checkedAt": "2026-06-10T04:01:08.067Z",
+  "baseUrl": "https://nk.2checkin.com",
+  "workedAccount": "t@clinic.vn",
+  "loginSucceeded": true,
+  "loginAttempts": [
+    {
+      "email": "t@clinic.vn",
+      "ok": true,
+      "visibleError": "",
+      "apiErrorsDuringAttempt": [],
+      "finalUrl": "https://nk.2checkin.com/"
+    }
+  ],
+  "version": {
+    "version": "0.32.44",
+    "buildTime": "2026-05-27T04:06:39.953Z",
+    "gitCommit": "ff65634",
+    "gitBranch": "detached-ff65634f",
+    "environment": "development"
+  },
+  "aggregate": {
+    "apiErrors": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [
+      "HEAD https://nk.2checkin.com/MdQqranMIbVI7ifbeP0IiBNw7AcJoNfolCIHOXpG4BSoPMnO5p86qffRki-KjW7-wqu2dOmBaVWICDR5pmc8m11edub98q98olU8AOWoXBWk-TQo5eXj_mnaRUy0YVwKw8SIs7gnoZokBDAk1fxhnVq4uZwo6uq5nTV-eGs5OS7QaRBNyE0oB93qtsEes-TLwIbX3swHRxvJVt_pjoAEFWttJ-i1XPt9gpj19ESBtcBcYnlmu2OajOGkBcDFG7unmIINwJ_UXqgbQn7koVp9_PNIZwJyN1RQXg33oNpy3ak_kGnJvYtrPmkpSBercqv8xArySz7eHJ-RYV66LnF4qeRCOULEfN6xwz5ShzucdvxayyVlovtMu4UyjGz6v5h7IeXgT9gMaCQFXgvnjkpLb5a6ktdkZXMzQW5QVineG6Gi796Y-56ANio3Adz7RCQRij5-DdIDwZYALpNr :: net::ERR_ABORTED"
+    ]
+  },
+  "screens": [
+    {
+      "name": "Overview",
+      "path": "/",
+      "finalUrl": "https://nk.2checkin.com/",
+      "clickedSelector": "a[href=\"/\"]",
+      "usedFallbackGoto": false,
+      "bodyChars": 17777,
+      "blank": false,
+      "loading": false,
+      "visibleError": false,
+      "expectedText": true,
+      "apiErrors": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260610T040048Z/redacted-safe/01-overview.png"
+    },
+    {
+      "name": "Calendar",
+      "path": "/calendar",
+      "finalUrl": "https://nk.2checkin.com/calendar",
+      "clickedSelector": "a[href=\"/calendar\"]",
+      "usedFallbackGoto": false,
+      "bodyChars": 53781,
+      "blank": false,
+      "loading": false,
+      "visibleError": false,
+      "expectedText": true,
+      "apiErrors": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260610T040048Z/redacted-safe/02-calendar.png"
+    },
+    {
+      "name": "Customers",
+      "path": "/customers",
+      "finalUrl": "https://nk.2checkin.com/customers",
+      "clickedSelector": "a[href=\"/customers\"]",
+      "usedFallbackGoto": false,
+      "bodyChars": 2442,
+      "blank": false,
+      "loading": false,
+      "visibleError": false,
+      "expectedText": true,
+      "apiErrors": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260610T040048Z/redacted-safe/03-customers.png"
+    }
+  ],
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260610T040048Z",
+  "safeDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260610T040048Z/redacted-safe"
+}

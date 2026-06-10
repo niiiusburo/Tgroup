@@ -1,169 +1,2128 @@
 [
   {
-    "id": "TS-001",
-    "title": "Admin login and redirect",
-    "description": "Test that admin can login with correct credentials and be redirected to overview",
-    "category": "Authentication",
-    "priority": "High",
-    "targetPage": "/login",
+    "id": "TC001",
+    "title": "Admin signs in and reaches the dashboard",
+    "description": "This verifies an admin can authenticate and land on the overview dashboard with access to the protected app.",
+    "category": "Authentication and Authorization",
     "steps": [
-      "fill email",
-      "fill password",
-      "submit"
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the overview dashboard is displayed"
+      }
     ],
-    "expectedResult": "User is logged in and redirected to /overview"
+    "priority": "High"
   },
   {
-    "id": "TS-002",
-    "title": "Invalid login rejection",
-    "description": "Test that invalid credentials are rejected with error message",
-    "category": "Authentication",
-    "priority": "High",
-    "targetPage": "/login",
+    "id": "TC002",
+    "title": "CTV can generate a QR discount voucher and staff can complete it",
+    "description": "This verifies the end-to-end voucher flow from CTV generation through staff verification, check-in, and completion.",
+    "category": "Permission Matrix and RBAC (READ-ONLY)",
     "steps": [
-      "fill wrong email",
-      "fill wrong password",
-      "submit"
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Generate a QR discount voucher in the CTV portal"
+      },
+      {
+        "type": "action",
+        "description": "Open the staff discount verification screen"
+      },
+      {
+        "type": "action",
+        "description": "Verify the generated discount voucher"
+      },
+      {
+        "type": "action",
+        "description": "Check in the verified voucher"
+      },
+      {
+        "type": "action",
+        "description": "Complete the voucher flow"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the voucher is marked completed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the voucher can no longer be processed as pending"
+      }
     ],
-    "expectedResult": "Error message displayed, no redirect"
+    "priority": "High"
   },
   {
-    "id": "TS-003",
-    "title": "Logout clears session",
-    "description": "Test that logout button clears session and redirects to login",
-    "category": "Authentication",
-    "priority": "High",
-    "targetPage": "/overview",
+    "id": "TC003",
+    "title": "Staff can verify check-in and complete a generated discount code",
+    "description": "A staff user can open a generated voucher through the verify flow, check in the customer, and complete the code without re-resolving the customer.",
+    "category": "CTV QR Discount Voucher (FM-20260610-01/02 regression)",
     "steps": [
-      "click logout"
+      {
+        "type": "action",
+        "description": "Navigate to /verify-discount?code=GENERATED_CODE"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Return to the discount verification flow"
+      },
+      {
+        "type": "action",
+        "description": "Select a valid LOB"
+      },
+      {
+        "type": "action",
+        "description": "Enter the customer's phone number"
+      },
+      {
+        "type": "action",
+        "description": "Verify the discount code"
+      },
+      {
+        "type": "action",
+        "description": "Complete the code"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the code is marked as used"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the staff attribution is displayed"
+      }
     ],
-    "expectedResult": "Session cleared, redirected to /login"
+    "priority": "High"
   },
   {
-    "id": "TS-010",
-    "title": "Customer list page loads",
-    "description": "Test that /customers page loads and displays customer list",
+    "id": "TC004",
+    "title": "Admin can sign in and reach the overview dashboard",
+    "description": "This verifies an admin can authenticate and land on the main dashboard successfully.",
+    "category": "Permission Matrix and RBAC (READ-ONLY)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user lands on the overview dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the main admin shell is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC005",
+    "title": "Admin reaches the overview and can sweep core sidebar routes",
+    "description": "This verifies an admin can sign in, land on the overview, and open each core admin section without blank screens.",
+    "category": "Employee Management with Permission Groups",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the overview"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view customers"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the calendar"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view payment"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view services"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view reports"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view employees"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view permissions"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view settings"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view commission"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view feedback"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the final route renders a usable admin section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no blank screen is shown"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC006",
+    "title": "Logout ends the session and protects the app",
+    "description": "This verifies signing out clears access and sends the user back to the login screen when they try to use a protected route.",
+    "category": "Authentication and Authorization",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Sign out of the application"
+      },
+      {
+        "type": "action",
+        "description": "Open a protected area of the app"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the sign-in screen is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC007",
+    "title": "Admin can open every guarded shell route from the sidebar",
+    "description": "This verifies the admin shell route sweep works without blank screens across the main guarded sections.",
+    "category": "Permission Matrix and RBAC (READ-ONLY)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the customers section"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the calendar section"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the payment section"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the services section"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the reports section"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the employees section"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the permissions section"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the settings section"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the commission section"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the feedback section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify each guarded admin section renders successfully"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no blank screen is shown during the route sweep"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC008",
+    "title": "CTV portal login and dashboard access",
+    "description": "A CTV can sign in to the portal and land on the dashboard with their account data visible.",
+    "category": "CTV Self-Service Portal",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the CTV portal entry point"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the CTV dashboard is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify account-specific portal content is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC009",
+    "title": "Protected pages redirect back after login",
+    "description": "This verifies a logged-out user who opens a protected page is returned to that page after signing in.",
+    "category": "Authentication and Authorization",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /customers"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the customers page is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC010",
+    "title": "CTV portal access is limited to CTV users",
+    "description": "This verifies a CTV user can sign in to the portal and access the CTV experience instead of the admin shell.",
+    "category": "Permission Matrix and RBAC (READ-ONLY)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the CTV portal is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the admin shell is not displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC011",
+    "title": "CTV portal blocks admin access",
+    "description": "A signed-in CTV is prevented from viewing admin routes and is redirected away from the admin shell.",
+    "category": "CTV Self-Service Portal",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /overview"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access to the admin area is blocked"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user is redirected to an allowed portal view"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC012",
+    "title": "Admin can assign and then clear a CTV on a service",
+    "description": "This verifies a service can earn commission only when a CTV is explicitly selected and that clearing the CTV reverses the pending earnings.",
+    "category": "Service Catalog and Strict CTV Commission (DEC-20260610-01)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the services section"
+      },
+      {
+        "type": "action",
+        "description": "Create a disposable ZZ_TESTSPRITE_ service with an explicit CTV selected"
+      },
+      {
+        "type": "action",
+        "description": "Open the created service for editing"
+      },
+      {
+        "type": "action",
+        "description": "Clear the selected CTV from the service"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the service no longer shows a pending CTV earning"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the commission attribution is removed from the service"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC013",
+    "title": "Admin can open every sidebar section without a blank screen",
+    "description": "This verifies each core admin sidebar route renders its headed content and stays usable during a route sweep.",
+    "category": "Admin Shell Route Sweep",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the overview section"
+      },
+      {
+        "type": "action",
+        "description": "Open the customers section"
+      },
+      {
+        "type": "action",
+        "description": "Open the calendar section"
+      },
+      {
+        "type": "action",
+        "description": "Open the payment section"
+      },
+      {
+        "type": "action",
+        "description": "Open the services section"
+      },
+      {
+        "type": "action",
+        "description": "Open the reports section"
+      },
+      {
+        "type": "action",
+        "description": "Open the employees section"
+      },
+      {
+        "type": "action",
+        "description": "Open the permissions section"
+      },
+      {
+        "type": "action",
+        "description": "Open the settings section"
+      },
+      {
+        "type": "action",
+        "description": "Open the commission section"
+      },
+      {
+        "type": "action",
+        "description": "Open the feedback section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the final section content is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the page remains usable without a blank main panel"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC014",
+    "title": "CTV users cannot access admin-only routes",
+    "description": "This verifies route guarding prevents CTV users from opening admin-only areas.",
+    "category": "Permission Matrix and RBAC (READ-ONLY)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to open an admin-only route from the app shell"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user is kept out of the admin area"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify only the CTV portal remains available"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC015",
+    "title": "Admin route sweep stays populated",
+    "description": "An admin can move through the core sidebar routes and each destination renders content instead of a blank shell.",
+    "category": "CTV Admin Module (Commission, Network, Management)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the overview page"
+      },
+      {
+        "type": "action",
+        "description": "Open the customers page"
+      },
+      {
+        "type": "action",
+        "description": "Open the calendar page"
+      },
+      {
+        "type": "action",
+        "description": "Open the services page"
+      },
+      {
+        "type": "action",
+        "description": "Open the reports page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify each visited admin route displays page content"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no blank screen is shown during the route sweep"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC016",
+    "title": "CTV portal can generate a discount voucher",
+    "description": "A CTV can generate a QR discount voucher and see the new code appear in the voucher area and history list.",
+    "category": "CTV QR Discount Voucher (FM-20260610-01/02 regression)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the referral and QR section"
+      },
+      {
+        "type": "action",
+        "description": "Open the QR code sub-tab"
+      },
+      {
+        "type": "action",
+        "description": "Generate a discount voucher"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a new voucher card is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the generated code appears in the voucher history"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC017",
+    "title": "Admin can create a disposable service without assigning a CTV",
+    "description": "This verifies a service can be created for a disposable test customer without creating any CTV commission attribution.",
+    "category": "Service Catalog and Strict CTV Commission (DEC-20260610-01)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the services section"
+      },
+      {
+        "type": "action",
+        "description": "Create a disposable ZZ_TESTSPRITE_ service without selecting a CTV"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new service is saved"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no CTV commission attribution is shown for the service"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC018",
+    "title": "Commission summary renders per CTV",
+    "description": "An admin can open the commission area and view commission breakdowns and payout status for consultants.",
+    "category": "CTV Admin Module (Commission, Network, Management)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the commission page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify consultant commission summaries are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify payout status information is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC019",
+    "title": "Public discount landing displays voucher details",
+    "description": "A visitor can open a public discount landing page and see the voucher and clinic information without being redirected to the admin area.",
+    "category": "Public Visitor Flows (Unauthenticated)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to a public discount landing route"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the voucher landing content is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the page does not redirect to the admin overview"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC020",
+    "title": "Cosmetic customer list shows only cosmetic records",
+    "description": "An authenticated admin can switch to the Cosmetic line of business and view a customer list that contains only cosmetic data.",
+    "category": "Cosmetic Line of Business Isolation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the login page"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the credentials for an admin user"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the Cosmetic line of business"
+      },
+      {
+        "type": "action",
+        "description": "Open the customer list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify cosmetic customers are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dental customer records are not mixed into the list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC021",
+    "title": "Admin can schedule an appointment and see it in calendar views",
+    "description": "An admin can create a disposable appointment and confirm it appears in the calendar across supported views.",
+    "category": "Appointment Calendar",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the calendar page"
+      },
+      {
+        "type": "action",
+        "description": "Create an appointment with all required fields filled"
+      },
+      {
+        "type": "action",
+        "description": "Open the day view"
+      },
+      {
+        "type": "action",
+        "description": "Open the week view"
+      },
+      {
+        "type": "action",
+        "description": "Open the month view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new appointment is visible in the calendar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the appointment appears across the calendar views"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC022",
+    "title": "Admin can create an appointment and see it across calendar views",
+    "description": "This verifies a disposable appointment can be created and then viewed in day, week, and month calendar modes.",
+    "category": "Appointment Calendar",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the calendar"
+      },
+      {
+        "type": "action",
+        "description": "Create a new appointment for a ZZ_TESTSPRITE_ customer using valid details"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the week view"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the month view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the appointment is visible on the calendar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the appointment appears in more than one calendar view"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC023",
+    "title": "Admin can search a customer by accent-insensitive text",
+    "description": "An admin can find a customer profile using a search term that omits accents and open the matching customer record.",
+    "category": "Customer Profile Flow",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the customers page"
+      },
+      {
+        "type": "action",
+        "description": "Search for a customer using an accent-insensitive term"
+      },
+      {
+        "type": "action",
+        "description": "Open the matching customer profile"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the matching customer profile is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the search results reflect the entered search term"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC024",
+    "title": "Customer search finds accented names from an unaccented query",
+    "description": "This verifies customer search matches names regardless of accents so staff can find the right profile quickly.",
     "category": "Customer Management",
-    "priority": "High",
-    "targetPage": "/customers",
     "steps": [
-      "navigate to customers"
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the customers section"
+      },
+      {
+        "type": "action",
+        "description": "Search for an unaccented customer term"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify matching customer results are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an accented match appears in the results"
+      }
     ],
-    "expectedResult": "Customer list displayed with search functionality"
+    "priority": "High"
   },
   {
-    "id": "TS-011",
-    "title": "Customer search works",
-    "description": "Test accent-insensitive search for Vietnamese names",
+    "id": "TC025",
+    "title": "Cosmetic service catalog shows only cosmetic services",
+    "description": "An authenticated admin can switch to the Cosmetic line of business and view a service catalog that contains only cosmetic data.",
+    "category": "Cosmetic Line of Business Isolation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the login page"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the credentials for an admin user"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the Cosmetic line of business"
+      },
+      {
+        "type": "action",
+        "description": "Open the service catalog"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify cosmetic services are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dental service records are not mixed into the catalog"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC026",
+    "title": "Admin can find a customer using an accent-insensitive search",
+    "description": "This verifies customer lookup works when the search term omits accents and still returns the matching profile.",
+    "category": "Permission Matrix and RBAC (READ-ONLY)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the customers section"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the customer search field with an accent-insensitive term"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the matching customer profile is shown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the search results remain filtered to the matching customer"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC027",
+    "title": "Commission attribution requires an explicit CTV selection",
+    "description": "An admin can create one service with a consultant assignment and another without it to confirm commission is only attributed when explicitly selected.",
+    "category": "CTV Admin Module (Commission, Network, Management)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the services page"
+      },
+      {
+        "type": "action",
+        "description": "Create a service and explicitly select a consultant"
+      },
+      {
+        "type": "action",
+        "description": "Create a second service without selecting a consultant"
+      },
+      {
+        "type": "action",
+        "description": "Open the commission page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify commission attribution is shown for the explicitly assigned service"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no commission attribution is shown for the unassigned service"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC028",
+    "title": "CTV referral QR list renders",
+    "description": "A CTV can open the referral and QR area and see their referral history and QR-related content.",
+    "category": "CTV Self-Service Portal",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the referral and QR section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify referral history is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify QR-related content is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC029",
+    "title": "Public join form shows referral context",
+    "description": "A visitor can open the public join page with a referral code and see the join form with the upline information resolved.",
+    "category": "Public Visitor Flows (Unauthenticated)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the public join route with a referral code"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the join form is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the referral or upline context is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC030",
+    "title": "Admin can update an appointment status and keep the change visible",
+    "description": "This verifies a disposable appointment can be updated and the new status remains visible after saving.",
+    "category": "Appointment Calendar",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the calendar"
+      },
+      {
+        "type": "action",
+        "description": "Create a new appointment for a ZZ_TESTSPRITE_ customer using valid details"
+      },
+      {
+        "type": "action",
+        "description": "Open the appointment"
+      },
+      {
+        "type": "action",
+        "description": "Change the appointment status"
+      },
+      {
+        "type": "action",
+        "description": "Save the appointment changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated appointment status is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the appointment remains on the calendar"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC031",
+    "title": "Admin can view report cards and open report previews",
+    "description": "This verifies the reports area renders its summary cards and preview views for normal read-only use.",
+    "category": "Reports and Excel Export",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the reports section"
+      },
+      {
+        "type": "action",
+        "description": "Open the appointments report preview"
+      },
+      {
+        "type": "action",
+        "description": "Open the deposits report preview"
+      },
+      {
+        "type": "action",
+        "description": "Open the revenue report preview"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the report cards are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the selected report preview data is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC032",
+    "title": "Admin can create edit and delete a disposable customer record",
+    "description": "An admin can complete a disposable ZZ_TESTSPRITE_ customer create, edit, and delete flow from the customer area.",
+    "category": "Customer Profile Flow",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the customers page"
+      },
+      {
+        "type": "action",
+        "description": "Create a customer record with a ZZ_TESTSPRITE_ name"
+      },
+      {
+        "type": "action",
+        "description": "Edit the created customer record"
+      },
+      {
+        "type": "action",
+        "description": "Delete the created customer record"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the customer record is no longer available in the list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the customer area shows the expected post-delete state"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC033",
+    "title": "Cosmetic data stays isolated when opening a customer profile",
+    "description": "An authenticated admin can open a cosmetic customer profile and see that the related journeys and services come from the cosmetic database only.",
+    "category": "Cosmetic Line of Business Isolation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the login page"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the credentials for an admin user"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the Cosmetic line of business"
+      },
+      {
+        "type": "action",
+        "description": "Open a cosmetic customer profile"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the customer profile is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the related journey or service data belongs to the cosmetic line of business"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC034",
+    "title": "Customer profile tabs are available for review",
+    "description": "This verifies an opened customer profile shows the expected information areas for staff review.",
     "category": "Customer Management",
-    "priority": "High",
-    "targetPage": "/customers",
     "steps": [
-      "type search query",
-      "verify results"
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the customers section"
+      },
+      {
+        "type": "action",
+        "description": "Open any customer profile from the list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the customer profile is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the profile tabs are displayed"
+      }
     ],
-    "expectedResult": "Results match search query regardless of diacritics"
+    "priority": "High"
   },
   {
-    "id": "TS-012",
-    "title": "Create new customer",
-    "description": "Test customer creation form with valid data",
+    "id": "TC035",
+    "title": "CTV network hierarchy renders",
+    "description": "An admin can open a consultant's hierarchy view and see the upline and downline relationships.",
+    "category": "CTV Admin Module (Commission, Network, Management)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the CTV management page"
+      },
+      {
+        "type": "action",
+        "description": "Open a consultant's network view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the upline relationship is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the downline relationship is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC036",
+    "title": "Admin can export a report to Excel",
+    "description": "This verifies the reports page can produce an Excel export from the UI.",
+    "category": "Reports and Excel Export",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the reports section"
+      },
+      {
+        "type": "action",
+        "description": "Trigger an Excel export from the reports page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an export is produced"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the reports page remains accessible after the export action"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC037",
+    "title": "Public discount landing page opens for a shared code",
+    "description": "A public visitor can open the discount fan landing page for a valid shared code and see the voucher landing content.",
+    "category": "CTV QR Discount Voucher (FM-20260610-01/02 regression)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /ctv/discount/VALID_SHORT_CODE"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the discount landing page is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify voucher-related content is visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC038",
+    "title": "Public join completes for a disposable test account",
+    "description": "A visitor can complete the public join flow with disposable test data and see the new account confirmation.",
+    "category": "Public Visitor Flows (Unauthenticated)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the public join route with a referral code"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the required join details with disposable test data"
+      },
+      {
+        "type": "action",
+        "description": "Submit the join form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a join success confirmation is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new account is created"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC039",
+    "title": "Admin can open customer profile tabs after searching",
+    "description": "This verifies an admin can search for a customer and navigate through the available profile tabs.",
+    "category": "Permission Matrix and RBAC (READ-ONLY)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the customers section"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the customer search field with an accent-insensitive term"
+      },
+      {
+        "type": "action",
+        "description": "Open the matched customer profile"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the profile tabs one by one"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the customer profile content is displayed across tabs"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the tabbed customer details area remains available"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC040",
+    "title": "Admin creates and deactivates a disposable CTV",
+    "description": "An admin can create a disposable consultant record and then deactivate it from the management area.",
+    "category": "CTV Admin Module (Commission, Network, Management)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the CTV management page"
+      },
+      {
+        "type": "action",
+        "description": "Open the add CTV flow"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the name field with ZZ_TESTSPRITE_CTV_<timestamp>"
+      },
+      {
+        "type": "action",
+        "description": "Create the consultant record"
+      },
+      {
+        "type": "action",
+        "description": "Deactivate the newly created consultant record"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new consultant appears in the list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the consultant is shown as deactivated"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC041",
+    "title": "Admin can create and edit a service with a selected CTV",
+    "description": "An admin can create a service with an explicit consultant assignment and later edit it through the services area.",
+    "category": "Service Catalog",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the services page"
+      },
+      {
+        "type": "action",
+        "description": "Create a service and explicitly select a consultant"
+      },
+      {
+        "type": "action",
+        "description": "Edit the created service"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the service is displayed in the catalog"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the consultant assignment is retained on the service"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC042",
+    "title": "Staff can create, edit, and remove a disposable customer record",
+    "description": "This verifies a ZZ_TESTSPRITE_ customer can be created, updated, and soft-deleted within the customer workflow.",
     "category": "Customer Management",
-    "priority": "High",
-    "targetPage": "/customers",
     "steps": [
-      "click add",
-      "fill form",
-      "save"
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the customers section"
+      },
+      {
+        "type": "action",
+        "description": "Create a new customer using a ZZ_TESTSPRITE_ name"
+      },
+      {
+        "type": "action",
+        "description": "Edit a customer field for the ZZ_TESTSPRITE_ record"
+      },
+      {
+        "type": "action",
+        "description": "Save the customer changes"
+      },
+      {
+        "type": "action",
+        "description": "Delete the ZZ_TESTSPRITE_ customer record"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the ZZ_TESTSPRITE_ customer record is no longer active"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated customer record was saved before deletion"
+      }
     ],
-    "expectedResult": "New customer created and visible in list"
+    "priority": "Medium"
   },
   {
-    "id": "TS-013",
-    "title": "Edit existing customer",
-    "description": "Test editing customer details",
-    "category": "Customer Management",
-    "priority": "High",
-    "targetPage": "/customers",
+    "id": "TC043",
+    "title": "Admin sees validation when required appointment fields are missing",
+    "description": "This verifies the appointment form blocks submission and shows validation when required fields are left empty.",
+    "category": "Appointment Calendar",
     "steps": [
-      "select customer",
-      "edit details",
-      "save"
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the calendar"
+      },
+      {
+        "type": "action",
+        "description": "Open the appointment creation form"
+      },
+      {
+        "type": "action",
+        "description": "Submit the appointment form without filling required fields"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a validation error is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no appointment is created"
+      }
     ],
-    "expectedResult": "Customer details updated"
+    "priority": "Medium"
   },
   {
-    "id": "TS-020",
-    "title": "Employee list page loads",
-    "description": "Test that /employees page loads and displays employee list",
-    "category": "Employee Management",
-    "priority": "Medium",
-    "targetPage": "/employees",
+    "id": "TC044",
+    "title": "CTV can edit profile details",
+    "description": "A CTV can open their profile and save changes to their own profile information.",
+    "category": "CTV Self-Service Portal",
     "steps": [
-      "navigate to employees"
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the profile section"
+      },
+      {
+        "type": "action",
+        "description": "Edit a profile field with a new valid value"
+      },
+      {
+        "type": "action",
+        "description": "Save the profile changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated profile information is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a confirmation of the saved profile changes is visible"
+      }
     ],
-    "expectedResult": "Employee list displayed with search"
+    "priority": "Medium"
   },
   {
-    "id": "TS-021",
-    "title": "Create new employee",
-    "description": "Test employee creation with permission group",
-    "category": "Employee Management",
-    "priority": "Medium",
-    "targetPage": "/employees",
+    "id": "TC045",
+    "title": "Service catalog search and filters work",
+    "description": "An admin can search and filter the service catalog to find matching services.",
+    "category": "Service Catalog",
     "steps": [
-      "click add",
-      "fill form",
-      "save"
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the services page"
+      },
+      {
+        "type": "action",
+        "description": "Search for a service using a valid term"
+      },
+      {
+        "type": "action",
+        "description": "Apply a service filter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify matching services are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the filtered service list is shown"
+      }
     ],
-    "expectedResult": "New employee created with assigned permissions"
+    "priority": "Medium"
   },
   {
-    "id": "TS-030",
-    "title": "Calendar page loads",
-    "description": "Test that /calendar page loads and displays appointments",
-    "category": "Calendar",
-    "priority": "High",
-    "targetPage": "/calendar",
+    "id": "TC046",
+    "title": "Public referral signup page renders",
+    "description": "A public visitor can open the referral signup flow and see the join form content.",
+    "category": "CTV QR Discount Voucher (FM-20260610-01/02 regression)",
     "steps": [
-      "navigate to calendar"
+      {
+        "type": "action",
+        "description": "Navigate to /ctv/join"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the referral signup page is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the signup form is visible"
+      }
     ],
-    "expectedResult": "Calendar view displayed with appointments"
+    "priority": "Medium"
   },
   {
-    "id": "TS-031",
-    "title": "Calendar date navigation",
-    "description": "Test navigating between dates",
-    "category": "Calendar",
-    "priority": "High",
-    "targetPage": "/calendar",
+    "id": "TC047",
+    "title": "Public join form validates missing required fields",
+    "description": "A visitor can submit the public join form with missing required information and see validation errors without creating an account.",
+    "category": "Public Visitor Flows (Unauthenticated)",
     "steps": [
-      "click next/prev date"
+      {
+        "type": "action",
+        "description": "Navigate to the public join route with a referral code"
+      },
+      {
+        "type": "action",
+        "description": "Submit the join form without filling required fields"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify validation errors are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the form remains on the join page"
+      }
     ],
-    "expectedResult": "Calendar updates to show selected date"
+    "priority": "Medium"
   },
   {
-    "id": "TS-040",
-    "title": "Payment history page loads",
-    "description": "Test that /payments page loads and displays payment history",
-    "category": "Payments",
-    "priority": "Medium",
-    "targetPage": "/payments",
+    "id": "TC048",
+    "title": "Invalid login keeps the user on the sign-in screen",
+    "description": "This verifies invalid credentials are rejected and the user remains on the login screen with an error message visible.",
+    "category": "Authentication and Authorization",
     "steps": [
-      "navigate to payments"
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with invalid credentials"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with invalid credentials"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the sign-in screen is still displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a login error message is visible"
+      }
     ],
-    "expectedResult": "Payment history list displayed"
+    "priority": "Medium"
   },
   {
-    "id": "TS-050",
-    "title": "Permission matrix loads",
-    "description": "Test that permission matrix page loads correctly",
-    "category": "Permissions",
-    "priority": "Medium",
-    "targetPage": "/settings/permissions",
+    "id": "TC049",
+    "title": "Admin searches employees and sees filtered results",
+    "description": "This verifies an admin can search the employee list and see results filtered by the entered name.",
+    "category": "Employee Management with Permission Groups",
     "steps": [
-      "navigate to permissions"
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view employees"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the employee search field with a known employee name"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the employee list shows filtered results"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the searched employee is visible"
+      }
     ],
-    "expectedResult": "Permission groups and matrix displayed"
+    "priority": "Medium"
+  },
+  {
+    "id": "TC050",
+    "title": "Appointment form shows required field validation",
+    "description": "An admin sees validation feedback when trying to create an appointment without required information.",
+    "category": "Appointment Calendar",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the calendar page"
+      },
+      {
+        "type": "action",
+        "description": "Open the appointment create form"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form without filling required fields"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify required-field validation errors are visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the appointment is not created"
+      }
+    ],
+    "priority": "Medium"
   }
 ]

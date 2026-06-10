@@ -1,0 +1,77 @@
+{
+  "outDir": "website/output/playwright/nk3-redeploy-check-20260605T111600Z",
+  "results": [
+    {
+      "name": "01-ctv-thammyvientam-landing",
+      "url": "https://ctv.thammyvientam.com/",
+      "screenshot": "website/output/playwright/nk3-redeploy-check-20260605T111600Z/01-ctv-thammyvientam-landing.png",
+      "elapsedMs": 2697,
+      "title": "Tâm — Thẩm Mỹ Viện",
+      "assertion": {
+        "pass": true,
+        "detail": [
+          {
+            "text": "Đặt Lịch Cho Khách",
+            "href": "https://ctv.thammyvientam.com/welcome?book=1"
+          },
+          {
+            "text": "Đăng Ký CTV",
+            "href": "https://ctv.thammyvientam.com/ctv/join"
+          },
+          {
+            "text": "Đăng Nhập",
+            "href": "https://ctv.thammyvientam.com/ctv"
+          }
+        ]
+      },
+      "textStart": "Đặt Lịch Cho Khách\nĐăng Ký CTV\nĐăng Nhập"
+    },
+    {
+      "name": "02-tmv-ctv-join-no-login",
+      "url": "https://tmv.2checkin.com/ctv/join",
+      "screenshot": "website/output/playwright/nk3-redeploy-check-20260605T111600Z/02-tmv-ctv-join-no-login.png",
+      "elapsedMs": 3572,
+      "title": "TG Clinic - Clinic Management System",
+      "assertion": {
+        "pass": true,
+        "detail": {
+          "inputs": 5,
+          "buttons": 1,
+          "labelSignals": 6
+        }
+      },
+      "textStart": "Đăng ký Cộng tác viên\n\nNhập số điện thoại CTV giới thiệu ở cuối form.\n\nHọ tên\nSố điện thoại của bạn\nEmail (không bắt buộc)\nMật khẩu\nCTV giới thiệu\nKhông bắt buộc — để trống để đăng ký làm CTV cấp gốc.\nTạo tài khoản CTV"
+    },
+    {
+      "name": "03-tmv-welcome-book-deeplink",
+      "url": "https://tmv.2checkin.com/welcome?book=1",
+      "screenshot": "website/output/playwright/nk3-redeploy-check-20260605T111600Z/03-tmv-welcome-book-deeplink.png",
+      "elapsedMs": 2620,
+      "title": "Tâm — Thẩm Mỹ Viện",
+      "assertion": {
+        "pass": true,
+        "detail": {
+          "textSignals": 5,
+          "formFields": 4,
+          "dialogLikeNodes": 1
+        }
+      },
+      "textStart": "Đặt Lịch Cho Khách\nĐăng Ký CTV\nĐăng Nhập\nGiới thiệu khách\nLĩnh vực\nDental\nCosmetic\n\nType in the phone number to verify first.\n\nSố điện thoại\nHọ tên\nSố điện thoại CTV\nNgày hẹn\n05/06/2026\nDịch vụ\nChọn dịch vụ (không bắt buộc)\nGhi chú\nGiới thiệu khách"
+    },
+    {
+      "name": "04-tmv-main-shell",
+      "url": "https://tmv.2checkin.com/",
+      "screenshot": "website/output/playwright/nk3-redeploy-check-20260605T111600Z/04-tmv-main-shell.png",
+      "elapsedMs": 2131,
+      "title": "TG Clinic - Clinic Management System",
+      "assertion": {
+        "pass": true,
+        "detail": {
+          "rootNodes": 1,
+          "textLength": 108
+        }
+      },
+      "textStart": "TD\nĐăng nhập\n\nĐăng nhập\n\nEmail hoặc số điện thoại CTV\nMật khẩu\nĐăng nhập\n\nTG Clinic Management System © 2026"
+    }
+  ]
+}

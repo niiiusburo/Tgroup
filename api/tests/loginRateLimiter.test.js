@@ -222,6 +222,35 @@ describe('login rate limiter', () => {
     expect(meRes.body.user.lob_scope).toEqual(['cosmetic']);
   });
 
+  it('issues a 30-day token when rememberMe is true', async () => {
+    const jwt = require('jsonwebtoken');
+    const app = loadApp({ passwordMatches: true });
+
+    const loginRes = await request(app)
+      .post('/api/Auth/login')
+      .send({ email: 't@clinic.vn', password: '123123', rememberMe: true });
+
+    expect(loginRes.status).toBe(200);
+    const decoded = jwt.decode(loginRes.body.token);
+    expect(decoded.remember).toBe(true);
+    expect(decoded.exp - decoded.iat).toBeGreaterThan(29 * 24 * 60 * 60);
+    expect(decoded.exp - decoded.iat).toBeLessThanOrEqual(30 * 24 * 60 * 60);
+  });
+
+  it('keeps the default 24-hour token when rememberMe is omitted', async () => {
+    const jwt = require('jsonwebtoken');
+    const app = loadApp({ passwordMatches: true });
+
+    const loginRes = await request(app)
+      .post('/api/Auth/login')
+      .send({ email: 't@clinic.vn', password: '123123' });
+
+    expect(loginRes.status).toBe(200);
+    const decoded = jwt.decode(loginRes.body.token);
+    expect(decoded.remember).toBe(false);
+    expect(decoded.exp - decoded.iat).toBe(24 * 60 * 60);
+  });
+
   it('limits repeated failures for one email without blocking another email on the same IP', async () => {
     const app = loadApp({ passwordMatches: false });
 

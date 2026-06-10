@@ -1,0 +1,55 @@
+# NK3 (tmv.2checkin.com) — Cosmetic LOB v2 staging target.
+# Live copy on VPS: /opt/tgroup-nk3/runtime/docker-compose.nk3.yml
+#
+# Bảng giá live sync: API worker writes to website/public/bang-gia on the host;
+# web container mounts the same directory so /bang-gia updates without rebuild.
+
+services:
+  api:
+    build:
+      context: /opt/tgroup-nk3/app
+      dockerfile: Dockerfile.api
+    container_name: tgroup-nk3-api
+    restart: unless-stopped
+    network_mode: host
+    env_file:
+      - /opt/tgroup-nk3/.env.nk3
+    environment:
+      PORT: "3202"
+      NODE_ENV: staging
+      TZ: Asia/Ho_Chi_Minh
+      FACE_SERVICE_URL: http://127.0.0.1:8001
+      FACE_RECOGNITION_PROVIDER: compreface
+      COMPREFACE_URL: http://127.0.0.1:8004
+      PRICING_SYNC_ENABLED: "true"
+      PRICING_SYNC_INTERVAL_MS: "30000"
+      PRICING_SHEET_ID: "19YZB-SgpqvI3-hu93xOk0OCDWtUPxrAAfR6CiFpU4GY"
+      BANG_GIA_OUTPUT_DIR: /bang-gia-output
+      GOOGLE_CREDENTIALS_FILE: /secrets/google_credentials.json
+    volumes:
+      - /opt/tgroup-nk3/uploads:/app/uploads
+      - /opt/tgroup-nk3/app/website/public/bang-gia:/bang-gia-output
+      - /opt/tgroup-nk3/secrets/google_credentials.json:/secrets/google_credentials.json:ro
+
+  web:
+    build:
+      context: /opt/tgroup-nk3/app
+      dockerfile: Dockerfile.web
+      args:
+        VITE_API_URL: /api
+        VITE_COSMETIC_LOB_ENABLED: "true"
+        VITE_DEFAULT_LOB: "cosmetic"
+        VITE_CTV_PUBLIC_ROOT_SIGNUP: "true"
+        VITE_PAYMENT_EDIT_DISABLED: "true"
+        NODE_ENV: staging
+    container_name: tgroup-nk3-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "5375:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - /opt/tgroup-nk3/runtime/nginx.nk3.docker.conf:/etc/nginx/conf.d/default.conf:ro
+      - /opt/tgroup-nk3/app/website/public/bang-gia:/usr/share/nginx/html/bang-gia:ro

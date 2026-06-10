@@ -2,6 +2,9 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.37.3] — 2026-06-10 — Remember me (30 days)
+- **Login page adds a “Remember me for 30 days” checkbox.** Checked logins issue a `30d` JWT (`remember: true` in payload) and store the token in `localStorage`; unchecked logins stay `24h` and use `sessionStorage` so closing the browser ends the session. Preference is restored on the login form via `tgclinic_remember_pref`. — @agent — UC-AUTH-001
+
 ## [0.37.2] — 2026-06-10 — NK3 auth session parity fix
 - **Login and `/api/Auth/me` now share one `resolveEffectiveLobScope` helper** so cosmetic-only staff with empty `lob_scope` keep `['cosmetic']` after page refresh instead of dropping to `[]` and losing LOB access (INV-008D). `change-password` updates the auth-source DB via `getQuery(authLob)`. Login UI maps 429 rate-limit responses separately from 401 invalid credentials. — @agent — FM-20260610-03
 

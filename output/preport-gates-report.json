@@ -1,0 +1,30 @@
+{
+  "ts": 1780845749,
+  "results": [
+    {
+      "gate": "additivity",
+      "status": "PASS",
+      "detail": "0 HIGH ops on pre-existing dental objects"
+    },
+    {
+      "gate": "revalidate[tdental_demo]",
+      "status": "PASS",
+      "detail": "0 partners would violate the new CHECK"
+    },
+    {
+      "gate": "revalidate[tcosmetic_demo]",
+      "status": "PASS",
+      "detail": "0 partners would violate the new CHECK"
+    },
+    {
+      "gate": "flag-guards",
+      "status": "PASS",
+      "detail": "Tests:       13 passed, 13 total"
+    },
+    {
+      "gate": "two-db",
+      "status": "SKIP",
+      "detail": "--skip-live"
+    }
+  ]
+}

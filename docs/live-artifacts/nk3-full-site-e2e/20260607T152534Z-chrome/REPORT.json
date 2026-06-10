@@ -1,0 +1,248 @@
+{
+  "startedAt": "2026-06-07T15:25:34.671Z",
+  "target": "https://tmv.2checkin.com",
+  "allowWrites": false,
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome",
+  "loginSucceeded": true,
+  "cosmeticSelected": false,
+  "routes": [
+    {
+      "id": "R-001",
+      "path": "/",
+      "label": "Overview",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/",
+      "visibleErrors": [
+        "7h 30m 53s *"
+      ],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-001.png"
+    },
+    {
+      "id": "R-002",
+      "path": "/customers",
+      "label": "Customers",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/customers",
+      "visibleErrors": [],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-002.png"
+    },
+    {
+      "id": "R-003",
+      "path": "/calendar",
+      "label": "Calendar",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/calendar",
+      "visibleErrors": [
+        "7h 30m 59s *",
+        "Xóa bộ lọc"
+      ],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-003.png"
+    },
+    {
+      "id": "R-004",
+      "path": "/employees",
+      "label": "Employees",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/employees",
+      "visibleErrors": [],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-004.png"
+    },
+    {
+      "id": "R-005",
+      "path": "/services",
+      "label": "Services",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/services",
+      "visibleErrors": [],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-005.png"
+    },
+    {
+      "id": "R-006",
+      "path": "/service-catalog",
+      "label": "Service Catalog",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/service-catalog",
+      "visibleErrors": [],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-006.png"
+    },
+    {
+      "id": "R-007",
+      "path": "/payment",
+      "label": "Payment",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/payment",
+      "visibleErrors": [
+        "65.200.000 ₫"
+      ],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-007.png"
+    },
+    {
+      "id": "R-008",
+      "path": "/permissions",
+      "label": "Permissions",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/permissions",
+      "visibleErrors": [],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-008.png"
+    },
+    {
+      "id": "R-009",
+      "path": "/commission",
+      "label": "Commission",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/commission",
+      "visibleErrors": [],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-009.png"
+    },
+    {
+      "id": "R-010",
+      "path": "/commission?tab=newClients&lob=cosmetic",
+      "label": "New Clients COM",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/commission?tab=newClients&lob=cosmetic",
+      "visibleErrors": [],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-010.png"
+    },
+    {
+      "id": "R-011",
+      "path": "/reports/dashboard",
+      "label": "Reports Dashboard",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/reports/dashboard",
+      "visibleErrors": [
+        "-34.0% vs prev period"
+      ],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-011.png"
+    },
+    {
+      "id": "R-012",
+      "path": "/reports/revenue",
+      "label": "Reports Revenue",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/reports/revenue",
+      "visibleErrors": [],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-012.png"
+    },
+    {
+      "id": "R-013",
+      "path": "/reports/appointments",
+      "label": "Reports Appointments",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/reports/appointments",
+      "visibleErrors": [],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-013.png"
+    },
+    {
+      "id": "R-014",
+      "path": "/reports/customers",
+      "label": "Reports Customers",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/reports/customers",
+      "visibleErrors": [],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-014.png"
+    },
+    {
+      "id": "R-015",
+      "path": "/reports/doctors",
+      "label": "Reports Doctors",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/reports/doctors",
+      "visibleErrors": [
+        "1",
+        "0"
+      ],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-015.png"
+    },
+    {
+      "id": "R-016",
+      "path": "/locations",
+      "label": "Locations",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/locations",
+      "visibleErrors": [],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-016.png"
+    },
+    {
+      "id": "R-017",
+      "path": "/settings",
+      "label": "Settings",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/settings",
+      "visibleErrors": [],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-017.png"
+    },
+    {
+      "id": "R-018",
+      "path": "/feedback",
+      "label": "Feedback",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/feedback",
+      "visibleErrors": [],
+      "apiErrors": [
+        {
+          "url": "https://tmv.2checkin.com/api/Feedback/all?source=manual",
+          "status": 403,
+          "route": "R-018"
+        }
+      ],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-018.png"
+    },
+    {
+      "id": "R-019",
+      "path": "/relationships",
+      "label": "Relationships",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/relationships",
+      "visibleErrors": [],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-019.png"
+    },
+    {
+      "id": "R-020",
+      "path": "/notifications",
+      "label": "Notifications",
+      "status": "PASS",
+      "url": "https://tmv.2checkin.com/notifications",
+      "visibleErrors": [],
+      "apiErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-full-site-e2e/20260607T152534Z-chrome/R-020.png"
+    },
+    {
+      "id": "W-DELETE-PROBE",
+      "status": "SKIP",
+      "detail": "ALLOW_WRITES not set"
+    }
+  ],
+  "bugs": [
+    {
+      "severity": "P1",
+      "id": "BUG-R-018-api-403",
+      "title": "API 403 on Feedback",
+      "detail": "https://tmv.2checkin.com/api/Feedback/all?source=manual"
+    }
+  ],
+  "apiErrors": [],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 403 ()",
+    "Failed to load admin feedback: ApiError: Admin access required\n    at J (https://tmv.2checkin.com/assets/index-DzmA0zef.js:77:5777)\n    at async https://tmv.2checkin.com/assets/FeedbackAdminContent-B-Q6C963.js:26:12364"
+  ],
+  "networkMisses": [],
+  "finishedAt": "2026-06-07T15:26:51.366Z"
+}

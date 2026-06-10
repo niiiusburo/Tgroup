@@ -1,0 +1,70 @@
+{
+  "url": "https://nk.2checkin.com/calendar",
+  "loadingStillVisible": false,
+  "finalTextSample": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Lịch All Locations 2 Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Lịch hẹn Quản lý lịch hẹn khám bệnh Ngày Tuần Tháng Chủ Nhật, 7 tháng 6, 2026 Hôm nay Xuất dữ liệu Bộ lọc Hẹn mới Chủ Nhật, 7 tháng 6 670 Lịch hẹn 07:00 07:30 08:00 2 Lịch hẹn Đang hẹn BÁC SĨ 26 0901111111 BÁC SĨ 26 08:00 · 30 phút BÁC SĨ 26 - OFF ✎ Đã hủy ▾ Võ Kim Đắc 09655272758 Bác sĩ 29 08:00 · 25 phút CÓ R GỌI - QUYÊN ✎ 08:30 09:00 74 Lịch hẹn Đang hẹn",
+  "samples": [
+    {
+      "t": 2,
+      "loading": false,
+      "text": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Lịch All Locat"
+    },
+    {
+      "t": 4,
+      "loading": false,
+      "text": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Lịch All Locat"
+    },
+    {
+      "t": 6,
+      "loading": false,
+      "text": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Lịch All Locat"
+    }
+  ],
+  "paths": {
+    "rawPath": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260607T000409Z/raw/calendar-after-40s.png",
+    "safePath": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260607T000409Z/redacted-safe/calendar-after-40s.png"
+  },
+  "events": {
+    "apiResponses": [
+      {
+        "method": "POST",
+        "status": 200,
+        "url": "https://nk.2checkin.com/api/Auth/login"
+      },
+      {
+        "method": "GET",
+        "status": 200,
+        "url": "https://nk.2checkin.com/api/Feedback/unread-count"
+      },
+      {
+        "method": "GET",
+        "status": 200,
+        "url": "https://nk.2checkin.com/api/Companies?offset=0&limit=50"
+      },
+      {
+        "method": "GET",
+        "status": 200,
+        "url": "https://nk.2checkin.com/api/Appointments?offset=0&limit=200&date_from=2026-06-07&date_to=2026-06-07T23%3A59%3A59"
+      },
+      {
+        "method": "GET",
+        "status": 200,
+        "url": "https://nk.2checkin.com/api/Employees?offset=0&limit=500&active=all"
+      },
+      {
+        "method": "GET",
+        "status": 200,
+        "url": "https://nk.2checkin.com/api/Appointments?offset=0&limit=3000&date_from=2026-06-07&date_to=2026-06-07+23%3A59%3A59&calendar_mode=true&include_counts=false"
+      }
+    ],
+    "apiErrors": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [
+      {
+        "method": "HEAD",
+        "url": "https://nk.2checkin.com/a5XtNh80Qn3MVJa5knyrloetAN3Zk-_d3xby7KumpHbCsA7d0uj4x7iBuHaYuEuQHiA7cJrOfckcJ9WAHUiQ0zWAGIucKqS4_WsVOg4nQjYiGtWON3jdhufR0NRVcrkUfoL2I-LCrGt18V92TW9QaPYH7g0xVemPqldshSxaNTud41bAsB3oEk5m_eiNvjTAfqyZ2sqcv_wKdIAuibKKCnH74eXUmH3KeiGxItHOKbVF5hrMS0MzzU_d3sw0q-xPOz_v5Qag2mEN43LY6HGdFlLG6UoLA8ukXA7HP7GAPL6qQd7ces1eiaZUFijSEi72zieeQfdOTEhcruLkgONsxhpfgKsvRbwHej46aHvTdlNkqmUqep0zlXFCwtExsJXeFNLORQBwmvteIRnxPU_7avwWnbR7UG4R2uFva4Gp45jdhmGf9HPAMHuZrG61SgCriHHBSsaCicRPBZX5",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  }
+}

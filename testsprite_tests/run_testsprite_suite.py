@@ -267,7 +267,7 @@ class TestSpriteRunner:
                         print(f"      → {r['error'][:150]}")
 
     def write_report(self):
-        """Write JSON report to file."""
+        """Write JSON report to timestamped file + stable testsprite-results.json."""
         report_path = self.test_dir / f"test-run-{datetime.now().strftime('%Y%m%d-%H%M%S')}.json"
         report = {
             "timestamp": datetime.now().isoformat(),
@@ -283,8 +283,13 @@ class TestSpriteRunner:
                 "error": sum(1 for r in self.results if r["status"] == "ERROR"),
             }
         }
-        report_path.write_text(json.dumps(report, indent=2))
+        payload = json.dumps(report, indent=2)
+        report_path.write_text(payload)
+        # Stable path for file-based handoff: outer loops / MCP-independent
+        # consumers poll this fixed file instead of blocking on a live session.
+        (self.test_dir / "testsprite-results.json").write_text(payload)
         print(f"\n📝 Report written to: {report_path}")
+        print(f"📝 Stable results:    {self.test_dir / 'testsprite-results.json'}")
         return report_path
 
 

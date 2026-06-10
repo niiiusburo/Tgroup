@@ -45,6 +45,7 @@ const meResponse = {
 describe('AuthProvider session events', () => {
   beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     apiMocks.fetchMe.mockReset();
     apiMocks.login.mockReset();
   });

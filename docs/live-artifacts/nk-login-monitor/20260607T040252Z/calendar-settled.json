@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-06-07T04:03:55.351Z",
+  "finalUrl": "https://nk.2checkin.com/calendar",
+  "bodyChars": 67124,
+  "stillLoading": false,
+  "visibleError": false,
+  "expectedText": true,
+  "apiErrors": [],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "requestFailures": [
+    "HEAD https://nk.2checkin.com/QEaFFsaK50B4L06AGSYAgq8WULZDYFJW7-_R6k8AlqiRIJm5Q4Qxc2BXokNzi6TvsztiI6pc6P-WBhI3JNov35p4iOVTF1VauW4NfaUI-YlqqP2xfKnnwyQYsahCkTcV4ZRD2tffRKteUp4LktWQGWY33CtGyus8THa7bhGf2ExGIld9Ss1gMGKALPQKg5P_Us4w-KTvnqwosUu7KHHjZI4lXSyflnTiUG57tDIlEkPd_3DtMQNZJpUQwkiBvw91l51UkDrwh1aJa72Ux9NvRIvMtag-jzKXSky5rSstzMHRiQrEttEOZfXTCFqk1_VKcdcNt2wlEIwmveejyD1Pn3DX9E406urukjrh0kzPUiX37xM2IBSX8RKuoDSvaPUBgXXQjgx0EAfnLSAmlDiLHNqQWEgXutQAPEx-uRPRsCZNXrESMLkD-54bX-TFeYht2VFtGVwnOhpID2-8 :: net::ERR_ABORTED",
+    "GET https://nk.2checkin.com/assets/useEmployees-FshQICAs.js :: net::ERR_ABORTED",
+    "GET https://nk.2checkin.com/assets/DatePicker-B1b-7PqN.js :: net::ERR_ABORTED",
+    "GET https://nk.2checkin.com/favicon.svg :: net::ERR_ABORTED",
+    "HEAD https://nk.2checkin.com/Ye9OMxzc8es3JRojy10FDDLj9gI6lUGPsLyNWNLGcYOiFwiV-0lsdDF-aDDnYQcOlqO3LRC2QUMxKuuwbj9KBHlI3feypnbgEb7fzM-GIfmjGLmb2t_fOLDrBjLFH3p3WGHkKGWmH51xKZB-KXwHJ7H5rmjr6lwaSaSIrSWtfDJdQQYkKV6H0eWkV-xBtX3_9jUxX9EJpN6oKRZjGYOw9oJLWsjl0JpxQvTS3pG2VGcjQ0aoVTxPLI8C6sOD3oIJke0GtIO7mHHs7gohtNhOR6s8YS8ncGLAqlHeyHubEOta8X-MIlSK1z59wmIZzcklmhxvDr4iwn-yu_C6twm9qMip2x7kvYFvaGP4h_SH2tPSBb0lG6-vfw2yJfMgHED1RuO2S-iqCll3Y7Nc4sBbuK7XcSLi3djtrvcWidsfT3BeuxeFFe5F6KfbG5YLvJsIMtwj_1cFOrgJke0-7zDG :: net::ERR_ABORTED"
+  ],
+  "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260607T040252Z/redacted-safe/02-calendar-settled.png"
+}

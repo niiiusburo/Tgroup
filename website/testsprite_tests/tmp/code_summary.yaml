@@ -1,100 +1,274 @@
-project:
-  name: tgclinic-website
-  type: Frontend Web Application
-  version: 0.32.101
-
-techStack:
-  frontend:
-    framework: React 18
-    language: TypeScript
-    buildTool: Vite
-    uiLibrary: Custom components with Tailwind CSS
-    stateManagement: React Context + Hooks
-    routing: React Router v6
-    i18n: i18next
-  testing:
-    unitTesting: Vitest
-    e2eTesting: Playwright
-  dependencies:
-    - react
-    - react-dom
-    - react-router-dom
-    - i18next
-    - framer-motion
-    - tailwindcss
-    - fontsource/inter
-    - zod
-
+version: "2"
+type: frontend
+tech_stack:
+  - TypeScript
+  - React 18
+  - Vite
+  - Tailwind CSS (custom components)
+  - React Router v6
+  - i18next (vi default, en)
+  - Express + PostgreSQL two-DB backend (tdental_nk3 + tcosmetic_nk3)
+routes:
+  - path: /login
+    file: src/pages/Login.tsx
+    auth_required: false
+    description: Email/password login; honors returnTo query param after login
+  - path: /overview
+    file: src/pages/Overview.tsx
+    auth_required: true
+    description: Admin dashboard with appointments, wait timers, activity feed
+  - path: /customers
+    file: src/pages/Customers.tsx
+    auth_required: true
+    description: Customer list with accent-insensitive search, create/edit modals
+  - path: /customers/:id
+    file: src/pages/CustomerProfile.tsx
+    auth_required: true
+    description: Customer profile with info, services, payments, journey tabs
+  - path: /calendar
+    file: src/pages/Calendar.tsx
+    auth_required: true
+    description: Appointment calendar with day/week/month views
+  - path: /payment
+    file: src/pages/Payments.tsx
+    auth_required: true
+    description: Payment history, allocations, VietQR (route is /payment, NOT /payments)
+  - path: /services
+    file: src/pages/ServiceCatalog.tsx
+    auth_required: true
+    description: Service catalog with categories and search
+  - path: /reports
+    file: src/pages/Reports.tsx
+    auth_required: true
+    description: Reports and Excel export center
+  - path: /employees
+    file: src/pages/Employees.tsx
+    auth_required: true
+    description: Employee list, search, create/edit with permission groups
+  - path: /permissions
+    file: src/pages/Permissions.tsx
+    auth_required: true
+    description: Permission matrix board (route is /permissions, NOT /settings/permissions)
+  - path: /settings
+    file: src/pages/Settings.tsx
+    auth_required: true
+    description: Business units, locations, customer sources configuration
+  - path: /commission
+    file: src/pages/Commission.tsx
+    auth_required: true
+    description: Admin commission tracking per CTV with level breakdown and CTV management tab
+  - path: /ctv
+    file: src/pages/CTV/CtvDashboard.tsx
+    auth_required: true
+    description: CTV self-service portal (CTV role only) with dashboard, referral/QR, profile tabs
+  - path: /ctv/discount/:shortCode
+    file: src/pages/CtvDiscountLanding.tsx
+    auth_required: false
+    description: Public fan discount landing showing CTV name and voucher QR
+  - path: /ctv/join
+    file: src/pages/CTV/JoinCtv.tsx
+    auth_required: false
+    description: Public CTV self-signup with optional referral upline
+  - path: /verify-discount
+    file: src/pages/VerifyDiscount.tsx
+    auth_required: true
+    description: Staff QR voucher verification (lookup, check-in, complete); CTV users get logout gate
 features:
-  authentication:
-    - Admin login with email/password
-    - Session management
-    - Role-based access control
-  customerManagement:
-    - Customer CRUD operations
-    - Customer search with accent-insensitive matching
-    - Customer profile viewing
-    - Customer deletion with confirmation
-  employeeManagement:
-    - Employee CRUD operations
-    - Employee search
-    - Permission group assignment
-  appointmentCalendar:
-    - Calendar views (day, week, month)
-    - Appointment creation and editing
-    - Doctor/CTV assignment
-    - Status management
-  paymentProcessing:
-    - Payment history
-    - Payment allocation
-    - VietQR integration
-  permissionControl:
-    - Permission matrix management
-    - Permission groups
-    - Role-based permissions
-  serviceCatalog:
-    - Service listing
-    - Service editing
-    - Category management
-  reportGeneration:
-    - Report views
-    - Export functionality (Excel)
-  settings:
-    - Business unit configuration
-    - Location settings
-    - API configuration
-  ctvModule:
-    - CTV (Consultant) management
-    - CTV hierarchy
-    - Commission tracking
-  cosmeticLOB:
-    - Line of business switching
-    - Cosmetic services
-    - Cosmetic client management
-
-keyComponents:
-  pages:
-    - Login
-    - Overview
-    - Customers
-    - Employees
-    - Calendar
-    - Commission
-    - Payments
-    - ServiceCatalog
-    - Reports
-    - Settings
-    - CTV
-  sharedComponents:
-    - Layout/Sidebar
-    - DataTable
-    - Modal
-    - Form inputs
-    - DatePicker
-    - SearchBar
-  hooks:
-    - useAuth
-    - useCustomerProfile
-    - useServices
-    - useOverviewAppointments
-    - useExport
+  - name: Authentication and returnTo bounce
+    description: Login, logout, role gating; deep-linked protected routes redirect to /login?returnTo and bounce back after login
+    files:
+      - src/pages/Login.tsx
+      - src/hooks/useAuth.ts
+    entry_route: /login
+    user_interactions:
+      - Fill email and password fields
+      - Click login button
+      - See Vietnamese error message on invalid credentials
+      - Logout and get redirected to /login
+    api_calls:
+      - method: POST
+        endpoint: /api/auth/login
+    auth_required: false
+  - name: Customer Management
+    description: Accent-insensitive search, profile tabs, create/edit; delete requires confirmation
+    files:
+      - src/pages/Customers.tsx
+      - src/pages/CustomerProfile.tsx
+    entry_route: /customers
+    user_interactions:
+      - Search "nguyen" without accents and match "Nguyễn"
+      - Open a profile and switch tabs
+      - Create a customer with ZZ_TESTSPRITE_ prefixed name
+      - Edit and save the same customer
+      - Open delete dialog and CANCEL (never confirm on real data)
+    api_calls:
+      - method: GET
+        endpoint: /api/Partners
+      - method: POST
+        endpoint: /api/Partners
+    auth_required: true
+  - name: Employee Management
+    description: Employee CRUD with permission group assignment display
+    files:
+      - src/pages/Employees.tsx
+    entry_route: /employees
+    user_interactions:
+      - Search employees by name
+      - Create ZZ_TESTSPRITE_EMP employee
+      - Edit the employee name and save
+    api_calls:
+      - method: GET
+        endpoint: /api/Employees
+    auth_required: true
+  - name: Appointment Calendar
+    description: Day/week/month appointment views with create/edit
+    files:
+      - src/pages/Calendar.tsx
+    entry_route: /calendar
+    user_interactions:
+      - Switch between day, week, month views
+      - Create an appointment for a ZZ_TESTSPRITE_ customer
+      - Change appointment status
+    api_calls:
+      - method: GET
+        endpoint: /api/Appointments
+    auth_required: true
+  - name: Payment Surfaces (READ-ONLY)
+    description: Payment history and allocation review; money actions are PROHIBITED in tests (no submit, no void, no refund, no deposit)
+    files:
+      - src/pages/Payments.tsx
+    entry_route: /payment
+    user_interactions:
+      - Browse payment history with filters
+      - Open a payment detail and view allocations
+      - Open the new-payment form and ABANDON it without submitting
+    api_calls:
+      - method: GET
+        endpoint: /api/Payments
+    auth_required: true
+  - name: Service Catalog and Strict CTV Commission
+    description: "Catalog browse/search plus strict commission rule (DEC-20260610-01): a service saved WITHOUT selecting a CTV must create ZERO commission earnings even for referred customers; explicit CTV selection creates pending earnings at full price; clearing the CTV reverses them"
+    files:
+      - src/pages/ServiceCatalog.tsx
+      - src/components/services/ServiceForm.tsx
+    entry_route: /services
+    user_interactions:
+      - Search and filter the catalog
+      - Create a service on a ZZ_TESTSPRITE_ customer WITHOUT picking a CTV and verify no commission appears
+      - Create a service WITH an explicit CTV and verify pending commission appears
+    api_calls:
+      - method: POST
+        endpoint: /api/SaleOrders
+      - method: POST
+        endpoint: /api/cosmetic/SaleOrders
+    auth_required: true
+  - name: Permission Matrix (READ-ONLY)
+    description: Permission board renders groups/employees/toggles; SAVING permission changes is PROHIBITED in tests
+    files:
+      - src/pages/Permissions.tsx
+    entry_route: /permissions
+    user_interactions:
+      - View the matrix and groups
+      - Do NOT toggle or save anything
+    api_calls:
+      - method: GET
+        endpoint: /api/permissions/resolve
+    auth_required: true
+  - name: Reports and Excel Export
+    description: Report previews and Excel export downloads
+    files:
+      - src/pages/Reports.tsx
+    entry_route: /reports
+    user_interactions:
+      - Open report previews (appointments, deposits, revenue)
+      - Trigger an Excel export and verify a file downloads
+    api_calls:
+      - method: GET
+        endpoint: /api/reports
+    auth_required: true
+  - name: CTV Admin Module
+    description: Commission summary per CTV, CTV management (create via shared SSOT form), network hierarchy
+    files:
+      - src/pages/Commission.tsx
+      - src/components/commission/CtvManagementTab.tsx
+    entry_route: /commission
+    user_interactions:
+      - View commission rows and level breakdown
+      - Create CTV ZZ_TESTSPRITE_CTV via Add CTV modal (email optional)
+      - View a CTV network hierarchy
+    api_calls:
+      - method: GET
+        endpoint: /api/commission-summary
+      - method: POST
+        endpoint: /api/ctv
+    auth_required: true
+  - name: CTV Self-Service Portal with QR Discount Voucher
+    description: "CTV login lands on /ctv; Giới thiệu/QR tab has Mã QR sub-tab where 'Tạo mã & tải ảnh' generates a discount code and renders a QR canvas (regression FM-20260610-01: must not fail silently; errors show a role=alert banner). CTV cannot reach admin routes"
+    files:
+      - src/pages/CTV/CtvDashboard.tsx
+      - src/components/ctv/CtvQrDiscountPanel.tsx
+    entry_route: /ctv
+    user_interactions:
+      - Login as CTV account ctv-c-0531demo@clinic.vn password Test1234!
+      - Open Giới thiệu/QR tab then Mã QR sub-tab
+      - Click 'Tạo mã & tải ảnh' and verify a voucher code + QR canvas render
+      - Verify history list shows the new code
+      - Navigate to /overview and verify it is gated
+    api_calls:
+      - method: POST
+        endpoint: /api/discount-codes/generate
+      - method: GET
+        endpoint: /api/discount-codes/mine
+    auth_required: true
+  - name: Staff QR Verify Flow
+    description: "Staff opens /verify-discount?code=X (QR target). Logged-out: redirect to /login?returnTo and bounce back. Code auto-validates showing CTV name and discount. Check-in binds a customer; completion (markAsUsed) works even after reload regardless of selected LOB (FM-20260610-02)"
+    files:
+      - src/pages/VerifyDiscount.tsx
+    entry_route: /verify-discount
+    user_interactions:
+      - Open /verify-discount?code=<code> while logged out and verify the login bounce returns to the code
+      - See code validity, CTV name and discount label
+      - Enter a customer phone, run client search, check in the code
+      - Reload and complete the code (Hoàn tất mã)
+    api_calls:
+      - method: GET
+        endpoint: /api/discount-codes/lookup
+      - method: POST
+        endpoint: /api/discount-codes/verify
+    auth_required: true
+  - name: Public Visitor Flows
+    description: Fan discount landing (/ctv/discount/CTV-xxxxxx) renders CTV name + voucher QR without auth and must not fall through to admin routes; /ctv/join renders the public CTV signup with validation
+    files:
+      - src/pages/CtvDiscountLanding.tsx
+      - src/pages/CTV/JoinCtv.tsx
+    entry_route: /ctv/join
+    user_interactions:
+      - Open a fan landing URL and see the voucher
+      - Open /ctv/join and submit with missing fields to see red-border validation errors
+    api_calls:
+      - method: GET
+        endpoint: /api/ctv-public/refcode/:code
+      - method: POST
+        endpoint: /api/ctv-public/join
+    auth_required: false
+  - name: Cosmetic LOB Isolation
+    description: Switching to Cosmetic LOB scopes customers/services/payments to the cosmetic database via /api/cosmetic/* endpoints; dental rows never leak into cosmetic lists
+    files:
+      - src/pages/Customers.tsx
+      - src/lib/api/core.ts
+    entry_route: /customers
+    user_interactions:
+      - Switch LOB to Thẩm mỹ (cosmetic)
+      - Verify customer and service lists change and requests hit /api/cosmetic/*
+      - Switch back to dental and verify lists revert
+    api_calls:
+      - method: GET
+        endpoint: /api/cosmetic/Partners
+    auth_required: true
+known_limitations:
+  - issue: "SAFETY LANES for live testing: Lane A read-only is default; Lane B disposable writes allowed ONLY with ZZ_TESTSPRITE_ prefixed data (cleanup required); Lane C PROHIBITED — payments, deposits, allocations, voids, refunds, payouts, permission/tier edits, settings saves, deleting non-ZZ data, changing shared demo passwords"
+    location: docs/PRD-TestSprite-Live-Site-Debugging.md
+    impact: Tests must never move money or mutate permissions on the live site
+  - issue: Target is the LIVE site https://tmv.2checkin.com at version 0.37.0 (not a local dev server)
+    location: website/.testsprite/config.json baseUrl
+    impact: Tests run against production-grade build with real Vietnamese UI copy

@@ -1,0 +1,22 @@
+{
+  "url": "https://nk.2checkin.com/calendar",
+  "waitMs": 1069,
+  "loadingStillVisible": true,
+  "textSample": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Lịch All Locations 2 Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Lịch hẹn Quản lý lịch hẹn khám bệnh Ngày Tuần Tháng Chủ Nhật, 7 tháng 6, 2026 Hôm nay Xuất dữ liệu Bộ lọc Hẹn mới Loading calendar... Fetching appointments for",
+  "paths": {
+    "rawPath": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260607T000409Z/raw/calendar-after-wait.png",
+    "safePath": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260607T000409Z/redacted-safe/calendar-after-wait.png"
+  },
+  "events": {
+    "apiErrors": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [
+      {
+        "method": "HEAD",
+        "url": "https://nk.2checkin.com/H47stsmBgn6H70hp3HliyvYI4jNTxA1OQtlb8fhs7AE5a3f2Ci3BC3hBj2gEYbccS3qtRhBDVM7At7U9kchxisA_F30hGX_RBe_VHljxfx9VafjnprClrWUHIaC_QVxpehAPgXVIvyTQmDOIN-WDDH9WlZOKLBXF_Zqqn52bXbvzmdSqBlMnSuQLLXuN7b3d0Sl0wEQi8z9otRmPqx1vdU2GY5pQ9lQV8vySOgJ3npX03J7u-Xy_S4aDDCi_4LMfPu6Oy8vNcwzE7C3gGQshFqOxzncz5xfUt9k7OJU271YQEG9mpe8bh_uHcOQWvhlH2LD6koPGEaIehSSk24YIGDazNaHZo8M_VOPAYnbwhu1v3804NHDf_43gLvGvQdisH_v4fpe3jSfuuSKCm_n46uC9CXfQ_oil_WFSKyd45tS5-qwnHKLunf4JvovU3DILDesDV0B-YgxHpERr",
+        "failure": "net::ERR_ABORTED"
+      }
+    ]
+  }
+}

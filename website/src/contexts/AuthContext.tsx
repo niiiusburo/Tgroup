@@ -14,13 +14,16 @@ import {
 } from 'react';
 import { AUTH_UNAUTHORIZED_EVENT } from '@/lib/api/core';
 import {
+  clearAuthToken,
+  getAuthToken,
+  setAuthToken,
+} from '@/lib/authToken';
+import {
   login as apiLogin,
   fetchMe,
   type AuthUser,
   type AuthPermissions,
 } from '@/lib/api';
-
-const TOKEN_KEY = 'tgclinic_token';
 
 interface AuthState {
   user: AuthUser | null;
@@ -30,7 +33,7 @@ interface AuthState {
 }
 
 interface AuthContextValue extends AuthState {
-  login: (identifier: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string, rememberMe?: boolean) => Promise<void>;
   logout: () => void;
   hasPermission: (permission: string) => boolean;
   hasLocationAccess: (locationId: string) => boolean;
@@ -56,11 +59,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     );
   }
 
-  const clearSession = useCallback((clearRemember = false) => {
-    localStorage.removeItem(TOKEN_KEY);
-    if (clearRemember) {
-      localStorage.removeItem('tgclinic_remember');
-    }
+  const clearSession = useCallback((clearRememberPreference = false) => {
+    clearAuthToken(clearRememberPreference);
     setState({ user: null, permissions: null, isAuthenticated: false, isLoading: false });
     dispatchAuthChange(null);
   }, []);
@@ -73,7 +73,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // On mount, validate existing token
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
+    const token = getAuthToken();
     if (!token) {
       setState((prev) => ({ ...prev, isLoading: false }));
       return;
@@ -94,9 +94,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
   }, [clearSession]);
 
-  const login = useCallback(async (identifier: string, password: string) => {
-    const res = await apiLogin(identifier, password);
-    localStorage.setItem(TOKEN_KEY, res.token);
+  const login = useCallback(async (identifier: string, password: string, rememberMe = false) => {
+    const res = await apiLogin(identifier, password, rememberMe);
+    setAuthToken(res.token, rememberMe);
     // Show the FeedbackWidget login hint once on each fresh login.
     sessionStorage.removeItem('tg_feedback_hint_dismissed');
     setState({

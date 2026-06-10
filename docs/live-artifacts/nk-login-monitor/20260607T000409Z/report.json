@@ -1,0 +1,114 @@
+{
+  "runStartedAt": "2026-06-07T00:04:25.036Z",
+  "baseUrl": "https://nk.2checkin.com",
+  "outDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260607T000409Z",
+  "rawDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260607T000409Z/raw",
+  "safeDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260607T000409Z/redacted-safe",
+  "version": {
+    "ok": true,
+    "status": 200,
+    "body": {
+      "version": "0.32.44",
+      "buildTime": "2026-05-27T04:06:39.953Z",
+      "gitCommit": "ff65634",
+      "gitBranch": "detached-ff65634f",
+      "environment": "development"
+    }
+  },
+  "health": {
+    "ok": true,
+    "status": 200,
+    "body": {
+      "status": "healthy",
+      "checks": {
+        "db": true,
+        "faceService": true
+      },
+      "faceProvider": "compreface",
+      "latency": {
+        "db": 0,
+        "faceService": 771
+      },
+      "timestamp": "2026-06-07T00:04:11.399Z"
+    }
+  },
+  "loginSucceeded": true,
+  "workedAccount": "t@clinic.vn",
+  "fallbackUsed": false,
+  "lastLoginError": null,
+  "visibleErrors": [],
+  "screens": [
+    {
+      "name": "dashboard",
+      "expectedRoute": "/",
+      "url": "https://nk.2checkin.com/",
+      "clicked": true,
+      "navResult": {
+        "beforeUrl": "https://nk.2checkin.com/",
+        "afterUrl": "https://nk.2checkin.com/"
+      },
+      "navError": null,
+      "nonblank": true,
+      "bodySample": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Tổng quan All ",
+      "visibleErrors": [
+        "Không có bệnh nhân"
+      ],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260607T000409Z/redacted-safe/dashboard.png",
+      "rawScreenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260607T000409Z/raw/dashboard.png",
+      "newApiErrors": [],
+      "newConsoleErrors": [],
+      "newPageErrors": [],
+      "newRequestFailures": []
+    },
+    {
+      "name": "calendar",
+      "expectedRoute": "/calendar",
+      "url": "https://nk.2checkin.com/calendar",
+      "clicked": true,
+      "navResult": {
+        "beforeUrl": "https://nk.2checkin.com/",
+        "afterUrl": "https://nk.2checkin.com/calendar"
+      },
+      "navError": null,
+      "nonblank": true,
+      "bodySample": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Lịch All Locat",
+      "visibleErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260607T000409Z/redacted-safe/calendar.png",
+      "rawScreenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260607T000409Z/raw/calendar.png",
+      "newApiErrors": [],
+      "newConsoleErrors": [],
+      "newPageErrors": [],
+      "newRequestFailures": []
+    },
+    {
+      "name": "customers",
+      "expectedRoute": "/customers",
+      "url": "https://nk.2checkin.com/customers",
+      "clicked": true,
+      "navResult": {
+        "beforeUrl": "https://nk.2checkin.com/calendar",
+        "afterUrl": "https://nk.2checkin.com/customers"
+      },
+      "navError": null,
+      "nonblank": true,
+      "bodySample": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Khách hàng All",
+      "visibleErrors": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260607T000409Z/redacted-safe/customers.png",
+      "rawScreenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260607T000409Z/raw/customers.png",
+      "newApiErrors": [],
+      "newConsoleErrors": [],
+      "newPageErrors": [],
+      "newRequestFailures": []
+    }
+  ],
+  "aggregateApiErrors": [],
+  "aggregateConsoleErrors": [],
+  "aggregatePageErrors": [],
+  "aggregateRequestFailures": [
+    {
+      "method": "HEAD",
+      "url": "https://nk.2checkin.com/fY-YF_b_JnH-P6x3C73INq4sfHNW1UC3bcVDnrR7YIp6B5xJ1aionqy-lo1Cek6mDnDuFoPpJOSE_jiTa03YPog4AH9LqDgioyxe-2qk8rx2U0B-jkvTApIBxMnLTrhEI7bUYBdq8pyjYzWjjrNPHVnMI7upUiAwLo5NzESnXhZ9sdc2ewGhkhCu6j_aoKCGN06pUomVFUoNmZsr-wDdlTk_TA6EmhUhz7GOmhSrwaIatensxtfRhEwdq3CUaTe33ZR6jbXffb_p-1RK5wFMCD_ZFULAL5bme5HZhhgaRYrq2FrQDGsPNJEPQzb5ZUxe8yLqule0XHZpC8jqD2WxJ2pSoH1npWU_JQCowBOKUriXKhlTKipkCF9Dw2A7dtVQTnJfZYaLLSykiWj7ESCHBczi94jehxMZ1hBGjMs6Nhi8HWWv5IwW-eCyagzSq3tmjIHmkrfNns1Fmy9T",
+      "failure": "net::ERR_ABORTED"
+    }
+  ]
+}

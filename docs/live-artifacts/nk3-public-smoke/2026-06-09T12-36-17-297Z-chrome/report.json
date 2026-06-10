@@ -1,0 +1,108 @@
+{
+  "auditedAt": "2026-06-09T12:37:02.778Z",
+  "baseUrl": "https://tmv.2checkin.com",
+  "outDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-public-smoke/2026-06-09T12-36-17-297Z-chrome",
+  "totals": {
+    "pass": 5,
+    "partial": 0,
+    "fail": 0
+  },
+  "results": [
+    {
+      "route": "/welcome",
+      "label": "public landing",
+      "status": "PASS",
+      "finalUrl": "https://tmv.2checkin.com/welcome",
+      "textLength": 40,
+      "apiErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        {
+          "url": "https://tmv.2checkin.com/28mN5MbHF-B3cOeYOz2FpI8Y0j1grfWDvWPApL_3NrVxpbRwlyebcbEn9VSB8kCt3CwfFHZYiMVYeMP7b7vR7y5_EhQVBUgswDvT5UNbwiZxjSgvvqbgZqnKiiIAaJ69J_fGG4LSeMKMshZd245bzEKPeAj9LeXGgCRf8jGFvxRZ3vBfvz9DyB8WbDrkk5HmXW4CdI4bKL0bjq7BjaRiFLwPJv19QZV7UqSwB3PB7bzDHBxacwi4CKnAqrv-g5tfG0yGgoZDU2XKgVfFNo0uxFAv_zKOfVS_Kbm3UOP72jqEjyYyXXuw69IA9lCkoNHYPLJATAx6gsO1Gf51RQfYhANCFQaxPE6uQ51lVRNGtJRadU_KdrRb7PbV5_8JWMtDr203EcCPR8vvkX_LCc1lBcnQ_1nMlagiLkC-WvFjkaTIHsuqPwsbRPnSLshdklCQhmznNZQEE1NTAevfKr6KrQ",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-public-smoke/2026-06-09T12-36-17-297Z-chrome/01-public-landing.png",
+      "notes": []
+    },
+    {
+      "route": "/welcome?book=1",
+      "label": "public booking sheet entry",
+      "status": "PASS",
+      "finalUrl": "https://tmv.2checkin.com/welcome?book=1",
+      "textLength": 245,
+      "apiErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        {
+          "url": "https://tmv.2checkin.com/x5CSqffeLvQZQtVST4tz5RhkfuB9ORlw0idCvC34W3CCRQGNTR4EccPCOIjxJDsNZJ8Io6divcq7z5E7zK46bIk4-HbKDA--p-Pg8l2Ox_Q4H8ipnvoPEbdNmNBvDTwaZDa3IP0FoAUlBtvZQ4wLzNfwgRx77-V4cHLB6uUdz1f_WBGO-HCgCgr1qGr8jqJoD9q43YOV9IFxfJPccRLrZADrKcqGgUBzPWu2PTqSG2nAv0KIAqBHJBUzP3wBe_WfkcCEilYa41ppe27qv6vE0zAG1P49cqHMJeVo9q749VqCBIVEEf2FNxE6dJEsKMCyfSAzr5e7ZNe05HIyEgo8h0qcNSYSSqyfpRLuoyFUE0nWBqfukpQlGGtA_dA2TC-krjc7q-_QQSlQy7oj_jvrMdRLeehCcq0EYlZEz78psMdix9b1mMHHWG84D0CjDqLjQJ4bLupsrVKbsf4UnuwVMPO-e2hOTuU",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-public-smoke/2026-06-09T12-36-17-297Z-chrome/02-public-booking-sheet-entry.png",
+      "notes": []
+    },
+    {
+      "route": "/ctv/join",
+      "label": "public CTV join",
+      "status": "PASS",
+      "finalUrl": "https://tmv.2checkin.com/ctv/join",
+      "textLength": 310,
+      "apiErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        {
+          "url": "https://tmv.2checkin.com/4AG62AVHfLveAtWbqHZ4h0JP78j-go3kR0OmybMrXASXk3pNnyUGJ8UicagzRBv7uX3WXpEqeEjRjHeFQPxDlyWtKGsyQoVXDxW_rXOb3QZhB_BdhuxSREzBNPNnXC2AEHILYbBtpMOLeGT-MkYMRMm2ViUNaL18zknPOIzjECqSZo6jxNXgkfVZ4hRJ-WaKMeBFgrgGk8ykJREyeSINp_RqzjnnJVOyTNE0QU0OH_ftjAvU0_osaUFfZQuxKkDiv2NT6yzx4O9PAFPVj5zQxM7axVjNdnmtR6QCsFHitNp9jKvtax6V9Xe7QffRao47gjNmBo6bqZ7HPrwRBGN9CIg3pNbMixxiSfFlicOYed7rE4KboBaXtJGluEoVP7TWdvkfsVvlsuKzA-frV0Kjns0yvWyOTcJWWdMh4BulUPBy_Y-yUhQwqL7TksdupWTWXZjU59GpLoU81KUgoCDjKh4",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-public-smoke/2026-06-09T12-36-17-297Z-chrome/03-public-ctv-join.png",
+      "notes": []
+    },
+    {
+      "route": "/ctv/discount/CTV-333333",
+      "label": "public discount landing dummy code",
+      "status": "PASS",
+      "finalUrl": "https://tmv.2checkin.com/ctv/discount/CTV-333333",
+      "textLength": 46,
+      "apiErrors": [
+        {
+          "status": 404,
+          "url": "https://tmv.2checkin.com/api/discount-codes/landing/CTV-333333"
+        }
+      ],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 ()"
+      ],
+      "failedRequests": [
+        {
+          "url": "https://tmv.2checkin.com/HuQmnw3luvNqEallVe8LO9OkiwJyou_Uq_IGYmktb3QaiFCz-WLdBtaojdUBer9dt8AXLO21-b-pFxzvYDhjD-vdkjsyOxiecGlANC6BzGtIQjZ594z6SbTIqs4cKo630WRmVQfhEgl496IZC-Fpk2mheD4YbsqgMRsy8YOEYfSYGGjgJsgtbRdGtx9MbPnkCVerZMcVOYxUcizA1YSS7TC6o6F-Fv0vnbriZPuHe3-ArBWW4Rk2FZ47bCo7sEA8QXUPq10BPubAOM8dY4LOLhtxAgmW91bfiOEU2EeqCxnP8l_lVTrC3wtBWMYy0NFLK-a7e4gU0cUrjSoTIUEKhHoh2wXFRaSO4Oajet0E-tDhvn_xWNvjt3QE7D1ZnXrBERB4NMv1iDgA9Wk74nbj9MFSwqaNIa7Jh6Q7vlCi8mg7OBXyrX10InQzacr22lfHCqCs276NwP03w6Qey1Al-CJtakKEBXAkS8g8p0xYhhw",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-public-smoke/2026-06-09T12-36-17-297Z-chrome/04-public-discount-landing-dummy-code.png",
+      "notes": [
+        "dummy discount short code returned 404 as setup/data condition"
+      ]
+    },
+    {
+      "route": "/verify-discount",
+      "label": "staff voucher verify guard/page",
+      "status": "PASS",
+      "finalUrl": "https://tmv.2checkin.com/login?returnTo=%2Fverify-discount",
+      "textLength": 123,
+      "apiErrors": [],
+      "consoleErrors": [],
+      "failedRequests": [
+        {
+          "url": "https://tmv.2checkin.com/sZ3IuQcLYe0ltRlf8DG6geQnls4OdT3oz-gjgQNzGmQZoDwEQJXoUWe1BXms7-B7P86bEd1W-H2TvtIQ91FbekaSPwP0a8bFX477gAbjVfL1ElsgTkx6gnHqUYjwsdc2iyySpCGICyOI9pFa7mfz5TJK8JSvWsTOXLAkIObAcauJk6giuAoXw6AmsfC6khat56HCWuTTfcQ3rQDC6fwkLdMEtp9GWvz7obulIk2s1O_fGESr5rwalWBoZnoSH-Jv2o2xrTVGOMm1s5jrWPy-dM0xjLwXCG_EkmwHf6o2d3jZLT1LUuN7N1jMffyjMHoMb60v3Y5S9DX1rj4EHuZNm2uZjnuJApFQR8jAjFqxXX_BjvIJZFq0XQ5mjetQa9pSiUUpmamJD-OpMTAd15J00r-R0b-mBAJ4PAu0nHS4N7gjceZdAwPsTNGl4sek3GpOHfyDrj2Ojg4VCgq_AxG49qGA_pQnQsfU",
+          "error": "net::ERR_ABORTED"
+        }
+      ],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-public-smoke/2026-06-09T12-36-17-297Z-chrome/05-staff-voucher-verify-guard-page.png",
+      "notes": [
+        "login guard shown as acceptable for staff-only verify route"
+      ]
+    }
+  ]
+}

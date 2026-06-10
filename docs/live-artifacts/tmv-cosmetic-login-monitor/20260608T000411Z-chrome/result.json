@@ -1,0 +1,32 @@
+{
+  "startedAt": "2026-06-08T00:04:11.308Z",
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260608T000411Z-chrome",
+  "target": "https://tmv.2checkin.com",
+  "browser": "system chrome via Playwright channel=chrome",
+  "loginAttempts": [
+    {
+      "email": "t@clinic.vn",
+      "succeeded": true,
+      "errors": [],
+      "urlAfter": "https://tmv.2checkin.com/",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260608T000411Z-chrome/login-after-t-clinic-vn.png"
+    }
+  ],
+  "accountWorked": "t@clinic.vn",
+  "loginSucceeded": true,
+  "cosmeticVisible": false,
+  "cosmeticBlocker": "Logged in, but Cosmetic was not visibly selected or selectable.",
+  "screens": [],
+  "apiErrors": [],
+  "consoleErrors": [],
+  "failedRequests": [
+    {
+      "method": "HEAD",
+      "url": "https://tmv.2checkin.com/Ramb0av6bOi-SK-XWKXFQUoD0xwhW_eQ1Z3SBoJl5I-xQVmk0EOlkATlL33hNkFHZVlQWyv5lni0LyB3JZCfE009RRIbMrNE4o6qTvsgdoCSLQNoGpx-PLnKv9KOYQSayRGsMXjOMPA4sNkwraNwx4ftxaKiIYw-QAID27wm5GluBRAsU1nN_cHZI1zCBE-rXKHNkxSmCsx-lQy72ir_Hy9hQzGnXZrg15bLqdLt2VubMS6cyoY_kQBsQ8KhmiNS1hEm-LYXEHX5Uo4z6QOIVUa83a2NsL0gzqG-ZJXp9KDiwAyy6dgeqpgFynGaXx7lRS0Pdj828kJ2SMW7vQlT3FQJM0jZJZZ9DfOdjZctrEtBq9A_NqeXyuy5tzKONl_MjOo1obcaga7K847-Z9OwAqmpVunOQmP9CrUePQV5Uj_DiTzKEAXWz0dGujcn-ZbF7GTiSL3JHNR3PvyHCoo",
+      "errorText": "net::ERR_ABORTED"
+    }
+  ],
+  "visibleErrors": [],
+  "cosmeticHeaderScreenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260608T000411Z-chrome/00-cosmetic-header.png",
+  "finishedAt": "2026-06-08T00:04:16.888Z"
+}

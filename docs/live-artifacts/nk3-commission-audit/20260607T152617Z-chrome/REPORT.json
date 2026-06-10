@@ -1,0 +1,426 @@
+{
+  "startedAt": "2026-06-07T15:26:17.985Z",
+  "target": "https://tmv.2checkin.com",
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-commission-audit/20260607T152617Z-chrome",
+  "login": {
+    "ok": true,
+    "email": "t@clinic.vn"
+  },
+  "cosmetic": {
+    "ok": false
+  },
+  "probes": [
+    {
+      "id": "P1-newClients",
+      "status": "PASS",
+      "detail": "columns and data load",
+      "evidence": {
+        "url": "https://tmv.2checkin.com/commission?tab=newClients&lob=cosmetic",
+        "apiUrl": "https://tmv.2checkin.com/api/cosmetic/NewClients?limit=10",
+        "apiStatus": 200,
+        "itemCount": 10,
+        "sampleKeys": [
+          "id",
+          "name",
+          "phone",
+          "email",
+          "referred_at",
+          "referring_ctv_id",
+          "referring_ctv_name",
+          "referring_ctv_phone",
+          "service_count",
+          "service_line_count",
+          "service_total",
+          "paid_total",
+          "earnings_count",
+          "commissioned_service_line_count",
+          "commission_total",
+          "service_missing_ctv_count",
+          "missing_commission",
+          "commission_status",
+          "lob"
+        ],
+        "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-commission-audit/20260607T152617Z-chrome/01-newClients-cosmetic.png",
+        "bodySnippet": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Hoa hồng Thẩm mỹ All Locations Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Tổng quan Nhóm Hoa hồng Hoa hồng Theo dõi và quản"
+      }
+    },
+    {
+      "id": "P2-payouts-lob",
+      "status": "PARTIAL",
+      "detail": "per-LOB only (no All)",
+      "evidence": {
+        "url": "https://tmv.2checkin.com/commission?tab=payouts&lob=cosmetic",
+        "lobOptions": [
+          "cosmetic",
+          "dental"
+        ],
+        "lobLabels": [
+          "Thẩm mỹ",
+          "Nha khoa"
+        ],
+        "hasAllOption": false,
+        "hasCombinedLabel": false,
+        "apiCalls": [
+          {
+            "url": "https://tmv.2checkin.com/api/Payouts?lob=dental&limit=50",
+            "status": 200,
+            "method": "GET"
+          },
+          {
+            "url": "https://tmv.2checkin.com/api/Earnings?lob=dental&status=pending&limit=200",
+            "status": 200,
+            "method": "GET"
+          }
+        ],
+        "screenshots": [
+          "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-commission-audit/20260607T152617Z-chrome/02-payouts-cosmetic.png",
+          "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-commission-audit/20260607T152617Z-chrome/03-payouts-dental.png"
+        ],
+        "bodySnippet": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Hoa hồng Thẩm mỹ All Locations Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Tổng quan Nhóm Hoa hồng Hoa hồng Theo dõi và quản"
+      }
+    },
+    {
+      "id": "P3-earnings-api",
+      "status": "FAIL",
+      "detail": "status 404",
+      "evidence": {
+        "responses": [
+          {
+            "url": "https://tmv.2checkin.com/api/cosmetic/Earnings?limit=5",
+            "status": 404,
+            "keys": []
+          },
+          {
+            "url": "https://tmv.2checkin.com/api/Earnings?lob=cosmetic&limit=5",
+            "status": 200,
+            "itemCount": 5,
+            "keys": [
+              "id",
+              "client_id",
+              "recipient_partner_id",
+              "payment_id",
+              "service_line_id",
+              "source",
+              "level",
+              "amount",
+              "status",
+              "payout_id",
+              "earned_at",
+              "created_at",
+              "client_name",
+              "recipient_name",
+              "product_id"
+            ]
+          },
+          {
+            "url": "https://tmv.2checkin.com/api/Earnings?lob=all&limit=5",
+            "status": 200,
+            "itemCount": 5,
+            "keys": [
+              "id",
+              "client_id",
+              "recipient_partner_id",
+              "payment_id",
+              "service_line_id",
+              "source",
+              "level",
+              "amount",
+              "status",
+              "payout_id",
+              "earned_at",
+              "created_at",
+              "client_name",
+              "recipient_name",
+              "product_id"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "P4-payment-patch",
+      "status": "PASS",
+      "detail": "405 B_PAYMENT_EDIT_DISABLED=true",
+      "evidence": {
+        "paymentId": "6fb31eba-2200-4f32-a62a-85479a3900a8",
+        "responses": [
+          {
+            "url": "https://tmv.2checkin.com/api/Payments/6fb31eba-2200-4f32-a62a-85479a3900a8",
+            "status": 405,
+            "body": {
+              "error": {
+                "code": "B_PAYMENT_EDIT_DISABLED",
+                "message": "Payments cannot be edited. Delete/void the payment and create a new, correct payment."
+              }
+            }
+          },
+          {
+            "url": "https://tmv.2checkin.com/api/cosmetic/Payments/6fb31eba-2200-4f32-a62a-85479a3900a8",
+            "status": 405,
+            "body": {
+              "error": {
+                "code": "B_PAYMENT_EDIT_DISABLED",
+                "message": "Payments cannot be edited. Delete/void the payment and create a new, correct payment."
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "bugs": [
+    {
+      "severity": "P1",
+      "id": "BUG-COSMETIC",
+      "title": "Cosmetic LOB not visibly selected after login",
+      "detail": "header check failed",
+      "evidence": {}
+    },
+    {
+      "severity": "P3",
+      "id": "BUG-PAYOUT-NO-ALL",
+      "title": "Payouts tab lacks All/Combined LOB filter (only per-LOB)",
+      "detail": "options=cosmetic,dental",
+      "evidence": {
+        "url": "https://tmv.2checkin.com/commission?tab=payouts&lob=cosmetic",
+        "lobOptions": [
+          "cosmetic",
+          "dental"
+        ],
+        "lobLabels": [
+          "Thẩm mỹ",
+          "Nha khoa"
+        ],
+        "hasAllOption": false,
+        "hasCombinedLabel": false,
+        "apiCalls": [
+          {
+            "url": "https://tmv.2checkin.com/api/Payouts?lob=dental&limit=50",
+            "status": 200,
+            "method": "GET"
+          },
+          {
+            "url": "https://tmv.2checkin.com/api/Earnings?lob=dental&status=pending&limit=200",
+            "status": 200,
+            "method": "GET"
+          }
+        ],
+        "screenshots": [
+          "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-commission-audit/20260607T152617Z-chrome/02-payouts-cosmetic.png",
+          "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-commission-audit/20260607T152617Z-chrome/03-payouts-dental.png"
+        ],
+        "bodySnippet": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Hoa hồng Thẩm mỹ All Locations Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Tổng quan Nhóm Hoa hồng Hoa hồng Theo dõi và quản"
+      }
+    },
+    {
+      "severity": "P0",
+      "id": "BUG-EARN-API",
+      "title": "GET /api/cosmetic/Earnings failed",
+      "detail": "{\"responses\":[{\"url\":\"https://tmv.2checkin.com/api/cosmetic/Earnings?limit=5\",\"status\":404,\"keys\":[]},{\"url\":\"https://tmv.2checkin.com/api/Earnings?lob=cosmetic&limit=5\",\"status\":200,\"itemCount\":5,\"keys\":[\"id\",\"client_id\",\"recipient_partner_id\",\"payment_id\",\"service_line_id\",\"source\",\"level\",\"amount\",\"status\",\"payout_id\",\"earned_at\",\"created_at\",\"client_name\",\"recipient_name\",\"product_id\"]},{\"url\":\"https://tmv.2checkin.com/api/Earnings?lob=all&limit=5\",\"status\":200,\"itemCount\":5,\"keys\":[\"id\",\"client_id\",\"recipient_partner_id\",\"payment_id\",\"service_line_id\",\"source\",\"level\",\"amount\",\"status\",\"payout_id\",\"earned_at\",\"created_at\",\"client_name\",\"recipient_name\",\"product_id\"]}]}",
+      "evidence": {
+        "responses": [
+          {
+            "url": "https://tmv.2checkin.com/api/cosmetic/Earnings?limit=5",
+            "status": 404,
+            "keys": []
+          },
+          {
+            "url": "https://tmv.2checkin.com/api/Earnings?lob=cosmetic&limit=5",
+            "status": 200,
+            "itemCount": 5,
+            "keys": [
+              "id",
+              "client_id",
+              "recipient_partner_id",
+              "payment_id",
+              "service_line_id",
+              "source",
+              "level",
+              "amount",
+              "status",
+              "payout_id",
+              "earned_at",
+              "created_at",
+              "client_name",
+              "recipient_name",
+              "product_id"
+            ]
+          },
+          {
+            "url": "https://tmv.2checkin.com/api/Earnings?lob=all&limit=5",
+            "status": 200,
+            "itemCount": 5,
+            "keys": [
+              "id",
+              "client_id",
+              "recipient_partner_id",
+              "payment_id",
+              "service_line_id",
+              "source",
+              "level",
+              "amount",
+              "status",
+              "payout_id",
+              "earned_at",
+              "created_at",
+              "client_name",
+              "recipient_name",
+              "product_id"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "passed": [
+    {
+      "id": "PASS-LOGIN",
+      "title": "Login succeeded",
+      "detail": "t@clinic.vn",
+      "evidence": {}
+    },
+    {
+      "id": "PASS-NC-API",
+      "title": "NewClients API returns service_total & commission_total",
+      "detail": "https://tmv.2checkin.com/api/cosmetic/NewClients?limit=10 status=200",
+      "evidence": {
+        "url": "https://tmv.2checkin.com/commission?tab=newClients&lob=cosmetic",
+        "apiUrl": "https://tmv.2checkin.com/api/cosmetic/NewClients?limit=10",
+        "apiStatus": 200,
+        "itemCount": 10,
+        "sampleKeys": [
+          "id",
+          "name",
+          "phone",
+          "email",
+          "referred_at",
+          "referring_ctv_id",
+          "referring_ctv_name",
+          "referring_ctv_phone",
+          "service_count",
+          "service_line_count",
+          "service_total",
+          "paid_total",
+          "earnings_count",
+          "commissioned_service_line_count",
+          "commission_total",
+          "service_missing_ctv_count",
+          "missing_commission",
+          "commission_status",
+          "lob"
+        ],
+        "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-commission-audit/20260607T152617Z-chrome/01-newClients-cosmetic.png",
+        "bodySnippet": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Hoa hồng Thẩm mỹ All Locations Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Tổng quan Nhóm Hoa hồng Hoa hồng Theo dõi và quản"
+      }
+    },
+    {
+      "id": "PASS-NC-UI",
+      "title": "New Clients tab loads with revenue/COM columns",
+      "detail": "10 rows",
+      "evidence": {
+        "url": "https://tmv.2checkin.com/commission?tab=newClients&lob=cosmetic",
+        "apiUrl": "https://tmv.2checkin.com/api/cosmetic/NewClients?limit=10",
+        "apiStatus": 200,
+        "itemCount": 10,
+        "sampleKeys": [
+          "id",
+          "name",
+          "phone",
+          "email",
+          "referred_at",
+          "referring_ctv_id",
+          "referring_ctv_name",
+          "referring_ctv_phone",
+          "service_count",
+          "service_line_count",
+          "service_total",
+          "paid_total",
+          "earnings_count",
+          "commissioned_service_line_count",
+          "commission_total",
+          "service_missing_ctv_count",
+          "missing_commission",
+          "commission_status",
+          "lob"
+        ],
+        "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-commission-audit/20260607T152617Z-chrome/01-newClients-cosmetic.png",
+        "bodySnippet": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Hoa hồng Thẩm mỹ All Locations Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Tổng quan Nhóm Hoa hồng Hoa hồng Theo dõi và quản"
+      }
+    },
+    {
+      "id": "PASS-PAYOUT-LOAD",
+      "title": "Payouts tab loads and LOB switch works",
+      "detail": "options: cosmetic, dental",
+      "evidence": {
+        "url": "https://tmv.2checkin.com/commission?tab=payouts&lob=cosmetic",
+        "lobOptions": [
+          "cosmetic",
+          "dental"
+        ],
+        "lobLabels": [
+          "Thẩm mỹ",
+          "Nha khoa"
+        ],
+        "hasAllOption": false,
+        "hasCombinedLabel": false,
+        "apiCalls": [
+          {
+            "url": "https://tmv.2checkin.com/api/Payouts?lob=dental&limit=50",
+            "status": 200,
+            "method": "GET"
+          },
+          {
+            "url": "https://tmv.2checkin.com/api/Earnings?lob=dental&status=pending&limit=200",
+            "status": 200,
+            "method": "GET"
+          }
+        ],
+        "screenshots": [
+          "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-commission-audit/20260607T152617Z-chrome/02-payouts-cosmetic.png",
+          "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk3-commission-audit/20260607T152617Z-chrome/03-payouts-dental.png"
+        ],
+        "bodySnippet": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Hoa hồng Thẩm mỹ All Locations Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Tổng quan Nhóm Hoa hồng Hoa hồng Theo dõi và quản"
+      }
+    },
+    {
+      "id": "PASS-PAY-405",
+      "title": "PATCH /api/Payments/:id returns 405 (edit disabled)",
+      "detail": "https://tmv.2checkin.com/api/Payments/6fb31eba-2200-4f32-a62a-85479a3900a8 → 405 code=B_PAYMENT_EDIT_DISABLED",
+      "evidence": {
+        "paymentId": "6fb31eba-2200-4f32-a62a-85479a3900a8",
+        "responses": [
+          {
+            "url": "https://tmv.2checkin.com/api/Payments/6fb31eba-2200-4f32-a62a-85479a3900a8",
+            "status": 405,
+            "body": {
+              "error": {
+                "code": "B_PAYMENT_EDIT_DISABLED",
+                "message": "Payments cannot be edited. Delete/void the payment and create a new, correct payment."
+              }
+            }
+          },
+          {
+            "url": "https://tmv.2checkin.com/api/cosmetic/Payments/6fb31eba-2200-4f32-a62a-85479a3900a8",
+            "status": 405,
+            "body": {
+              "error": {
+                "code": "B_PAYMENT_EDIT_DISABLED",
+                "message": "Payments cannot be edited. Delete/void the payment and create a new, correct payment."
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "apiErrors": [
+    {
+      "url": "https://tmv.2checkin.com/api/cosmetic/Earnings?limit=5",
+      "status": 404,
+      "method": "GET"
+    }
+  ],
+  "consoleErrors": [],
+  "networkMisses": [],
+  "finishedAt": "2026-06-07T15:26:57.653Z"
+}

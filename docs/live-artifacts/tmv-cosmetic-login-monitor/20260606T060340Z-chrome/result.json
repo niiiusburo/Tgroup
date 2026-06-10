@@ -1,0 +1,25 @@
+{
+  "startedAt": "2026-06-06T06:03:40.366Z",
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260606T060340Z-chrome",
+  "target": "https://tmv.2checkin.com",
+  "browser": "system chrome via Playwright channel=chrome",
+  "loginAttempts": [],
+  "accountWorked": null,
+  "loginSucceeded": false,
+  "cosmeticVisible": false,
+  "cosmeticBlocker": null,
+  "screens": [],
+  "apiErrors": [],
+  "consoleErrors": [],
+  "failedRequests": [
+    {
+      "method": "HEAD",
+      "url": "https://tmv.2checkin.com/WeMPn1PbSzWq2-VYGImHqvxdc7p25kH8T2Z3BBSmJZCZXGIsK1qrBPzbrGUu81hdmKW0bJFBvHdMvF__Sm6rVYJT1ViRMddvknqdVtGXO1QV2mzV8s6lPXNu1COwSo3FxYqGOnoBWSNenz1dJO3kFClwJNSbegN6i3v_AZ-m7Tun8oSylMGjfeIxM_wME5vdsF8eRfU5iz8F4d79HGm8Ma99ZRbg4--e6WgBAv-UK35jNQLY0817rXyb--wJZIsJF-28HDzxGIwFMUmzpUEGPuPCjcAXtGtFwFTbsq0yvskfh5ksVIdhoGb33R26fw5Rh31FmUULLoJx-66p_D-dvyhhmgdjaf6j6tYug8QcLYmPHfB34ywvsF7Tq6TOZHfHY6UK94KAVK94cCynmr5tpwrbIMviuA8Gw7TMRLZ0GYxD3L5IrmgVG8Jkg8uuSojfSqiyrSh5WTT3T3GSEyk",
+      "errorText": "net::ERR_ABORTED"
+    }
+  ],
+  "visibleErrors": [],
+  "cosmeticHeaderScreenshot": null,
+  "finishedAt": "2026-06-06T06:03:58.429Z",
+  "fatalError": "locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[type=\"email\"], input[name=\"email\"], input[placeholder*=\"Email\" i]').first() to be visible\u001b[22m\n\n    at fillLogin (/Users/thuanle/Documents/TamTMV/Tgrouptest/.tmp/tmv_cosmetic_login_monitor_readonly.cjs:77:18)\n    at tryLogin (/Users/thuanle/Documents/TamTMV/Tgrouptest/.tmp/tmv_cosmetic_login_monitor_readonly.cjs:92:9)\n    at async /Users/thuanle/Documents/TamTMV/Tgrouptest/.tmp/tmv_cosmetic_login_monitor_readonly.cjs:196:25"
+}

@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-06-09T04:06:41.880Z",
+  "finalUrl": "https://nk.2checkin.com/calendar",
+  "appointmentStatus": 200,
+  "bodyChars": 60502,
+  "hasCalendarText": true,
+  "stuckLoading": false,
+  "apiErrors": [],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failures": [
+    "HEAD https://nk.2checkin.com/gTKCw5aXsqPzAEN4jwNTv8rzzLvQV20IUAaJ7btrHM4KH7PLMCRUVBNCJymY9JEkNNdvy5SSzp2DpFqhkhdz1nbGrAIOH3RdNQ1ZPkXCSQc8UX-pF9ba3M2-YCp04IsdUPZKNKv4uDFfZ4Qc94umYDrhOcA3yNpshCcYesrMjomaxOE7iQafdIHt1Kj1HHmap6VgjtW-MguqQmENsCewZhnW_DiZ_xOBU6oYhoCb_o0T-5LvAUHBIEPuO1VHzMLXeyLHjwBaceCvt-E6H2tVPP5AfR7ZQuKkJGZb3vBUuAPMjaktW05QJqYpQRvgoZ44ilOj7WqkZPTbkDBjHkA5p00K8kg-5VDDCFCecKkW0BtB_WYX0fczShpWxQOEp5kAWSEqIZmPaoz34dTyHOr2W6hNtqdSBy54_z88nOPVih8gpiRgRElB3KIBw-NWjK9cHcSqvjinLMBDFfqc :: net::ERR_ABORTED",
+    "HEAD https://nk.2checkin.com/X31M_Uei7ZfaztOGx-HHK7_EJLF4q1G-aPzVP7pB6-sRtnhPKlBl93hhpv-1RvanWRJcFSnSfb_iNS1zxuC0IVMWPRYqFZazZM7BqpcNP9RfI_Mrh-QHzOAb5wp9CYbiodLy8BVX4Eo7qQxJicerxyb1u5P0gY5KqcVUJ64mJn1ZTgwTqzdeMV5ctAPtYQeeUIISxSblGXcpa8ZUZB3ls74Uw0ajUCVm_xFLiVaW8NrRilmu7Bn2EFGNke2Uo862MFSrCwyqUovywUUfVIkda2OQsRPRHnxYSFzqkAZSLUBZs92HEs38HoUvusMgk6VjlqBPONxVA_9x0OJHElGMCI4_vMVQ_CQPT3HXGNMaUsd5y8jiPqw7mdeKx9L14cvmudntLJwcutaNV6C4ughgVWt2idJaZoDWNxlvMh8_tJWWp99GF8SOOCFy-T84bs51-TZUhnd8scjScq6M-Vbq :: net::ERR_ABORTED"
+  ],
+  "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260609T040630Z-calendar-focus/redacted-safe/02-calendar-focused.png",
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260609T040630Z-calendar-focus"
+}

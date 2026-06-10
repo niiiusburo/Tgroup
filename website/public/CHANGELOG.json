@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.37.3",
+    "date": "2026-06-10",
+    "commit": "pending",
+    "highlights": "Remember me for 30 days — checkbox on login extends JWT and persists session.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Login checkbox: Remember me for 30 days (localStorage + 30-day JWT).",
+          "Unchecked login keeps a 24-hour session in sessionStorage (clears when browser closes)."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.37.2",
     "date": "2026-06-10",
     "commit": "22d257ef",

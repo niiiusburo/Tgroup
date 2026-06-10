@@ -80,7 +80,8 @@ async function findEmployeeForCurrentToken(employeeId, preferredLob) {
  */
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, rememberMe: rememberMeRaw } = req.body;
+    const rememberMe = rememberMeRaw === true || rememberMeRaw === 'true';
     const loginIdentifier = normalizeLoginIdentifier(email);
     const invalidLoginError = { error: 'Invalid login or password' };
 
@@ -150,9 +151,12 @@ router.post('/login', async (req, res) => {
       isCtv: employeeIsCtv,
       lobScope: effectiveLobScope,
       authLob,
+      remember: rememberMe,
     };
 
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '24h' });
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
+      expiresIn: rememberMe ? '30d' : '24h',
+    });
 
     return res.json({
       token,

@@ -107,7 +107,7 @@ When `COSMETIC_LOB_ENABLED=true`, login resolves identity from Dental first, the
 {
   email: string;           // staff/admin email, or imported legacy CTV phone/ref code
   password: string;        // plaintext; bcrypt compared first, gated legacy CTV hash fallback second
-  rememberMe?: boolean;    // default false → token expires 24h; true → 60d
+  rememberMe?: boolean;    // default false → token expires 24h; true → 30d
 }
 ```
 **Response 200:**

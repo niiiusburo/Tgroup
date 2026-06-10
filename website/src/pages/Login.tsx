@@ -13,6 +13,7 @@ import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { ApiError } from '@/lib/api/core';
+import { getRememberMePreference, setRememberMePreference } from '@/lib/authToken';
 import { useTranslation } from 'react-i18next';
 
 const LOGIN_STORAGE_KEY = 'tgclinic_saved_login';
@@ -56,6 +57,7 @@ export function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showForgotHint, setShowForgotHint] = useState(false);
+  const [rememberMe, setRememberMe] = useState(() => getRememberMePreference());
 
   useEffect(() => {
     mountedRef.current = true;
@@ -70,10 +72,11 @@ export function Login() {
     setIsLoading(true);
 
     try {
-      await login(identifier, password);
+      await login(identifier, password, rememberMe);
 
       if (!mountedRef.current) return;
 
+      setRememberMePreference(rememberMe);
       // Only save login identifier (not password) for prefill convenience.
       saveLogin(identifier);
 
@@ -180,6 +183,18 @@ export function Login() {
                 </p>
               )}
             </div>
+
+            <label className="flex items-center gap-2.5 cursor-pointer select-none">
+              <input
+                id="remember-me"
+                data-testid="remember-me"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary/20"
+              />
+              <span className="text-sm text-gray-600">{t('rememberMe')}</span>
+            </label>
 
             <button
               type="submit"

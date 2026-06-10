@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "url": "https://tmv.2checkin.com/",
+  "version": {
+    "version": "0.37.2",
+    "buildTime": "2026-06-10T13:47:06.237Z",
+    "gitCommit": "unknown",
+    "gitBranch": "unknown",
+    "environment": "development"
+  },
+  "apiErrors": []
+}

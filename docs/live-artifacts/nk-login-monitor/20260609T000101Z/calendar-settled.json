@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-06-09T00:02:14.894Z",
+  "finalUrl": "https://nk.2checkin.com/calendar",
+  "bodyChars": 57451,
+  "stillLoading": false,
+  "visibleError": false,
+  "expectedText": true,
+  "apiErrors": [],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "requestFailures": [
+    "HEAD https://nk.2checkin.com/qgTzrs1kmaBseWrf2sCM9JjYFt0m6b8NccECmT5JJVYMGrdv_jJr06TXT4p3dmezVFJu8ec_F7iH2Vw7TDoZBJFYZzoUZOn9BZ4amTP4F8x3Ke0RS_5jGwkqHkCwUgSE7sMD4p745XIK7Wj_pYfqTEEa9fR5GC1p6_Jon4EJpWWRAy9MQTtB-zQ7iQeUyJuVCLz_DvhYwnFFYO0r3Yp5gxvW6kwK2K7Dl_nYy0YhWaPt1_Lt921HvfYZNiYjDJ4NwwTP9pkDp6mkONOHBzZffhnBYy3SSmOZA0UouEuSmagMiuWTOxJtepmE6kHpYfACkkggR6lVVIQcNeeZ80dI_S0D7KgnM3UpO0FMqkwlsAbmDm52SOxb5f08znTfgEBFv5s6KgqNIkxFxHUEZ-kKObaegIjSuJufI97qinRbPvugCAq-5oh6bpuPVbWqxk1qd6I_1IjHdnYLQ3m3 :: net::ERR_ABORTED",
+    "GET https://nk.2checkin.com/assets/pencil-BUVexbl_.js :: net::ERR_ABORTED",
+    "GET https://nk.2checkin.com/assets/QuickAddAppointmentButton-DMGR2v-6.js :: net::ERR_ABORTED",
+    "GET https://nk.2checkin.com/assets/statusStyles-CxN-_QH1.js :: net::ERR_ABORTED",
+    "GET https://nk.2checkin.com/assets/mail-C2V3dN7Z.js :: net::ERR_ABORTED",
+    "GET https://nk.2checkin.com/assets/formatting-Brx1-2Qz.js :: net::ERR_ABORTED",
+    "GET https://nk.2checkin.com/assets/scale-DGSBsq8G.js :: net::ERR_ABORTED",
+    "GET https://nk.2checkin.com/assets/DatePicker-B1b-7PqN.js :: net::ERR_ABORTED",
+    "GET https://nk.2checkin.com/assets/products-BRwFAYYI.js :: net::ERR_ABORTED",
+    "GET https://nk.2checkin.com/assets/useEmployees-FshQICAs.js :: net::ERR_ABORTED",
+    "GET https://nk.2checkin.com/assets/pen-9Qx_fHBQ.js :: net::ERR_ABORTED",
+    "GET https://nk.2checkin.com/assets/building-2-CAyyg5ZQ.js :: net::ERR_ABORTED",
+    "GET https://nk.2checkin.com/favicon.svg :: net::ERR_ABORTED",
+    "HEAD https://nk.2checkin.com/RKGv3A124lb_DcdUElVtBuMRi-5sZ71W6jy7wcKSuA7NScorF30Ki-0nH0l85wE8OybUbQ8skpIXQ1QiZc27O4__4ydIAAJ--vtjA314bqd9So8vzhoVdtLbdtGrfEIOVVSdByKEYzURfFjF3iPUhecHi7blGj5LOsa2ZnKF42w6GXByHYS4CuL8P3n34hR6zHALXNRdtk94UZ-jdo3YUlxu_ADA-EUa7nV4_X4rKeRJCH3BvCqi61ktUTan-2ulvZxWqnKLeuh1AOcPyft7VF6KucvMw72DEybbCs1FOdEVZf79oWnmziaeZcgdFakHuB7SJznHL3aEKpywFNWJPC7JZainWRC58DCKfESEKVEbe89Int5Ay4IV0yDCHm9cjbw81pwIx_7RxH0-6AOXX1sSxZFAeoT_8rMCLfc2ERiMruQVyw_3KFjCV96eokeThCLfvRLvgRPCGKvZRN1i :: net::ERR_ABORTED"
+  ],
+  "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/20260609T000101Z/redacted-safe/02-calendar-settled.png"
+}

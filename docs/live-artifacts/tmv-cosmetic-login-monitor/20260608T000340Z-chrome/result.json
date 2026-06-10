@@ -1,0 +1,33 @@
+{
+  "startedAt": "2026-06-08T00:03:40.427Z",
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260608T000340Z-chrome",
+  "target": "https://tmv.2checkin.com",
+  "browser": "system chrome via Playwright channel=chrome",
+  "loginAttempts": [
+    {
+      "email": "t@clinic.vn",
+      "succeeded": true,
+      "errors": [],
+      "urlAfter": "https://tmv.2checkin.com/",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260608T000340Z-chrome/login-after-t-clinic-vn.png"
+    }
+  ],
+  "accountWorked": "t@clinic.vn",
+  "loginSucceeded": true,
+  "cosmeticVisible": false,
+  "cosmeticBlocker": null,
+  "screens": [],
+  "apiErrors": [],
+  "consoleErrors": [],
+  "failedRequests": [
+    {
+      "method": "HEAD",
+      "url": "https://tmv.2checkin.com/MbtrEmQeVtuKvXVQmRNmihsOlrbqAoJ9fnTC_fGTMyzLVQ6K3iRPJu_LJNJjpB6krmw6p8IZMPTi9qlLRVI4mjjIQnh4XfMn1yCnZ5xLPWrudifqwYZ5DIqSe3sw1q8_XKwxWTzpHytuSKjlsT0T27SsABcUdtnPQjuDsCuAXWiTDJFjnnf93OyXCtQhc68LmIUNkxxJIPXKLmsK2BY4GQVPyjODrg49nbiTDo7BEGYPILtRlvGslf-jWU4cVsV-6QduLNyA-9LlHibLvBW5hsm7Ku-uc4OSHw4_pnLLwOQA1gjm_WRaKNsO_pZG29kd-ilJYfHcDhJP5OmL8ms8SfSGI7e34gMlr-Jqu4ElB54-93_ISRSxh-J_vf5QR3fTxlnaVeMKbNHeZN-QeeKmWPL9I1gvJ2Y5mBqQsMWFVGtNcIgPUtVAcodZxMBlITphF1M73lxBFj6rOOg4WZg",
+      "errorText": "net::ERR_ABORTED"
+    }
+  ],
+  "visibleErrors": [],
+  "cosmeticHeaderScreenshot": null,
+  "finishedAt": "2026-06-08T00:03:46.354Z",
+  "fatalError": "locator.count: Unexpected token \"=\" while parsing css selector \"button:has-text(\"Cosmetic\"), a:has-text(\"Cosmetic\"), [role=\"button\"]:has-text(\"Cosmetic\"), text=/Cosmetic/i\". Did you mean to CSS.escape it?\n    at clickCosmeticIfNeeded (/Users/thuanle/Documents/TamTMV/Tgrouptest/.tmp/tmv_cosmetic_login_monitor_readonly.cjs:125:22)\n    at async /Users/thuanle/Documents/TamTMV/Tgrouptest/.tmp/tmv_cosmetic_login_monitor_readonly.cjs:235:30"
+}

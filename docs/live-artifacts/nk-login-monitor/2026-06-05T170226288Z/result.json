@@ -1,0 +1,82 @@
+{
+  "checkedAt": "2026-06-05T17:02:26.288Z",
+  "baseUrl": "https://nk.2checkin.com",
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/2026-06-05T170226288Z",
+  "loginAttempts": [
+    {
+      "account": "t@clinic.vn",
+      "label": "primary",
+      "success": true,
+      "loginFormStillVisible": false,
+      "url": "https://nk.2checkin.com/",
+      "visibleError": "296h 7m 59s\n*",
+      "bodyChars": 15200,
+      "textStart": "TD\nPHÒNG KHÁM\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\nBÁO CÁO\nBảng điều khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\nQUẢN TRỊ\nCài đặt\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nTổng quan\nAll Locations\n2\n\nCó vấn đề?\n\nNhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc.\n\nHẹn mới\nLịch trình ngày\nTất cả · 1\nĐang chờ · 1\nĐang khám · 0\nHoàn thành · 0\nĐang chờ\n▾\n296h 7m 59s\n*\nĐÀO THỊ THANH HẰNG\nBS (20)\n·\n16:15\nTĂNG LỰC + SÚC MẮC CÀI -L-ANHPH-LY- ĐỢI\nTODAY'S SERVICES / ACTIVITY\nSERVICE\tPATIENT\tQTY\tDOCTOR\tAMOUNT\tSTATUS\nServices will populate as patients are treated throughout the day.\nLỊCH HẸN HÔM NAY\nTất cả · 200\nĐã đến · 1\nĐã hủy · 11\nLƯU Ý\nBác sĩ 08\n08:00 · 30 phút\n0972020908\nĐang hẹn\nLƯU Ý\nBác sĩ 32\n08:00 · 30 phút\n0972020908\nĐang hẹn\nTEST\nBS (11)\n08:00 · 30 phút\n0173030908\nĐang hẹn\nLƯU Ý\nBác sĩ 36\n08:00 · 30 phút",
+      "obviousIssue": false,
+      "blank": false
+    }
+  ],
+  "loginSucceeded": true,
+  "workedAccount": "t@clinic.vn",
+  "screens": [
+    {
+      "name": "dashboard",
+      "expectedHref": "/",
+      "clickMethod": "href",
+      "finalUrl": "https://nk.2checkin.com/",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/2026-06-05T170226288Z/01-dashboard.png",
+      "apiErrorsDuringScreen": 0,
+      "consoleErrorsDuringScreen": 0,
+      "bodyChars": 15199,
+      "textStart": "TD\nPHÒNG KHÁM\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\nBÁO CÁO\nBảng điều khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\nQUẢN TRỊ\nCài đặt\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nTổng quan\nAll Locations\n2\n\nCó vấn đề?\n\nNhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc.\n\nHẹn mới\nLịch trình ngày\nTất cả · 1\nĐang chờ · 1\nĐang khám · 0\nHoàn thành · 0\nĐang chờ\n▾\n296h 8m 1s\n*\nĐÀO THỊ THANH HẰNG\nBS (20)\n·\n16:15\nTĂNG LỰC + SÚC MẮC CÀI -L-ANHPH-LY- ĐỢI\nTODAY'S SERVICES / ACTIVITY\nSERVICE\tPATIENT\tQTY\tDOCTOR\tAMOUNT\tSTATUS\nServices will populate as patients are treated throughout the day.\nLỊCH HẸN HÔM NAY\nTất cả · 200\nĐã đến · 1\nĐã hủy · 11\nLƯU Ý\nBác sĩ 08\n08:00 · 30 phút\n0972020908\nĐang hẹn\nLƯU Ý\nBác sĩ 32\n08:00 · 30 phút\n0972020908\nĐang hẹn\nTEST\nBS (11)\n08:00 · 30 phút\n0173030908\nĐang hẹn\nLƯU Ý\nBác sĩ 36\n08:00 · 30 phút\n",
+      "obviousIssue": false,
+      "blank": false
+    },
+    {
+      "name": "calendar",
+      "expectedHref": "/calendar",
+      "clickMethod": "href",
+      "finalUrl": "https://nk.2checkin.com/calendar",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/2026-06-05T170226288Z/02-calendar.png",
+      "apiErrorsDuringScreen": 0,
+      "consoleErrorsDuringScreen": 0,
+      "bodyChars": 48540,
+      "textStart": "TD\nPHÒNG KHÁM\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\nBÁO CÁO\nBảng điều khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\nQUẢN TRỊ\nCài đặt\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nLịch\nAll Locations\n2\n\nCó vấn đề?\n\nNhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc.\n\nLịch hẹn\n\nQuản lý lịch hẹn khám bệnh\n\nNgày\nTuần\nTháng\nThứ Bảy, 6 tháng 6, 2026\nHôm nay\nXuất dữ liệu\nBộ lọc\nHẹn mới\nThứ Bảy, 6 tháng 6\n502 Lịch hẹn\n07:00\n07:30\n08:00\n5 Lịch hẹn\nĐang hẹn\nLƯU Ý\n0972020908\nBác sĩ 32\n08:00 · 30 phút\n\nBÁC 32 OFF\n\n✎\nĐang hẹn\nLƯU Ý\n0972020908\nBác sĩ 08\n08:00 · 30 phút\n\nBÁC 08 OFF\n\n✎\nĐang hẹn\nTEST\n0173030908\nBS (11)\n08:00 · 30 phút\n\n11 OFF\n\n✎\nĐang hẹn\nLƯU Ý\n0972020908\nBác sĩ 36\n08:00 · 30 phút\n\nBÁC 36 OFF\n\n✎\nĐã hủy\n▾\nLƯU Ý\n0972020908\nBác sĩ 46\n08:00 · 30 phút\n\nBÁC 46 FULL\n\n✎\n08:30\n09:00\n51 Lịch hẹn\nĐang hẹn\nAnh Thư\n0964241467",
+      "obviousIssue": false,
+      "blank": false
+    },
+    {
+      "name": "customers",
+      "expectedHref": "/customers",
+      "clickMethod": "href",
+      "finalUrl": "https://nk.2checkin.com/customers",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/2026-06-05T170226288Z/03-customers.png",
+      "apiErrorsDuringScreen": 0,
+      "consoleErrorsDuringScreen": 0,
+      "bodyChars": 2350,
+      "textStart": "TD\nPHÒNG KHÁM\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\nBÁO CÁO\nBảng điều khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\nQUẢN TRỊ\nCài đặt\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nKhách hàng\nAll Locations\n2\n\nCó vấn đề?\n\nNhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc.\n\nKhách hàng\n\n37095 patients · 37058 active\n\nXuất dữ liệu\nAdd Customer\nAll Status\nActive\nInactive\nPending\nCODE\n\t\nCUSTOMER\n\t\nPHONE\n\t\nEMAIL\n\t\nLOCATION\n\t\nSTATUS\n\t\nLAST VISIT\n\t\n\nT914339\t\nT\nTrần Thuỳ Trinh\n\t\n0347340309\n\t\n\t\nTấm Dentist Quận 10\n\t\nActive\t05 Jun 2026\t\n\nT645466\t\nH\nHuỳnh Thị Thanh Thảo\n\t\n0382448574\n\t\n\t\nTấm Dentist Quận 10\n\t\nActive\t05 Jun 2026\t\n\nT755717\t\nH\nHiền Marvo\n\t\n0783513689\n\t\n\t\nTấm Dentist Quận 10\n\t\nActive\t05 Jun 2026\t\n\nT564652\t\nT\nThanh Nhi\n\t\n0868677602\n\t\n\t\nTấm Dentist Thủ Đức\n\t\nActive\t05 Jun 2026\t\n\nT649563\t\nP\nPhuong Anh\n\t\n0366128489\n\t",
+      "obviousIssue": false,
+      "blank": false
+    }
+  ],
+  "apiErrors": [],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "requestFailures": [],
+  "visibleLoginErrors": [
+    {
+      "account": "t@clinic.vn",
+      "text": "296h 7m 59s\n*"
+    }
+  ],
+  "version": {
+    "status": 200,
+    "body": {
+      "version": "0.32.44",
+      "buildTime": "2026-05-27T04:06:39.953Z",
+      "gitCommit": "ff65634",
+      "gitBranch": "detached-ff65634f",
+      "environment": "development"
+    }
+  }
+}

@@ -1,0 +1,2106 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Giá Thẩm Mỹ Viện Tấm</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/bang-gia/pricing.css">
+</head>
+<body>
+    <header class="top-nav">
+        <div class="top-nav-content">
+            <a href="/ctv" class="back-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                <span>Về Cổng CTV</span>
+            </a>
+            <h1 class="page-title-header">Bảng Giá</h1>
+            <div class="last-updated-badge" id="lastUpdatedBadge" title="Tự động cập nhật mỗi 30 giây">
+                <svg class="sync-icon" viewBox="0 0 24 24" width="14" height="14">
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+                </svg>
+                <span class="update-time" id="updateTime">--:--</span>
+            </div>
+        </div>
+    </header>
+
+    <button class="mobile-category-toggle" id="mobileCategoryToggle" type="button">
+        <svg viewBox="0 0 24 24" width="20" height="20">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+        <span>Danh mục</span>
+    </button>
+
+    <div class="pricing-container">
+        <aside class="pricing-sidebar" id="pricingSidebar">
+            <div class="sidebar-title">Danh Mục</div>
+            <nav class="category-nav">
+                <a href="#filler-basic" class="category-link active"
+                    data-category="filler-basic" data-tooltip="FILLER HÀN CƠ BẢN">
+                    <span class="category-icon">💉</span>
+                    <span>FILLER HÀN CƠ BẢN</span>
+                </a>
+
+                <a href="#filler-premium" class="category-link "
+                    data-category="filler-premium" data-tooltip="FILLER HÀN CAO CẤP">
+                    <span class="category-icon">✨</span>
+                    <span>FILLER HÀN CAO CẤP</span>
+                </a>
+
+                <a href="#breast" class="category-link "
+                    data-category="breast" data-tooltip="DỊCH VỤ NÂNG NGỰC">
+                    <span class="category-icon">🌸</span>
+                    <span>DỊCH VỤ NÂNG NGỰC</span>
+                </a>
+
+                <a href="#slimming" class="category-link "
+                    data-category="slimming" data-tooltip="TIÊM THON GỌN TỪNG VÙNG">
+                    <span class="category-icon">💫</span>
+                    <span>TIÊM THON GỌN TỪNG VÙNG</span>
+                </a>
+
+                <a href="#vline" class="category-link "
+                    data-category="vline" data-tooltip="THON GỌN HÀM VLINE PERFECT">
+                    <span class="category-icon">✓</span>
+                    <span>THON GỌN HÀM VLINE PERFECT</span>
+                </a>
+
+                <a href="#other" class="category-link "
+                    data-category="other" data-tooltip="DỊCH VỤ KHÁC">
+                    <span class="category-icon">⚡</span>
+                    <span>DỊCH VỤ KHÁC</span>
+                </a>
+
+                <a href="#nose" class="category-link "
+                    data-category="nose" data-tooltip="NÂNG MŨI">
+                    <span class="category-icon">👃</span>
+                    <span>NÂNG MŨI</span>
+                </a>
+
+                <a href="#eyes" class="category-link "
+                    data-category="eyes" data-tooltip="CÁC DỊCH VỤ VỀ MẮT">
+                    <span class="category-icon">👁</span>
+                    <span>CÁC DỊCH VỤ VỀ MẮT</span>
+                </a>
+
+                <a href="#intimate" class="category-link "
+                    data-category="intimate" data-tooltip="THẨM MỸ CÔ BÉ">
+                    <span class="category-icon">🌺</span>
+                    <span>THẨM MỸ CÔ BÉ</span>
+                </a>
+
+                <a href="#facelift" class="category-link "
+                    data-category="facelift" data-tooltip="CĂNG DA MEDI LIFT">
+                    <span class="category-icon">✨</span>
+                    <span>CĂNG DA MEDI LIFT</span>
+                </a>
+
+                <a href="#apple-lift" class="category-link "
+                    data-category="apple-lift" data-tooltip="NÂNG CƠ TÁO (Nâng cơ tầng mặt giữa)">
+                    <span class="category-icon">🍎</span>
+                    <span>NÂNG CƠ TÁO (Nâng cơ tầng mặt giữa)</span>
+                </a>
+
+                <a href="#high-tech" class="category-link "
+                    data-category="high-tech" data-tooltip="THẨM MỸ CÔNG NGHỆ CAO">
+                    <span class="category-icon">🔬</span>
+                    <span>THẨM MỸ CÔNG NGHỆ CAO</span>
+                </a>
+
+                <a href="#mac-cai-canh-cam-tu-dong" class="category-link "
+                    data-category="mac-cai-canh-cam-tu-dong" data-tooltip="Mắc cài cánh cam TỰ ĐÓNG">
+                    <span class="category-icon">🔹</span>
+                    <span>Mắc cài cánh cam TỰ ĐÓNG</span>
+                </a>
+
+                <a href="#mac-cai-kim-loai-mat-trong" class="category-link "
+                    data-category="mac-cai-kim-loai-mat-trong" data-tooltip="Mắc cài kim loại mặt trong">
+                    <span class="category-icon">🔹</span>
+                    <span>Mắc cài kim loại mặt trong</span>
+                </a>
+
+                <a href="#rang-su-1-rang" class="category-link "
+                    data-category="rang-su-1-rang" data-tooltip="Răng sứ (1 răng)">
+                    <span class="category-icon">🔹</span>
+                    <span>Răng sứ (1 răng)</span>
+                </a>
+
+                <a href="#cay-ghep-implant" class="category-link "
+                    data-category="cay-ghep-implant" data-tooltip="Cấy ghép Implant">
+                    <span class="category-icon">🔹</span>
+                    <span>Cấy ghép Implant</span>
+                </a>
+                <a href="/welcome?book=1" class="category-link booking-link" data-tooltip="Đặt lịch">
+                    <span class="category-icon">📅</span>
+                    <span>Đặt lịch</span>
+                </a>
+                <a href="/catalogue" class="category-link" data-tooltip="Catalog">
+                    <span class="category-icon">📖</span>
+                    <span>Catalog</span>
+                </a>
+                <a href="/ctv" class="category-link" data-tooltip="CTV Portal">
+                    <span class="category-icon">🏠</span>
+                    <span>CTV Portal</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="pricing-content">
+            <div class="page-title">
+                <h1>Bảng Giá Dịch Vụ</h1>
+                
+            </div>
+            
+            <section id="filler-basic" class="pricing-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>
+                        <span class="section-icon">💉</span>
+                        FILLER HÀN CƠ BẢN
+                    </h2>
+                    <svg class="collapse-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="section-content">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">1cc</div>
+                            <div class="card-price "><span class="regular-price">4.800.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card has-bonus">
+                            
+                            <div class="card-name">COMBO Môi 2cc</div>
+                            <div class="card-price "><span class="regular-price">10.000.000đ</span></div>
+                            <div class="card-bonus">Tặng thêm 1cc (thời hạn sử dụng 6 tháng)</div>
+                            
+                        </div>
+
+                        <div class="pricing-card has-bonus">
+                            
+                            <div class="card-name">COMBO Cằm 2cc</div>
+                            <div class="card-price "><span class="regular-price">10.000.000đ</span></div>
+                            <div class="card-bonus">Tặng thêm 1cc (thời hạn sử dụng 6 tháng)</div>
+                            
+                        </div>
+
+                        <div class="pricing-card has-bonus">
+                            
+                            <div class="card-name">COMBO Rãnh Cười 2cc</div>
+                            <div class="card-price "><span class="regular-price">10.000.000đ</span></div>
+                            <div class="card-bonus">Tặng thêm 1cc (thời hạn sử dụng 6 tháng)</div>
+                            
+                        </div>
+
+                        <div class="pricing-card has-bonus">
+                            
+                            <div class="card-name">COMBO Tai Tài Lộc 3cc</div>
+                            <div class="card-price "><span class="regular-price">16.000.000đ</span></div>
+                            <div class="card-bonus">Tặng thêm 2cc (thời hạn sử dụng 6 tháng)</div>
+                            
+                        </div>
+
+                        <div class="pricing-card has-bonus">
+                            
+                            <div class="card-name">COMBO Thái Dương 3cc</div>
+                            <div class="card-price "><span class="regular-price">16.000.000đ</span></div>
+                            <div class="card-bonus">Tặng thêm 2cc (thời hạn sử dụng 6 tháng)</div>
+                            
+                        </div>
+
+                        <div class="pricing-card has-bonus">
+                            
+                            <div class="card-name">COMBO Đầy Trán 5cc</div>
+                            <div class="card-price "><span class="regular-price">24.800.000đ</span></div>
+                            <div class="card-bonus">Tặng thêm 3cc (thời hạn sử dụng 6 tháng)</div>
+                            
+                        </div>
+
+                        <div class="pricing-card has-bonus">
+                            
+                            <div class="card-name">COMBO má cấp độ I (5cc)</div>
+                            <div class="card-price "><span class="regular-price">24.800.000đ</span></div>
+                            <div class="card-bonus">Tặng thêm 3cc (thời hạn sử dụng 6 tháng)</div>
+                            
+                        </div>
+
+                        <div class="pricing-card has-bonus">
+                            
+                            <div class="card-name">COMBO má cấp độ II (7cc)</div>
+                            <div class="card-price "><span class="regular-price">34.400.000đ</span></div>
+                            <div class="card-bonus">Tặng thêm 4cc (thời hạn sử dụng 6 tháng)</div>
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">50cc Mông</div>
+                            <div class="card-price "><span class="regular-price">20.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">200cc Mông</div>
+                            <div class="card-price "><span class="regular-price">52.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">COMBo 3cc</div>
+                            <div class="card-price "><span class="regular-price">12.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Combo 5cc</div>
+                            <div class="card-price "><span class="regular-price">18.000.000đ</span></div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="filler-premium" class="pricing-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>
+                        <span class="section-icon">✨</span>
+                        FILLER HÀN CAO CẤP
+                    </h2>
+                    <svg class="collapse-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="section-content">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">1cc</div>
+                            <div class="card-price "><span class="regular-price">7.200.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card has-bonus">
+                            
+                            <div class="card-name">COMBO Môi 2cc</div>
+                            <div class="card-price "><span class="regular-price">16.000.000đ</span></div>
+                            <div class="card-bonus">Tặng thêm 1cc  (thời hạn sử dụng 6 tháng)</div>
+                            
+                        </div>
+
+                        <div class="pricing-card has-bonus">
+                            
+                            <div class="card-name">COMBO Cằm 2cc</div>
+                            <div class="card-price "><span class="regular-price">16.000.000đ</span></div>
+                            <div class="card-bonus">Tặng thêm 1cc (thời hạn sử dụng 6 tháng)</div>
+                            
+                        </div>
+
+                        <div class="pricing-card has-bonus">
+                            
+                            <div class="card-name">COMBO Rãnh Cười 2cc</div>
+                            <div class="card-price "><span class="regular-price">16.000.000đ</span></div>
+                            <div class="card-bonus">Tặng thêm 1cc (thời hạn sử dụng 6 tháng)</div>
+                            
+                        </div>
+
+                        <div class="pricing-card has-bonus">
+                            
+                            <div class="card-name">COMBO Tai Tài Lộc 3cc</div>
+                            <div class="card-price "><span class="regular-price">24.800.000đ</span></div>
+                            <div class="card-bonus">Tặng thêm 2cc (thời hạn sử dụng 6 tháng)</div>
+                            
+                        </div>
+
+                        <div class="pricing-card has-bonus">
+                            
+                            <div class="card-name">COMBO Thái Dương 3cc</div>
+                            <div class="card-price "><span class="regular-price">24.800.000đ</span></div>
+                            <div class="card-bonus">Tặng thêm 2cc (thời hạn sử dụng 6 tháng)</div>
+                            
+                        </div>
+
+                        <div class="pricing-card has-bonus">
+                            
+                            <div class="card-name">COMBO má cấp độ I (3cc)</div>
+                            <div class="card-price "><span class="regular-price">24.800.000đ</span></div>
+                            <div class="card-bonus">Tặng thêm 2cc (thời hạn sử dụng 6 tháng)</div>
+                            
+                        </div>
+
+                        <div class="pricing-card has-bonus">
+                            
+                            <div class="card-name">COMBO Đầy Trán 5cc</div>
+                            <div class="card-price "><span class="regular-price">36.800.000đ</span></div>
+                            <div class="card-bonus">Tặng thêm 3cc (thời hạn sử dụng 6 tháng)</div>
+                            
+                        </div>
+
+                        <div class="pricing-card has-bonus">
+                            
+                            <div class="card-name">COMBO má cấp độ II (5cc)</div>
+                            <div class="card-price "><span class="regular-price">36.800.000đ</span></div>
+                            <div class="card-bonus">Tặng thêm 3cc (thời hạn sử dụng 6 tháng)</div>
+                            
+                        </div>
+
+                        <div class="pricing-card has-bonus">
+                            
+                            <div class="card-name">COMBO má cấp độ III (7cc)</div>
+                            <div class="card-price "><span class="regular-price">48.800.000đ</span></div>
+                            <div class="card-bonus">Tặng thêm 4cc (thời hạn sử dụng 6 tháng)</div>
+                            
+                        </div>
+
+                        <div class="pricing-card premium">
+                            <div class="card-badge">Premium</div>
+                            <div class="card-name">1cc Filler Juverderm</div>
+                            <div class="card-price "><span class="regular-price">11.200.000đ</span></div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="breast" class="pricing-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>
+                        <span class="section-icon">🌸</span>
+                        DỊCH VỤ NÂNG NGỰC
+                    </h2>
+                    <svg class="collapse-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="section-content">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            <div class="card-badge">Hot</div>
+                            <div class="card-name">Nâng ngực Nano Ergonomix</div>
+                            <div class="card-price "><span class="regular-price">160.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng ngực Nano Chip</div>
+                            <div class="card-price "><span class="regular-price">152.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng ngực Nano không Chip</div>
+                            <div class="card-price "><span class="regular-price">132.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng ngực Mentor Perfect</div>
+                            <div class="card-price "><span class="regular-price">152.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Treo Sa Trễ</div>
+                            <div class="card-price "><span class="regular-price">100.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Thu Nhỏ Quầng Ti</div>
+                            <div class="card-price "><span class="regular-price">40.000.000đ</span></div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="slimming" class="pricing-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>
+                        <span class="section-icon">💫</span>
+                        TIÊM THON GỌN TỪNG VÙNG
+                    </h2>
+                    <svg class="collapse-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="section-content">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Thon gọn hàm Botox Hàn 50 unit</div>
+                            <div class="card-price "><span class="regular-price">3.600.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Thon gọn hàm Botox Hàn 100 unit</div>
+                            <div class="card-price "><span class="regular-price">6.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Thon gọn hàm Botox Hàn trọn gói 2 năm</div>
+                            <div class="card-price "><span class="regular-price">18.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card premium">
+                            <div class="card-badge">Premium</div>
+                            <div class="card-name">Thon gọn hàm Botox Mỹ</div>
+                            <div class="card-price "><span class="regular-price">11.200.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Thon gọn cầu vai</div>
+                            <div class="card-price "><span class="regular-price">14.400.000đ</span></div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="vline" class="pricing-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>
+                        <span class="section-icon">✓</span>
+                        THON GỌN HÀM VLINE PERFECT
+                    </h2>
+                    <svg class="collapse-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="section-content">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Thon gọn hàm Vline Perfect 50 shot</div>
+                            <div class="card-price "><span class="regular-price">7.200.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Thon gọn hàm Vline Perfect 100 shot</div>
+                            <div class="card-price "><span class="regular-price">11.200.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Thon gọn hàm Vline Perfect 150 shot</div>
+                            <div class="card-price "><span class="regular-price">12.800.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">COMBO 2 năm</div>
+                            <div class="card-price "><span class="regular-price">24.800.000đ</span></div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="other" class="pricing-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>
+                        <span class="section-icon">⚡</span>
+                        DỊCH VỤ KHÁC
+                    </h2>
+                    <svg class="collapse-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="section-content">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Cắt 2 môi</div>
+                            <div class="card-price "><span class="regular-price">12.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Cắt 1 môi</div>
+                            <div class="card-price "><span class="regular-price">8.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Làm đầy hốc mắt (bảo hành dặm miễn phí 3 tháng)</div>
+                            <div class="card-price "><span class="regular-price">12.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Xóa nếp nhăn trán Botox Hàn</div>
+                            <div class="card-price "><span class="regular-price">8.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Xóa nếp nhăn mắt Botox Hàn</div>
+                            <div class="card-price "><span class="regular-price">4.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Xóa nếp nhăn ấn đường Botox Hàn</div>
+                            <div class="card-price "><span class="regular-price">8.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card premium">
+                            <div class="card-badge">Premium</div>
+                            <div class="card-name">Xóa nếp nhăn trán Botox Mỹ</div>
+                            <div class="card-price "><span class="regular-price">10.800.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card premium">
+                            <div class="card-badge">Premium</div>
+                            <div class="card-name">Xóa nếp nhăn mắt Botox Mỹ</div>
+                            <div class="card-price "><span class="regular-price">10.800.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card premium">
+                            <div class="card-badge">Premium</div>
+                            <div class="card-name">Xóa nếp nhăn ấn đường Botox Mỹ</div>
+                            <div class="card-price "><span class="regular-price">10.800.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Hút mở xoài vai</div>
+                            <div class="card-price "><span class="regular-price">32.800.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Hút mỡ họng cằm</div>
+                            <div class="card-price "><span class="regular-price">32.800.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Hút mỡ đùi</div>
+                            <div class="card-price "><span class="regular-price">60.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Hút mỡ Bụng+Eo</div>
+                            <div class="card-price "><span class="regular-price">60.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Hút mỡ bắp tay</div>
+                            <div class="card-price "><span class="regular-price">32.800.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Hút mỡ bắp chân</div>
+                            <div class="card-price "><span class="regular-price">32.800.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Thu nhỏ đầu ti</div>
+                            <div class="card-price "><span class="regular-price">13.200.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Thu ngắn đầu ti</div>
+                            <div class="card-price "><span class="regular-price">13.200.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Thu nhỏ quầng vú</div>
+                            <div class="card-price "><span class="regular-price">20.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Trị hôi nách bằng Botox Hàn</div>
+                            <div class="card-price "><span class="regular-price">12.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card premium">
+                            <div class="card-badge">Premium</div>
+                            <div class="card-name">Trị hôi nách bằng Botox Mỹ</div>
+                            <div class="card-price "><span class="regular-price">20.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Hút tuyến mồ hôi trị hôi nách</div>
+                            <div class="card-price "><span class="regular-price">29.600.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card premium">
+                            <div class="card-badge">Premium</div>
+                            <div class="card-name">Độn cằm sụn Mỹ</div>
+                            <div class="card-price "><span class="regular-price">32.800.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Độn cằm sụn Hàn</div>
+                            <div class="card-price "><span class="regular-price">49.600.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card premium">
+                            <div class="card-badge">Premium</div>
+                            <div class="card-name">Độn cằm sụn Sugiform</div>
+                            <div class="card-price "><span class="regular-price">64.800.000đ</span></div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="nose" class="pricing-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>
+                        <span class="section-icon">👃</span>
+                        NÂNG MŨI
+                    </h2>
+                    <svg class="collapse-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="section-content">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng mũi Mini Line</div>
+                            <div class="card-price "><span class="regular-price">20.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng mũi Softline 4D</div>
+                            <div class="card-price "><span class="regular-price">27.200.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng mũi Shanghai</div>
+                            <div class="card-price "><span class="regular-price">44.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Sụn sinh học Surgiform</div>
+                            <div class="card-price "><span class="regular-price">16.800.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Bọc sụn đầu mũi</div>
+                            <div class="card-price "><span class="regular-price">8.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng mũi Tái Cấu Trúc Reform
+ (đã gồm bọc đầu mũi , thu gọn dầu mũi , dựng trụ)</div>
+                            <div class="card-price "><span class="regular-price">44.800.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng mũi TCT Reform sụn Tự Thân</div>
+                            <div class="card-price "><span class="regular-price">108.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Thu nhỏ đầu mũi</div>
+                            <div class="card-price "><span class="regular-price">24.800.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mài gồ</div>
+                            <div class="card-price "><span class="regular-price">8.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Cắt cánh mũi</div>
+                            <div class="card-price "><span class="regular-price">6.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Thu nền mũi</div>
+                            <div class="card-price "><span class="regular-price">6.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mũi sửa lại lần 2 (Thêm chi phí tháo sụn và bóc tách bao sơ)</div>
+                            <div class="card-price "><span class="regular-price">8.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Chỉ tháo sụn mũi</div>
+                            <div class="card-price "><span class="regular-price">6.000.000đ</span></div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="eyes" class="pricing-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>
+                        <span class="section-icon">👁</span>
+                        CÁC DỊCH VỤ VỀ MẮT
+                    </h2>
+                    <svg class="collapse-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="section-content">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Cắt mí Line Mini</div>
+                            <div class="card-price "><span class="regular-price">10.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Cắt mí Line Mini (khách hàng &gt;=39 tuổi)</div>
+                            <div class="card-price "><span class="regular-price">12.500.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Cắt mí Shanghai</div>
+                            <div class="card-price "><span class="regular-price">12.500.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nhấn mí Baby Eyes</div>
+                            <div class="card-price "><span class="regular-price">8.500.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Bấm mí</div>
+                            <div class="card-price "><span class="regular-price">10.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mở góc mắt trong</div>
+                            <div class="card-price "><span class="regular-price">11.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mở góc mắt ngoài</div>
+                            <div class="card-price "><span class="regular-price">11.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Hạ mắt xếch</div>
+                            <div class="card-price "><span class="regular-price">11.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Bóc mỡ mắt (khách làm lẻ dịch vụ)</div>
+                            <div class="card-price "><span class="regular-price">7.500.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng nửa đuôi cung mày</div>
+                            <div class="card-price "><span class="regular-price">12.500.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng full cung chân mày</div>
+                            <div class="card-price "><span class="regular-price">15.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Cấy mỡ ly tâm mí mắt trên</div>
+                            <div class="card-price "><span class="regular-price">18.500.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Cấy mỡ ly tâm mí mắt dưới</div>
+                            <div class="card-price "><span class="regular-price">18.500.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Căng da mắt</div>
+                            <div class="card-price "><span class="regular-price">28.000.000đ</span></div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="intimate" class="pricing-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>
+                        <span class="section-icon">🌺</span>
+                        THẨM MỸ CÔ BÉ
+                    </h2>
+                    <svg class="collapse-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="section-content">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Tạo Hình môi bé độ 1</div>
+                            <div class="card-price "><span class="regular-price">8.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Tạo Hình môi bé độ 2</div>
+                            <div class="card-price "><span class="regular-price">10.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Tạo Hình môi bé độ 3</div>
+                            <div class="card-price "><span class="regular-price">13.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Chuyển vạt làm hồng</div>
+                            <div class="card-price "><span class="regular-price">12.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Tạo hình môi lớn độ 1</div>
+                            <div class="card-price "><span class="regular-price">13.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Tạo hình môi lớn độ 2</div>
+                            <div class="card-price "><span class="regular-price">15.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Tiêm filler làm đầy môi lớn</div>
+                            <div class="card-price "><span class="regular-price">12.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Cấy mỡ môi lớn tự thân</div>
+                            <div class="card-price "><span class="regular-price">35.200.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Căng chỉ trẻ hóa môi lớn</div>
+                            <div class="card-price "><span class="regular-price">22.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Tiêm/Cấy PRP trẻ hóa môi lớn</div>
+                            <div class="card-price "><span class="regular-price">8.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Thu hẹp âm đạo độ 1</div>
+                            <div class="card-price "><span class="regular-price">18.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Thu hẹp âm đạo độ 2</div>
+                            <div class="card-price "><span class="regular-price">20.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Thu hẹp âm đạo độ 3</div>
+                            <div class="card-price "><span class="regular-price">22.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Bóc bỏ xơ sẹo/niêm mạc</div>
+                            <div class="card-price "><span class="regular-price">9.200.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Siết cơ vòng âm đạo tăng đàn hồi Nano cấp 1</div>
+                            <div class="card-price "><span class="regular-price">15.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Siết cơ vòng âm đạo tăng đàn hồi Nano cấp 2</div>
+                            <div class="card-price "><span class="regular-price">22.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Siết cơ vòng âm đạo tăng đàn hồi Nano cấp 3</div>
+                            <div class="card-price "><span class="regular-price">30.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Cấy chỉ âm đạo Collagen</div>
+                            <div class="card-price "><span class="regular-price">22.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Tăng kích thích điểm G/Nâng G</div>
+                            <div class="card-price "><span class="regular-price">18.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Chỉnh mũ âm vật độ 1</div>
+                            <div class="card-price "><span class="regular-price">6.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Chỉnh mũ âm vật độ 2</div>
+                            <div class="card-price "><span class="regular-price">12.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng sa trễ tầng sinh môn</div>
+                            <div class="card-price "><span class="regular-price">12.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Sửa sẹo tầng sinh môn</div>
+                            <div class="card-price "><span class="regular-price">9.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Loại bỏ niêm mạc gốc màng trinh</div>
+                            <div class="card-price "><span class="regular-price">6.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng sa trễ âm đạo/tử cung</div>
+                            <div class="card-price "><span class="regular-price">6.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Tái tạo/ vá màng trinh</div>
+                            <div class="card-price "><span class="regular-price">54.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Bóc u tuyến Batholin</div>
+                            <div class="card-price "><span class="regular-price">22.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Bóc nang bã đậu âm đạo</div>
+                            <div class="card-price "><span class="regular-price">6.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Thẩm mỹ sẹo mổ đẻ</div>
+                            <div class="card-price "><span class="regular-price">12.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Combo Tạo hình Môi bé+ Thu hẹp âm đạo</div>
+                            <div class="card-price "><span class="regular-price">18.000.000đ</span></div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="facelift" class="pricing-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>
+                        <span class="section-icon">✨</span>
+                        CĂNG DA MEDI LIFT
+                    </h2>
+                    <svg class="collapse-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="section-content">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Căng da Medi Lift  toàn mặt ( gây mê ) tại BV</div>
+                            <div class="card-price "><span class="regular-price">88.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Căng da Medi Lift vùng cổ ( tiền mê ) tại BV</div>
+                            <div class="card-price "><span class="regular-price">42.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Căng da Medi Lift vùng trán ( gây tê)</div>
+                            <div class="card-price "><span class="regular-price">32.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Căng da Medi Lift vùng đuôi mắt / thái dương ( gây tê)</div>
+                            <div class="card-price "><span class="regular-price">32.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Căng da Medi Lift vùng hàm ( gây tê)</div>
+                            <div class="card-price "><span class="regular-price">32.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Căng da Medi Lift vùng má ( gây tê)</div>
+                            <div class="card-price "><span class="regular-price">32.000.000đ</span></div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="apple-lift" class="pricing-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>
+                        <span class="section-icon">🍎</span>
+                        NÂNG CƠ TÁO (Nâng cơ tầng mặt giữa)
+                    </h2>
+                    <svg class="collapse-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="section-content">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng cơ táo Cấp độ 1</div>
+                            <div class="card-price "><span class="regular-price">32.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng cơ táo Cấp độ 2</div>
+                            <div class="card-price "><span class="regular-price">44.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng cơ táo Cấp độ 3</div>
+                            <div class="card-price "><span class="regular-price">60.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng cơ táo Cấp độ 4</div>
+                            <div class="card-price "><span class="regular-price">80.000.000đ</span></div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="high-tech" class="pricing-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>
+                        <span class="section-icon">🔬</span>
+                        THẨM MỸ CÔNG NGHỆ CAO
+                    </h2>
+                    <svg class="collapse-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="section-content">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Trẻ hóa PRH Cấp độ 1</div>
+                            <div class="card-price "><span class="regular-price">25.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Trẻ hóa PRH Cấp độ 2</div>
+                            <div class="card-price "><span class="regular-price">50.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Trẻ hóa PRH Cấp độ 3</div>
+                            <div class="card-price "><span class="regular-price">75.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Trẻ hóa PRH Cấp độ 4</div>
+                            <div class="card-price "><span class="regular-price">100.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng cơ trẻ hóa Hifu cấp độ 1</div>
+                            <div class="card-price "><span class="regular-price">10.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng cơ trẻ hóa Hifu cấp độ 2</div>
+                            <div class="card-price "><span class="regular-price">16.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng cơ trẻ hóa Hifu cấp độ 3</div>
+                            <div class="card-price "><span class="regular-price">22.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng cơ trẻ hóa Hifu cấp độ 4</div>
+                            <div class="card-price "><span class="regular-price">32.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng cơ trẻ hóa vùng mắt Ultherapy</div>
+                            <div class="card-price "><span class="regular-price">16.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng cơ trẻ hóa vùng mặt Ultherapy</div>
+                            <div class="card-price "><span class="regular-price">24.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng cơ trẻ hóa vùng mặt+cổ Ultherapy</div>
+                            <div class="card-price "><span class="regular-price">32.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng cơ trẻ hóa vùng bụng/đùi Ultherapy</div>
+                            <div class="card-price "><span class="regular-price">44.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng cơ trẻ hóa vùng mắt Thermage</div>
+                            <div class="card-price "><span class="regular-price">40.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng cơ trẻ hóa vùng mặt Thermage</div>
+                            <div class="card-price "><span class="regular-price">60.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng cơ trẻ hóa vùng mặt+cổ Thermage</div>
+                            <div class="card-price "><span class="regular-price">72.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Nâng cơ trẻ hóa vùng bụng/đùi Thermage</div>
+                            <div class="card-price "><span class="regular-price">80.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Slim Plus Giảm Mỡ  Hạ Gò Má</div>
+                            <div class="card-price "><span class="regular-price">12.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Slim Plus Giảm Mỡ Má</div>
+                            <div class="card-price "><span class="regular-price">13.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Slim Plus Giảm Mỡ Bắp Tay</div>
+                            <div class="card-price "><span class="regular-price">15.600.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Slim Plus Giảm Mỡ Bắp Chân</div>
+                            <div class="card-price "><span class="regular-price">15.600.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Slim Plus Giảm Mỡ Đùi</div>
+                            <div class="card-price "><span class="regular-price">22.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Slim Plus Giảm Mỡ Bụng</div>
+                            <div class="card-price "><span class="regular-price">28.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Slim Plus  Giảm Mỡ Eo</div>
+                            <div class="card-price "><span class="regular-price">28.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Slim Plus Giảm Mỡ Nọng Cằm</div>
+                            <div class="card-price "><span class="regular-price">11.200.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài kim loại tiêu chuẩn cấp độ 1</div>
+                            <div class="card-price "><span class="regular-price">22.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài kim loại tiêu chuẩn cấp độ 2</div>
+                            <div class="card-price "><span class="regular-price">26.250.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài kim loại tiêu chuẩn cấp độ 3</div>
+                            <div class="card-price "><span class="regular-price">29.400.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài kim loại tiêu chuẩn cấp độ 4</div>
+                            <div class="card-price "><span class="regular-price">33.600.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài kim loại tự đóng cấp độ 1</div>
+                            <div class="card-price "><span class="regular-price">25.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài kim loại tự đóng cấp độ 2</div>
+                            <div class="card-price "><span class="regular-price">30.450.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài kim loại tự đóng cấp độ 3</div>
+                            <div class="card-price "><span class="regular-price">33.600.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài kim loại tự đóng cấp độ 4</div>
+                            <div class="card-price "><span class="regular-price">37.800.000đ</span></div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="mac-cai-canh-cam-tu-dong" class="pricing-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>
+                        <span class="section-icon">🔹</span>
+                        Mắc cài cánh cam TỰ ĐÓNG
+                    </h2>
+                    <svg class="collapse-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="section-content">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài cánh cam tự đóng cấp độ 1</div>
+                            <div class="card-price "><span class="regular-price">30.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài cánh cam tự đóng cấp độ 2</div>
+                            <div class="card-price "><span class="regular-price">35.450.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài cánh cam tự đóng cấp độ 3</div>
+                            <div class="card-price "><span class="regular-price">38.600.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài cánh cam tự đóng cấp độ 4</div>
+                            <div class="card-price "><span class="regular-price">42.800.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài sứ tiêu chuẩn cấp độ 1</div>
+                            <div class="card-price "><span class="regular-price">30.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài sứ tiêu chuẩn cấp độ 2</div>
+                            <div class="card-price "><span class="regular-price">35.700.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài sứ tiêu chuẩn cấp độ 3</div>
+                            <div class="card-price "><span class="regular-price">40.950.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài sứ tiêu chuẩn cấp độ 4</div>
+                            <div class="card-price "><span class="regular-price">45.150.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài sứ tự đóng cấp độ 1</div>
+                            <div class="card-price "><span class="regular-price">36.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài sứ tự đóng cấp độ 2</div>
+                            <div class="card-price "><span class="regular-price">42.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài sứ tự đóng cấp độ 3</div>
+                            <div class="card-price "><span class="regular-price">47.250.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài sứ tự đóng cấp độ 3</div>
+                            <div class="card-price "><span class="regular-price">51.450.000đ</span></div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="mac-cai-kim-loai-mat-trong" class="pricing-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>
+                        <span class="section-icon">🔹</span>
+                        Mắc cài kim loại mặt trong
+                    </h2>
+                    <svg class="collapse-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="section-content">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài kim loại tiêu chuẩn mặt trong cấp độ 1</div>
+                            <div class="card-price "><span class="regular-price">60.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài kim loại tiêu chuẩn mặt trong cấp độ 2</div>
+                            <div class="card-price "><span class="regular-price">65.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài kim loại tiêu chuẩn mặt trong cấp độ 3</div>
+                            <div class="card-price "><span class="regular-price">70.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài kim loại tiêu chuẩn mặt trong cấp độ 4</div>
+                            <div class="card-price "><span class="regular-price">0đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Tiền chỉnh nha</div>
+                            <div class="card-price "><span class="regular-price">18.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài tự đóng Damon Ultima cấp độ 1</div>
+                            <div class="card-price "><span class="regular-price">38.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài tự đóng Damon Ultima cấp độ 2</div>
+                            <div class="card-price "><span class="regular-price">44.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài tự đóng Damon Ultima cấp độ 3</div>
+                            <div class="card-price "><span class="regular-price">46.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Mắc cài tự đóng Damon Ultima cấp độ 4</div>
+                            <div class="card-price "><span class="regular-price">52.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Invisalign đơn giản (09-12 tháng)</div>
+                            <div class="card-price "><span class="regular-price">80.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Invisalign tiêu chuẩn (13- 30 tháng)</div>
+                            <div class="card-price "><span class="regular-price">100.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Invisalign phức tạp (Trên 30 tháng)</div>
+                            <div class="card-price "><span class="regular-price">140.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Aligner Pro đơn giản (09-12 tháng)</div>
+                            <div class="card-price "><span class="regular-price">50.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Aligner Pro tiêu chuẩn (13- 30 tháng)</div>
+                            <div class="card-price "><span class="regular-price">60.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Aligner Pro phức tạp (Trên 30 tháng)</div>
+                            <div class="card-price "><span class="regular-price">70.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Doctor Clear Aligner đơn giản (09-12 tháng)</div>
+                            <div class="card-price "><span class="regular-price">55.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Doctor Clear Aligner tiêu chuẩn (13- 30 tháng)</div>
+                            <div class="card-price "><span class="regular-price">65.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Doctor Clear Aligner phức tạp (Trên 30 tháng)</div>
+                            <div class="card-price "><span class="regular-price">75.000.000đ</span></div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="rang-su-1-rang" class="pricing-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>
+                        <span class="section-icon">🔹</span>
+                        Răng sứ (1 răng)
+                    </h2>
+                    <svg class="collapse-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="section-content">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">RS Titan</div>
+                            <div class="card-price "><span class="regular-price">2.100.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">RS Katana</div>
+                            <div class="card-price "><span class="regular-price">2.650.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">RS Venus 3D</div>
+                            <div class="card-price "><span class="regular-price">3.220.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">RS Ful Zirconia</div>
+                            <div class="card-price "><span class="regular-price">3.690.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">RS Ceramill</div>
+                            <div class="card-price "><span class="regular-price">5.200.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">RS Emax</div>
+                            <div class="card-price "><span class="regular-price">5.200.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">RS HT Smile</div>
+                            <div class="card-price "><span class="regular-price">5.670.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">RS Cercon HT</div>
+                            <div class="card-price "><span class="regular-price">5.670.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">RS Nacera Vita</div>
+                            <div class="card-price "><span class="regular-price">6.150.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">RS 3M Lava Plus</div>
+                            <div class="card-price "><span class="regular-price">7.560.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">RS Orodent</div>
+                            <div class="card-price "><span class="regular-price">14.650.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Dán sứ Veneer Emax Press</div>
+                            <div class="card-price "><span class="regular-price">6.810.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Dán sứ Veneer Caramay Ngọc Trai</div>
+                            <div class="card-price "><span class="regular-price">8.700.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Dán sứ Veneer Lisi Press</div>
+                            <div class="card-price "><span class="regular-price">13.420.000đ</span></div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="cay-ghep-implant" class="pricing-section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>
+                        <span class="section-icon">🔹</span>
+                        Cấy ghép Implant
+                    </h2>
+                    <svg class="collapse-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="section-content">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Trụ Implant Hàn</div>
+                            <div class="card-price "><span class="regular-price">16.500.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Trụ Implant Mỹ</div>
+                            <div class="card-price "><span class="regular-price">19.800.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Trụ Implant Pháp</div>
+                            <div class="card-price "><span class="regular-price">22.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Trụ Implant Thụy Sỹ</div>
+                            <div class="card-price "><span class="regular-price">33.880.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Implant Toàn hàm: All-on Phục hình tạm</div>
+                            <div class="card-price "><span class="regular-price">11.000.000đ</span></div>
+                            
+                            
+                        </div>
+
+                        <div class="pricing-card">
+                            
+                            <div class="card-name">Implant Toàn hàm: All-on Phục hình cố định: thanh bar</div>
+                            <div class="card-price "><span class="regular-price">27.500.000đ</span></div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <button class="scroll-top" id="scrollTopBtn" onclick="scrollToTop()">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+            <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+    </button>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <script src="/bang-gia/pricing.js"></script>
+</body>
+</html>

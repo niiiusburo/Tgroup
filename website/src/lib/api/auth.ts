@@ -35,8 +35,11 @@ export interface LoginResponse {
   redirectTo?: string;
 }
 
-export function login(identifier: string, password: string) {
-  return apiFetch<LoginResponse>('/Auth/login', { method: 'POST', body: { email: identifier, password } });
+export function login(identifier: string, password: string, rememberMe = false) {
+  return apiFetch<LoginResponse>('/Auth/login', {
+    method: 'POST',
+    body: { email: identifier, password, rememberMe },
+  });
 }
 
 export function fetchMe() {

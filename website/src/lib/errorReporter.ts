@@ -1,3 +1,5 @@
+import { getAuthToken } from '@/lib/authToken';
+
 /**
  * ErrorReporter — sends errors from frontend to backend telemetry for AutoDebugger
  * @crossref:used-in[ErrorBoundary, logger, api/core, main.tsx]
@@ -9,7 +11,7 @@
 
 const TELEMETRY_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3002/api').replace(/\/?api\/?$/, '') + '/api/telemetry';
 
-interface ErrorReport {
+export interface ErrorReport {
   error_type: 'React' | 'API' | 'Network' | 'Global' | 'UnhandledRejection' | 'Console';
   message: string;
   stack: string;
@@ -60,7 +62,7 @@ function getRoute(): string {
 
 function getUserId(): string | null {
   try {
-    const token = localStorage.getItem('tgclinic_token');
+    const token = getAuthToken();
     if (!token) return null;
     // JWT payload is the middle part
     const payload = token.split('.')[1];
@@ -83,6 +85,60 @@ function getLocationId(): string | null {
 }
 
 const FLUSH_INTERVAL = 2000; // Batch errors every 2s to avoid flooding
+const CHUNK_RELOAD_SESSION_KEY = 'tg_chunk_reload_attempted';
+
+const STALE_CHUNK_PATTERN = /Failed to fetch dynamically imported module/i;
+const NOISE_MESSAGE_PATTERNS = [
+  /Failed to connect to MetaMask/i,
+  /MetaMask/i,
+  /Failed to execute 'insertBefore' on 'Node'/i,
+  /Failed to execute 'removeChild' on 'Node'/i,
+  /ResizeObserver loop/i,
+];
+
+function isNoiseError(report: ErrorReport): boolean {
+  const haystack = `${report.message || ''} ${report.stack || ''}`;
+  return NOISE_MESSAGE_PATTERNS.some((pattern) => pattern.test(haystack));
+}
+
+function isStaleChunkError(report: ErrorReport): boolean {
+  return STALE_CHUNK_PATTERN.test(report.message || '');
+}
+
+/**
+ * After deploy, users on an old bundle may request deleted chunk files.
+ * Reload once per tab session to pick up the current asset manifest.
+ */
+export function tryRecoverStaleChunk(report: ErrorReport): boolean {
+  if (!isStaleChunkError(report)) return false;
+  if (import.meta.env.DEV) return false;
+
+  try {
+    if (sessionStorage.getItem(CHUNK_RELOAD_SESSION_KEY) === '1') return false;
+    sessionStorage.setItem(CHUNK_RELOAD_SESSION_KEY, '1');
+  } catch {
+    return false;
+  }
+
+  const returnPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  try {
+    sessionStorage.setItem('tg_return_path', returnPath);
+  } catch {
+    // ignore
+  }
+
+  window.setTimeout(() => {
+    window.location.reload();
+  }, 50);
+
+  return true;
+}
+
+export function shouldReportError(report: ErrorReport): boolean {
+  if (isNoiseError(report)) return false;
+  if (tryRecoverStaleChunk(report)) return false;
+  return true;
+}
 
 // Send error reports in batches to avoid flooding the backend
 async function sendBatch(errors: ErrorReport[]) {
@@ -124,6 +180,10 @@ export function reportError(report: ErrorReport) {
   // In dev, just log locally
   if (import.meta.env.DEV) {
     console.debug('[ErrorReporter]', report.error_type, report.message);
+    return;
+  }
+
+  if (!shouldReportError(report)) {
     return;
   }
 

@@ -1,0 +1,34 @@
+{
+  "projectName": "tgclinic-website",
+  "type": "frontend",
+  "frontend": {
+    "framework": "react",
+    "buildTool": "vite",
+    "baseUrl": "https://tmv.2checkin.com",
+    "entryFile": "src/main.tsx"
+  },
+  "testSettings": {
+    "needLogin": true,
+    "loginCredential": {
+      "email": "t@clinic.vn",
+      "password": "123123"
+    },
+    "defaultViewport": {
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "scopes": [
+    "customer-management",
+    "employee-management",
+    "appointment-calendar",
+    "payment-processing",
+    "permission-control",
+    "service-catalog",
+    "report-generation",
+    "ctv-portal",
+    "public-guest-booking",
+    "commission-tracking",
+    "cosmetic-lob"
+  ]
+}

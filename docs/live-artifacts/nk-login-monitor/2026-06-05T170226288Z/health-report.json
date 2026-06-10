@@ -1,0 +1,66 @@
+{
+  "checkedAt": "2026-06-05T17:02:26.288Z",
+  "baseUrl": "https://nk.2checkin.com",
+  "version": {
+    "status": 200,
+    "body": {
+      "version": "0.32.44",
+      "buildTime": "2026-05-27T04:06:39.953Z",
+      "gitCommit": "ff65634",
+      "gitBranch": "detached-ff65634f",
+      "environment": "development"
+    }
+  },
+  "loginSucceeded": true,
+  "workedAccount": "t@clinic.vn",
+  "fallbackUsed": false,
+  "accountAttempts": [
+    {
+      "account": "t@clinic.vn",
+      "success": true,
+      "loginFormStillVisible": false,
+      "url": "https://nk.2checkin.com/",
+      "visibleError": ""
+    }
+  ],
+  "apiErrors": 0,
+  "consoleErrors": 0,
+  "pageErrors": 0,
+  "requestFailures": 0,
+  "screens": [
+    {
+      "name": "dashboard",
+      "finalUrl": "https://nk.2checkin.com/",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/2026-06-05T170226288Z/01-dashboard.png",
+      "privacySafeScreenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/2026-06-05T170226288Z/redacted-safe/01-dashboard-privacy-redacted.png",
+      "bodyChars": 15199,
+      "blank": false,
+      "obviousIssue": false,
+      "apiErrorsDuringScreen": 0,
+      "consoleErrorsDuringScreen": 0
+    },
+    {
+      "name": "calendar",
+      "finalUrl": "https://nk.2checkin.com/calendar",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/2026-06-05T170226288Z/02-calendar.png",
+      "privacySafeScreenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/2026-06-05T170226288Z/redacted-safe/02-calendar-privacy-redacted.png",
+      "bodyChars": 48540,
+      "blank": false,
+      "obviousIssue": false,
+      "apiErrorsDuringScreen": 0,
+      "consoleErrorsDuringScreen": 0
+    },
+    {
+      "name": "customers",
+      "finalUrl": "https://nk.2checkin.com/customers",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/2026-06-05T170226288Z/03-customers.png",
+      "privacySafeScreenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/nk-login-monitor/2026-06-05T170226288Z/redacted-safe/03-customers-privacy-redacted.png",
+      "bodyChars": 2350,
+      "blank": false,
+      "obviousIssue": false,
+      "apiErrorsDuringScreen": 0,
+      "consoleErrorsDuringScreen": 0
+    }
+  ],
+  "issues": []
+}
