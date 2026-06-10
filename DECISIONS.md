@@ -193,3 +193,15 @@ References:
 - 2026-05-18-cosmetic-line-of-business-design-v2.md (D1–D16)
 - Migration 047 + bootstrap script
 - .claude/memory.md (session notes on the audit finding)
+
+## DEC-20260610-01: Strict CTV commission attribution — explicit card CTV only
+**Status:** Accepted (owner interview 2026-06-10, business-logic-interview Q1 = option 2)
+**Context:** `createSaleOrder` inherited the customer's active `referred_by_ctv_id` when the form sent no `ctv_id`, attaching the referrer and paying commission automatically ("the notebook gives Anna candy by itself"). Owner wants commission only when a human deliberately points at a CTV.
+**Decision:** A service card earns CTV commission ONLY when the create/edit payload explicitly carries a CTV. No `ctv_id` ⇒ `saleorders.ctv_id` stays NULL ⇒ zero earnings, regardless of the customer's recorded referrer. `referred_by_ctv_id` remains as referral bookkeeping (CTV referrals list, client tracking) but never silently drives money.
+**Consequences:** Create-time fallback removed from `createSaleOrder.js` (resolveEffectiveCtvId no longer queries the customer); INV-003C rewritten; earnings-commissions.yaml + ctv.yaml + ctv-referral-commission.md updated; strict-mode unit tests replace the inheritance test. Staff MUST pick the CTV on the card for the referrer to earn.
+
+## DEC-20260610-02: Nightly commission-attribution guard with Telegram alert
+**Status:** Accepted (owner interview 2026-06-10, Q2 = option 1)
+**Context:** 5 stale pre-cutover earnings rows violating the no-CTV rule sat unnoticed for ~3 weeks until a manual audit.
+**Decision:** `scripts/nk3-commission-audit.sh` runs nightly on the VPS (cron 18:00 UTC = 01:00 ICT) against `tdental_nk3` + `tcosmetic_nk3`, checking: (1) ACTIVE (status<>'reversed') net earnings on no-CTV services, (2) ACTIVE earnings to non-CTV recipients, (3) ACTIVE earnings with no service line. Violations alert the project Telegram chat (`/opt/tgroup/scripts/telegram.env`, chmod 600 — token NOT in the repo).
+**Consequences:** Wrong commission is caught within 24h instead of by accident. Script failure also alerts. Silent when clean.

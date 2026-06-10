@@ -9,7 +9,7 @@ summary: |
   Shows pending/paid, LOB-tagged activity, referred clients across LOBs, split bars, etc. per visual companion. D13 recipient resolution powers the rows.
   CTV is the only surface that intentionally crosses the two DBs (composition in API, no SQL JOIN).
   CTV v3 business authority lives in docs/business-logic/ctv-referral-commission.md:
-  CTV booking is appointment-only; CTV earnings are created from service cards with selected or inherited customer referrer CTVs, based on full service price, using CTV tier config.
+  CTV booking is appointment-only; CTV earnings are created ONLY from service cards with an explicitly selected CTV (DEC-20260610-01 — no referrer inheritance), based on full service price, using CTV tier config.
   Claim locks are per LOB, not cross-LOB. Public signup can create a root/top-level CTV when no upline is supplied.
 owns:
   - api/src/routes/ctv.js and ctv* helper modules (commission-summary + client-journeys cross-DB aggregators using getDb on both)
@@ -160,7 +160,7 @@ impact_tests:
   - CTV Tôi tab changes passwords only after current-password verification, rejects short/mismatched new passwords client-side, and never exposes password hashes
   - POST /api/ctv/bookings resolves non-null appointment companyid, creates dbo.appointments without creating saleorders or saleorderlines, defaulting omitted service metadata to Referral Start when configured
   - POST /api/ctv/clients blocks re-registration when the same phone is actively claimed in the selected LOB by a different CTV; Dental and Cosmetic locks do not cross-block each other
-  - Service-card CTV assignment creates full-service-price tier earnings immediately; service-card creation inherits the customer's active recorded referral CTV when the submitted `ctv_id` is blank; service-card CTV reassignment before payout reverses/recreates pending earnings; paid-out earnings block reassignment
+  - Service-card CTV assignment creates full-service-price tier earnings immediately; service-card creation with a blank `ctv_id` stays CTV-less and creates NO earnings (DEC-20260610-01); service-card CTV reassignment before payout reverses/recreates pending earnings; paid-out earnings block reassignment
   - Appointment-card CTV reassignment changes ownership without commission movement and preserves the existing timer anchor
   - Admin CTV hierarchy tree blocks moving CTVs with any referred customer, service, or earning activity and logs allowed moves automatically
   - Staff /verify-discount blocks CTV login, requires LOB + phone, reclaims client under issuing CTV on verify

@@ -33,7 +33,7 @@ Legacy admin commission configuration in `product-map/business-logic/commission-
 | Amount basis | Commission is calculated from the full service price immediately, not from amount paid, deposit paid, or collected cash. | target |
 | Appointment-only booking | CTV booking creates or reclaims a customer and creates an appointment only. It does not create a service card and does not create commission. | current invariant |
 | Appointment selected service | Service selected during CTV booking is appointment intent only. It can be stored on `appointments.productid`, including Referral Start fallback, but it is not a commissionable sale. | current invariant |
-| Service with no selected CTV | If staff creates a service card without a CTV selected, the backend uses the customer partner's active `referred_by_ctv_id` as the service CTV, saves it to `saleorders.ctv_id`, and creates full-price CTV earnings. If the customer has no active recorded referrer, no CTV commission is created. | current invariant |
+| Service with no selected CTV | If staff creates a service card without a CTV selected, the service stays CTV-less (`saleorders.ctv_id` NULL) and NO commission is created — even when the customer has an active `referred_by_ctv_id`. Commission requires an explicit CTV pick on the card (owner decision DEC-20260610-01, strict attribution; supersedes the create-time inheritance rule). | current invariant |
 
 ## 4. Tier Rates
 

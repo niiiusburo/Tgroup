@@ -2,11 +2,11 @@ name: Earnings & Commissions Engine (v2) — Transactional Attribution (D13)
 summary: |
   Append-only transactional earnings table (dbo.earnings) in BOTH databases.
   Separate from legacy commission *rules* system (commissions, commissionproductrules, saleorderlinepartnercommissions tables — untouched by v2; see legacy in business-logic/commission-rules.md).
-  CTV v3 authority lives in docs/business-logic/ctv-referral-commission.md. For CTV, earnings are triggered when a service card with a selected CTV is created, or when the customer partner has an active recorded referral CTV that the create-service path inherits, based on the full service price, and tier percentages come from CTV admin tier config.
+  CTV v3 authority lives in docs/business-logic/ctv-referral-commission.md. For CTV, earnings are triggered ONLY when a service card with an explicitly selected CTV is created (DEC-20260610-01 strict attribution; the old create-time inheritance of the customer's recorded referrer is removed), based on the full service price, and tier percentages come from CTV admin tier config.
   Older payment-collected + product commission_rate_percent behavior is an implementation gap for CTV, not the target rule.
   Refunds, voids, deletes, and safe service reversals create negative reversal rows (original untouched) while earnings remain unpaid/pending.
   Paid-out earnings (status=paid or payout_id set) lock client-side payment/service reversal.
-  CTV recipient resolution starts from the CTV selected on the service card, falling back on create to the customer's active `referred_by_ctv_id` when no CTV is selected. Disabled/missing uplines earn nothing; company keeps those percentages.
+  CTV recipient resolution is the CTV explicitly selected on the service card — nothing else (DEC-20260610-01). A service created with no CTV selected stays CTV-less and produces zero commission, even when the customer has an active `referred_by_ctv_id`. Disabled/missing uplines earn nothing; company keeps those percentages.
   Product/service commission_rate_percent is legacy mock data and must not drive CTV earnings.
   Current partial implementation can still write earnings via payment collection and D13 recipient fallback; that path is superseded for CTV but remains documented until fully migrated.
   Payouts table for admin batch runs (earnings.payout_id link); admin-only via earnings.payout.run or commissions.* perms. Combined Dental+Cosmetic payouts use LOB-local payout rows linked by shared payout_group_id and receipt URL.
@@ -57,7 +57,7 @@ tables:
   - etc.
 endpoints:
   - Current partial implementation: earnings writes via payments path
-  - Target CTV implementation: earnings writes when service card with selected/inherited referral CTV is created or reassigned before payout
+  - Target CTV implementation: earnings writes when a service card with an explicitly selected CTV is created or reassigned before payout (DEC-20260610-01: no inherited referrer)
   - GET /api/Earnings or reports (admin earnings view reads earning rows, including service_line_id for service drilldowns)
   - POST /api/Payouts (batch payout)
 ui_surfaces:
@@ -72,7 +72,7 @@ shared_types:
   - api/src/services/commissionEngine (D13 types, EarningsRow)
   - contracts for payout/earnings if exposed
 dependencies:
-  - Service cards / SaleOrderLines (target CTV trigger on service-card create with selected or inherited referral CTV, plus reassignment)
+  - Service cards / SaleOrderLines (target CTV trigger on service-card create with explicitly selected CTV only, plus reassignment)
   - Payments / Deposits (reversal and paid-out guard surfaces; current partial trigger on collect is superseded for CTV)
   - Cosmetic Clients / Partners (D13 inputs: referred_by, salestaffid, consulting_staff)
   - CTV tier config (rate source)
@@ -85,7 +85,7 @@ affected_by:
   - consultation card logic
 impact_tests:
   - Service-card creation in dental or cosmetic with selected CTV creates CTV earnings from full service price and configured enabled tier levels
-  - Service-card creation without selected CTV inherits the customer's active recorded referrer and creates CTV earnings; if the customer has no active recorded referrer, no CTV earnings are created
+  - Service-card creation without a selected CTV creates NO CTV earnings and leaves saleorders.ctv_id NULL — regardless of the customer's recorded referrer (DEC-20260610-01); nightly guard scripts/nk3-commission-audit.sh enforces the invariant and alerts Telegram
   - Refund/void/delete/safe service reversal creates negative reversal row; original earnings row remains for history
   - Paid-out earnings block payment void/delete and service reversal
   - Service-card CTV reassignment before payout reverses old pending earnings and creates new pending earnings for the new CTV/uplines

@@ -18,23 +18,12 @@ function serviceCardCommissionEnabled() {
   return process.env.CTV_SERVICE_CARD_COMMISSION === 'true' || process.env.CTV_SERVICE_CARD_COMMISSION === '1';
 }
 
-async function resolveEffectiveCtvId(q, partnerid, ctvId) {
-  if (isUuid(ctvId)) return ctvId.trim();
-  if (!isUuid(partnerid)) return null;
-
-  const rows = await q(
-    `SELECT c.referred_by_ctv_id
-       FROM partners c
-       JOIN partners r ON r.id = c.referred_by_ctv_id
-      WHERE c.id = $1
-        AND COALESCE(c.isdeleted, false) = false
-        AND r.is_ctv = true
-        AND r.active = true
-        AND COALESCE(r.isdeleted, false) = false
-      LIMIT 1`,
-    [partnerid],
-  );
-  return isUuid(rows?.[0]?.referred_by_ctv_id) ? rows[0].referred_by_ctv_id.trim() : null;
+// Owner decision 2026-06-10 (strict commission attribution): the service card's CTV is
+// ONLY what the request explicitly supplies. The old create-time fallback that inherited
+// the client's referred_by_ctv_id is removed — a service created with no CTV selected
+// must stay CTV-less and produce zero commission, even for referred clients.
+function resolveEffectiveCtvId(ctvId) {
+  return isUuid(ctvId) ? ctvId.trim() : null;
 }
 
 async function createSaleOrder(req, res) {
@@ -76,7 +65,7 @@ async function createSaleOrder(req, res) {
     const seqResult = await q(`SELECT nextval('dbo.saleorder_code_seq') AS seq`);
     const seqNum = parseInt(seqResult[0]?.seq || '1', 10);
     const code = `SO-${year}-${String(seqNum).padStart(4, '0')}`;
-    const effectiveCtvId = await resolveEffectiveCtvId(q, partnerid, ctv_id);
+    const effectiveCtvId = resolveEffectiveCtvId(ctv_id);
 
     await q(
       `INSERT INTO saleorders (
@@ -161,7 +150,7 @@ async function createSaleOrder(req, res) {
       }
     }
 
-    // Assign the chosen or inherited CTV as the customer's commission referrer (assign-only
+    // Assign the explicitly chosen CTV as the customer's commission referrer (assign-only
     // no-op when no valid CTV exists — never clears an existing referrer). lob enables the
     // retroactive earnings backfill (harmless no-op on a brand-new order with no payments).
     await setCustomerReferrer(q, partnerid, effectiveCtvId, { lob: req.lob || 'dental' });
