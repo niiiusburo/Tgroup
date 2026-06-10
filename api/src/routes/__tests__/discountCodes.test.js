@@ -317,4 +317,52 @@ describe('discount-codes routes', () => {
     expect(updateSql).toContain('$9::varchar');
     expect(updateParams).toContain('cust-9');
   });
+
+  test('POST /verify completion ignores createIfMissing/wrong LOB when a customer is bound (live repro)', async () => {
+    // Live repro 2026-06-10: completion screen reloaded with default LOB (dental)
+    // while the client was checked in under cosmetic; phone lookup found nothing,
+    // UI sent createIfMissing:true WITHOUT customerName. Must complete with the
+    // bound customer, not 400 "customerName is required".
+    const handler = findRouteHandler(discountCodesRouter, '/verify', 'post');
+    fetchCodeRow.mockResolvedValue({
+      id: 'code-row-3',
+      code: 'LINH-C9Z3X5',
+      status: 'checked_in',
+      discount_value: 10,
+      discount_type: 'percent',
+      ctv_partner_id: 'ctv-1',
+      ctv_name: 'Linh',
+      customer_partner_id: 'cust-7',
+      customer_lob: 'cosmetic',
+      expires_at: '2026-07-08T00:00:00.000Z',
+    });
+    const db = {
+      queryRows: jest.fn().mockResolvedValue([{ id: 'cust-7', name: 'Bound Client', phone: '0900777001' }]),
+      query: jest.fn().mockResolvedValue({ rows: [] }),
+    };
+    getDb.mockReturnValue(db);
+
+    const res = makeRes();
+    await handler(
+      {
+        user: { employeeId: 'staff-1', is_ctv: false, name: 'Staff' },
+        body: {
+          code: 'LINH-C9Z3X5',
+          customerPhone: '0900777001',
+          customerLob: 'dental', // wrong LOB selected on the completion screen
+          createIfMissing: true, // UI thought the client was new
+          markAsUsed: true,
+          // no customerName, no customerPartnerId
+        },
+      },
+      res
+    );
+
+    expect(res.statusCode).toBe(200);
+    expect(res.jsonBody.valid).toBe(true);
+    expect(res.jsonBody.status).toBe('used');
+    // Bound LOB must win over the (wrong) submitted LOB
+    expect(res.jsonBody.customerLob).toBe('cosmetic');
+    expect(createCustomerForCtv).not.toHaveBeenCalled();
+  });
 });

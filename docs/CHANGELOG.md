@@ -3,6 +3,13 @@
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
 
+## [0.36.3] — 2026-06-10
+### Fixed (NK3 — QR scan-path live walkthrough found a completion-step bug)
+- **Completing a checked-in code 400'd when the completion screen had the wrong LOB selected.** Live QR walkthrough (decoded QR → staff scan → check-in → reload → "Hoàn tất mã") repro'd it: the verify page defaults LOB to dental, the bound client was cosmetic, so the phone lookup said "new client" and the UI sent `createIfMissing: true` without a name → 400 `customerName is required`. The bound-customer fallback sat *after* the `createIfMissing` branch. Moved it *before* client re-resolution: completion of a `checked_in` code now always prefers `row.customer_partner_id` + `row.customer_lob` and never creates or rebinds a different client (`api/src/routes/discountCodes.js`). — @agent — FM-20260610-02.
+### Tests
+- `api/src/routes/__tests__/discountCodes.test.js` +1 (10 passed) — completion with wrong LOB + `createIfMissing` + no name must 200 with the bound cosmetic customer and never call `createCustomerForCtv`.
+- Live QR scan-path verified end-to-end on `tmv.2checkin.com`: QR pixels decode to `https://tmv.2checkin.com/verify-discount?code=…`, anonymous scan → `/login?returnTo=…` → staff login bounces back with the code, lookup valid, check-in 200, completion (post-fix) 200 → `used`.
+
 ## [0.36.2] — 2026-06-10
 ### Fixed (NK3 — CTV QR discount generation + staff verify, live-reproduced)
 - **CTV portal "Tạo mã & tải ảnh" silently failed (the reported QR-generation bug).** `generateCtvDiscountCode`, `verifyDiscountCode`, and `ensureCtvDiscountCode` passed pre-stringified bodies to `apiFetch`, which stringifies again — the server received a double-encoded JSON *string* and `express.json` (strict) rejected it with 400 (`Unexpected token '"' … is not valid JSON`). Reproduced live on `tmv.2checkin.com` via instrumented browser click. Fixed by passing plain objects (`website/src/lib/api/discountCodes.ts`). — @agent — INV: CTV QR voucher flow must be generatable from the portal.

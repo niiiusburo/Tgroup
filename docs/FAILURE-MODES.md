@@ -14,6 +14,16 @@ Each entry:
 
 ---
 
+## FM-20260610-02: Completing a Checked-In QR Code 400s When the Completion Screen LOB Doesn't Match
+
+- **Symptom:** Staff checks in a discount code, later reopens `/verify-discount?code=…` to complete it ("Hoàn tất mã"), and gets "customerName is required when creating a new client" — even though the customer is already bound to the code.
+- **Root Cause:** The verify page defaults the LOB selector to dental on load; the client was bound under cosmetic. The phone lookup in the wrong LOB returned "new client", so the UI submitted `createIfMissing: true` without a name. In `POST /verify`, the `createIfMissing` branch ran *before* the bound-customer fallback, so completion tried to create a client instead of using `row.customer_partner_id`.
+- **Fix:** The bound-customer fallback now runs *before* client resolution: completing a `checked_in` code always prefers `row.customer_partner_id` + `row.customer_lob`; explicit `customerPartnerId` is still honored; completion never creates or rebinds a different client.
+- **Prevention:** Route test locks the exact repro (checked_in + wrong LOB + `createIfMissing` + no name → 200 with bound cosmetic customer, `createCustomerForCtv` never called). Any future "complete" action on an entity that already carries its binding must consume the stored binding, not re-derive it from screen state.
+- **Related:** FM-20260610-01, CONTRACTS v1.0.33, `product-map/domains/ctv.yaml` discount_qr.
+
+---
+
 ## FM-20260610-01: CTV Portal QR Generation + Staff Verify Dead — Double-Encoded Body, Swallowed DB Error, Untyped SQL Param
 
 - **Symptom:** CTV taps "Tạo mã & tải ảnh" in `/ctv` → Mã QR and nothing happens (no voucher, no error). Staff `/verify-discount` always answers "Mã không tồn tại" for freshly generated codes; when lookup is bypassed, verify 500s.

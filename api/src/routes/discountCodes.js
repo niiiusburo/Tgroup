@@ -325,6 +325,17 @@ router.post('/verify', requireAuth, requireStaff, async (req, res) => {
       });
     }
 
+    // Completing a checked-in code: the customer was already bound at check-in.
+    // Prefer that binding over re-resolution — staff may have a different LOB
+    // selected or a phone-format mismatch on the completion screen, and
+    // completion must never create or rebind a different client.
+    if (!customerPartnerId && row.status === 'checked_in' && row.customer_partner_id) {
+      customerPartnerId = row.customer_partner_id;
+      if (row.customer_lob === 'cosmetic' || row.customer_lob === 'dental') {
+        customerLob = row.customer_lob;
+      }
+    }
+
     if (customerPartnerId) {
       const claim = await getReferralClaimStatus(customerPartnerId, customerLob, {});
       if (claim.active && claim.ownerCtvId && claim.ownerCtvId !== row.ctv_partner_id) {
@@ -355,15 +366,6 @@ router.post('/verify', requireAuth, requireStaff, async (req, res) => {
       }
       customerPartnerId = created.customer.id;
       customerLob = created.lob;
-    }
-
-    // Completing a checked-in code: fall back to the customer bound at check-in
-    // so staff don't have to re-resolve the client (phone format/LOB drift safe).
-    if (!customerPartnerId && row.status === 'checked_in' && row.customer_partner_id) {
-      customerPartnerId = row.customer_partner_id;
-      if (row.customer_lob === 'cosmetic' || row.customer_lob === 'dental') {
-        customerLob = row.customer_lob;
-      }
     }
 
     if (!customerPartnerId) {
