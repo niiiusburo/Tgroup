@@ -45,6 +45,23 @@ case "$cmd" in
     if [[ ! " ${args[*]:-} " == *" --mode "* ]]; then
       args=(--mode live "${args[@]:-}")
     fi
+    # Pre-flight: launch headless Chromium once — exercises the exact path the
+    # tests use (incl. the headless-shell build). External cache prunes of
+    # ~/Library/Caches/ms-playwright repeatedly caused instant mass-failures.
+    if ! "$PYTHON" - <<'EOF'
+import sys
+from playwright.sync_api import sync_playwright
+try:
+    with sync_playwright() as p:
+        p.chromium.launch(headless=True).close()
+except Exception as e:
+    print(f"pre-flight launch failed: {e}", file=sys.stderr)
+    sys.exit(1)
+EOF
+    then
+      echo "Playwright Chromium build missing/broken — installing..."
+      "$PYTHON" -m playwright install chromium
+    fi
     : > "$LOG_FILE"
     nohup "$PYTHON" "$TS_DIR/run_testsprite_suite.py" "${args[@]}" \
       >> "$LOG_FILE" 2>&1 &
