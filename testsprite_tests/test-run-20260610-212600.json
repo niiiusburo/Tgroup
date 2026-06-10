@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-10T21:34:50.610825",
+  "timestamp": "2026-06-10T21:26:00.355348",
   "mode": "live",
   "target_url": "https://tmv.2checkin.com",
   "results": [
@@ -7,140 +7,140 @@
       "id": "TC001",
       "name": "Admin login reaches protected overview",
       "status": "PASS",
-      "duration": 15.82,
+      "duration": 16.71,
       "error": null
     },
     {
       "id": "TC002",
       "name": "Logout clears session",
       "status": "PASS",
-      "duration": 4.66,
+      "duration": 4.53,
       "error": null
     },
     {
       "id": "TC003",
       "name": "Invalid credentials are rejected",
       "status": "PASS",
-      "duration": 15.59,
+      "duration": 16.53,
       "error": null
     },
     {
       "id": "TC004",
       "name": "Admin can access core guarded pages",
       "status": "PASS",
-      "duration": 18.4,
+      "duration": 17.6,
       "error": null
     },
     {
       "id": "TC005",
       "name": "Sidebar exposes expected admin navigation",
       "status": "PASS",
-      "duration": 16.04,
+      "duration": 16.15,
       "error": null
     },
     {
       "id": "TC006",
       "name": "Admin can create a new TEST_SPRITE customer",
       "status": "PASS",
-      "duration": 9.3,
+      "duration": 9.34,
       "error": null
     },
     {
       "id": "TC007",
       "name": "Admin can edit the existing TEST_SPRITE customer",
       "status": "PASS",
-      "duration": 15.42,
+      "duration": 13.9,
       "error": null
     },
     {
       "id": "TC008",
       "name": "Customer profile mutation controls are visible for admin",
       "status": "PASS",
-      "duration": 11.68,
+      "duration": 11.0,
       "error": null
     },
     {
       "id": "TC009",
       "name": "Delete and hard delete require explicit confirmation",
       "status": "PASS",
-      "duration": 12.17,
+      "duration": 11.52,
       "error": null
     },
     {
       "id": "TC010",
       "name": "Employees page loads and search works",
       "status": "PASS",
-      "duration": 7.71,
+      "duration": 8.22,
       "error": null
     },
     {
       "id": "TC011",
       "name": "Employee creation should work for TESTSPRITE employee",
       "status": "PASS",
-      "duration": 9.13,
+      "duration": 9.72,
       "error": null
     },
     {
       "id": "TC012",
       "name": "Employee edit should work for TESTSPRITE employee",
-      "status": "PASS",
-      "duration": 20.17,
-      "error": null
+      "status": "FAIL",
+      "duration": 25.96,
+      "error": "in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/thuanle/Library/Python/3.12/lib/python/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator(\"main table tbody tr\").first.locator(\"button[title^=\\\"S\u1eeda nh\u00e2n vi\u00ean\\\"]\")\n\n"
     },
     {
       "id": "TC013",
       "name": "Permission board loads groups and employees",
       "status": "PASS",
-      "duration": 7.42,
+      "duration": 8.98,
       "error": null
     },
     {
       "id": "TC014",
       "name": "Employee create failure does not break permission surfaces",
-      "status": "PASS",
-      "duration": 10.75,
-      "error": null
+      "status": "FAIL",
+      "duration": 5.74,
+      "error": ".12.13/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/base_events.py\", line 691, in run_until_complete\n    return future.result()\n           ^^^^^^^^^^^^^^^\n  File \"/Users/thuanle/Documents/TamTMV/Tgrouptest/testsprite_tests/TC014_Employee_create_failure_does_not_break_permission_surfaces.py\", line 28, in run_test\n    assert await submit.is_disabled(), (\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Employee create submit should be disabled with missing required fields\n"
     },
     {
       "id": "TC015",
       "name": "Reports protected routes render",
       "status": "PASS",
-      "duration": 20.47,
+      "duration": 19.88,
       "error": null
     },
     {
       "id": "TC016",
       "name": "Payment page renders without submitting money actions",
       "status": "PASS",
-      "duration": 5.53,
+      "duration": 5.51,
       "error": null
     },
     {
       "id": "TC017",
       "name": "Service catalog page renders and search/filter works",
       "status": "PASS",
-      "duration": 8.17,
+      "duration": 7.69,
       "error": null
     },
     {
       "id": "TC018",
       "name": "Settings page renders but does not save changes",
       "status": "PASS",
-      "duration": 16.16,
+      "duration": 15.75,
       "error": null
     },
     {
       "id": "TC060",
       "name": "TestSprite MCP CTV commission artifacts/config/results/screenshots",
       "status": "PASS",
-      "duration": 0.03,
+      "duration": 0.04,
       "error": null
     }
   ],
   "summary": {
     "total": 19,
-    "pass": 19,
-    "fail": 0,
+    "pass": 17,
+    "fail": 2,
     "skip": 0,
     "timeout": 0,
     "error": 0

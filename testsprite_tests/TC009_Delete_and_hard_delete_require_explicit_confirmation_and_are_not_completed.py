@@ -1,86 +1,48 @@
+"""TC009 — Delete requires explicit confirmation and is not completed (NK3-resilient rewrite, 2026-06-10).
+
+Clicks the row delete button, asserts the confirmation overlay appears, cancels,
+and verifies the row survives. No destructive action is completed.
+"""
 import asyncio
-from playwright import async_api
+
 from playwright.async_api import expect
-import os
-BASE_URL = os.environ.get("TESTSPRITE_BASE_URL", "http://127.0.0.1:5175")
+
+from _helpers import (
+    TestSession,
+    login,
+    search_customers,
+    ensure_test_sprite_customer,
+    TEST_MARKER,
+)
+
 
 async def run_test():
-    pw = None
-    browser = None
-    context = None
+    async with TestSession() as page:
+        await login(page)
+        await ensure_test_sprite_customer(page)
 
-    try:
-        # Start a Playwright session in asynchronous mode
-        pw = await async_api.async_playwright().start()
+        await search_customers(page, TEST_MARKER)
+        rows = page.locator("main table tbody tr")
+        await expect(rows.first).to_be_visible(timeout=15000)
+        count_before = await rows.count()
 
-        # Launch a Chromium browser in headless mode with custom arguments
-        browser = await pw.chromium.launch(
-            headless=True,
-            args=[
-                "--window-size=1280,720",         # Set the browser window size
-                "--disable-dev-shm-usage",        # Avoid using /dev/shm which can cause issues in containers
-                "--ipc=host",                     # Use host-level IPC for better stability
-                "--single-process"                # Run the browser in a single process mode
-            ],
+        # Trigger delete on the first (TEST_SPRITE) row
+        await rows.first.locator('button[title="Xóa"]').click()
+
+        # Confirmation overlay must appear and offer a cancel path
+        cancel = page.get_by_role("button", name="Hủy", exact=True)
+        await expect(cancel).to_be_visible(timeout=10000)
+        body = await page.evaluate("() => document.body.innerText")
+        assert "Xóa khách hàng" in body, "Delete confirmation text not shown"
+
+        # Cancel — nothing must be deleted
+        await cancel.click()
+        await asyncio.sleep(2)
+        count_after = await page.locator("main table tbody tr").count()
+        assert count_after == count_before, (
+            f"Row count changed after cancelled delete: {count_before} -> {count_after}"
         )
+        print("✅ TC009 PASS — delete demands confirmation; cancel preserves the row")
 
-        # Create a new browser context (like an incognito window)
-        context = await browser.new_context()
-        context.set_default_timeout(5000)
-
-        # Open a new page in the browser context
-        page = await context.new_page()
-
-        # Interact with the page elements to simulate user flow
-        # -> Navigate to http://127.0.0.1:5175
-        await page.goto(f"{BASE_URL}")
-
-        # -> Fill the email and password fields and submit the login form (click 'Đăng nhập').
-        frame = context.pages[-1]
-        # Input text
-        elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/div/input').nth(0)
-        await asyncio.sleep(3); await elem.fill('t@clinic.vn')
-
-        frame = context.pages[-1]
-        # Input text
-        elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/div[2]/input').nth(0)
-        await asyncio.sleep(3); await elem.fill('123123')
-
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/button').nth(0)
-        await asyncio.sleep(3); await elem.click()
-
-        # -> Open the Customers page (Khách hàng) to search for 'TEST SPRITE'
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div/div/aside/nav/a[3]').nth(0)
-        await asyncio.sleep(3); await elem.click()
-
-        # -> Click the Delete (trash) button for the top TEST SPRITE row to open the delete confirmation dialog (do not confirm delete).
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div/div/div/main/div/div[3]/div/table/tbody/tr/td[8]/button').nth(0)
-        await asyncio.sleep(3); await elem.click()
-
-        # -> Click the 'Hủy' button to cancel the delete, then verify the TEST SPRITE customer (TEST SPRITE LIVE QA 20260503172521) remains visible/searchable in the customers list.
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div/div/div/main/div/div[4]/div/div/button').nth(0)
-        await asyncio.sleep(3); await elem.click()
-
-        # --> Test passed — verified by AI agent
-        frame = context.pages[-1]
-        current_url = await frame.evaluate("() => window.location.href")
-        assert current_url is not None, "Test completed successfully"
-        await asyncio.sleep(5)
-
-    finally:
-        if context:
-            await context.close()
-        if browser:
-            await browser.close()
-        if pw:
-            await pw.stop()
 
 asyncio.run(run_test())

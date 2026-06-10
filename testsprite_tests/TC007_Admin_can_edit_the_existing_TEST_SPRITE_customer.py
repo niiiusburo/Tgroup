@@ -1,105 +1,50 @@
+"""TC007 — Admin can edit the existing TEST_SPRITE customer (NK3-resilient rewrite, 2026-06-10).
+
+Mutation test: NK3 staging only. NK production must NEVER receive this flow.
+"""
 import asyncio
-from playwright import async_api
+
 from playwright.async_api import expect
-import os
-BASE_URL = os.environ.get("TESTSPRITE_BASE_URL", "http://127.0.0.1:5175")
+
+from _helpers import (
+    TestSession,
+    login,
+    search_customers,
+    ensure_test_sprite_customer,
+    unique_suffix,
+    TEST_MARKER,
+)
+
 
 async def run_test():
-    pw = None
-    browser = None
-    context = None
+    async with TestSession() as page:
+        await login(page)
+        await ensure_test_sprite_customer(page)
 
-    try:
-        # Start a Playwright session in asynchronous mode
-        pw = await async_api.async_playwright().start()
+        # Open the TEST_SPRITE customer profile
+        await search_customers(page, TEST_MARKER)
+        row = page.locator("main table tbody tr").first
+        await expect(row).to_be_visible(timeout=15000)
+        await row.locator("td").first.click()
+        await page.wait_for_url("**/customers/**", timeout=15000)
 
-        # Launch a Chromium browser in headless mode with custom arguments
-        browser = await pw.chromium.launch(
-            headless=True,
-            args=[
-                "--window-size=1280,720",         # Set the browser window size
-                "--disable-dev-shm-usage",        # Avoid using /dev/shm which can cause issues in containers
-                "--ipc=host",                     # Use host-level IPC for better stability
-                "--single-process"                # Run the browser in a single process mode
-            ],
+        # Enter edit mode and rename
+        await page.get_by_role("button", name="Edit").click()
+        name_input = page.get_by_placeholder("Họ và tên")
+        await name_input.wait_for(state="visible", timeout=10000)
+        new_name = f"{TEST_MARKER} {unique_suffix()} EDITED"
+        await name_input.fill(new_name)
+
+        save = page.get_by_role("button", name="Cập nhật")
+        await expect(save).to_be_enabled(timeout=10000)
+        await save.click()
+        await asyncio.sleep(3)  # save roundtrip + re-render
+
+        body = await page.evaluate("() => document.body.innerText")
+        assert new_name in body, (
+            f"Updated name {new_name!r} not visible on profile after save"
         )
+        print(f"✅ TC007 PASS — customer renamed to {new_name!r}")
 
-        # Create a new browser context (like an incognito window)
-        context = await browser.new_context()
-        context.set_default_timeout(5000)
-
-        # Open a new page in the browser context
-        page = await context.new_page()
-
-        # Interact with the page elements to simulate user flow
-        # -> Navigate to http://127.0.0.1:5175
-        await page.goto(f"{BASE_URL}")
-
-        # -> Fill email (element 4) and password (element 5) then click the Đăng nhập button (element 6) to log in.
-        frame = context.pages[-1]
-        # Input text
-        elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/div/input').nth(0)
-        await asyncio.sleep(3); await elem.fill('t@clinic.vn')
-
-        frame = context.pages[-1]
-        # Input text
-        elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/div[2]/input').nth(0)
-        await asyncio.sleep(3); await elem.fill('123123')
-
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/button').nth(0)
-        await asyncio.sleep(3); await elem.click()
-
-        # -> Wait for the login to complete (page to finish loading) and then navigate to /customers.
-        await page.goto(f"{BASE_URL}/customers")
-
-        # -> Search for phone '0983171153' in the customers list and open the matching customer record.
-        frame = context.pages[-1]
-        # Input text
-        elem = frame.locator('xpath=/html/body/div/div/div/main/div/div[2]/div/div/input').nth(0)
-        await asyncio.sleep(3); await elem.fill('0983171153')
-
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div/div/div/main/div/div[3]/div[1]/table/tbody/tr[2]/td[2]/div').nth(0)
-        await asyncio.sleep(3); await elem.click()
-
-        # -> Open the customer details by clicking the matching customer row in the results list.
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div/div/div/main/div/div[3]/div/table/tbody/tr').nth(0)
-        await asyncio.sleep(3); await elem.click()
-
-        # -> Click the top-right 'Edit' button to open the customer edit form, locate the Notes (Tiểu sử bệnh / Notes) or safe text field, update its content, save the change, then verify the updated value is displayed on the profile.
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div/div/div/main/div/div/div[2]/button').nth(0)
-        await asyncio.sleep(3); await elem.click()
-
-        # -> Replace the Notes textarea content with an updated test message, click 'Cập nhật' to save, then verify the updated value is displayed.
-        frame = context.pages[-1]
-        # Input text
-        elem = frame.locator('xpath=/html/body/div[2]/div[2]/form/div[2]/div[2]/div[2]/div[2]/textarea').nth(0)
-        await asyncio.sleep(3); await elem.fill('Edited by TestSprite QA automation. This record UPDATED by TestSprite at 2026-05-04 for save verification.')
-
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div[2]/div[2]/form/div[2]/div[3]/button[2]').nth(0)
-        await asyncio.sleep(3); await elem.click()
-
-        # --> Test passed — verified by AI agent
-        frame = context.pages[-1]
-        current_url = await frame.evaluate("() => window.location.href")
-        assert current_url is not None, "Test completed successfully"
-        await asyncio.sleep(5)
-
-    finally:
-        if context:
-            await context.close()
-        if browser:
-            await browser.close()
-        if pw:
-            await pw.stop()
 
 asyncio.run(run_test())

@@ -1,80 +1,34 @@
+"""TC017 — Service catalog renders and search/filter works (NK3-resilient rewrite, 2026-06-10)."""
 import asyncio
-from playwright import async_api
+
 from playwright.async_api import expect
-import os
-BASE_URL = os.environ.get("TESTSPRITE_BASE_URL", "http://127.0.0.1:5175")
+
+from _helpers import TestSession, login, goto, assert_no_access_denied, body_text
+
 
 async def run_test():
-    pw = None
-    browser = None
-    context = None
+    async with TestSession() as page:
+        await login(page)
+        await goto(page, "/service-catalog", settle=2.5)
+        await assert_no_access_denied(page, "/service-catalog")
 
-    try:
-        # Start a Playwright session in asynchronous mode
-        pw = await async_api.async_playwright().start()
+        await expect(
+            page.get_by_role("heading", name="Danh mục dịch vụ").first
+        ).to_be_visible(timeout=15000)
+        rows_before = await page.locator("main table tbody tr").count()
+        assert rows_before > 0, "Service catalog rendered no rows"
 
-        # Launch a Chromium browser in headless mode with custom arguments
-        browser = await pw.chromium.launch(
-            headless=True,
-            args=[
-                "--window-size=1280,720",         # Set the browser window size
-                "--disable-dev-shm-usage",        # Avoid using /dev/shm which can cause issues in containers
-                "--ipc=host",                     # Use host-level IPC for better stability
-                "--single-process"                # Run the browser in a single process mode
-            ],
+        # Search must filter (or at least re-render) without crashing
+        search = page.get_by_placeholder("Tìm dịch vụ...")
+        await search.fill("Filler")
+        await asyncio.sleep(2.5)
+        await assert_no_access_denied(page, "/service-catalog (search)")
+        assert await search.input_value() == "Filler", "Search input lost its value"
+        text = await body_text(page)
+        assert "Danh mục dịch vụ" in text, "Page heading vanished after search"
+        print(
+            f"✅ TC017 PASS — catalog renders {rows_before} rows; search keeps page intact"
         )
 
-        # Create a new browser context (like an incognito window)
-        context = await browser.new_context()
-        context.set_default_timeout(5000)
-
-        # Open a new page in the browser context
-        page = await context.new_page()
-
-        # Interact with the page elements to simulate user flow
-        # -> Navigate to http://127.0.0.1:5175
-        await page.goto(f"{BASE_URL}")
-
-        # -> Fill the email and password fields and submit the login form (click the 'Đăng nhập' button).
-        frame = context.pages[-1]
-        # Input text
-        elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/div/input').nth(0)
-        await asyncio.sleep(3); await elem.fill('t@clinic.vn')
-
-        frame = context.pages[-1]
-        # Input text
-        elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/div[2]/input').nth(0)
-        await asyncio.sleep(3); await elem.fill('123123')
-
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/button').nth(0)
-        await asyncio.sleep(3); await elem.click()
-
-        # -> Open the service catalog (Danh mục dịch vụ) page so I can perform a search/filter and verify the service list/table is usable.
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div/div/aside/nav/div/div/div/div[2]/a[2]').nth(0)
-        await asyncio.sleep(3); await elem.click()
-
-        # -> Type a search term into the 'Tìm dịch vụ...' input to filter the service list (e.g., 'Abutment') and verify the table updates.
-        frame = context.pages[-1]
-        # Input text
-        elem = frame.locator('xpath=/html/body/div/div/div/main/div/div[2]/div/div[2]/div/input').nth(0)
-        await asyncio.sleep(3); await elem.fill('Abutment')
-
-        # --> Test passed — verified by AI agent
-        frame = context.pages[-1]
-        current_url = await frame.evaluate("() => window.location.href")
-        assert current_url is not None, "Test completed successfully"
-        await asyncio.sleep(5)
-
-    finally:
-        if context:
-            await context.close()
-        if browser:
-            await browser.close()
-        if pw:
-            await pw.stop()
 
 asyncio.run(run_test())

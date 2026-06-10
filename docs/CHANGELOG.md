@@ -2,6 +2,10 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [Docs/Tests] — 2026-06-10 — TestSprite suite green on NK3 + MCP-decoupled detached runner
+- **Rewrote the 14 stale-selector `testsprite_tests/TC*.py` scripts against the live NK3 DOM** (login `#login-identifier`, placeholder-based search inputs, text/role locators, direct route navigation) on a new shared `testsprite_tests/_helpers.py` (TestSession, login/logout, create/find TEST_SPRITE customer + employee). Full live sweep on `tmv.2checkin.com`: **19/19 PASS** (was 5/19). Deleted superseded `TC004_*_v2.py`/`TC015_*_v2.py` (wrong `input[type="email"]` login selector, unreferenced by the runner). Confirmed the collapsed-sidebar `lg:ml-[72px]` wrapper does NOT overlap the sidebar — the old failures were stale absolute XPaths, not an app bug. — @agent
+- **TestSprite/MCP connection hardening:** long sweeps no longer run inside an MCP/agent session. New `scripts/testsprite-detached.sh` (`start|status|results|wait|stop`) runs the suite under `nohup` with file-based handoff — `run_testsprite_suite.py` now also writes stable `testsprite_tests/testsprite-results.json` for polling. `.claude/settings.json` sets `MCP_TIMEOUT=300000`/`MCP_TOOL_TIMEOUT=600000`. TestSprite MCP key verified valid (Starter, 146 credits, unchanged — sweeps run locally); connection confirmed alive before and after both full sweeps. Root cause of today's 18-fail fast run was a missing Playwright Chromium build (v1208) after a package update, reinstalled twice (cache was pruned mid-session by an external process). — @agent
+
 ## [0.37.3] — 2026-06-10 — Remember me (30 days)
 - **Login page adds a “Remember me for 30 days” checkbox.** Checked logins issue a `30d` JWT (`remember: true` in payload) and store the token in `localStorage`; unchecked logins stay `24h` and use `sessionStorage` so closing the browser ends the session. Preference is restored on the login form via `tgclinic_remember_pref`. — @agent — UC-AUTH-001
 

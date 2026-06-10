@@ -1,77 +1,38 @@
+"""TC010 — Employees page loads and search works (NK3-resilient rewrite, 2026-06-10)."""
 import asyncio
-from playwright import async_api
+
 from playwright.async_api import expect
-import os
-BASE_URL = os.environ.get("TESTSPRITE_BASE_URL", "http://127.0.0.1:5175")
+
+from _helpers import TestSession, login, goto, search_employees, EMPLOYEE_SEARCH
+
 
 async def run_test():
-    pw = None
-    browser = None
-    context = None
+    async with TestSession() as page:
+        await login(page)
+        await goto(page, "/employees")
 
-    try:
-        # Start a Playwright session in asynchronous mode
-        pw = await async_api.async_playwright().start()
+        # Page shell renders
+        await expect(
+            page.get_by_role("heading", name="Nhân viên").first
+        ).to_be_visible(timeout=15000)
+        rows = page.locator("main table tbody tr")
+        await expect(rows.first).to_be_visible(timeout=15000)
 
-        # Launch a Chromium browser in headless mode with custom arguments
-        browser = await pw.chromium.launch(
-            headless=True,
-            args=[
-                "--window-size=1280,720",         # Set the browser window size
-                "--disable-dev-shm-usage",        # Avoid using /dev/shm which can cause issues in containers
-                "--ipc=host",                     # Use host-level IPC for better stability
-                "--single-process"                # Run the browser in a single process mode
-            ],
-        )
+        # Take a real name fragment from the first row and search for it
+        first_cell = (await rows.first.locator("td").nth(0).inner_text()).strip()
+        if len(first_cell) < 3:
+            first_cell = (await rows.first.locator("td").nth(1).inner_text()).strip()
+        query = first_cell.split("\n")[0][:12].strip()
+        assert len(query) >= 2, f"Could not derive a search query from row: {first_cell!r}"
 
-        # Create a new browser context (like an incognito window)
-        context = await browser.new_context()
-        context.set_default_timeout(5000)
+        await search_employees(page, query)
+        filtered = page.locator("main table tbody tr")
+        await expect(filtered.first).to_be_visible(timeout=15000)
 
-        # Open a new page in the browser context
-        page = await context.new_page()
+        # Search box kept its value and the page did not crash
+        value = await page.locator(EMPLOYEE_SEARCH).input_value()
+        assert value == query, f"Search input lost its value: {value!r} != {query!r}"
+        print(f"✅ TC010 PASS — employees page renders; search {query!r} returns rows")
 
-        # Interact with the page elements to simulate user flow
-        # -> Navigate to http://127.0.0.1:5175
-        await page.goto(f"{BASE_URL}")
-
-        # -> Fill the email and password fields and click the Đăng nhập button to log in.
-        frame = context.pages[-1]
-        # Input text
-        elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/div/input').nth(0)
-        await asyncio.sleep(3); await elem.fill('t@clinic.vn')
-
-        frame = context.pages[-1]
-        # Input text
-        elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/div[2]/input').nth(0)
-        await asyncio.sleep(3); await elem.fill('123123')
-
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/button').nth(0)
-        await asyncio.sleep(3); await elem.click()
-
-        # -> Wait for the login to complete and then navigate to /employees to verify the employee list and perform a search for TESTSPRITE.
-        await page.goto(f"{BASE_URL}/employees")
-
-        # -> Enter 'TESTSPRITE' into the employee search input (index 8243) and wait for results to render, then inspect the list for matches or confirm no results and that the UI remains usable.
-        frame = context.pages[-1]
-        # Input text
-        elem = frame.locator('xpath=/html/body/div/div/div/main/div/div[2]/div/div/input').nth(0)
-        await asyncio.sleep(3); await elem.fill('TESTSPRITE')
-
-        # --> Test passed — verified by AI agent
-        frame = context.pages[-1]
-        current_url = await frame.evaluate("() => window.location.href")
-        assert current_url is not None, "Test completed successfully"
-        await asyncio.sleep(5)
-
-    finally:
-        if context:
-            await context.close()
-        if browser:
-            await browser.close()
-        if pw:
-            await pw.stop()
 
 asyncio.run(run_test())

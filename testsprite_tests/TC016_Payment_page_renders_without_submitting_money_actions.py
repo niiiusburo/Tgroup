@@ -1,74 +1,38 @@
+"""TC016 — Payment page renders without submitting money actions (NK3-resilient rewrite, 2026-06-10).
+
+Read-only: renders the payment surfaces and asserts controls exist. No money
+action is clicked. NK production must NEVER receive payment mutations anyway.
+"""
 import asyncio
-from playwright import async_api
+
 from playwright.async_api import expect
-import os
-BASE_URL = os.environ.get("TESTSPRITE_BASE_URL", "http://127.0.0.1:5175")
+
+from _helpers import TestSession, login, goto, assert_no_access_denied
+
 
 async def run_test():
-    pw = None
-    browser = None
-    context = None
+    async with TestSession() as page:
+        await login(page)
+        await goto(page, "/payment", settle=2.5)
+        await assert_no_access_denied(page, "/payment")
 
-    try:
-        # Start a Playwright session in asynchronous mode
-        pw = await async_api.async_playwright().start()
+        await expect(
+            page.get_by_role("heading", name="Thanh toán").first
+        ).to_be_visible(timeout=15000)
+        await expect(
+            page.get_by_role("button", name="Thanh toán & Ví")
+        ).to_be_visible(timeout=15000)
+        await expect(
+            page.get_by_role("button", name="Kế hoạch trả góp")
+        ).to_be_visible(timeout=15000)
+        await expect(
+            page.get_by_placeholder("Tìm thanh toán...")
+        ).to_be_visible(timeout=15000)
 
-        # Launch a Chromium browser in headless mode with custom arguments
-        browser = await pw.chromium.launch(
-            headless=True,
-            args=[
-                "--window-size=1280,720",         # Set the browser window size
-                "--disable-dev-shm-usage",        # Avoid using /dev/shm which can cause issues in containers
-                "--ipc=host",                     # Use host-level IPC for better stability
-                "--single-process"                # Run the browser in a single process mode
-            ],
-        )
+        # Data table renders (read-only check)
+        rows = await page.locator("main table tbody tr").count()
+        assert rows > 0, "Payment table rendered no rows"
+        print(f"✅ TC016 PASS — payment page renders {rows} rows; no money action touched")
 
-        # Create a new browser context (like an incognito window)
-        context = await browser.new_context()
-        context.set_default_timeout(5000)
-
-        # Open a new page in the browser context
-        page = await context.new_page()
-
-        # Interact with the page elements to simulate user flow
-        # -> Navigate to http://127.0.0.1:5175
-        await page.goto(f"{BASE_URL}")
-
-        # -> Enter credentials and submit the login form, then navigate to /payment and check for the payment/monthly-plan UI rendering.
-        frame = context.pages[-1]
-        # Input text
-        elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/div/input').nth(0)
-        await asyncio.sleep(3); await elem.fill('t@clinic.vn')
-
-        frame = context.pages[-1]
-        # Input text
-        elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/div[2]/input').nth(0)
-        await asyncio.sleep(3); await elem.fill('123123')
-
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/button').nth(0)
-        await asyncio.sleep(3); await elem.click()
-
-        # -> Click the 'Kế hoạch thanh toán' menu item to open the payment/monthly-plan UI, then wait for the page to settle and verify the UI renders. Do not perform any create/refund/void/proof actions.
-        frame = context.pages[-1]
-        # Click element
-        elem = frame.locator('xpath=/html/body/div/div/aside/nav/div/div/div/div[2]/a[3]').nth(0)
-        await asyncio.sleep(3); await elem.click()
-
-        # --> Test passed — verified by AI agent
-        frame = context.pages[-1]
-        current_url = await frame.evaluate("() => window.location.href")
-        assert current_url is not None, "Test completed successfully"
-        await asyncio.sleep(5)
-
-    finally:
-        if context:
-            await context.close()
-        if browser:
-            await browser.close()
-        if pw:
-            await pw.stop()
 
 asyncio.run(run_test())
