@@ -3,7 +3,7 @@
 /**
  * @crossref:domain[ctv]
  * @crossref:used-in[api/src/services/pricingSheetSync.js, website/scripts/generate-bang-gia.mjs]
- * @crossref:uses[website/public/bang-gia/pricing.css, website/public/bang-gia/pricing.js]
+ * @crossref:uses[website/public/bang-gia/pricing.css, website/public/bang-gia/pricing.js, product-map/domains/ctv.yaml]
  */
 
 const fs = require('fs');

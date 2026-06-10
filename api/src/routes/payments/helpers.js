@@ -1,9 +1,9 @@
 /**
  * @crossref:domain[payments-deposits]
- * @crossref:used-in[NK3 Express API route: api/src/routes/payments/helpers]
- * @crossref:uses[product-map/domains/payments-deposits.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[payment allocation/receipt helpers: api/src/routes/payments.js, api/src/routes/payments/readHandlers.js]
+ * @crossref:uses[api/src/db.js, api/src/lib/dateUtils.js (getVietnamYear), product-map/domains/payments-deposits.yaml]
  */
-const { query: legacyQuery, getQuery } = require("../../db");
+const { query: legacyQuery } = require("../../db");
 const { getVietnamYear } = require("../../lib/dateUtils");
 
 async function rowsFrom(queryable, sql, params) {

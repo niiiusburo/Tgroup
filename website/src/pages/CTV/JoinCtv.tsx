@@ -12,7 +12,7 @@ import { CtvCreationForm } from '@/components/shared/CtvCreationForm';
  * validation (email optional, password >=6, name/phone/pass required), per-field errors, LOB dental-forced.
  * Page-specific: upline resolution + lookup gate, rootSignupEnabled flag, code vs manual uplinePhone wiring into joinCtv payload.
  *
- * @crossref:used-in[public unauthed /ctv/join landing + any ?book=1 or direct CTV signup CTA]
+ * @crossref:used-in[public unauthed /ctv/join landing + any ?book=1 or direct CTV signup CTA, routed from website/src/App.tsx]
  * @crossref:uses[shared/CtvCreationForm (SSOT domain for ctv creation), joinCtv (wraps with code/uplinePhone), resolveCtvRefCode + lookupPublicCtvByPhone for referrer gate]
  * @crossref:domain[ctv-creation — the third canonical call site; changes to hook or form propagate here]
  */

@@ -2,7 +2,7 @@
 
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 backend service function: api/src/services/nk3CtvIntegrityRepair]
+ * @crossref:used-in[NK3 backend service function: api/src/services/nk3CtvIntegrityRepair, scripts/nk3-only/nk3-live-ctv-integrity-repair.js (CLI runner)]
  * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
  * @crossref:function[computeCtvRepairPlan, classifyServiceCardGap, migrationLedgerTargets]
  * @crossref:uses[scripts/nk3-only/nk3-live-ctv-integrity-repair.js, product-map/domains/earnings-commissions.yaml, docs/MIGRATIONS.md]

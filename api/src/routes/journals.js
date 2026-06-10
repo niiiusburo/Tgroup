@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 Express API route: api/src/routes/journals]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[DEAD ROUTE — /api/AccountJournals mount is commented out in api/src/server.js (column errors on NK3); no frontend client]
+ * @crossref:uses[api/src/db.js (query — accountjournals/accountpayments balances), api/src/utils/search.js, product-map/domains/settings-system.yaml]
  */
 const express = require('express');
 const { query } = require('../db');

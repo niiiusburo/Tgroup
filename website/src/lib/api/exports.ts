@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/exports]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Exports API client; website/src/components/shared/ExportPreviewModal.tsx, website/src/hooks/useExport.ts]
+ * @crossref:uses[website/src/lib/api/core.ts, website/src/lib/authToken.ts, api/src/routes/exports.js, product-map/domains/reports-analytics.yaml]
+ * Calls /api/Exports/:type preview/download/types; download uses raw fetch for Blob.
  */
 import { getAuthToken } from '@/lib/authToken';
 import { apiFetch, API_URL } from './core';

@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/useCustomerDepositActions]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[deposit action callbacks composed by website/src/pages/Customers/useCustomerDetailController.ts (deposit ops in customer profile payment tab)]
+ * @crossref:uses[caller-injected hooks only (addDeposit/addRefund/voidDeposit/editDeposit from website/src/hooks/useDeposits.ts via the controller), product-map/domains/customers-partners.yaml]
  */
 /**
  * Deposit action callbacks for the customer profile

@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[payments-deposits]
- * @crossref:used-in[NK3 Express API route: api/src/routes/monthlyPlans]
- * @crossref:uses[product-map/domains/payments-deposits.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/MonthlyPlans (+/api/cosmetic mirror) by api/src/server.js; frontend client website/src/lib/api/monthlyPlans.ts]
+ * @crossref:uses[api/src/db.js (query/pool — dbo.monthlyplans/planinstallments/monthlyplan_items, saleorders join), api/src/utils/search.js (accent-insensitive search), api/src/middleware/auth.js (requirePermission 'payment.view'/'payment.edit'), product-map/domains/payments-deposits.yaml]
  */
 /**
  * Monthly Plans API Routes
@@ -327,9 +327,6 @@ router.put('/:id', requirePermission('payment.edit'), async (req, res) => {
       result = planResult;
     }
 
-    if (result.length === 0) {
-      return res.status(404).json({ error: 'Plan not found' });
-    }
 
     // Update linked invoices if provided
     if (Array.isArray(invoice_ids)) {

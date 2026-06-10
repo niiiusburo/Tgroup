@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/useCustomerProfileData]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[profileData built for website/src/pages/Customers/useCustomerDetailController.ts (fed to CustomerProfileContent)]
+ * @crossref:uses[website/src/hooks/useCustomerProfile.ts (CustomerProfileData shape — fallback chain hookProfile -> listCustomer -> empty), website/src/hooks/useCustomers.ts (Customer type), product-map/domains/customers-partners.yaml]
  */
 import { useMemo } from 'react';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';

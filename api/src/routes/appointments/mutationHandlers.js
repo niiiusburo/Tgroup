@@ -1,9 +1,9 @@
 /**
  * @crossref:domain[appointments-calendar]
- * @crossref:used-in[NK3 Express API route: api/src/routes/appointments/mutationHandlers]
- * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[POST/PUT handlers wired by api/src/routes/appointments.js (mounted at /api/Appointments); frontend client website/src/lib/api/appointments.ts]
+ * @crossref:uses[api/src/routes/appointments/helpers.js (validators, foreignKeyExists), api/src/services/customerReferrer.js (set/clearCustomerReferrer — commission referrer side effects), api/src/db.js (getQuery), product-map/domains/appointments-calendar.yaml]
  */
-const { query: legacyQuery, getQuery } = require('../../db');
+const { getQuery } = require('../../db');
 const { errorResponse, foreignKeyExists, isValidISODate, isValidUUID, readBodyField, VALID_STATES } = require('./helpers');
 const { setCustomerReferrer, clearCustomerReferrer } = require('../../services/customerReferrer');
 

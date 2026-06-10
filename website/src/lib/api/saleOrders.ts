@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/saleOrders]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Sale orders API client; website/src/lib/api.ts (barrel), website/src/hooks/useServices.ts, website/src/hooks/usePayment.ts, website/src/pages/Customers/useCustomerServiceActions.ts, website/src/pages/Customers/mapSaleOrderLines.ts]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/saleOrders.js, api/src/routes/saleOrderLines.js, product-map/domains/services-catalog.yaml]
+ * Calls /api/SaleOrders (CRUD/state/lines) and DELETE /api/SaleOrderLines/:id.
  */
 import { apiFetch, type PaginatedResponse } from './core';
 

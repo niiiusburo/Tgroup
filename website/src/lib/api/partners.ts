@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/partners]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Partners/customers API client; website/src/lib/api.ts (barrel), website/src/pages/Customers.tsx, website/src/pages/Customers/useCustomerFormActions.ts, website/src/components/customer/CustomerKeyPicker.tsx, website/src/components/shared/GlobalFaceIdButton.tsx, website/src/hooks/useCustomers.ts]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/partners.js, api/src/routes/faceRecognition.js, api/src/server.js (/api/cross-lob-probe inline), product-map/domains/customers-partners.yaml]
+ * Calls /api/Partners CRUD/resolve, /api/face/* (recognize/register/status), /api/cross-lob-probe.
  */
 import { apiFetch, type PaginatedResponse } from './core';
 

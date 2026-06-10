@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/CTV/CtvDashboard]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[CTV portal shell routed at /ctv (CTVRouteGuard) from website/src/App.tsx]
+ * @crossref:uses[website/src/lib/api.ts (fetchCtvReferrals/CommissionSummary/Profile/Hierarchy), website/src/pages/CTV/tabs/CtvHomeTab.tsx (+ CtvCommissionTab/CtvTrackingTab/CtvNetworkTab/CtvMeTab siblings), website/src/components/ctv/CtvReferModal.tsx, website/src/components/ctv/CtvRecruitModal.tsx, product-map/domains/ctv.yaml]
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ComponentType } from 'react';

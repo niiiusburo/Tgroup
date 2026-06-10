@@ -1,11 +1,10 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/index]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[website/src/App.tsx (lazy route imports for all main SPA pages)]
+ * @crossref:uses[website/src/pages/ (Overview, Calendar, Customers, Employees, Locations, ServiceCatalog, Settings, Relationships, Commission, Notifications, PermissionBoard, Login, Payment, Landing), product-map/domains/settings-system.yaml]
  */
 /**
  * Page Components Barrel Export
- * @crossref:used-in[App]
  */
 
 export { Overview } from './Overview';

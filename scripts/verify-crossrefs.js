@@ -17,7 +17,6 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 const APPLY = process.argv.includes('--apply');
-const GENERATED_BREADCRUMB_RE = /^\/\*\*\n \* @crossref:domain\[[^\]]+\]\n \* @crossref:used-in\[[^\]]+\]\n \* @crossref:uses\[[^\]]+\]\n \*\/\n+/;
 
 const TARGET_ROOTS = [
   { dir: 'website/src/pages', surface: 'NK3 SPA page route' },
@@ -225,17 +224,9 @@ function main() {
   for (const absPath of targets) {
     const file = rel(absPath);
     const source = fs.readFileSync(absPath, 'utf8');
-    const generated = file.endsWith('.sql') ? null : GENERATED_BREADCRUMB_RE.exec(source);
-    const expected = breadcrumbFor(file);
 
-    if (generated && generated[0] !== expected) {
-      missing.push(file);
-      if (APPLY) {
-        fs.writeFileSync(absPath, source.replace(GENERATED_BREADCRUMB_RE, expected));
-      }
-      continue;
-    }
-
+    // Any complete domain/used-in/uses triad passes — enriched breadcrumbs
+    // with real code refs are the desired end state, never reverted.
     if (hasCompleteCrossref(source)) continue;
     missing.push(file);
     if (APPLY) {

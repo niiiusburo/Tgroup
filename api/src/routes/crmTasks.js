@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 Express API route: api/src/routes/crmTasks]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[DEAD ROUTE — /api/CrmTasks mount is commented out in api/src/server.js (dbo.crmtasks does not exist on NK3; HTTP 500)]
+ * @crossref:uses[api/src/db.js (query — legacy crmtasks/crmtasktypes/crmtaskcategories), api/src/utils/search.js, product-map/domains/settings-system.yaml]
  */
 const express = require('express');
 const { query } = require('../db');

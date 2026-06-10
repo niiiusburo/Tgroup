@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/useCustomerFormActions]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[create/edit form actions composed by website/src/pages/Customers/useCustomerDetailController.ts; powers AddCustomerForm submit in website/src/pages/Customers.tsx]
+ * @crossref:uses[website/src/lib/api.ts (registerFace post-create), website/src/lib/api/partners.ts (ApiPartner shape), website/src/hooks/useTrackedForm.ts (submit telemetry/toast), website/src/data/mockCustomerForm.ts (CustomerFormData), product-map/domains/customers-partners.yaml]
  */
 /**
  * Form submission and edit-data preparation for the AddCustomerForm

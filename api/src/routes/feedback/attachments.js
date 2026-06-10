@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[feedback-cms]
- * @crossref:used-in[NK3 Express API route: api/src/routes/feedback/attachments]
- * @crossref:uses[product-map/domains/feedback-cms.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[attachment storage/multer helpers for api/src/routes/feedback/adminRoutes.js and api/src/routes/feedback/userRoutes.js; files served from /uploads/feedback (api/src/server.js static mount)]
+ * @crossref:uses[api/src/db.js (query — feedback_attachments), multer + sharp (compression to JPEG), product-map/domains/feedback-cms.yaml]
  */
 const path = require('path');
 const fs = require('fs');

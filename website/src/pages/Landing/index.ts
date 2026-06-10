@@ -1,6 +1,6 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Landing/index]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[barrel imported by website/src/App.tsx lazy route for /welcome]
+ * @crossref:uses[website/src/pages/Landing/Landing.tsx, product-map/domains/settings-system.yaml]
  */
 export { Landing, default } from './Landing';

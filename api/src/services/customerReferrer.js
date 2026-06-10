@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 backend service function: api/src/services/customerReferrer]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/routes/saleOrders/createSaleOrder.js, api/src/routes/saleOrders/updateSaleOrder.js, api/src/routes/appointments/mutationHandlers.js]
+ * @crossref:uses[api/src/services/commissionEngine.js (backfillEarningsForClient), product-map/domains/customers-partners.yaml, product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md]
  */
 /**
  * customerReferrer.js — assign a CTV (Cộng tác viên) as a customer's commission referrer.
@@ -22,7 +22,6 @@
  * `referred_by_ctv_id` is a soft reference (no FK in migration 047), matching the existing
  * /api/ctv/bookings reclaim path which UPDATEs it directly.
  *
- * @crossref:used-in[saleOrders/createSaleOrder, saleOrders/updateSaleOrder, appointments/mutationHandlers]
  */
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

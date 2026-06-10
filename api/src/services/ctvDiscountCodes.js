@@ -4,7 +4,7 @@
  * @crossref:domain[ctv]
  * @crossref:function[ctvDiscountCodes]
  * @crossref:used-in[api/src/routes/discountCodes.js]
- * @crossref:uses[product-map/domains/ctv.yaml]
+ * @crossref:uses[product-map/domains/ctv.yaml, api/src/db.js, api/src/routes/ctvHelpers.js (safeQueryRows), api/src/services/referralClaim.js]
  */
 const { randomUUID } = require('crypto');
 const { getDb } = require('../db');
@@ -13,7 +13,6 @@ const { getReferralClaimStatus } = require('./referralClaim');
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const DEFAULT_NON_LIVE_PERCENT = 10;
-const DEFAULT_EXPIRY_DAYS = 30;
 
 /** Read global QR discount settings from systempreferences (dental DB). */
 async function getQrDiscountSettings() {

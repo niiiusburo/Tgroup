@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[appointments-calendar]
- * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/TodayAppointmentCard]
- * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Zone 3 appointment card: website/src/components/modules/TodayAppointments.tsx]
+ * @crossref:uses[website/src/hooks/useOverviewAppointments.ts (types), website/src/components/shared/CustomerNameLink.tsx, website/src/constants/index.ts (APPOINTMENT_CARD_COLORS), website/src/lib/appointmentDuration.ts, product-map/domains/appointments-calendar.yaml]
  */
 import { useTranslation } from 'react-i18next';
 import { Clock, Pencil, Phone, User, UserCheck } from 'lucide-react';

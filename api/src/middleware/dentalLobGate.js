@@ -3,7 +3,7 @@
 /**
  * @crossref:domain[auth]
  * @crossref:used-in[api/src/server.js — mounted on /api before the legacy dental route mounts]
- * @crossref:uses[api/src/middleware/auth.js requireLobScope, docs/INVARIANTS.md INV-008A, docs/SECURITY.md]
+ * @crossref:uses[api/src/middleware/auth.js requireLobScope, product-map/domains/auth.yaml, docs/INVARIANTS.md INV-008A, docs/SECURITY.md]
  *
  * dentalLobGate — symmetric LOB hard gate for the LEGACY dental routes.
  *

@@ -13,8 +13,7 @@ import {
   type CtvRecord,
   type UpdateCtvInput,
 } from '@/lib/api/ctv';
-import { useCtvCreationForm } from '@/components/shared/CtvCreationForm';
-import { CtvCreationForm } from '@/components/shared/CtvCreationForm';
+import { CtvCreationForm, useCtvCreationForm } from '@/components/shared/CtvCreationForm';
 import { ApiError } from '@/lib/api/core';
 import { CtvHierarchyPanel } from '@/components/ctv/CtvHierarchyPanel';
 
@@ -24,8 +23,8 @@ import { CtvHierarchyPanel } from '@/components/ctv/CtvHierarchyPanel';
  * This ensures admin create, portal-recruit, and public-join share validation, email-optional rule,
  * LOB dental-forced, specific per-field errors, and payload shape.
  *
- * @crossref:used-in[admin /commission or CTV mgmt tab for "Add CTV"]
- * @crossref:uses[shared/CtvCreationForm (SSOT), createCtv from @/lib/api/ctv, useBusinessUnit for LOB context]
+ * @crossref:used-in[admin /commission or CTV mgmt tab for "Add CTV"; website/src/pages/Commission.tsx]
+ * @crossref:uses[shared/CtvCreationForm (SSOT), createCtv from @/lib/api/ctv, useBusinessUnit for LOB context, website/src/components/ctv/CtvHierarchyPanel.tsx, website/src/lib/api/core.ts, product-map/domains/ctv.yaml]
  * @crossref:domain[ctv-creation — primary admin call site; see also CtvRecruitModal + JoinCtv]
  */
 

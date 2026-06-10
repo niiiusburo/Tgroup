@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/DeleteDialog]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[soft/hard delete confirm dialog rendered by website/src/pages/Customers/CustomerListView.tsx (state owned by website/src/pages/Customers.tsx)]
+ * @crossref:uses[react-i18next customers namespace only (no API calls — confirm/cancel callbacks come from Customers.tsx), product-map/domains/customers-partners.yaml]
  */
 import { useTranslation } from 'react-i18next';
 

@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[api/src/services/pricingSheetParse.js]
- * @crossref:uses[ctv2checkin/modules/pricing_sync.py CATEGORY_MAP]
+ * @crossref:used-in[api/src/services/pricingSheetParse.js, api/src/services/pricingSheetSync.js, api/src/services/pricingSyncWorker.js]
+ * @crossref:uses[ctv2checkin/modules/pricing_sync.py CATEGORY_MAP, product-map/domains/ctv.yaml]
  */
 
 /** Category headers from Google Sheet → stable HTML section ids (legacy ctv2checkin). */

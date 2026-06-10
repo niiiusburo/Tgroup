@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/FormShell/FormShell]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[canonical modal wrapper (via FormShell/index.ts barrel): website/src/components/forms/AddCustomerForm/AddCustomerForm.tsx, website/src/components/services/ServiceForm.tsx, website/src/components/appointments/unified/AppointmentFormShell.tsx, website/src/components/shared/DeleteConfirmDialog.tsx]
+ * @crossref:uses[website/src/lib/utils.ts, react-dom createPortal, product-map/domains/settings-system.yaml]
  */
 /**
  * FormShell — Unified modal shell for all TG Clinic form modals.
@@ -18,8 +18,6 @@
  *   <div className="p-6">...form fields...</div>
  *   <FormFooter onCancel={handleClose} onSubmit={handleSubmit} />
  * </FormShell>
- *
- * @crossref:used-in[AddCustomerForm, ServiceForm, AppointmentForm, EmployeeForm, PaymentForm]
  */
 
 import { type ReactNode } from 'react';

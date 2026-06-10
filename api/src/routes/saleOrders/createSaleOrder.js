@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 Express API route: api/src/routes/saleOrders/createSaleOrder]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[POST /api/SaleOrders handler: api/src/routes/saleOrders.js; called by website/src/lib/api/saleOrders.ts (createSaleOrder)]
+ * @crossref:uses[api/src/db.js (getQuery), api/src/lib/dateUtils.js, api/src/routes/saleOrders/fetchSaleOrderById.js, product-map/domains/services-catalog.yaml]
  * @crossref:function[createSaleOrder -> service-card create with inherited/selected CTV attribution]
  * @crossref:uses[api/src/services/customerReferrer.js, api/src/services/commissionEngine.js, product-map/domains/ctv.yaml]
  */

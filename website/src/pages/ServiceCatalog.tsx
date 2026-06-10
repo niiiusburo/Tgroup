@@ -1,12 +1,11 @@
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/ServiceCatalog]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed page (/service-catalog): website/src/App.tsx (lazy via website/src/pages/index.ts barrel)]
+ * @crossref:uses[website/src/lib/api.ts (fetchProducts/fetchProductCategories/fetchCompanies/createProduct/updateProduct/deleteProduct — backend api/src/routes/products.js, api/src/routes/productCategories.js, api/src/routes/companies.js), website/src/components/services/ServiceCatalogModals.tsx, website/src/components/services/ServiceCatalogTable.tsx, website/src/hooks/useExport.ts, website/src/contexts/BusinessUnitContext.tsx (LOB isolation), product-map/domains/services-catalog.yaml]
  */
 /**
  * Service Catalog Page — "Thông tin sản phẩm" with service groups sidebar + services table
- * @crossref:route[/website]
- * @crossref:uses[fetchProducts, fetchProductCategories, fetchCompanies]
+ * @crossref:route[/service-catalog]
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';

@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 CTV portal and referral surface: website/src/components/ctv/CtvHierarchyPanel]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[upline/downline hierarchy view: website/src/components/commission/CtvManagementTab.tsx, website/src/pages/CTV/tabs/CtvNetworkTab.tsx]
+ * @crossref:uses[website/src/lib/api/ctv.ts (CtvHierarchyNode/CtvHierarchyResponse types), website/src/lib/i18n/ctv.ts, website/src/lib/utils.ts, product-map/domains/ctv.yaml]
  */
 import { useMemo, useState } from 'react';
 import {

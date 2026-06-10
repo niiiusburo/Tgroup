@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-06-10T22:13:55.664000",
+  "mode": "live",
+  "target_url": "https://tmv.2checkin.com",
+  "results": [
+    {
+      "id": "TC060",
+      "name": "TestSprite MCP CTV commission artifacts/config/results/screenshots",
+      "status": "PASS",
+      "duration": 0.03,
+      "error": null
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "pass": 1,
+    "fail": 0,
+    "skip": 0,
+    "timeout": 0,
+    "error": 0
+  }
+}

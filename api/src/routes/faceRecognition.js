@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[integrations]
- * @crossref:used-in[NK3 Express API route: api/src/routes/faceRecognition]
- * @crossref:uses[product-map/domains/integrations.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/face (+/api/cosmetic mirror) by api/src/server.js; frontend client website/src/lib/api/partners.ts (recognizeFace/registerFace/getFaceStatus/reregisterFace)]
+ * @crossref:uses[api/src/services/faceRecognitionRuntime.js (provider switch), api/src/services/faceMatchEngine.js, api/src/services/faceEngineClient.js, api/src/services/comprefaceFaceProvider.js, api/src/db.js (dbo.partners), product-map/domains/integrations.yaml]
  */
 const express = require('express');
 const multer = require('multer');

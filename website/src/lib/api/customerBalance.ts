@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/customerBalance]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Customer balance API client; website/src/lib/api.ts (barrel), website/src/hooks/useCustomerProfile.ts, website/src/hooks/useDeposits.ts]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/customerBalance.js, product-map/domains/customers-partners.yaml]
+ * Calls /api/CustomerBalance/:customerId; maps snake_case response to camelCase.
  */
 import { apiFetch } from './core';
 

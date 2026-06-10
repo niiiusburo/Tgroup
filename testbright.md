@@ -10,6 +10,93 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: TMV 2Checkin Cosmetic login monitor 2026-06-11 04:02 +07
+Feature/edit name: Recurring live TMV Cosmetic login health monitor; read-only production verification.
+
+Changed URLs / API routes / data flow:
+- URLs changed: none.
+- API routes changed: none.
+- URLs verified read-only: `https://tmv.2checkin.com/`, `https://tmv.2checkin.com/customers`, `https://tmv.2checkin.com/calendar`.
+- Data flow: existing live login only, Cosmetic LOB visibility, protected page loads; no create/edit/delete/submit actions after login.
+
+Affected roles and data flows:
+- Role: Cosmetic admin/staff using `t@clinic.vn`.
+- Happy path: login succeeds, Cosmetic/`Thẩm mỹ` remains visible, three Cosmetic-side navigation screens render nonblank without visible errors.
+- Edge cases: fallback account `t@clinic.com` is only attempted if `t@clinic.vn` cannot log in; Dental must not be selected; random non-API HEAD probes are treated as browser noise only when they do not affect UI or `/api/` calls.
+- Regressions: no API 4xx/5xx, console errors, blank pages, broken UI, or visible error banners during the checked read-only pages.
+
+Setup data and login state:
+- Target: `https://tmv.2checkin.com`.
+- Browser: Playwright with system Chrome channel.
+- Evidence: `docs/live-artifacts/tmv-cosmetic-login-monitor/20260610T210223Z-chrome/`.
+
+Execution checks:
+- [x] PASS: Authority gate passed before run.
+- [x] PASS: `node .tmp/tmv_cosmetic_login_monitor_readonly.cjs` logged in with `t@clinic.vn`; fallback `t@clinic.com` was not needed.
+- [x] PASS: Cosmetic stayed visible as `Thẩm mỹ` on Dashboard `/`, Customers `/customers`, and Calendar `/calendar`.
+- [x] PASS: Dashboard, Customers, and Calendar rendered nonblank with 0 captured API errors, 0 console errors, and 0 visible error messages.
+- [x] PASS: Screenshot evidence captured for Cosmetic header and all three checked screens; one random non-API `HEAD` probe aborted with `net::ERR_ABORTED` and did not affect the UI.
+
+---
+
+# TestSprite Plan: NK 2Checkin login monitor 2026-06-11 04:02 +07
+Feature/edit name: Recurring live NK 2Checkin login health monitor; read-only production verification.
+
+Changed URLs / API routes / data flow:
+- URLs changed: none.
+- API routes changed: none.
+- URLs verified read-only: `https://nk.2checkin.com/`, `https://nk.2checkin.com/calendar`, `https://nk.2checkin.com/customers`.
+- API routes verified read-only: `POST https://nk.2checkin.com/api/Auth/login`.
+- Data flow: existing live login only and protected page loads; no create/edit/delete/submit actions after login.
+
+Affected roles and data flows:
+- Role: NK admin/staff using `t@clinic.vn`.
+- Happy path: primary account logs in, fallback `t@clinic.com` is not needed, Overview/Calendar/Customers render nonblank without visible errors.
+- Edge cases: if Calendar or Customers briefly show loading placeholders, the monitor waits/retries before final evidence; random non-API HEAD probes are browser noise only when they do not affect UI or `/api/` calls.
+- Regressions: no API 4xx/5xx, console errors, page errors, blank screens, broken UI, or visible error banners during checked read-only pages.
+
+Setup data and login state:
+- Target: `https://nk.2checkin.com`.
+- Browser: Playwright with system Chrome channel.
+- Evidence: `docs/live-artifacts/nk-login-monitor/20260610T210225Z/redacted-safe/`.
+
+Execution checks:
+- [x] PASS: Authority gate passed before run.
+- [x] PASS: `NODE_PATH=/Users/thuanle/Documents/TamTMV/Tgrouptest/website/node_modules node .tmp/nk_login_monitor_readonly.cjs` logged in with `t@clinic.vn`; fallback `t@clinic.com` was not needed.
+- [x] PASS: Overview `/`, Calendar `/calendar`, and Customers `/customers` rendered nonblank with expected labels, 0 captured API errors, 0 console errors, and 0 page errors.
+- [x] PASS: Screenshot evidence captured for all three checked screens; one random non-API `HEAD` probe aborted with `net::ERR_ABORTED` and did not affect visible UI.
+
+---
+
+# TestSprite Plan: NK 2Checkin login monitor 2026-06-11 00:03 +07
+Feature/edit name: Recurring live NK 2Checkin login health monitor; read-only production verification.
+
+Changed URLs / API routes / data flow:
+- URLs changed: none.
+- API routes changed: none.
+- URLs verified read-only: `https://nk.2checkin.com/`, `https://nk.2checkin.com/calendar`, `https://nk.2checkin.com/customers`.
+- API routes verified read-only: `POST https://nk.2checkin.com/api/Auth/login`.
+- Data flow: existing live login only and protected page loads; no create/edit/delete/submit actions after login.
+
+Affected roles and data flows:
+- Role: NK admin/staff using `t@clinic.vn`.
+- Happy path: primary account logs in, fallback `t@clinic.com` is not needed, Overview/Calendar/Customers render nonblank without visible errors.
+- Edge cases: if Calendar or Customers briefly show loading placeholders, the monitor waits/retries before final evidence; random non-API HEAD probes are browser noise only when they do not affect UI or `/api/` calls.
+- Regressions: no API 4xx/5xx, console errors, page errors, blank screens, broken UI, or visible error banners during checked read-only pages.
+
+Setup data and login state:
+- Target: `https://nk.2checkin.com`.
+- Browser: Playwright with system Chrome channel.
+- Evidence: `docs/live-artifacts/nk-login-monitor/20260610T170254Z/redacted-safe/`.
+
+Execution checks:
+- [x] PASS: Authority gate passed before run.
+- [x] PASS: `NODE_PATH=/Users/thuanle/Documents/TamTMV/Tgrouptest/website/node_modules node .tmp/nk_login_monitor_readonly.cjs` logged in with `t@clinic.vn`; fallback `t@clinic.com` was not needed.
+- [x] PASS: Overview `/`, Calendar `/calendar`, and Customers `/customers` rendered nonblank with expected labels, 0 captured API errors, 0 console errors, and 0 page errors.
+- [x] PASS: Screenshot evidence captured for all three checked screens; one random non-API `HEAD` probe aborted with `net::ERR_ABORTED` and did not affect visible UI.
+
+---
+
 # TestSprite Plan: NK3 auth session parity 2026-06-10 20:48 +07
 Feature/edit name: Align `/api/Auth/login` and `/api/Auth/me` lob_scope via `authSession.resolveEffectiveLobScope`; deploy 0.37.2 to tmv.2checkin.com.
 - API routes verified: `POST /api/Auth/login`, `GET /api/Auth/me`.
@@ -4347,3 +4434,6 @@ TestSprite execution items:
 - [x] DONE: Full-site TestSprite live-test PRD rewritten (2026-06-10): website/testsprite_tests/standard_prd.json now targets https://tmv.2checkin.com at 0.37.0 with 14 feature areas (auth/returnTo, route sweep with corrected paths, customers, employees, calendar, payment read-only, services + strict commission DEC-20260610-01, permissions read-only, reports, CTV admin, CTV portal, QR voucher FM-20260610-01/02 regression, public flows, cosmetic LOB isolation, settings), explicit safety lanes (A read-only / B ZZ_TESTSPRITE_ disposable / C money-prohibited), evidence + bug-classification rules, and both test accounts.
 - [x] DONE: Local TestSprite suite hardened for live targeting: 39 TC*.py scripts converted from hardcoded http://127.0.0.1:5175 to TESTSPRITE_BASE_URL env (compile-verified), TC011 pre-existing syntax corruption (stray `]}}{`) repaired, run_testsprite_suite.py now passes the env to subprocesses and `--mode live` targets NK3 tmv.2checkin.com (was wrongly nk.2checkin.com production — Lane-B mutations must never hit NK).
 - [x] PASS(with-classification): Live suite run on tmv.2checkin.com (test-run-20260610-085229.json): 5/19 PASS (login, invalid-creds, sidebar, settings, artifacts), 14 FAIL — all 14 classified as TEST BRITTLENESS (machine-generated absolute XPaths from the May local DOM + overlay-intercept timing), NOT product bugs. Proof: independent read-only browser sweep of every failed surface (/employees /payment /permissions /services /customers /reports /calendar) rendered with 0 failing API calls + 0 page errors; employees search filtered correctly. BLOCKED (needs owner): TestSprite CLOUD lane — API key sk-user-q2QVL… is invalid in all configs (~/.claude.json, mcp-configs, ~/.codex/config.toml); mint a new key at testsprite.com/dashboard/settings/apikey to run generate_code_and_execute with the new PRD.
+- [x] PASS: 2026-06-11 00:03 ICT live Cosmetic login monitor rerun with `NODE_PATH=/Users/thuanle/Documents/TamTMV/Tgrouptest/website/node_modules node .tmp/tmv_cosmetic_login_monitor_readonly.cjs` - `t@clinic.vn` logged in successfully; fallback `t@clinic.com` was not needed; app stayed visibly on `Thẩm mỹ`/Cosmetic; Dashboard `/`, Customers `/customers`, and Calendar `/calendar` all loaded nonblank with 0 API errors, 0 console errors, and 0 visible error messages. Initial pass captured Customers too early in a `Loading...` state, so the read-only helper now waits for real route content before screenshots; successful evidence is in `docs/live-artifacts/tmv-cosmetic-login-monitor/20260610T170258Z-chrome/`.
+- [x] PASS: 2026-06-11 06:01 ICT live NK login monitor rerun with `NODE_PATH=/Users/thuanle/Documents/TamTMV/Tgrouptest/website/node_modules node .tmp/nk_login_monitor_readonly.cjs` - `t@clinic.vn` logged in successfully; fallback `t@clinic.com` was not needed; `https://nk.2checkin.com/`, `/calendar`, and `/customers` all loaded nonblank with expected labels, 0 API errors, 0 console errors, and 0 page errors. Aggregate request noise included one aborted random non-API `HEAD` probe, treated as non-blocking because it was not `/api/` and did not affect visible UI. Evidence is in `docs/live-artifacts/nk-login-monitor/20260610T230059Z/redacted-safe/`.
+- [x] PASS: 2026-06-11 06:02 ICT live Cosmetic login monitor rerun with `NODE_PATH=/Users/thuanle/Documents/TamTMV/Tgrouptest/website/node_modules node .tmp/tmv_cosmetic_login_monitor_readonly.cjs` - `t@clinic.vn` logged in successfully; fallback `t@clinic.com` was not needed; app stayed visibly on `Thẩm mỹ`/Cosmetic; Dashboard `/`, Customers `/customers`, and Calendar `/calendar` loaded nonblank through visible navigation with 0 API errors, 0 console errors, and 0 visible error messages. Aggregate request noise included one aborted random non-API `HEAD` probe, treated as non-blocking because it was not `/api/` and did not affect visible UI. Evidence is in `docs/live-artifacts/tmv-cosmetic-login-monitor/20260610T230232Z-chrome/`.

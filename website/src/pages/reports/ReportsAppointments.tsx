@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[appointments-calendar]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/reports/ReportsAppointments]
- * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed page (/reports/appointments): website/src/App.tsx (lazy, re-exported via website/src/pages/Reports.tsx); filters arrive via Outlet context from Reports shell]
+ * @crossref:uses[website/src/hooks/useReportData.ts ('/Reports/appointments/*' — backend api/src/routes/reports/appointments.js), website/src/components/reports/ (KPICard, BarChart, DonutChart, ReportsFilters, ReportError), product-map/domains/appointments-calendar.yaml]
  */
 import { useOutletContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';

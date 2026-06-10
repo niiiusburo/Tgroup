@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed at /customers and /customers/:id (ProtectedRoute) from website/src/App.tsx; commission deep links arrive via ?from=commission&serviceLineId=]
+ * @crossref:uses[website/src/pages/Customers/useCustomerDetailController.ts (detail orchestration), website/src/pages/Customers/CustomerListView.tsx + CustomerColumns.tsx + CustomerFormModal.tsx + CustomerProfileContent.tsx, website/src/hooks/useCustomers.ts, website/src/lib/api.ts (softDeletePartner/hardDeletePartner) + website/src/lib/api/partners.ts (resolvePartnerKey), product-map/domains/customers-partners.yaml]
  */
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 import { useState, useMemo, useEffect } from "react";

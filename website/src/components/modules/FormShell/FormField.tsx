@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/FormShell/FormField]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[label+input compound (via FormShell/index.ts barrel): website/src/components/forms/AddCustomerForm/AddCustomerForm.tsx, website/src/components/services/ServiceForm.tsx, website/src/components/appointments/unified/AppointmentFormShell.tsx]
+ * @crossref:uses[website/src/lib/utils.ts, product-map/domains/settings-system.yaml]
  */
 /**
  * FormField — Label + input compound component for TG Clinic modal forms.
@@ -19,8 +19,6 @@
  * >
  *   <CustomerSelector ... />
  * </FormField>
- *
- * @crossref:used-in[FormShell, AddCustomerForm, ServiceForm, AppointmentForm]
  */
 
 import { type ReactNode } from 'react';

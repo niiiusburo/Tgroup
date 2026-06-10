@@ -1,13 +1,11 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Notifications]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed page (/notifications): website/src/App.tsx (lazy via website/src/pages/index.ts barrel)]
+ * @crossref:uses[website/src/components/shared/PageHeader.tsx, product-map/domains/settings-system.yaml]
  */
 /**
  * Notifications Page — Placeholder for SMS/Email notification management
  * @crossref:route[/notifications]
- * @crossref:used-in[App]
- * @crossref:uses[Payment, Customers]
  */
 
 import { Bell, Mail, MessageSquare, Send } from 'lucide-react';

@@ -1,12 +1,10 @@
 /**
  * @crossref:domain[auth]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/PermissionBoard/PermissionBoard]
- * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed page (/permissions): website/src/App.tsx (lazy via website/src/pages/index.ts barrel; re-exported by website/src/pages/PermissionBoard/index.ts)]
+ * @crossref:uses[website/src/hooks/usePermissionBoard.ts, website/src/pages/PermissionBoard/ArchitectureView.tsx, website/src/pages/PermissionBoard/MatrixView.tsx, website/src/pages/PermissionBoard/LogicFlowView.tsx, website/src/contexts/AuthContext.tsx (hasPermission), product-map/domains/auth.yaml]
  */
 /**
  * PermissionBoard - Permission system architecture visualization and management
- * @crossref:used-in[App]
- * @crossref:uses[usePermissionBoard, PermissionGroup as Tier, EmployeePermission]
  */
 
 import { useState } from 'react';

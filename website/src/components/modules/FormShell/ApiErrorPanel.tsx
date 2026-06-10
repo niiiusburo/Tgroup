@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/FormShell/ApiErrorPanel]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[modal form error panel (via FormShell/index.ts barrel): website/src/components/forms/AddCustomerForm/AddCustomerForm.tsx, website/src/components/appointments/unified/AppointmentFormShell.tsx]
+ * @crossref:uses[lucide-react only (no app imports), product-map/domains/settings-system.yaml]
  */
 /**
  * ApiErrorPanel — API error display for TG Clinic modal forms.
@@ -11,8 +11,6 @@
  * - Field-level error details
  * - Technical details (expandable)
  * - Hint text when available
- *
- * @crossref:used-in[FormShell, AddCustomerForm]
  */
 
 import { useState } from 'react';

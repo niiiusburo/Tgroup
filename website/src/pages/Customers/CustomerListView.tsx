@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/CustomerListView]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[customer list (table + export + delete dialog) rendered by website/src/pages/Customers.tsx when no :id selected]
+ * @crossref:uses[website/src/components/shared/DataTable.tsx, website/src/components/shared/SearchBar.tsx, website/src/hooks/useExport.ts (+ ExportMenu/ExportPreviewModal), website/src/pages/Customers/DeleteDialog.tsx, product-map/domains/customers-partners.yaml]
  */
 import { Users, Plus, Search } from 'lucide-react';
 import type { Customer } from '@/hooks/useCustomers';

@@ -4,7 +4,7 @@
  * No mocks, no stubs. Data is 100% from DB via engine-written rows (referred_by_ctv_id path).
  * Mounted at /api/ctv (gated by ctv.dashboard.view perm + requireAuth).
  * @crossref:endpoint[GET /api/ctv/commission-summary, GET /api/ctv/referrals, GET /api/ctv/client-journeys, POST /api/ctv, POST /api/ctv/clients, POST /api/ctv/bookings]
- * @crossref:uses[api/src/services/referralClaim.js, api/src/services/ctvNetwork.js, api/src/services/ctvBookingCompany.js, product-map/domains/ctv.yaml]
+ * @crossref:uses[api/src/services/referralClaim.js, api/src/services/ctvNetwork.js, api/src/services/ctvBookingCompany.js, api/src/routes/ctvHelpers.js (isCtvUser), api/src/middleware/auth.js (requireAuth), api/src/services/permissionService.js (lazy admin checks), product-map/domains/ctv.yaml]
  */
 const express = require('express');
 const { requireAuth } = require('../middleware/auth');
@@ -587,7 +587,7 @@ router.get('/client-journeys', requireAuth, async (req, res) => {
  *   - Errors: VALIDATION, U_DUPLICATE_PHONE (cross both DBs), U_DUPLICATE_EMAIL (only if supplied), S_CTV_CREATE_FORBIDDEN.
  *
  * @crossref:uses[./ctvHelpers (isCtvUser), ../services/permissionService (resolveEffectivePermissions for admin), ../db (getDb dual), local safeQueryRows for dual-DB dup checks + inserts]
- * @crossref:used-in[authed CTV create flows (admin Add CTV + portal recruit); complements public /ctv-public/join]
+ * @crossref:used-in[authed CTV create flows (admin Add CTV + portal recruit); complements public /ctv-public/join; frontend client website/src/lib/api/ctv.ts]
  */
 router.post('/', requireAuth, async (req, res) => {
   const { employeeId } = req.user || {};

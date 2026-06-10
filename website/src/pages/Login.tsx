@@ -1,12 +1,10 @@
 /**
  * @crossref:domain[auth]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Login]
- * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed page (/login): website/src/App.tsx (lazy via website/src/pages/index.ts barrel)]
+ * @crossref:uses[website/src/contexts/AuthContext.tsx (login), website/src/lib/api/core.ts (ApiError; backend api/src/routes/auth.js), website/src/lib/authToken.ts (remember-me pref), product-map/domains/auth.yaml]
  */
 /**
  * Login Page - TG Clinic authentication screen
- * @crossref:used-in[App]
- * @crossref:uses[AuthContext.login]
  */
 
 import { useState, useEffect, useRef, type FormEvent } from 'react';

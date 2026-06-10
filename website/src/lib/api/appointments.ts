@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[appointments-calendar]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/appointments]
- * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Appointments API client; website/src/lib/api.ts (barrel), website/src/hooks/useAppointments.ts, website/src/hooks/useCalendarData.ts, website/src/hooks/useTodaySchedule.ts, website/src/components/appointments/unified/useAppointmentForm.ts]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/appointments.js, api/src/routes/appointments/readHandlers.js, api/src/routes/appointments/mutationHandlers.js, product-map/domains/appointments-calendar.yaml]
+ * Calls /api/Appointments (list/create/update; LOB-aware via core apiFetch).
  */
 import { apiFetch, type PaginatedResponse } from './core';
 

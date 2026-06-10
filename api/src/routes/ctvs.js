@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 Express API route: api/src/routes/ctvs]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/Ctvs (+/api/cosmetic mirror) by api/src/server.js; frontend client website/src/lib/api/ctv.ts (fetchCtvOptions/fetchAdminCtvs/updateCtv/setCtvActive/fetchCtvHierarchyById/moveCtv)]
+ * @crossref:uses[api/src/db.js (getDb dental+cosmetic — dbo.partners/saleorders/earnings/audit_logs), api/src/services/ctvNetwork.js (getCtvHierarchy), api/src/services/permissionService.js (admin gate), api/src/middleware/auth.js (requireAuth), product-map/domains/ctv.yaml]
  */
 /**
  * ctvs.js — Admin CTV management (list + suspend/reactivate).

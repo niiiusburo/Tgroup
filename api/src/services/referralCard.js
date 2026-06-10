@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 backend service function: api/src/services/referralCard]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/routes/ctvActions.js — POST /api/ctv/refer "Referral Start" anchor card]
+ * @crossref:uses[api/src/db.js, api/src/lib/dateUtils.js (getVietnamYear), api/src/services/newClientsQuery.js (excludes pricetotal=0 anchor), product-map/domains/ctv.yaml]
  */
 const crypto = require('crypto');
 const { getDb: defaultGetDb } = require('../db');

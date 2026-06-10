@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/systemPreferences]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[System preferences API client; website/src/lib/api.ts (barrel), website/src/hooks/useSettings.ts]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/systemPreferences.js, product-map/domains/settings-system.yaml]
+ * Calls /api/SystemPreferences key-based CRUD.
  */
 import { apiFetch } from './core';
 

@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 Express API route: api/src/routes/reports/cashFlow]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[POST /api/Reports/cash-flow/* + /revenue/rules: mounted via api/src/routes/reports.js; called by website/src/hooks/useReportData.ts]
+ * @crossref:uses[api/src/db.js, api/src/middleware/auth.js, api/src/routes/reports/helpers.js (resolveReportCompanyScope, datePaymentScopeFilter), product-map/domains/reports-analytics.yaml]
  */
 const express = require('express');
 const { query } = require('../../db');

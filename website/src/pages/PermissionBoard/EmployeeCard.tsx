@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[employees-hr]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/PermissionBoard/EmployeeCard]
- * @crossref:uses[product-map/domains/employees-hr.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[website/src/pages/PermissionBoard/ArchitectureView.tsx (employee column of /permissions board)]
+ * @crossref:uses[website/src/lib/api.ts (PermissionGroup, EmployeePermission), website/src/pages/PermissionBoard/constants.ts (getInitials, getRoleLabel), website/src/components/shared/ExpandableText.tsx, product-map/domains/employees-hr.yaml]
  */
 import type { PermissionGroup, EmployeePermission } from '@/lib/api';
 import { ExpandableText } from '@/components/shared/ExpandableText';

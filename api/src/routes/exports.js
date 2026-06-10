@@ -2,13 +2,12 @@
 
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 Express API route: api/src/routes/exports]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/Exports by api/src/server.js; frontend client website/src/lib/api/exports.ts (preview/download/types)]
+ * @crossref:uses[api/src/services/exports/exportRegistry.js (getExportType, sanitizeFilters, listExportTypes), api/src/services/permissionService.js (per-type permission gate), api/src/db.js (dbo.exports_audit), api/src/middleware/auth.js, product-map/domains/reports-analytics.yaml]
  */
 const express = require('express');
 const { requireAuth } = require('../middleware/auth');
 const { getExportType, sanitizeFilters } = require('../services/exports/exportRegistry');
-const { buildFilename } = require('../services/exports/exportWorkbook');
 const { resolveEffectivePermissions } = require('../services/permissionService');
 const { query } = require('../db');
 

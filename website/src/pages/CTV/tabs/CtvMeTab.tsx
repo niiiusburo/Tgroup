@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/CTV/tabs/CtvMeTab]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in["Me" tab of website/src/pages/CTV/CtvDashboard.tsx (CTV portal /ctv); builds the /ctv/join?ref= referral link]
+ * @crossref:uses[website/src/contexts/AuthContext.tsx (useAuth logout/user), website/src/lib/api.ts (CtvProfile type), website/src/pages/CTV/tabs/CtvAccountSettings.tsx, website/src/components/shared/LanguageToggle.tsx, product-map/domains/ctv.yaml]
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';

@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[appointments-calendar]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Calendar]
- * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed at /calendar (ROUTES.CALENDAR, ProtectedRoute) from website/src/App.tsx]
+ * @crossref:uses[website/src/hooks/useCalendarData.ts, website/src/hooks/useExport.ts (+ ExportPreviewModal/ExportDateRangeModal), website/src/components/appointments/unified (AppointmentFormShell), website/src/components/calendar/CalendarToolbar.tsx + CalendarViewPanel.tsx + SmartFilterDrawer.tsx, website/src/contexts (Auth/Location/Timezone/BusinessUnit), product-map/domains/appointments-calendar.yaml]
  */
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -124,11 +124,6 @@ export function Calendar() {
     setEditingAppointment(calendarAppointmentToFormData(appointment));
     setIsEditModalOpen(true);
   }, [canEditAppointments]);
-
-  // Handle pencil icon edit - same action as card click in Calendar
-  const handleEditClick = useCallback((appointment: CalendarAppointment) => {
-    handleAppointmentClick(appointment);
-  }, [handleAppointmentClick]);
 
   const handleEditModalClose = useCallback(() => {
     setIsEditModalOpen(false);
@@ -296,7 +291,7 @@ export function Calendar() {
         monthDates={monthDates}
         getAppointmentsForDate={getAppointmentsForDate}
         onAppointmentClick={canEditAppointments ? handleAppointmentClick : undefined}
-        onAppointmentEdit={canEditAppointments ? handleEditClick : undefined}
+        onAppointmentEdit={canEditAppointments ? handleAppointmentClick : undefined}
         onDragStart={canEditAppointments ? handleDragStart : undefined}
         onDragOver={canEditAppointments ? handleDragOver : undefined}
         onDrop={canEditAppointments ? handleDrop : undefined}

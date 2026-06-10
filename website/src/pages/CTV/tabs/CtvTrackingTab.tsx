@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/CTV/tabs/CtvTrackingTab]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[referral tracking tab of website/src/pages/CTV/CtvDashboard.tsx (CTV portal /ctv); receives focus handoff from commission tab]
+ * @crossref:uses[website/src/components/ctv/ReferralFlipCard.tsx, website/src/lib/api.ts (CtvReferral type, stage_progress semantics), website/src/lib/utils.ts (normalizeText), product-map/domains/ctv.yaml]
  */
 import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';

@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[feedback-cms]
- * @crossref:used-in[NK3 Express API route: api/src/routes/feedback/admin]
- * @crossref:uses[product-map/domains/feedback-cms.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[permission helpers for api/src/routes/feedback/adminRoutes.js and api/src/routes/feedback/userRoutes.js (isAdmin badge logic)]
+ * @crossref:uses[api/src/services/permissionService.js (resolveEffectivePermissions, isAdminPermissionState), product-map/domains/feedback-cms.yaml]
  */
 const {
   resolveEffectivePermissions,

@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 backend service function: api/src/services/exports/builders/legacyFlatReportColumns]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/services/exports/builders/legacyFlatReportsExport.js (column defs for revenue-flat/deposit-flat)]
+ * @crossref:uses[product-map/domains/reports-analytics.yaml]
  */
 const REVENUE_COLUMNS = [
   { key: 'companyName', header: 'Cơ sở' },

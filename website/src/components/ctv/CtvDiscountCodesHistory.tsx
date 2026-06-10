@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 CTV portal and referral surface: website/src/components/ctv/CtvDiscountCodesHistory]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[CTV portal code-history list: website/src/components/ctv/CtvQrDiscountPanel.tsx]
+ * @crossref:uses[website/src/lib/api/discountCodes.ts (fetchMyDiscountCodes/Stats), website/src/lib/i18n/ctv.ts, website/src/lib/utils.ts, product-map/domains/ctv.yaml]
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Clock, Filter, RefreshCw, Search, UserCheck, XCircle } from 'lucide-react';

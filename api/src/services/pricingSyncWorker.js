@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[api/src/server.js]
- * @crossref:uses[api/src/services/pricingSheetSync.js, api/src/services/googleSheetsClient.js]
+ * @crossref:used-in[api/src/server.js, api/src/routes/publicBangGia.js]
+ * @crossref:uses[api/src/services/pricingSheetSync.js, api/src/services/googleSheetsClient.js, api/src/services/pricingSheetCategoryMap.js, product-map/domains/ctv.yaml]
  */
 
 const cluster = require('cluster');

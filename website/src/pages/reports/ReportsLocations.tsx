@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/reports/ReportsLocations]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed page (/reports/locations): website/src/App.tsx (lazy, re-exported via website/src/pages/Reports.tsx); filters arrive via Outlet context from Reports shell]
+ * @crossref:uses[website/src/hooks/useReportData.ts ('/Reports/locations/comparison' — backend api/src/routes/reports/locationsComparison.js), website/src/components/reports/ (KPICard, BarChart, ReportsFilters, ReportError), website/src/lib/formatting.ts (formatVND), product-map/domains/reports-analytics.yaml]
  */
 import { useOutletContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';

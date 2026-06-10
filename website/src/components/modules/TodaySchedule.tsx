@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[appointments-calendar]
- * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/TodaySchedule]
- * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[today's timeline — NO current importers (orphan candidate; useTodaySchedule hook is separate and live)]
+ * @crossref:uses[website/src/data/mockCalendar.ts (CalendarAppointment, STATUS_BADGE_STYLES), website/src/components/shared/CustomerNameLink.tsx, website/src/lib/appointmentDuration.ts, product-map/domains/appointments-calendar.yaml]
  */
 import { Clock, User, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +12,6 @@ import { formatAppointmentDuration } from '@/lib/appointmentDuration';
 
 /**
  * TodaySchedule - Appointment timeline for today
- * @crossref:used-in[Overview, CalendarPage]
  */
 
 interface TodayScheduleProps {

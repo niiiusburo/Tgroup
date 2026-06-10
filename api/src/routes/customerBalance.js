@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 Express API route: api/src/routes/customerBalance]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/CustomerBalance (+/api/cosmetic mirror) by api/src/server.js; frontend client website/src/lib/api/customerBalance.ts]
+ * @crossref:uses[api/src/db.js (getQuery — payments/saleorders/dotkhams balance math), product-map/domains/customers-partners.yaml]
  */
 const express = require('express');
 const router = express.Router();

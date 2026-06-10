@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 Express API route: api/src/routes/customerSources]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/CustomerSources (+/api/cosmetic mirror) by api/src/server.js; frontend client website/src/lib/api/customerSources.ts]
+ * @crossref:uses[api/src/db.js (query — dbo.customersources/dbo.partners), api/src/middleware/auth.js (requirePermission 'settings.edit' on mutations), product-map/domains/customers-partners.yaml]
  */
 /**
  * Customer Sources API Routes

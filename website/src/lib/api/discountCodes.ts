@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/discountCodes]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[CTV discount codes API client; website/src/components/commission/DiscountCodesAdminTab.tsx, website/src/components/ctv/CtvDiscountCodesHistory.tsx, website/src/components/ctv/CtvQrDiscountPanel.tsx, website/src/pages/CtvDiscountLanding.tsx, website/src/pages/VerifyDiscount.tsx]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/discountCodes.js, product-map/domains/settings-system.yaml]
+ * Calls /api/discount-codes/* (lookup/verify/generate/landing/mine/admin).
  */
 import { apiFetch, API_URL } from './core';
 

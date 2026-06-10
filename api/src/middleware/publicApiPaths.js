@@ -3,7 +3,7 @@
 /**
  * @crossref:domain[ctv]
  * @crossref:used-in[api/src/server.js global /api auth gate]
- * @crossref:uses[product-map/domains/ctv.yaml]
+ * @crossref:uses[product-map/domains/ctv.yaml, api/src/routes/discountCodes.js (public QR landing/claim paths), api/src/routes/publicBangGia.js]
  */
 
 /** Exact paths that skip requireAuth (login, health, telemetry, etc.). */

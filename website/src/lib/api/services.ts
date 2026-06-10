@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/services]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[DEAD CODE — no consumers; only re-exported by website/src/lib/api.ts (barrel)]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/services.js (unmounted in api/src/server.js), product-map/domains/services-catalog.yaml]
+ * Calls /api/Services, whose route mount is commented out (non-existent public.services table).
  */
 import { apiFetch } from './core';
 

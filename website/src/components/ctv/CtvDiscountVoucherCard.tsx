@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 CTV portal and referral surface: website/src/components/ctv/CtvDiscountVoucherCard]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[voucher card UI: website/src/components/ctv/CtvQrDiscountPanel.tsx, website/src/pages/CtvDiscountLanding.tsx]
+ * @crossref:uses[website/src/components/ctv/ctvDiscountVoucherCanvas.ts (formatDiscountValue), website/src/lib/utils.ts, qrcode, product-map/domains/ctv.yaml]
  */
 import { useEffect, useRef } from 'react';
 import { Gift, MapPin } from 'lucide-react';

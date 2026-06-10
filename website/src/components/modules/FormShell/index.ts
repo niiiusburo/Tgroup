@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/FormShell/index]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[FormShell barrel: website/src/components/appointments/unified/AppointmentFormShell.tsx, website/src/components/forms/AddCustomerForm/AddCustomerForm.tsx, website/src/components/services/ServiceForm.tsx, website/src/components/shared/DeleteConfirmDialog.tsx]
+ * @crossref:uses[website/src/components/modules/FormShell/{FormShell,FormHeader,FormFooter,FormField,FormGrid,ApiErrorPanel}.tsx, product-map/domains/settings-system.yaml]
  */
 /**
  * FormShell Module — Unified modal form components for TG Clinic.
@@ -16,8 +16,6 @@
  *
  * Usage:
  * import { FormShell, FormHeader, FormFooter, FormField, FormGrid, ApiErrorPanel } from '@/components/modules/FormShell';
- *
- * @crossref:used-in[AddCustomerForm, ServiceForm, AppointmentForm, EmployeeForm, PaymentForm]
  */
 
 // Re-export all components from their individual files

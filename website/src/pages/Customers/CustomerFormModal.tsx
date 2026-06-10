@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/CustomerFormModal]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[add/edit customer modal rendered by website/src/pages/Customers.tsx]
+ * @crossref:uses[website/src/components/forms/AddCustomerForm (form SSOT), website/src/components/shared/faceCaptureProfile.ts (CapturedFaceImages type), website/src/data/mockCustomerForm.ts (CustomerFormData type), product-map/domains/customers-partners.yaml]
  */
 import { AddCustomerForm } from '@/components/forms/AddCustomerForm';
 import type { CapturedFaceImages } from '@/components/shared/faceCaptureProfile';

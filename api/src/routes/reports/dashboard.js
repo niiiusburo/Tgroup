@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 Express API route: api/src/routes/reports/dashboard]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[POST /api/Reports/dashboard: mounted via api/src/routes/reports.js; called by website/src/hooks/useReportData.ts]
+ * @crossref:uses[api/src/db.js, api/src/middleware/auth.js, api/src/lib/dateUtils.js (getVietnamToday), api/src/routes/reports/helpers.js, api/src/services/reports/canonicalRevenue.js, product-map/domains/reports-analytics.yaml]
  */
 const express = require('express');
 const { query } = require('../../db');

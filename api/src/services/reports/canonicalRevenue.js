@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 backend service function: api/src/services/reports/canonicalRevenue]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/routes/reports/dashboard.js, api/src/routes/reports/doctors.js, api/src/routes/reports/locationsComparison.js]
+ * @crossref:uses[api/src/routes/reports/revenueRecognition.js (shared filter SQL), api/src/db.js, api/src/services/exports/builders/legacyFlatRevenueQuery.js (same formula), product-map/domains/reports-analytics.yaml]
  */
 // Canonical revenue source-of-truth — the same formula the Excel "revenue-flat"
 // export uses (see api/src/services/exports/builders/legacyFlatRevenueQuery.js).

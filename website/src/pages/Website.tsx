@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Website]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed page (/website): website/src/App.tsx (lazy via website/src/pages/index.ts barrel)]
+ * @crossref:uses[website/src/hooks/useWebsiteData.ts, website/src/components/website/PageList.tsx, website/src/components/website/PageEditor.tsx, website/src/components/website/ServiceCatalogManager.tsx, website/src/components/website/SEOManager.tsx, product-map/domains/settings-system.yaml]
  */
 import { Globe, FileText, Palette, Search, LayoutList } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -17,8 +17,6 @@ import { useAuth } from '@/contexts/AuthContext';
 /**
  * Website Page — CMS for managing public website pages
  * @crossref:route[/website]
- * @crossref:used-in[App]
- * @crossref:uses[PageEditor, PageList, SEOManager, ServiceCatalogManager]
  */
 
 interface TabConfig {

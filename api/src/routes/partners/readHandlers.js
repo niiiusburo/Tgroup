@@ -1,9 +1,9 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 Express API route: api/src/routes/partners/readHandlers]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[GET /api/Partners list/check-unique/GetKPIs handlers: api/src/routes/partners.js; called by website/src/lib/api/partners.ts]
+ * @crossref:uses[api/src/db.js (getQuery), api/src/routes/partners/listFilters.js, api/src/routes/partners/searchFilters.js, product-map/domains/customers-partners.yaml]
  */
-const { query: legacyQuery, getQuery } = require('../../db');
+const { getQuery } = require('../../db');
 const { applyPartnerListFilters } = require('./listFilters');
 const { applyPartnerSearchFilter } = require('./searchFilters');
 

@@ -1,17 +1,16 @@
 /**
  * @crossref:domain[employees-hr]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Employees/index]
- * @crossref:uses[product-map/domains/employees-hr.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed at /employees (ProtectedRoute) from website/src/App.tsx]
+ * @crossref:uses[website/src/hooks/useEmployees.ts, website/src/lib/api.ts (fetchPermissionGroups, ApiEmployee), website/src/components/employees/EmployeeTable.tsx + EmployeeProfile.tsx + EmployeeForm.tsx + TierSelector.tsx + RoleMultiSelect.tsx, website/src/contexts/LocationContext.tsx (useLocationFilter) + BusinessUnitContext.tsx, product-map/domains/employees-hr.yaml]
  */
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { UserCog, Search, X } from 'lucide-react';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { TierSelector } from '@/components/employees/TierSelector';
 import { RoleMultiSelect } from '@/components/employees/RoleMultiSelect';
-import { useState as useStateReact, useEffect as useEffectReact } from 'react';
 import { fetchPermissionGroups, type PermissionGroup } from '@/lib/api';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { EmployeeTable } from '@/components/employees/EmployeeTable';
@@ -71,10 +70,10 @@ export function Employees() {
     setShowForm(true);
   };
 
-  const [tiers, setTiers] = useStateReact<PermissionGroup[]>([]);
-  const [tiersLoading, setTiersLoading] = useStateReact(true);
+  const [tiers, setTiers] = useState<PermissionGroup[]>([]);
+  const [tiersLoading, setTiersLoading] = useState(true);
 
-  useEffectReact(() => {
+  useEffect(() => {
     setTiersLoading(true);
     fetchPermissionGroups(currentLOB)
       .then(setTiers)

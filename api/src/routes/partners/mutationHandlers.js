@@ -1,9 +1,9 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 Express API route: api/src/routes/partners/mutationHandlers]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[POST/PUT/PATCH/DELETE /api/Partners handlers: api/src/routes/partners.js; called by website/src/lib/api/partners.ts]
+ * @crossref:uses[api/src/db.js (getQuery), product-map/domains/customers-partners.yaml]
  */
-const { query: legacyQuery, getQuery } = require('../../db');
+const { getQuery } = require('../../db');
 
 const CUSTOMER_CODE_DIGITS = 6;
 const CUSTOMER_CODE_MAX_ATTEMPTS = 20;

@@ -2,7 +2,7 @@
 
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 backend service function: api/src/services/ctvBookingCompany]
+ * @crossref:used-in[NK3 backend service function: api/src/services/ctvBookingCompany, api/src/routes/ctv.js]
  * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
  * @crossref:function[resolveCtvBookingCompanyId -> non-null appointment company for CTV booking]
  * @crossref:uses[api/src/routes/ctv.js, api/src/routes/ctvPublic.js, product-map/domains/business-unit.yaml]

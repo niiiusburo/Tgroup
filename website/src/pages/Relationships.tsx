@@ -1,13 +1,11 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Relationships]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed page (/relationships): website/src/App.tsx (lazy via website/src/pages/index.ts barrel)]
+ * @crossref:uses[website/src/hooks/useRelationshipsData.ts, website/src/components/relationships/PermissionMatrix.tsx, website/src/components/relationships/EntityRelationshipMap.tsx, website/src/contexts/AuthContext.tsx (hasPermission), product-map/domains/settings-system.yaml]
  */
 /**
  * Relationships Page — Permission matrix and entity relationship map
  * @crossref:route[/relationships]
- * @crossref:used-in[App]
- * @crossref:uses[PermissionMatrix, EntityRelationshipMap]
  */
 
 import { Network, Shield, GitBranch } from 'lucide-react';

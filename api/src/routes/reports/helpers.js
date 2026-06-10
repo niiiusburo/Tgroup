@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 Express API route: api/src/routes/reports/helpers]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[shared report validators/filters: all api/src/routes/reports/*.js sub-routers (dashboard, revenue, revenueBreakdowns, cashFlow, appointments, doctors, customers, employeesOverview, servicesBreakdown, locationsComparison)]
+ * @crossref:uses[api/src/services/permissionService.js (resolveEffectivePermissions), product-map/domains/reports-analytics.yaml]
  */
 const { resolveEffectivePermissions } = require('../../services/permissionService');
 

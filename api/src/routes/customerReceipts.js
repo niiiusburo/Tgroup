@@ -1,10 +1,10 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 Express API route: api/src/routes/customerReceipts]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/CustomerReceipts (+/api/cosmetic mirror) by api/src/server.js; no live frontend lib/api client (legacy Odoo customerreceipts)]
+ * @crossref:uses[api/src/db.js (getQuery — customerreceipts/appointments/dotkhams), api/src/utils/search.js, api/src/middleware/auth.js (requirePermission 'customers.view'), product-map/domains/customers-partners.yaml]
  */
 const express = require('express');
-const { query: legacyQuery, getQuery } = require('../db');
+const { getQuery } = require('../db');
 const { requirePermission } = require('../middleware/auth');
 const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 

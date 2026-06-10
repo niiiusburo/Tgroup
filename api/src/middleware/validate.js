@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 API middleware: api/src/middleware/validate]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/routes/appointments.js, api/src/routes/partners.js, api/src/routes/payments.js — zod body validation]
+ * @crossref:uses[product-map/domains/settings-system.yaml]
  */
 const validate = (schema) => (req, res, next) => {
   const result = schema.safeParse(req.body);

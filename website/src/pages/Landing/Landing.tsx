@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Landing/Landing]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[public landing routed at /welcome from website/src/App.tsx (via website/src/pages/Landing/index.ts barrel); deep-link /welcome?book=1 opens booking sheet]
+ * @crossref:uses[website/src/components/ctv/CtvReferModal.tsx (publicMode booking sheet), website/src/pages/Landing/landing.css, product-map/domains/settings-system.yaml]
  */
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';

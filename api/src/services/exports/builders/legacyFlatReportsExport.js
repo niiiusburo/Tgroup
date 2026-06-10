@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 backend service function: api/src/services/exports/builders/legacyFlatReportsExport]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/services/exports/exportRegistry.js ('revenue-flat' + 'deposit-flat' types → api/src/routes/exports.js)]
+ * @crossref:uses[api/src/services/exports/flatWorkbook.js, api/src/services/exports/builders/legacyFlatRevenueQuery.js, api/src/services/exports/builders/legacyFlatDepositQuery.js, api/src/services/exports/builders/legacyFlatReportColumns.js, product-map/domains/reports-analytics.yaml]
  */
 const { toVNDate } = require('../exportWorkbook');
 const { createFlatWorkbook } = require('../flatWorkbook');

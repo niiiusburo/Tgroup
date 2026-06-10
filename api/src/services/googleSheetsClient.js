@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[integrations]
- * @crossref:used-in[api/src/services/pricingSheetSync.js]
- * @crossref:uses[ctv2checkin/google_credentials.json service account pattern]
+ * @crossref:used-in[api/src/services/pricingSheetSync.js, api/src/services/pricingSyncWorker.js]
+ * @crossref:uses[ctv2checkin/google_credentials.json service account pattern, product-map/domains/integrations.yaml]
  */
 
 const fs = require('fs');

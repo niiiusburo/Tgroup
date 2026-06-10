@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Reports]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed page (/reports shell + nested /reports/* tabs): website/src/App.tsx (lazy, direct import — not via pages barrel); re-exports all website/src/pages/reports/* sub-pages]
+ * @crossref:uses[website/src/components/reports/ReportsFilters.tsx, website/src/hooks/useLocations.ts, website/src/constants/index.ts (ROUTES.REPORTS_*), website/src/pages/reports/ (8 sub-pages), product-map/domains/reports-analytics.yaml]
  */
 /**
  * Reports Page — Shell with nested routing for 8 report sub-pages.

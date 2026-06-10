@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[auth]
- * @crossref:used-in[NK3 API middleware: api/src/middleware/auth]
- * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[JWT + permission + LOB gate for nearly all routes: api/src/server.js, api/src/routes/auth.js, api/src/routes/payments.js, api/src/routes/ctv.js, api/src/routes/exports.js, api/src/middleware/dentalLobGate.js]
+ * @crossref:uses[api/src/services/permissionService.js, product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
  */
 const jwt = require('jsonwebtoken');
 const { resolveEffectivePermissions } = require('../services/permissionService');

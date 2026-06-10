@@ -1,8 +1,8 @@
 /**
  * @crossref:domain[ctv]
  * @crossref:route[path="/verify-discount"]
- * @crossref:used-in[NK3 staff QR discount verification — scanned from CTV voucher]
- * @crossref:uses[product-map/domains/ctv.yaml, website/src/lib/api/discountCodes.ts]
+ * @crossref:used-in[NK3 staff QR discount verification — scanned from CTV voucher; routed page (/verify-discount): website/src/App.tsx (lazy)]
+ * @crossref:uses[product-map/domains/ctv.yaml, website/src/lib/api/discountCodes.ts (backend api/src/routes/discountCodes.js), website/src/lib/api/core.ts (ApiError), website/src/contexts/AuthContext.tsx]
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';

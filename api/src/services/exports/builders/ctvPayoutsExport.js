@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 backend service function: api/src/services/exports/builders/ctvPayoutsExport]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/services/exports/exportRegistry.js ('ctv-payouts' type → api/src/routes/exports.js)]
+ * @crossref:uses[api/src/db.js (getDb dual-LOB), api/src/services/exports/exportWorkbook.js, api/src/routes/payouts.js (mirrored query), product-map/domains/ctv.yaml]
  */
 /**
  * ctvPayoutsExport.js — Excel export for the "Chi trả" (CTV payout cycles) tab.

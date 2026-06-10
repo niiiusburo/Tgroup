@@ -1,11 +1,10 @@
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/TodayServicesTable]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Zone 2 services-today placeholder: website/src/pages/Overview.tsx]
+ * @crossref:uses[react-i18next + lucide-react only (no app imports yet; data wiring pending), product-map/domains/services-catalog.yaml]
  */
 /**
  * TodayServicesTable - Zone 2: Services performed today
- * @crossref:used-in[Overview]
  *
  * Placeholder for now — will show services/procedures for the day.
  * Data will come from service orders linked to today's appointments.

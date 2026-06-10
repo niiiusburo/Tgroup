@@ -1,14 +1,13 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/StatCardModule]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[dashboard stat cards; StatCardData type consumed by website/src/hooks/useDashboardStats.ts]
+ * @crossref:uses[lucide-react only (no app imports), product-map/domains/settings-system.yaml]
  */
 import { type LucideIcon } from 'lucide-react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
 /**
  * StatCardModule - Reusable stat card for dashboard metrics
- * @crossref:used-in[Overview, Reports, LocationDetail]
  */
 
 export interface StatCardData {

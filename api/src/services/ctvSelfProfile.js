@@ -2,7 +2,7 @@
 
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 backend service function: api/src/services/ctvSelfProfile]
+ * @crossref:used-in[NK3 backend service function: api/src/services/ctvSelfProfile, api/src/routes/ctvProfile.js]
  * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
  * @crossref:function[getCtvSelfProfile, updateCtvSelfProfile, changeCtvSelfPassword]
  * @crossref:uses[api/src/routes/ctvProfile.js, api/src/services/legacyCtvPassword.js, website/src/pages/CTV/tabs/CtvAccountSettings.tsx]

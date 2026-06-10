@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[auth]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/auth]
- * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Auth API client; website/src/lib/api.ts (barrel), website/src/contexts/AuthContext.tsx, website/src/components/shared/ChangePasswordModal.tsx]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/auth.js, product-map/domains/auth.yaml]
+ * Calls /api/Auth/login, /api/Auth/me, /api/Auth/change-password.
  */
 import { apiFetch } from './core';
 

@@ -1,10 +1,9 @@
 /**
  * @crossref:domain[auth]
- * @crossref:used-in[NK3 Express API route: api/src/routes/session]
- * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[LEGACY: /Web/Session mount is commented out in api/src/server.js (parity stub serving truth-session.json); no frontend callers]
+ * @crossref:uses[api/src/truth-session.json fixture, product-map/domains/auth.yaml]
  */
 const express = require('express');
-const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
 

@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 CTV portal and referral surface: website/src/components/ctv/CtvReferModal]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[refer-a-client sheet (portal + public landing): website/src/pages/CTV/CtvDashboard.tsx, website/src/pages/Landing/Landing.tsx]
+ * @crossref:uses[website/src/lib/api/ctv.ts (createBooking/createPublicBooking/lookups), website/src/lib/api/core.ts, website/src/components/ctv/CtvModalSheet.tsx, website/src/components/ctv/ServicePicker.tsx, website/src/components/ui/DatePicker.tsx, product-map/domains/ctv.yaml]
  */
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';

@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 backend service function: api/src/services/larkNotifier]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/routes/publicTelemetryErrors.js — auto-detected error → Lark alert]
+ * @crossref:uses[Lark/Feishu bot webhook (LARK_FEEDBACK_WEBHOOK_URL/SECRET env), product-map/domains/services-catalog.yaml, product-map/domains/feedback-cms.yaml, docs/TEST-MATRIX.md]
  */
 const crypto = require('crypto');
 

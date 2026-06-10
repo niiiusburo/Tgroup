@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 backend service function: api/src/services/permissionService]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/middleware/auth.js (requirePermission), api/src/routes/auth.js, api/src/routes/ctvHelpers.js, api/src/routes/reports/helpers.js, api/src/routes/exports.js, api/src/routes/payouts.js]
+ * @crossref:uses[api/src/db.js (getQuery authLob-pinned; dbo.permission_groups/group_permissions/permission_overrides), product-map/domains/services-catalog.yaml, product-map/domains/auth.yaml, docs/TEST-MATRIX.md]
  */
 const { query, getQuery } = require('../db');
 

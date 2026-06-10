@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 Express API route: api/src/routes/publicBangGia]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[public unauthenticated /api/public/bang-gia: mounted in api/src/server.js (before auth gate); consumed by public price-list page website/public/bang-gia]
+ * @crossref:uses[api/src/services/pricingSyncWorker.js (getPricingSyncStatus), product-map/domains/settings-system.yaml]
  */
 /**
  * @crossref:domain[ctv]

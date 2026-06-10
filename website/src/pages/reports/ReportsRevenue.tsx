@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/reports/ReportsRevenue]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed page (/reports/revenue): website/src/App.tsx (lazy, re-exported via website/src/pages/Reports.tsx); filters arrive via Outlet context from Reports shell]
+ * @crossref:uses[website/src/hooks/useReportData.ts ('/Reports/revenue/*', '/Reports/cash-flow/summary' — backend api/src/routes/reports/revenue.js, revenueBreakdowns.js, cashFlow.js), website/src/hooks/useExport.ts (revenue-flat/deposit-flat/report-sales-employees), website/src/lib/api/employees.ts (fetchEmployees), website/src/contexts/BusinessUnitContext.tsx, website/src/components/reports/, product-map/domains/reports-analytics.yaml]
  */
 import { useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';

@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 Express API route: api/src/routes/dotKhams]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/DotKhams (+/api/cosmetic mirror) by api/src/server.js; frontend client website/src/lib/api/dotKhams.ts]
+ * @crossref:uses[api/src/db.js (query — dotkhams/dotkhamsteps/partners/saleorders), api/src/utils/search.js (accent-insensitive search), product-map/domains/settings-system.yaml]
  */
 const express = require('express');
 const { query } = require('../db');

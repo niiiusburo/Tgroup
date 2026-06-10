@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 backend service function: api/src/services/faceMatchEngine]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/routes/faceRecognition.js (provider=local embedding match/register paths)]
+ * @crossref:uses[api/src/db.js (dbo.customer_face_embeddings, dbo.partners), api/src/services/faceEngineClient.js (embedding producer upstream), product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md]
  */
 const { query, pool } = require("../db");
 

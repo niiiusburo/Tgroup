@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[feedback-cms]
- * @crossref:used-in[NK3 Express API route: api/src/routes/feedback/userRoutes]
- * @crossref:uses[product-map/domains/feedback-cms.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[user sub-router mounted via api/src/routes/feedback.js at /api/Feedback (/, /my*, /unread-count); frontend client website/src/lib/api/feedback.ts]
+ * @crossref:uses[api/src/routes/feedback/admin.js (isAdmin), api/src/routes/feedback/attachments.js (upload + attachment helpers), api/src/db.js (query/pool — feedback_threads/messages), api/src/lib/dateUtils.js (getVietnamNow), product-map/domains/feedback-cms.yaml]
  */
 const express = require('express');
 const { query, pool } = require('../../db');

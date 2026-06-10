@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/useCustomerPaymentActions]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[handleMakePayment composed by website/src/pages/Customers/useCustomerDetailController.ts (customer profile payment submit)]
+ * @crossref:uses[website/src/components/payment/PaymentForm.tsx (PaymentFormData shape incl. sources/allocations), website/src/hooks/useCustomerPayments.ts (addPayment), product-map/domains/customers-partners.yaml]
  */
 import { useCallback } from 'react';
 import type { PaymentFormData } from '@/components/payment/PaymentForm';

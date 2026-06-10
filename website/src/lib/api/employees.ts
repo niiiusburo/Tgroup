@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[employees-hr]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/employees]
- * @crossref:uses[product-map/domains/employees-hr.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Employees API client; website/src/lib/api.ts (barrel), website/src/hooks/useEmployees.ts, website/src/hooks/usePermissionBoard.ts, website/src/components/employees/EmployeeForm.tsx, website/src/pages/reports/ReportsRevenue.tsx]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/employees.js, api/src/routes/employees/mutations.js, product-map/domains/employees-hr.yaml]
+ * Calls /api/Employees CRUD (LOB-aware).
  */
 import { apiFetch, type PaginatedResponse } from './core';
 

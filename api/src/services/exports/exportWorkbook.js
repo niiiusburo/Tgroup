@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 backend service function: api/src/services/exports/exportWorkbook]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/routes/exports.js, api/src/services/exports/exportRegistry.js, api/src/services/exports/builders/* (every builder's 3-sheet helper)]
+ * @crossref:uses[exceljs, product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md]
  */
 const ExcelJS = require('exceljs');
 

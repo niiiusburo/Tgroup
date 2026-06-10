@@ -1,10 +1,10 @@
 /**
  * @crossref:domain[employees-hr]
- * @crossref:used-in[NK3 Express API route: api/src/routes/employees]
- * @crossref:uses[product-map/domains/employees-hr.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/Employees (+/api/cosmetic mirror) by api/src/server.js; frontend client website/src/lib/api/employees.ts]
+ * @crossref:uses[api/src/routes/employees/mutations.js (POST/PUT/DELETE sub-router), api/src/routes/employees/locationScopes.js, api/src/db.js (getQuery — employees/companies/permission_groups), api/src/utils/search.js, api/src/middleware/auth.js (requirePermission 'employees.view'), product-map/domains/employees-hr.yaml]
  */
 const express = require('express');
-const { query: legacyQuery, getQuery } = require('../db');
+const { getQuery } = require('../db');
 const { requirePermission } = require('../middleware/auth');
 const { attachLocationScopes, fetchLocationScopeIds } = require('./employees/locationScopes');
 const { addAccentInsensitiveSearchCondition } = require('../utils/search');

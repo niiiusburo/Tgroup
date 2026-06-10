@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/CTV/tabs/CtvAccountSettings]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[account settings panel rendered by website/src/pages/CTV/tabs/CtvMeTab.tsx (CTV portal "Me" tab)]
+ * @crossref:uses[website/src/lib/api.ts (updateCtvSelfProfile, changeCtvSelfPassword), product-map/domains/ctv.yaml]
  */
 import { type FormEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';

@@ -3,16 +3,15 @@ import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';
 import { createCtv } from '@/lib/api/ctv';
 import { CtvModalSheet } from './CtvModalSheet';
-import { useCtvCreationForm } from '@/components/shared/CtvCreationForm';
-import { CtvCreationForm } from '@/components/shared/CtvCreationForm';
+import { CtvCreationForm, useCtvCreationForm } from '@/components/shared/CtvCreationForm';
 
 /**
  * CtvRecruitModal — CTV logged-in portal "recruit/refer a new CTV" sheet.
  * Now delegates entirely to the shared CtvCreationForm + useCtvCreationForm (mode: 'portal-recruit').
  * Email optional (consistent with admin Add + public Join); per-field errors + specific messages.
  *
- * @crossref:used-in[CTV portal recruit flow (logged-in CTV creating downline)]
- * @crossref:uses[shared/CtvCreationForm (SSOT for validation, LOB dental-forced, payload shape, error UI), createCtv, CtvModalSheet]
+ * @crossref:used-in[CTV portal recruit flow (logged-in CTV creating downline); website/src/pages/CTV/CtvDashboard.tsx]
+ * @crossref:uses[shared/CtvCreationForm (SSOT for validation, LOB dental-forced, payload shape, error UI), createCtv, CtvModalSheet, product-map/domains/ctv.yaml]
  * @crossref:domain[ctv-creation — one of 3 call sites; change here or in hook affects all via import]
  */
 

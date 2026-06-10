@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/reports/ReportsDoctors]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed page (/reports/doctors): website/src/App.tsx (lazy, re-exported via website/src/pages/Reports.tsx); filters arrive via Outlet context from Reports shell]
+ * @crossref:uses[website/src/hooks/useReportData.ts ('/Reports/doctors/performance' — backend api/src/routes/reports/doctors.js), website/src/components/reports/ (KPICard, BarChart, ReportsFilters, ReportError), website/src/lib/formatting.ts (formatVND), product-map/domains/reports-analytics.yaml]
  */
 import { useOutletContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -27,9 +27,6 @@ export function ReportsDoctors() {
   const totalAppts = doctors.reduce((s, d) => s + d.totalAppointments, 0);
   const totalDone = doctors.reduce((s, d) => s + d.done, 0);
   const totalRev = doctors.reduce((s, d) => s + d.revenue, 0);
-  const topDoctor = doctors.reduce((best, d) => d.done > (best?.done || 0) ? d : best, doctors[0]);
-  void topDoctor;
-
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

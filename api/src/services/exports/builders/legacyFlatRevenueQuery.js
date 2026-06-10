@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 backend service function: api/src/services/exports/builders/legacyFlatRevenueQuery]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/services/exports/builders/legacyFlatReportsExport.js ('revenue-flat' export; formula mirrored by api/src/services/reports/canonicalRevenue.js)]
+ * @crossref:uses[api/src/db.js, api/src/services/exports/builders/legacyFlatReportFilters.js, product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md]
  */
 const { query } = require('../../../db');
 const { addCommonDateFilters } = require('./legacyFlatReportFilters');

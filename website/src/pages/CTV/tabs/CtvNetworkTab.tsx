@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/CTV/tabs/CtvNetworkTab]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[network tab of website/src/pages/CTV/CtvDashboard.tsx (CTV portal /ctv)]
+ * @crossref:uses[website/src/components/ctv/CtvHierarchyPanel.tsx, website/src/components/ctv/CtvQrDiscountPanel.tsx, website/src/lib/api/ctv.ts (CtvHierarchyResponse type), website/src/lib/api/ctvSelf.ts (CtvProfile type), product-map/domains/ctv.yaml]
  */
 import { useState } from 'react';
 import { Network, QrCode } from 'lucide-react';

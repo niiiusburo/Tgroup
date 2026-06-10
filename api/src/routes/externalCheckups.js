@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[integrations]
- * @crossref:used-in[NK3 Express API route: api/src/routes/externalCheckups]
- * @crossref:uses[product-map/domains/integrations.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/ExternalCheckups (+/api/cosmetic mirror) by api/src/server.js; frontend client website/src/lib/api/externalCheckups.ts]
+ * @crossref:uses[api/src/services/hosoonlineClient.js (all Hoso API helpers + error types), api/src/middleware/auth.js (requireAuth + requirePermission 'external_checkups.*'), multer (uploads), product-map/domains/integrations.yaml]
  */
 const express = require('express');
 const multer = require('multer');

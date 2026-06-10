@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/companies]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Companies/locations API client; website/src/lib/api.ts (barrel), website/src/hooks/useLocations.ts, website/src/hooks/useOverviewData.ts, website/src/components/employees/EmployeeForm.tsx, website/src/pages/ServiceCatalog.tsx]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/companies.js, product-map/domains/settings-system.yaml]
+ * Calls /api/Companies (list/create/update; LOB-aware).
  */
 import { apiFetch, type PaginatedResponse } from './core';
 

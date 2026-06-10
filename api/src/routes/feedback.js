@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[feedback-cms]
- * @crossref:used-in[NK3 Express API route: api/src/routes/feedback]
- * @crossref:uses[product-map/domains/feedback-cms.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/Feedback by api/src/server.js; frontend client website/src/lib/api/feedback.ts]
+ * @crossref:uses[api/src/routes/feedback/userRoutes.js, api/src/routes/feedback/adminRoutes.js, product-map/domains/feedback-cms.yaml]
  */
 const express = require('express');
 

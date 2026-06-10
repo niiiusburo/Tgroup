@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[earnings-commissions]
- * @crossref:used-in[NK3 Express API route: api/src/routes/commissionConfig]
- * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/CommissionConfig (+/api/cosmetic mirror) by api/src/server.js; frontend client website/src/lib/api/commission.ts (fetch/saveCommissionConfig)]
+ * @crossref:uses[api/src/db.js (query — dbo.commission_level_config), api/src/services/permissionService.js, api/src/middleware/auth.js (requireAuth), product-map/domains/earnings-commissions.yaml]
  */
 /**
  * commissionConfig.js — MLM commission level config (admin).

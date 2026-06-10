@@ -3,7 +3,7 @@
 /**
  * @crossref:domain[ctv]
  * @crossref:used-in[api/src/services/pricingSheetSync.js]
- * @crossref:uses[api/src/services/pricingSheetCategoryMap.js]
+ * @crossref:uses[api/src/services/pricingSheetCategoryMap.js, product-map/domains/ctv.yaml]
  */
 
 const {

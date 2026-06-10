@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 backend service function: api/src/services/exports/builders/customersExport]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/services/exports/exportRegistry.js ('customers' type → api/src/routes/exports.js)]
+ * @crossref:uses[api/src/db.js, api/src/services/exports/exportWorkbook.js, product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md]
  */
 const { query } = require('../../../db');
 const { createWorkbook, populateDataSheet, populateSummarySheet, toVNDate } = require('../exportWorkbook');

@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[earnings-commissions]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/commission]
- * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Admin commission API client; website/src/pages/Commission.tsx, website/src/components/commission/EarningsPayoutsTabs.tsx, website/src/components/commission/NewClientsTab.tsx]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/commissionConfig.js, api/src/routes/earnings.js, api/src/routes/payouts.js, api/src/routes/newClients.js, product-map/domains/earnings-commissions.yaml]
+ * Calls /api/CommissionConfig, /api/Earnings, /api/Payouts, /api/NewClients.
  */
 /**
  * commission.ts — API client for commission configuration (admin)

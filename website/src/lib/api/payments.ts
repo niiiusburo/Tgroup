@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[payments-deposits]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/payments]
- * @crossref:uses[product-map/domains/payments-deposits.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Payments/deposits API client; website/src/lib/api.ts (barrel), website/src/hooks/usePayment.ts, website/src/hooks/useDeposits.ts, website/src/hooks/useCustomerPayments.ts, website/src/components/customer/CustomerProfile/PaymentTab.tsx]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/payments.js, api/src/routes/payments/readHandlers.js, product-map/domains/payments-deposits.yaml]
+ * Calls /api/Payments create/void/refund/deposits/deposit-usage; delete is hard by default, 409 if commission paid out.
  */
 import { apiFetch } from './core';
 

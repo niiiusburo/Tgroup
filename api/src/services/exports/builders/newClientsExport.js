@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 backend service function: api/src/services/exports/builders/newClientsExport]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/services/exports/exportRegistry.js ('new-clients' type → api/src/routes/exports.js)]
+ * @crossref:uses[api/src/services/newClientsQuery.js (shared list query), api/src/services/exports/exportWorkbook.js, product-map/domains/ctv.yaml]
  */
 /**
  * newClientsExport.js — Excel export for the admin "New Clients" tab.

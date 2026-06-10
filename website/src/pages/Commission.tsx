@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[earnings-commissions]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Commission]
- * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed at /commission (ProtectedRoute) from website/src/App.tsx; ?tab= deep links from website/src/components/commission/CommissionNavigation.tsx]
+ * @crossref:uses[website/src/lib/api/commission.ts (fetchCommissionConfig/saveCommissionConfig -> api/src/routes/commissionConfig.js), website/src/lib/api/core.ts (ApiError), website/src/components/commission/CommissionFlowTabs.tsx, website/src/components/commission/CtvManagementTab.tsx + DiscountCodesAdminTab/NewClientsTab/EarningsPayoutsTabs siblings, product-map/domains/earnings-commissions.yaml]
  */
 /**
  * Commission Page — Admin commission configuration and CTV management

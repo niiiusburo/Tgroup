@@ -2,7 +2,7 @@
 
 /**
  * @crossref:domain[auth]
- * @crossref:used-in[NK3 backend service: api/src/services/authSession]
+ * @crossref:used-in[NK3 backend service: api/src/services/authSession, api/src/routes/auth.js (login + /me lob_scope)]
  * @crossref:uses[product-map/domains/auth.yaml, api/src/routes/auth.js, docs/TEST-MATRIX.md]
  */
 

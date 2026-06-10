@@ -2,13 +2,13 @@
 
 /**
  * @crossref:domain[auth]
- * @crossref:used-in[NK3 Express API route: api/src/routes/auth]
- * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/Auth by api/src/server.js (login rate-limited there); frontend client website/src/lib/api/auth.ts (login/me/change-password)]
+ * @crossref:uses[api/src/services/authSession.js, api/src/services/loginIdentifier.js, api/src/services/legacyCtvPassword.js, api/src/services/permissionService.js, api/src/db.js (getQuery/runWithLob — partners), product-map/domains/auth.yaml]
  */
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { query, getQuery, runWithLob } = require('../db');
+const { getQuery, runWithLob } = require('../db');
 const { requireAuth } = require('../middleware/auth');
 const { resolveEffectivePermissions, isAdminPermissionState } = require('../services/permissionService');
 const { canUseLegacyCtvPassword, verifyLegacyCtvPassword } = require('../services/legacyCtvPassword');

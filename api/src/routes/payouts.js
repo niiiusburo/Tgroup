@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[earnings-commissions]
- * @crossref:used-in[NK3 Express API route: api/src/routes/payouts]
- * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Express router for /api/Payouts: mounted in api/src/server.js; called by website/src/lib/api/commission.ts (fetchPayouts/createPayout/uploadPayoutReceipt/updatePayoutReceipt)]
+ * @crossref:uses[api/src/db.js (getDb), api/src/middleware/auth.js (requireAuth), api/src/services/permissionService.js (resolveEffectivePermissions, isAdminPermissionState), product-map/domains/earnings-commissions.yaml]
  */
 /**
  * payouts.js — Admin CTV payout cycles + receipt photo.

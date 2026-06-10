@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[auth]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/PermissionBoard/LogicFlowView]
- * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[website/src/pages/PermissionBoard/PermissionBoard.tsx (logic-flow tab of /permissions board)]
+ * @crossref:uses[website/src/lib/api.ts (PermissionGroup, EmployeePermission), website/src/pages/PermissionBoard/constants.ts (getInitials), product-map/domains/auth.yaml]
  */
 import type { PermissionGroup, EmployeePermission } from '@/lib/api';
 import { getInitials } from './constants';

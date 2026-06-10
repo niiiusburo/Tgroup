@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[business-unit]
- * @crossref:used-in[NK3 API middleware: api/src/middleware/lob]
- * @crossref:uses[product-map/domains/business-unit.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/server.js — attachCosmeticDb wraps the /api/cosmetic/* mirror router]
+ * @crossref:uses[api/src/db.js (getDb, runWithLob ALS), product-map/domains/business-unit.yaml, docs/TEST-MATRIX.md, testbright.md]
  */
 const { getDb, runWithLob } = require('../db');
 

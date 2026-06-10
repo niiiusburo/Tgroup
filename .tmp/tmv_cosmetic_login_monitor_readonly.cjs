@@ -198,6 +198,14 @@ async function clickNav(page, screen) {
   return false;
 }
 
+async function waitForRouteContent(page) {
+  await page.waitForFunction(() => {
+    const text = (document.body?.innerText || '').replace(/\s+/g, ' ').trim();
+    return text.length > 80 && !/^Loading\.{0,3}$/i.test(text);
+  }, null, { timeout: 20000 }).catch(() => {});
+  await page.waitForTimeout(500);
+}
+
 async function captureScreen(page, screen, index) {
   const clickedNav = await clickNav(page, screen);
   if (!clickedNav) {
@@ -205,6 +213,7 @@ async function captureScreen(page, screen, index) {
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {});
     await page.waitForTimeout(1500);
   }
+  await waitForRouteContent(page);
   let screenshot;
   if (index === 1) {
     screenshot = path.join(artifactDir, '01-dashboard.png');

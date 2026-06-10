@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[earnings-commissions]
- * @crossref:used-in[NK3 commission and CTV admin surface: website/src/components/commission/CommissionNavigation]
- * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[commission nav/link helpers: website/src/pages/Commission.tsx, website/src/pages/Customers.tsx, website/src/components/commission/EarningsPayoutsTabs.tsx, website/src/components/commission/NewClientsTab.tsx]
+ * @crossref:uses[website/src/components/commission/CommissionFlowTabs.tsx, website/src/contexts/BusinessUnitContext.tsx, website/src/lib/utils.ts, product-map/domains/earnings-commissions.yaml]
  */
 import { Link } from 'react-router-dom';
 import { ArrowLeft, BadgeDollarSign, ChevronRight, ExternalLink, Stethoscope, UserRound } from 'lucide-react';

@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 backend service function: api/src/services/loginIdentifier]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/routes/auth.js — login partner lookup (email or CTV phone/ref)]
+ * @crossref:uses[product-map/domains/services-catalog.yaml, product-map/domains/auth.yaml, docs/TEST-MATRIX.md]
  */
 function normalizeLoginIdentifier(value) {
   return String(value || '').trim();

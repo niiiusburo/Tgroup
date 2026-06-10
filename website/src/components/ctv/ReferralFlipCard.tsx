@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 CTV portal and referral surface: website/src/components/ctv/ReferralFlipCard]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[referral progress flip card: website/src/pages/CTV/tabs/CtvTrackingTab.tsx]
+ * @crossref:uses[website/src/lib/api/ctv.ts (CtvReferral types), website/src/lib/formatting.ts, website/src/lib/i18n/ctv.ts, website/src/components/shared (CtvLinkBar), product-map/domains/ctv.yaml]
  */
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';

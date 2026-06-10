@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[business-unit]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Locations]
- * @crossref:uses[product-map/domains/business-unit.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed at /locations (ProtectedRoute) from website/src/App.tsx]
+ * @crossref:uses[website/src/hooks/useLocations.ts (list/detail/stats/updateLocation), website/src/components/locations/LocationCard.tsx + LocationDetail.tsx, website/src/contexts/AuthContext.tsx (locations.edit gate), website/src/data/mockLocations.ts (STATUS_LABELS, LocationBranch type), product-map/domains/business-unit.yaml]
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';

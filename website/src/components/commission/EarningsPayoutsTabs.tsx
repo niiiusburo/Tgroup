@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[earnings-commissions]
- * @crossref:used-in[NK3 commission and CTV admin surface: website/src/components/commission/EarningsPayoutsTabs]
- * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[earnings + payouts admin tabs: website/src/pages/Commission.tsx]
+ * @crossref:uses[website/src/lib/api/commission.ts, website/src/lib/api/core.ts, website/src/hooks/useExport.ts, website/src/components/commission/CommissionNavigation.tsx, website/src/components/shared/ExportMenu.tsx, product-map/domains/earnings-commissions.yaml]
  */
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';

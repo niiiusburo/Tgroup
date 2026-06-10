@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 API middleware: api/src/middleware/ipAccess]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/server.js (mounted pre-auth), api/src/routes/ipAccess.js (cache invalidation after mutations)]
+ * @crossref:uses[api/src/db.js (dbo.ip_access_settings/entries), api/src/lib/dateUtils.js, product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md]
  */
 /**
  * IP Access Control Middleware

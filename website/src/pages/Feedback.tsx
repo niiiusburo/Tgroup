@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[feedback-cms]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Feedback]
- * @crossref:uses[product-map/domains/feedback-cms.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed at /feedback (ProtectedRoute) from website/src/App.tsx]
+ * @crossref:uses[website/src/components/settings/FeedbackAdminContent.tsx (all data fetching/mutation lives there), website/src/contexts/AuthContext.tsx (hasPermission feedback.*), product-map/domains/feedback-cms.yaml]
  */
 /**
  * Feedback Admin Page

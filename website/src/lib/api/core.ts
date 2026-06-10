@@ -1,11 +1,12 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/core]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Shared fetch wrapper; every website/src/lib/api/* client, website/src/lib/api.ts (barrel), website/src/contexts/AuthContext.tsx, website/src/hooks/useBankSettings.ts, website/src/hooks/useTrackedForm.ts]
+ * @crossref:uses[website/src/lib/authToken.ts, website/src/lib/errorReporter.ts, website/src/lib/silentFailureReporter.ts, api/src/server.js (route mount table + auth gate), product-map/domains/settings-system.yaml]
+ * apiFetch: snake_case params, Bearer auth, LOB /cosmetic prefix, structured ApiError parsing, 401 broadcast.
  */
 /**
  * API Client core - fetch wrapper, error handling, and shared types
- * @crossref:used-in[lib/api/* domain modules]
+ * Consumed by all lib/api/* domain modules.
  */
 
 import { clearAuthToken, getAuthToken } from '@/lib/authToken';

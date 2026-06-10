@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[integrations]
- * @crossref:used-in[NK3 Express API route: api/src/routes/places]
- * @crossref:uses[product-map/domains/integrations.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Express router for /api/Places (Google Places proxy): mounted in api/src/server.js; called by website/src/components/shared/AddressAutocomplete.tsx]
+ * @crossref:uses[api/src/middleware/auth.js (requireAuth), Google Places API (GOOGLE_PLACES_API_KEY), product-map/domains/integrations.yaml]
  */
 const express = require('express');
 const router = express.Router();

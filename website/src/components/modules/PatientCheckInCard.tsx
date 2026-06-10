@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[appointments-calendar]
- * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/PatientCheckInCard]
- * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[per-patient check-in card: website/src/components/modules/PatientCheckIn.tsx]
+ * @crossref:uses[website/src/components/appointments/WaitTimer.tsx, website/src/components/shared/CustomerNameLink.tsx, website/src/hooks/useOverviewAppointments.ts (types), website/src/lib/appointmentNotes.ts, product-map/domains/appointments-calendar.yaml]
  */
 import { useEffect, useRef, useState } from 'react';
 import { Clock, FileText, User } from 'lucide-react';

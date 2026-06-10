@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[appointments-calendar]
- * @crossref:used-in[NK3 Express API route: api/src/routes/reports/appointments]
- * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[POST /api/Reports/appointments/* sub-router: mounted via api/src/routes/reports.js; called by website/src/hooks/useReportData.ts]
+ * @crossref:uses[api/src/db.js, api/src/middleware/auth.js, api/src/routes/reports/helpers.js (err, validDate, validUUID, dateCompanyFilter), product-map/domains/appointments-calendar.yaml]
  */
 const express = require('express');
 const { query } = require('../../db');

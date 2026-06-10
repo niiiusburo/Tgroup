@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 Express API route: api/src/routes/reports/revenueRecognition]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[canonical service-revenue SQL SSOT: api/src/routes/reports/revenue.js, api/src/routes/reports/revenueBreakdowns.js, api/src/routes/reports/servicesBreakdown.js, api/src/services/reports/canonicalRevenue.js, api/src/services/exports/builders/reportSalesEmployeesExport.js]
+ * @crossref:uses[product-map/domains/reports-analytics.yaml; mirrors api/src/services/exports/builders/legacyFlatRevenueQuery.js WHERE clause]
  */
 // Single source of truth for "service revenue" — matches the Excel revenue-flat
 // export's WHERE clause exactly (see api/src/services/exports/builders/legacyFlatRevenueQuery.js).

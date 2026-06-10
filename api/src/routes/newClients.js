@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 Express API route: api/src/routes/newClients]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/NewClients (+/api/cosmetic mirror) by api/src/server.js; frontend client website/src/lib/api/commission.ts (fetchNewClients)]
+ * @crossref:uses[api/src/services/newClientsQuery.js (listNewClients), api/src/services/permissionService.js, api/src/middleware/auth.js (requireAuth), product-map/domains/ctv.yaml]
  */
 /**
  * newClients.js — Admin "New Clients" referral revenue/COM audit.

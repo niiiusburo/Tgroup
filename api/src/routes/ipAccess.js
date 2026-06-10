@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 Express API route: api/src/routes/ipAccess]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/IpAccess by api/src/server.js; frontend client website/src/lib/api/ipAccess.ts (settings/entries/check)]
+ * @crossref:uses[api/src/middleware/ipAccess.js (getClientIp, checkIpAccess, invalidateIpAccessCache — enforcement lives there), api/src/db.js (dbo.ip_access_settings/dbo.ip_access_entries), api/src/middleware/auth.js (requirePermission 'settings.*'), product-map/domains/settings-system.yaml]
  */
 /**
  * IP Access Control API Routes

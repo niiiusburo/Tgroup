@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 CTV portal and referral surface: website/src/components/ctv/CtvQrDiscountPanel]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[CTV QR/discount-code panel: website/src/pages/CTV/tabs/CtvNetworkTab.tsx]
+ * @crossref:uses[website/src/lib/api/discountCodes.ts (generateCtvDiscountCode), website/src/lib/api/ctvSelf.ts, website/src/lib/api/core.ts, website/src/components/ctv/CtvDiscountVoucherCard.tsx, website/src/components/ctv/ctvDiscountVoucherCanvas.ts, product-map/domains/ctv.yaml]
  */
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Copy, ExternalLink, Link2, Share2 } from 'lucide-react';

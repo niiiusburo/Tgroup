@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 Express API route: api/src/routes/partners/searchFilters]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[partner search filtering: api/src/routes/partners/readHandlers.js (listPartners/checkPartnerUnique)]
+ * @crossref:uses[api/src/utils/search.js (accentInsensitiveSearchCondition, normalizeVietnamese), product-map/domains/customers-partners.yaml]
  */
 const { accentInsensitiveSearchCondition, normalizeVietnamese } = require('../../utils/search');
 

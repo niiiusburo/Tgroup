@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 Express API route: api/src/routes/reports/customers]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[POST /api/Reports/customers/summary: mounted via api/src/routes/reports.js; called by website/src/hooks/useReportData.ts]
+ * @crossref:uses[api/src/db.js, api/src/middleware/auth.js, api/src/routes/reports/helpers.js (err, validDate, validUUID, dateCompanyFilter), product-map/domains/customers-partners.yaml]
  */
 const express = require('express');
 const { query } = require('../../db');
@@ -24,9 +24,6 @@ router.post('/customers/summary', requirePermission('reports.view'), async (req,
     const cf = dateCompanyFilter(dateFrom, dateTo, companyId, 'datecreated');
     const newCust = await query(
       `SELECT COUNT(*) as cnt FROM dbo.partners WHERE customer=true AND isdeleted=false ${cf.where}`, cf.params);
-
-    // By source (moved to services breakdown — placeholder kept for compatibility)
-    const sources = [];
 
     // By gender
     const gender = await query(

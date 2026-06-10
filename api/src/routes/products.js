@@ -1,10 +1,10 @@
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 Express API route: api/src/routes/products]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Express router for /api/Products (service catalog): mounted in api/src/server.js; called by website/src/lib/api/products.ts]
+ * @crossref:uses[api/src/db.js (getQuery), api/src/middleware/auth.js, api/src/lib/dateUtils.js (getVietnamNow), api/src/utils/search.js, product-map/domains/services-catalog.yaml]
  */
 const express = require('express');
-const { query: legacyQuery, getQuery } = require('../db');
+const { getQuery } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const { requirePermission } = require('../middleware/auth');
 const { getVietnamNow } = require('../lib/dateUtils');

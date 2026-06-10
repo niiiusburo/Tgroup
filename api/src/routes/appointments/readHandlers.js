@@ -1,9 +1,9 @@
 /**
  * @crossref:domain[appointments-calendar]
- * @crossref:used-in[NK3 Express API route: api/src/routes/appointments/readHandlers]
- * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[GET handlers wired by api/src/routes/appointments.js (mounted at /api/Appointments); frontend client website/src/lib/api/appointments.ts]
+ * @crossref:uses[api/src/routes/appointments/helpers.js (validators, VALID_STATES), api/src/db.js (getQuery — appointments + joins), api/src/utils/search.js (accent-insensitive search), product-map/domains/appointments-calendar.yaml]
  */
-const { query: legacyQuery, getQuery } = require('../../db');
+const { getQuery } = require('../../db');
 const { errorResponse, isValidISODate, isValidUUID, VALID_STATES } = require('./helpers');
 const { addAccentInsensitiveSearchCondition } = require('../../utils/search');
 

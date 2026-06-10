@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/useCustomerServiceActions]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[service create/update/delete callbacks composed by website/src/pages/Customers/useCustomerDetailController.ts (customer profile services tab)]
+ * @crossref:uses[website/src/hooks/useServices.ts (CreateServiceInput, createServiceRecord/updateServiceRecord), website/src/lib/api.ts (deleteSaleOrderLine), website/src/contexts/BusinessUnitContext.tsx (currentLOB), product-map/domains/customers-partners.yaml]
  */
 /**
  * Service action callbacks for the customer profile
@@ -53,6 +53,41 @@ interface UseCustomerServiceActionsOptions {
   readonly refetchServices?: () => void | Promise<void>;
 }
 
+/** Map the profile service form input onto the useServices create/update payload. */
+function buildServicePayload(
+  data: ServiceCreateInput,
+  customerId: string | null,
+  profile: CustomerProfileData | null,
+): CreateServiceInput {
+  return {
+    customerId: customerId ?? '',
+    customerName: profile?.name ?? '',
+    customerPhone: profile?.phone ?? '',
+    catalogItemId: data.catalogItemId,
+    serviceName: data.serviceName,
+    category: (data.category ?? 'treatment') as CreateServiceInput['category'],
+    doctorId: data.doctorId,
+    doctorName: data.doctorName,
+    assistantId: data.assistantId ?? null,
+    assistantName: data.assistantName ?? '',
+    dentalAideId: data.dentalAideId ?? null,
+    dentalAideName: data.dentalAideName ?? '',
+    locationId: data.locationId,
+    locationName: data.locationName,
+    totalVisits: data.totalVisits ?? 1,
+    totalCost: data.totalCost,
+    startDate: data.startDate,
+    expectedEndDate: data.expectedEndDate || data.startDate,
+    notes: data.notes,
+    quantity: data.quantity,
+    unit: data.unit,
+    toothNumbers: data.toothNumbers,
+    toothComment: data.toothComment ?? undefined,
+    sourceId: data.sourceId ?? null,
+    ctvId: data.ctvId ?? null,
+  };
+}
+
 export function useCustomerServiceActions({
   createServiceRecord,
   updateServiceRecord,
@@ -66,33 +101,7 @@ export function useCustomerServiceActions({
 
   const handleCreateService = useCallback(
     async (data: ServiceCreateInput) => {
-      await createServiceRecord({
-        customerId: selectedCustomerId ?? '',
-        customerName: hookProfile?.name ?? '',
-        customerPhone: hookProfile?.phone ?? '',
-        catalogItemId: data.catalogItemId,
-        serviceName: data.serviceName,
-        category: (data.category ?? 'treatment') as CreateServiceInput['category'],
-        doctorId: data.doctorId,
-        doctorName: data.doctorName,
-        assistantId: data.assistantId ?? null,
-        assistantName: data.assistantName ?? '',
-        dentalAideId: data.dentalAideId ?? null,
-        dentalAideName: data.dentalAideName ?? '',
-        locationId: data.locationId,
-        locationName: data.locationName,
-        totalVisits: data.totalVisits ?? 1,
-        totalCost: data.totalCost,
-        startDate: data.startDate,
-        expectedEndDate: data.expectedEndDate || data.startDate,
-        notes: data.notes,
-        quantity: data.quantity,
-        unit: data.unit,
-        toothNumbers: data.toothNumbers,
-        toothComment: data.toothComment ?? undefined,
-        sourceId: data.sourceId ?? null,
-        ctvId: data.ctvId ?? null,
-      });
+      await createServiceRecord(buildServicePayload(data, selectedCustomerId, hookProfile));
       // Refresh the service list so the new record appears immediately
       await loadSaleOrderLines();
     },
@@ -101,35 +110,7 @@ export function useCustomerServiceActions({
 
   const handleUpdateService = useCallback(
     async (data: ServiceUpdateInput) => {
-      const payload = {
-        id: data.id,
-        customerId: selectedCustomerId ?? '',
-        customerName: hookProfile?.name ?? '',
-        customerPhone: hookProfile?.phone ?? '',
-        catalogItemId: data.catalogItemId,
-        serviceName: data.serviceName,
-        category: (data.category ?? 'treatment') as CreateServiceInput['category'],
-        doctorId: data.doctorId,
-        doctorName: data.doctorName,
-        assistantId: data.assistantId ?? null,
-        assistantName: data.assistantName ?? '',
-        dentalAideId: data.dentalAideId ?? null,
-        dentalAideName: data.dentalAideName ?? '',
-        locationId: data.locationId,
-        locationName: data.locationName,
-        totalVisits: data.totalVisits ?? 1,
-        totalCost: data.totalCost,
-        startDate: data.startDate,
-        expectedEndDate: data.expectedEndDate || data.startDate,
-        notes: data.notes,
-        quantity: data.quantity,
-        unit: data.unit,
-        toothNumbers: data.toothNumbers,
-        toothComment: data.toothComment ?? undefined,
-        sourceId: data.sourceId ?? null,
-        ctvId: data.ctvId ?? null,
-      };
-      await updateServiceRecord(payload);
+      await updateServiceRecord({ ...buildServicePayload(data, selectedCustomerId, hookProfile), id: data.id });
       await loadSaleOrderLines();
     },
     [updateServiceRecord, selectedCustomerId, hookProfile, loadSaleOrderLines],

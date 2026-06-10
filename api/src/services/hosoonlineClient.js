@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 backend service function: api/src/services/hosoonlineClient]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/routes/externalCheckups.js — /api/ExternalCheckups proxy]
+ * @crossref:uses[hosoonline.com external API (HOSOONLINE_* env), api/src/db.js (partners code/phone lookup), sharp, product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md]
  */
 const path = require('path');
 const sharp = require('sharp');

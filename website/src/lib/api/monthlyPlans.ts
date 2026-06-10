@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[payments-deposits]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/monthlyPlans]
- * @crossref:uses[product-map/domains/payments-deposits.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Monthly plans API client; website/src/lib/api.ts (barrel), website/src/hooks/useMonthlyPlans.ts, website/src/pages/Payment.tsx]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/monthlyPlans.js, product-map/domains/payments-deposits.yaml]
+ * Calls /api/MonthlyPlans CRUD + installment pay (LOB-aware).
  */
 import { apiFetch } from './core';
 

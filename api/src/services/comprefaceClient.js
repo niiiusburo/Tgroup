@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 backend service function: api/src/services/comprefaceClient]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/services/comprefaceFaceProvider.js, api/src/services/faceRecognitionRuntime.js]
+ * @crossref:uses[CompreFace HTTP API (COMPREFACE_URL/COMPREFACE_API_KEY env), product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md]
  */
 const COMPREFACE_URL = (process.env.COMPREFACE_URL || 'http://compreface-api').replace(/\/$/, '');
 const COMPREFACE_API_KEY = process.env.COMPREFACE_API_KEY || '';

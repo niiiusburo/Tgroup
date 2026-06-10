@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[earnings-commissions]
- * @crossref:used-in[NK3 commission and CTV admin surface: website/src/components/commission/CommissionFlowTabs]
- * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[commission tab stepper: website/src/components/commission/CommissionNavigation.tsx, website/src/pages/Commission.tsx]
+ * @crossref:uses[website/src/components/commission/dateFormatting.ts, website/src/lib/utils.ts, product-map/domains/earnings-commissions.yaml]
  */
 import { ArrowLeft, BadgeDollarSign, CalendarDays, CheckCircle2, ChevronRight, ReceiptText, Settings2, Tag, UserPlus, Users } from 'lucide-react';
 import { useMemo } from 'react';

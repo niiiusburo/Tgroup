@@ -1,11 +1,10 @@
 /**
  * @crossref:domain[appointments-calendar]
- * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/TodayAppointments]
- * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Zone 3 today's appointments sidebar: website/src/pages/Overview.tsx]
+ * @crossref:uses[website/src/components/modules/TodayAppointmentCard.tsx, website/src/components/appointments/unified (AppointmentFormShell), website/src/hooks/useOverviewAppointments.ts (types), product-map/domains/appointments-calendar.yaml]
  */
 /**
  * TodayAppointments - Zone 3: Today's appointment sidebar
- * @crossref:used-in[Overview]
  *
  * ╔════════════════════════════════════════════════════════════════════════╗
  * ║  APPOINTMENT MODULE FAMILY — @crossref:related[]                       ║

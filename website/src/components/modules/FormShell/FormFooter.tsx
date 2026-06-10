@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/FormShell/FormFooter]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[modal footer buttons (via FormShell/index.ts barrel): website/src/components/forms/AddCustomerForm/AddCustomerForm.tsx, website/src/components/services/ServiceForm.tsx, website/src/components/appointments/unified/AppointmentFormShell.tsx, website/src/components/shared/DeleteConfirmDialog.tsx]
+ * @crossref:uses[website/src/lib/utils.ts, product-map/domains/settings-system.yaml]
  */
 /**
  * FormFooter — Footer buttons for TG Clinic modal forms.
@@ -18,8 +18,6 @@
  *   isEdit={isEditing}
  *   submitLabel="Save"
  * />
- *
- * @crossref:used-in[FormShell, AddCustomerForm, ServiceForm, AppointmentForm]
  */
 
 import { Loader2 } from 'lucide-react';

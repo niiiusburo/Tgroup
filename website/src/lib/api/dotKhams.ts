@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/dotKhams]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[DotKhams API client; website/src/lib/api.ts (barrel), website/src/components/calendar/MedicalHistoryTooltip.tsx]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/dotKhams.js, product-map/domains/settings-system.yaml]
+ * Calls /api/DotKhams (treatment-session read list).
  */
 import { apiFetch, type PaginatedResponse } from './core';
 

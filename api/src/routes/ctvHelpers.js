@@ -18,8 +18,8 @@
  *   API types: /Users/thuanle/Documents/TamTMV/Tgrouptest/website/src/lib/api/ctv.ts
  *
  * Invariants surface here via callers: dental-forced LOB, email-optional (enforced in route handlers), cross-DB, etc.
- * @crossref:uses[../services/permissionService for isAdminCaller]
- * @crossref:used-in[ctv.js create + profile + client journeys routes]
+ * @crossref:uses[../services/permissionService for isAdminCaller, product-map/domains/ctv.yaml]
+ * @crossref:used-in[ctv.js create + profile + client journeys routes, ctvActions.js, ctvClientJourneys.js, ctvProfile.js, discountCodes.js, api/src/services/ctvDiscountCodes.js]
  */
 function toRows(result) {
   if (Array.isArray(result)) return result;

@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[earnings-commissions]
- * @crossref:used-in[NK3 commission and CTV admin surface: website/src/components/commission/dateFormatting]
- * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[VN-timezone date helpers: website/src/components/commission/CommissionFlowTabs.tsx, website/src/components/commission/EarningsPayoutsTabs.tsx, website/src/components/commission/NewClientsTab.tsx]
+ * @crossref:uses[Intl.DateTimeFormat with Asia/Ho_Chi_Minh, product-map/domains/earnings-commissions.yaml]
  */
 const VIETNAM_TIME_ZONE = 'Asia/Ho_Chi_Minh';
 

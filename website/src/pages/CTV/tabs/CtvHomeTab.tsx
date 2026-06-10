@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/CTV/tabs/CtvHomeTab]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[home tab of website/src/pages/CTV/CtvDashboard.tsx (CTV portal /ctv)]
+ * @crossref:uses[website/src/lib/api/ctv.ts (CtvCommissionRow/CtvCommissionSummary/CtvReferral types), website/src/lib/formatting.ts (formatVND), website/src/lib/i18n/ctv.ts (useCtvLocale), product-map/domains/ctv.yaml]
  */
 import { ChevronRight, Tag } from 'lucide-react';
 import { useTranslation } from 'react-i18next';

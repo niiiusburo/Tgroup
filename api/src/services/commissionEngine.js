@@ -1,6 +1,6 @@
 /**
  * @crossref:domain[earnings-commissions]
- * @crossref:used-in[NK3 backend service function: api/src/services/commissionEngine]
+ * @crossref:used-in[NK3 backend service function: api/src/services/commissionEngine, api/src/routes/payments.js, api/src/routes/saleOrders/createSaleOrder.js, api/src/routes/saleOrders/updateSaleOrder.js, api/src/services/customerReferrer.js, api/src/services/serviceReversal.js]
  * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
  * @crossref:function[createEarningsForServiceCard, reverseServiceCardEarnings, createEarningsForPayment, reverseOnRefund]
  * @crossref:uses[api/src/routes/saleOrders/createSaleOrder.js, api/src/routes/saleOrders/updateSaleOrder.js, api/src/routes/payments.js]

@@ -1,8 +1,8 @@
 /**
  * @crossref:domain[ctv]
  * @crossref:route[path="/ctv/discount/:shortCode"]
- * @crossref:used-in[NK3 public fan landing — KOL parity Mode A]
- * @crossref:uses[website/src/lib/api/discountCodes.ts, CtvDiscountVoucherCard]
+ * @crossref:used-in[NK3 public fan landing — KOL parity Mode A; routed at /ctv/discount/:shortCode from website/src/App.tsx]
+ * @crossref:uses[website/src/lib/api/discountCodes.ts (fetchCtvDiscountLanding/checkExistingFanCode/generateFanDiscountCode), website/src/components/ctv/CtvDiscountVoucherCard.tsx, product-map/domains/ctv.yaml]
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -17,7 +17,6 @@ import {
   generateFanDiscountCode,
   type CtvDiscountLandingInfo,
 } from '@/lib/api/discountCodes';
-import { cn } from '@/lib/utils';
 
 export default function CtvDiscountLanding() {
   const { shortCode = '' } = useParams();
@@ -117,11 +116,7 @@ export default function CtvDiscountLanding() {
             <p className="mt-4 text-center text-xs leading-5 text-gray-500">{t('discountLanding.instructions')}</p>
           </div>
         ) : (
-          <div
-            className={cn(
-              'mt-8 rounded-3xl border border-orange-200 bg-white/90 p-6 text-center shadow-lg backdrop-blur-sm'
-            )}
-          >
+          <div className="mt-8 rounded-3xl border border-orange-200 bg-white/90 p-6 text-center shadow-lg backdrop-blur-sm">
             <Gift className="mx-auto h-10 w-10 text-orange-500" />
             <p className="mt-4 text-sm leading-6 text-gray-700">{t('discountLanding.claimBody')}</p>
             <button

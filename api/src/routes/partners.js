@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 Express API route: api/src/routes/partners]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Express router for /api/Partners: mounted in api/src/server.js; called by website/src/lib/api/partners.ts]
+ * @crossref:uses[api/src/routes/partners/getPartnerById.js, api/src/routes/partners/readHandlers.js, api/src/routes/partners/mutationHandlers.js, api/src/routes/partners/resolveHandler.js, api/src/middleware/auth.js, product-map/domains/customers-partners.yaml]
  */
 const express = require('express');
 const { requirePermission } = require('../middleware/auth');

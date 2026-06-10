@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[earnings-commissions]
- * @crossref:used-in[NK3 Express API route: api/src/routes/commissions]
- * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[DEAD ROUTE — /api/Commissions mount is commented out in api/src/server.js (legacy "commissions" table missing on NK3; superseded by v3 earnings model)]
+ * @crossref:uses[api/src/db.js (query — legacy commissions/commissionhistories tables), api/src/utils/search.js, product-map/domains/earnings-commissions.yaml]
  */
 const express = require('express');
 const { query } = require('../db');

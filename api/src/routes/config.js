@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 Express API route: api/src/routes/config]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/IrConfigParameters by api/src/server.js (legacy Odoo config stub, always returns null)]
+ * @crossref:uses[express only — no db/services; product-map/domains/settings-system.yaml]
  */
 const express = require('express');
 

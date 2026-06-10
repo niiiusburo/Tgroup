@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/productCategories]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Product categories API client; website/src/lib/api.ts (barrel), website/src/pages/ServiceCatalog.tsx]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/productCategories.js, product-map/domains/services-catalog.yaml]
+ * Calls /api/ProductCategories CRUD.
  */
 import { apiFetch } from './core';
 

@@ -3,7 +3,7 @@
 /**
  * @crossref:domain[ctv]
  * @crossref:used-in[api/src/services/pricingSyncWorker.js]
- * @crossref:uses[api/src/services/pricingSheetParse.js, api/src/services/bangGiaGenerator.js]
+ * @crossref:uses[api/src/services/pricingSheetParse.js, api/src/services/bangGiaGenerator.js, api/src/services/googleSheetsClient.js, api/src/services/pricingSheetCategoryMap.js, product-map/domains/ctv.yaml]
  */
 
 const { parsePricingRows } = require('./pricingSheetParse');

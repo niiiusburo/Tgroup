@@ -1,9 +1,9 @@
 /**
  * @crossref:domain[earnings-commissions]
- * @crossref:used-in[NK3 commission and CTV admin surface: website/src/components/commission/DiscountCodesAdminTab]
- * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[admin discount-codes tab: website/src/pages/Commission.tsx]
+ * @crossref:uses[website/src/lib/api/discountCodes.ts, website/src/lib/utils.ts, product-map/domains/earnings-commissions.yaml]
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { CheckCircle2, Clock, Filter, RefreshCw, Search, Tag, UserCheck, XCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -55,7 +55,7 @@ export function DiscountCodesAdminTab() {
     void load();
   }, [load]);
 
-  const filtered = useMemo(() => codes, [codes]);
+  const filtered = codes;
 
   function formatDate(value: string | null | undefined): string {
     if (!value) return t('common.emDash');

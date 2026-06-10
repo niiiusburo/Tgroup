@@ -1,11 +1,10 @@
 /**
  * @crossref:domain[appointments-calendar]
- * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/PatientCheckIn]
- * @crossref:uses[product-map/domains/appointments-calendar.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Zone 1 treatment tracker: website/src/pages/Overview.tsx (PatientCheckIn.test.tsx also consumes the parseAppointmentNote re-export)]
+ * @crossref:uses[website/src/components/modules/PatientCheckInCard.tsx, website/src/hooks/useOverviewAppointments.ts (types), website/src/lib/appointmentNotes.ts (re-export), product-map/domains/appointments-calendar.yaml]
  */
 /**
  * PatientCheckIn - Zone 1: Treatment tracker for arrived patients
- * @crossref:used-in[Overview]
  *
  * Only shows patients who have been marked "Arrived" in Zone 3.
  * Downline status: Chờ khám (waiting) → Đang khám (in-treatment) → Hoàn thành (done)

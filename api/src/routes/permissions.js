@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[auth]
- * @crossref:used-in[NK3 Express API route: api/src/routes/permissions]
- * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Express router for /api/Permissions: mounted in api/src/server.js; called by website/src/lib/api/permissions.ts]
+ * @crossref:uses[api/src/db.js (getQuery), api/src/middleware/auth.js (requirePermission), api/src/services/permissionService.js (resolution mirrors), product-map/domains/auth.yaml]
  */
 const express = require('express');
 const { getQuery } = require('../db');

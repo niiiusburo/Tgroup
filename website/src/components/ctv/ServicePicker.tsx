@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 CTV portal and referral surface: website/src/components/ctv/ServicePicker]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[grouped searchable service selector: website/src/components/ctv/CtvReferModal.tsx]
+ * @crossref:uses[website/src/lib/api/ctv.ts (CtvServiceOption type), website/src/lib/utils.ts (normalizeText), product-map/domains/ctv.yaml]
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronDown, Layers, Search, X } from 'lucide-react';
@@ -20,8 +20,6 @@ import type { CtvServiceOption } from '@/lib/api/ctv';
  *
  * Renders the panel in normal flow (not an absolute dropdown) so the parent modal's
  * `overflow-y-auto` cannot clip it on mobile.
- *
- * @crossref:used-in[CtvReferModal]
  */
 
 interface ServicePickerProps {

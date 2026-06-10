@@ -1,14 +1,13 @@
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/RevenueChartModule]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[CSS bar revenue chart — NO current importers (orphan candidate; verify before reuse/removal)]
+ * @crossref:uses[website/src/types/common.ts (RevenueDataPoint), product-map/domains/reports-analytics.yaml]
  */
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import type { RevenueDataPoint } from '@/types/common';
 
 /**
  * RevenueChartModule - Revenue chart visualization using pure CSS bars
- * @crossref:used-in[Overview, Reports]
  */
 
 interface RevenueChartModuleProps {

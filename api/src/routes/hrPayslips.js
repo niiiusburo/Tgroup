@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[employees-hr]
- * @crossref:used-in[NK3 Express API route: api/src/routes/hrPayslips]
- * @crossref:uses[product-map/domains/employees-hr.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[DEAD ROUTE — /api/HrPayslips mount is commented out in api/src/server.js (hrpayslips table missing on NK3; HTTP 500); no frontend client]
+ * @crossref:uses[api/src/db.js (query — legacy hrpayslips/hrpayslipruns/hrpayrollstructures), api/src/utils/search.js, product-map/domains/employees-hr.yaml]
  */
 const express = require('express');
 const { query } = require('../db');

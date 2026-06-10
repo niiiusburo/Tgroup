@@ -1,13 +1,13 @@
 /**
  * @crossref:domain[payments-deposits]
- * @crossref:used-in[NK3 Express API route: api/src/routes/payments]
- * @crossref:uses[product-map/domains/payments-deposits.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Express router for /api/Payments: mounted in api/src/server.js; called by website/src/lib/api/payments.ts]
+ * @crossref:uses[api/src/db.js (getQuery, pool), api/src/middleware/auth.js, api/src/middleware/validate.js, api/src/routes/payments/helpers.js, product-map/domains/payments-deposits.yaml]
  * @crossref:endpoint[POST /api/Payments, POST /api/Payments/refund, DELETE /api/Payments/:id, POST /api/Payments/:id/void]
  * @crossref:uses[api/src/services/commissionEngine.js, api/src/routes/payments/readHandlers.js, product-map/business-logic/payment-allocation.md]
  */
 const express = require("express");
 const router = express.Router();
-const { query: legacyQuery, pool, getQuery } = require("../db");
+const { pool, getQuery } = require("../db");
 const { requirePermission } = require("../middleware/auth");
 const { validate } = require("../middleware/validate");
 const { PaymentCreateSchema, PaymentUpdateSchema } = require("@tgroup/contracts");

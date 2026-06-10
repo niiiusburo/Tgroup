@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[payments-deposits]
- * @crossref:used-in[NK3 Express API route: api/src/routes/accountPayments]
- * @crossref:uses[product-map/domains/payments-deposits.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/AccountPayments (+/api/cosmetic mirror) by api/src/server.js; legacy Odoo accountpayments read-only — no live frontend lib/api client]
+ * @crossref:uses[api/src/db.js (query — accountpayments/partners/accountjournals joins), api/src/utils/search.js (accent-insensitive search), api/src/middleware/auth.js (requirePermission 'payment.view'), product-map/domains/payments-deposits.yaml]
  */
 const express = require('express');
 const { query } = require('../db');

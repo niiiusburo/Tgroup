@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 backend service function: api/src/services/exports/exportRegistry]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/routes/exports.js — /api/Exports type lookup + filter sanitization]
+ * @crossref:uses[api/src/services/exports/exportWorkbook.js, api/src/services/exports/builders/* (all export builders), product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md]
  */
 const { buildFilename } = require('./exportWorkbook');
 const serviceCatalogExport = require('./builders/serviceCatalogExport');

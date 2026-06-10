@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[feedback-cms]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/websitePages]
- * @crossref:uses[product-map/domains/feedback-cms.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Website pages CMS API client; website/src/lib/api.ts (barrel), website/src/hooks/useWebsiteData.ts, website/src/components/payment/VietQrModal.tsx (uploadPaymentProof)]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/websitePages.js, api/src/routes/payments.js (POST /api/Payments/:id/proof), product-map/domains/feedback-cms.yaml]
+ * Calls /api/WebsitePages CRUD; uploadPaymentProof posts to /api/Payments/:id/proof.
  */
 import { apiFetch } from './core';
 

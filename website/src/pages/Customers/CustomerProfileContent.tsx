@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/CustomerProfileContent]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[profile detail wrapper rendered by website/src/pages/Customers.tsx when a customer :id is selected]
+ * @crossref:uses[website/src/components/customer/CustomerProfile (wraps; wires delete/payment/service-status callbacks), website/src/hooks/useCustomerProfile.ts (CustomerProfileData type), website/src/types/customer.ts (CustomerService type), product-map/domains/customers-partners.yaml]
  */
 import { CustomerProfile } from '@/components/customer';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';

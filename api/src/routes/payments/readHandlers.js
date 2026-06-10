@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[payments-deposits]
- * @crossref:used-in[NK3 Express API route: api/src/routes/payments/readHandlers]
- * @crossref:uses[product-map/domains/payments-deposits.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[GET /api/Payments list/deposits/deposit-usage/:id handlers: api/src/routes/payments.js; called by website/src/lib/api/payments.ts]
+ * @crossref:uses[api/src/db.js (getQuery), api/src/routes/payments/helpers.js (mapAllocations), api/src/utils/search.js, product-map/domains/payments-deposits.yaml]
  */
 const { query: legacyQuery, getQuery } = require("../../db");
 const { mapAllocations } = require("./helpers");

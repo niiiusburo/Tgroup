@@ -1,9 +1,9 @@
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 Express API route: api/src/routes/saleOrders/fetchSaleOrderById]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[shared sale-order fetch: api/src/routes/saleOrders/createSaleOrder.js, getSaleOrderById.js, updateSaleOrder.js, updateSaleOrderState.js]
+ * @crossref:uses[api/src/db.js (getQuery), product-map/domains/services-catalog.yaml]
  */
-const { query: legacyQuery, getQuery } = require('../../db');
+const { getQuery } = require('../../db');
 
 function fetchSaleOrderById(id, reqOrLobOrQ) {
   const q = typeof reqOrLobOrQ === 'function' ? reqOrLobOrQ : getQuery(reqOrLobOrQ);

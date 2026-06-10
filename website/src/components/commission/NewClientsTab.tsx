@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 commission and CTV admin surface: website/src/components/commission/NewClientsTab]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[admin new-clients (referral leads) tab: website/src/pages/Commission.tsx]
+ * @crossref:uses[website/src/lib/api/commission.ts (fetchNewClients), website/src/lib/api/core.ts, website/src/hooks/useExport.ts, website/src/components/shared/ExportMenu.tsx, website/src/components/commission/CommissionNavigation.tsx, product-map/domains/ctv.yaml]
  */
 /**
  * NewClientsTab — Admin "New Clients" surface (commission page).
@@ -9,9 +9,6 @@
  * a paid service, so staff can phone them to book. Shows phone + referring CTV.
  * Filters by LOB and a today/this-week date range (reuses ExportDateRangeModal),
  * with Excel export via the shared export pipeline (type 'new-clients').
- *
- * @crossref:uses[lib/api/commission fetchNewClients, hooks/useExport, components/shared/ExportMenu]
- * @crossref:used-in[pages/Commission]
  */
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';

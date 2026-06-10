@@ -3,8 +3,8 @@
 /**
  * @crossref:domain[ctv]
  * @crossref:route[discountCodes]
- * @crossref:used-in[NK3 staff discount QR verification + CTV portal code generation/tracking]
- * @crossref:uses[product-map/domains/ctv.yaml, api/src/services/ctvDiscountCodes.js, docs/CONTRACTS.md]
+ * @crossref:used-in[NK3 staff discount QR verification + CTV portal code generation/tracking; mounted at /api/discount-codes by api/src/server.js; frontend client website/src/lib/api/discountCodes.ts]
+ * @crossref:uses[product-map/domains/ctv.yaml, api/src/services/ctvDiscountCodes.js, api/src/routes/ctvHelpers.js (safeQueryRows, isCtvUser), api/src/services/referralClaim.js (getReferralClaimStatus), api/src/middleware/auth.js (requireAuth), docs/CONTRACTS.md]
  */
 const express = require('express');
 const jwt = require('jsonwebtoken');

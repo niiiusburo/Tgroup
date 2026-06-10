@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[integrations]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/externalCheckups]
- * @crossref:uses[product-map/domains/integrations.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[hosoonline checkups API client; website/src/lib/api.ts (barrel), website/src/hooks/useExternalCheckups.ts, website/src/components/customer/HealthCheckupUploadForm.tsx, website/src/components/customer/HealthCheckupGallery.tsx, website/src/components/customer/AuthenticatedCheckupImage.tsx]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/externalCheckups.js, product-map/domains/integrations.yaml]
+ * Calls /api/ExternalCheckups/* (hosoonline.com proxy); raw fetch for image blobs + multipart upload.
  */
 import { apiFetch, API_URL } from './core';
 

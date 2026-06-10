@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[feedback-cms]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/feedback]
- * @crossref:uses[product-map/domains/feedback-cms.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Feedback API client; website/src/lib/api.ts (barrel), website/src/components/shared/FeedbackWidget.tsx, website/src/components/settings/FeedbackAdminContent.tsx]
+ * @crossref:uses[website/src/lib/api/core.ts, website/src/types/feedback.ts, api/src/routes/feedback.js, api/src/routes/feedback/userRoutes.js, api/src/routes/feedback/adminRoutes.js, product-map/domains/feedback-cms.yaml]
+ * Calls /api/Feedback/* (my/all threads, replies, status, unread-count).
  */
 import { apiFetch } from './core';
 
@@ -50,24 +51,28 @@ export async function createFeedback(data: {
   return apiFetch('/Feedback', { method: 'POST', body: rest });
 }
 
+function postFeedbackReply(path: string, content: string, files?: File[]): Promise<FeedbackMessage> {
+  if (files && files.length > 0) {
+    const form = new FormData();
+    form.append('content', content);
+    files.forEach((file) => form.append('files', file));
+    return apiFetch(path, {
+      method: 'POST',
+      body: form as unknown as Record<string, unknown>,
+    });
+  }
+  return apiFetch(path, {
+    method: 'POST',
+    body: { content },
+  });
+}
+
 export async function replyToMyFeedbackThread(
   threadId: string,
   content: string,
   files?: File[]
 ): Promise<FeedbackMessage> {
-  if (files && files.length > 0) {
-    const form = new FormData();
-    form.append('content', content);
-    files.forEach((file) => form.append('files', file));
-    return apiFetch(`/Feedback/my/${encodeURIComponent(threadId)}/reply`, {
-      method: 'POST',
-      body: form as unknown as Record<string, unknown>,
-    });
-  }
-  return apiFetch(`/Feedback/my/${encodeURIComponent(threadId)}/reply`, {
-    method: 'POST',
-    body: { content },
-  });
+  return postFeedbackReply(`/Feedback/my/${encodeURIComponent(threadId)}/reply`, content, files);
 }
 
 export interface FetchAllFeedbackParams {
@@ -96,19 +101,7 @@ export async function replyToFeedbackThread(
   content: string,
   files?: File[]
 ): Promise<FeedbackMessage> {
-  if (files && files.length > 0) {
-    const form = new FormData();
-    form.append('content', content);
-    files.forEach((file) => form.append('files', file));
-    return apiFetch(`/Feedback/all/${encodeURIComponent(threadId)}/reply`, {
-      method: 'POST',
-      body: form as unknown as Record<string, unknown>,
-    });
-  }
-  return apiFetch(`/Feedback/all/${encodeURIComponent(threadId)}/reply`, {
-    method: 'POST',
-    body: { content },
-  });
+  return postFeedbackReply(`/Feedback/all/${encodeURIComponent(threadId)}/reply`, content, files);
 }
 
 export async function updateFeedbackStatus(

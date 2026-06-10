@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[earnings-commissions]
- * @crossref:used-in[NK3 Express API route: api/src/routes/earnings]
- * @crossref:uses[product-map/domains/earnings-commissions.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/Earnings (+/api/cosmetic mirror) by api/src/server.js; frontend client website/src/lib/api/commission.ts (fetchEarnings)]
+ * @crossref:uses[api/src/db.js (getDb — dbo.earnings/partners/saleorderlines/products), api/src/services/permissionService.js, api/src/middleware/auth.js (requireAuth), product-map/domains/earnings-commissions.yaml]
  */
 /**
  * earnings.js — Admin earnings ledger for CTV/MLM commissions.

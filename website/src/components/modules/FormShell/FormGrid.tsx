@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 dashboard/workspace module: website/src/components/modules/FormShell/FormGrid]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[form grid layout (barrel + direct import): website/src/components/services/ServiceForm.tsx, website/src/components/forms/AddCustomerForm/AddCustomerForm.tsx]
+ * @crossref:uses[website/src/lib/utils.ts, product-map/domains/settings-system.yaml]
  */
 /**
  * FormGrid — Column grid layouts for TG Clinic modal forms.
@@ -18,8 +18,6 @@
  *   <div>Field 2</div>
  *   <div>Field 3</div>
  * </FormGrid>
- *
- * @crossref:used-in[FormShell, AddCustomerForm, ServiceForm, AppointmentForm]
  */
 
 import { type ReactNode } from 'react';

@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[integrations]
- * @crossref:used-in[NK3 Express API route: api/src/routes/publicTelemetryErrors]
- * @crossref:uses[product-map/domains/integrations.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[public /api/telemetry/errors (pre-auth error intake): mounted in api/src/server.js; posted to by website/src/lib/errorReporter.ts]
+ * @crossref:uses[api/src/db.js, api/src/services/larkNotifier.js (notifyFeedbackThreadCreated), product-map/domains/integrations.yaml]
  */
 const crypto = require('crypto');
 const express = require('express');

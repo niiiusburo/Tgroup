@@ -1,10 +1,10 @@
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 Express API route: api/src/routes/saleOrders]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Express router for /api/SaleOrders: mounted in api/src/server.js; called by website/src/lib/api/saleOrders.ts]
+ * @crossref:uses[api/src/routes/saleOrders/createSaleOrder.js, api/src/routes/saleOrders/getSaleOrderById.js, api/src/routes/saleOrders/updateSaleOrder.js, api/src/routes/saleOrders/updateSaleOrderState.js, api/src/middleware/auth.js, product-map/domains/services-catalog.yaml]
  */
 const express = require('express');
-const { query: legacyQuery, getQuery } = require('../db');
+const { getQuery } = require('../db');
 const { requirePermission } = require('../middleware/auth');
 const { createSaleOrder } = require('./saleOrders/createSaleOrder');
 const { getSaleOrderById } = require('./saleOrders/getSaleOrderById');

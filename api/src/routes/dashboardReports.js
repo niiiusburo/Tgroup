@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 Express API route: api/src/routes/dashboardReports]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/DashboardReports (+/api/cosmetic mirror) by api/src/server.js; legacy dashboard KPI widget (POST /GetSumary) — no live frontend lib/api client (see website/src/lib/api/* Reports instead)]
+ * @crossref:uses[api/src/db.js (query — accountpayments/accountjournals/companies), api/src/middleware/auth.js (requirePermission 'reports.view'), product-map/domains/reports-analytics.yaml]
  */
 const express = require('express');
 const { query } = require('../db');

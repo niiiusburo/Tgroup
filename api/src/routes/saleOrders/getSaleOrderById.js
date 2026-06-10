@@ -1,9 +1,9 @@
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 Express API route: api/src/routes/saleOrders/getSaleOrderById]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[GET /api/SaleOrders/:id handler: api/src/routes/saleOrders.js; called by website/src/lib/api/saleOrders.ts]
+ * @crossref:uses[api/src/db.js (getQuery), api/src/routes/saleOrders/fetchSaleOrderById.js, product-map/domains/services-catalog.yaml]
  */
-const { query: legacyQuery, getQuery } = require('../../db');
+const { getQuery } = require('../../db');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
 
 async function getSaleOrderById(req, res) {

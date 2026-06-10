@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 backend service function: api/src/services/exports/builders/reportSalesEmployeesExport]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/services/exports/exportRegistry.js ('report-sales-employees' type → api/src/routes/exports.js)]
+ * @crossref:uses[api/src/db.js, api/src/services/permissionService.js (location scope gate), api/src/routes/reports/revenueRecognition.js, api/src/services/exports/exportWorkbook.js, product-map/domains/reports-analytics.yaml]
  */
 const { query } = require('../../../db');
 const { resolveEffectivePermissions } = require('../../permissionService');

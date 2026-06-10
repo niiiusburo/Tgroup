@@ -1,12 +1,11 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 API middleware: api/src/middleware/errorHandler]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/server.js — registered as the global Express error handler]
+ * @crossref:uses[api/src/db.js (dbo.error_events), product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md]
  */
 /**
  * Global error handler middleware for Express
  * Catches unhandled route errors and sends them to the error_events table.
- * @crossref:used-in[api/src/server.js]
  */
 const { query } = require('../db');
 const crypto = require('crypto');

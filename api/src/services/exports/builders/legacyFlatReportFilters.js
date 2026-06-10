@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[reports-analytics]
- * @crossref:used-in[NK3 backend service function: api/src/services/exports/builders/legacyFlatReportFilters]
- * @crossref:uses[product-map/domains/reports-analytics.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/services/exports/builders/legacyFlatDepositQuery.js, api/src/services/exports/builders/legacyFlatRevenueQuery.js]
+ * @crossref:uses[product-map/domains/reports-analytics.yaml]
  */
 function addCommonDateFilters(filters, conditions, params, idx, dateExpr, timeExpr) {
   if (filters.dateFrom) {

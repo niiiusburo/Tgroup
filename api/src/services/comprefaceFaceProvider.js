@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 backend service function: api/src/services/comprefaceFaceProvider]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/routes/faceRecognition.js (provider=compreface paths)]
+ * @crossref:uses[api/src/services/comprefaceClient.js, api/src/db.js (dbo.partners face_subject_id), product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md]
  */
 const {
   recognize,

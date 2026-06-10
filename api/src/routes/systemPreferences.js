@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 Express API route: api/src/routes/systemPreferences]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Express router for /api/SystemPreferences: mounted in api/src/server.js; called by website/src/lib/api/systemPreferences.ts]
+ * @crossref:uses[api/src/db.js, api/src/middleware/auth.js (requirePermission), product-map/domains/settings-system.yaml]
  */
 /**
  * System Preferences API Routes

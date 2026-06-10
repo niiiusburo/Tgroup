@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[employees-hr]
- * @crossref:used-in[NK3 Express API route: api/src/routes/employees/locationScopes]
- * @crossref:uses[product-map/domains/employees-hr.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[shared by api/src/routes/employees.js (list/detail) and api/src/routes/employees/mutations.js (PUT scope refresh)]
+ * @crossref:uses[api/src/db.js (query — employee_location_scope), product-map/domains/employees-hr.yaml]
  */
 const { query } = require('../../db');
 

@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/ctvSelf]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[CTV self-profile API client; website/src/components/ctv/CtvQrDiscountPanel.tsx, website/src/pages/CTV/tabs/CtvNetworkTab.tsx]
+ * @crossref:uses[website/src/lib/api/core.ts, website/src/lib/pii.ts, api/src/routes/ctvProfile.js, product-map/domains/ctv.yaml]
+ * Calls /api/ctv/me and /api/ctv/me/password; masks PII before returning.
  */
 import { apiFetch } from './core';
 import { maskEmail, maskPhone } from '@/lib/pii';

@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/ipAccess]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[IP access control API client; website/src/hooks/useIpAccessControl.ts, website/src/lib/api.ts (barrel)]
+ * @crossref:uses[website/src/lib/api/core.ts, website/src/types/ipAccessControl.ts, api/src/routes/ipAccess.js, product-map/domains/settings-system.yaml]
+ * Calls /api/IpAccess settings/entries/check.
  */
 import { apiFetch } from './core';
 import type { IpEntry, IpAccessMode } from '@/types/ipAccessControl';

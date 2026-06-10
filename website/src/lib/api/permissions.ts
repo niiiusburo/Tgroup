@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[auth]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/permissions]
- * @crossref:uses[product-map/domains/auth.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Permissions API client; website/src/lib/api.ts (barrel), website/src/hooks/usePermissions.ts, website/src/hooks/usePermissionGroups.ts, website/src/hooks/usePermissionBoard.ts, website/src/pages/Employees/index.tsx]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/permissions.js, product-map/domains/auth.yaml]
+ * Calls /api/Permissions groups/employees/resolve.
  */
 import { apiFetch } from './core';
 

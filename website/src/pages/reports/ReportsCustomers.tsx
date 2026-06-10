@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/reports/ReportsCustomers]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed page (/reports/customers): website/src/App.tsx (lazy, re-exported via website/src/pages/Reports.tsx); filters arrive via Outlet context from Reports shell]
+ * @crossref:uses[website/src/hooks/useReportData.ts ('/Reports/customers/summary' — backend api/src/routes/reports/customers.js), website/src/components/reports/ (KPICard, BarChart, DonutChart, ReportsFilters, ReportError), website/src/lib/formatting.ts (formatVND), product-map/domains/customers-partners.yaml]
  */
 import { useOutletContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';

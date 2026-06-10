@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[payments-deposits]
- * @crossref:used-in[NK3 backend service function: api/src/services/exports/builders/legacyFlatDepositQuery]
- * @crossref:uses[product-map/domains/payments-deposits.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/services/exports/builders/legacyFlatReportsExport.js ('deposit-flat' export)]
+ * @crossref:uses[api/src/db.js, api/src/services/exports/builders/legacyFlatReportFilters.js, product-map/domains/payments-deposits.yaml, docs/TEST-MATRIX.md]
  */
 const { query } = require('../../../db');
 const { addCommonDateFilters } = require('./legacyFlatReportFilters');

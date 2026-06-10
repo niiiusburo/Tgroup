@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 Express API route: api/src/routes/services]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[DEAD ROUTE: /api/Services mount is commented out in api/src/server.js (queries non-existent public.services); frontend uses /api/Products + /api/SaleOrders instead]
+ * @crossref:uses[api/src/db.js, api/src/middleware/auth.js, product-map/domains/services-catalog.yaml]
  */
 /**
  * ═══════════════════════════════════════════════════════════════════

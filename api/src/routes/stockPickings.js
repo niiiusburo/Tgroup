@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 Express API route: api/src/routes/stockPickings]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[DEAD ROUTE: /api/StockPickings mount is commented out in api/src/server.js (relation stockpickings does not exist on NK3); no frontend callers]
+ * @crossref:uses[api/src/db.js, api/src/middleware/auth.js, api/src/utils/search.js, product-map/domains/settings-system.yaml]
  */
 const express = require('express');
 const { query } = require('../db');

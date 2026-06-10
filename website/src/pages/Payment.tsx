@@ -1,14 +1,12 @@
 /**
  * @crossref:domain[payments-deposits]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Payment]
- * @crossref:uses[product-map/domains/payments-deposits.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed page (/payment): website/src/App.tsx (lazy via website/src/pages/index.ts barrel)]
+ * @crossref:uses[website/src/hooks/usePayment.ts, website/src/hooks/useDeposits.ts, website/src/hooks/useMonthlyPlans.ts, website/src/components/payment/ (DepositWallet, OutstandingBalance, PaymentHistory, CustomerDeposits, MonthlyPlan), website/src/hooks/useExport.ts, product-map/domains/payments-deposits.yaml]
  */
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 /**
  * Payment Page - Deposit wallet, payment form, outstanding balances, and payment history
  * @crossref:route[/payment]
- * @crossref:used-in[App]
- * @crossref:uses[DepositWallet, OutstandingBalance, PaymentHistory, MonthlyPlanCreator, PaymentSchedule, usePayment, useMonthlyPlans, useLocationFilter]
  */
 
 import { useState, useEffect, useMemo } from 'react';

@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/products]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Products/services-catalog API client; website/src/lib/api.ts (barrel), website/src/hooks/useProducts.ts, website/src/pages/ServiceCatalog.tsx, website/src/hooks/useSettings.ts]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/products.js, product-map/domains/services-catalog.yaml]
+ * Calls /api/Products CRUD (LOB-aware).
  */
 import { apiFetch, type PaginatedResponse } from './core';
 

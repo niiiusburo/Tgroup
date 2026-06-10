@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/useCustomerDetailController]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[customer detail orchestration hook consumed by website/src/pages/Customers.tsx (profile/services/deposits/payments/checkups state)]
+ * @crossref:uses[website/src/lib/api.ts (fetchSaleOrderLines), website/src/hooks (useCustomerProfile/useServices/useDeposits/useCustomerPayments/useExternalCheckups/useEmployees), website/src/pages/Customers/mapSaleOrderLines.ts, sibling action hooks useCustomerFormActions/useCustomerPaymentActions/useCustomerDepositActions/useCustomerServiceActions/useCustomerProfileData, product-map/domains/customers-partners.yaml]
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { fetchSaleOrderLines } from '@/lib/api';

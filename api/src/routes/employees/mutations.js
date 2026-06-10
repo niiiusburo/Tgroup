@@ -1,10 +1,10 @@
 /**
  * @crossref:domain[employees-hr]
- * @crossref:used-in[NK3 Express API route: api/src/routes/employees/mutations]
- * @crossref:uses[product-map/domains/employees-hr.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[POST/PUT/DELETE sub-router mounted by api/src/routes/employees.js (under /api/Employees); frontend client website/src/lib/api/employees.ts]
+ * @crossref:uses[api/src/db.js (pool/getQuery/getCurrentLob — partners + employee_location_scope + employee_permissions transactions), api/src/routes/employees/locationScopes.js, api/src/lib/dateUtils.js (getVietnamNow), api/src/middleware/auth.js (requirePermission 'employees.edit'), product-map/domains/employees-hr.yaml]
  */
 const express = require('express');
-const { query: legacyQuery, getQuery, pool, getCurrentLob } = require('../../db');
+const { getQuery, pool, getCurrentLob } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
 const { fetchLocationScopeIds } = require('./locationScopes');
 const { getVietnamNow } = require('../../lib/dateUtils');

@@ -1,13 +1,11 @@
 /**
  * @crossref:domain[settings-system]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Settings/index]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed page (/settings): website/src/App.tsx (lazy via website/src/pages/index.ts barrel)]
+ * @crossref:uses[website/src/components/settings/SystemPreferencesContent.tsx, website/src/components/settings/BankSettingsForm.tsx, website/src/components/settings/IpAccessControl.tsx, website/src/components/settings/FeedbackAdminContent.tsx, website/src/components/settings/TimezoneSelector.tsx, product-map/domains/settings-system.yaml]
  */
 /**
  * Settings Page — System settings with IP Access Control
  * @crossref:route[/settings]
- * @crossref:used-in[App]
- * @crossref:uses[SystemPreferences, IpAccessControl]
  */
 
 import { useState } from 'react';

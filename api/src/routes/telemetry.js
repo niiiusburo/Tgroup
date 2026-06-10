@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[integrations]
- * @crossref:used-in[NK3 Express API route: api/src/routes/telemetry]
- * @crossref:uses[product-map/domains/integrations.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Express router for /api/telemetry (version + error events): mounted in api/src/server.js; posted to by website/src/lib/errorReporter.ts, website/src/lib/silentFailureReporter.ts, website/src/hooks/useVersionCheck]
+ * @crossref:uses[api/src/db.js, dbo.error_events + feedback_threads tables, product-map/domains/integrations.yaml]
  */
 /**
  * Telemetry route — version events + error collection for AutoDebugger

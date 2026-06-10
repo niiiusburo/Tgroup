@@ -1,14 +1,12 @@
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Services/index]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[routed page (/services): website/src/App.tsx (lazy via website/src/pages/index.ts barrel)]
+ * @crossref:uses[website/src/hooks/useServices.ts, website/src/components/services/ServiceForm.tsx, website/src/components/services/ServiceHistoryList.tsx, website/src/hooks/useExport.ts, website/src/contexts/LocationContext.tsx (useLocationFilter), product-map/domains/services-catalog.yaml]
  */
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 /**
  * Services Management Page
  * @crossref:route[/services]
- * @crossref:used-in[App]
- * @crossref:uses[ServiceForm, ServiceHistoryList, MultiVisitTracker, useLocationFilter]
  */
 
 import { useState, useMemo } from 'react';

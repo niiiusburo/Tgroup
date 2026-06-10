@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/customerSources]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[Customer sources API client; website/src/lib/api.ts (barrel), website/src/hooks/useSettings.ts]
+ * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/customerSources.js, product-map/domains/customers-partners.yaml]
+ * Calls /api/CustomerSources CRUD.
  */
 import { apiFetch } from './core';
 

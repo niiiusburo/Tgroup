@@ -2,7 +2,7 @@
 
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 backend service function: api/src/services/referralClaim]
+ * @crossref:used-in[NK3 backend service function: api/src/services/referralClaim, api/src/routes/ctv.js, api/src/routes/ctvPublic.js, api/src/routes/discountCodes.js, api/src/routes/partners/getPartnerById.js, api/src/routes/partners/resolveHandler.js, api/src/services/ctvDiscountCodes.js]
  * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
  * @crossref:function[computeClaim, computeCtvLink, getCtvLinkStatus, getReferralClaimStatus]
  * @crossref:uses[api/src/routes/ctv.js, api/src/routes/ctvPublic.js, product-map/domains/cosmetic-clients.yaml]

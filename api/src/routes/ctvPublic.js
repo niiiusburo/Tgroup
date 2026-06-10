@@ -419,7 +419,7 @@ router.post('/join', async (req, res) => {
    *
    * This is the public counterpart to the authed POST /api/ctv create path in ctv.js.
    * @crossref:uses[shared/CtvCreationForm (SSOT), joinCtv wrapper in JoinCtv.tsx, resolveUpline/resolveCtvByPhone local helpers here, getDb('dental'|'cosmetic') + safeRows for dual-DB]
-   * @crossref:used-in[public unauthed CTV join flow; also portal-recruit via CtvRecruitModal calling createCtv which is the other route]
+   * @crossref:used-in[public unauthed CTV join flow; also portal-recruit via CtvRecruitModal calling createCtv which is the other route; mounted at /api/ctv-public by api/src/server.js (before auth gate); frontend client website/src/lib/api/ctv.ts]
    */
   // Email is OPTIONAL (spec §12): only name, phone, and password are required.  [enhanced with @crossref per AGENTS.md §5.1; see block above]
   if (!name || !phone || !password) {

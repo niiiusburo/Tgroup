@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 SPA page route: website/src/pages/Customers/CustomerColumns]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[buildCustomerColumns consumed by website/src/pages/Customers.tsx (list table via CustomerListView)]
+ * @crossref:uses[website/src/components/shared/DataTable.tsx (Column type), website/src/components/shared/StatusBadge.tsx, website/src/hooks/useCustomers.ts (Customer type), product-map/domains/customers-partners.yaml]
  */
 import { Phone, Mail, MapPin, Trash2 } from 'lucide-react';
 import { StatusBadge, type StatusVariant } from '@/components/shared/StatusBadge';

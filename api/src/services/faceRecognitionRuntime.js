@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 backend service function: api/src/services/faceRecognitionRuntime]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/routes/faceRecognition.js, api/src/server.js (startup health log)]
+ * @crossref:uses[api/src/services/faceEngineClient.js, api/src/services/comprefaceClient.js, product-map/domains/services-catalog.yaml]
  */
 const { healthCheck: faceServiceHealth } = require("./faceEngineClient");
 const { healthCheck: comprefaceHealth } = require("./comprefaceClient");

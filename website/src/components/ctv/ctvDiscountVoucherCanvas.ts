@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 CTV portal and referral surface: website/src/components/ctv/ctvDiscountVoucherCanvas]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[voucher PNG renderer + discount label: website/src/components/ctv/CtvDiscountVoucherCard.tsx, website/src/components/ctv/CtvQrDiscountPanel.tsx]
+ * @crossref:uses[Canvas 2D API only (no app imports), product-map/domains/ctv.yaml]
  */
 export function formatDiscountValue(value: number, type: 'percent' | 'fixed'): string {
   if (type === 'fixed' || value > 100) {
@@ -88,16 +88,4 @@ export async function renderKolStyleVoucherPng(options: {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('PNG export failed'))), 'image/png');
   });
-}
-
-export function dataUrlToBlob(dataUrl: string): Blob {
-  const [header, base64Data] = dataUrl.split(',');
-  const mimeMatch = header.match(/data:(.*?);base64/);
-  const mimeType = mimeMatch?.[1] || 'image/png';
-  const binaryString = atob(base64Data);
-  const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i += 1) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-  return new Blob([bytes], { type: mimeType });
 }

@@ -1,10 +1,10 @@
 /**
  * @crossref:domain[services-catalog]
- * @crossref:used-in[NK3 Express API route: api/src/routes/saleOrders/updateSaleOrderState]
- * @crossref:uses[product-map/domains/services-catalog.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[PATCH /api/SaleOrders/:id/state handler: api/src/routes/saleOrders.js; called by website/src/lib/api/saleOrders.ts (updateSaleOrderState)]
+ * @crossref:uses[api/src/db.js (getQuery), api/src/routes/saleOrders/fetchSaleOrderById.js, saleorder_state_logs audit table, product-map/domains/services-catalog.yaml]
  */
 const crypto = require('crypto');
-const { query: legacyQuery, getQuery } = require('../../db');
+const { getQuery } = require('../../db');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
 
 async function updateSaleOrderState(req, res) {

@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 Express API route: api/src/routes/partners/getPartnerById]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[GET /api/Partners/:id handler: api/src/routes/partners.js; called by website/src/lib/api/partners.ts]
+ * @crossref:uses[api/src/db.js, api/src/services/referralClaim.js (getCtvLinkStatus), product-map/domains/customers-partners.yaml]
  */
 const { query, getQuery } = require('../../db');
 

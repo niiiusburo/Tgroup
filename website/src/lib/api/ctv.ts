@@ -1,7 +1,8 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 frontend API client: website/src/lib/api/ctv]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[CTV portal+admin API client; website/src/hooks/useCtvs.ts, website/src/components/commission/CtvManagementTab.tsx, website/src/components/shared/CtvSelector.tsx, website/src/pages/CTV/JoinCtv.tsx, website/src/components/ctv/CtvReferModal.tsx, website/src/components/ctv/CtvHierarchyPanel.tsx]
+ * @crossref:uses[website/src/lib/api/core.ts, website/src/lib/pii.ts, api/src/routes/ctv.js, api/src/routes/ctvs.js, api/src/routes/ctvPublic.js, product-map/domains/ctv.yaml]
+ * Calls /api/ctv/* (portal), /api/Ctvs/* (admin), /api/ctv-public/* (no-auth join/booking).
  */
 import { apiFetch } from './core';
 import { maskPhone, maskEmail } from '@/lib/pii';

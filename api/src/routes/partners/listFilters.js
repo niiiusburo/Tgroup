@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[customers-partners]
- * @crossref:used-in[NK3 Express API route: api/src/routes/partners/listFilters]
- * @crossref:uses[product-map/domains/customers-partners.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[partner list filtering: api/src/routes/partners/readHandlers.js (listPartners)]
+ * @crossref:uses[product-map/domains/customers-partners.yaml]
  */
 function applyPartnerListFilters({ query, conditions, params, paramIdx }) {
   let nextParamIdx = paramIdx;

@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 CTV portal and referral surface: website/src/components/ctv/CtvModalSheet]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[CTV bottom-sheet modal shell: website/src/components/ctv/CtvRecruitModal.tsx, website/src/components/ctv/CtvReferModal.tsx]
+ * @crossref:uses[website/src/lib/utils.ts, product-map/domains/ctv.yaml]
  */
 import { useId, type ReactNode } from 'react';
 import { X } from 'lucide-react';

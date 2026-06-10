@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[settings-system]
  * @crossref:used-in[NK3 API routes for standardized business-error responses]
- * @crossref:uses[product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md]
+ * @crossref:uses[api/src/db.js, product-map/domains/settings-system.yaml, docs/TEST-MATRIX.md]
  *
  * Standardized business-error responses + internal logging.
  * Business errors are 4xx/200 responses where the operation was rejected by

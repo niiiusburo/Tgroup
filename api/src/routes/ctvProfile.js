@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 Express API route: api/src/routes/ctvProfile]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[mounted at /api/ctv (gated by requirePermission('ctv.dashboard.view')) by api/src/server.js; frontend client website/src/lib/api/ctvSelf.ts (/ctv/me)]
+ * @crossref:uses[api/src/services/ctvSelfProfile.js (CtvProfileError + self-profile CRUD), api/src/routes/ctvHelpers.js (isCtvUser), api/src/middleware/auth.js (requireAuth), product-map/domains/ctv.yaml]
  */
 const express = require('express');
 const { requireAuth } = require('../middleware/auth');

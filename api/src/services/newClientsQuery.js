@@ -2,8 +2,8 @@
 
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 backend service function: api/src/services/newClientsQuery]
- * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
+ * @crossref:used-in[api/src/routes/newClients.js, api/src/services/exports/builders/newClientsExport.js]
+ * @crossref:uses[api/src/db.js (getDb dual-LOB; dbo.partners/saleorders/earnings), api/src/services/referralCard.js (pricetotal=0 anchor convention), product-map/domains/ctv.yaml, docs/TEST-MATRIX.md]
  */
 /**
  * newClientsQuery.js — shared query for the admin "New Clients" surface.

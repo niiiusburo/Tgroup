@@ -2,7 +2,7 @@
 
 /**
  * @crossref:domain[ctv]
- * @crossref:used-in[NK3 backend service function: api/src/services/legacyCtvPassword]
+ * @crossref:used-in[NK3 backend service function: api/src/services/legacyCtvPassword, api/src/routes/auth.js, api/src/services/ctvSelfProfile.js]
  * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
  * @crossref:function[canUseLegacyCtvPassword, verifyLegacyCtvPassword]
  * @crossref:uses[api/src/routes/auth.js, api/src/services/loginIdentifier.js, product-map/domains/auth.yaml]
