@@ -3,9 +3,27 @@
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
 
+## [0.36.2] — 2026-06-10
+### Fixed (NK3 — CTV QR discount generation + staff verify, live-reproduced)
+- **CTV portal "Tạo mã & tải ảnh" silently failed (the reported QR-generation bug).** `generateCtvDiscountCode`, `verifyDiscountCode`, and `ensureCtvDiscountCode` passed pre-stringified bodies to `apiFetch`, which stringifies again — the server received a double-encoded JSON *string* and `express.json` (strict) rejected it with 400 (`Unexpected token '"' … is not valid JSON`). Reproduced live on `tmv.2checkin.com` via instrumented browser click. Fixed by passing plain objects (`website/src/lib/api/discountCodes.ts`). — @agent — INV: CTV QR voucher flow must be generatable from the portal.
+- **Staff lookup/verify always answered "Mã không tồn tại".** `fetchCodeRow` called `safeQueryRows(sql, params)` without the `db` first argument; the helper swallowed the TypeError and returned `[]`, so every staff `GET /lookup` and `POST /verify` reported the code missing even right after generation. Fixed in `api/src/services/ctvDiscountCodes.js`. — @agent
+- **Staff verify 500: `inconsistent types deduced for parameter $9`.** The verify UPDATE used `$9` both as the `status` assignment (varchar) and in `CASE WHEN $9 = 'used'` comparisons (text); Postgres refused the statement, so check-in/complete could never persist. Cast `$9::varchar` consistently (`api/src/routes/discountCodes.js`). — @agent
+- **Completing a checked-in code no longer requires re-resolving the customer.** `POST /verify` with `markAsUsed` now falls back to the `customer_partner_id`/`customer_lob` bound at check-in when the caller does not resend `customerPartnerId` (phone-format/LOB drift safe). — @agent
+- **QR panel now surfaces generation failures.** `CtvQrDiscountPanel.handleDownloadImage` had no `catch`, so any API failure was an unhandled rejection with zero user feedback. Added error state + `role="alert"` banner with new `ctv:qrDiscount.generateError` key (vi/en). — @agent
+- Removed dead `DEFAULT_EXPIRY_DAYS`/`DEFAULT_NON_LIVE_PERCENT` route imports (`DEFAULT_EXPIRY_DAYS` was never exported by the service — destructured to `undefined`). — @agent
+### Tests
+- New `website/src/lib/api/__tests__/discountCodes.body.test.ts` (3 passed) — locks single-encoded POST bodies.
+- New `api/src/services/__tests__/ctvDiscountCodes.fetchCodeRow.test.js` (2 passed) — locks the `db` argument via the real `safeQueryRows`.
+- Extended `api/src/routes/__tests__/discountCodes.test.js` (+1, 9 passed) — checked-in completion fallback + `$9::varchar` cast lock.
+- E2E verified locally (Vite 5175 + API 3002): CTV login → Giới thiệu/QR → Mã QR → generate (`CTVDEMOREF-TS5B5A`, QR canvas rendered) → staff lookup (`found:true`) → check-in (auto-created client) → complete (`status='used'`, staff name stamped).
+### Docs
+- **NK3 physical DB names recorded.** NK3 (`tmv.2checkin.com`) runs `tdental_nk3` + `tcosmetic_nk3` (per `/opt/tgroup-nk3/.env.nk3`), not `tdental_demo`; documented per-environment names in `product-map/schema-map.md` and an NK3-specific migration loop in `docs/runbooks/DEPLOYMENT.md`. Verified live: `tdental_nk3.dbo.ctv_discount_codes` exists with `generation_source` + `payment_id` and `partners.is_live` (migrations 062–065 already applied) — deploy of 0.36.2 needs no NK3 migration step. — @agent
+
 ## [Docs] — 2026-06-09
 ### Added
 - **TestSprite live-site debugging PRD for NK3/TMV.** Added `docs/PRD-TestSprite-Live-Site-Debugging.md` as a Web Portal handoff spec for `https://tmv.2checkin.com`, separating read-only live exploration from approved disposable mutations and prohibited money/destructive flows. Documentation-only change; no runtime version bump. — @agent — TestSprite live debugging handoff / production safety lanes.
+- **CTV QR generation added to the live TestSprite PRD.** Added explicit `TS-LIVE-014` coverage for `/ctv` → `Giới thiệu/QR` → `Mã QR` → `Tạo mã & tải ảnh`, `POST /api/discount-codes/generate`, voucher QR canvas, and `Mã của tôi` history as a Lane B disposable-CTV mutation test. — @agent — QR generation must be visible in the TestSprite Web Portal plan.
+- **TestSprite target rerouted to the reachable TMV host.** The first Web Portal run against `ctv.2checkin.com` reproduced the local DNS/setup blocker and created no test data; rerouted the PRD, `testbright.md`, and temporary upload handoff to `tmv.2checkin.com`, which resolves to `76.13.16.68` and returns HTTP 200. — @agent — Live TestSprite target routing.
 
 
 ## [0.36.1] — 2026-06-09

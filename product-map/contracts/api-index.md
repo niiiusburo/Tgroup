@@ -98,9 +98,9 @@ Mounted at `/api/discount-codes`. Public fan endpoints bypass the global `/api` 
 | POST | `/api/discount-codes/ensure` | CTV self | — | `{ code, discountValue, discountType, status, expiresAt? }` — legacy single-code ensure |
 | GET | `/api/discount-codes/lookup` | Staff (non-CTV) | `?code=` | `{ found, valid?, code, status?, discountValue?, discountType?, discountLabel?, ctvName?, expiresAt?, message? }` |
 | GET | `/api/discount-codes/client-search` | Staff | `?phone=&lob=dental\|cosmetic&code=` | `{ exists, lob, clientId?, name?, phone?, claimed?, claimedByMe?, ownerName?, expiresAt?, hasService? }` — claim ownership vs code's `ctv_partner_id` |
-| POST | `/api/discount-codes/verify` | Staff | `{ code, customerPhone, customerLob, customerPartnerId?, customerName?, createIfMissing? }` | `{ valid, code, status?, discountLabel?, ctvName?, customerName?, customerLob?, message?, usedAt? }`; may reclaim `referred_by_ctv_id` then mark `status='used'` |
+| POST | `/api/discount-codes/verify` | Staff | `{ code, customerPhone, customerLob, customerPartnerId?, customerName?, createIfMissing?, markAsUsed? }` | `{ valid, code, status?, discountLabel?, ctvName?, customerName?, customerLob?, message?, usedAt?, checkedInAt? }`; first verify marks `checked_in`, `markAsUsed: true` completes to `used` (falls back to the customer bound at check-in when `customerPartnerId` is omitted); may reclaim `referred_by_ctv_id` |
 
-Staff routes return `403 S_STAFF_REQUIRED` when the JWT belongs to a CTV user. Data store: `dbo.ctv_discount_codes` (dental DB only; migrations 062–063).
+Staff routes return `403 S_STAFF_REQUIRED` when the JWT belongs to a CTV user. Data store: `dbo.ctv_discount_codes` (dental DB only; migrations 062–065). All POST bodies are single-encoded JSON objects — `express.json` (strict) rejects double-encoded top-level strings with 400 (FM-20260610-01).
 
 ## Admin CTV & Commission config
 

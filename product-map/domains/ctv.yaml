@@ -169,6 +169,8 @@ impact_tests:
   - NK3-only CTV integrity repair dry-run returns zero planned SQL after apply for Dental/Cosmetic CTV identity mirrors, active Cosmetic-only CTV dental-auth insertion, inactive Cosmetic-only scope normalization, and account `0972020908` CTV-only auth flags
   - Public fan landing `/ctv/discount/:shortCode` renders without admin Overview redirect; GET /api/discount-codes/landing/:shortCode works without auth token
   - CTV portal Mã QR link opens fan landing; after claim, voucher QR populates with staff-verify URL
+  - CTV portal "Tạo mã & tải ảnh" POSTs a single-encoded JSON body and surfaces API failures via a visible alert (discountCodes.body.test.ts; qrDiscount.generateError)
+  - Staff lookup/verify finds freshly generated codes (fetchCodeRow passes db handle — ctvDiscountCodes.fetchCodeRow.test.js); verify UPDATE keeps $9::varchar cast; markAsUsed falls back to the customer bound at check-in
   - Staff /verify-discount blocks CTV login, requires LOB + phone, reclaims client under issuing CTV on verify
 risk_level: high (only cross-DB surface)
 notes:

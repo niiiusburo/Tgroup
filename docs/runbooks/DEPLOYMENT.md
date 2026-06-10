@@ -27,6 +27,13 @@ export VITE_COSMETIC_LOB_ENABLED=true
 
 These flags enable `/api/cosmetic/*` routes and the LOB toggle in the admin UI. The `docker-compose.yml` defaults both to `false`, so NK and NK2 deployments are unaffected when these exports are omitted.
 
+NK3 databases are `tdental_nk3` + `tcosmetic_nk3` (from `/opt/tgroup-nk3/.env.nk3`), **not** `tdental_demo`. The checklist step-4 migration loop on NK3 must target them:
+
+```bash
+for f in /opt/tgroup-nk3/app/api/migrations/*.sql; do docker exec -i tgroup-db psql -U postgres -d tdental_nk3 < "$f"; done
+# cosmetic-DB migrations likewise against tcosmetic_nk3
+```
+
 ## Deployment Checklist
 
 1. Confirm local git status and intended commit.

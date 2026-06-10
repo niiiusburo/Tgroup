@@ -157,7 +157,8 @@
     "generateHint": "Each tap creates a new code (one code = one voucher image).",
     "generateAndDownload": "Generate code & download image",
     "downloadFilename": "discount-code-{{code}}.png",
-    "canvasDiscount": "🎁 {{value}} off"
+    "canvasDiscount": "🎁 {{value}} off",
+    "generateError": "Could not generate a discount code. Please try again."
   },
   "codeHistory": {
     "title": "My codes",

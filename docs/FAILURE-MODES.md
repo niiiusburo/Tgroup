@@ -14,6 +14,16 @@ Each entry:
 
 ---
 
+## FM-20260610-01: CTV Portal QR Generation + Staff Verify Dead — Double-Encoded Body, Swallowed DB Error, Untyped SQL Param
+
+- **Symptom:** CTV taps "Tạo mã & tải ảnh" in `/ctv` → Mã QR and nothing happens (no voucher, no error). Staff `/verify-discount` always answers "Mã không tồn tại" for freshly generated codes; when lookup is bypassed, verify 500s.
+- **Root Cause:** Three stacked bugs in one flow. (1) `discountCodes.ts` callers passed `body: JSON.stringify(...)` to `apiFetch`, which stringifies again — `express.json` (strict) rejected the double-encoded top-level string with 400. The panel's handler had no `catch`, so the rejection was silent. (2) `fetchCodeRow` called `safeQueryRows(sql, params)` without the `db` first argument; the helper logged and swallowed the TypeError and returned `[]`, masking the bug as "code not found". (3) The verify UPDATE used `$9` as both varchar assignment and text comparison — Postgres aborted with `inconsistent types deduced for parameter $9`.
+- **Fix:** Pass plain objects to `apiFetch`; pass `db` into `safeQueryRows` in `fetchCodeRow`; cast `$9::varchar` consistently; surface generation failures via `qrDiscount.generateError` alert; verify `markAsUsed` now falls back to the customer bound at check-in.
+- **Prevention:** `apiFetch` callers never pre-stringify (`discountCodes.body.test.ts` locks single encoding). Helpers that swallow errors (`safeQueryRows`) hide miscalls — the fetchCodeRow regression test exercises the REAL helper against a spy db. Route tests assert the `$9::varchar` cast. Unit tests that fully mock the service (the old route test) cannot catch service-level miscalls; keep at least one test per service query path.
+- **Related:** UC/WF CTV QR discount flow; `product-map/domains/ctv.yaml` discount_qr.
+
+---
+
 ## FM-20260601-03: Deleted Cosmetic Service Still Shows as Customer Debt
 
 - **Symptom:** Staff deletes a Cosmetic service card, but the customer profile still shows the deleted service amount in `Outstanding` / `Công nợ`.

@@ -270,4 +270,51 @@ describe('discount-codes routes', () => {
 
     expect(res.jsonBody.hasCode).toBe(false);
   });
+
+  test('POST /verify completes a checked-in code using the customer bound at check-in', async () => {
+    const handler = findRouteHandler(discountCodesRouter, '/verify', 'post');
+    fetchCodeRow.mockResolvedValue({
+      id: 'code-row-2',
+      code: 'LINH-B7Y2W4',
+      status: 'checked_in',
+      discount_value: 10,
+      discount_type: 'percent',
+      ctv_partner_id: 'ctv-1',
+      ctv_name: 'Linh',
+      customer_partner_id: 'cust-9',
+      customer_lob: 'dental',
+      expires_at: '2026-07-08T00:00:00.000Z',
+    });
+    const dentalDb = {
+      queryRows: jest.fn().mockResolvedValue([{ id: 'cust-9', name: 'Bound Client', phone: '0901234567' }]),
+      query: jest.fn().mockResolvedValue({ rows: [] }),
+    };
+    getDb.mockReturnValue(dentalDb);
+
+    const res = makeRes();
+    await handler(
+      {
+        user: { employeeId: 'staff-1', is_ctv: false, name: 'Staff' },
+        body: {
+          code: 'LINH-B7Y2W4',
+          customerPhone: '0901234567',
+          customerLob: 'dental',
+          markAsUsed: true,
+          // NOTE: no customerPartnerId — must fall back to row.customer_partner_id
+        },
+      },
+      res
+    );
+
+    expect(res.statusCode).toBe(200);
+    expect(res.jsonBody.valid).toBe(true);
+    expect(res.jsonBody.status).toBe('used');
+    const updateCall = dentalDb.query.mock.calls.find(([sql]) => sql.includes('UPDATE dbo.ctv_discount_codes'));
+    expect(updateCall).toBeDefined();
+    const [updateSql, updateParams] = updateCall;
+    // Regression lock — $9 must be cast consistently or Postgres rejects the
+    // statement with "inconsistent types deduced for parameter $9".
+    expect(updateSql).toContain('$9::varchar');
+    expect(updateParams).toContain('cust-9');
+  });
 });

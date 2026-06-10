@@ -490,7 +490,9 @@ Execution verification:
 - [x] PASS: `pg_restore -l` read each newest dump and listed the expected source database names `tdental_demo`, `tdental_smoketest`, and `tcosmetic_smoketest`.
 - [x] PASS: Local download saved each newest dump/checksum and local checksum verification succeeded in `backups/nk-db-daily/`, `backups/nk3-dental-smoketest-db-daily/`, and `backups/nk3-cosmetic-db-daily/`.
 - [x] PASS: Codex daily backup verification automation now verifies/downloads all three targets and keeps latest 7 local dump sets per target.
-- [ ] PENDING: Next scheduled run confirms the 12:00/12:15/12:30 Vietnam cron jobs create fresh dumps without manual fallback.
+- [x] PASS: 2026-06-09 scheduled cron run created fresh dumps without fallback: `nk-tdental_demo-20260609_120001.dump` (50,327,215 bytes), `nk-tdental_nk3-20260609_121501.dump` (4,070,443 bytes), and `nk-tcosmetic_nk3-20260609_123001.dump` (4,031,002 bytes); VPS Postgres 16 `pg_restore -l` read all three archives and local mirrored checksums matched after re-pulling the interrupted `tdental_demo` download.
+- [x] PASS: Local keep-latest-7 cleanup remains within policy after the 2026-06-09 mirror: `backups/nk-db-daily/` has 6 dump sets, `backups/nk3-dental-smoketest-db-daily/` has 6 dump sets, and `backups/nk3-cosmetic-db-daily/` has 7 dump sets.
+- [x] PASS: Runtime naming drift is still documented for the two NK3 directories: the cron entries target `tdental_nk3` and `tcosmetic_nk3`, so the newest scheduled dumps do not use the older `tdental_smoketest` or `tcosmetic_smoketest` filename prefix.
 
 ---
 
@@ -4137,3 +4139,75 @@ Local verification items:
 
 Not run locally (requires a seeded two-DB + admin lob.crossview session):
 - [ ] PENDING: Live UAT on `tmv.2checkin.com` — register the same phone customer in both dental and cosmetic, scan the face as an admin, confirm the chooser appears and each option opens the correct LOB record. Also confirm the ProfileHeader cross-LOB badge works again.
+
+---
+
+# TestSprite Plan: NK3/TMV live-site debugging PRD 2026-06-09
+
+Feature/edit name: TestSprite Web Portal PRD for live-site debugging on `https://tmv.2checkin.com`.
+
+Changed URLs and API routes:
+- Documentation only: `docs/PRD-TestSprite-Live-Site-Debugging.md`.
+- Target live URL for TestSprite: `https://tmv.2checkin.com`.
+- Localhost/local MCP routes changed: none.
+- Runtime app URLs/API routes changed: none.
+
+Affected data flows:
+- No production data mutation from this documentation task.
+- The PRD separates TestSprite live runs into read-only, approved disposable-mutation, and prohibited money/destructive lanes.
+- TestSprite should collect screenshot/video/network proof for failures and classify each as product bug, auth/setup blocker, stale route, safety-lane block, timeout/performance, or needs-human-decision.
+
+User roles:
+- Public visitor.
+- Staff/admin with Cosmetic access.
+- Multi-LOB admin for Cosmetic/Dental toggle checks.
+- CTV user only when a known-good or disposable CTV credential is configured.
+- Unauthorized user for protected-route redirect checks.
+
+Happy paths:
+- Upload `docs/PRD-TestSprite-Live-Site-Debugging.md` into TestSprite Web Portal.
+- Configure a live UI/frontend project with base URL `https://tmv.2checkin.com`.
+- Run the `NK3 Live Read-Only Smoke` and `NK3 Public Visitor Smoke` lists without creating, editing, deleting, paying, voiding, refunding, or importing data.
+- Use Cosmetic / `Thẩm mỹ` as the default LOB and verify route loads, search/filter, reports, commission tabs, permissions, payment read surfaces, and public pages.
+- Run the `NK3 CTV / Commission Regression` list manually with an approved disposable CTV account to verify QR generation: `/ctv` > `Giới thiệu/QR` > `Mã QR` > `Tạo mã & tải ảnh`, `POST /api/discount-codes/generate`, voucher QR canvas, and `Mã của tôi` history.
+
+Edge cases:
+- Treat `/payments` and `/settings/permissions` as stale route assumptions; canonical routes are `/payment` and `/permissions`.
+- Retest prior live regression candidates as current evidence, not assumptions: Cosmetic customer soft-delete prefix, admin-created CTV login, and feedback admin 403.
+- If TestSprite cannot log in, classify as auth/setup blocker until the same credential is checked manually on the live site.
+- CTV portal interior is blocked unless TestSprite has a valid CTV account.
+- QR generation is Lane B only because it writes a `ctv_discount_codes` row; TestSprite must record the generated code and screenshot/video proof before/after generation.
+
+Regressions:
+- Do not run money-moving flows in ordinary live debugging: payments, deposits, voids, refunds, payouts, allocations, or service-card revenue/earnings writes.
+- Do not hard-delete production people or change permissions.
+- Do not switch the monitor away from Cosmetic unless the specific test is an LOB isolation check.
+- Every failed/blocked route must preserve screenshot/video/network evidence.
+
+Setup data and login state:
+- TestSprite project name recommendation: `NK3 TMV Live Debug - Cosmetic`.
+- Credentials must be entered in TestSprite Authentication or shared out-of-band; do not paste secrets into the PRD.
+- Approved mutation runs must use disposable `ZZ_TESTSPRITE_*` records and record cleanup/orphan status.
+- 2026-06-09 user-approved live mutation/debug lane: TestSprite may create clients, employees, and CTVs on `https://tmv.2checkin.com` only when every created person/account name includes cleanup marker `ZZ_TESTSPRITE_CLEANUP_20260609`, and the run records enough identifying detail to remove those records later.
+
+TestSprite execution items:
+- [x] PASS: Upload/use `docs/PRD-TestSprite-Live-Site-Debugging.md` context in TestSprite Web Portal - initial upload/extraction was already completed from the handoff PRD, and the follow-up frontend run was configured with the same read-only live-debug scope.
+- [ ] PENDING: Create Test Lists named `NK3 Live Read-Only Smoke`, `NK3 Public Visitor Smoke`, `NK3 CTV / Commission Regression`, `NK3 Approved Disposable Mutation`, and `NK3 Money Manual Gate`.
+- [x] PASS: Initial TestSprite Web Portal upload/extraction completed from the handoff PRD; TestSprite found 7 features and 14 use cases, including QR generation/history coverage.
+- [x] PASS: `https://ctv.2checkin.com` was confirmed as the wrong/dead host for this run; local `curl -I -L --max-time 20 https://ctv.2checkin.com` returned `Could not resolve host`, and TestSprite exploration blocked on `chrome-error://chromewebdata/` before creating any test data. Screenshot: `artifacts/testsprite/testsprite-ctv-dns-blocker-2026-06-09.png`.
+- [x] PASS: Corrected active target to `https://tmv.2checkin.com`; local `dig +short tmv.2checkin.com` returned `76.13.16.68`, and `curl -I -L --max-time 20 https://tmv.2checkin.com` returned HTTP 200 from nginx.
+- [x] PASS: Submitted TestSprite live Frontend (URLs) configuration for `https://tmv.2checkin.com` with read-only Cosmetic instructions and existing staff test account; screenshots: `artifacts/testsprite/testsprite-live-frontend-config-filled-2026-06-09.png` and `artifacts/testsprite/testsprite-live-frontend-exploration-started-2026-06-09.png`.
+- [ ] FAIL: TestSprite Web Portal could not finish the live exploration/run because free quota was insufficient; portal reported "Not enough free quota left to explore your app" and "Max steps reached..." after login succeeded and `/payment` loaded. Evidence text saved at `artifacts/testsprite/testsprite-live-frontend-generated-plan-text-2026-06-09.txt`.
+- [ ] FAIL: Generated TestSprite plan was unsafe for the approved read-only lane: 8 of 10 selected cases created/edited/deactivated production employees, CTVs, clients, service cards, or cleanup records, so `Generate Tests` was not clicked.
+- [x] PASS: Inspected TestSprite Results creation `d032226b-4cf2-469d-ba80-ccda4b4b888f` in Chrome after Computer Use transport returned `Transport closed`; portal showed 9 total UI cases, 4 passed, and 5 blocked. Report evidence saved at `artifacts/testsprite/testsprite-results-report-2026-06-09-redacted.txt`; screenshots saved at `artifacts/testsprite/testsprite-results-report-overview-2026-06-09-v2.png` and `artifacts/testsprite/testsprite-results-report-2026-06-09.png`.
+- [ ] FAIL: TestSprite blocked five mutation/setup cases rather than finding broad read-only route failures: missing or unexposed `CTV A` referrer test seed, a duplicate-ownership reassignment test that did not reach a persisted save, no disposable-data approval for CTV creation/suspension, and no approved destructive cleanup path for the disposable employee. Follow-up should be a dedicated disposable-data lane or sandbox tenant, plus inspection of the customer edit referrer save path before rerun.
+- [ ] PENDING: Rerun the five blocked TestSprite cases with explicit disposable-data approval and cleanup marker `ZZ_TESTSPRITE_CLEANUP_20260609`; execute dependency order CTV create -> client under CTV A -> duplicate ownership -> CTV suspension -> employee cleanup, then preserve report screenshots and the created-record identifiers.
+- [x] PASS: Approved live mutation/API lane executed on `https://tmv.2checkin.com` with cleanup marker `ZZ_TESTSPRITE_CLEANUP_20260609` and no secret output. Evidence saved at `artifacts/testsprite/approved-mutation-seed-20260609133817.json`, employee screenshot `artifacts/testsprite/approved-mutation-employees-20260609133956.png`, and customer screenshot `artifacts/testsprite/approved-mutation-customers-20260609133956.png`. Created cleanup CTV A `6772e292-7d55-4906-9c54-9c78ee5bfbd6` (`CTV A ZZ_TESTSPRITE_CLEANUP_20260609 20260609133817`, phone `0912298644`) and cleanup CTV B `72494087-6a69-45ba-bf1a-ad1ab01791d1` (`CTV B ZZ_TESTSPRITE_CLEANUP_20260609 20260609133817`, phone `0912300384`); both were suspended once for the suspension check, then reactivated and verified selectable in Cosmetic CTV options at `artifacts/testsprite/approved-mutation-active-ctv-options-20260609134230.json`.
+- [x] PASS: Live API recheck disproved the current TestSprite owner-mapping diagnosis for the cleanup client. `artifacts/testsprite/live-api-recheck-20260609-client-ctv.json` shows login PASS, cleanup CTV A/B active and selectable, cleanup client `9ea8178c-c14e-4108-93ce-ac44242fbe72` searchable in Cosmetic, client detail `referralClaim.ownerCtvId=6772e292-7d55-4906-9c54-9c78ee5bfbd6`, duplicate CTV B claim rejected with `400 B_CLIENT_CLAIMED`, and cleanup employee `1853147a-21a7-4cdf-a7dd-260f55d3c2e8` inactive after delete.
+- [ ] FAIL: TestSprite saved-script rerun still cannot be treated as authoritative for the client-under-CTV-A case. Normal rerun of `b96abb82-837a-47b4-89fc-d02dac143d14` moved the suite from 4 passed / 5 blocked to 5 passed / 1 failed / 3 blocked, but it replayed stale steps that still mention read-only/no-approval behavior and ended with a generic owner-mapping diagnosis that conflicts with the live API recheck. Screenshot/text: `artifacts/testsprite/testsprite-client-ctv-a-rerun-error-20260609.png`, `artifacts/testsprite/testsprite-client-ctv-a-rerun-error-20260609.txt`, and updated report `artifacts/testsprite/testsprite-results-report-after-rerun-20260609.png` / `.txt`.
+- [ ] BLOCKED: TestSprite prompt edit for the same client case accepted the approved cleanup prompt, but the `Regenerate` action did not rewrite the recorded steps within the observed timeout; visible steps stayed on the old "do not create / no disposable-data approval" flow. Auto-heal rerun is upgrade-gated in the TestSprite UI, so the remaining TestSprite blockers need either a fresh generated test run/test list with the cleanup prompt or plan access to auto-heal; the live website flow itself is currently verified by API evidence above.
+- [x] PASS: Read-only fallback protected-route audit completed against `https://tmv.2checkin.com` Cosmetic LOB with `NODE_PATH=/Users/thuanle/Documents/TamTMV/Tgrouptest/website/node_modules node website/scripts/nk3-protected-routes-audit.mjs` - 23 PASS / 0 PARTIAL / 0 FAIL; report and screenshots in `website/output/playwright/nk3-protected-routes-audit-2026-06-09T12-32-30-793Z/`.
+- [x] PASS: Read-only fallback public visitor smoke completed for `/welcome`, `/welcome?book=1`, `/ctv/join`, `/ctv/discount/CTV-333333`, and `/verify-discount` - 5 PASS / 0 PARTIAL / 0 FAIL; dummy discount code returned a 404 setup/data condition without route crash; report and screenshots in `docs/live-artifacts/nk3-public-smoke/2026-06-09T12-36-17-297Z-chrome/`.
+- [ ] PENDING: After explicit approval and disposable CTV credentials, run the QR generation case from `TS-LIVE-014` and preserve the generated code, QR screenshot, history screenshot, network status for `POST /api/discount-codes/generate`, and any downloaded/share artifact status.
+- [ ] PENDING: Use TestSprite's report evidence to file live-site debug issues with route, role, LOB, screenshot/video timestamp, failing API request, and classification after quota-safe TestSprite execution is available; local fallback evidence is already saved above.
+- [x] PASS: Root cause of the TS-LIVE-014 QR generation failure found by live repro on `https://tmv.2checkin.com` (instrumented browser click as CTV `ctv-c-0531demo@clinic.vn`): `POST /api/discount-codes/generate` returned 400 because the frontend double-stringified the JSON body (`apiFetch` re-stringifies; express.json strict rejected the top-level string), and the panel swallowed the rejection with no UI feedback. Two further backend bugs found behind it: `fetchCodeRow` dropped the `db` arg (staff lookup/verify always "Mã không tồn tại") and the verify UPDATE failed with `inconsistent types deduced for parameter $9`. All fixed in 0.36.2 (FM-20260610-01) and verified end-to-end locally: generate `CTVDEMOREF-TS5B5A` → QR canvas rendered → staff lookup found:true → check-in → complete `status='used'`. Live NK3 still runs the broken bundle until the next deploy; rerun TS-LIVE-014 after deploying 0.36.2.

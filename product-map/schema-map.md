@@ -26,6 +26,10 @@
 > earnings table (not commissions) chosen to avoid legacy name collision.
 > No cross-DB JOINs at SQL; CTV aggregation + cross-view only in API layer (getDb calls).
 > D13 recipient resolution implemented in commissionEngine against partners + earnings.
+> **Per-environment physical DB names** (same logical pair everywhere; `getDb(lob)` resolves via `DATABASE_URL` / `COSMETIC_DATABASE_URL`):
+> - Local dev + NK (`nk.2checkin.com`): `tdental_demo` + `tcosmetic_demo` (local: 127.0.0.1:5433 native or 55433 via `tgroup-db` docker).
+> - NK3 (`tmv.2checkin.com`, `/opt/tgroup-nk3/.env.nk3`): `tdental_nk3` + `tcosmetic_nk3` (VPS 127.0.0.1:55433, container `tgroup-db`).
+> Docs that say "tdental_demo" mean "the dental pool" — on NK3 apply migrations to `tdental_nk3`/`tcosmetic_nk3`, never to a `*_demo` name.
 
 **Database layout (final implemented)**
 

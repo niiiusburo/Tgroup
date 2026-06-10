@@ -13,8 +13,6 @@ const { getDb } = require('../db');
 const { safeQueryRows, isCtvUser } = require('./ctvHelpers');
 const { getReferralClaimStatus } = require('../services/referralClaim');
 const {
-  DEFAULT_EXPIRY_DAYS,
-  DEFAULT_NON_LIVE_PERCENT,
   buildCtvShortCode,
   checkExistingCodeForVisitor,
   createCustomerForCtv,
@@ -359,6 +357,15 @@ router.post('/verify', requireAuth, requireStaff, async (req, res) => {
       customerLob = created.lob;
     }
 
+    // Completing a checked-in code: fall back to the customer bound at check-in
+    // so staff don't have to re-resolve the client (phone format/LOB drift safe).
+    if (!customerPartnerId && row.status === 'checked_in' && row.customer_partner_id) {
+      customerPartnerId = row.customer_partner_id;
+      if (row.customer_lob === 'cosmetic' || row.customer_lob === 'dental') {
+        customerLob = row.customer_lob;
+      }
+    }
+
     if (!customerPartnerId) {
       return res.status(400).json({
         error: { code: 'VALIDATION', message: 'customerPartnerId is required' },
@@ -382,10 +389,10 @@ router.post('/verify', requireAuth, requireStaff, async (req, res) => {
     const db = getDb('dental');
     await db.query(
       `UPDATE dbo.ctv_discount_codes
-          SET status = $9,
-              used_at = CASE WHEN $9 = 'used' THEN $2 ELSE used_at END,
-              used_by_staff_id = CASE WHEN $9 = 'used' THEN $3 ELSE used_by_staff_id END,
-              used_by_staff_name = CASE WHEN $9 = 'used' THEN $4 ELSE used_by_staff_name END,
+          SET status = $9::varchar,
+              used_at = CASE WHEN $9::varchar = 'used' THEN $2 ELSE used_at END,
+              used_by_staff_id = CASE WHEN $9::varchar = 'used' THEN $3 ELSE used_by_staff_id END,
+              used_by_staff_name = CASE WHEN $9::varchar = 'used' THEN $4 ELSE used_by_staff_name END,
               customer_partner_id = $5,
               customer_lob = $6,
               customer_phone = $7,

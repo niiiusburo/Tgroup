@@ -157,7 +157,8 @@
     "generateHint": "Mỗi lần bấm sẽ tạo một mã mới (1 mã = 1 ảnh voucher).",
     "generateAndDownload": "Tạo mã & tải ảnh",
     "downloadFilename": "ma-giam-gia-{{code}}.png",
-    "canvasDiscount": "🎁 Giảm {{value}}"
+    "canvasDiscount": "🎁 Giảm {{value}}",
+    "generateError": "Không tạo được mã giảm giá. Vui lòng thử lại."
   },
   "codeHistory": {
     "title": "Mã của tôi",

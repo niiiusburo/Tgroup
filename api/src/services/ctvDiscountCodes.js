@@ -154,6 +154,7 @@ async function resolveCtvByShortCode(shortCode) {
 async function fetchCodeRow(code) {
   const db = getDb('dental');
   const rows = await safeQueryRows(
+    db,
     `SELECT c.*, p.name AS ctv_name, p.phone AS ctv_phone, c.payment_id
        FROM dbo.ctv_discount_codes c
        JOIN dbo.partners p ON p.id = c.ctv_partner_id

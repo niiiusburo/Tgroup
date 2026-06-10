@@ -7,6 +7,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { Copy, ExternalLink, Link2, Share2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { ApiError } from '@/lib/api/core';
 import type { CtvProfile } from '@/lib/api/ctvSelf';
 import {
   buildStaffVerifyDiscountUrl,
@@ -54,6 +55,7 @@ export function CtvQrDiscountPanel({ profile, profileName }: CtvQrDiscountPanelP
   const { t } = useTranslation('ctv');
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle');
   const [isDownloading, setIsDownloading] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
   const [activeCode, setActiveCode] = useState<string | null>(null);
   const [discountPercent, setDiscountPercent] = useState(DEFAULT_NON_LIVE_PERCENT);
   const copyTimerRef = useRef<number | null>(null);
@@ -100,6 +102,7 @@ export function CtvQrDiscountPanel({ profile, profileName }: CtvQrDiscountPanelP
   const handleDownloadImage = useCallback(async () => {
     if (isDownloading) return;
     setIsDownloading(true);
+    setGenerateError(null);
     try {
       const generated = await generateCtvDiscountCode({ forceNew: true });
       const code = generated.code;
@@ -154,6 +157,11 @@ export function CtvQrDiscountPanel({ profile, profileName }: CtvQrDiscountPanelP
       }
 
       window.setTimeout(() => URL.revokeObjectURL(objectUrl), 15000);
+    } catch (error) {
+      const message = error instanceof ApiError && error.message
+        ? error.message
+        : t('qrDiscount.generateError');
+      setGenerateError(message);
     } finally {
       setIsDownloading(false);
     }
@@ -254,6 +262,11 @@ export function CtvQrDiscountPanel({ profile, profileName }: CtvQrDiscountPanelP
             </button>
           </div>
         )}
+        {generateError ? (
+          <p className="mt-3 rounded-2xl bg-red-50 px-3 py-2 text-center text-xs font-semibold text-red-600 sm:text-sm" role="alert">
+            {generateError}
+          </p>
+        ) : null}
       </section>
 
       <CtvDiscountCodesHistory />

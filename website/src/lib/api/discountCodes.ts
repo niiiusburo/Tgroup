@@ -150,12 +150,12 @@ export async function verifyDiscountCode(input: {
 }): Promise<DiscountVerifyResult> {
   return apiFetch<DiscountVerifyResult>('/discount-codes/verify', {
     method: 'POST',
-    body: JSON.stringify(input),
+    body: input,
   });
 }
 
 export async function ensureCtvDiscountCode(): Promise<DiscountCodeEnsure> {
-  return apiFetch<DiscountCodeEnsure>('/discount-codes/ensure', { method: 'POST', body: '{}' });
+  return apiFetch<DiscountCodeEnsure>('/discount-codes/ensure', { method: 'POST', body: {} });
 }
 
 export async function generateCtvDiscountCode(input?: {
@@ -166,7 +166,7 @@ export async function generateCtvDiscountCode(input?: {
 }): Promise<DiscountCodeGenerate> {
   return apiFetch<DiscountCodeGenerate>('/discount-codes/generate', {
     method: 'POST',
-    body: JSON.stringify(input || {}),
+    body: input || {},
   });
 }
 
