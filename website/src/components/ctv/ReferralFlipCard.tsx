@@ -3,7 +3,7 @@
  * @crossref:used-in[NK3 CTV portal and referral surface: website/src/components/ctv/ReferralFlipCard]
  * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CalendarDays, Check, ExternalLink, Link2, ReceiptText, RotateCcw, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -14,6 +14,8 @@ import { CtvLinkBar } from '@/components/shared';
 
 interface ReferralFlipCardProps {
   readonly referral: CtvReferral;
+  readonly initialFlipped?: boolean;
+  readonly highlightServiceLineId?: string | null;
 }
 
 function getLobClass(lob: CtvLob): string {
@@ -41,12 +43,23 @@ function getProgress(referral: CtvReferral): { current: number; paid: boolean } 
   return { current: paid ? 4 : 3, paid };
 }
 
-function ServiceRow({ service }: { readonly service: CtvReferralService }) {
+function ServiceRow({
+  service,
+  highlighted = false,
+}: {
+  readonly service: CtvReferralService;
+  readonly highlighted?: boolean;
+}) {
   const { t } = useTranslation('ctv');
   const ctv = useCtvLocale();
 
   return (
-    <li className="grid grid-cols-[1fr_auto] gap-3 rounded-xl border border-gray-100 bg-white p-3">
+    <li
+      className={cn(
+        'grid grid-cols-[1fr_auto] gap-3 rounded-xl border bg-white p-3',
+        highlighted ? 'border-orange-300 bg-orange-50 ring-2 ring-orange-300/50' : 'border-gray-100'
+      )}
+    >
       <div className="min-w-0">
         <p className="truncate text-sm font-semibold text-gray-900">{service.serviceName || ctv.unknownService()}</p>
         <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] font-medium text-gray-500">
@@ -65,11 +78,19 @@ function ServiceRow({ service }: { readonly service: CtvReferralService }) {
   );
 }
 
-export function ReferralFlipCard({ referral }: ReferralFlipCardProps) {
+export function ReferralFlipCard({
+  referral,
+  initialFlipped = false,
+  highlightServiceLineId = null,
+}: ReferralFlipCardProps) {
   const { t } = useTranslation('ctv');
   const ctv = useCtvLocale();
-  const [isFlipped, setIsFlipped] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(initialFlipped);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (initialFlipped) setIsFlipped(true);
+  }, [initialFlipped, referral.id, highlightServiceLineId]);
   // The referred client IS a partner row; referral.id is that customer's id, so the
   // admin customer page lives at /customers/:id. CTVs can copy/share this link; anyone
   // with customer access opens the client directly.
@@ -99,7 +120,10 @@ export function ReferralFlipCard({ referral }: ReferralFlipCardProps) {
   ];
 
   return (
-    <article className="relative rounded-[22px] border border-gray-200 bg-white shadow-sm">
+    <article
+      id={`ctv-referral-${referral.id}`}
+      className="relative rounded-[22px] border border-gray-200 bg-white shadow-sm scroll-mt-24"
+    >
       <button
         type="button"
         aria-expanded={isFlipped}
@@ -240,7 +264,16 @@ export function ReferralFlipCard({ referral }: ReferralFlipCardProps) {
 
                 <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3">
                   {hasServices ? (
-                    services.map((service) => <ServiceRow key={service.id} service={service} />)
+                    services.map((service) => (
+                      <ServiceRow
+                        key={service.id}
+                        service={service}
+                        highlighted={
+                          !!highlightServiceLineId &&
+                          (service.serviceLineId === highlightServiceLineId || service.id === highlightServiceLineId)
+                        }
+                      />
+                    ))
                   ) : (
                     <li className="flex h-full flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white p-4 text-center text-sm text-gray-500">
                       <ReceiptText className="mb-2 h-5 w-5 text-gray-400" />

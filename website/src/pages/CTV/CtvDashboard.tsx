@@ -15,6 +15,7 @@ import {
   fetchCtvHierarchy,
   fetchCtvProfile,
   fetchCtvReferrals,
+  type CtvCommissionRow,
   type CtvCommissionSummary,
   type CtvHierarchyResponse,
   type CtvProfile,
@@ -60,7 +61,27 @@ export default function CtvDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [hierarchyError, setHierarchyError] = useState<string | null>(null);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const [trackingFocus, setTrackingFocus] = useState<{
+    clientId: string;
+    serviceLineId?: string | null;
+    clientName?: string | null;
+    serviceName?: string | null;
+  } | null>(null);
   const shouldReduceMotion = useReducedMotion();
+
+  const handleCommissionNavigate = useCallback((row: CtvCommissionRow) => {
+    if (!row.client_id) {
+      setActiveTab('commission');
+      return;
+    }
+    setTrackingFocus({
+      clientId: row.client_id,
+      serviceLineId: row.service_line_id ?? null,
+      clientName: row.client_name,
+      serviceName: row.service_name,
+    });
+    setActiveTab('tracking');
+  }, []);
 
   const loadDashboard = useCallback(async () => {
     setIsLoading(true);
@@ -244,15 +265,29 @@ export default function CtvDashboard() {
           <h2 className="sr-only">{activeTitle}</h2>
 
           {activeTab === 'home' ? (
-            <CtvHomeTab summary={summary} referrals={referrals} profileName={profileName} isLoading={isLoading} />
+            <CtvHomeTab
+              summary={summary}
+              referrals={referrals}
+              profileName={profileName}
+              isLoading={isLoading}
+              onActivityClick={handleCommissionNavigate}
+            />
           ) : null}
-          {activeTab === 'commission' ? <CtvCommissionTab summary={summary} isLoading={isLoading} /> : null}
+          {activeTab === 'commission' ? (
+            <CtvCommissionTab
+              summary={summary}
+              isLoading={isLoading}
+              onRowClick={handleCommissionNavigate}
+            />
+          ) : null}
           {activeTab === 'tracking' ? (
             <CtvTrackingTab
               referrals={referrals}
               isLoading={isLoading}
               error={error}
               onRetry={() => void loadDashboard()}
+              focus={trackingFocus}
+              onFocusClear={() => setTrackingFocus(null)}
             />
           ) : null}
           {activeTab === 'network' ? (
@@ -294,7 +329,10 @@ export default function CtvDashboard() {
                 <button
                   key={key}
                   type="button"
-                  onClick={() => setActiveTab(key)}
+                  onClick={() => {
+                    if (key !== 'tracking') setTrackingFocus(null);
+                    setActiveTab(key);
+                  }}
                   className={cn(
                     'flex h-16 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium leading-tight transition-colors',
                     active ? 'text-orange-600' : 'text-gray-400'

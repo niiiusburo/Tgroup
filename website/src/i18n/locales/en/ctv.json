@@ -65,6 +65,8 @@
     "services": "Services",
     "paidOut": "Paid out",
     "recentActivity": "Recent activity",
+    "recentActivityHint": "Each row is a commission earned from a service card under one of your clients. Tap to open that client.",
+    "viewActivityFor": "View {{client}} — {{service}}",
     "noActivityPlain": "No recent activity yet."
   },
   "commission": {
@@ -100,6 +102,13 @@
     "passwordRequired": "Fill in all password fields.",
     "passwordMin": "New password must be at least 6 characters.",
     "passwordMismatch": "New passwords do not match."
+  },
+  "tracking": {
+    "focusBreadcrumb": "From commission",
+    "focusHint": "Card flipped to show the service under this client.",
+    "focusMissingClient": "This client is not in your tracking list yet. Commission came from a service card attached to them.",
+    "unknownClient": "Client",
+    "clearFocus": "Clear"
   },
   "title": "Referred Client Tracking",
   "subtitle": "Track referred clients from booking to payment",

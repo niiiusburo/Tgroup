@@ -2,6 +2,8 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.37.1] — 2026-06-09 — CTV portal recent-activity drill-down
+- **CTV home “Recent activity” rows now explain and link to the client.** `GET /api/ctv/commission-summary` returns `client_id`, `service_line_id`, and `service_name`; home + commission rows are tappable and open Tracking with the client card flipped to the matching service (INV-003C commission breadcrumb). — @agent
 
 ## [Docs] — 2026-06-10 — CTV commission attribution audit (NK3 live)
 - **Verified the no-CTV-no-commission invariant end-to-end on NK3** (code: engine guards + `_linesForPayment` filter + update-clear reversal; 21/21 engine unit tests; live A/B/C scenarios on cosmetic LOB with disposable ZZ_CTVCHECK data). Documented fallback (service created with no CTV for a referred client auto-attaches the referrer) confirmed working as specified in `earnings-commissions.yaml`. Cleaned 5 stale pre-cutover legacy rows (2026-05-20→24, pay-as-paid D13 fallback on no-CTV services, demo clients) by flipping to `status='reversed'`; final audit: 0 active no-CTV earnings lines in both `tdental_nk3` and `tcosmetic_nk3`. Details in testbright.md. — @agent

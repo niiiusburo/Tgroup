@@ -61,9 +61,11 @@ router.get('/commission-summary', requireAuth, requireCtvUser, async (req, res) 
   const earningsSql = `
     SELECT e.id, e.client_id, e.recipient_partner_id, e.payment_id, e.service_line_id,
            e.source, e.amount, e.status, e.payout_id, e.earned_at, e.created_at,
-           p.name AS client_name
+           p.name AS client_name,
+           sol.productname AS service_name
     FROM dbo.earnings e
     LEFT JOIN dbo.partners p ON p.id = e.client_id
+    LEFT JOIN dbo.saleorderlines sol ON sol.id = e.service_line_id
     WHERE e.recipient_partner_id = $1
     ORDER BY COALESCE(e.earned_at, e.created_at) DESC
     LIMIT 100
@@ -114,22 +116,33 @@ router.get('/commission-summary', requireAuth, requireCtvUser, async (req, res) 
     }
   });
 
-  const recent = all.slice(0, 8).map((e) => ({
+  const mapEarningRow = (e) => ({
     id: e.id,
+    client_id: e.client_id || null,
     client_name: e.client_name || null,
+    service_line_id: e.service_line_id || null,
+    service_name: e.service_name || null,
+    payment_id: e.payment_id || null,
     amount: parseFloat(e.amount || 0),
     source: e.source || 'ctv',
     lob: e.lob,
     earned_at: e.earned_at || e.created_at,
     status: e.status,
     payout_id: e.payout_id || null,
-  }));
+  });
 
-  const pendingList = recent.filter((r) => r.status === 'pending');
+  const recent = all.slice(0, 8).map(mapEarningRow);
+  const pendingList = all
+    .filter((e) => e.status === 'pending' && parseFloat(e.amount || 0) > 0)
+    .slice(0, 50)
+    .map(mapEarningRow);
   // Paid = actually paid out (matches the aggregation's isPaid). This deliberately
   // EXCLUDES 'pending' reversals and INV-003C service-card 'reversed' rows, neither of
   // which are paid earnings.
-  const paidList = recent.filter((r) => r.status === 'paid' || !!r.payout_id);
+  const paidList = all
+    .filter((e) => e.status === 'paid' || !!e.payout_id)
+    .slice(0, 50)
+    .map(mapEarningRow);
 
   // Fetch payout cycles referenced by this CTV's earnings (for Paid tab grouping)
   const dPayoutIds = [...new Set(dRows.map((r) => r.payout_id).filter(Boolean))];

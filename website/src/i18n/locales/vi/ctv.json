@@ -65,7 +65,16 @@
     "services": "Dịch vụ",
     "paidOut": "Đã nhận",
     "recentActivity": "Hoạt động gần đây",
+    "recentActivityHint": "Mỗi dòng là hoa hồng từ thẻ dịch vụ của một khách bạn giới thiệu. Chạm để mở khách đó.",
+    "viewActivityFor": "Xem {{client}} — {{service}}",
     "noActivityPlain": "Chưa có hoạt động gần đây."
+  },
+  "tracking": {
+    "focusBreadcrumb": "Từ hoa hồng",
+    "focusHint": "Thẻ đã lật để hiện dịch vụ của khách này.",
+    "focusMissingClient": "Khách này chưa có trong danh sách theo dõi. Hoa hồng đến từ thẻ dịch vụ gắn với khách đó.",
+    "unknownClient": "Khách hàng",
+    "clearFocus": "Bỏ chọn"
   },
   "commission": {
     "myCommission": "Hoa hồng của tôi",

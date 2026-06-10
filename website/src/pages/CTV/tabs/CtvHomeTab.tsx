@@ -3,11 +3,11 @@
  * @crossref:used-in[NK3 SPA page route: website/src/pages/CTV/tabs/CtvHomeTab]
  * @crossref:uses[product-map/domains/ctv.yaml, docs/TEST-MATRIX.md, testbright.md]
  */
-import { Tag } from 'lucide-react';
+import { ChevronRight, Tag } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { formatVND } from '@/lib/formatting';
-import type { CtvCommissionSummary, CtvReferral } from '@/lib/api/ctv';
+import type { CtvCommissionRow, CtvCommissionSummary, CtvReferral } from '@/lib/api/ctv';
 import { useCtvLocale } from '@/lib/i18n/ctv';
 
 interface CtvHomeTabProps {
@@ -15,9 +15,10 @@ interface CtvHomeTabProps {
   readonly referrals: CtvReferral[];
   readonly profileName: string;
   readonly isLoading: boolean;
+  readonly onActivityClick?: (row: CtvCommissionRow) => void;
 }
 
-export function CtvHomeTab({ summary, referrals, profileName, isLoading }: CtvHomeTabProps) {
+export function CtvHomeTab({ summary, referrals, profileName, isLoading, onActivityClick }: CtvHomeTabProps) {
   const { t } = useTranslation('ctv');
   const ctv = useCtvLocale();
   const pending = summary?.totals.pending ?? 0;
@@ -90,16 +91,48 @@ export function CtvHomeTab({ summary, referrals, profileName, isLoading }: CtvHo
 
       <section className="mt-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
         <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-gray-500">{t('home.recentActivity')}</p>
+        <p className="mt-1 text-xs text-gray-500">{t('home.recentActivityHint')}</p>
         <div className="mt-3 space-y-2 text-sm">
-          {(summary?.recent ?? []).slice(0, 5).map((row) => (
-            <div key={row.id} className="flex items-center justify-between gap-3 border-b border-gray-50 py-2 last:border-0">
-              <div className="min-w-0">
-                <p className="truncate font-medium text-gray-900">{row.client_name || ctv.unknownClient()}</p>
-                <p className="text-xs text-gray-500">{ctv.getLobLabel(row.lob)}</p>
-              </div>
-              <p className="shrink-0 font-bold text-emerald-600">+{formatVND(Math.abs(row.amount))}</p>
-            </div>
-          ))}
+          {(summary?.recent ?? []).slice(0, 5).map((row) => {
+            const clientLabel = row.client_name || ctv.unknownClient();
+            const serviceLabel = row.service_name || ctv.unknownService();
+            const clickable = !!onActivityClick && !!row.client_id;
+
+            if (!clickable) {
+              return (
+                <div key={row.id} className="flex items-center justify-between gap-3 border-b border-gray-50 py-2 last:border-0">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-gray-900">{clientLabel}</p>
+                    <p className="text-xs text-gray-500">
+                      {serviceLabel} · {ctv.getLobLabel(row.lob)}
+                    </p>
+                  </div>
+                  <p className="shrink-0 font-bold text-emerald-600">+{formatVND(Math.abs(row.amount))}</p>
+                </div>
+              );
+            }
+
+            return (
+              <button
+                key={row.id}
+                type="button"
+                onClick={() => onActivityClick(row)}
+                className="flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-1 py-2 text-left transition-colors hover:border-orange-100 hover:bg-orange-50/60 focus:outline-none focus:ring-2 focus:ring-orange-300/60"
+                aria-label={t('home.viewActivityFor', { client: clientLabel, service: serviceLabel })}
+              >
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-gray-900">{clientLabel}</p>
+                  <p className="text-xs text-gray-500">
+                    {serviceLabel} · {ctv.getLobLabel(row.lob)} · {ctv.getServiceStatusLabel(row.status)}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-1">
+                  <p className="font-bold text-emerald-600">+{formatVND(Math.abs(row.amount))}</p>
+                  <ChevronRight className="h-4 w-4 text-orange-500" aria-hidden="true" />
+                </div>
+              </button>
+            );
+          })}
           {summary?.recent?.length ? null : (
             <p className="py-4 text-center text-sm text-gray-400">{t('home.noActivityPlain')}</p>
           )}

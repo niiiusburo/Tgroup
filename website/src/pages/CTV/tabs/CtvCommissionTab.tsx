@@ -16,25 +16,55 @@ type CommissionMode = 'pending' | 'paid';
 interface CtvCommissionTabProps {
   readonly summary: CtvCommissionSummary | null;
   readonly isLoading: boolean;
+  readonly onRowClick?: (row: CtvCommissionRow) => void;
 }
 
-function CommissionRow({ row }: { readonly row: CtvCommissionRow }) {
+function CommissionRow({
+  row,
+  onRowClick,
+}: {
+  readonly row: CtvCommissionRow;
+  readonly onRowClick?: (row: CtvCommissionRow) => void;
+}) {
+  const { t } = useTranslation('ctv');
   const ctv = useCtvLocale();
+  const clientLabel = row.client_name || ctv.unknownClient();
+  const serviceLabel = row.service_name || ctv.unknownService();
+  const clickable = !!onRowClick && !!row.client_id;
 
-  return (
-    <article className="flex items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-100">
+  const content = (
+    <>
       <div className="min-w-0">
-        <p className="truncate text-sm font-semibold text-gray-900">{row.client_name || ctv.unknownClient()}</p>
+        <p className="truncate text-sm font-semibold text-gray-900">{clientLabel}</p>
         <p className="mt-1 text-xs text-gray-500">
-          {ctv.getLobLabel(row.lob)} · {row.service_name || ctv.unknownService()}
+          {serviceLabel} · {ctv.getLobLabel(row.lob)} · {ctv.getServiceStatusLabel(row.status)}
         </p>
       </div>
       <p className="shrink-0 text-sm font-bold text-orange-600">{formatVND(Math.abs(row.amount))}</p>
-    </article>
+    </>
+  );
+
+  if (!clickable) {
+    return (
+      <article className="flex items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-100">
+        {content}
+      </article>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => onRowClick(row)}
+      className="flex w-full items-center justify-between gap-3 rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-gray-100 transition-colors hover:ring-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-300/60"
+      aria-label={t('home.viewActivityFor', { client: clientLabel, service: serviceLabel })}
+    >
+      {content}
+    </button>
   );
 }
 
-export function CtvCommissionTab({ summary, isLoading }: CtvCommissionTabProps) {
+export function CtvCommissionTab({ summary, isLoading, onRowClick }: CtvCommissionTabProps) {
   const { t } = useTranslation('ctv');
   const [mode, setMode] = useState<CommissionMode>('pending');
 
@@ -79,7 +109,7 @@ export function CtvCommissionTab({ summary, isLoading }: CtvCommissionTabProps) 
 
       <div className="mt-4 space-y-2">
         {rows.map((row) => (
-          <CommissionRow key={row.id} row={row} />
+          <CommissionRow key={row.id} row={row} onRowClick={onRowClick} />
         ))}
         {rows.length === 0 ? (
           <p className="rounded-2xl bg-white p-5 text-center text-sm text-gray-500 ring-1 ring-gray-100">

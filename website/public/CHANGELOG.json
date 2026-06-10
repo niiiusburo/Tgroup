@@ -1,5 +1,42 @@
 [
   {
+    "version": "0.37.1",
+    "date": "2026-06-10",
+    "commit": "6ac9f641",
+    "highlights": "CTV portal recent-activity rows link to client + service in Tracking.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Home overview recent-activity rows now show service name and open the matching client in Tracking.",
+          "Commission summary API returns client_id, service_line_id, and service_name for breadcrumb drill-down."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.36.1",
+    "date": "2026-06-09",
+    "commit": "pending",
+    "highlights": "NK3 0.36.1 — Triaged all TMV auto-detected errors; stale chunk auto-reload after deploy.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Bulk-resolved 82 auto-detected feedback threads on tmv.2checkin.com (27 resolved, 55 ignored).",
+          "errorReporter auto-reloads once when a post-deploy dynamic-import chunk 404s.",
+          "Suppressed MetaMask and React DOM reconciliation noise from auto-error telemetry."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "website/src/lib/errorReporter.test.ts — stale chunk + noise filters."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.35.1",
     "date": "2026-06-09",
     "commit": "pending",
