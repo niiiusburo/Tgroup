@@ -1,5 +1,9 @@
 const request = require('supertest');
 
+// Each test re-requires the full server (jest.resetModules) — under parallel
+// suite load this regularly blows the 5s default and reads as a flake.
+jest.setTimeout(20000);
+
 const ADMIN_GROUP_ID = '11111111-0000-0000-0000-000000000001';
 
 const adminPermissions = {

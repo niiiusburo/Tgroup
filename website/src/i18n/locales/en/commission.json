@@ -20,7 +20,8 @@
     "discountCodes": "QR discount codes",
     "newClients": "Referred clients",
     "earnings": "Client-paid earnings",
-    "payouts": "Payout proof"
+    "payouts": "Payout proof",
+    "next": "Next"
   },
   "date": {
     "fromPrefix": "From",
@@ -197,5 +198,8 @@
   "loading": "Loading...",
   "save": "Save",
   "error": "Error",
-  "clear": "Clear"
+  "clear": "Clear",
+  "common": {
+    "emDash": "—"
+  }
 }

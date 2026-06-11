@@ -20,7 +20,8 @@
     "discountCodes": "Mã giảm giá QR",
     "newClients": "Khách được giới thiệu",
     "earnings": "Thu nhập đã thu",
-    "payouts": "Biên lai chi trả"
+    "payouts": "Biên lai chi trả",
+    "next": "Tiếp theo"
   },
   "date": {
     "fromPrefix": "Từ",
@@ -197,5 +198,8 @@
   "loading": "Đang tải...",
   "save": "Lưu",
   "error": "Lỗi",
-  "clear": "Xóa"
+  "clear": "Xóa",
+  "common": {
+    "emDash": "—"
+  }
 }

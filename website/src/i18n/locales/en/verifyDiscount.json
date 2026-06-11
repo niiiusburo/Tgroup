@@ -38,5 +38,6 @@
   "ctvGateTitle": "Staff login required",
   "ctvGateBody": "You are signed in as a CTV. Log out and sign in with a staff account to verify this code at the desk.",
   "ctvGateSignedInAs": "Signed in as: {{name}}",
-  "ctvGateLogout": "Log out & sign in as staff"
+  "ctvGateLogout": "Log out & sign in as staff",
+  "verifyFailed": "Code verification failed."
 }

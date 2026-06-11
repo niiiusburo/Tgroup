@@ -14,6 +14,16 @@ vi.mock('@/contexts/AuthContext', () => ({
   }),
 }));
 
+// Today, local time — the calendar opens on the current week, so the mock
+// appointment must always fall inside the visible window (a hardcoded date
+// here silently drifts out of view and the test times out).
+// vi.hoisted: vi.mock factories are hoisted above top-level consts.
+const { TODAY } = vi.hoisted(() => ({
+  TODAY: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 10),
+}));
+
 // Mock API
 vi.mock('@/lib/api', () => ({
   fetchAppointments: vi.fn().mockResolvedValue({
@@ -27,7 +37,7 @@ vi.mock('@/lib/api', () => ({
       companyid: 'loc-1',
       companyname: 'Main Clinic',
       name: 'Cleaning',
-      date: '2026-05-31',
+      date: TODAY,
       time: '09:00',
       note: '',
       timeexpected: 30,

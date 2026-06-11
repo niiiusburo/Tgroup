@@ -6,6 +6,7 @@ jest.mock('../src/middleware/auth', () => ({
     next();
   },
   requirePermission: jest.fn(() => (_req, _res, next) => next()),
+  requireLobScope: () => (_req, _res, next) => next(),
 }));
 
 jest.mock('../src/db', () => ({
@@ -18,6 +19,7 @@ jest.mock('../src/db', () => ({
 jest.mock('../src/routes/feedback/admin', () => ({
   isAdmin: jest.fn(async () => true),
   requireAdmin: (_req, _res, next) => next(),
+  requireFeedbackPermission: () => (_req, _res, next) => next(),
 }));
 
 jest.mock('../src/routes/feedback/attachments', () => ({

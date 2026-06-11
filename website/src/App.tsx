@@ -223,8 +223,10 @@ function App() {
                 <Route path="/verify-discount" element={<VerifyDiscount />} />
                 {/* @crossref:route[path="/ctv/*"] — CTV portal + public join + fan discount landing */}
                 <Route path="/ctv" element={<Outlet />}>
+                  {/* @crossref:route[path="/ctv/join", component=JoinCtv] */}
                   <Route path="join" element={<JoinCtv />} />
                   <Route path="discount/:shortCode" element={<CtvDiscountLanding />} />
+                  {/* @crossref:route[path="/ctv", component=CtvDashboard] — portal home (CTVRouteGuard) */}
                   <Route
                     index
                     element={

@@ -2,6 +2,19 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.37.5] — 2026-06-11 — Hardening: both test suites fully green + CTV pending-reversal visibility fix
+### Fixed
+- **CTV commission-summary Pending tab shows negative pending reversals again** (`api/src/routes/ctv.js`): commit `873464ca` (drill-down) added an `amount > 0` filter to `pendingList`, silently regressing the Jun-1 spec test ("a pending reversal belongs in Pending, never in Paid") — reversal rows are audit-visible per INV-003A and the CTV must see upcoming deductions. Filter removed; `ctvBookings.test.js` 17/17. Totals aggregation unchanged. — @agent — INV-003A
+- **Stale-mock jest suites repaired:** `feedbackAttachments` + `authResponseShape` auth mocks gained `requireLobScope` (dentalLobGate landed after they were written); `feedbackAttachments` admin mock gained `requireFeedbackPermission`. `saleOrderLines.test.js` rewritten against the current transactional route contract (BEGIN/COMMIT/ROLLBACK + `ServiceReversalError`→HTTP mapping; business logic stays covered by `serviceReversal.test.js`) — also updated in TEST-MATRIX. — @agent
+- **i18n coverage back to zero missing keys:** added real gaps (`payment`: viewDepositHistory/depositHistoryFor/selectCustomer/depositWalletHistory; `commission`: flow.next + common.emDash; `verifyDiscount`: verifyFailed) and fixed `scripts/audit-i18n.cjs` to honor ALL `useTranslation` hooks per file (it previously applied only the first hook's namespace, producing 36 false positives against VerifyDiscount.tsx). — @agent
+- **Flake hardening:** `loginRateLimiter`/`authResponseShape` suites set `jest.setTimeout(20000)` (each test re-requires the full server; 5s default flaked under parallel load). `Calendar.click.test.tsx` mock appointment date made dynamic via `vi.hoisted` (hardcoded 2026-05-31 had drifted out of the visible calendar week). `CtvManagementTab.test.tsx` payload expectation updated for the deliberate `is_live` toggle field. — @agent
+- **App.tsx route markers completed:** `@crossref:route[path="/ctv", component=CtvDashboard]` + `/ctv/join` markers added; `crossrefBreadcrumbs.test.ts` 2/2. — @agent
+### Changed
+- **`runtime/nginx.nk3.docker.conf` is now version-controlled** (pulled from the VPS, byte-identical): it already served `/version.json` with `no-store` — the post-deploy "stale version" observation was a local fetch-cache artifact, not an edge-cache bug. Verified live: `cache-control: no-store, no-cache, must-revalidate` + 0.37.4 payload. — @agent
+- Dead-route audit: `commissions.js`, `crmTasks.js`, `receipts.js`, `ctvActions.js` (+ `journals.js`, `stockPickings.js`, `hrPayslips.js`) confirmed unmounted (disabled 2026-06-06 in server.js). Files retained pending owner approval — `commissions.js` intersects `product-map/unknowns.md` #12. — @agent
+### Tests
+- Full gates: api jest **105/105 suites, 1024/1024 tests**; website vitest **129 files, 730 tests** (0 failures, both previously-flaky suites pass under load); `tsc` + `vite build` PASS; `verify-crossrefs` PASS; `audit-i18n` 0 missing.
+
 ## [0.37.4] — 2026-06-10 — Site-wide crossref breadcrumb enrichment + behavior-preserving simplification
 ### Changed (258 files: website/src/{pages,lib/api,components/{modules,commission,ctv}}, api/src/{routes,services,middleware})
 - **Every in-scope source file now carries an enriched `@crossref` breadcrumb with REAL code cross-references** instead of the generic auto-generated triad: `used-in` names actual consumers (pages name `App.tsx` routing, services name the route files that require them), `uses` names actual dependencies (frontend API clients name their backend Express route file, backend routes name their frontend `lib/api/*.ts` caller). An agent editing any file can now see which other layers to read. CTV-SSOT blocks and strict `@crossref:route/endpoint/function` markers preserved verbatim (append-only). 242 generic blocks enriched. — @agent

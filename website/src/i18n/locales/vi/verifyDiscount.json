@@ -38,5 +38,6 @@
   "ctvGateTitle": "Cần đăng nhập nhân viên",
   "ctvGateBody": "Bạn đang đăng nhập tài khoản CTV. Đăng xuất và đăng nhập bằng tài khoản nhân viên để xác minh mã cho khách tại quầy.",
   "ctvGateSignedInAs": "Đang đăng nhập: {{name}}",
-  "ctvGateLogout": "Đăng xuất & đăng nhập nhân viên"
+  "ctvGateLogout": "Đăng xuất & đăng nhập nhân viên",
+  "verifyFailed": "Xác minh mã thất bại."
 }

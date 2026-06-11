@@ -49,9 +49,19 @@ const missing = [];
 for (const file of files) {
   const content = fs.readFileSync(file, 'utf8');
   
-  // Find useTranslation namespace(s)
-  const nsMatch = content.match(/useTranslation\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/);
-  const defaultNs = nsMatch ? nsMatch[1] : 'common';
+  // Find ALL useTranslation namespaces in the file — a file can host several
+  // components with different hooks (e.g. VerifyDiscount.tsx declares
+  // 'common' for its loading shell and 'verifyDiscount' for the page).
+  // A key counts as covered when ANY declared namespace provides it.
+  const nsDecls = [...content.matchAll(/useTranslation\s*\(\s*(?:['"`]([^'"`]+)['"`]|\[([^\]]+)\])/g)];
+  const fileNamespaces = [];
+  for (const [, single, list] of nsDecls) {
+    if (single) fileNamespaces.push(single);
+    else if (list) {
+      for (const m of list.matchAll(/['"`]([^'"`]+)['"`]/g)) fileNamespaces.push(m[1]);
+    }
+  }
+  if (fileNamespaces.length === 0) fileNamespaces.push('common');
 
   // Find t('...') calls, possibly with ns override
   const tCalls = [...content.matchAll(/(?<![\w$])t\s*\(\s*['"`]([^'"`]+)['"`]([^)]*)\)/g)];
@@ -69,12 +79,12 @@ for (const file of files) {
       }
     }
 
-    const ns = overrideNs || defaultNs;
-    const enVal = getValue(namespaces.en[ns], key);
-    const viVal = getValue(namespaces.vi[ns], key);
+    const candidates = overrideNs ? [overrideNs] : fileNamespaces;
+    const enFound = candidates.some((n) => getValue(namespaces.en[n], key) !== undefined);
+    const viFound = candidates.some((n) => getValue(namespaces.vi[n], key) !== undefined);
 
-    if (enVal === undefined || viVal === undefined) {
-      missing.push({ file: path.relative(srcDir, file), ns, key, en: enVal !== undefined, vi: viVal !== undefined });
+    if (!enFound || !viFound) {
+      missing.push({ file: path.relative(srcDir, file), ns: candidates.join('|'), key, en: enFound, vi: viFound });
     }
   }
 }

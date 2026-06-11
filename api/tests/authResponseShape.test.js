@@ -2,6 +2,10 @@
 
 const request = require('supertest');
 
+// Each test re-requires the full server (jest.resetModules) — under parallel
+// suite load this regularly blows the 5s default and reads as a flake.
+jest.setTimeout(20000);
+
 function loadApp({ row }) {
   jest.resetModules();
   process.env.JWT_SECRET = 'test-secret';
@@ -13,6 +17,7 @@ function loadApp({ row }) {
   jest.doMock('../src/middleware/auth', () => ({
     requireAuth: (_req, _res, next) => next(),
     requirePermission: () => (_req, _res, next) => next(),
+    requireLobScope: () => (_req, _res, next) => next(),
   }));
 
   jest.doMock('uuid', () => ({

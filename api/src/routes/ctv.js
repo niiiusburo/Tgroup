@@ -132,8 +132,11 @@ router.get('/commission-summary', requireAuth, requireCtvUser, async (req, res) 
   });
 
   const recent = all.slice(0, 8).map(mapEarningRow);
+  // Pending tab shows ALL pending rows including negative reversals (INV-003A:
+  // reversal rows are audit-visible; the CTV must see upcoming deductions).
+  // Regression guard: ctvBookings.test.js "does not list pending reversals ... in the Paid tab".
   const pendingList = all
-    .filter((e) => e.status === 'pending' && parseFloat(e.amount || 0) > 0)
+    .filter((e) => e.status === 'pending')
     .slice(0, 50)
     .map(mapEarningRow);
   // Paid = actually paid out (matches the aggregation's isPaid). This deliberately

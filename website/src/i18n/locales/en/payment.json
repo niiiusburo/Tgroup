@@ -282,5 +282,9 @@
     "loadingWallets": "Loading wallets...",
     "loadingPlans": "Loading payment plans...",
     "loadingDetails": "Loading plan details..."
-  }
+  },
+  "viewDepositHistory": "Deposit wallet history",
+  "depositHistoryFor": "Customer deposit wallet history",
+  "selectCustomer": "— Select customer —",
+  "depositWalletHistory": "Deposit wallet history"
 }

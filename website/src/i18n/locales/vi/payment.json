@@ -282,5 +282,9 @@
     "loadingWallets": "Đang tải ví...",
     "loadingPlans": "Đang tải kế hoạch thanh toán...",
     "loadingDetails": "Đang tải chi tiết..."
-  }
+  },
+  "viewDepositHistory": "Lịch sử ví nạp",
+  "depositHistoryFor": "Lịch sử ví nạp của khách hàng",
+  "selectCustomer": "— Chọn khách hàng —",
+  "depositWalletHistory": "Lịch sử ví nạp"
 }
