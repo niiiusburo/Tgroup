@@ -42,6 +42,11 @@ services:
         VITE_CTV_PUBLIC_ROOT_SIGNUP: "true"
         VITE_PAYMENT_EDIT_DISABLED: "true"
         NODE_ENV: staging
+        # Stamp the real deployed commit into version.json (Dockerfile.web ARGs).
+        # Export GIT_SHA/GIT_BRANCH before `docker compose up --build`
+        # (see scripts/deploy-build-args.sh); defaults keep older flows working.
+        GIT_SHA: ${GIT_SHA:-unknown}
+        GIT_BRANCH: ${GIT_BRANCH:-unknown}
     container_name: tgroup-nk3-web
     restart: unless-stopped
     depends_on:
