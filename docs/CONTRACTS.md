@@ -1030,7 +1030,7 @@ export const PaymentBaseSchema = z.object({
 |---|---|---|---|
 | `/api/Account/Login` (`account.js`) | Frozen | `/api/Auth/login` | Unknown external clients (see `product-map/unknowns.md` #4) |
 | `/api/Web/Session` (`session.js`) | Frozen | JWT auth | Unknown external clients |
-| `/api/Services` (`services.js`) | Frozen / Dead | `/api/Products` | Queries non-existent table; do not mount on new servers |
+| `/api/Services` (`services.js`) | Removed | `/api/Products` | File and mount deleted from NK3 (2026-06-14); was already unmounted and returned 500 due to missing `public.services` table |
 | `APPOINTMENT_STATUS_LABELS_VI` | Deprecated | `APPOINTMENT_STATUS_I18N_KEYS` | Verify no active imports before removal |
 
 ---
@@ -1040,6 +1040,7 @@ export const PaymentBaseSchema = z.object({
 | Date | Version | Change | Commit |
 |---|---|---|---|
 | 2026-06-06 | v1.0.28 | Added source-traceability breadcrumb contract markers for API/client/service surfaces; no payload shape changes. | pending |
+| 2026-06-14 | v1.0.30 | `/api/Services` contract removed: dead route file and mount references deleted from NK3; endpoint was already unmounted. | pending |
 | 2026-06-07 | v1.0.29 | Added Face ID liveness gate contract: `liveness` field on face-service `/embed`, new `SPOOF_DETECTED` 422 error code on recognize/register (local provider, default off, fail-open). | pending |
 | 2026-06-07 | v1.0.30 | Restored `GET /api/cross-lob-probe` contract + documented the Face ID cross-LOB chooser consumer. | pending |
 | 2026-05-17 | v1.0.1 | Aligned API contracts with live payment enum, reports endpoints, and export registry routes. | pending |

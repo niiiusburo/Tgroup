@@ -2,6 +2,23 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.37.7] — 2026-06-14 — NK3 cleanup: break apiFetch cycle + delete dead /api/Services route
+### Fixed
+- **Break static import cycle between `apiFetch` and `silentFailureReporter`.** Extracted `API_URL` into a new leaf module `website/src/lib/api/apiBaseUrl.ts`; `core.ts` now imports the base URL from the leaf and re-exports it for backward compatibility, while `silentFailureReporter.ts` imports from the same leaf. Added regression test `website/src/lib/__tests__/importCycles.test.ts` to block future static cycles. — @agent — NK3 audit; no API contract change.
+- **Delete dead `/api/Services` route.** Removed `api/src/routes/services.js` and all commented-out mount/import references in `api/src/server.js`. The route was already unmounted and returned 500 because it queries the non-existent `public.services` table. Updated `api/src/__tests__/enterprise-verification.test.js` to assert full removal. — @agent — `docs/CONTRACTS.md` §6; NK3 audit P1.
+### Tests
+- `website/src/lib/__tests__/importCycles.test.ts` (2) + apiFetch suite (19) + NK3 CTV/auth matrix (100) + website NK3 matrix (83) + `vite build` + `verify:governance` all pass.
+
+## [Docs/Tooling] — 2026-06-12 — Blast-radius analysis and hard local gates
+### Added
+- **CRG + graphify anti-breakage workflow.** Registered Code Review Graph with repo-scoped MCP tool allow-list, rebuilt the SQLite graph, added staged-diff hard pre-commit gates for typecheck/lint/affected tests, and appended the mandatory edit protocol to `CLAUDE.md` + `AGENTS.md`. Docs-only governance/tooling change; no website runtime version bump. — @agent — Workflow enforcement / graph navigation truth.
+
+## [0.37.6] — 2026-06-11 — NK3 service delete reverses service-card CTV earnings
+### Fixed
+- **`reverseServiceLine` now reverses INV-003C service-card earnings on delete** (`api/src/services/serviceReversal.js`): pending rows with `payment_id IS NULL` are cleared via `reverseServiceCardEarnings` before soft-delete; paid-out service-card earnings block delete with `B_COMMISSION_PAID_OUT` (same guard as payment-linked commissions). — @agent — earnings-commissions.yaml :67/:89; NK3 audit P0
+### Tests
+- Extended `serviceReversal.test.js` (+2): service-card reversal call + paid-out guard. `nk3-services-money` / `nk3-ctv-commission` verify packages via `scripts/nk3-verify-package.sh` + `.github/workflows/nk3-verify-packages.yml`.
+
 ## [0.37.5] — 2026-06-11 — Hardening: both test suites fully green + CTV pending-reversal visibility fix
 ### Fixed
 - **CTV commission-summary Pending tab shows negative pending reversals again** (`api/src/routes/ctv.js`): commit `873464ca` (drill-down) added an `amount > 0` filter to `pendingList`, silently regressing the Jun-1 spec test ("a pending reversal belongs in Pending, never in Paid") — reversal rows are audit-visible per INV-003A and the CTV must see upcoming deductions. Filter removed; `ctvBookings.test.js` 17/17. Totals aggregation unchanged. — @agent — INV-003A

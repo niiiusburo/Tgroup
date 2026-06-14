@@ -1,17 +1,19 @@
 /**
  * @crossref:domain[settings-system]
  * @crossref:used-in[Shared fetch wrapper; every website/src/lib/api/* client, website/src/lib/api.ts (barrel), website/src/contexts/AuthContext.tsx, website/src/hooks/useBankSettings.ts, website/src/hooks/useTrackedForm.ts]
- * @crossref:uses[website/src/lib/authToken.ts, website/src/lib/errorReporter.ts, website/src/lib/silentFailureReporter.ts, api/src/server.js (route mount table + auth gate), product-map/domains/settings-system.yaml]
+ * @crossref:uses[website/src/lib/api/apiBaseUrl.ts (API_URL leaf), website/src/lib/authToken.ts, website/src/lib/errorReporter.ts, website/src/lib/silentFailureReporter.ts (dynamic import only), api/src/server.js (route mount table + auth gate), product-map/domains/settings-system.yaml]
  * apiFetch: snake_case params, Bearer auth, LOB /cosmetic prefix, structured ApiError parsing, 401 broadcast.
  */
 /**
  * API Client core - fetch wrapper, error handling, and shared types
  * Consumed by all lib/api/* domain modules.
  */
-
 import { clearAuthToken, getAuthToken } from '@/lib/authToken';
+import { API_URL } from './apiBaseUrl';
 
-export const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3000/api';
+// Re-export for backward compatibility — new code should prefer './apiBaseUrl'.
+export { API_URL };
+
 export const AUTH_UNAUTHORIZED_EVENT = 'tgclinic:auth-unauthorized';
 
 export class ApiError extends Error {

@@ -1,13 +1,13 @@
 /**
  * @crossref:domain[feedback-cms]
- * @crossref:used-in[website/src/lib/actionTracker.ts, website/src/lib/api/core.ts]
- * @crossref:uses[website/src/lib/errorReporter.ts, product-map/domains/feedback-cms.yaml]
+ * @crossref:used-in[website/src/lib/actionTracker.ts, website/src/lib/api/core.ts (dynamic import only)]
+ * @crossref:uses[website/src/lib/api/apiBaseUrl.ts (API_URL leaf), website/src/lib/errorReporter.ts, product-map/domains/feedback-cms.yaml]
  *
  * SilentFailureReporter — ships "silent failures" (no exception thrown,
  * but action did not achieve its goal) to the backend telemetry pipeline.
  * These are batched and deduplicated server-side by fingerprint.
  */
-import { API_URL } from './api/core';
+import { API_URL } from './api/apiBaseUrl';
 export interface SilentFailureReport {
   readonly module: string;
   readonly action: string;
@@ -24,7 +24,7 @@ const TELEMETRY_URL = API_URL.replace(/\/?api$/, '') + '/api/telemetry/action-er
 const FLUSH_INTERVAL_MS = 2000;
 const MAX_QUEUE = 20;
 
-let queue: SilentFailureReport[] = [];
+const queue: SilentFailureReport[] = [];
 let timer: ReturnType<typeof setTimeout> | null = null;
 
 function scheduleFlush(): void {

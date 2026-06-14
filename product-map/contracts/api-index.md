@@ -510,7 +510,7 @@ Hosoonline uses a mixed current contract: if `HOSOONLINE_USERNAME` and `HOSOONLI
 
 | Route | Status | Notes |
 |-------|--------|-------|
-| `GET/POST /api/Services` | **UNMOUNTED DEAD CODE** | `api/src/routes/services.js` queries non-existent `public.services`; server.js no longer mounts it |
+| `GET/POST /api/Services` | **REMOVED** | `api/src/routes/services.js` deleted 2026-06-14; file and server.js references removed; frontend uses `/api/Products` + `/api/SaleOrders` |
 | `POST /api/Account/Login` | **UNMOUNTED LEGACY** | Frontend uses `/api/Auth/login`; server.js comments this route out |
 | `/Web/Session/*` | **UNMOUNTED LEGACY** | Kept in source pending external-client confirmation |
 

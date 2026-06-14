@@ -90,20 +90,20 @@ describe('P0.1 — Permission Resolution Deduplication', () => {
 // SUITE 2: Dead Route Removal
 // ──────────────────────────────────────────────────────────
 describe('P0.2 — Dead Route Removal', () => {
-  it('/api/Services route is no longer mounted', () => {
+  it('/api/Services route is fully removed (file deleted + no mount references)', () => {
     const fs = require('fs');
     const path = require('path');
     const serverCode = fs.readFileSync(
       path.join(__dirname, '..', 'server.js'),
       'utf8'
     );
-    // Should be commented out
-    expect(serverCode).toContain('// app.use(\'/api/Services\', servicesRoutes)');
-    // Should NOT be active
-    const activeMounts = serverCode.split('\n')
-      .filter(l => l.includes('app.use') && l.includes('Services'))
-      .filter(l => !l.trim().startsWith('//'));
-    expect(activeMounts.length).toBe(0);
+    // No active or commented-out Services mount remains
+    expect(serverCode).not.toContain('servicesRoutes');
+    expect(serverCode).not.toContain("app.use('/api/Services'");
+    // File is gone
+    expect(() => {
+      fs.accessSync(path.join(__dirname, '..', 'routes', 'services.js'));
+    }).toThrow();
   });
 
   it('/api/Account legacy route is commented out', () => {
@@ -116,16 +116,6 @@ describe('P0.2 — Dead Route Removal', () => {
     expect(serverCode).toContain('// app.use(\'/api/Account\', accountRoutes)');
   });
 
-  it('services.js route file is no longer required', () => {
-    const fs = require('fs');
-    const path = require('path');
-    const serverCode = fs.readFileSync(
-      path.join(__dirname, '..', 'server.js'),
-      'utf8'
-    );
-    expect(serverCode).not.toContain("require('./routes/services')");
-    expect(serverCode).toContain('// const servicesRoutes');
-  });
 
   it('Dead frontend services.ts is deleted', () => {
     const fs = require('fs');

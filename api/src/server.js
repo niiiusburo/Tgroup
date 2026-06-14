@@ -64,7 +64,6 @@ const dashboardReportsRoutes = require('./routes/dashboardReports');
 const permissionsRoutes = require('./routes/permissions');
 const authRoutes = require('./routes/auth');
 const paymentsRoutes = require('./routes/payments');
-// const servicesRoutes removed: dead route queries non-existent table
 const customerBalanceRoutes = require('./routes/customerBalance');
 const monthlyPlansRoutes = require('./routes/monthlyPlans');
 const customerSourcesRoutes = require('./routes/customerSources');
@@ -259,8 +258,6 @@ app.use('/api/DashboardReports', dashboardReportsRoutes);
 app.use('/api/Permissions', permissionsRoutes);
 app.use('/api/Auth', authRoutes);
 app.use('/api/Payments', paymentsRoutes);
-// DEAD ROUTE: services.js queries non-existent public.services table
-// app.use('/api/Services', servicesRoutes);
 app.use('/api/CustomerBalance', customerBalanceRoutes);
 app.use('/api/MonthlyPlans', monthlyPlansRoutes);
 app.use('/api/CustomerSources', customerSourcesRoutes);
