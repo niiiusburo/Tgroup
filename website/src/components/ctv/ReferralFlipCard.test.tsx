@@ -98,6 +98,30 @@ describe('ReferralFlipCard', () => {
     expect(screen.getByRole('button', { name: /Back/i })).toBeVisible();
   });
 
+  it('keeps the card flipped while commission focus is active', async () => {
+    localStorage.setItem('tg-lang', 'en');
+    const user = userEvent.setup();
+    render(
+      <ReferralFlipCard
+        referral={referral}
+        initialFlipped
+        focus={{
+          clientId: 'client-1',
+          serviceLineId: 'line-2',
+          serviceName: 'Laser da mặt',
+        }}
+      />
+    );
+
+    const flipButton = screen.getByRole('button', {
+      name: /show client tracking journey for seed client - nk3 ctv/i,
+    });
+    expect(flipButton).toHaveAttribute('aria-expanded', 'true');
+    await user.click(flipButton);
+    expect(flipButton).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('Laser da mặt')).toBeVisible();
+  });
+
   it('starts flipped and highlights the focused commission service row', () => {
     localStorage.setItem('tg-lang', 'en');
     render(

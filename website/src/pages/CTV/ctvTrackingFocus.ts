@@ -4,6 +4,7 @@
  * @crossref:uses[website/src/lib/api/ctv.ts (CtvReferral types), product-map/domains/ctv.yaml]
  */
 import type { CtvLob, CtvReferral, CtvReferralService, CtvServiceStatus } from '@/lib/api/ctv';
+import { normalizeText } from '@/lib/utils';
 
 export interface CtvTrackingFocus {
   readonly clientId: string;
@@ -40,7 +41,7 @@ function serviceLineMatches(
     if (normalizeCtvClientId(service.serviceLineId) === needle) return true;
   }
   if (serviceName && service.serviceName) {
-    return service.serviceName.trim().toLowerCase() === serviceName.trim().toLowerCase();
+    return normalizeText(service.serviceName) === normalizeText(serviceName);
   }
   return false;
 }
@@ -120,4 +121,8 @@ export function serviceMatchesFocus(
 ): boolean {
   if (!focus) return false;
   return serviceLineMatches(service, focus.serviceLineId, focus.serviceName);
+}
+
+export function ctvReferralDomId(clientId: string | null | undefined): string {
+  return `ctv-referral-${normalizeCtvClientId(clientId)}`;
 }

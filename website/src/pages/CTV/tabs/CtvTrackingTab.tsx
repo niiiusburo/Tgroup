@@ -13,6 +13,7 @@ import type { CtvReferral } from '@/lib/api';
 import { cn, normalizeText } from '@/lib/utils';
 import {
   ctvClientIdsMatch,
+  ctvReferralDomId,
   resolveReferralsForFocus,
   type CtvTrackingFocus,
 } from '@/pages/CTV/ctvTrackingFocus';
@@ -85,7 +86,7 @@ export function CtvTrackingTab({
   onFocusClear,
 }: CtvTrackingTabProps) {
   const { t } = useTranslation('ctv');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(() => focus?.clientName ?? '');
   const [filter, setFilter] = useState<FilterKey>('all');
   const resolvedReferrals = useMemo(
     () => resolveReferralsForFocus(referrals, focus),
@@ -96,18 +97,19 @@ export function CtvTrackingTab({
     if (!focus?.clientId) return;
     if (focus.clientName) setSearchTerm(focus.clientName);
     setFilter('all');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [focus?.clientId, focus?.clientName, focus?.serviceLineId, focus?.serviceName]);
 
   useEffect(() => {
     if (!focus?.clientId || isLoading) return;
     const timer = window.setTimeout(() => {
-      document.getElementById(`ctv-referral-${focus.clientId}`)?.scrollIntoView({
+      document.getElementById(ctvReferralDomId(focus.clientId))?.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
       });
-    }, 120);
+    }, 180);
     return () => window.clearTimeout(timer);
-  }, [focus?.clientId, focus?.serviceLineId, isLoading, referrals.length]);
+  }, [focus?.clientId, focus?.serviceLineId, focus?.serviceName, isLoading, referrals.length]);
 
   const filteredReferrals = useMemo(() => {
     const filtered = resolvedReferrals.filter(

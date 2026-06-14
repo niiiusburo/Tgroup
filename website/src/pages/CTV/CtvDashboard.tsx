@@ -21,7 +21,7 @@ import {
   type CtvProfile,
   type CtvReferral,
 } from '@/lib/api';
-import { cn } from '@/lib/utils';
+import { cn, normalizeText } from '@/lib/utils';
 import { CtvCommissionTab } from './tabs/CtvCommissionTab';
 import { CtvHomeTab } from './tabs/CtvHomeTab';
 import { CtvMeTab } from './tabs/CtvMeTab';
@@ -63,15 +63,24 @@ export default function CtvDashboard() {
   const [hierarchyError, setHierarchyError] = useState<string | null>(null);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [trackingFocus, setTrackingFocus] = useState<CtvTrackingFocus | null>(null);
+  const [trackingFocusKey, setTrackingFocusKey] = useState(0);
   const shouldReduceMotion = useReducedMotion();
 
   const handleCommissionNavigate = useCallback((row: CtvCommissionRow) => {
-    if (!row.client_id) {
+    let clientId = row.client_id?.trim() || '';
+    if (!clientId && row.client_name) {
+      const needle = normalizeText(row.client_name);
+      const matchedReferral = referrals.find(
+        (referral) => normalizeText(referral.name ?? '') === needle
+      );
+      clientId = matchedReferral?.id?.trim() ?? '';
+    }
+    if (!clientId) {
       setActiveTab('commission');
       return;
     }
     setTrackingFocus({
-      clientId: row.client_id,
+      clientId,
       serviceLineId: row.service_line_id ?? null,
       clientName: row.client_name,
       serviceName: row.service_name,
@@ -80,8 +89,10 @@ export default function CtvDashboard() {
       status: row.status,
       earnedAt: row.earned_at,
     });
+    setTrackingFocusKey((value) => value + 1);
     setActiveTab('tracking');
-  }, []);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [referrals]);
 
   const loadDashboard = useCallback(async () => {
     setIsLoading(true);
@@ -282,6 +293,7 @@ export default function CtvDashboard() {
           ) : null}
           {activeTab === 'tracking' ? (
             <CtvTrackingTab
+              key={trackingFocus ? `tracking-focus-${trackingFocusKey}` : 'tracking-default'}
               referrals={referrals}
               isLoading={isLoading}
               error={error}

@@ -11,7 +11,11 @@ import { formatVND } from '@/lib/formatting';
 import { useCtvLocale } from '@/lib/i18n/ctv';
 import type { CtvLob, CtvReferral, CtvReferralService } from '@/lib/api/ctv';
 import { CtvLinkBar } from '@/components/shared';
-import { serviceMatchesFocus, type CtvTrackingFocus } from '@/pages/CTV/ctvTrackingFocus';
+import {
+  ctvReferralDomId,
+  serviceMatchesFocus,
+  type CtvTrackingFocus,
+} from '@/pages/CTV/ctvTrackingFocus';
 
 interface ReferralFlipCardProps {
   readonly referral: CtvReferral;
@@ -86,12 +90,14 @@ export function ReferralFlipCard({
 }: ReferralFlipCardProps) {
   const { t } = useTranslation('ctv');
   const ctv = useCtvLocale();
-  const [isFlipped, setIsFlipped] = useState(initialFlipped);
+  const focusLocked = !!focus;
+  const [manualFlipped, setManualFlipped] = useState(initialFlipped);
   const [copied, setCopied] = useState(false);
+  const isFlipped = focusLocked ? true : manualFlipped;
 
   useEffect(() => {
-    setIsFlipped(initialFlipped);
-  }, [initialFlipped, referral.id, focus?.clientId, focus?.serviceLineId, focus?.serviceName]);
+    if (!focusLocked) setManualFlipped(initialFlipped);
+  }, [focusLocked, initialFlipped, referral.id, focus?.clientId, focus?.serviceLineId, focus?.serviceName]);
   // The referred client IS a partner row; referral.id is that customer's id, so the
   // admin customer page lives at /customers/:id. CTVs can copy/share this link; anyone
   // with customer access opens the client directly.
@@ -122,14 +128,17 @@ export function ReferralFlipCard({
 
   return (
     <article
-      id={`ctv-referral-${referral.id}`}
+      id={ctvReferralDomId(referral.id)}
       className="relative rounded-[22px] border border-gray-200 bg-white shadow-sm scroll-mt-24"
     >
       <button
         type="button"
         aria-expanded={isFlipped}
         aria-label={t(isFlipped ? 'card.showFrontFor' : 'card.showServicesFor', { name: referral.name })}
-        onClick={() => setIsFlipped((value) => !value)}
+        onClick={() => {
+          if (focusLocked) return;
+          setManualFlipped((value) => !value);
+        }}
         className="block w-full rounded-[22px] text-left outline-none transition-shadow duration-150 focus:ring-2 focus:ring-primary/30"
       >
         <div className="relative min-h-[248px] [perspective:1200px]">
@@ -294,7 +303,7 @@ export function ReferralFlipCard({
         <div className="flex justify-center pb-2">
           <button
             type="button"
-            onClick={() => setIsFlipped(false)}
+            onClick={() => setManualFlipped(false)}
             className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm ring-1 ring-gray-200 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
             <RotateCcw className="h-3.5 w-3.5" />

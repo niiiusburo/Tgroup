@@ -2,6 +2,10 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.37.12] — 2026-06-14 — CTV portal: harden recent-activity → tracking handoff
+### Fixed
+- **Recent-activity drill-down now reliably flips and highlights.** Focus handoff remounts the tracking tab per navigation, scrolls to top, locks the referral card in flipped state while focus is active, resolves missing `client_id` via accent-insensitive referral name match, and normalizes DOM scroll targets + service-name matching. — @agent — CTV portal UX
+
 ## [0.37.11] — 2026-06-14 — CTV portal: recent-activity drill-down flips tracking card
 ### Fixed
 - **Recent activity rows now open Tracking with flip + search highlight.** Tapping a home/commission row switches to the client tracking tab, pre-fills the search with the client name, highlights the search field, flips the matching `ReferralFlipCard`, and highlights the commission service row (including synthetic merge when the service line is missing from sale-order data). — @agent — CTV portal UX

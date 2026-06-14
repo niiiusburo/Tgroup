@@ -28,7 +28,7 @@ Setup data and login state:
 
 Execution checklist:
 - [x] PASS: Unit — `ctvTrackingFocus.test.ts`, `CtvTrackingTab.test.tsx`, `ReferralFlipCard.test.tsx` (10/10).
-- [ ] PENDING: Live — tap recent-activity row; confirm flip + search highlight + service highlight screenshot.
+- [ ] PENDING: Live — tap recent-activity row on v0.37.12+; confirm flip + search highlight + service highlight screenshot.
 
 ---
 # TestSprite Plan: NK3 aesthetic LOB pink accent + Aesthetic i18n 2026-06-14

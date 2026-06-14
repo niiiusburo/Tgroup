@@ -4,6 +4,7 @@ import type { CtvReferral } from '@/lib/api/ctv';
 import {
   buildSyntheticReferralFromFocus,
   ctvClientIdsMatch,
+  ctvReferralDomId,
   mergeReferralWithFocus,
   resolveReferralsForFocus,
   serviceMatchesFocus,
@@ -97,5 +98,15 @@ describe('ctvTrackingFocus', () => {
         serviceName: '1cc Filler Hàn',
       })
     ).toBe(true);
+    expect(
+      serviceMatchesFocus(service, {
+        clientId: 'client-1',
+        serviceName: '1cc filler han',
+      })
+    ).toBe(true);
+  });
+
+  it('normalizes referral dom ids for scroll targeting', () => {
+    expect(ctvReferralDomId('ABC-123')).toBe('ctv-referral-abc-123');
   });
 });

@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.37.12",
+    "date": "2026-06-14",
+    "commit": "pending",
+    "highlights": "CTV recent-activity handoff hardened: forced flip, search highlight, scroll-to-client.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Tapping recent activity now reliably opens Tracking, pre-fills/highlights search, flips the client card, and highlights the commission service row."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.37.11",
     "date": "2026-06-14",
     "commit": "pending",
