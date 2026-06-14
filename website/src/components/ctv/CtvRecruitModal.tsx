@@ -52,7 +52,7 @@ export function CtvRecruitModal({ open, onClose, onSuccess }: CtvRecruitModalPro
     if (!open) {
       formApi.reset();
     }
-  }, [open, formApi.reset]);
+  }, [open, formApi]);
 
   if (!open) return null;
 

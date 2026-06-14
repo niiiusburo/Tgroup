@@ -75,6 +75,33 @@ export default defineConfig({
       },
     },
   ],
+  // Vendor splitting so the main `index-*.js` chunk stays under the 500 KB warning
+  // limit. NK3 target is mobile clinic staff in Vietnam on slow connections, so a
+  // 577 KB main chunk was a real first-load penalty. Reference: bulletproof-react
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('framer-motion')) return 'vendor-motion';
+            if (id.includes('lucide-react')) return 'vendor-icons';
+            if (id.includes('react-i18next') || id.includes('/i18next/')) return 'vendor-i18n';
+            if (id.includes('react-router')) return 'vendor-router';
+            if (id.includes('xlsx-js-style') || id.includes('/xlsx/')) return 'vendor-xlsx';
+            if (id.includes('zod')) return 'vendor-zod';
+            // React core only (avoid catching react-i18next, react-router, react-dom/server, etc.)
+            if (id.includes('react-dom') || id.includes('/react-dom/') || id.includes('node_modules/react/')) return 'vendor-react';
+            // No catch-all `vendor` chunk — returning undefined lets Rollup pick the
+            // optimal chunk graph and avoids circular vendor <-> vendor-react deps.
+            return undefined;
+          }
+          if (id.includes('@tgroup/contracts')) return 'contracts';
+          return undefined; // let Vite handle app code
+        },
+      },
+    },
+    chunkSizeWarningLimit: 500,
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

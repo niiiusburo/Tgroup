@@ -14,13 +14,19 @@ afterEach(() => {
 
 describe('getEmbedding', () => {
   let fetchSpy;
+  let originalFetch;
 
   beforeEach(() => {
-    fetchSpy = jest.spyOn(global, 'fetch').mockImplementation(() => Promise.resolve({ ok: true }));
+    // Node 18+ ships `fetch` as a non-configurable global; `jest.spyOn(global, 'fetch')`
+    // silently fails there. Assign a jest.fn() onto globalThis instead so the source's
+    // bare `fetch(...)` call resolves to our mock for the duration of the test.
+    originalFetch = globalThis.fetch;
+    globalThis.fetch = jest.fn().mockImplementation(() => Promise.resolve({ ok: true }));
+    fetchSpy = globalThis.fetch;
   });
 
   afterEach(() => {
-    fetchSpy.mockRestore();
+    globalThis.fetch = originalFetch;
   });
 
   it('returns embedding, model, and quality on success', async () => {
@@ -196,13 +202,18 @@ describe('getEmbedding', () => {
 
 describe('healthCheck', () => {
   let fetchSpy;
+  let originalFetch;
 
   beforeEach(() => {
-    fetchSpy = jest.spyOn(global, 'fetch').mockImplementation(() => Promise.resolve({ ok: true }));
+    // Node 18+ ships `fetch` as a non-configurable global; `jest.spyOn(global, 'fetch')`
+    // silently fails there. Assign a jest.fn() onto globalThis instead.
+    originalFetch = globalThis.fetch;
+    globalThis.fetch = jest.fn().mockImplementation(() => Promise.resolve({ ok: true }));
+    fetchSpy = globalThis.fetch;
   });
 
   afterEach(() => {
-    fetchSpy.mockRestore();
+    globalThis.fetch = originalFetch;
   });
 
   it('returns ok=true with data on healthy service', async () => {
@@ -296,13 +307,18 @@ describe('FaceEngineError', () => {
 
 describe('getEmbedding', () => {
   let localFetchSpy;
+  let originalFetch;
 
   beforeEach(() => {
-    localFetchSpy = jest.spyOn(global, 'fetch').mockImplementation(() => Promise.resolve({ ok: true }));
+    // Node 18+ ships `fetch` as a non-configurable global; `jest.spyOn(global, 'fetch')`
+    // silently fails there. Assign a jest.fn() onto globalThis instead.
+    originalFetch = globalThis.fetch;
+    globalThis.fetch = jest.fn().mockImplementation(() => Promise.resolve({ ok: true }));
+    localFetchSpy = globalThis.fetch;
   });
 
   afterEach(() => {
-    localFetchSpy.mockRestore();
+    globalThis.fetch = originalFetch;
   });
 
   it('posts image to face-service embed endpoint', async () => {

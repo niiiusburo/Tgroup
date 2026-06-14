@@ -49,7 +49,7 @@ export function DiscountCodesAdminTab() {
   useEffect(() => {
     setPage(1);
     void load({ nextPage: 1 });
-  }, [status, search]);
+  }, [status, search, load]);
 
   useEffect(() => {
     void load();

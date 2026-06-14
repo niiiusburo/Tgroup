@@ -15,13 +15,19 @@ afterEach(() => {
 
 describe('comprefaceClient', () => {
   let fetchSpy;
+  let originalFetch;
 
   beforeEach(() => {
-    fetchSpy = jest.spyOn(global, 'fetch').mockImplementation(() => Promise.resolve({ ok: true }));
+    // Node 18+ ships `fetch` as a non-configurable global; `jest.spyOn(global, 'fetch')`
+    // silently fails there. Assign a jest.fn() onto globalThis instead so the source's
+    // bare `fetch(...)` call resolves to our mock for the duration of the test.
+    originalFetch = globalThis.fetch;
+    globalThis.fetch = jest.fn().mockImplementation(() => Promise.resolve({ ok: true }));
+    fetchSpy = globalThis.fetch;
   });
 
   afterEach(() => {
-    fetchSpy.mockRestore();
+    globalThis.fetch = originalFetch;
   });
 
   describe('recognize', () => {

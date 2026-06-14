@@ -129,8 +129,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       setSourceId(initialData.sourceId ?? null);
       setCtvId(initialData.ctvId ?? null);
     }
-  }, [initialData?.id, readonlyCustomerId]);
-
+  }, [initialData?.id, readonlyCustomerId, initialData, getToday]);
   useEffect(() => {
     if (isProfileContext && readonlyCustomerId && apiCustomers.length > 0) {
       const customer = apiCustomers.find((c) => c.id === readonlyCustomerId);
@@ -141,7 +140,6 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       }
     }
   }, [readonlyCustomerId, apiCustomers, isProfileContext]);
-
   const { customers, searching: customersSearching } = useCustomerSelectorOptions(
     apiCustomers,
     customerId,

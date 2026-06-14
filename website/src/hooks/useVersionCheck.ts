@@ -109,10 +109,9 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
         if (msg.type === 'updateAvailable' && msg.version) {
           setLatestVersion(msg.version);
           setUpdateSeverity(getUpdateSeverity(msg.version));
-          setIsUpdateAvailable(true);
         } else if (msg.type === 'applyUpdate') {
           // Another tab triggered update - follow along
-          void applyUpdate();
+          void applyUpdateRef.current();
         } else if (msg.type === 'snoozed') {
           setIsSnoozed(msg.until > Date.now());
         }
@@ -204,13 +203,12 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
 
       countdownIntervalRef.current = setInterval(() => {
         remaining -= 1;
-        setCountdownRemaining(remaining);
         if (remaining <= 0) {
           if (countdownIntervalRef.current) {
             clearInterval(countdownIntervalRef.current);
             countdownIntervalRef.current = null;
           }
-          void applyUpdate();
+          void applyUpdateRef.current();
         }
       }, 1000);
     } else {
@@ -300,11 +298,10 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
     } finally {
       setIsChecking(false);
     }
-  }, [enabled, currentVersion, onUpdateAvailable, clearUpdateState, postBroadcast]);
+  }, [currentVersion, onUpdateAvailable, clearUpdateState, postBroadcast]);
 
   const checkRef = useRef(checkForUpdates);
   useEffect(() => { checkRef.current = checkForUpdates; }, [checkForUpdates]);
-
   const applyUpdate = useCallback(async () => {
     const currentPath = window.location.pathname + window.location.search;
     try {
@@ -359,7 +356,8 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
 
     window.location.replace(url.toString());
   }, [currentVersion, latestVersion, updateSeverity, postBroadcast]);
-  // expose stable applyUpdate ref for bc callback
+  // Stable ref to applyUpdate for BroadcastChannel and countdown effects
+  // (they intentionally don't re-subscribe when applyUpdate identity changes).
   const applyUpdateRef = useRef(applyUpdate);
   useEffect(() => { applyUpdateRef.current = applyUpdate; }, [applyUpdate]);
 

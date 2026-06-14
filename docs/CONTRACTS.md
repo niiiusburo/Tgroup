@@ -47,6 +47,7 @@
 | v1.0.32 | 2026-06-10 | CTV discount QR fixes (NK3, FM-20260610-01): all `/api/discount-codes/*` POST bodies are single-encoded JSON objects (clients must NOT pre-`JSON.stringify` into `apiFetch`); `POST /verify` with `markAsUsed: true` on a `checked_in` code now falls back to the `customer_partner_id`/`customer_lob` bound at check-in when `customerPartnerId` is omitted. No field shapes changed. |
 | v1.0.34 | 2026-06-10 | Strict CTV commission attribution (DEC-20260610-01): `POST /api/SaleOrders` (+ `/api/cosmetic/SaleOrders`) no longer inherits the customer's `referred_by_ctv_id` when the payload omits `ctv_id` — the card stays CTV-less and creates zero earnings. Commission requires an explicit `ctv_id` in the payload. Field shapes unchanged. |
 | v1.0.33 | 2026-06-10 | CTV discount QR completion hardened (FM-20260610-02): on a `checked_in` code, the bound customer takes precedence over `createIfMissing`/submitted `customerLob` — completion never creates or rebinds a different client. Explicit `customerPartnerId` still honored. No field shapes changed. |
+| v1.0.35 | 2026-06-14 | Service-line reversal extended to service-card CTV earnings: `DELETE /api/SaleOrderLines/:id` (and the service-card delete path) now calls `reverseServiceCardEarnings` to clear pending service-card earnings (`payment_id IS NULL`) before soft-delete, and blocks the reversal with `B_COMMISSION_PAID_OUT` (HTTP 409) when paid-out service-card earnings exist. Response shape adds `reversedServiceCardEarningsCount: number`. Service-line delete no longer leaves orphan pending service-card earnings behind. NK3-only flag: `CTV_SERVICE_CARD_COMMISSION=true`. |
 
 ---
 
@@ -593,8 +594,8 @@ Cosmetic mirror: `GET/POST/PATCH/DELETE /api/cosmetic/Payments...`, `/api/cosmet
 
 #### DELETE /api/SaleOrderLines/:id
 **Auth:** Requires `customers.edit` and `payment.void`.
-**Effect:** Soft-deletes the active service line. If it is the last active line, soft-deletes the parent saleorder. If linked payment allocations exist, the route first enforces the CTV paid-out guard, then only auto-voids linked payments when the deleted line is the last active line on the order and every affected payment is allocated solely to that saleorder.
-**Response 200:** `{ success: true, id: string, orderId: string | null, deletedOrder: boolean, voidedPayments: string[], reversedAllocationTotal: number, reversedEarningsCount: number }`
+**Effect:** Soft-deletes the active service line. If it is the last active line, soft-deletes the parent saleorder. If linked payment allocations exist, the route first enforces the CTV paid-out guard, then only auto-voids linked payments when the deleted line is the last active line on the order and every affected payment is allocated solely to that saleorder. When the NK3 service-card commission flag is on (`CTV_SERVICE_CARD_COMMISSION=true`), the route also calls `reverseServiceCardEarnings` to clear any pending service-card earnings (`earnings.payment_id IS NULL`) for this line, and blocks the reversal with `B_COMMISSION_PAID_OUT` (HTTP 409) when any service-card earnings for this line are already paid out.
+**Response 200:** `{ success: true, id: string, orderId: string | null, deletedOrder: boolean, voidedPayments: string[], reversedAllocationTotal: number, reversedEarningsCount: number, reversedServiceCardEarningsCount: number }`
 **Error 409:** `B_COMMISSION_PAID_OUT`, `B_PAYMENT_MIXED_ALLOCATIONS`, or `B_SERVICE_PAYMENT_REQUIRES_ORDER_VOID`.
 Cosmetic mirror: `DELETE /api/cosmetic/SaleOrderLines/:id` uses the same contract against the cosmetic DB.
 

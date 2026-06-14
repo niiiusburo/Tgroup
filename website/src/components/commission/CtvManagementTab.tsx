@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertCircle, Check, ChevronDown, ChevronRight, KeyRound, Loader, Pencil, Plus, Search, Users, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
@@ -273,8 +273,8 @@ function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
       }, 800);
       return () => clearTimeout(id);
     }
-  }, [formApi.success, createdCtv, formApi.clearSuccess, onSuccess]);
-  const handleCopyAll = async () => {
+  }, [formApi, formApi.success, createdCtv, onSuccess]);
+   const handleCopyAll = async () => {
     if (!createdCtv) return;
     const text = [
       `${tc('ctv.loginUrl')}: https://tmv.2checkin.com/login`,
@@ -675,7 +675,7 @@ export function CtvManagementTab() {
     });
   }, [ctvs, search]);
 
-  const handleLoad = async () => {
+  const handleLoad = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -687,7 +687,7 @@ export function CtvManagementTab() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentLOB]);
 
   const handleMoveCtv = async (draggedId: string, targetId: string) => {
     setMoveError(null);
@@ -705,7 +705,7 @@ export function CtvManagementTab() {
 
   useEffect(() => {
     handleLoad();
-  }, [currentLOB]);
+  }, [currentLOB, handleLoad]);
 
   if (loading) {
     return (

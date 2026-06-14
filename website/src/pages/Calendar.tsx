@@ -78,7 +78,7 @@ export function Calendar() {
     statusesFilter.setSelected(selectedStatuses);
     colorsFilter.setSelected(selectedColors);
     setIsFilterOpen(true);
-  }, [selectedDoctors, selectedStatuses, selectedColors]);
+  }, [selectedDoctors, selectedStatuses, selectedColors, doctorsFilter, statusesFilter, colorsFilter]);
 
   const closeFilter = useCallback(() => {
     setIsFilterOpen(false);
@@ -89,14 +89,13 @@ export function Calendar() {
     setSelectedStatuses(statusesFilter.selected);
     setSelectedColors(colorsFilter.selected);
     setIsFilterOpen(false);
-  }, [doctorsFilter.selected, statusesFilter.selected, colorsFilter.selected]);
-
+  }, [doctorsFilter, statusesFilter, colorsFilter, setSelectedDoctors, setSelectedStatuses, setSelectedColors]);
   const clearFilter = useCallback(() => {
     doctorsFilter.clear();
     statusesFilter.clear();
     colorsFilter.clear();
     clearFilters();
-  }, [clearFilters]);
+  }, [doctorsFilter, statusesFilter, colorsFilter, clearFilters]);
 
   const { hasPermission } = useAuth();
   const canCreateAppointments = hasPermission('appointments.add');

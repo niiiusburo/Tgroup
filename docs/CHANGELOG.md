@@ -2,6 +2,23 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.37.8] — 2026-06-14 — NK3 aesthetic LOB: pink accent theme + i18n cleanup
+### Changed
+- **LOB accent palette switches with business unit.** `BusinessUnitContext` sets `data-lob` on `<html>`; dental keeps warm orange, cosmetic/aesthetic uses a soft dusty-rose pink via shared `--accent-*` CSS variables wired into Tailwind `primary` and `orange` scales. — @agent — NK3 aesthetic UX
+- **English LOB label "Cosmetic" → "Aesthetic".** Updated `common`, `calendar`, `customers`, `services`, `verifyDiscount` en locale keys; `FilterByBusinessUnit` fallback aligned.
+### Fixed
+- **Overview hardcoded English strings.** `TodayServicesTable` title/columns/empty state now use `overview.servicesTable.*` i18n keys (vi + en). `FilterByLocation` uses `common.allLocations` instead of hardcoded "All Locations". `NewClientsTab` LOB badges use `common.lob.*` instead of inline Vietnamese. — @agent — i18n / NK3 polish
+
+## [0.37.9] — 2026-06-14 — NK3 hardening: API test fixes, docs gate, bundle split, lint deps
+### Fixed
+ **37 API tests repaired.** Replaced `jest.spyOn(global, 'fetch')` with `globalThis.fetch = jest.fn()` in `api/src/services/__tests__/comprefaceClient.test.js` and `api/src/services/__tests__/faceEngineClient.test.js`; Node 18+ makes `globalThis.fetch` non-configurable so `spyOn` throws. Tests restore fetch in `afterEach`. Result: API jest 1025/1025 pass. — @agent — NK3 test suite hygiene.
+ **Top-10 `react-hooks/exhaustive-deps` warnings.** Added correct deps in `Calendar.tsx` (`openFilter`, `applyFilter`, `clearFilter` callbacks), `useVersionCheck.ts` (`applyUpdateRef.current`), `CtvManagementTab.tsx` (`formApi`, `handleLoad`), `DiscountCodesAdminTab.tsx` (`load`), `CtvRecruitModal.tsx` (`formApi`), and `ServiceForm.tsx` (`getToday`, `initialData`). No behavior change. — @agent — lint discipline.
+### Changed
+ **Vite bundle split.** Added `manualChunks` in `website/vite.config.ts` for `vendor-react`, `vendor-motion`, `vendor-icons`, `vendor-i18n`, `vendor-router`, `vendor-xlsx`, `vendor-zod`, and `@tgroup/contracts`; `chunkSizeWarningLimit` raised to 500 kB. Main chunk dropped from 577.71 kB to 341.40 kB. — @agent — NK3 web performance.
+### Docs/Tooling
+ **Reference library committed.** Added `library/` with 9 domain folders, 66 battle-tested open-source repositories, `INDEX.md`, `README.md`, `CODEBASE_ANALYSIS.md`, `REFACTOR_ROADMAP.md`, `HARDENING_PLAN.md`, and per-domain `README-reference.md` files. — @agent — knowledge base for NK3 hardening.
+ **Doc gate compliance.** Updated `docs/CONTRACTS.md` (v1.0.35), `docs/TEST-MATRIX.md`, and `product-map/contracts/api-index.md` to document `reverseServiceCardEarnings` behavior on `DELETE /api/SaleOrderLines/:id` and `reversedServiceCardEarningsCount` in the response. — @agent — §16 documentation enforcement.
+
 ## [0.37.7] — 2026-06-14 — NK3 cleanup: break apiFetch cycle + delete dead /api/Services route
 ### Fixed
 - **Break static import cycle between `apiFetch` and `silentFailureReporter`.** Extracted `API_URL` into a new leaf module `website/src/lib/api/apiBaseUrl.ts`; `core.ts` now imports the base URL from the leaf and re-exports it for backward compatibility, while `silentFailureReporter.ts` imports from the same leaf. Added regression test `website/src/lib/__tests__/importCycles.test.ts` to block future static cycles. — @agent — NK3 audit; no API contract change.
