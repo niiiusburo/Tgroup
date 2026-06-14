@@ -1,0 +1,63 @@
+{
+  "name": "@casl/react",
+  "version": "7.0.0",
+  "description": "React component for CASL which makes it easy to add permissions in any React application",
+  "main": "./dist/esm/index.mjs",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "require": "./dist/cjs/index.cjs",
+      "import": "./dist/esm/index.mjs"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stalniy/casl.git",
+    "directory": "packages/casl-react"
+  },
+  "bugs": {
+    "url": "https://github.com/stalniy/casl/issues"
+  },
+  "homepage": "https://casl.js.org",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build.prepare": "rm -rf dist/* && dx tsc",
+    "build": "npm run build.prepare && dx tsdown",
+    "lint": "dx eslint src/ spec/",
+    "test": "dx jest --env jsdom",
+    "release.prepare": "npm run lint && npm test && NODE_ENV=production npm run build",
+    "release": "npm run release.prepare && pnpm publish --tag \"$RELEASE_DIST_TAG\" --publish-branch \"$RELEASE_PUBLISH_BRANCH\""
+  },
+  "keywords": [
+    "casl",
+    "react",
+    "authorization",
+    "acl",
+    "permissions"
+  ],
+  "author": "Sergii Stotskyi <sergiy.stotskiy@gmail.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "@casl/ability": "^4.0.0 || ^5.1.0 || ^6.0.0 || ^7.0.0",
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@casl/ability": "workspace:*",
+    "@casl/dx": "workspace:^",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.12.2",
+    "@types/react": "^19.2.14",
+    "chai": "^4.5.0",
+    "chai-spies": "^1.1.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  },
+  "files": [
+    "dist"
+  ]
+}

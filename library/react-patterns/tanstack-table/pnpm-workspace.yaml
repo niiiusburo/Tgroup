@@ -1,0 +1,44 @@
+packages:
+  - examples/**/*
+  - packages/*
+
+overrides:
+  '@tanstack/angular-table-devtools': 'workspace:*'
+  '@tanstack/angular-table': 'workspace:*'
+  '@tanstack/lit-table': 'workspace:*'
+  '@tanstack/match-sorter-utils': 'workspace:*'
+  '@tanstack/preact-table-devtools': 'workspace:*'
+  '@tanstack/preact-table': 'workspace:*'
+  '@tanstack/react-table-devtools': 'workspace:*'
+  '@tanstack/react-table': 'workspace:*'
+  '@tanstack/solid-table-devtools': 'workspace:*'
+  '@tanstack/solid-table': 'workspace:*'
+  '@tanstack/svelte-table': 'workspace:*'
+  '@tanstack/table-core': 'workspace:*'
+  '@tanstack/table-devtools': 'workspace:*'
+  '@tanstack/vue-table-devtools': 'workspace:*'
+  '@tanstack/vue-table': 'workspace:*'
+
+allowBuilds:
+  # root dependency
+  nx: true
+  unrs-resolver: false # not directly required for build
+  esbuild: true
+
+  # @angular/build
+  '@parcel/watcher': false # optional dep of @angular/build
+  lmdb: false # optional dep of @angular/build
+  msgpackr-extract: false # optional dep of @angular/build
+
+  # @tanstack/vue-store
+  vue-demi: false # only required for vue 2 support
+
+cleanupUnusedCatalogs: true
+
+linkWorkspacePackages: true
+preferWorkspacePackages: true
+blockExoticSubdeps: true
+trustPolicy: 'no-downgrade'
+trustPolicyExclude:
+  - chokidar@4.0.3
+  - semver@5.7.2 || 6.3.1

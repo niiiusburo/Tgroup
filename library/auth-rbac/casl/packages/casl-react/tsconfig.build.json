@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig",
+  "exclude": [
+    "spec/**/*"
+  ],
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true
+  }
+}

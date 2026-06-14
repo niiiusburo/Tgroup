@@ -1,0 +1,216 @@
+{% extends "__base" %}
+
+{% import "_dashboard_toast" as dashboard_toast %}
+{% import "_dashboard_header" as dashboard_header %}
+{% import "_dashboard_menu" as dashboard_menu %}
+
+{% block title %}Trackers | Dashboard{% endblock title %}
+
+{% block stylesheets %}
+  {{ super() }}
+
+  <link rel="stylesheet" href="/assets/stylesheets/dashboard.css?v={{ config.runtime_version | escape }}" type="text/css" />
+{% endblock stylesheets %}
+
+{% block javascripts %}
+  {{ super() }}
+
+  <script src="/assets/javascripts/dashboard.js?v={{ config.runtime_version | escape }}" type="text/javascript"></script>
+  <script src="/assets/javascripts/dashboard_trackers.js?v={{ config.runtime_version | escape }}" type="text/javascript"></script>
+
+  <script type="text/javascript">
+    window.onload = function() {
+      {% if create_failure %}
+        ToastManager.error("Tracker not created.", "The tracker could not be created. Try again.");
+      {% elif create_success %}
+        ToastManager.success("Tracker created.", "The tracker has been created and is now available for use.");
+      {% elif remove_failure %}
+        ToastManager.error("Trackers not removed.", "The selected trackers could not be removed.");
+      {% elif remove_neutral %}
+        ToastManager.warning("No tracker was removed.", "No tracker was removed from selected trackers.");
+      {% elif remove_success %}
+        ToastManager.success("Trackers removed.", "The selected trackers have been removed.");
+      {% endif %}
+    };
+  </script>
+{% endblock javascripts %}
+
+{% block body %}
+  {{ dashboard_header::header(config=config) }}
+
+  <main data-pending="false">
+    <div class="main-inner">
+      {{ dashboard_menu::menu(config=config, common=common, sidebar="", selected="trackers", infobox_title="Manage your trackers.", infobox_label="Send those tracker links to people and start earning money.") }}
+
+      <section>
+        <div class="section-inner">
+          <div class="section-wrap">
+            <form action="/dashboard/trackers/form/remove/" method="post" id="trackers-remove-form">
+              <div class="section-title">
+                <div class="section-title-main">
+                  <h2 class="font-sans-bold">Trackers</h2>
+
+                  {% if trackers | length > 0 %}
+                    <div class="section-title-status font-sans-semibold">({{ trackers | length }} tracker{{ trackers | length | pluralize }})</div>
+                  {% endif %}
+                </div>
+
+                <ul>
+                  <li class="icon remove">
+                    <a href="#" onclick="FormTrackersManager.remove_trackers_confirm(); return false;" data-locked="true" id="trackers-remove-button" class="button button-small button-action font-sans-semibold">Remove selection</a>
+                  </li>
+
+                  <li>
+                    <a href="#" onclick="FormTrackersManager.create_tracker(); return false;" class="button button-small font-sans-semibold">Add a new tracker</a>
+                  </li>
+                </ul>
+
+                <div class="clear"></div>
+              </div>
+
+              <div class="section-box">
+                <div class="section-box-inner">
+                  <ul class="section-list">
+                    {% if trackers | length > 0 %}
+                      {% for tracker in trackers %}
+                        <li data-selected="false">
+                          <div class="section-list-selection">
+                            <input id="select_{{ tracker.tracking_id | escape }}" class="checkbox" type="checkbox" name="tracker" value="{{ tracker.tracking_id | escape }}" onchange="FormTrackersManager.checkbox_change(this)">
+
+                            <label class="checkbox-label" for="select_{{ tracker.tracking_id | escape }}">
+                              <span class="checkbox-image"></span>
+                            </label>
+                          </div>
+
+                          <div class="section-list-content section-list-content-trackers">
+                            <div class="item-identity">
+                              <h6 class="text-overflow-ellipsis font-sans-bold">{{ tracker.label | escape }}</h6>
+                              <input class="item-identity-sub underlined text-overflow-ellipsis font-sans-regular" type="text" value="{{ config.track_url | escape }}?{{ config.track_parameter | escape }}={{ tracker.tracking_id | escape }}" readonly>
+                            </div>
+
+                            <div class="item-metrics">
+                              <div class="item-metrics-one">
+                                <p class="font-sans-regular">Signups</p>
+                                <h5 class="font-sans-semibold">{{ tracker.statistics_signups | escape }}</h5>
+                              </div>
+
+                              <div class="item-metrics-one">
+                                <p class="font-sans-regular">Earned so far</p>
+                                <h5 class="font-sans-semibold">{{ config.payout_currency | escape }} {{ tracker.total_earned | escape }}</h5>
+                              </div>
+
+                              <div class="clear"></div>
+                            </div>
+
+                            <div class="clear"></div>
+                          </div>
+
+                          <div class="section-list-actions">
+                            <a href="#" class="button button-tiny font-sans-semibold" onclick="FormTrackersManager.copy_tracker_link(this); return false;">Copy tracker link</a>
+
+                            {% if config.banners | length > 0 %}
+                              <a href="#" onclick="FormBannersManager.open(this); return false;" class="button button-tiny button-dark font-sans-semibold">View banners</a>
+                            {% endif %}
+
+                            <div class="clear"></div>
+                          </div>
+
+                          <div class="clear"></div>
+                        </li>
+                      {% endfor %}
+                    {% else %}
+                      <h4 class="section-list-empty font-sans-semibold">No tracker was found. Add your first tracker now!</h4>
+                    {% endif %}
+                  </ul>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="lock modal-lock" data-name="create" data-visible="false">
+    <div class="modal">
+      <div class="modal-inner">
+        <div class="modal-title">
+          <h1 class="font-sans-bold">Create a new tracker…</h1>
+          <a href="#" onclick="IntentManager.hide('modal', 'create'); return false;" class="close"></a>
+
+          <div class="clear"></div>
+        </div>
+
+        <p class="modal-main font-sans-semibold">Name your tracker and start making money.</p>
+        <p class="font-sans-regular">Please enter a name for your tracker. This lets you recognize trackers if you use multiple ones at once, eg. if you run multiple campaigns.</p>
+
+        <form method="post" action="/dashboard/trackers/form/create/" onsubmit="FormManager.submit(); IntentManager.hide('modal', 'create');">
+          <input class="modal-field" type="text" name="name" placeholder="Enter tracker name (eg. Website Footer)..." required>
+
+          <div class="modal-actions">
+            <button type="submit" class="button button-medium button-next font-sans-semibold">Create tracker</button>
+
+            <div class="clear"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="lock modal-lock" data-name="remove" data-visible="false">
+    <div class="modal">
+      <div class="modal-inner">
+        <div class="modal-title">
+          <h1 class="font-sans-bold">Remove selected trackers…</h1>
+          <a href="#" onclick="IntentManager.hide('modal', 'remove'); return false;" class="close"></a>
+
+          <div class="clear"></div>
+        </div>
+
+        <p class="modal-main font-sans-semibold">Remove all the selected trackers?</p>
+        <p class="font-sans-regular">Please confirm you want to remove those trackers. If this code is used for payment reports in the future, you may lose money. Beware!</p>
+
+        <div class="modal-actions">
+          <a href="#" onclick="FormTrackersManager.remove_trackers_submit(); return false;" class="button button-medium button-next button-danger font-sans-semibold">Remove selected trackers</a>
+
+          <div class="clear"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lock popup-lock" data-name="banner" data-visible="false">
+    <div class="popup">
+      <div class="popup-inner">
+        <div class="popup-scroll">
+          <div class="popup-title">
+            <h1 class="font-sans-bold">Pick a tracker banner…</h1>
+            <a href="#" onclick="IntentManager.hide('popup', 'banner'); return false;" class="close"></a>
+
+            <div class="clear"></div>
+          </div>
+
+          <ul class="popup-banner-picker">
+            {% for banner in config.banners %}
+              <li data-selected="false">
+                <a href="#" onclick="FormBannersManager.pick_banner(this); return false;">
+                  <img src="{{ banner.0 | escape }}" alt="" data-width="{{ banner.1 }}" data-height="{{ banner.2 }}">
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="popup-actions popup-banner-actions">
+          <input id="trackers-banner-code" value="" readonly>
+
+          <a href="#" onclick="FormBannersManager.copy_selected_banner(); return false;" class="button button-medium button-next font-sans-semibold" data-locked="true">Copy this banner HTML</a>
+
+          <div class="clear"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{ dashboard_toast::toast() }}
+{% endblock body %}

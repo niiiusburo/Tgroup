@@ -1,0 +1,129 @@
+{% extends "__base" %}
+
+{% import "_dashboard_toast" as dashboard_toast %}
+{% import "_dashboard_header" as dashboard_header %}
+{% import "_dashboard_menu" as dashboard_menu %}
+{% import "_dashboard_payouts" as dashboard_payouts %}
+
+{% block title %}Trackers | Dashboard{% endblock title %}
+
+{% block stylesheets %}
+  {{ super() }}
+
+  <link rel="stylesheet" href="/assets/stylesheets/dashboard.css?v={{ config.runtime_version | escape }}" type="text/css" />
+{% endblock stylesheets %}
+
+{% block javascripts %}
+  {{ super() }}
+
+  <script src="/assets/javascripts/dashboard.js?v={{ config.runtime_version | escape }}" type="text/javascript"></script>
+  <script src="/assets/javascripts/dashboard_payouts.js?v={{ config.runtime_version | escape }}" type="text/javascript"></script>
+
+  <script type="text/javascript">
+    window.onload = function() {
+      {% if request_failure %}
+        ToastManager.error("Payout not requested.", "The payout could not be requested. Please try again later.");
+      {% elif amount_failure %}
+        ToastManager.error("Payout not requested.", "A payout can only be requested when your balance is above {{ config.payout_currency | escape }} {{ config.payout_amount_minimum | escape }}. Earn more and try again later.");
+      {% elif config_failure %}
+        ToastManager.error("Payout not requested.", "You need to fill your payout recipient settings first (go to the account page).");
+      {% elif amount_neutral %}
+        ToastManager.warning("No money available.", "You have no money available on your account. The payout could not be requested.");
+      {% elif request_success %}
+        ToastManager.success("Payout requested.", "The payout has been requested. We will process it shortly and email you about it.");
+      {% endif %}
+    };
+  </script>
+{% endblock javascripts %}
+
+{% block body %}
+  {{ dashboard_header::header(config=config) }}
+
+  <main data-pending="false">
+    <div class="main-inner">
+      {{ dashboard_menu::menu(config=config, common=common, sidebar="", selected="payouts", infobox_title="Manage your payouts.", infobox_label="Get the money you earned wired to your bank and retrieve invoices.") }}
+
+      <section>
+        <div class="section-inner">
+          <div class="section-wrap">
+            <div class="section-title">
+              <div class="section-title-main">
+                <h2 class="font-sans-bold">Payouts</h2>
+              </div>
+
+              <div class="clear"></div>
+            </div>
+
+            <div class="section-box">
+              <div class="section-box-inner">
+                <div class="payout-balances">
+                  <div class="payout-balance payout-balance-unpaid">
+                    <div class="payout-balance-inner">
+                      <h6 class="font-sans-regular">Your unpaid balance:</h6>
+                      <p class="payout-balance-amount color-{% if common.balance_pending != "0.00" %}blue{% else %}grey{% endif %} font-sans-semibold">{{ config.payout_currency | escape }} {{ common.balance_pending | escape }}</p>
+                    </div>
+
+                    <a href="#" onclick="IntentManager.show('modal', 'request'); return false;" class="button button-medium font-sans-semibold {% if common.balance_pending == "0.00" %}disabled{% endif %}">Request payout of {{ config.payout_currency | escape }} {{ common.balance_pending | escape }}</a>
+                  </div>
+
+                  <div class="payout-balance payout-balance-all">
+                    <div class="payout-balance-inner">
+                      <h6 class="font-sans-regular">You earned in total:</h6>
+                      <p class="payout-balance-amount color-grey font-sans-semibold">{{ config.payout_currency | escape }} {{ balance_total | escape }}</p>
+
+                      <p class="payout-balance-notice font-sans-regular">This includes your paid and unpaid balance.</p>
+                    </div>
+                  </div>
+
+                  <div class="clear"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <div class="section-wrap">
+            <div class="section-title">
+              <div class="section-title-main">
+                <h3 class="font-sans-semibold">Payout history</h3>
+
+                <div class="section-title-status font-sans-semibold">({{ payouts_total }} payout{{ payouts_total | pluralize }})</div>
+              </div>
+
+              <div class="clear"></div>
+            </div>
+
+            {{ dashboard_payouts::payouts(payouts=payouts, has_more=has_more) }}
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="lock modal-lock" data-name="request" data-visible="false">
+    <div class="modal">
+      <div class="modal-inner">
+        <div class="modal-title">
+          <h1 class="font-sans-bold">Request a payout…</h1>
+          <a href="#" onclick="IntentManager.hide('modal', 'request'); return false;" class="close"></a>
+
+          <div class="clear"></div>
+        </div>
+
+        <p class="modal-main font-sans-semibold"><mark class="font-sans-bold">{{ config.payout_currency | escape }} {{ common.balance_pending | escape }}</mark> from your balance will be wired to your bank.</p>
+        <p class="font-sans-regular">Payouts are manually processed by our team. The wire will take a few days to be accepted, and then a few days to be received at your bank.</p>
+
+        <form method="post" action="/dashboard/payouts/form/request/" onsubmit="FormManager.submit(); IntentManager.hide('modal', 'request');">
+          <div class="modal-actions">
+            <button type="submit" class="button button-medium button-next font-sans-semibold">Request payout now</button>
+
+            <div class="clear"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {{ dashboard_toast::toast() }}
+{% endblock body %}

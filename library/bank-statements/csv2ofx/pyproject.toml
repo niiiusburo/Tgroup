@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=61.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "csv2ofx"
+version = "0.34.2"
+description = "converts a csv file of transactions to an ofx or qif file"
+readme = "README.md"
+authors = [
+	{ name = "Reuben Cummings", email = "reubano@gmail.com" }
+]
+maintainers = [
+	{ name = "Jason R. Coombs", email = "jaraco@jaraco.com" }
+]
+classifiers = [
+	"Development Status :: 5 - Production/Stable",
+	"Natural Language :: English",
+	"Programming Language :: Python :: 3",
+	"Programming Language :: Python :: 3 :: Only",
+	"Programming Language :: Python :: Implementation :: CPython",
+	"Programming Language :: Python :: Implementation :: PyPy",
+	"Environment :: Console",
+	"Topic :: Software Development :: Libraries :: Python Modules",
+	"Intended Audience :: Developers",
+]
+dependencies = [
+	"python-dateutil>=2.7.2,<3.0.0",
+	"requests>=2.18.4,<3.0.0",
+	"meza>=0.47.0,<0.48.0",
+]
+requires-python = ">=3.9"
+
+[project.urls]
+Source = "https://github.com/reubano/csv2ofx"
+
+[project.scripts]
+csv2ofx = "csv2ofx.main:run"
+
+[project.optional-dependencies]
+test = [
+	"pytest",
+	"pytest-enabler",
+	"pytest-ruff",
+	"freezegun",
+]
+
+[tool.setuptools]
+packages = ["csv2ofx", "csv2ofx.mappings"]

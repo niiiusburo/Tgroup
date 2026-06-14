@@ -1,0 +1,12 @@
+# Minimum Python version
+# Requires Python >= 3.14
+# pip will automatically use the right Python version
+
+asyncpg>=0.31.0
+bcrypt>=5.0.0
+fastapi>=0.127.0
+httpx>=0.28.1
+pydantic[email]>=2.12.5
+PyJWT>=2.10.1
+python-dotenv>=1.2.1
+uvicorn>=0.40.0

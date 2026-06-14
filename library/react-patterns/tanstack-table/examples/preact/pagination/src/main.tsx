@@ -1,0 +1,207 @@
+import { render } from 'preact'
+import { useMemo, useReducer, useState } from 'preact/hooks'
+import './index.css'
+import {
+  createColumnHelper,
+  createPaginatedRowModel,
+  rowPaginationFeature,
+  tableFeatures,
+  useTable,
+} from '@tanstack/preact-table'
+import { makeData } from './makeData'
+import type { Person } from './makeData'
+
+const features = tableFeatures({
+  rowPaginationFeature,
+  paginatedRowModel: createPaginatedRowModel(),
+})
+
+const columnHelper = createColumnHelper<typeof features, Person>()
+
+function App() {
+  const rerender = useReducer(() => ({}), {})[1]
+
+  const columns = useMemo(
+    () =>
+      columnHelper.columns([
+        columnHelper.accessor('firstName', {
+          cell: (info) => info.getValue(),
+          footer: (props) => props.column.id,
+        }),
+        columnHelper.accessor((row) => row.lastName, {
+          id: 'lastName',
+          cell: (info) => info.getValue(),
+          header: () => <span>Last Name</span>,
+          footer: (props) => props.column.id,
+        }),
+        columnHelper.accessor('age', {
+          header: () => 'Age',
+          footer: (props) => props.column.id,
+        }),
+        columnHelper.accessor('visits', {
+          header: () => <span>Visits</span>,
+          footer: (props) => props.column.id,
+        }),
+        columnHelper.accessor('status', {
+          header: 'Status',
+          footer: (props) => props.column.id,
+        }),
+        columnHelper.accessor('progress', {
+          header: 'Profile Progress',
+          footer: (props) => props.column.id,
+        }),
+      ]),
+    [],
+  )
+
+  const [data, setData] = useState(() => makeData(1_000))
+  const refreshData = () => setData(() => makeData(1_000))
+  const stressTest = () => setData(() => makeData(200_000))
+
+  return (
+    <>
+      <div>
+        <button onClick={() => refreshData()}>Regenerate Data</button>
+        <button onClick={() => stressTest()}>Stress Test (200k rows)</button>
+      </div>
+      <MyTable data={data} columns={columns} />
+      <hr />
+      <div>
+        <button onClick={() => rerender(0)}>Force Rerender</button>
+      </div>
+    </>
+  )
+}
+
+function MyTable({
+  data,
+  columns,
+}: {
+  data: Array<Person>
+  columns: ReturnType<typeof columnHelper.columns>
+}) {
+  const table = useTable(
+    {
+      features,
+      columns,
+      data,
+      debugTable: true,
+      // no need to pass pageCount or rowCount with client-side pagination as it is calculated automatically
+    },
+    (state) => state, // default selector
+  )
+
+  return (
+    <div className="demo-root">
+      <div className="spacer-sm" />
+      <table>
+        <thead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                return (
+                  <th key={header.id} colSpan={header.colSpan}>
+                    <div>
+                      <table.FlexRender header={header} />
+                    </div>
+                  </th>
+                )
+              })}
+            </tr>
+          ))}
+        </thead>
+        <tbody>
+          {table.getRowModel().rows.map((row) => {
+            return (
+              <tr key={row.id}>
+                {row.getAllCells().map((cell) => {
+                  return (
+                    <td key={cell.id}>
+                      <table.FlexRender cell={cell} />
+                    </td>
+                  )
+                })}
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+      <div className="spacer-sm" />
+      <div className="controls">
+        <button
+          className="demo-button demo-button-sm"
+          onClick={() => table.firstPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          {'<<'}
+        </button>
+        <button
+          className="demo-button demo-button-sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          {'<'}
+        </button>
+        <button
+          className="demo-button demo-button-sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          {'>'}
+        </button>
+        <button
+          className="demo-button demo-button-sm"
+          onClick={() => table.lastPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          {'>>'}
+        </button>
+        <span className="inline-controls">
+          <div>Page</div>
+          <strong>
+            {(table.state.pagination.pageIndex + 1).toLocaleString()} of{' '}
+            {table.getPageCount().toLocaleString()}
+          </strong>
+        </span>
+        <span className="inline-controls">
+          | Go to page:
+          <input
+            type="number"
+            min="1"
+            max={table.getPageCount()}
+            defaultValue={table.state.pagination.pageIndex + 1}
+            onChange={(e) => {
+              const page = (e.target as HTMLInputElement).value
+                ? Number((e.target as HTMLInputElement).value) - 1
+                : 0
+              table.setPageIndex(page)
+            }}
+            className="page-size-input"
+          />
+        </span>
+        <select
+          value={table.state.pagination.pageSize}
+          onChange={(e) => {
+            table.setPageSize(Number((e.target as HTMLInputElement).value))
+          }}
+        >
+          {[10, 20, 30, 40, 50].map((pageSize) => (
+            <option key={pageSize} value={pageSize}>
+              Show {pageSize}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        Showing {table.getRowModel().rows.length.toLocaleString()} of{' '}
+        {table.getRowCount().toLocaleString()} Rows
+      </div>
+      <pre>{JSON.stringify(table.state, null, 2)}</pre>
+    </div>
+  )
+}
+
+const rootElement = document.getElementById('root')
+if (!rootElement) throw new Error('Failed to find the root element')
+
+render(<App />, rootElement)

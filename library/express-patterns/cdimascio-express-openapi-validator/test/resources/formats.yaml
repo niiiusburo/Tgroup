@@ -1,0 +1,59 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: test bug OpenApiValidator
+servers:
+  - url: '/v1'
+paths:
+  /fees:
+    get:
+      parameters: 
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: amount
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
+            minimum: -10.0
+      responses:
+        '200':
+          description: response
+
+  /formats/1:
+    get:
+      parameters: 
+        - name: string_id
+          in: query
+          schema:
+            type: string
+            format: three-letters
+        - name: number_id
+          in: query
+          schema:
+            type: number
+            format: three-digits
+      responses:
+        '200':
+          description: response
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                number_id:
+                  type: number
+                  format: three-digits
+                string_id:
+                  type: string
+                  format: three-letters
+      responses:
+        '200':
+          description: response
+

@@ -1,0 +1,51 @@
+{% extends "__base" %}
+
+{% block title %}Recover{% endblock title %}
+
+{% block stylesheets %}
+  {{ super() }}
+
+  <link rel="stylesheet" href="/assets/stylesheets/initiate.css?v={{ config.runtime_version | escape }}" type="text/css" />
+{% endblock stylesheets %}
+
+{% block body %}
+  {% if failure %}
+    <mark class="failure font-sans-bold">No account was found for the email you entered.</mark>
+  {% elif success %}
+    <mark class="success font-sans-bold">An account recovery email is on its way to your mailbox. Follow the instructions there.</mark>
+  {% else %}
+    <mark class="notice font-sans-bold">Enter your email address to recover your account. You will receive a recovery email.</mark>
+  {% endif %}
+
+  <main>
+    <a class="logo" href="/dashboard/">
+      <div class="logo-inner">
+        <img src="{{ config.logo_white_url | escape }}" alt="" />
+
+        <span class="logo-label font-sans-semibold">Affiliates</span>
+      </div>
+    </a>
+
+    {% if failure %}
+      <p class="error font-sans-semibold">Could not recover account (email not found).</p>
+    {% endif %}
+
+    <form action="/initiate/recover/form/recover/" method="post">
+      <label>
+        <input type="email" name="email" placeholder="Email address" class="font-sans-regular" autofocus>
+      </label>
+
+      <button type="submit" class="button button-large font-sans-semibold">Recover your {{ config.page_title | escape }} account</button>
+    </form>
+
+    <nav>
+      <ul>
+        <li>
+          <a href="/initiate/login/" class="font-sans-semibold">Login to your account.</a>
+        </li>
+
+        <div class="clear"></div>
+      </ul>
+    </nav>
+  </main>
+{% endblock body %}

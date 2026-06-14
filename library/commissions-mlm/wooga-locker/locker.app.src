@@ -1,0 +1,11 @@
+{application, locker,
+ [
+  {description, ""},
+  {vsn, "6"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {env, []}
+ ]}.

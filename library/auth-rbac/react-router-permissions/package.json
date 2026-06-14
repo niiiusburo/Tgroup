@@ -1,0 +1,80 @@
+{
+  "name": "@tshio/react-router-permissions",
+  "version": "1.2.1",
+  "description": "",
+  "main": "build/index.js",
+  "module": "build/es/index.js",
+  "typings": "typings/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheSoftwareHouse/react-router-permissions"
+  },
+  "author": {
+    "name": "The Software House",
+    "url": "https://tsh.io/"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "contributors": [
+    "Rafał Kucharski <rafal.kucharski@thesoftwarehouse.pl>",
+    "Mateusz Klinowski <mateusz.klinowski@thesoftwarehouse.pl>",
+    "Łukasz Pietrek <lukasz.pietrek@thesoftwarehouse.pl>",
+    "Jakub Musik <jakub.musik@thesoftwarehouse.pl>",
+    "Karol Noszczyński <karol.noszczynski@thesoftwarehouse.pl>"
+  ],
+  "peerDependencies": {
+    "react": "^16.8.0"
+  },
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "node scripts/test.js",
+    "flow": "flow",
+    "prepublishOnly": "node scripts/build.js"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.1.0",
+    "@babel/core": "^7.1.0",
+    "@babel/plugin-proposal-class-properties": "^7.1.0",
+    "@babel/plugin-proposal-export-default-from": "^7.0.0",
+    "@babel/preset-env": "^7.1.0",
+    "@babel/preset-flow": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
+    "babel-core": "^7.0.0-0",
+    "babel-jest": "^23.6.0",
+    "codecov": "^3.1.0",
+    "enzyme": "^3.7.0",
+    "enzyme-adapter-react-16": "^1.7.0",
+    "flow-bin": "^0.81.0",
+    "fstream": "^1.0.12",
+    "husky": "^1.3.1",
+    "jest": "^23.6.0",
+    "lint-staged": "^8.1.5",
+    "prettier": "^1.16.4",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-router": "^5.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.(js|md)": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.js?(x)",
+      "!src/**/index.js"
+    ],
+    "testMatch": [
+      "<rootDir>/src/__tests__/**/*.js?(x)",
+      "<rootDir>/src/**/(*.)+(spec|test).js?(x)"
+    ]
+  }
+}

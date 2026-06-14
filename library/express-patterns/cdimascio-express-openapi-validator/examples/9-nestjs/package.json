@@ -1,0 +1,42 @@
+{
+  "name": "nestjs-example",
+  "version": "0.0.0",
+  "description": "An example NestJS application using express-openapi-validator.",
+  "license": "MIT",
+  "main": "dist/main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cdimascio/express-openapi-validator.git"
+  },
+  "scripts": {
+    "build": "npm run build:clean && npm run build:assets && nest build",
+    "build:assets": "shx cp src/api.yaml dist/",
+    "build:clean": "shx rm -rf dist/ && shx mkdir dist/",
+    "start": "npm run start:dev",
+    "start:dev": "npm run build:clean && npm run build:assets && nest start --watch",
+    "start:prod": "nest start",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.4.16",
+    "@nestjs/core": "^10.3.8",
+    "@nestjs/platform-express": "^10.4.22",
+    "express-openapi-validator": "^4.13.2",
+    "reflect-metadata": "^0.1.13",
+    "shx": "^0.3.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "eslint": "^9.14.0",
+    "globals": "^15.12.0",
+    "@nestjs/cli": "^10.4.5",
+    "@nestjs/testing": "^10.3.8",
+    "@types/jest": "^27.0.2",
+    "@types/supertest": "^2.0.11",
+    "jest": "^27.2.5",
+    "supertest": "^6.1.6",
+    "ts-jest": "^27.0.5",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.4.3"
+  }
+}

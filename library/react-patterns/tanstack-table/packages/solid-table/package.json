@@ -1,0 +1,73 @@
+{
+  "name": "@tanstack/solid-table",
+  "version": "9.0.0-beta.11",
+  "description": "Headless UI for building powerful tables & datagrids for Solid.",
+  "author": "Tanner Linsley",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TanStack/table.git",
+    "directory": "packages/solid-table"
+  },
+  "homepage": "https://tanstack.com/table",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/tannerlinsley"
+  },
+  "keywords": [
+    "solid",
+    "table",
+    "solid-table",
+    "datagrid",
+    "tanstack-intent"
+  ],
+  "type": "module",
+  "types": "./dist/index.d.cts",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "solid": "./dist/index.js",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./static-functions": {
+      "solid": "./dist/static-functions.js",
+      "import": "./dist/static-functions.js",
+      "require": "./dist/static-functions.cjs"
+    },
+    "./flex-render": {
+      "solid": "./dist/flex-render.js",
+      "import": "./dist/flex-render.js",
+      "require": "./dist/flex-render.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=16"
+  },
+  "files": [
+    "dist",
+    "src",
+    "skills"
+  ],
+  "scripts": {
+    "clean": "rimraf ./build && rimraf ./dist",
+    "test:eslint": "eslint ./src",
+    "test:types": "tsc",
+    "test:build": "publint --strict",
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@tanstack/store": "^0.11.0",
+    "@tanstack/table-core": "workspace:*"
+  },
+  "devDependencies": {
+    "solid-js": "^1.9.13",
+    "vite-plugin-solid": "^2.11.12"
+  },
+  "peerDependencies": {
+    "solid-js": ">=1.3"
+  },
+  "main": "./dist/index.cjs"
+}

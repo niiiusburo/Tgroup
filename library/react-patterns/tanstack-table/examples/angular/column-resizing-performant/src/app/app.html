@@ -1,0 +1,52 @@
+<div class="demo-root">
+  <button (click)="refreshData()" class="demo-button">Regenerate Data</button>
+  <button (click)="stressTest()" class="demo-button">Stress Test (2k rows)</button>
+  <div class="spacer-md"></div>
+  <pre [style.min-height]="'10rem'">
+    {{ stringifiedState() }}
+  </pre>
+  <div class="spacer-md"></div>
+
+  ({{ data().length.toLocaleString() }} rows)
+
+  <div class="scroll-container">
+    <div class="divTable" [style]="columnSizeVars()" [style.width.px]="table.getTotalSize()">
+      <div class="thead">
+        @for (headerGroup of table.getHeaderGroups(); track headerGroup.id) {
+          <div class="tr">
+            @for (header of headerGroup.headers; track header.id) {
+              <div class="th" [tableResizableHeader]="header.id">
+                @if (!header.isPlaceholder) {
+                  <ng-container *flexRenderHeader="header; let header">
+                    <div [innerHTML]="header"></div>
+                  </ng-container>
+                }
+
+                <div
+                  class="resizer"
+                  [class.isResizing]="header.column.getIsResizing()"
+                  (dblclick)="header.column.resetSize()"
+                  (mousedown)="header.getResizeHandler()($event)"
+                  (touchstart)="header.getResizeHandler()($event)"
+                ></div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+      <div class="tbody">
+        @for (row of table.getRowModel().rows; track row.id) {
+          <div class="tr">
+            @for (cell of row.getAllCells(); track cell.id) {
+              <div class="td" [tableResizableCell]="cell.column.id">
+                <ng-container *flexRenderCell="cell; let cell">
+                  <div [innerHTML]="cell"></div>
+                </ng-container>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

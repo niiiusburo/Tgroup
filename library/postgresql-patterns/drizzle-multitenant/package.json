@@ -1,0 +1,128 @@
+{
+  "name": "drizzle-multitenant",
+  "version": "1.3.5",
+  "description": "Multi-tenancy toolkit for Drizzle ORM with schema isolation, tenant context, and parallel migrations",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./express": {
+      "import": "./dist/integrations/express.js",
+      "types": "./dist/integrations/express.d.ts"
+    },
+    "./fastify": {
+      "import": "./dist/integrations/fastify.js",
+      "types": "./dist/integrations/fastify.d.ts"
+    },
+    "./nestjs": {
+      "import": "./dist/integrations/nestjs/index.js",
+      "types": "./dist/integrations/nestjs/index.d.ts"
+    },
+    "./hono": {
+      "import": "./dist/integrations/hono.js",
+      "types": "./dist/integrations/hono.d.ts"
+    },
+    "./migrator": {
+      "import": "./dist/migrator/index.js",
+      "types": "./dist/migrator/index.d.ts"
+    },
+    "./cross-schema": {
+      "import": "./dist/cross-schema/index.js",
+      "types": "./dist/cross-schema/index.d.ts"
+    },
+    "./scaffold": {
+      "import": "./dist/scaffold/index.js",
+      "types": "./dist/scaffold/index.d.ts"
+    },
+    "./lint": {
+      "import": "./dist/lint/index.js",
+      "types": "./dist/lint/index.d.ts"
+    },
+    "./metrics": {
+      "import": "./dist/metrics/index.js",
+      "types": "./dist/metrics/index.d.ts"
+    },
+    "./export": {
+      "import": "./dist/export/index.js",
+      "types": "./dist/export/index.d.ts"
+    }
+  },
+  "bin": {
+    "drizzle-multitenant": "./bin/drizzle-multitenant.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "drizzle",
+    "drizzle-orm",
+    "multi-tenant",
+    "multitenancy",
+    "postgresql",
+    "schema-isolation",
+    "saas"
+  ],
+  "author": "Mateus Flores",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mateusflorez/drizzle-multitenant.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mateusflorez/drizzle-multitenant/issues"
+  },
+  "homepage": "https://github.com/mateusflorez/drizzle-multitenant#readme",
+  "dependencies": {
+    "@inquirer/prompts": "^8.1.0",
+    "chalk": "^5.6.2",
+    "cli-progress": "^3.12.0",
+    "cli-table3": "^0.6.5",
+    "commander": "^12.1.0",
+    "glob": "^13.0.0",
+    "lru-cache": "^10.4.3",
+    "ora": "^8.2.0"
+  },
+  "peerDependencies": {
+    "drizzle-orm": ">=0.29.0",
+    "pg": ">=8.0.0"
+  },
+  "devDependencies": {
+    "@nestjs/common": "^10.4.20",
+    "@nestjs/core": "^10.4.20",
+    "@nestjs/testing": "^10.4.20",
+    "@types/cli-progress": "^3.11.6",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "drizzle-orm": "^0.38.2",
+    "express": "^5.2.1",
+    "fastify": "^5.6.2",
+    "fastify-plugin": "^5.1.0",
+    "pg": "^8.13.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "LICENSE"
+  ]
+}

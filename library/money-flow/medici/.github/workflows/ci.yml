@@ -1,0 +1,36 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    name: Node ${{ matrix.node }}, Mongo ${{ matrix.mongodb-version }}, on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node: [16, 18, 20]
+        mongodb-version: [4.0, 4.2, 4.4, 5.0, 6.0]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js v${{ matrix.node }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Start MongoDB v${{ matrix.mongodb-version }}
+        uses: supercharge/mongodb-github-action@1.8.0
+        with:
+          mongodb-version: ${{ matrix.mongodb-version }}
+          mongodb-replica-set: test-rs
+
+      # ignoring scripts to not install mongodb-memory-server
+      - run: npm ci --ignore-scripts
+      - run: npm run ci
+      - run: npm run ci-mongoose5
+      - run: npm run ci-mongoose6
+      - run: npm run ci-mongoose7
+      - run: npm run ci-mongoose8
+      # mongoose 9 requires Node >= 20, so skip this step on older Node versions
+      - if: matrix.node >= 20
+        run: npm run ci-mongoose9

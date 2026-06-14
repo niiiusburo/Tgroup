@@ -1,0 +1,59 @@
+{% extends "__base" %}
+
+{% block title %}Login{% endblock title %}
+
+{% block stylesheets %}
+  {{ super() }}
+
+  <link rel="stylesheet" href="/assets/stylesheets/initiate.css?v={{ config.runtime_version | escape }}" type="text/css" />
+{% endblock stylesheets %}
+
+{% block body %}
+  {% if failure %}
+    <mark class="failure font-sans-bold">Oops. Your credentials are invalid. Please enter them again and retry.</mark>
+  {% else %}
+    <mark class="information font-sans-bold">Please sign in to access your {{ config.page_title | escape }} dashboard.</mark>
+  {% endif %}
+
+  <main>
+    <a class="logo" href="/dashboard/">
+      <div class="logo-inner">
+        <img src="{{ config.logo_white_url | escape }}" alt="" />
+
+        <span class="logo-label font-sans-regular">Affiliates</span>
+      </div>
+    </a>
+
+    {% if failure %}
+      <p class="error font-sans-semibold">Invalid credentials. Try again.</p>
+    {% endif %}
+
+    <form action="/initiate/login/form/login/" method="post">
+      <label>
+        <input type="email" name="email" placeholder="Email address" class="font-sans-regular" autofocus>
+      </label>
+
+      <label>
+        <input type="password" name="password" placeholder="Password" class="font-sans-regular">
+      </label>
+
+      <button type="submit" class="button button-large font-sans-semibold">Log in with your {{ config.page_title | escape }} account</button>
+    </form>
+
+    <nav>
+      <ul>
+        {% if config.account_create_allow %}
+          <li>
+            <a href="/initiate/signup/" class="font-sans-semibold">Create your account.</a>
+          </li>
+        {% endif %}
+
+        <li>
+          <a href="/initiate/recover/" class="font-sans-regular">Forgot your password?</a>
+        </li>
+
+        <div class="clear"></div>
+      </ul>
+    </nav>
+  </main>
+{% endblock body %}

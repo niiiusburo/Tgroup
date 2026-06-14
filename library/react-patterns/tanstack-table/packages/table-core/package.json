@@ -1,0 +1,78 @@
+{
+  "name": "@tanstack/table-core",
+  "version": "9.0.0-beta.11",
+  "description": "Headless UI for building powerful tables & datagrids for TS/JS.",
+  "author": "Tanner Linsley",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TanStack/table.git",
+    "directory": "packages/table-core"
+  },
+  "homepage": "https://tanstack.com/table",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/tannerlinsley"
+  },
+  "keywords": [
+    "react",
+    "vue",
+    "solid",
+    "svelte",
+    "lit",
+    "angular",
+    "table",
+    "table-core",
+    "datagrid",
+    "tanstack-intent"
+  ],
+  "type": "module",
+  "types": "./dist/index.d.cts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./flex-render": {
+      "import": "./dist/flex-render.js",
+      "require": "./dist/flex-render.cjs"
+    },
+    "./reactivity": {
+      "import": "./dist/reactivity.js",
+      "require": "./dist/reactivity.cjs"
+    },
+    "./static-functions": {
+      "import": "./dist/static-functions.js",
+      "require": "./dist/static-functions.cjs"
+    },
+    "./store-reactivity-bindings": {
+      "import": "./dist/store-reactivity-bindings.js",
+      "require": "./dist/store-reactivity-bindings.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=16"
+  },
+  "files": [
+    "dist/",
+    "src",
+    "skills"
+  ],
+  "scripts": {
+    "clean": "rimraf ./build && rimraf ./dist",
+    "lint:fix": "eslint ./src --fix",
+    "test:eslint": "eslint ./src",
+    "test:lib": "vitest",
+    "test:lib:dev": "pnpm test:lib --watch",
+    "test:types": "tsc && tsc -p tests/tsconfig.declaration-emit.json",
+    "test:build": "publint --strict",
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@tanstack/store": "^0.11.0"
+  }
+}

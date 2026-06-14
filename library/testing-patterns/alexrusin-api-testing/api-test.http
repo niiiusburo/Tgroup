@@ -1,0 +1,40 @@
+### List tasks
+GET http://localhost:3000/tasks HTTP/1.1
+
+### Filter tasks by name
+GET http://localhost:3000/tasks?name=project HTTP/1.1
+
+### Filter tasks by due date range
+GET http://localhost:3000/tasks?dueDateFrom=2025-11-01T00:00:00Z&dueDateTo=2025-12-31T23:59:59Z HTTP/1.1
+
+### Filter tasks by name and due date
+GET http://localhost:3000/tasks?name=setup&dueDateFrom=2025-11-01T00:00:00Z&dueDateTo=2025-12-31T23:59:59Z HTTP/1.1
+
+
+### Get task by ID
+GET http://localhost:3000/tasks/69173d2072c6c9ea34d55873 HTTP/1.1
+
+### Create a new task
+POST http://localhost:3000/tasks HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Write API tests",
+  "description": "Create comprehensive tests for all endpoints",
+  "dueDate": "2025-12-15T23:59:59Z",
+  "completed": false
+}
+
+### Update a task
+PUT http://localhost:3000/tasks/69173d2072c6c9ea34d55873 HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Complete project setup",
+  "description": "MongoDB and Task model completed successfully",
+  "dueDate": "2025-11-30T23:59:59Z",
+  "completed": true
+}
+
+### Delete a task
+DELETE http://localhost:3000/tasks/69173d2072c6c9ea34d55873 HTTP/1.1

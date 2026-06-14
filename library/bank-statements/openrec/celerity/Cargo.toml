@@ -1,0 +1,51 @@
+[package]
+name = "celerity"
+version = "0.1.0"
+edition = "2018"
+
+# Disable cargo standard integration test structure. We don't want one test binary per .rs file.
+autotests = false
+
+[lib]
+name = "celerity"
+path = "src/lib.rs"
+doctest = false
+
+[[bin]]
+name = "celerity"
+path = "src/bin.rs"
+test = false
+
+#[[test]]
+#name = "integration"
+#path = "tests/mod.rs"
+#harness = true
+
+[dependencies]
+core = { path = "../core" }
+log = "0.4.14"
+log4rs = "1.0.0"
+dotenv = "0.15.0"
+anyhow = "1.0"
+thiserror = "1.0.30"
+csv = "1.1.6"
+uuid = { version = "0.8.2", features = ["v4", "serde"] }
+regex = "1.5.4"
+lazy_static = "1.4.0"
+chrono = { version = "0.4.19", features = ["serde"] }
+ubyte = "0.10.1"
+rlua = "0.18.0"
+rust_decimal = "1.17.0"
+bytes = "1.1.0"
+itertools = "0.10.1"
+serde = { version = "1.0.130", features = ["derive"] }
+serde_json = "1.0.71"
+clap = "2.33.3"
+positioned-io = "0.2.2"
+byteorder = "1.4.3"
+rayon = "1.5.1"
+num_cpus = "1.13.1"
+
+[dev-dependencies]
+fs_extra = "1.2.0"
+assert-json-diff = "2.0.1"

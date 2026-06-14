@@ -1,0 +1,57 @@
+{% extends "__base" %}
+
+{% block title %}Signup{% endblock title %}
+
+{% block stylesheets %}
+  {{ super() }}
+
+  <link rel="stylesheet" href="/assets/stylesheets/initiate.css?v={{ config.runtime_version | escape }}" type="text/css" />
+{% endblock stylesheets %}
+
+{% block body %}
+  {% if failure %}
+    <mark class="failure font-sans-bold">Oops. The account could not be created. Please check your credentials and try again.</mark>
+  {% else %}
+    <mark class="notice font-sans-bold">Signup for a new {{ config.page_title | escape }} account to access your dashboard.</mark>
+  {% endif %}
+
+  <main>
+    <a class="logo" href="/dashboard/">
+      <div class="logo-inner">
+        <img src="{{ config.logo_white_url | escape }}" alt="" />
+
+        <span class="logo-label font-sans-semibold">Affiliates</span>
+      </div>
+    </a>
+
+    {% if failure %}
+      <p class="error font-sans-semibold">Could not create an account with this email.</p>
+    {% endif %}
+
+    <form action="/initiate/signup/form/signup/" method="post">
+      <label>
+        <input type="email" name="email" placeholder="Email address" class="font-sans-regular" autofocus>
+      </label>
+
+      <label>
+        <input type="password" name="password" placeholder="Password" class="font-sans-regular">
+      </label>
+
+      <label>
+        <input type="password" name="password_repeat" placeholder="Password (repeat)" class="font-sans-regular">
+      </label>
+
+      <button type="submit" class="button button-large font-sans-semibold">Create your {{ config.page_title | escape }} account</button>
+    </form>
+
+    <nav>
+      <ul>
+        <li>
+          <a href="/initiate/login/" class="font-sans-semibold">Login to your account.</a>
+        </li>
+
+        <div class="clear"></div>
+      </ul>
+    </nav>
+  </main>
+{% endblock body %}

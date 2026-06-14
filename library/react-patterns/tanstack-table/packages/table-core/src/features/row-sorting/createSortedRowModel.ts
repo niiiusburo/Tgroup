@@ -1,0 +1,157 @@
+import { tableMemo } from '../../utils'
+import { table_autoResetPageIndex } from '../row-pagination/rowPaginationFeature.utils'
+import { column_getCanSort, column_getSortFn } from './rowSortingFeature.utils'
+import type { Column_Internal } from '../../types/Column'
+import type { TableFeatures } from '../../types/TableFeatures'
+import type { RowModel } from '../../core/row-models/coreRowModelsFeature.types'
+import type { Table, Table_Internal } from '../../types/Table'
+import type { Row } from '../../types/Row'
+import type { SortFn } from './rowSortingFeature.types'
+import type { RowData } from '../../types/type-utils'
+
+/**
+ * Creates a memoized sorted row model factory.
+ *
+ * The factory reads the relevant table state atoms and options, then returns a row model function used by the table row-model pipeline.
+ *
+ * Register sorting functions with the `sortFns` slot on the `features` option:
+ * `tableFeatures({ rowSortingFeature, sortedRowModel: createSortedRowModel(), sortFns })`.
+ */
+export function createSortedRowModel<
+  TFeatures extends TableFeatures,
+  TData extends RowData,
+>(): (table: Table<TFeatures, TData>) => () => RowModel<TFeatures, TData> {
+  return (_table) => {
+    const table = _table as unknown as Table_Internal<TFeatures, TData>
+    return tableMemo({
+      feature: 'rowSortingFeature',
+      table,
+      fnName: 'table.getSortedRowModel',
+      memoDeps: () => [
+        table.atoms.sorting?.get(),
+        table.getPreSortedRowModel(),
+      ],
+      fn: () => _createSortedRowModel(table),
+      onAfterUpdate: () => table_autoResetPageIndex(table),
+    })
+  }
+}
+
+function _createSortedRowModel<
+  TFeatures extends TableFeatures,
+  TData extends RowData = any,
+>(table: Table_Internal<TFeatures, TData>): RowModel<TFeatures, TData> {
+  const preSortedRowModel = table.getPreSortedRowModel()
+  const sorting = table.atoms.sorting?.get()
+
+  if (!preSortedRowModel.rows.length || !sorting?.length) {
+    return preSortedRowModel
+  }
+
+  const sortedFlatRows: Array<Row<TFeatures, TData>> = []
+
+  // Filter out sortings that correspond to non existing columns
+  const availableSorting = sorting.filter((sort) =>
+    column_getCanSort(
+      table.getColumn(sort.id) as Column_Internal<TFeatures, TData>,
+    ),
+  )
+
+  const columnInfoById: Record<
+    string,
+    {
+      sortUndefined?: false | -1 | 1 | 'first' | 'last'
+      invertSorting?: boolean
+      sortFn: SortFn<TFeatures, TData>
+    }
+  > = {}
+
+  availableSorting.forEach((sortEntry) => {
+    const column: Column_Internal<TFeatures, TData> | undefined =
+      table.getColumn(sortEntry.id)
+    if (!column) return
+
+    columnInfoById[sortEntry.id] = {
+      sortUndefined: column.columnDef.sortUndefined,
+      invertSorting: column.columnDef.invertSorting,
+      sortFn: column_getSortFn(column),
+    }
+  })
+
+  const sortData = (rows: Array<Row<TFeatures, TData>>) => {
+    const sortedData = rows.slice()
+
+    sortedData.sort((rowA, rowB) => {
+      for (let i = 0; i < availableSorting.length; i++) {
+        const sortEntry = availableSorting[i]!
+        const columnInfo = columnInfoById[sortEntry.id]!
+        const sortUndefined = columnInfo.sortUndefined
+        const isDesc = sortEntry.desc
+
+        let sortInt = 0
+
+        // All sorting ints should always return in ascending order
+        if (sortUndefined) {
+          const aValue = rowA.getValue(sortEntry.id)
+          const bValue = rowB.getValue(sortEntry.id)
+
+          const aUndefined = aValue === undefined
+          const bUndefined = bValue === undefined
+
+          if (aUndefined || bUndefined) {
+            if (sortUndefined === 'first') return aUndefined ? -1 : 1
+            if (sortUndefined === 'last') return aUndefined ? 1 : -1
+            sortInt =
+              aUndefined && bUndefined
+                ? 0
+                : aUndefined
+                  ? sortUndefined
+                  : -sortUndefined
+          }
+        }
+
+        if (sortInt === 0) {
+          sortInt = columnInfo.sortFn(rowA, rowB, sortEntry.id)
+        }
+
+        // If sorting is non-zero, take care of desc and inversion
+        if (sortInt !== 0) {
+          if (isDesc) {
+            sortInt *= -1
+          }
+
+          if (columnInfo.invertSorting) {
+            sortInt *= -1
+          }
+
+          return sortInt
+        }
+      }
+      return rowA.index - rowB.index
+    })
+
+    // If there are sub-rows, sort them. Clone only rows that need mutation
+    // (i.e. have subRows) so we don't corrupt the source row model.
+    for (let i = 0; i < sortedData.length; i++) {
+      const row = sortedData[i]!
+      if (row.subRows.length) {
+        // Preserve prototype chain so methods like getValue() remain accessible
+        const cloned = Object.create(Object.getPrototypeOf(row))
+        Object.assign(cloned, row)
+        cloned.subRows = sortData(row.subRows)
+        sortedData[i] = cloned
+        sortedFlatRows.push(cloned)
+      } else {
+        sortedFlatRows.push(row)
+      }
+    }
+
+    return sortedData
+  }
+
+  return {
+    rows: sortData(preSortedRowModel.rows),
+    flatRows: sortedFlatRows,
+    rowsById: preSortedRowModel.rowsById,
+  }
+}

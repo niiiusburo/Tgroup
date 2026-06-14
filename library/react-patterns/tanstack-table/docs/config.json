@@ -1,0 +1,1170 @@
+{
+  "$schema": "https://raw.githubusercontent.com/TanStack/tanstack.com/main/tanstack-docs-config.schema.json",
+  "docSearch": {
+    "appId": "74SF5EKVW9",
+    "apiKey": "9fc015a3310be6669ed66c6c459f319f",
+    "indexName": "tanstack-table"
+  },
+  "sections": [
+    {
+      "label": "Getting Started",
+      "children": [
+        { "label": "Overview", "to": "overview" },
+        { "label": "Installation", "to": "installation" },
+        { "label": "Devtools", "to": "devtools" }
+      ],
+      "frameworks": [
+        {
+          "label": "angular",
+          "children": [
+            { "label": "Quick Start", "to": "framework/angular/quick-start" },
+            { "label": "Migrating to V9", "to": "framework/angular/guide/migrating" },
+            { "label": "Rendering components", "to": "framework/angular/guide/rendering" }
+          ]
+        },
+        {
+          "label": "lit",
+          "children": [
+            { "label": "Quick Start", "to": "framework/lit/quick-start" },
+            { "label": "Migrating to V9", "to": "framework/lit/guide/migrating" }
+          ]
+        },
+        {
+          "label": "react",
+          "children": [
+            { "label": "Quick Start", "to": "framework/react/quick-start" },
+            { "label": "Migrating to V9", "to": "framework/react/guide/migrating" },
+            { "label": "useLegacyTable Guide", "to": "framework/react/guide/use-legacy-table" }
+          ]
+        },
+        {
+          "label": "preact",
+          "children": [
+            { "label": "Quick Start", "to": "framework/preact/quick-start" },
+            { "label": "Migrating to V9", "to": "framework/preact/guide/migrating" }
+          ]
+        },
+        {
+          "label": "solid",
+          "children": [
+            { "label": "Quick Start", "to": "framework/solid/quick-start" },
+            { "label": "Migrating to V9", "to": "framework/solid/guide/migrating" }
+          ]
+        },
+        {
+          "label": "svelte",
+          "children": [
+            { "label": "Quick Start", "to": "framework/svelte/quick-start" },
+            { "label": "Migrating to V9", "to": "framework/svelte/guide/migrating" }
+          ]
+        },
+        {
+          "label": "vue",
+          "children": [
+            { "label": "Quick Start", "to": "framework/vue/quick-start" },
+            { "label": "Migrating to V9", "to": "framework/vue/guide/migrating" }
+          ]
+        },
+        {
+          "label": "vanilla",
+          "children": [
+            { "label": "Vanilla JS (No Framework)", "to": "vanilla" }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Core Guides",
+      "children": [
+        { "label": "Data", "to": "guide/data" },
+        { "label": "Column Defs", "to": "guide/column-defs" },
+        { "label": "Table Instance", "to": "guide/tables" },
+        { "label": "Row Models", "to": "guide/row-models" },
+        { "label": "Rows", "to": "guide/rows" },
+        { "label": "Cells", "to": "guide/cells" },
+        { "label": "Header Groups", "to": "guide/header-groups" },
+        { "label": "Headers", "to": "guide/headers" },
+        { "label": "Columns", "to": "guide/columns" },
+        { "label": "Table and Column Meta", "to": "guide/table-and-column-meta" }
+      ],
+      "frameworks": [
+        {
+          "label": "angular",
+          "children": [
+            { "label": "Table State", "to": "framework/angular/guide/table-state" },
+            { "label": "Composable Tables", "to": "framework/angular/guide/composable-tables" }
+          ]
+        },
+        {
+          "label": "lit",
+          "children": [
+            { "label": "Table State", "to": "framework/lit/guide/table-state" },
+            { "label": "Composable Tables", "to": "framework/lit/guide/composable-tables" }
+          ]
+        },
+        {
+          "label": "react",
+          "children": [
+            { "label": "Table State", "to": "framework/react/guide/table-state" },
+            { "label": "Composable Tables", "to": "framework/react/guide/composable-tables" }
+          ]
+        },
+        {
+          "label": "preact",
+          "children": [
+            { "label": "Table State", "to": "framework/preact/guide/table-state" },
+            { "label": "Composable Tables", "to": "framework/preact/guide/composable-tables" }
+          ]
+        },
+        {
+          "label": "solid",
+          "children": [
+            { "label": "Table State", "to": "framework/solid/guide/table-state" },
+            { "label": "Composable Tables", "to": "framework/solid/guide/composable-tables" }
+          ]
+        },
+        {
+          "label": "svelte",
+          "children": [
+            { "label": "Table State", "to": "framework/svelte/guide/table-state" },
+            { "label": "Composable Tables", "to": "framework/svelte/guide/composable-tables" }
+          ]
+        },
+        {
+          "label": "vue",
+          "children": [
+            { "label": "Table State", "to": "framework/vue/guide/table-state" },
+            { "label": "Composable Tables", "to": "framework/vue/guide/composable-tables" }
+          ]
+        },
+        {
+          "label": "vanilla",
+          "children": [
+            { "label": "Table State", "to": "framework/vanilla/guide/table-state" }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Feature Guides",
+      "children": [],
+      "frameworks": [
+        {
+          "label": "angular",
+          "children": [
+            { "label": "Column Ordering", "to": "framework/angular/guide/column-ordering" },
+            { "label": "Column Pinning", "to": "framework/angular/guide/column-pinning" },
+            { "label": "Column Sizing", "to": "framework/angular/guide/column-sizing" },
+            { "label": "Column Resizing", "to": "framework/angular/guide/column-resizing" },
+            { "label": "Column Visibility", "to": "framework/angular/guide/column-visibility" },
+            { "label": "Column Filtering", "to": "framework/angular/guide/column-filtering" },
+            { "label": "Global Filtering", "to": "framework/angular/guide/global-filtering" },
+            { "label": "Fuzzy Filtering", "to": "framework/angular/guide/fuzzy-filtering" },
+            { "label": "Faceting", "to": "framework/angular/guide/column-faceting" },
+            { "label": "Grouping", "to": "framework/angular/guide/grouping" },
+            { "label": "Expanding", "to": "framework/angular/guide/expanding" },
+            { "label": "Pagination", "to": "framework/angular/guide/pagination" },
+            { "label": "Row Pinning", "to": "framework/angular/guide/row-pinning" },
+            { "label": "Row Selection", "to": "framework/angular/guide/row-selection" },
+            { "label": "Sorting", "to": "framework/angular/guide/sorting" },
+            { "label": "Virtualization", "to": "framework/angular/guide/virtualization" },
+            { "label": "Custom Features", "to": "framework/angular/guide/custom-features" }
+          ]
+        },
+        {
+          "label": "lit",
+          "children": [
+            { "label": "Column Ordering", "to": "framework/lit/guide/column-ordering" },
+            { "label": "Column Pinning", "to": "framework/lit/guide/column-pinning" },
+            { "label": "Column Sizing", "to": "framework/lit/guide/column-sizing" },
+            { "label": "Column Resizing", "to": "framework/lit/guide/column-resizing" },
+            { "label": "Column Visibility", "to": "framework/lit/guide/column-visibility" },
+            { "label": "Column Filtering", "to": "framework/lit/guide/column-filtering" },
+            { "label": "Global Filtering", "to": "framework/lit/guide/global-filtering" },
+            { "label": "Fuzzy Filtering", "to": "framework/lit/guide/fuzzy-filtering" },
+            { "label": "Faceting", "to": "framework/lit/guide/column-faceting" },
+            { "label": "Grouping", "to": "framework/lit/guide/grouping" },
+            { "label": "Expanding", "to": "framework/lit/guide/expanding" },
+            { "label": "Pagination", "to": "framework/lit/guide/pagination" },
+            { "label": "Row Pinning", "to": "framework/lit/guide/row-pinning" },
+            { "label": "Row Selection", "to": "framework/lit/guide/row-selection" },
+            { "label": "Sorting", "to": "framework/lit/guide/sorting" },
+            { "label": "Virtualization", "to": "framework/lit/guide/virtualization" },
+            { "label": "Custom Features", "to": "framework/lit/guide/custom-features" }
+          ]
+        },
+        {
+          "label": "react",
+          "children": [
+            { "label": "Column Ordering", "to": "framework/react/guide/column-ordering" },
+            { "label": "Column Pinning", "to": "framework/react/guide/column-pinning" },
+            { "label": "Column Sizing", "to": "framework/react/guide/column-sizing" },
+            { "label": "Column Resizing", "to": "framework/react/guide/column-resizing" },
+            { "label": "Column Visibility", "to": "framework/react/guide/column-visibility" },
+            { "label": "Column Filtering", "to": "framework/react/guide/column-filtering" },
+            { "label": "Global Filtering", "to": "framework/react/guide/global-filtering" },
+            { "label": "Fuzzy Filtering", "to": "framework/react/guide/fuzzy-filtering" },
+            { "label": "Faceting", "to": "framework/react/guide/column-faceting" },
+            { "label": "Grouping", "to": "framework/react/guide/grouping" },
+            { "label": "Expanding", "to": "framework/react/guide/expanding" },
+            { "label": "Pagination", "to": "framework/react/guide/pagination" },
+            { "label": "Row Pinning", "to": "framework/react/guide/row-pinning" },
+            { "label": "Row Selection", "to": "framework/react/guide/row-selection" },
+            { "label": "Sorting", "to": "framework/react/guide/sorting" },
+            { "label": "Virtualization", "to": "framework/react/guide/virtualization" },
+            { "label": "Custom Features", "to": "framework/react/guide/custom-features" }
+          ]
+        },
+        {
+          "label": "preact",
+          "children": [
+            { "label": "Column Ordering", "to": "framework/preact/guide/column-ordering" },
+            { "label": "Column Pinning", "to": "framework/preact/guide/column-pinning" },
+            { "label": "Column Sizing", "to": "framework/preact/guide/column-sizing" },
+            { "label": "Column Resizing", "to": "framework/preact/guide/column-resizing" },
+            { "label": "Column Visibility", "to": "framework/preact/guide/column-visibility" },
+            { "label": "Column Filtering", "to": "framework/preact/guide/column-filtering" },
+            { "label": "Global Filtering", "to": "framework/preact/guide/global-filtering" },
+            { "label": "Fuzzy Filtering", "to": "framework/preact/guide/fuzzy-filtering" },
+            { "label": "Faceting", "to": "framework/preact/guide/column-faceting" },
+            { "label": "Grouping", "to": "framework/preact/guide/grouping" },
+            { "label": "Expanding", "to": "framework/preact/guide/expanding" },
+            { "label": "Pagination", "to": "framework/preact/guide/pagination" },
+            { "label": "Row Pinning", "to": "framework/preact/guide/row-pinning" },
+            { "label": "Row Selection", "to": "framework/preact/guide/row-selection" },
+            { "label": "Sorting", "to": "framework/preact/guide/sorting" },
+            { "label": "Virtualization", "to": "framework/preact/guide/virtualization" },
+            { "label": "Custom Features", "to": "framework/preact/guide/custom-features" }
+          ]
+        },
+        {
+          "label": "solid",
+          "children": [
+            { "label": "Column Ordering", "to": "framework/solid/guide/column-ordering" },
+            { "label": "Column Pinning", "to": "framework/solid/guide/column-pinning" },
+            { "label": "Column Sizing", "to": "framework/solid/guide/column-sizing" },
+            { "label": "Column Resizing", "to": "framework/solid/guide/column-resizing" },
+            { "label": "Column Visibility", "to": "framework/solid/guide/column-visibility" },
+            { "label": "Column Filtering", "to": "framework/solid/guide/column-filtering" },
+            { "label": "Global Filtering", "to": "framework/solid/guide/global-filtering" },
+            { "label": "Fuzzy Filtering", "to": "framework/solid/guide/fuzzy-filtering" },
+            { "label": "Faceting", "to": "framework/solid/guide/column-faceting" },
+            { "label": "Grouping", "to": "framework/solid/guide/grouping" },
+            { "label": "Expanding", "to": "framework/solid/guide/expanding" },
+            { "label": "Pagination", "to": "framework/solid/guide/pagination" },
+            { "label": "Row Pinning", "to": "framework/solid/guide/row-pinning" },
+            { "label": "Row Selection", "to": "framework/solid/guide/row-selection" },
+            { "label": "Sorting", "to": "framework/solid/guide/sorting" },
+            { "label": "Virtualization", "to": "framework/solid/guide/virtualization" },
+            { "label": "Custom Features", "to": "framework/solid/guide/custom-features" }
+          ]
+        },
+        {
+          "label": "svelte",
+          "children": [
+            { "label": "Column Ordering", "to": "framework/svelte/guide/column-ordering" },
+            { "label": "Column Pinning", "to": "framework/svelte/guide/column-pinning" },
+            { "label": "Column Sizing", "to": "framework/svelte/guide/column-sizing" },
+            { "label": "Column Resizing", "to": "framework/svelte/guide/column-resizing" },
+            { "label": "Column Visibility", "to": "framework/svelte/guide/column-visibility" },
+            { "label": "Column Filtering", "to": "framework/svelte/guide/column-filtering" },
+            { "label": "Global Filtering", "to": "framework/svelte/guide/global-filtering" },
+            { "label": "Fuzzy Filtering", "to": "framework/svelte/guide/fuzzy-filtering" },
+            { "label": "Faceting", "to": "framework/svelte/guide/column-faceting" },
+            { "label": "Grouping", "to": "framework/svelte/guide/grouping" },
+            { "label": "Expanding", "to": "framework/svelte/guide/expanding" },
+            { "label": "Pagination", "to": "framework/svelte/guide/pagination" },
+            { "label": "Row Pinning", "to": "framework/svelte/guide/row-pinning" },
+            { "label": "Row Selection", "to": "framework/svelte/guide/row-selection" },
+            { "label": "Sorting", "to": "framework/svelte/guide/sorting" },
+            { "label": "Virtualization", "to": "framework/svelte/guide/virtualization" },
+            { "label": "Custom Features", "to": "framework/svelte/guide/custom-features" }
+          ]
+        },
+        {
+          "label": "vue",
+          "children": [
+            { "label": "Column Ordering", "to": "framework/vue/guide/column-ordering" },
+            { "label": "Column Pinning", "to": "framework/vue/guide/column-pinning" },
+            { "label": "Column Sizing", "to": "framework/vue/guide/column-sizing" },
+            { "label": "Column Resizing", "to": "framework/vue/guide/column-resizing" },
+            { "label": "Column Visibility", "to": "framework/vue/guide/column-visibility" },
+            { "label": "Column Filtering", "to": "framework/vue/guide/column-filtering" },
+            { "label": "Global Filtering", "to": "framework/vue/guide/global-filtering" },
+            { "label": "Fuzzy Filtering", "to": "framework/vue/guide/fuzzy-filtering" },
+            { "label": "Faceting", "to": "framework/vue/guide/column-faceting" },
+            { "label": "Grouping", "to": "framework/vue/guide/grouping" },
+            { "label": "Expanding", "to": "framework/vue/guide/expanding" },
+            { "label": "Pagination", "to": "framework/vue/guide/pagination" },
+            { "label": "Row Pinning", "to": "framework/vue/guide/row-pinning" },
+            { "label": "Row Selection", "to": "framework/vue/guide/row-selection" },
+            { "label": "Sorting", "to": "framework/vue/guide/sorting" },
+            { "label": "Virtualization", "to": "framework/vue/guide/virtualization" },
+            { "label": "Custom Features", "to": "framework/vue/guide/custom-features" }
+          ]
+        },
+        {
+          "label": "vanilla",
+          "children": [
+            { "label": "Pagination", "to": "framework/vanilla/guide/pagination" },
+            { "label": "Sorting", "to": "framework/vanilla/guide/sorting" }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "API Reference",
+      "children": [
+        { "label": "Core API Reference", "to": "reference/index" }
+      ],
+      "frameworks": [
+        {
+          "label": "angular",
+          "children": [
+            { "label": "Angular API Reference", "to": "framework/angular/reference/index" }
+          ]
+        },
+        {
+          "label": "react",
+          "children": [
+            { "label": "React API Reference", "to": "framework/react/reference/index" }
+          ]
+        },
+        {
+          "label": "preact",
+          "children": [
+            { "label": "Preact API Reference", "to": "framework/preact/reference/index" }
+          ]
+        },
+        {
+          "label": "solid",
+          "children": [
+            { "label": "Solid API Reference", "to": "framework/solid/reference/index" }
+          ]
+        },
+        {
+          "label": "svelte",
+          "children": [
+            { "label": "Svelte API Reference", "to": "framework/svelte/reference/index" }
+          ]
+        },
+        {
+          "label": "vue",
+          "children": [
+            { "label": "Vue API Reference", "to": "framework/vue/reference/index" }
+          ]
+        },
+        {
+          "label": "lit",
+          "children": [
+            { "label": "Lit API Reference", "to": "framework/lit/reference/index" }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsible": true,
+      "defaultCollapsed": true,
+      "label": "Table API Reference",
+      "children": [
+        { "label": "Table", "to": "reference/index/type-aliases/Table" },
+        { "label": "TableOptions", "to": "reference/index/type-aliases/TableOptions" },
+        { "label": "TableState", "to": "reference/index/type-aliases/TableState" },
+        { "label": "TableMeta", "to": "reference/index/interfaces/TableMeta" },
+        { "label": "TableFeature", "to": "reference/index/interfaces/TableFeature" },
+        { "label": "TableFeatures", "to": "reference/index/interfaces/TableFeatures" },
+        { "label": "StockFeatures", "to": "reference/index/interfaces/StockFeatures" },
+        { "label": "CoreFeatures", "to": "reference/index/interfaces/CoreFeatures" },
+        { "label": "BaseAtoms", "to": "reference/index/type-aliases/BaseAtoms" },
+        { "label": "Atoms", "to": "reference/index/type-aliases/Atoms" },
+        { "label": "ExternalAtoms", "to": "reference/index/type-aliases/ExternalAtoms" },
+        { "label": "constructTable", "to": "reference/index/functions/constructTable" },
+        { "label": "tableOptions", "to": "reference/index/functions/tableOptions" },
+        { "label": "tableFeatures", "to": "reference/index/functions/tableFeatures" },
+        { "label": "getInitialTableState", "to": "reference/index/functions/getInitialTableState" },
+        { "label": "OnChangeFn", "to": "reference/index/type-aliases/OnChangeFn" },
+        { "label": "Updater", "to": "reference/index/type-aliases/Updater" },
+        { "label": "DebugOptions", "to": "reference/index/type-aliases/DebugOptions" }
+      ],
+      "frameworks": [
+        {
+          "label": "react",
+          "children": [
+            { "label": "useTable", "to": "framework/react/reference/index/functions/useTable" },
+            { "label": "createTableHook", "to": "framework/react/reference/index/functions/createTableHook" },
+            { "label": "ReactTable", "to": "framework/react/reference/index/type-aliases/ReactTable" },
+            { "label": "AppReactTable", "to": "framework/react/reference/index/type-aliases/AppReactTable" },
+            { "label": "CreateTableHookOptions", "to": "framework/react/reference/index/type-aliases/CreateTableHookOptions" },
+            { "label": "Subscribe", "to": "framework/react/reference/index/functions/Subscribe" },
+            { "label": "FlexRender", "to": "framework/react/reference/index/functions/FlexRender-1" },
+            { "label": "flexRender", "to": "framework/react/reference/index/functions/flexRender" }
+          ]
+        },
+        {
+          "label": "angular",
+          "children": [
+            { "label": "injectTable", "to": "framework/angular/reference/functions/injectTable" },
+            { "label": "createTableHook", "to": "framework/angular/reference/functions/createTableHook" },
+            { "label": "AngularTable", "to": "framework/angular/reference/type-aliases/AngularTable" },
+            { "label": "AppAngularTable", "to": "framework/angular/reference/type-aliases/AppAngularTable" },
+            { "label": "CreateTableHookResult", "to": "framework/angular/reference/type-aliases/CreateTableHookResult" },
+            { "label": "CreateTableContextOptions", "to": "framework/angular/reference/type-aliases/CreateTableContextOptions" },
+            { "label": "flexRenderComponent", "to": "framework/angular/reference/functions/flexRenderComponent" },
+            { "label": "FlexRender", "to": "framework/angular/reference/variables/FlexRender" },
+            { "label": "TanStackTable", "to": "framework/angular/reference/classes/TanStackTable" },
+            { "label": "injectTableContext", "to": "framework/angular/reference/functions/injectTableContext" }
+          ]
+        },
+        {
+          "label": "preact",
+          "children": [
+            { "label": "useTable", "to": "framework/preact/reference/functions/useTable" },
+            { "label": "createTableHook", "to": "framework/preact/reference/functions/createTableHook" },
+            { "label": "PreactTable", "to": "framework/preact/reference/type-aliases/PreactTable" },
+            { "label": "AppPreactTable", "to": "framework/preact/reference/type-aliases/AppPreactTable" },
+            { "label": "CreateTableHookOptions", "to": "framework/preact/reference/type-aliases/CreateTableHookOptions" },
+            { "label": "Subscribe", "to": "framework/preact/reference/functions/Subscribe" },
+            { "label": "FlexRender", "to": "framework/preact/reference/functions/FlexRender-1" },
+            { "label": "flexRender", "to": "framework/preact/reference/functions/flexRender" }
+          ]
+        },
+        {
+          "label": "solid",
+          "children": [
+            { "label": "createTable", "to": "framework/solid/reference/functions/createTable" },
+            { "label": "createTableHook", "to": "framework/solid/reference/functions/createTableHook" },
+            { "label": "SolidTable", "to": "framework/solid/reference/type-aliases/SolidTable" },
+            { "label": "AppSolidTable", "to": "framework/solid/reference/type-aliases/AppSolidTable" },
+            { "label": "CreateTableHookOptions", "to": "framework/solid/reference/type-aliases/CreateTableHookOptions" },
+            { "label": "FlexRender", "to": "framework/solid/reference/functions/FlexRender-1" },
+            { "label": "flexRender", "to": "framework/solid/reference/functions/flexRender" }
+          ]
+        },
+        {
+          "label": "svelte",
+          "children": [
+            { "label": "createTable", "to": "framework/svelte/reference/functions/createTable" },
+            { "label": "createTableHook", "to": "framework/svelte/reference/functions/createTableHook" },
+            { "label": "createTableState", "to": "framework/svelte/reference/functions/createTableState" },
+            { "label": "SvelteTable", "to": "framework/svelte/reference/type-aliases/SvelteTable" },
+            { "label": "AppSvelteTable", "to": "framework/svelte/reference/type-aliases/AppSvelteTable" },
+            { "label": "subscribeTable", "to": "framework/svelte/reference/functions/subscribeTable" },
+            { "label": "renderComponent", "to": "framework/svelte/reference/functions/renderComponent" },
+            { "label": "renderSnippet", "to": "framework/svelte/reference/functions/renderSnippet" },
+            { "label": "FlexRender", "to": "framework/svelte/reference/variables/FlexRender" }
+          ]
+        },
+        {
+          "label": "vue",
+          "children": [
+            { "label": "useTable", "to": "framework/vue/reference/functions/useTable" },
+            { "label": "createTableHook", "to": "framework/vue/reference/functions/createTableHook" },
+            { "label": "VueTable", "to": "framework/vue/reference/type-aliases/VueTable" },
+            { "label": "AppVueTable", "to": "framework/vue/reference/type-aliases/AppVueTable" },
+            { "label": "CreateTableHookOptions", "to": "framework/vue/reference/type-aliases/CreateTableHookOptions" },
+            { "label": "FlexRender", "to": "framework/vue/reference/variables/FlexRender" },
+            { "label": "flexRender", "to": "framework/vue/reference/functions/flexRender" }
+          ]
+        },
+        {
+          "label": "lit",
+          "children": [
+            { "label": "TableController", "to": "framework/lit/reference/classes/TableController" },
+            { "label": "createTableHook", "to": "framework/lit/reference/functions/createTableHook" },
+            { "label": "LitTable", "to": "framework/lit/reference/type-aliases/LitTable" },
+            { "label": "AppLitTable", "to": "framework/lit/reference/type-aliases/AppLitTable" },
+            { "label": "CreateTableHookOptions", "to": "framework/lit/reference/type-aliases/CreateTableHookOptions" },
+            { "label": "FlexRender", "to": "framework/lit/reference/functions/FlexRender-1" },
+            { "label": "flexRender", "to": "framework/lit/reference/functions/flexRender" }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsible": true,
+      "defaultCollapsed": true,
+      "label": "Column API Reference",
+      "children": [
+        { "label": "Column", "to": "reference/index/type-aliases/Column" },
+        { "label": "ColumnDef", "to": "reference/index/type-aliases/ColumnDef" },
+        { "label": "ColumnDefBase", "to": "reference/index/type-aliases/ColumnDefBase" },
+        { "label": "AccessorColumnDef", "to": "reference/index/type-aliases/AccessorColumnDef" },
+        { "label": "DisplayColumnDef", "to": "reference/index/type-aliases/DisplayColumnDef" },
+        { "label": "GroupColumnDef", "to": "reference/index/type-aliases/GroupColumnDef" },
+        { "label": "ColumnDefTemplate", "to": "reference/index/type-aliases/ColumnDefTemplate" },
+        { "label": "ColumnHelper", "to": "reference/index/type-aliases/ColumnHelper" },
+        { "label": "ColumnMeta", "to": "reference/index/interfaces/ColumnMeta" },
+        { "label": "createColumnHelper", "to": "reference/index/functions/createColumnHelper" },
+        { "label": "constructColumn", "to": "reference/index/functions/constructColumn" },
+        { "label": "AccessorFn", "to": "reference/index/type-aliases/AccessorFn" },
+        { "label": "DeepKeys", "to": "reference/index/type-aliases/DeepKeys" },
+        { "label": "DeepValue", "to": "reference/index/type-aliases/DeepValue" }
+      ],
+      "frameworks": [
+        {
+          "label": "react",
+          "children": [
+            { "label": "AppColumnHelper", "to": "framework/react/reference/index/type-aliases/AppColumnHelper" }
+          ]
+        },
+        {
+          "label": "angular",
+          "children": [
+            { "label": "AppColumnHelper", "to": "framework/angular/reference/type-aliases/AppColumnHelper" }
+          ]
+        },
+        {
+          "label": "preact",
+          "children": [
+            { "label": "AppColumnHelper", "to": "framework/preact/reference/type-aliases/AppColumnHelper" }
+          ]
+        },
+        {
+          "label": "solid",
+          "children": [
+            { "label": "AppColumnHelper", "to": "framework/solid/reference/type-aliases/AppColumnHelper" }
+          ]
+        },
+        {
+          "label": "svelte",
+          "children": [
+            { "label": "AppColumnHelper", "to": "framework/svelte/reference/type-aliases/AppColumnHelper" }
+          ]
+        },
+        {
+          "label": "vue",
+          "children": [
+            { "label": "AppColumnHelper", "to": "framework/vue/reference/type-aliases/AppColumnHelper" }
+          ]
+        },
+        {
+          "label": "lit",
+          "children": [
+            { "label": "AppColumnHelper", "to": "framework/lit/reference/type-aliases/AppColumnHelper" }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsible": true,
+      "defaultCollapsed": true,
+      "label": "Row API Reference",
+      "children": [
+        { "label": "Row", "to": "reference/index/type-aliases/Row" },
+        { "label": "RowData", "to": "reference/index/type-aliases/RowData" },
+        { "label": "RowModel", "to": "reference/index/interfaces/RowModel" },
+        { "label": "constructRow", "to": "reference/index/functions/constructRow" },
+        { "label": "createCoreRowModel", "to": "reference/index/functions/createCoreRowModel" },
+        { "label": "createFilteredRowModel", "to": "reference/index/functions/createFilteredRowModel" },
+        { "label": "createSortedRowModel", "to": "reference/index/functions/createSortedRowModel" },
+        { "label": "createGroupedRowModel", "to": "reference/index/functions/createGroupedRowModel" },
+        { "label": "createExpandedRowModel", "to": "reference/index/functions/createExpandedRowModel" },
+        { "label": "createPaginatedRowModel", "to": "reference/index/functions/createPaginatedRowModel" },
+        { "label": "createFacetedRowModel", "to": "reference/index/functions/createFacetedRowModel" },
+        { "label": "createFacetedMinMaxValues", "to": "reference/index/functions/createFacetedMinMaxValues" },
+        { "label": "createFacetedUniqueValues", "to": "reference/index/functions/createFacetedUniqueValues" },
+        { "label": "expandRows", "to": "reference/index/functions/expandRows" },
+        { "label": "RowModelFns", "to": "reference/index/type-aliases/RowModelFns" },
+        { "label": "CreateRowModels", "to": "reference/index/type-aliases/CreateRowModels" },
+        { "label": "CachedRowModels", "to": "reference/index/type-aliases/CachedRowModels" }
+      ]
+    },
+    {
+      "collapsible": true,
+      "defaultCollapsed": true,
+      "label": "Cell API Reference",
+      "children": [
+        { "label": "Cell", "to": "reference/index/type-aliases/Cell" },
+        { "label": "CellContext", "to": "reference/index/interfaces/CellContext" },
+        { "label": "CellData", "to": "reference/index/type-aliases/CellData" },
+        { "label": "constructCell", "to": "reference/index/functions/constructCell" }
+      ],
+      "frameworks": [
+        {
+          "label": "react",
+          "children": [
+            { "label": "AppCellContext", "to": "framework/react/reference/index/type-aliases/AppCellContext" }
+          ]
+        },
+        {
+          "label": "angular",
+          "children": [
+            { "label": "AppCellContext", "to": "framework/angular/reference/type-aliases/AppCellContext" }
+          ]
+        },
+        {
+          "label": "preact",
+          "children": [
+            { "label": "AppCellContext", "to": "framework/preact/reference/type-aliases/AppCellContext" }
+          ]
+        },
+        {
+          "label": "solid",
+          "children": [
+            { "label": "AppCellContext", "to": "framework/solid/reference/type-aliases/AppCellContext" }
+          ]
+        },
+        {
+          "label": "svelte",
+          "children": [
+            { "label": "AppCellContext", "to": "framework/svelte/reference/type-aliases/AppCellContext" }
+          ]
+        },
+        {
+          "label": "vue",
+          "children": [
+            { "label": "AppCellContext", "to": "framework/vue/reference/type-aliases/AppCellContext" }
+          ]
+        },
+        {
+          "label": "lit",
+          "children": [
+            { "label": "AppCellContext", "to": "framework/lit/reference/type-aliases/AppCellContext" }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsible": true,
+      "defaultCollapsed": true,
+      "label": "Header API Reference",
+      "children": [
+        { "label": "Header", "to": "reference/index/type-aliases/Header" },
+        { "label": "HeaderGroup", "to": "reference/index/type-aliases/HeaderGroup" },
+        { "label": "HeaderContext", "to": "reference/index/interfaces/HeaderContext" },
+        { "label": "constructHeader", "to": "reference/index/functions/constructHeader" },
+        { "label": "buildHeaderGroups", "to": "reference/index/functions/buildHeaderGroups" }
+      ],
+      "frameworks": [
+        {
+          "label": "react",
+          "children": [
+            { "label": "AppHeaderContext", "to": "framework/react/reference/index/type-aliases/AppHeaderContext" }
+          ]
+        },
+        {
+          "label": "angular",
+          "children": [
+            { "label": "AppHeaderContext", "to": "framework/angular/reference/type-aliases/AppHeaderContext" }
+          ]
+        },
+        {
+          "label": "preact",
+          "children": [
+            { "label": "AppHeaderContext", "to": "framework/preact/reference/type-aliases/AppHeaderContext" }
+          ]
+        },
+        {
+          "label": "solid",
+          "children": [
+            { "label": "AppHeaderContext", "to": "framework/solid/reference/type-aliases/AppHeaderContext" }
+          ]
+        },
+        {
+          "label": "svelte",
+          "children": [
+            { "label": "AppHeaderContext", "to": "framework/svelte/reference/type-aliases/AppHeaderContext" }
+          ]
+        },
+        {
+          "label": "vue",
+          "children": [
+            { "label": "AppHeaderContext", "to": "framework/vue/reference/type-aliases/AppHeaderContext" }
+          ]
+        },
+        {
+          "label": "lit",
+          "children": [
+            { "label": "AppHeaderContext", "to": "framework/lit/reference/type-aliases/AppHeaderContext" }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsible": true,
+      "defaultCollapsed": true,
+      "label": "Features API Reference",
+      "children": [
+        { "label": "stockFeatures", "to": "reference/index/variables/stockFeatures" },
+        { "label": "coreFeatures", "to": "reference/index/variables/coreFeatures" },
+        { "label": "coreCellsFeature", "to": "reference/index/variables/coreCellsFeature" },
+        { "label": "coreColumnsFeature", "to": "reference/index/variables/coreColumnsFeature" },
+        { "label": "coreHeadersFeature", "to": "reference/index/variables/coreHeadersFeature" },
+        { "label": "coreRowModelsFeature", "to": "reference/index/variables/coreRowModelsFeature" },
+        { "label": "coreRowsFeature", "to": "reference/index/variables/coreRowsFeature" },
+        { "label": "coreTablesFeature", "to": "reference/index/variables/coreTablesFeature" },
+        { "label": "columnFilteringFeature", "to": "reference/index/variables/columnFilteringFeature" },
+        { "label": "columnFacetingFeature", "to": "reference/index/variables/columnFacetingFeature" },
+        { "label": "columnGroupingFeature", "to": "reference/index/variables/columnGroupingFeature" },
+        { "label": "columnOrderingFeature", "to": "reference/index/variables/columnOrderingFeature" },
+        { "label": "columnPinningFeature", "to": "reference/index/variables/columnPinningFeature" },
+        { "label": "columnResizingFeature", "to": "reference/index/variables/columnResizingFeature" },
+        { "label": "columnSizingFeature", "to": "reference/index/variables/columnSizingFeature" },
+        { "label": "columnVisibilityFeature", "to": "reference/index/variables/columnVisibilityFeature" },
+        { "label": "globalFilteringFeature", "to": "reference/index/variables/globalFilteringFeature" },
+        { "label": "rowExpandingFeature", "to": "reference/index/variables/rowExpandingFeature" },
+        { "label": "rowPaginationFeature", "to": "reference/index/variables/rowPaginationFeature" },
+        { "label": "rowPinningFeature", "to": "reference/index/variables/rowPinningFeature" },
+        { "label": "rowSelectionFeature", "to": "reference/index/variables/rowSelectionFeature" },
+        { "label": "rowSortingFeature", "to": "reference/index/variables/rowSortingFeature" },
+        { "label": "filterFns", "to": "reference/index/variables/filterFns" },
+        { "label": "sortFns", "to": "reference/index/variables/sortFns" },
+        { "label": "aggregationFns", "to": "reference/index/variables/aggregationFns" },
+        { "label": "ColumnFilter", "to": "reference/index/interfaces/ColumnFilter" },
+        { "label": "ColumnPinningState", "to": "reference/index/interfaces/ColumnPinningState" },
+        { "label": "ColumnSort", "to": "reference/index/interfaces/ColumnSort" },
+        { "label": "PaginationState", "to": "reference/index/interfaces/PaginationState" },
+        { "label": "RowPinningState", "to": "reference/index/interfaces/RowPinningState" },
+        { "label": "columnResizingState", "to": "reference/index/interfaces/columnResizingState" },
+        { "label": "FilterFn", "to": "reference/index/interfaces/FilterFn" },
+        { "label": "FilterFns", "to": "reference/index/interfaces/FilterFns" },
+        { "label": "FilterMeta", "to": "reference/index/interfaces/FilterMeta" },
+        { "label": "SortFn", "to": "reference/index/interfaces/SortFn" },
+        { "label": "SortFns", "to": "reference/index/interfaces/SortFns" },
+        { "label": "AggregationFns", "to": "reference/index/interfaces/AggregationFns" },
+        { "label": "ColumnFiltersState", "to": "reference/index/type-aliases/ColumnFiltersState" },
+        { "label": "ColumnOrderState", "to": "reference/index/type-aliases/ColumnOrderState" },
+        { "label": "ColumnPinningPosition", "to": "reference/index/type-aliases/ColumnPinningPosition" },
+        { "label": "ColumnResizeDirection", "to": "reference/index/type-aliases/ColumnResizeDirection" },
+        { "label": "ColumnResizeMode", "to": "reference/index/type-aliases/ColumnResizeMode" },
+        { "label": "ColumnSizingState", "to": "reference/index/type-aliases/ColumnSizingState" },
+        { "label": "ColumnVisibilityState", "to": "reference/index/type-aliases/ColumnVisibilityState" },
+        { "label": "ExpandedState", "to": "reference/index/type-aliases/ExpandedState" },
+        { "label": "GroupingState", "to": "reference/index/type-aliases/GroupingState" },
+        { "label": "RowPinningPosition", "to": "reference/index/type-aliases/RowPinningPosition" },
+        { "label": "RowSelectionState", "to": "reference/index/type-aliases/RowSelectionState" },
+        { "label": "SortDirection", "to": "reference/index/type-aliases/SortDirection" },
+        { "label": "SortingState", "to": "reference/index/type-aliases/SortingState" },
+        { "label": "AggregationFn", "to": "reference/index/type-aliases/AggregationFn" },
+        { "label": "AggregationFnOption", "to": "reference/index/type-aliases/AggregationFnOption" },
+        { "label": "FilterFnOption", "to": "reference/index/type-aliases/FilterFnOption" },
+        { "label": "SortFnOption", "to": "reference/index/type-aliases/SortFnOption" },
+        { "label": "BuiltInAggregationFn", "to": "reference/index/type-aliases/BuiltInAggregationFn" },
+        { "label": "BuiltInFilterFn", "to": "reference/index/type-aliases/BuiltInFilterFn" },
+        { "label": "BuiltInSortFn", "to": "reference/index/type-aliases/BuiltInSortFn" }
+      ]
+    },
+    {
+      "collapsible": true,
+      "defaultCollapsed": true,
+      "label": "Static Functions API Reference",
+      "children": [
+        { "label": "Static Functions Overview", "to": "reference/static-functions/index" }
+      ]
+    },
+    {
+      "collapsible": true,
+      "defaultCollapsed": true,
+      "label": "Legacy API Reference",
+      "children": [],
+      "frameworks": [
+        {
+          "label": "react",
+          "children": [
+            { "label": "Legacy API Overview", "to": "framework/react/reference/legacy/index" },
+            { "label": "useLegacyTable", "to": "framework/react/reference/legacy/functions/useLegacyTable" },
+            { "label": "legacyCreateColumnHelper", "to": "framework/react/reference/legacy/functions/legacyCreateColumnHelper" },
+            { "label": "getCoreRowModel", "to": "framework/react/reference/legacy/functions/getCoreRowModel" },
+            { "label": "getFilteredRowModel", "to": "framework/react/reference/legacy/functions/getFilteredRowModel" },
+            { "label": "getSortedRowModel", "to": "framework/react/reference/legacy/functions/getSortedRowModel" },
+            { "label": "getGroupedRowModel", "to": "framework/react/reference/legacy/functions/getGroupedRowModel" },
+            { "label": "getExpandedRowModel", "to": "framework/react/reference/legacy/functions/getExpandedRowModel" },
+            { "label": "getPaginationRowModel", "to": "framework/react/reference/legacy/functions/getPaginationRowModel" },
+            { "label": "getFacetedRowModel", "to": "framework/react/reference/legacy/functions/getFacetedRowModel" },
+            { "label": "getFacetedMinMaxValues", "to": "framework/react/reference/legacy/functions/getFacetedMinMaxValues" },
+            { "label": "getFacetedUniqueValues", "to": "framework/react/reference/legacy/functions/getFacetedUniqueValues" },
+            { "label": "LegacyRowModelOptions", "to": "framework/react/reference/legacy/interfaces/LegacyRowModelOptions" },
+            { "label": "LegacyTable", "to": "framework/react/reference/legacy/type-aliases/LegacyTable" },
+            { "label": "LegacyTableOptions", "to": "framework/react/reference/legacy/type-aliases/LegacyTableOptions" },
+            { "label": "LegacyReactTable", "to": "framework/react/reference/legacy/type-aliases/LegacyReactTable" },
+            { "label": "LegacyColumnDef", "to": "framework/react/reference/legacy/type-aliases/LegacyColumnDef" }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Basic Examples",
+      "children": [],
+      "frameworks": [
+        {
+          "label": "angular",
+          "children": [
+            { "label": "Basic (injectTable)", "to": "framework/angular/examples/basic-inject-table" },
+            { "label": "Basic (createAppTable)", "to": "framework/angular/examples/basic-app-table" },
+            { "label": "Basic (External State)", "to": "framework/angular/examples/basic-external-state" },
+            { "label": "Basic (External Atoms)", "to": "framework/angular/examples/basic-external-atoms" },
+            { "label": "Header Groups", "to": "framework/angular/examples/column-groups" }
+          ]
+        },
+        {
+          "label": "lit",
+          "children": [
+            { "label": "Basic (TableController)", "to": "framework/lit/examples/basic-table-controller" },
+            { "label": "Basic (useAppTable)", "to": "framework/lit/examples/basic-app-table" },
+            { "label": "Basic (External State)", "to": "framework/lit/examples/basic-external-state" },
+            { "label": "Basic (External Atoms)", "to": "framework/lit/examples/basic-external-atoms" },
+            { "label": "Header Groups", "to": "framework/lit/examples/column-groups" }
+          ]
+        },
+        {
+          "label": "react",
+          "children": [
+            { "label": "Basic (useTable)", "to": "framework/react/examples/basic-use-table" },
+            { "label": "Basic (useAppTable)", "to": "framework/react/examples/basic-use-app-table" },
+            { "label": "Basic (useLegacyTable)", "to": "framework/react/examples/basic-use-legacy-table" },
+            { "label": "Basic (External State)", "to": "framework/react/examples/basic-external-state" },
+            { "label": "Basic (External Atoms)", "to": "framework/react/examples/basic-external-atoms" },
+            { "label": "Basic (Subscribe)", "to": "framework/react/examples/basic-subscribe" },
+            { "label": "Header Groups", "to": "framework/react/examples/column-groups" }
+          ]
+        },
+        {
+          "label": "solid",
+          "children": [
+            { "label": "Basic (createTable)", "to": "framework/solid/examples/basic-use-table" },
+            { "label": "Basic (createAppTable)", "to": "framework/solid/examples/basic-app-table" },
+            { "label": "Basic (External State)", "to": "framework/solid/examples/basic-external-state" },
+            { "label": "Basic (External Atoms)", "to": "framework/solid/examples/basic-external-atoms" },
+            { "label": "Header Groups", "to": "framework/solid/examples/column-groups" }
+          ]
+        },
+        {
+          "label": "svelte",
+          "children": [
+            { "label": "Basic (createTable)", "to": "framework/svelte/examples/basic-create-table" },
+            { "label": "Basic (createAppTable)", "to": "framework/svelte/examples/basic-app-table" },
+            { "label": "Basic (Snippets)", "to": "framework/svelte/examples/basic-snippets" },
+            { "label": "Basic (External State)", "to": "framework/svelte/examples/basic-external-state" },
+            { "label": "Basic (External Atoms)", "to": "framework/svelte/examples/basic-external-atoms" },
+            { "label": "Header Groups", "to": "framework/svelte/examples/column-groups" }
+          ]
+        },
+        {
+          "label": "vue",
+          "children": [
+            { "label": "Basic (useTable)", "to": "framework/vue/examples/basic-use-table" },
+            { "label": "Basic (useAppTable)", "to": "framework/vue/examples/basic-use-app-table" },
+            { "label": "Basic (External State)", "to": "framework/vue/examples/basic-external-state" },
+            { "label": "Basic (External Atoms)", "to": "framework/vue/examples/basic-external-atoms" },
+            { "label": "Header Groups", "to": "framework/vue/examples/column-groups" }
+          ]
+        },
+        {
+          "label": "preact",
+          "children": [
+            { "label": "Basic (useTable)", "to": "framework/preact/examples/basic-use-table" },
+            { "label": "Basic (useAppTable)", "to": "framework/preact/examples/basic-use-app-table" },
+            { "label": "Basic (External State)", "to": "framework/preact/examples/basic-external-state" },
+            { "label": "Basic (External Atoms)", "to": "framework/preact/examples/basic-external-atoms" },
+            { "label": "Basic (Subscribe)", "to": "framework/preact/examples/basic-subscribe" },
+            { "label": "Header Groups", "to": "framework/preact/examples/column-groups" }
+          ]
+        },
+        {
+          "label": "vanilla",
+          "children": [
+            { "label": "Basic", "to": "framework/vanilla/examples/basic" }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Feature Examples",
+      "children": [],
+      "frameworks": [
+        {
+          "label": "angular",
+          "children": [
+            { "label": "Column Filters", "to": "framework/angular/examples/filters" },
+            { "label": "Column Filters (Faceted)", "to": "framework/angular/examples/filters-faceted" },
+            { "label": "Fuzzy Search Filters", "to": "framework/angular/examples/filters-fuzzy" },
+            { "label": "Column Ordering", "to": "framework/angular/examples/column-ordering" },
+            { "label": "Column Pinning", "to": "framework/angular/examples/column-pinning" },
+            { "label": "Column Pinning (Split)", "to": "framework/angular/examples/column-pinning-split" },
+            { "label": "Sticky Column Pinning", "to": "framework/angular/examples/column-pinning-sticky" },
+            { "label": "Column Sizing", "to": "framework/angular/examples/column-sizing" },
+            { "label": "Column Resizing", "to": "framework/angular/examples/column-resizing" },
+            { "label": "Performant Column Resizing", "to": "framework/angular/examples/column-resizing-performant" },
+            { "label": "Column Visibility", "to": "framework/angular/examples/column-visibility" },
+            { "label": "Expanding", "to": "framework/angular/examples/expanding" },
+            { "label": "Grouping", "to": "framework/angular/examples/grouping" },
+            { "label": "Pagination", "to": "framework/angular/examples/pagination" },
+            { "label": "Row Pinning", "to": "framework/angular/examples/row-pinning" },
+            { "label": "Row Selection", "to": "framework/angular/examples/row-selection" },
+            { "label": "Sorting", "to": "framework/angular/examples/sorting" },
+            { "label": "Kitchen Sink (All Features)", "to": "framework/angular/examples/kitchen-sink" }
+          ]
+        },
+        {
+          "label": "lit",
+          "children": [
+            { "label": "Column Filters", "to": "framework/lit/examples/filters" },
+            { "label": "Column Filters (Faceted)", "to": "framework/lit/examples/filters-faceted" },
+            { "label": "Fuzzy Search Filters", "to": "framework/lit/examples/filters-fuzzy" },
+            { "label": "Column Ordering", "to": "framework/lit/examples/column-ordering" },
+            { "label": "Column Pinning", "to": "framework/lit/examples/column-pinning" },
+            { "label": "Column Pinning (Split)", "to": "framework/lit/examples/column-pinning-split" },
+            { "label": "Sticky Column Pinning", "to": "framework/lit/examples/column-pinning-sticky" },
+            { "label": "Column Sizing", "to": "framework/lit/examples/column-sizing" },
+            { "label": "Column Resizing", "to": "framework/lit/examples/column-resizing" },
+            { "label": "Performant Column Resizing", "to": "framework/lit/examples/column-resizing-performant" },
+            { "label": "Column Visibility", "to": "framework/lit/examples/column-visibility" },
+            { "label": "Expanding", "to": "framework/lit/examples/expanding" },
+            { "label": "Grouping", "to": "framework/lit/examples/grouping" },
+            { "label": "Pagination", "to": "framework/lit/examples/pagination" },
+            { "label": "Row Pinning", "to": "framework/lit/examples/row-pinning" },
+            { "label": "Row Selection", "to": "framework/lit/examples/row-selection" },
+            { "label": "Sorting", "to": "framework/lit/examples/sorting" },
+            { "label": "Sorting (Dynamic Data)", "to": "framework/lit/examples/sorting-dynamic-data" },
+            { "label": "Kitchen Sink (All Features)", "to": "framework/lit/examples/kitchen-sink" }
+          ]
+        },
+        {
+          "label": "react",
+          "children": [
+            { "label": "Column Filters", "to": "framework/react/examples/filters" },
+            { "label": "Column Filters (Faceted)", "to": "framework/react/examples/filters-faceted" },
+            { "label": "Fuzzy Search Filters", "to": "framework/react/examples/filters-fuzzy" },
+            { "label": "Column Ordering", "to": "framework/react/examples/column-ordering" },
+            { "label": "Column Ordering (DnD)", "to": "framework/react/examples/column-dnd" },
+            { "label": "Column Pinning", "to": "framework/react/examples/column-pinning" },
+            { "label": "Column Pinning (Split)", "to": "framework/react/examples/column-pinning-split" },
+            { "label": "Sticky Column Pinning", "to": "framework/react/examples/column-pinning-sticky" },
+            { "label": "Column Sizing", "to": "framework/react/examples/column-sizing" },
+            { "label": "Column Resizing", "to": "framework/react/examples/column-resizing" },
+            { "label": "Performant Column Resizing", "to": "framework/react/examples/column-resizing-performant" },
+            { "label": "Column Visibility", "to": "framework/react/examples/column-visibility" },
+            { "label": "Expanding", "to": "framework/react/examples/expanding" },
+            { "label": "Grouping", "to": "framework/react/examples/grouping" },
+            { "label": "Pagination", "to": "framework/react/examples/pagination" },
+            { "label": "Row DnD", "to": "framework/react/examples/row-dnd" },
+            { "label": "Row Pinning", "to": "framework/react/examples/row-pinning" },
+            { "label": "Row Selection", "to": "framework/react/examples/row-selection" },
+            { "label": "Sorting", "to": "framework/react/examples/sorting" },
+            { "label": "Kitchen Sink (All Features)", "to": "framework/react/examples/kitchen-sink" }
+          ]
+        },
+        {
+          "label": "solid",
+          "children": [
+            { "label": "Column Filters", "to": "framework/solid/examples/filters" },
+            { "label": "Column Filters (Faceted)", "to": "framework/solid/examples/filters-faceted" },
+            { "label": "Fuzzy Search Filters", "to": "framework/solid/examples/filters-fuzzy" },
+            { "label": "Column Ordering", "to": "framework/solid/examples/column-ordering" },
+            { "label": "Column Pinning", "to": "framework/solid/examples/column-pinning" },
+            { "label": "Column Pinning (Split)", "to": "framework/solid/examples/column-pinning-split" },
+            { "label": "Sticky Column Pinning", "to": "framework/solid/examples/column-pinning-sticky" },
+            { "label": "Column Sizing", "to": "framework/solid/examples/column-sizing" },
+            { "label": "Column Resizing", "to": "framework/solid/examples/column-resizing" },
+            { "label": "Performant Column Resizing", "to": "framework/solid/examples/column-resizing-performant" },
+            { "label": "Column Visibility", "to": "framework/solid/examples/column-visibility" },
+            { "label": "Expanding", "to": "framework/solid/examples/expanding" },
+            { "label": "Grouping", "to": "framework/solid/examples/grouping" },
+            { "label": "Pagination", "to": "framework/solid/examples/pagination" },
+            { "label": "Row Pinning", "to": "framework/solid/examples/row-pinning" },
+            { "label": "Row Selection", "to": "framework/solid/examples/row-selection" },
+            { "label": "Sorting", "to": "framework/solid/examples/sorting" },
+            { "label": "Kitchen Sink (All Features)", "to": "framework/solid/examples/kitchen-sink" }
+          ]
+        },
+        {
+          "label": "svelte",
+          "children": [
+            { "label": "Column Filters", "to": "framework/svelte/examples/filtering" },
+            { "label": "Column Filters (Faceted)", "to": "framework/svelte/examples/filters-faceted" },
+            { "label": "Fuzzy Search Filters", "to": "framework/svelte/examples/filters-fuzzy" },
+            { "label": "Column Ordering", "to": "framework/svelte/examples/column-ordering" },
+            { "label": "Column Pinning", "to": "framework/svelte/examples/column-pinning" },
+            { "label": "Column Pinning (Split)", "to": "framework/svelte/examples/column-pinning-split" },
+            { "label": "Sticky Column Pinning", "to": "framework/svelte/examples/column-pinning-sticky" },
+            { "label": "Column Sizing", "to": "framework/svelte/examples/column-sizing" },
+            { "label": "Column Resizing", "to": "framework/svelte/examples/column-resizing" },
+            { "label": "Performant Column Resizing", "to": "framework/svelte/examples/column-resizing-performant" },
+            { "label": "Column Visibility", "to": "framework/svelte/examples/column-visibility" },
+            { "label": "Expanding", "to": "framework/svelte/examples/expanding" },
+            { "label": "Grouping", "to": "framework/svelte/examples/grouping" },
+            { "label": "Pagination", "to": "framework/svelte/examples/pagination" },
+            { "label": "Row Pinning", "to": "framework/svelte/examples/row-pinning" },
+            { "label": "Row Selection", "to": "framework/svelte/examples/row-selection" },
+            { "label": "Sorting", "to": "framework/svelte/examples/sorting" },
+            { "label": "Kitchen Sink (All Features)", "to": "framework/svelte/examples/kitchen-sink" }
+          ]
+        },
+        {
+          "label": "vue",
+          "children": [
+            { "label": "Column Filters", "to": "framework/vue/examples/filters" },
+            { "label": "Column Filters (Faceted)", "to": "framework/vue/examples/filters-faceted" },
+            { "label": "Fuzzy Search Filters", "to": "framework/vue/examples/filters-fuzzy" },
+            { "label": "Column Ordering", "to": "framework/vue/examples/column-ordering" },
+            { "label": "Column Pinning", "to": "framework/vue/examples/column-pinning" },
+            { "label": "Column Pinning (Split)", "to": "framework/vue/examples/column-pinning-split" },
+            { "label": "Sticky Column Pinning", "to": "framework/vue/examples/column-pinning-sticky" },
+            { "label": "Column Sizing", "to": "framework/vue/examples/column-sizing" },
+            { "label": "Column Resizing", "to": "framework/vue/examples/column-resizing" },
+            { "label": "Performant Column Resizing", "to": "framework/vue/examples/column-resizing-performant" },
+            { "label": "Column Visibility", "to": "framework/vue/examples/column-visibility" },
+            { "label": "Expanding", "to": "framework/vue/examples/expanding" },
+            { "label": "Grouping", "to": "framework/vue/examples/grouping" },
+            { "label": "Pagination", "to": "framework/vue/examples/pagination" },
+            { "label": "Row Pinning", "to": "framework/vue/examples/row-pinning" },
+            { "label": "Row Selection", "to": "framework/vue/examples/row-selection" },
+            { "label": "Sorting", "to": "framework/vue/examples/sorting" },
+            { "label": "Kitchen Sink (All Features)", "to": "framework/vue/examples/kitchen-sink" }
+          ]
+        },
+        {
+          "label": "preact",
+          "children": [
+            { "label": "Column Filters", "to": "framework/preact/examples/filters" },
+            { "label": "Column Filters (Faceted)", "to": "framework/preact/examples/filters-faceted" },
+            { "label": "Fuzzy Search Filters", "to": "framework/preact/examples/filters-fuzzy" },
+            { "label": "Column Ordering", "to": "framework/preact/examples/column-ordering" },
+            { "label": "Column Pinning", "to": "framework/preact/examples/column-pinning" },
+            { "label": "Column Pinning (Split)", "to": "framework/preact/examples/column-pinning-split" },
+            { "label": "Sticky Column Pinning", "to": "framework/preact/examples/column-pinning-sticky" },
+            { "label": "Column Sizing", "to": "framework/preact/examples/column-sizing" },
+            { "label": "Column Resizing", "to": "framework/preact/examples/column-resizing" },
+            { "label": "Performant Column Resizing", "to": "framework/preact/examples/column-resizing-performant" },
+            { "label": "Column Visibility", "to": "framework/preact/examples/column-visibility" },
+            { "label": "Expanding", "to": "framework/preact/examples/expanding" },
+            { "label": "Grouping", "to": "framework/preact/examples/grouping" },
+            { "label": "Pagination", "to": "framework/preact/examples/pagination" },
+            { "label": "Row Pinning", "to": "framework/preact/examples/row-pinning" },
+            { "label": "Row Selection", "to": "framework/preact/examples/row-selection" },
+            { "label": "Sorting", "to": "framework/preact/examples/sorting" },
+            { "label": "Kitchen Sink (All Features)", "to": "framework/preact/examples/kitchen-sink" }
+          ]
+        },
+        {
+          "label": "vanilla",
+          "children": [
+            { "label": "Pagination", "to": "framework/vanilla/examples/pagination" },
+            { "label": "Sorting", "to": "framework/vanilla/examples/sorting" }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Specialized Examples",
+      "children": [],
+      "frameworks": [
+        {
+          "label": "angular",
+          "children": [
+            { "label": "Composable Tables", "to": "framework/angular/examples/composable-tables" },
+            { "label": "Custom Plugin", "to": "framework/angular/examples/custom-plugin" },
+            { "label": "Sub Components", "to": "framework/angular/examples/sub-components" },
+            { "label": "With TanStack Virtual - Columns", "to": "framework/angular/examples/virtualized-columns" },
+            { "label": "With TanStack Virtual - Rows", "to": "framework/angular/examples/virtualized-rows" },
+            { "label": "With TanStack Virtual - Infinite Scrolling", "to": "framework/angular/examples/virtualized-infinite-scrolling" },
+            { "label": "With TanStack Form", "to": "framework/angular/examples/with-tanstack-form" },
+            { "label": "With TanStack Query", "to": "framework/angular/examples/with-tanstack-query" },
+            { "label": "Fetch API data (SPA / SSR)", "to": "framework/angular/examples/remote-data" },
+            { "label": "Signal Input", "to": "framework/angular/examples/signal-input" },
+            { "label": "Row Selection (Signal)", "to": "framework/angular/examples/row-selection-signal" },
+            { "label": "Editable data", "to": "framework/angular/examples/editable" },
+            { "label": "Row Drag & Drop", "to": "framework/angular/examples/row-dnd" }
+          ]
+        },
+        {
+          "label": "lit",
+          "children": [
+            { "label": "Composable Tables", "to": "framework/lit/examples/composable-tables" },
+            { "label": "Sub Components", "to": "framework/lit/examples/sub-components" },
+            { "label": "With TanStack Virtual - Columns", "to": "framework/lit/examples/virtualized-columns" },
+            { "label": "With TanStack Virtual - Rows", "to": "framework/lit/examples/virtualized-rows" },
+            { "label": "With TanStack Virtual - Infinite Scrolling", "to": "framework/lit/examples/virtualized-infinite-scrolling" }
+          ]
+        },
+        {
+          "label": "react",
+          "children": [
+            { "label": "Composable Tables", "to": "framework/react/examples/composable-tables" },
+            { "label": "Custom Plugin", "to": "framework/react/examples/custom-plugin" },
+            { "label": "Sub Components", "to": "framework/react/examples/sub-components" },
+            { "label": "With TanStack Virtual - Columns", "to": "framework/react/examples/virtualized-columns" },
+            { "label": "With TanStack Virtual - Columns (Exp)", "to": "framework/react/examples/virtualized-columns-experimental" },
+            { "label": "With TanStack Virtual - Rows", "to": "framework/react/examples/virtualized-rows" },
+            { "label": "With TanStack Virtual - Rows (Exp)", "to": "framework/react/examples/virtualized-rows-experimental" },
+            { "label": "With TanStack Virtual - Infinite Scrolling", "to": "framework/react/examples/virtualized-infinite-scrolling" },
+            { "label": "With TanStack Form", "to": "framework/react/examples/with-tanstack-form" },
+            { "label": "With TanStack Query", "to": "framework/react/examples/with-tanstack-query" },
+            { "label": "With TanStack Router", "to": "framework/react/examples/with-tanstack-router" }
+          ]
+        },
+        {
+          "label": "solid",
+          "children": [
+            { "label": "Composable Tables", "to": "framework/solid/examples/composable-tables" },
+            { "label": "Sub Components", "to": "framework/solid/examples/sub-components" },
+            { "label": "With TanStack Virtual - Columns", "to": "framework/solid/examples/virtualized-columns" },
+            { "label": "With TanStack Virtual - Rows", "to": "framework/solid/examples/virtualized-rows" },
+            { "label": "With TanStack Virtual - Infinite Scrolling", "to": "framework/solid/examples/virtualized-infinite-scrolling" },
+            { "label": "With TanStack Form", "to": "framework/solid/examples/with-tanstack-form" },
+            { "label": "With TanStack Query", "to": "framework/solid/examples/with-tanstack-query" },
+            { "label": "With TanStack Router", "to": "framework/solid/examples/with-tanstack-router" }
+          ]
+        },
+        {
+          "label": "svelte",
+          "children": [
+            { "label": "Composable Tables", "to": "framework/svelte/examples/composable-tables" },
+            { "label": "Sub Components", "to": "framework/svelte/examples/sub-components" },
+            { "label": "With TanStack Virtual - Columns", "to": "framework/svelte/examples/virtualized-columns" },
+            { "label": "With TanStack Virtual - Rows", "to": "framework/svelte/examples/virtualized-rows" },
+            { "label": "With TanStack Virtual - Infinite Scrolling", "to": "framework/svelte/examples/virtualized-infinite-scrolling" },
+            { "label": "With TanStack Form", "to": "framework/svelte/examples/with-tanstack-form" },
+            { "label": "With TanStack Query", "to": "framework/svelte/examples/with-tanstack-query" }
+          ]
+        },
+        {
+          "label": "vue",
+          "children": [
+            { "label": "Composable Tables", "to": "framework/vue/examples/composable-tables" },
+            { "label": "Sub Components", "to": "framework/vue/examples/sub-components" },
+            { "label": "With TanStack Virtual - Columns", "to": "framework/vue/examples/virtualized-columns" },
+            { "label": "With TanStack Virtual - Rows", "to": "framework/vue/examples/virtualized-rows" },
+            { "label": "With TanStack Virtual - Infinite Scrolling", "to": "framework/vue/examples/virtualized-infinite-scrolling" },
+            { "label": "With TanStack Form", "to": "framework/vue/examples/with-tanstack-form" },
+            { "label": "With TanStack Query", "to": "framework/vue/examples/with-tanstack-query" }
+          ]
+        },
+        {
+          "label": "preact",
+          "children": [
+            { "label": "Composable Tables", "to": "framework/preact/examples/composable-tables" },
+            { "label": "Custom Plugin", "to": "framework/preact/examples/custom-plugin" },
+            { "label": "Sub Components", "to": "framework/preact/examples/sub-components" },
+            { "label": "With TanStack Query", "to": "framework/preact/examples/with-tanstack-query" }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Component Library Examples",
+      "children": [],
+      "frameworks": [
+        {
+          "label": "react",
+          "children": [
+            { "label": "Basic - Shadcn (Radix)", "to": "framework/react/examples/lib-shadcn-radix" },
+            { "label": "Basic - Shadcn (Base UI)", "to": "framework/react/examples/lib-shadcn-base" },
+            { "label": "Basic - React Aria", "to": "framework/react/examples/lib-react-aria" },
+            { "label": "Basic - Hero UI", "to": "framework/react/examples/lib-hero-ui" },
+            { "label": "Basic - Material UI", "to": "framework/react/examples/lib-material-ui" },
+            { "label": "Basic - Mantine", "to": "framework/react/examples/lib-mantine" },
+            { "label": "Kitchen Sink - Shadcn (Radix)", "to": "framework/react/examples/kitchen-sink-shadcn-radix" },
+            { "label": "Kitchen Sink - Shadcn (Base UI)", "to": "framework/react/examples/kitchen-sink-shadcn-base" },
+            { "label": "Kitchen Sink - React Aria", "to": "framework/react/examples/kitchen-sink-react-aria" },
+            { "label": "Kitchen Sink - Hero UI", "to": "framework/react/examples/kitchen-sink-hero-ui" },
+            { "label": "Kitchen Sink - Material UI", "to": "framework/react/examples/kitchen-sink-material-ui" },
+            { "label": "Kitchen Sink - Mantine", "to": "framework/react/examples/kitchen-sink-mantine" },
+            { "label": "Material React Table", "to": "framework/react/examples/material-react-table" },
+            { "label": "Mantine React Table", "to": "framework/react/examples/mantine-react-table" }
+          ]
+        }
+      ]
+    }
+  ]
+}

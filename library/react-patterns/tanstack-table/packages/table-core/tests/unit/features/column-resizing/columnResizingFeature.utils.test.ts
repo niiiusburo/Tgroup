@@ -1,0 +1,457 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  column_getCanResize,
+  column_getIsResizing,
+  getDefaultColumnResizingState,
+  header_getResizeHandler,
+  isTouchStartEvent,
+  passiveEventSupported,
+  table_resetHeaderSizeInfo,
+  table_setColumnResizing,
+} from '../../../../src/static-functions'
+import { generateTestTableWithData } from '../../../helpers/generateTestTable'
+
+// Add type for the features we need
+type TestFeatures = {
+  columnResizingFeature: {}
+  columnSizingFeature: {}
+}
+
+// Helper function to create a properly structured test header
+function createTestResizeHeader(table: any, overrides = {}) {
+  const baseColumn = {
+    ...table.getAllColumns()[0],
+    id: 'firstName',
+    columnDef: {
+      enableResizing: true,
+    },
+    table,
+    getLeafColumns: () => [
+      {
+        ...table.getAllColumns()[0],
+        id: 'firstName',
+        columnDef: {
+          enableResizing: true,
+        },
+      },
+    ],
+  }
+
+  return {
+    table,
+    column: baseColumn,
+    getLeafHeaders: () => [
+      {
+        column: baseColumn,
+        getSize: () => 100,
+        subHeaders: [],
+      },
+    ],
+    subHeaders: [],
+    getSize: () => 100,
+    ...overrides,
+  }
+}
+
+describe('getDefaultColumnResizingState', () => {
+  it('should return default column resizing state', () => {
+    const result = getDefaultColumnResizingState()
+    expect(result).toEqual({
+      startOffset: null,
+      startSize: null,
+      deltaOffset: null,
+      deltaPercentage: null,
+      isResizingColumn: false,
+      columnSizingStart: [],
+    })
+  })
+})
+
+describe('column_getCanResize', () => {
+  it('should return true when column resizing is enabled', () => {
+    const table = generateTestTableWithData(1)
+    const column = {
+      ...table.getAllColumns()[0],
+      columnDef: {},
+      table,
+    }
+
+    const result = column_getCanResize(column as any)
+
+    expect(result).toBe(true)
+  })
+
+  it('should return false when column resizing is disabled globally', () => {
+    const table = generateTestTableWithData(1, {
+      enableColumnResizing: false,
+    })
+    const column = {
+      ...table.getAllColumns()[0],
+      columnDef: {},
+      table,
+    }
+
+    const result = column_getCanResize(column as any)
+
+    expect(result).toBe(false)
+  })
+
+  it('should return false when column resizing is disabled for specific column', () => {
+    const table = generateTestTableWithData(1)
+    const column = {
+      ...table.getAllColumns()[0],
+      columnDef: { enableResizing: false },
+      table,
+    }
+
+    const result = column_getCanResize(column as any)
+
+    expect(result).toBe(false)
+  })
+})
+
+describe('column_getIsResizing', () => {
+  it('should return true when column is being resized', () => {
+    const table = generateTestTableWithData(1, {
+      initialState: {
+        columnResizing: {
+          isResizingColumn: 'firstName',
+          columnSizingStart: [],
+          deltaOffset: null,
+          deltaPercentage: null,
+          startOffset: null,
+          startSize: null,
+        },
+      },
+    })
+    const column = {
+      ...table.getAllColumns()[0],
+      id: 'firstName',
+      table,
+    }
+
+    const result = column_getIsResizing(column as any)
+
+    expect(result).toBe(true)
+  })
+
+  it('should return false when column is not being resized', () => {
+    const table = generateTestTableWithData(1)
+    const column = {
+      ...table.getAllColumns()[0],
+      table,
+    }
+
+    const result = column_getIsResizing(column as any)
+
+    expect(result).toBe(false)
+  })
+})
+
+describe('table_setColumnResizing', () => {
+  it('should call onColumnResizingChange with updater', () => {
+    const onColumnResizingChange = vi.fn()
+    const table = generateTestTableWithData(1, {
+      onColumnResizingChange,
+    })
+
+    const newState = {
+      startOffset: 100,
+      startSize: 200,
+      deltaOffset: 50,
+      deltaPercentage: 0.25,
+      isResizingColumn: 'firstName',
+      columnSizingStart: [],
+    }
+
+    table_setColumnResizing(table, newState)
+
+    expect(onColumnResizingChange).toHaveBeenCalledWith(newState)
+  })
+})
+
+describe('table_resetHeaderSizeInfo', () => {
+  it('should reset to default state when defaultState is true', () => {
+    const onColumnResizingChange = vi.fn()
+    const table = generateTestTableWithData(1, {
+      onColumnResizingChange,
+    })
+
+    table_resetHeaderSizeInfo(table, true)
+
+    expect(onColumnResizingChange).toHaveBeenCalledWith(
+      getDefaultColumnResizingState(),
+    )
+  })
+
+  it('should reset to initial state when defaultState is false', () => {
+    const initialState = {
+      columnResizing: {
+        startOffset: 100,
+        startSize: 200,
+        deltaOffset: 50,
+        deltaPercentage: 0.25,
+        isResizingColumn: 'firstName',
+        columnSizingStart: [],
+      },
+    }
+    const onColumnResizingChange = vi.fn()
+    const table = generateTestTableWithData(1, {
+      onColumnResizingChange,
+      initialState,
+    })
+
+    table_resetHeaderSizeInfo(table, false)
+
+    expect(onColumnResizingChange).toHaveBeenCalledWith(
+      initialState.columnResizing,
+    )
+  })
+})
+
+describe('isTouchStartEvent', () => {
+  it('should return true for touch start events', () => {
+    const event = { type: 'touchstart' }
+
+    const result = isTouchStartEvent(event)
+
+    expect(result).toBe(true)
+  })
+
+  it('should return false for non-touch start events', () => {
+    const event = { type: 'mousedown' }
+
+    const result = isTouchStartEvent(event)
+
+    expect(result).toBe(false)
+  })
+})
+
+describe('header_getResizeHandler', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('should return a function', () => {
+    const table = generateTestTableWithData<TestFeatures>(1, {
+      initialState: {
+        columnSizing: {},
+      },
+    })
+    const header = createTestResizeHeader(table)
+    const handler = header_getResizeHandler(header as any)
+    expect(typeof handler).toBe('function')
+  })
+
+  it('should not resize when column resizing is disabled', () => {
+    const table = generateTestTableWithData<TestFeatures>(1, {
+      enableColumnResizing: false,
+    })
+    const onColumnResizingChange = vi.fn()
+    table.options.onColumnResizingChange = onColumnResizingChange
+
+    const header = createTestResizeHeader(table)
+    const handler = header_getResizeHandler(header as any)
+    handler({ type: 'mousedown', clientX: 100 })
+
+    expect(onColumnResizingChange).not.toHaveBeenCalled()
+  })
+
+  it('should ignore multi-touch events', () => {
+    const table = generateTestTableWithData<TestFeatures>(1)
+    const onColumnResizingChange = vi.fn()
+    table.options.onColumnResizingChange = onColumnResizingChange
+
+    const header = createTestResizeHeader(table)
+    const handler = header_getResizeHandler(header as any)
+    handler({
+      type: 'touchstart',
+      touches: [{ clientX: 100 }, { clientX: 200 }],
+    })
+
+    expect(onColumnResizingChange).not.toHaveBeenCalled()
+  })
+
+  it('should update immediately in onChange mode', () => {
+    const table = generateTestTableWithData<TestFeatures>(1, {
+      columnResizeMode: 'onChange',
+    })
+    const onColumnSizingChange = vi.fn()
+    table.options.onColumnSizingChange = onColumnSizingChange
+
+    const header = createTestResizeHeader(table)
+    const handler = header_getResizeHandler(header as any)
+    handler({ type: 'mousedown', clientX: 100 })
+
+    // Simulate mouse move
+    const moveEvent = new MouseEvent('mousemove', { clientX: 150 })
+    document.dispatchEvent(moveEvent)
+
+    expect(onColumnSizingChange).toHaveBeenCalled()
+
+    const upEvent = new MouseEvent('mouseup', { clientX: 150 })
+    document.dispatchEvent(upEvent)
+  })
+
+  it('should allow resizing a column from zero width', () => {
+    const table = generateTestTableWithData<TestFeatures>(1, {
+      columnResizeMode: 'onChange',
+    })
+
+    let resizingState = getDefaultColumnResizingState()
+    table.options.onColumnResizingChange = (updater: any) => {
+      resizingState =
+        typeof updater === 'function' ? updater(resizingState) : updater
+      ;(table.store.state as any).columnResizing = resizingState
+    }
+
+    const sizingUpdates: Record<string, number>[] = []
+    table.options.onColumnSizingChange = (updater: any) => {
+      if (typeof updater === 'function') {
+        const result = updater(table.atoms.columnSizing?.get() ?? {})
+        sizingUpdates.push(result)
+      } else {
+        sizingUpdates.push(updater)
+      }
+    }
+
+    const zeroSizeColumn = {
+      ...table.getAllColumns()[0],
+      id: 'firstName',
+      columnDef: { enableResizing: true, minSize: 0, size: 0 },
+      table,
+    }
+    const header = createTestResizeHeader(table, {
+      getSize: () => 0,
+      getLeafHeaders: () => [
+        {
+          column: zeroSizeColumn,
+          getSize: () => 0,
+          subHeaders: [],
+        },
+      ],
+    })
+
+    const handler = header_getResizeHandler(header as any, document)
+    handler({ type: 'mousedown', clientX: 100 })
+
+    const moveEvent = new MouseEvent('mousemove', { clientX: 150 })
+    document.dispatchEvent(moveEvent)
+
+    const lastUpdate = sizingUpdates[sizingUpdates.length - 1]
+    expect(lastUpdate).toBeDefined()
+    const newSize = lastUpdate!['firstName']
+    expect(newSize).toBeGreaterThan(0)
+    expect(Number.isNaN(newSize)).toBe(false)
+
+    const upEvent = new MouseEvent('mouseup', { clientX: 150 })
+    document.dispatchEvent(upEvent)
+  })
+
+  it('should not produce NaN when startSize is zero', () => {
+    const table = generateTestTableWithData<TestFeatures>(1, {
+      columnResizeMode: 'onChange',
+    })
+
+    let resizingState = getDefaultColumnResizingState()
+    const resizingUpdates: any[] = []
+    table.options.onColumnResizingChange = (updater: any) => {
+      resizingState =
+        typeof updater === 'function' ? updater(resizingState) : updater
+      ;(table.store.state as any).columnResizing = resizingState
+      resizingUpdates.push(resizingState)
+    }
+
+    const zeroSizeColumn = {
+      ...table.getAllColumns()[0],
+      id: 'firstName',
+      columnDef: { enableResizing: true, minSize: 0, size: 0 },
+      table,
+    }
+    const header = createTestResizeHeader(table, {
+      getSize: () => 0,
+      getLeafHeaders: () => [
+        {
+          column: zeroSizeColumn,
+          getSize: () => 0,
+          subHeaders: [],
+        },
+      ],
+    })
+
+    const handler = header_getResizeHandler(header as any, document)
+    handler({ type: 'mousedown', clientX: 100 })
+
+    const moveEvent = new MouseEvent('mousemove', { clientX: 150 })
+    document.dispatchEvent(moveEvent)
+
+    const lastResizing = resizingUpdates[resizingUpdates.length - 1]
+    expect(lastResizing).toBeDefined()
+    expect(Number.isNaN(lastResizing.deltaPercentage)).toBe(false)
+    expect(Number.isFinite(lastResizing.deltaPercentage)).toBe(true)
+
+    const upEvent = new MouseEvent('mouseup', { clientX: 150 })
+    document.dispatchEvent(upEvent)
+  })
+
+  it('should cleanup event listeners on mouse up', () => {
+    const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener')
+    const table = generateTestTableWithData<TestFeatures>(1)
+
+    const header = createTestResizeHeader(table)
+    const handler = header_getResizeHandler(header as any, document)
+    handler({ type: 'mousedown', clientX: 100 })
+
+    // Clear the spy calls from setup
+    removeEventListenerSpy.mockClear()
+
+    // Simulate mouse up
+    const upEvent = new MouseEvent('mouseup', { clientX: 150 })
+    document.dispatchEvent(upEvent)
+
+    // Should remove mousemove and mouseup listeners
+    expect(removeEventListenerSpy).toHaveBeenCalledTimes(2)
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      'mousemove',
+      expect.any(Function),
+    )
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      'mouseup',
+      expect.any(Function),
+    )
+
+    removeEventListenerSpy.mockRestore()
+  })
+})
+
+describe('passiveEventSupported', () => {
+  it('should return boolean indicating passive event support', () => {
+    const result = passiveEventSupported()
+    expect(typeof result).toBe('boolean')
+  })
+
+  it('should cache the result of passive support check', () => {
+    const firstResult = passiveEventSupported()
+    const secondResult = passiveEventSupported()
+    expect(firstResult).toBe(secondResult)
+  })
+
+  it('should handle errors during support check', async () => {
+    // Reset modules so passiveEventSupported's cache starts fresh —
+    // earlier tests in this describe block populate the module-level cache,
+    // which would otherwise short-circuit before reaching the throwing spy.
+    vi.resetModules()
+    const { passiveEventSupported: freshPassiveEventSupported } =
+      await import('../../../../src/features/column-resizing/columnResizingFeature.utils')
+
+    const addEventListenerSpy = vi.spyOn(window, 'addEventListener')
+    addEventListenerSpy.mockImplementation(() => {
+      throw new Error('Test error')
+    })
+
+    const result = freshPassiveEventSupported()
+    expect(result).toBe(false)
+
+    addEventListenerSpy.mockRestore()
+  })
+})

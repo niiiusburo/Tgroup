@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "core",
+    "generator",
+    "jetwash",
+    "celerity",
+    "integration-tests",
+    "steward"]

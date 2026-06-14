@@ -1,0 +1,84 @@
+// Copyright (c) 2026 Lerian Studio. All rights reserved.
+// Use of this source code is governed by the Elastic License 2.0
+// that can be found in the LICENSE file.
+
+package query
+
+import (
+	"context"
+	"errors"
+	"fmt"
+
+	libCommons "github.com/LerianStudio/lib-observability"
+	libLog "github.com/LerianStudio/lib-observability/log"
+	libHTTP "github.com/LerianStudio/lib-commons/v5/commons/net/http"
+	libOpentelemetry "github.com/LerianStudio/lib-observability/tracing"
+	"github.com/LerianStudio/midaz/v3/components/ledger/internal/adapters/postgres/operation"
+	"github.com/LerianStudio/midaz/v3/components/ledger/internal/services"
+	"github.com/LerianStudio/midaz/v3/pkg"
+	"github.com/LerianStudio/midaz/v3/pkg/constant"
+	"github.com/LerianStudio/midaz/v3/pkg/net/http"
+	"github.com/google/uuid"
+)
+
+func (uc *UseCase) GetAllOperations(ctx context.Context, organizationID, ledgerID, transactionID uuid.UUID, filter http.QueryHeader) ([]*operation.Operation, libHTTP.CursorPagination, error) {
+	logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
+
+	ctx, span := tracer.Start(ctx, "query.get_all_operations")
+	defer span.End()
+
+	logger.Log(ctx, libLog.LevelInfo, "Retrieving operations by account")
+
+	op, cur, err := uc.OperationRepo.FindAll(ctx, organizationID, ledgerID, transactionID, filter.ToCursorPagination())
+	if err != nil {
+		logger.Log(ctx, libLog.LevelError, fmt.Sprintf("Error getting all operations on repo: %v", err))
+
+		if errors.Is(err, services.ErrDatabaseItemNotFound) {
+			err := pkg.ValidateBusinessError(constant.ErrNoOperationsFound, constant.EntityOperation)
+
+			libOpentelemetry.HandleSpanBusinessErrorEvent(span, "Failed to get all operations on repo", err)
+
+			logger.Log(ctx, libLog.LevelWarn, fmt.Sprintf("Error getting all operations on repo: %v", err))
+
+			return nil, libHTTP.CursorPagination{}, err
+		}
+
+		libOpentelemetry.HandleSpanBusinessErrorEvent(span, "Failed to get all operations on repo", err)
+
+		return nil, libHTTP.CursorPagination{}, err
+	}
+
+	if len(op) == 0 {
+		return op, cur, nil
+	}
+
+	operationIDs := make([]string, len(op))
+	for i, o := range op {
+		operationIDs[i] = o.ID
+	}
+
+	metadata, err := uc.TransactionMetadataRepo.FindByEntityIDs(ctx, constant.EntityOperation, operationIDs)
+	if err != nil {
+		err := pkg.ValidateBusinessError(constant.ErrNoOperationsFound, constant.EntityOperation)
+
+		libOpentelemetry.HandleSpanBusinessErrorEvent(span, "Failed to get metadata on mongodb operation", err)
+
+		logger.Log(ctx, libLog.LevelWarn, fmt.Sprintf("Error getting metadata on mongodb operation: %v", err))
+
+		return nil, libHTTP.CursorPagination{}, err
+	}
+
+	metadataMap := make(map[string]map[string]any, len(metadata))
+
+	for _, meta := range metadata {
+		metadataMap[meta.EntityID] = meta.Data
+	}
+
+	for i := range op {
+		if data, ok := metadataMap[op[i].ID]; ok {
+			op[i].Metadata = data
+		}
+	}
+
+	return op, cur, nil
+}

@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "scripts": {
+    "test-web": "percy exec -- playwright test todomvc_snapshot.spec.js --reporter=dot",
+    "test-automate-before": "percy exec -- playwright test bstackdemo_screenshot_before.spec.js --reporter=dot",
+    "test-automate-after": "percy exec -- playwright test bstackdemo_screenshot_after.spec.js --reporter=dot"
+  },
+  "devDependencies": {
+    "@percy/cli": "^1.31.2",
+  "@percy/playwright": "^1.0.9",
+  "@playwright/test": "1.53.2",
+  "playwright": "1.53.2",
+    "serve-handler": "^6.1.6",
+    "todomvc-app-css": "^2.4.3"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "tanstack-solid-table-example-basic-external-atoms",
+  "description": "",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "lint": "eslint ./src"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@faker-js/faker": "^10.4.0",
+    "typescript": "6.0.3",
+    "vite": "^8.0.16",
+    "vite-plugin-solid": "^2.11.12"
+  },
+  "dependencies": {
+    "@tanstack/solid-devtools": "^0.8.5",
+    "@tanstack/solid-store": "^0.11.0",
+    "@tanstack/solid-table": "^9.0.0-beta.11",
+    "@tanstack/solid-table-devtools": "^9.0.0-beta.11",
+    "solid-js": "^1.9.13"
+  }
+}
