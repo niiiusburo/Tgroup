@@ -9,6 +9,28 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 Do not remove failed checks until the defect is fixed and rerun.
 
 ---
+# TestSprite Plan: CTV recent-activity → tracking flip + search highlight 2026-06-14
+Feature/edit name: CTV portal home recent-activity rows open client tracking with flipped card, pre-filled search, and highlighted commission service.
+
+Changed URLs / API routes / data flow:
+- URLs changed: none (`https://tmv.2checkin.com/ctv` home → tracking tab in-portal).
+- API routes changed: none (existing `/api/ctv/commission-summary` + `/api/ctv/referrals`).
+- Data flow: activity click → `handleCommissionNavigate` → `CtvTrackingTab` focus → `ReferralFlipCard` flip + service highlight; synthetic service merge when earning line missing from sale-order services.
+- Edge cases: reversed earnings; client missing from referrals; service line id vs service name match.
+
+Affected roles and data flows:
+- Role: CTV on NK3 (`/ctv`).
+- Happy path: tap recent row (e.g. Seed Client NK3 CTV) → Tracking → search prefilled/highlighted → card flipped → service row highlighted.
+- Regressions: manual card flip; bottom-nav clears focus.
+
+Setup data and login state:
+- Target: `https://tmv.2checkin.com/ctv` as CTV Test Account with recent activity rows.
+
+Execution checklist:
+- [x] PASS: Unit — `ctvTrackingFocus.test.ts`, `CtvTrackingTab.test.tsx`, `ReferralFlipCard.test.tsx` (10/10).
+- [ ] PENDING: Live — tap recent-activity row; confirm flip + search highlight + service highlight screenshot.
+
+---
 # TestSprite Plan: NK3 aesthetic LOB pink accent + Aesthetic i18n 2026-06-14
 Feature/edit name: NK3 admin UI switches orange accents to soft pink when LOB = Thẩm mỹ/Aesthetic; English label Cosmetic → Aesthetic; overview i18n cleanup.
 

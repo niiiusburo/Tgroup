@@ -2,6 +2,10 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.37.11] — 2026-06-14 — CTV portal: recent-activity drill-down flips tracking card
+### Fixed
+- **Recent activity rows now open Tracking with flip + search highlight.** Tapping a home/commission row switches to the client tracking tab, pre-fills the search with the client name, highlights the search field, flips the matching `ReferralFlipCard`, and highlights the commission service row (including synthetic merge when the service line is missing from sale-order data). — @agent — CTV portal UX
+
 ## [0.37.10] — 2026-06-14 — NK3 aesthetic LOB: pink accent theme + i18n cleanup
 ### Changed
 - **LOB accent palette switches with business unit.** `BusinessUnitContext` sets `data-lob` on `<html>`; dental keeps warm orange, cosmetic/aesthetic uses a soft dusty-rose pink via shared `--accent-*` CSS variables wired into Tailwind `primary` and `orange` scales. — @agent — NK3 aesthetic UX

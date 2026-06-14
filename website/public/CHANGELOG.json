@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.37.11",
+    "date": "2026-06-14",
+    "commit": "pending",
+    "highlights": "CTV recent-activity tap opens Tracking, flips client card, highlights search + service row.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Home recent-activity rows now navigate to client tracking, flip the referral card, pre-fill search, and highlight the matching commission service."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.37.10",
     "date": "2026-06-14",
     "commit": "pending",

@@ -98,6 +98,26 @@ describe('ReferralFlipCard', () => {
     expect(screen.getByRole('button', { name: /Back/i })).toBeVisible();
   });
 
+  it('starts flipped and highlights the focused commission service row', () => {
+    localStorage.setItem('tg-lang', 'en');
+    render(
+      <ReferralFlipCard
+        referral={referral}
+        initialFlipped
+        focus={{
+          clientId: 'client-1',
+          serviceLineId: 'line-2',
+          serviceName: 'Laser da mặt',
+        }}
+      />
+    );
+
+    expect(
+      screen.getByRole('button', { name: /show client tracking journey for seed client - nk3 ctv/i })
+    ).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('Laser da mặt').closest('li')?.className).toMatch(/ring-orange-300/);
+  });
+
   it('shows 4/4 from server stage_progress for a paid client with no service lines (regression: was stuck at 1/4)', () => {
     localStorage.setItem('tg-lang', 'vi');
     const paidNoServices: CtvReferral = {

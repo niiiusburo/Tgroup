@@ -11,15 +11,13 @@ import { useTranslation } from 'react-i18next';
 import { ReferralFlipCard } from '@/components/ctv/ReferralFlipCard';
 import type { CtvReferral } from '@/lib/api';
 import { cn, normalizeText } from '@/lib/utils';
+import {
+  ctvClientIdsMatch,
+  resolveReferralsForFocus,
+  type CtvTrackingFocus,
+} from '@/pages/CTV/ctvTrackingFocus';
 
 type FilterKey = 'all' | 'active' | 'completed' | 'waitingPayment';
-
-interface CtvTrackingFocus {
-  readonly clientId: string;
-  readonly serviceLineId?: string | null;
-  readonly clientName?: string | null;
-  readonly serviceName?: string | null;
-}
 
 interface CtvTrackingTabProps {
   readonly referrals: CtvReferral[];
@@ -89,6 +87,16 @@ export function CtvTrackingTab({
   const { t } = useTranslation('ctv');
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<FilterKey>('all');
+  const resolvedReferrals = useMemo(
+    () => resolveReferralsForFocus(referrals, focus),
+    [focus, referrals]
+  );
+
+  useEffect(() => {
+    if (!focus?.clientId) return;
+    if (focus.clientName) setSearchTerm(focus.clientName);
+    setFilter('all');
+  }, [focus?.clientId, focus?.clientName, focus?.serviceLineId, focus?.serviceName]);
 
   useEffect(() => {
     if (!focus?.clientId || isLoading) return;
@@ -102,23 +110,23 @@ export function CtvTrackingTab({
   }, [focus?.clientId, focus?.serviceLineId, isLoading, referrals.length]);
 
   const filteredReferrals = useMemo(() => {
-    const filtered = referrals.filter(
+    const filtered = resolvedReferrals.filter(
       (referral) => matchesFilter(referral, filter) && matchesSearch(referral, searchTerm)
     );
     if (!focus?.clientId) return filtered;
-    const focused = referrals.find((referral) => referral.id === focus.clientId);
-    if (!focused || filtered.some((referral) => referral.id === focused.id)) return filtered;
+    const focused = resolvedReferrals.find((referral) => ctvClientIdsMatch(referral.id, focus.clientId));
+    if (!focused || filtered.some((referral) => ctvClientIdsMatch(referral.id, focused.id))) return filtered;
     return [focused, ...filtered];
-  }, [filter, focus?.clientId, referrals, searchTerm]);
+  }, [filter, focus?.clientId, resolvedReferrals, searchTerm]);
 
   const filterCounts = useMemo(
     () => ({
-      all: referrals.length,
-      active: referrals.filter((referral) => !isCompleted(referral)).length,
-      completed: referrals.filter(isCompleted).length,
-      waitingPayment: referrals.filter(isWaitingPayment).length,
+      all: resolvedReferrals.length,
+      active: resolvedReferrals.filter((referral) => !isCompleted(referral)).length,
+      completed: resolvedReferrals.filter(isCompleted).length,
+      waitingPayment: resolvedReferrals.filter(isWaitingPayment).length,
     }),
-    [referrals]
+    [resolvedReferrals]
   );
 
   const filters: { key: FilterKey; label: string }[] = [
@@ -130,8 +138,9 @@ export function CtvTrackingTab({
   const hasSearchOrFilter = searchTerm.trim().length > 0 || filter !== 'all';
 
   const focusReferral = focus?.clientId
-    ? referrals.find((referral) => referral.id === focus.clientId) ?? null
+    ? resolvedReferrals.find((referral) => ctvClientIdsMatch(referral.id, focus.clientId)) ?? null
     : null;
+  const searchHighlighted = !!focus?.clientId;
 
   return (
     <div>
@@ -166,8 +175,15 @@ export function CtvTrackingTab({
         </div>
       ) : null}
 
-      <label className="mt-4 flex h-12 items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 text-sm shadow-sm shadow-gray-200/40">
-        <Search className="h-4 w-4 shrink-0 text-gray-400" />
+      <label
+        className={cn(
+          'mt-4 flex h-12 items-center gap-3 rounded-2xl border bg-white px-4 text-sm shadow-sm shadow-gray-200/40 transition-colors',
+          searchHighlighted
+            ? 'border-orange-300 bg-orange-50/70 ring-2 ring-orange-200'
+            : 'border-gray-200'
+        )}
+      >
+        <Search className={cn('h-4 w-4 shrink-0', searchHighlighted ? 'text-orange-500' : 'text-gray-400')} />
         <span className="sr-only">{t('searchLabel')}</span>
         <input
           type="search"
@@ -227,14 +243,21 @@ export function CtvTrackingTab({
           </div>
         ) : filteredReferrals.length > 0 ? (
           <div className="space-y-3">
-            {filteredReferrals.map((referral) => (
-              <ReferralFlipCard
-                key={`${referral.id}:${referral.lobs.join('-')}`}
-                referral={referral}
-                initialFlipped={focus?.clientId === referral.id}
-                highlightServiceLineId={focus?.clientId === referral.id ? focus.serviceLineId ?? null : null}
-              />
-            ))}
+            {filteredReferrals.map((referral) => {
+              const isFocused = ctvClientIdsMatch(focus?.clientId, referral.id);
+              return (
+                <ReferralFlipCard
+                  key={
+                    isFocused
+                      ? `focus-${focus?.clientId}-${focus?.serviceLineId ?? focus?.serviceName ?? 'client'}`
+                      : `${referral.id}:${referral.lobs.join('-')}`
+                  }
+                  referral={referral}
+                  initialFlipped={isFocused}
+                  focus={isFocused ? focus : null}
+                />
+              );
+            })}
           </div>
         ) : hasSearchOrFilter ? (
           <EmptyState icon={<Search className="h-5 w-5" />} title={t('noSearchTitle')} body={t('noSearchBody')} />

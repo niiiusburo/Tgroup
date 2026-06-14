@@ -27,6 +27,7 @@ import { CtvHomeTab } from './tabs/CtvHomeTab';
 import { CtvMeTab } from './tabs/CtvMeTab';
 import { CtvNetworkTab } from './tabs/CtvNetworkTab';
 import { CtvTrackingTab } from './tabs/CtvTrackingTab';
+import type { CtvTrackingFocus } from './ctvTrackingFocus';
 import { CtvReferModal } from '@/components/ctv/CtvReferModal';
 import { CtvRecruitModal } from '@/components/ctv/CtvRecruitModal';
 
@@ -61,12 +62,7 @@ export default function CtvDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [hierarchyError, setHierarchyError] = useState<string | null>(null);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
-  const [trackingFocus, setTrackingFocus] = useState<{
-    clientId: string;
-    serviceLineId?: string | null;
-    clientName?: string | null;
-    serviceName?: string | null;
-  } | null>(null);
+  const [trackingFocus, setTrackingFocus] = useState<CtvTrackingFocus | null>(null);
   const shouldReduceMotion = useReducedMotion();
 
   const handleCommissionNavigate = useCallback((row: CtvCommissionRow) => {
@@ -79,6 +75,10 @@ export default function CtvDashboard() {
       serviceLineId: row.service_line_id ?? null,
       clientName: row.client_name,
       serviceName: row.service_name,
+      lob: row.lob,
+      amount: row.amount,
+      status: row.status,
+      earnedAt: row.earned_at,
     });
     setActiveTab('tracking');
   }, []);

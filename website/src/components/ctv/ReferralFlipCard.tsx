@@ -11,11 +11,12 @@ import { formatVND } from '@/lib/formatting';
 import { useCtvLocale } from '@/lib/i18n/ctv';
 import type { CtvLob, CtvReferral, CtvReferralService } from '@/lib/api/ctv';
 import { CtvLinkBar } from '@/components/shared';
+import { serviceMatchesFocus, type CtvTrackingFocus } from '@/pages/CTV/ctvTrackingFocus';
 
 interface ReferralFlipCardProps {
   readonly referral: CtvReferral;
   readonly initialFlipped?: boolean;
-  readonly highlightServiceLineId?: string | null;
+  readonly focus?: CtvTrackingFocus | null;
 }
 
 function getLobClass(lob: CtvLob): string {
@@ -81,7 +82,7 @@ function ServiceRow({
 export function ReferralFlipCard({
   referral,
   initialFlipped = false,
-  highlightServiceLineId = null,
+  focus = null,
 }: ReferralFlipCardProps) {
   const { t } = useTranslation('ctv');
   const ctv = useCtvLocale();
@@ -89,8 +90,8 @@ export function ReferralFlipCard({
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (initialFlipped) setIsFlipped(true);
-  }, [initialFlipped, referral.id, highlightServiceLineId]);
+    setIsFlipped(initialFlipped);
+  }, [initialFlipped, referral.id, focus?.clientId, focus?.serviceLineId, focus?.serviceName]);
   // The referred client IS a partner row; referral.id is that customer's id, so the
   // admin customer page lives at /customers/:id. CTVs can copy/share this link; anyone
   // with customer access opens the client directly.
@@ -268,10 +269,7 @@ export function ReferralFlipCard({
                       <ServiceRow
                         key={service.id}
                         service={service}
-                        highlighted={
-                          !!highlightServiceLineId &&
-                          (service.serviceLineId === highlightServiceLineId || service.id === highlightServiceLineId)
-                        }
+                        highlighted={serviceMatchesFocus(service, focus)}
                       />
                     ))
                   ) : (
