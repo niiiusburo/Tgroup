@@ -10,6 +10,7 @@
     "dental": "Nha khoa",
     "cosmetic": "Thẩm mỹ"
   },
+  "allLocations": "Tất cả chi nhánh",
   "actions": "Thao tác",
   "table": {
     "noData": "Không có dữ liệu",

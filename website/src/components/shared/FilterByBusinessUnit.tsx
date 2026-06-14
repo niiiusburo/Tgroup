@@ -20,7 +20,7 @@ interface FilterByBusinessUnitProps {
 
 const LOB_LABELS: Record<BusinessUnit, string> = {
   dental: 'Dental',
-  cosmetic: 'Cosmetic',
+  cosmetic: 'Aesthetic',
 };
 
 const LOB_ICONS: Record<BusinessUnit, React.ComponentType<{ className?: string }>> = {

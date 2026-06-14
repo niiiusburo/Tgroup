@@ -1,5 +1,6 @@
 import { MapPin, ChevronDown } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { LocationOption } from '@/types/common';
 
 /**
@@ -18,10 +19,13 @@ export function FilterByLocation({
   selectedId,
   onChange,
 }: FilterByLocationProps) {
+  const { t } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedLocation = locations.find((l) => l.id === selectedId);
+  const allLocationsLabel = t('allLocations');
+  const displayLabel = selectedLocation?.name ?? allLocationsLabel;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -42,10 +46,10 @@ export function FilterByLocation({
           bg-white hover:bg-gray-50 transition-colors duration-150
           text-sm font-medium text-gray-700
         "
-        aria-label={selectedLocation?.name ?? 'All Locations'}
+        aria-label={displayLabel}
       >
         <MapPin className="w-4 h-4 text-gray-400" />
-        <span className="hidden sm:inline">{selectedLocation?.name ?? 'All Locations'}</span>
+        <span className="hidden sm:inline">{displayLabel}</span>
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 

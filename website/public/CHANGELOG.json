@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.37.10",
+    "date": "2026-06-14",
+    "commit": "pending",
+    "highlights": "Aesthetic LOB switches accent from orange to soft pink; English label Cosmetic → Aesthetic.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Switching to Aesthetic (Thẩm mỹ) LOB applies a soft dusty-rose pink accent across the admin UI (sidebar, appointment panel, buttons)."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "English LOB toggle and labels now say Aesthetic instead of Cosmetic.",
+          "Overview services table and location filter use i18n instead of hardcoded English."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.37.3",
     "date": "2026-06-10",
     "commit": "5c907371",

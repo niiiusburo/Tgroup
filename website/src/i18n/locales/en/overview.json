@@ -58,5 +58,17 @@
   },
   "subtitle": "Dashboard overview",
   "todayScheduleTitle": "Today's Schedule",
-  "noAppointmentsToday": "No appointments scheduled for today"
+  "noAppointmentsToday": "No appointments scheduled for today",
+  "servicesTable": {
+    "title": "Today's Services / Activity",
+    "emptyMessage": "Services will populate as patients are treated throughout the day.",
+    "columns": {
+      "service": "Service",
+      "patient": "Patient",
+      "qty": "Qty",
+      "doctor": "Doctor",
+      "amount": "Amount",
+      "status": "Status"
+    }
+  }
 }

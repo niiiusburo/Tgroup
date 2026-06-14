@@ -9,6 +9,33 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 Do not remove failed checks until the defect is fixed and rerun.
 
 ---
+# TestSprite Plan: NK3 aesthetic LOB pink accent + Aesthetic i18n 2026-06-14
+Feature/edit name: NK3 admin UI switches orange accents to soft pink when LOB = Thẩm mỹ/Aesthetic; English label Cosmetic → Aesthetic; overview i18n cleanup.
+
+Changed URLs / API routes / data flow:
+- URLs changed: none (same routes on `https://tmv.2checkin.com`).
+- API routes changed: none.
+- Data flow: `BusinessUnitContext` sets `document.documentElement.dataset.lob`; CSS `--accent-*` vars drive Tailwind `primary`/`orange` palette.
+- Edge cases: toggle dental → aesthetic → dental; English vs Vietnamese LOB labels; location filter "All Locations" / "Tất cả chi nhánh".
+
+Affected roles and data flows:
+- Role: NK3 admin with multi-LOB toggle (`t@clinic.vn`).
+- Happy path: Overview `/` with Thẩm mỹ selected shows pink right appointments panel + pink sidebar accents; EN UI reads "Aesthetic".
+- Regressions: dental LOB still orange; no raw i18n keys; no API/LOB data leak on toggle.
+
+Setup data and login state:
+- Target: `https://tmv.2checkin.com` (NK3 only; not `nk.2checkin.com`).
+- Login: `t@clinic.vn` / `123123`; Cosmetic LOB enabled build.
+
+Execution checks:
+- [ ] PENDING: Live NK3 — login, switch LOB to Thẩm mỹ, confirm pink accent on Overview appointments panel (screenshot).
+- [ ] PENDING: Live NK3 — switch back to Nha khoa, confirm orange accent restored.
+- [ ] PENDING: Live NK3 — set language EN, confirm LOB dropdown shows "Aesthetic" not "Cosmetic".
+- [x] PASS: `npm --prefix website test -- src/contexts/__tests__/BusinessUnitContext.test.tsx` — 14/14 incl. `data-lob=cosmetic` assertion.
+- [x] PASS: `npx tsc -p website/tsconfig.json --noEmit` — clean.
+
+---
+
 # TestSprite Plan: NK3 cleanup — break apiFetch cycle + delete dead /api/Services route 2026-06-14
 Feature/edit name: NK3 code hygiene: break frontend import cycle and delete dead route. Local-only; no live production verification needed.
 
@@ -32,10 +59,39 @@ Execution checks:
 - [x] PASS: `cd website && npm run build` — build passes with new `apiBaseUrl.ts` leaf.
 - [x] PASS: `cd api && JWT_SECRET=test-secret npx jest --runInBand --no-coverage src/__tests__/enterprise-verification.test.js` — `/api/Services` fully removed assertion passes.
 - [x] PASS: `cd website && npx vitest run src/lib/__tests__/importCycles.test.ts` — 2 cycle tests pass (no static cycle).
-- [x] PASS: `cd website && npx vitest run src/lib/apiFetch.test.ts` — 19 apiFetch tests pass.
+- [x] PASS: `cd api && JWT_SECRET=test-secret npx jest --runInBand --no-coverage src/__tests__/enterprise-verification.test.js` — `/api/Services` fully removed assertion passes.
+…
 - [x] PASS: `npm run verify:governance` — all gates pass (CONTRACTS, TEST-MATRIX, CHANGELOG, product-map, crossref).
 
+
 ---
+
+# TestSprite Plan: NK3 service-line delete reverses INV-003C service-card earnings 2026-06-14
+Feature/edit name: NK3 service-line delete now also reverses service-card CTV earnings (commission born at service-card creation) before soft-delete; paid-out service-card earnings block delete with `B_COMMISSION_PAID_OUT`. Documents the CON v1.0.35 contract bump.
+
+Changed URLs / API routes / data flow:
+- API routes changed: `DELETE /api/SaleOrderLines/:id` and `DELETE /api/cosmetic/SaleOrderLines/:id` now call `reverseServiceCardEarnings` before soft-delete when `CTV_SERVICE_CARD_COMMISSION=true`; response shape adds `reversedServiceCardEarningsCount: number`.
+- No new routes; no new columns; no URL path changes.
+- Edge cases: service-card earnings already paid out must block delete (HTTP 409 `B_COMMISSION_PAID_OUT`); service-card reversal must run inside the same transaction as the line soft-delete.
+
+Affected roles and data flows:
+- Role: admin/staff with `customers.edit` + `payment.void` deleting a service line.
+- Happy path: deleting a service line with only pending service-card earnings clears them, soft-deletes the line, returns `reversedServiceCardEarningsCount >= 1`.
+- Edge cases: paid-out service-card earnings block the entire delete with `B_COMMISSION_PAID_OUT`; no partial delete; no orphan pending earnings left behind.
+- Regressions: payment-linked earnings reversal behavior unchanged; no new DB schema; commission night guard still clean.
+
+Setup data and login state:
+- Target: NK3 local two-DB (`tdental_nk3` + `tcosmetic_nk3`) and live `https://tmv.2checkin.com`.
+- Login: admin account on NK3 with `customers.edit` + `payment.void`.
+- Disposable fixtures: reusable `_helpers.py` `ensure_test_sprite_customer` creates a paid-unpaid service line with a `TEST_SPRITE_SC_REV_*` marker.
+
+Execution checks:
+- [x] PASS: `cd api && JWT_SECRET=test-secret npx jest --runInBand --no-coverage src/services/__tests__/serviceReversal.test.js` — pending service-card earnings are reversed; paid-out case returns `B_COMMISSION_PAID_OUT`; response includes `reversedServiceCardEarningsCount`.
+- [x] PASS: `npm run verify:governance` — CONTRACTS v1.0.35 + TEST-MATRIX row + product-map api-index + CHANGELOG all updated; crossref clean.
+- [x] PASS: `cd api && npm test` — 1025/1025 tests pass (T1 fetch-spy fix + service-card reversal coverage).
+- [ ] PENDING: NK3 live smoke — delete an unpaid service line on `https://tmv.2checkin.com` with a pending service-card CTV earning; confirm earnings row flips to `reversed` and the line soft-deletes.
+- [ ] PENDING: NK3 live smoke — try to delete a service line whose service-card earnings are paid out; confirm 409 `B_COMMISSION_PAID_OUT` and no DB mutation.
+- [ ] PENDING: NK3 commission night guard — `scripts/nk3-commission-audit.sh` reports 0 active no-CTV earnings after the live smoke runs.
 
 # TestSprite Plan: NK 2Checkin login monitor 2026-06-14 06:48 +07
 Feature/edit name: Recurring live NK 2Checkin login health monitor; read-only production verification.

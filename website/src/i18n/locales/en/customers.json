@@ -149,7 +149,7 @@
       "prompt": "This customer exists in both lines of business. Open which record?",
       "lob": {
         "dental": "Dental",
-        "cosmetic": "Cosmetic"
+        "cosmetic": "Aesthetic"
       }
     }
   },

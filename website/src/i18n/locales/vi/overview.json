@@ -58,5 +58,17 @@
   },
   "subtitle": "Tổng quan bảng điều khiển",
   "todayScheduleTitle": "Lịch hôm nay",
-  "noAppointmentsToday": "Không có lịch hẹn nào hôm nay"
+  "noAppointmentsToday": "Không có lịch hẹn nào hôm nay",
+  "servicesTable": {
+    "title": "Dịch vụ / Hoạt động hôm nay",
+    "emptyMessage": "Dịch vụ sẽ hiển thị khi bệnh nhân được điều trị trong ngày.",
+    "columns": {
+      "service": "Dịch vụ",
+      "patient": "Bệnh nhân",
+      "qty": "SL",
+      "doctor": "Bác sĩ",
+      "amount": "Số tiền",
+      "status": "Trạng thái"
+    }
+  }
 }

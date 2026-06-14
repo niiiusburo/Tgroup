@@ -169,6 +169,12 @@ export function BusinessUnitProvider({ children }: Props) {
     window.dispatchEvent(new CustomEvent(CHANGE_EVENT, { detail: { lob } }));
   }, [availableLOBs]);
 
+  // Drive site-wide accent palette: dental = orange, cosmetic/aesthetic = soft pink.
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.documentElement.dataset.lob = currentLOB;
+  }, [currentLOB]);
+
   const isMultiLOBUser = isAdminBusinessUnitUser && availableLOBs.length >= 2;
 
   // Stable context value per React Context best practices (memoized)

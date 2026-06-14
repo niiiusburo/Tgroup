@@ -8,8 +8,9 @@
   },
   "lob": {
     "dental": "Dental",
-    "cosmetic": "Cosmetic"
+    "cosmetic": "Aesthetic"
   },
+  "allLocations": "All Locations",
   "actions": "Actions",
   "table": {
     "noData": "No data available",

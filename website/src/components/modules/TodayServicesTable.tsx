@@ -28,7 +28,7 @@ export function TodayServicesTable({
       <div className="px-5 pt-5 pb-3">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
           <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wide">
-            Today's Services / Activity
+            {t('servicesTable.title')}
           </h2>
 
           {/* Quick search */}
@@ -38,7 +38,7 @@ export function TodayServicesTable({
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder={t('overview:zone1.searchPlaceholder')}
+              placeholder={t('zone1.searchPlaceholder')}
               className="w-full sm:w-56 pl-8 pr-3 py-1.5 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all"
             />
           </div>
@@ -49,18 +49,18 @@ export function TodayServicesTable({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b-2 border-gray-100">
-              <th className="text-left text-xs font-semibold text-gray-400 uppercase py-2 px-3">Service</th>
-              <th className="text-left text-xs font-semibold text-gray-400 uppercase py-2 px-3">Patient</th>
-              <th className="text-left text-xs font-semibold text-gray-400 uppercase py-2 px-3">Qty</th>
-              <th className="text-left text-xs font-semibold text-gray-400 uppercase py-2 px-3">Doctor</th>
-              <th className="text-left text-xs font-semibold text-gray-400 uppercase py-2 px-3">Amount</th>
-              <th className="text-left text-xs font-semibold text-gray-400 uppercase py-2 px-3">Status</th>
+              <th className="text-left text-xs font-semibold text-gray-400 uppercase py-2 px-3">{t('servicesTable.columns.service')}</th>
+              <th className="text-left text-xs font-semibold text-gray-400 uppercase py-2 px-3">{t('servicesTable.columns.patient')}</th>
+              <th className="text-left text-xs font-semibold text-gray-400 uppercase py-2 px-3">{t('servicesTable.columns.qty')}</th>
+              <th className="text-left text-xs font-semibold text-gray-400 uppercase py-2 px-3">{t('servicesTable.columns.doctor')}</th>
+              <th className="text-left text-xs font-semibold text-gray-400 uppercase py-2 px-3">{t('servicesTable.columns.amount')}</th>
+              <th className="text-left text-xs font-semibold text-gray-400 uppercase py-2 px-3">{t('servicesTable.columns.status')}</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td colSpan={6} className="text-center text-gray-400 text-sm py-8">
-                Services will populate as patients are treated throughout the day.
+                {t('servicesTable.emptyMessage')}
               </td>
             </tr>
           </tbody>

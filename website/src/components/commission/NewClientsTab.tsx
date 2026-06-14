@@ -23,8 +23,6 @@ import { ExportDateRangeModal } from '@/components/calendar/ExportDateRangeModal
 import { formatCommissionDate, formatCommissionDateRange } from './dateFormatting';
 import { ClientProfileLink, CommissionTabHeader } from './CommissionNavigation';
 
-const LOB_LABELS: Record<string, string> = { dental: 'Nha khoa', cosmetic: 'Thẩm mỹ' };
-
 function statusClass(status: NewClientRow['commission_status']) {
   if (status === 'missing_commission') return 'bg-red-50 text-red-700 ring-red-200';
   if (status === 'commission_recorded') return 'bg-emerald-50 text-emerald-700 ring-emerald-200';
@@ -34,6 +32,7 @@ function statusClass(status: NewClientRow['commission_status']) {
 export function NewClientsTab() {
   const { t, i18n } = useTranslation('commission');
   const { t: tc } = useTranslation('common');
+  const lobLabel = (lob: string) => tc(`lob.${lob}`, lob);
   const businessUnit = useBusinessUnitOptional();
 
   const [rows, setRows] = useState<NewClientRow[]>([]);
@@ -212,11 +211,11 @@ export function NewClientsTab() {
                   <div className="min-w-0">
                     <ClientProfileLink clientId={row.id} name={row.name} returnTab="newClients" lob={row.lob} className="text-base" />
                     <p className="mt-1 text-xs text-gray-500">
-                      {LOB_LABELS[row.lob] || row.lob} · {formatCommissionDate(row.referred_at, i18n.language)}
+                      {lobLabel(row.lob)} · {formatCommissionDate(row.referred_at, i18n.language)}
                     </p>
                   </div>
                   <span className="rounded-full bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700 ring-1 ring-orange-200">
-                    {LOB_LABELS[row.lob] || row.lob}
+                    {lobLabel(row.lob)}
                   </span>
                 </div>
                 <div className="mt-3 grid gap-2 text-sm">
@@ -290,7 +289,7 @@ export function NewClientsTab() {
                       <span className="block text-xs text-gray-400">{row.referring_ctv_phone}</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-700">{LOB_LABELS[row.lob] || row.lob}</td>
+                  <td className="px-4 py-3 text-gray-700">{lobLabel(row.lob)}</td>
                   <td className="px-4 py-3 text-gray-700">{formatCommissionDate(row.referred_at, i18n.language)}</td>
                   <td className="px-4 py-3 text-right font-medium text-gray-800">{formatMoney(row.service_total)}</td>
                   <td className="px-4 py-3 text-right text-gray-700">{formatMoney(row.paid_total)}</td>

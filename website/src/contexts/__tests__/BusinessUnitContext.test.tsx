@@ -191,6 +191,7 @@ describe('BusinessUnitContext (TDD)', () => {
     });
     expect(screen.getByTestId('current-lob').textContent).toBe('cosmetic');
     expect(localStorage.getItem('tgclinic_lob')).toBe('cosmetic');
+    expect(document.documentElement.dataset.lob).toBe('cosmetic');
 
     // Invalid ignored
     act(() => {
