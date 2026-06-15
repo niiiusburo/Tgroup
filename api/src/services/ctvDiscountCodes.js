@@ -10,6 +10,7 @@ const { randomUUID } = require('crypto');
 const { getDb } = require('../db');
 const { safeQueryRows } = require('../routes/ctvHelpers');
 const { getReferralClaimStatus } = require('./referralClaim');
+const { resolveCtvBookingCompanyId } = require('./ctvBookingCompany');
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const DEFAULT_NON_LIVE_PERCENT = 10;
@@ -509,6 +510,54 @@ async function lookupClientForDiscountVerify({ phone, lob, issuingCtvId }) {
   };
 }
 
+/**
+ * Lightweight appointment stub so discount verify reclaim shows on Theo dõi
+ * (appointments.ctv_id authority). Mirrors POST /api/ctv/bookings card write.
+ */
+async function ensureCtvTrackingAppointmentStub(clientId, lob, ctvId) {
+  const db = getDb(lob);
+  const existing = await safeQueryRows(
+    db,
+    `SELECT id FROM dbo.appointments
+      WHERE partnerid = $1 AND ctv_id = $2
+        AND COALESCE(state, '') NOT ILIKE 'cancel%'
+      LIMIT 1`,
+    [clientId, ctvId]
+  );
+  if (existing[0]) return existing[0].id;
+
+  const companyId = await resolveCtvBookingCompanyId({
+    queryRows: (sql, params) => safeQueryRows(db, sql, params),
+    requestedCompanyId: null,
+    tokenCompanyId: null,
+  });
+  if (!companyId) return null;
+
+  const apptId = randomUUID();
+  const nameResult = await safeQueryRows(
+    db,
+    "SELECT COALESCE(MAX(CAST(SUBSTRING(name FROM 3) AS INTEGER)), 0) + 1 AS next_seq FROM dbo.appointments WHERE name LIKE 'AP%'"
+  );
+  const nextSeq = nameResult[0]?.next_seq || 1;
+  const apptName = `AP${String(nextSeq).padStart(6, '0')}`;
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
+
+  await safeQueryRows(
+    db,
+    `INSERT INTO dbo.appointments (
+       id, name, date, partnerid, companyid, timeexpected,
+       color, state, aptstate, isrepeatcustomer, isnotreatment,
+       ctv_id, datecreated, lastupdated
+     ) VALUES (
+       $1, $2, $3, $4, $5, 30, '1', 'confirmed', 'confirmed', false, false, $6,
+       (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'),
+       (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
+     )`,
+    [apptId, apptName, today, clientId, companyId, ctvId]
+  );
+  return apptId;
+}
+
 async function reclaimClientForCtv(clientId, lob, referredByCtvId) {
   const db = getDb(lob);
   await safeQueryRows(
@@ -520,6 +569,7 @@ async function reclaimClientForCtv(clientId, lob, referredByCtvId) {
       WHERE id = $2`,
     [referredByCtvId, clientId]
   );
+  await ensureCtvTrackingAppointmentStub(clientId, lob, referredByCtvId);
 }
 
 async function createCustomerForCtv({
@@ -530,22 +580,11 @@ async function createCustomerForCtv({
 }) {
   const normalizedPhone = normalizePhone(phone);
   const db = getDb(lob);
-  const otherLob = lob === 'dental' ? 'cosmetic' : 'dental';
   const phoneCheckSql = `SELECT id FROM dbo.partners WHERE LOWER(phone) = LOWER($1) LIMIT 1`;
+  const dupInLob = await safeQueryRows(db, phoneCheckSql, [normalizedPhone]);
 
-  const [dupInLob, dupInOtherLob] = await Promise.all([
-    safeQueryRows(db, phoneCheckSql, [normalizedPhone]),
-    safeQueryRows(getDb(otherLob), phoneCheckSql, [normalizedPhone]),
-  ]);
-
-  const existingMatch = dupInLob[0]
-    ? { id: dupInLob[0].id, sourceLob: lob }
-    : dupInOtherLob[0]
-      ? { id: dupInOtherLob[0].id, sourceLob: otherLob }
-      : null;
-
-  if (existingMatch) {
-    const claim = await getReferralClaimStatus(existingMatch.id, existingMatch.sourceLob, {});
+  if (dupInLob[0]) {
+    const claim = await getReferralClaimStatus(dupInLob[0].id, lob, {});
     if (claim.active && claim.ownerCtvId && claim.ownerCtvId !== referredByCtvId) {
       return {
         error: {
@@ -555,16 +594,14 @@ async function createCustomerForCtv({
         },
       };
     }
-    if (existingMatch.sourceLob === lob) {
-      await reclaimClientForCtv(existingMatch.id, lob, referredByCtvId);
-      const rows = await safeQueryRows(
-        db,
-        `SELECT id, name, phone FROM dbo.partners
-          WHERE id = $1 AND COALESCE(isdeleted, false) = false LIMIT 1`,
-        [existingMatch.id]
-      );
-      return { customer: rows[0], created: false, lob, reclaimed: true };
-    }
+    await reclaimClientForCtv(dupInLob[0].id, lob, referredByCtvId);
+    const rows = await safeQueryRows(
+      db,
+      `SELECT id, name, phone FROM dbo.partners
+        WHERE id = $1 AND COALESCE(isdeleted, false) = false LIMIT 1`,
+      [dupInLob[0].id]
+    );
+    return { customer: rows[0], created: false, lob, reclaimed: true };
   }
 
   const id = randomUUID();
@@ -583,6 +620,7 @@ async function createCustomerForCtv({
     [id, name, normalizedPhone, [lob], referredByCtvId, now]
   );
 
+  await ensureCtvTrackingAppointmentStub(id, lob, referredByCtvId);
   return { customer: rows[0], created: true, lob };
 }
 
@@ -624,6 +662,7 @@ module.exports = {
   buildCtvShortCode,
   checkExistingCodeForVisitor,
   createCustomerForCtv,
+  ensureCtvTrackingAppointmentStub,
   effectiveStatus,
   fetchCodeRow,
   fetchCtvPartner,

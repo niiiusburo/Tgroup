@@ -8,12 +8,14 @@ import type { ReactNode } from 'react';
 import { AlertCircle, ListChecks, RefreshCw, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { CommissionProvenanceBreadcrumb } from '@/components/ctv/CommissionProvenanceBreadcrumb';
 import { ReferralFlipCard } from '@/components/ctv/ReferralFlipCard';
-import type { CtvReferral } from '@/lib/api';
+import type { CtvCommissionRow, CtvReferral } from '@/lib/api';
 import { cn, normalizeText } from '@/lib/utils';
 import {
   ctvClientIdsMatch,
   ctvReferralDomId,
+  isFocusClientOnTracking,
   resolveReferralsForFocus,
   type CtvTrackingFocus,
 } from '@/pages/CTV/ctvTrackingFocus';
@@ -26,6 +28,7 @@ interface CtvTrackingTabProps {
   readonly error: string | null;
   readonly onRetry: () => void;
   readonly focus?: CtvTrackingFocus | null;
+  readonly commissionSource?: CtvCommissionRow | null;
   readonly onFocusClear?: () => void;
 }
 
@@ -83,6 +86,7 @@ export function CtvTrackingTab({
   error,
   onRetry,
   focus = null,
+  commissionSource = null,
   onFocusClear,
 }: CtvTrackingTabProps) {
   const { t } = useTranslation('ctv');
@@ -100,8 +104,14 @@ export function CtvTrackingTab({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [focus?.clientId, focus?.clientName, focus?.serviceLineId, focus?.serviceName]);
 
+  const focusOnTracking = useMemo(
+    () => isFocusClientOnTracking(referrals, focus),
+    [focus, referrals]
+  );
+  const commissionHistoryOnly = !!focus?.clientId && (focus.commissionHistoryOnly || !focusOnTracking);
+
   useEffect(() => {
-    if (!focus?.clientId || isLoading) return;
+    if (!focus?.clientId || isLoading || commissionHistoryOnly) return;
     const timer = window.setTimeout(() => {
       document.getElementById(ctvReferralDomId(focus.clientId))?.scrollIntoView({
         behavior: 'smooth',
@@ -109,17 +119,17 @@ export function CtvTrackingTab({
       });
     }, 180);
     return () => window.clearTimeout(timer);
-  }, [focus?.clientId, focus?.serviceLineId, focus?.serviceName, isLoading, referrals.length]);
+  }, [commissionHistoryOnly, focus?.clientId, focus?.serviceLineId, focus?.serviceName, isLoading, referrals.length]);
 
   const filteredReferrals = useMemo(() => {
     const filtered = resolvedReferrals.filter(
       (referral) => matchesFilter(referral, filter) && matchesSearch(referral, searchTerm)
     );
-    if (!focus?.clientId) return filtered;
+    if (!focus?.clientId || commissionHistoryOnly) return filtered;
     const focused = resolvedReferrals.find((referral) => ctvClientIdsMatch(referral.id, focus.clientId));
     if (!focused || filtered.some((referral) => ctvClientIdsMatch(referral.id, focused.id))) return filtered;
     return [focused, ...filtered];
-  }, [filter, focus?.clientId, resolvedReferrals, searchTerm]);
+  }, [commissionHistoryOnly, filter, focus?.clientId, resolvedReferrals, searchTerm]);
 
   const filterCounts = useMemo(
     () => ({
@@ -139,10 +149,10 @@ export function CtvTrackingTab({
   ];
   const hasSearchOrFilter = searchTerm.trim().length > 0 || filter !== 'all';
 
-  const focusReferral = focus?.clientId
+  const focusReferral = focus?.clientId && focusOnTracking
     ? resolvedReferrals.find((referral) => ctvClientIdsMatch(referral.id, focus.clientId)) ?? null
     : null;
-  const searchHighlighted = !!focus?.clientId;
+  const searchHighlighted = !!focus?.clientId && focusOnTracking;
 
   return (
     <div>
@@ -160,9 +170,20 @@ export function CtvTrackingTab({
                 {focus.clientName || focusReferral?.name || t('tracking.unknownClient')}
                 {focus.serviceName ? ` · ${focus.serviceName}` : null}
               </p>
-              <p className="mt-1 text-xs text-orange-800/80">
-                {focusReferral ? t('tracking.focusHint') : t('tracking.focusMissingClient')}
+              <p
+                className={cn(
+                  'mt-1 text-xs',
+                  commissionHistoryOnly ? 'font-medium text-orange-900' : 'text-orange-800/80'
+                )}
+                data-testid={commissionHistoryOnly ? 'ctv-commission-history-only-banner' : undefined}
+              >
+                {commissionHistoryOnly ? t('tracking.focusMissingClient') : t('tracking.focusHint')}
               </p>
+              {commissionSource ? (
+                <div className="mt-2 rounded-xl bg-white/80 p-2 ring-1 ring-orange-200/60">
+                  <CommissionProvenanceBreadcrumb row={commissionSource} compact />
+                </div>
+              ) : null}
             </div>
             {onFocusClear ? (
               <button
@@ -246,7 +267,7 @@ export function CtvTrackingTab({
         ) : filteredReferrals.length > 0 ? (
           <div className="space-y-3">
             {filteredReferrals.map((referral) => {
-              const isFocused = ctvClientIdsMatch(focus?.clientId, referral.id);
+              const isFocused = focusOnTracking && ctvClientIdsMatch(focus?.clientId, referral.id);
               return (
                 <ReferralFlipCard
                   key={

@@ -1,8 +1,134 @@
 [
   {
+    "version": "0.37.20",
+    "date": "2026-06-15",
+    "commit": "pending",
+    "highlights": "CTV Theo dõi shows only the viewer's own commission lines per client — never another CTV's cards.",
+    "sections": [
+      {
+        "title": "Changed",
+        "items": [
+          "Flip-card service list sourced from viewer earnings only, not all saleorder lines.",
+          "Copy updated to your commission lines / các dòng hoa hồng của bạn."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.37.19",
+    "date": "2026-06-15",
+    "commit": "pending",
+    "highlights": "CTV gap-fix wave: integration tests, reclaim unit test, docs/governance sync.",
+    "sections": [
+      {
+        "title": "Added",
+        "items": [
+          "GET /api/ctv/referrals route integration test proves card-based builder (not referred_by SQL).",
+          "Reclaim scenario unit test: CTV-B wins latest card; CTV-A drops client from Theo dõi."
+        ]
+      },
+      {
+        "title": "Changed",
+        "items": [
+          "product-map + workflow spec aligned: Tracking card-based, commission saleorders.ctv_id.",
+          "Network client_count documented as profile-based vs Theo dõi card count."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.37.18",
+    "date": "2026-06-15",
+    "commit": "pending",
+    "highlights": "Dental and cosmetic CTV claim windows are independent per LOB.",
+    "sections": [
+      {
+        "title": "Changed",
+        "items": [
+          "Tracking shows separate 6-month link bars for dental vs cosmetic on the same client.",
+          "Registering a client in one LOB is not blocked by an active claim in the other LOB."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.37.17",
+    "date": "2026-06-15",
+    "commit": "pending",
+    "highlights": "Appointment with your CTV shows on Theo dõi and resets 6-month window; commission still requires service card.",
+    "sections": [
+      {
+        "title": "Changed",
+        "items": [
+          "Tracking lists clients from appointment or service cards with your CTV.",
+          "Commission still requires CTV on the service card only."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.37.16",
+    "date": "2026-06-15",
+    "commit": "pending",
+    "highlights": "Commission and Theo dõi require CTV on the service card — not profile or appointment.",
+    "sections": [
+      {
+        "title": "Changed",
+        "items": [
+          "Tracking lists clients from your service cards only (saleorders.ctv_id).",
+          "Customer profile CTV name and appointment-only cards do not grant commission."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.37.15",
+    "date": "2026-06-15",
+    "commit": "pending",
+    "highlights": "Theo dõi repopulated from appointment/service cards only (not referred_by).",
+    "sections": [
+      {
+        "title": "Changed",
+        "items": [
+          "Tracking tab lists clients on your appointment or service cards; latest card wins with 6-month link bar.",
+          "Commission-only earnings rows stay on Home/Commission — they no longer inflate Theo dõi."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.37.14",
+    "date": "2026-06-15",
+    "commit": "pending",
+    "highlights": "Theo dõi lists commission-only clients (ZZ_* QA rows) with Hoa hồng badge.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Clients with earnings but not in your referral list now appear on Theo dõi (commission-only badge)."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.37.13",
+    "date": "2026-06-15",
+    "commit": "pending",
+    "highlights": "Commission provenance breadcrumbs; downline override opens Network tab on source CTV.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Every commission row shows a colored source badge and breadcrumb trail (your referral, service-card attach, or downline override).",
+          "Tapping downline override commission jumps to Giới thiệu/QR and highlights the downline CTV who generated it."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.37.12",
     "date": "2026-06-14",
-    "commit": "pending",
+    "commit": "37163f69a",
     "highlights": "CTV recent-activity handoff hardened: forced flip, search highlight, scroll-to-client.",
     "sections": [
       {

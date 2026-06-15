@@ -3,14 +3,16 @@
  * @crossref:used-in[network tab of website/src/pages/CTV/CtvDashboard.tsx (CTV portal /ctv)]
  * @crossref:uses[website/src/components/ctv/CtvHierarchyPanel.tsx, website/src/components/ctv/CtvQrDiscountPanel.tsx, website/src/lib/api/ctv.ts (CtvHierarchyResponse type), website/src/lib/api/ctvSelf.ts (CtvProfile type), product-map/domains/ctv.yaml]
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Network, QrCode } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { CommissionProvenanceBreadcrumb } from '@/components/ctv/CommissionProvenanceBreadcrumb';
 import { CtvHierarchyPanel } from '@/components/ctv/CtvHierarchyPanel';
 import { CtvQrDiscountPanel } from '@/components/ctv/CtvQrDiscountPanel';
-import type { CtvHierarchyResponse } from '@/lib/api/ctv';
+import type { CtvCommissionRow, CtvHierarchyResponse } from '@/lib/api/ctv';
 import type { CtvProfile } from '@/lib/api/ctvSelf';
+import type { CtvNetworkFocus } from '@/pages/CTV/ctvCommissionNavigate';
 import { cn } from '@/lib/utils';
 
 type ReferralSubTab = 'network' | 'qr';
@@ -22,6 +24,9 @@ interface CtvNetworkTabProps {
   readonly onRetry: () => void;
   readonly profile: CtvProfile | null;
   readonly profileName: string;
+  readonly focus?: CtvNetworkFocus | null;
+  readonly commissionSource?: CtvCommissionRow | null;
+  readonly onFocusClear?: () => void;
 }
 
 export function CtvNetworkTab({
@@ -31,9 +36,16 @@ export function CtvNetworkTab({
   onRetry,
   profile,
   profileName,
+  focus = null,
+  commissionSource = null,
+  onFocusClear,
 }: CtvNetworkTabProps) {
   const { t } = useTranslation('ctv');
   const [subTab, setSubTab] = useState<ReferralSubTab>('network');
+
+  useEffect(() => {
+    if (focus?.downlineCtvId) setSubTab('network');
+  }, [focus?.downlineCtvId, focus?.earningId]);
 
   const subTabs: Array<{ key: ReferralSubTab; label: string; Icon: typeof Network }> = [
     { key: 'network', label: t('referralQr.subTabs.network'), Icon: Network },
@@ -78,7 +90,44 @@ export function CtvNetworkTab({
           <div>
             <h3 className="sr-only">{t('hierarchy.title')}</h3>
             <p className="sr-only">{t('hierarchy.subtitle')}</p>
-            <CtvHierarchyPanel hierarchy={hierarchy} isLoading={isLoading} error={error} onRetry={onRetry} />
+            {focus ? (
+              <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-emerald-800">
+                      {t('network.focusBreadcrumb')}
+                    </p>
+                    <p className="mt-1 truncate font-semibold">
+                      {focus.downlineCtvName || t('provenance.unknownDownline')}
+                      {focus.clientName ? ` → ${focus.clientName}` : null}
+                      {focus.serviceName ? ` · ${focus.serviceName}` : null}
+                    </p>
+                    <p className="mt-1 text-xs text-emerald-900/80">{t('network.focusHint')}</p>
+                    {commissionSource ? (
+                      <div className="mt-2 rounded-xl bg-white/80 p-2 ring-1 ring-emerald-200/60">
+                        <CommissionProvenanceBreadcrumb row={commissionSource} compact />
+                      </div>
+                    ) : null}
+                  </div>
+                  {onFocusClear ? (
+                    <button
+                      type="button"
+                      onClick={onFocusClear}
+                      className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-bold text-emerald-800 ring-1 ring-emerald-200"
+                    >
+                      {t('tracking.clearFocus')}
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+            <CtvHierarchyPanel
+              hierarchy={hierarchy}
+              isLoading={isLoading}
+              error={error}
+              onRetry={onRetry}
+              focusDownlineId={focus?.downlineCtvId ?? null}
+            />
           </div>
         ) : (
           <CtvQrDiscountPanel profile={profile} profileName={profileName} />

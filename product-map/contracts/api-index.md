@@ -59,7 +59,8 @@ When `COSMETIC_LOB_ENABLED=false` the entire family returns 503.
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
 | GET | `/api/ctv/commission-summary` | CTV (ctv.commission.view.self) | — | Aggregated payload: { pending: {total, dental, cosmetic, count}, paid, recent_activity[], by_service[] } with LOB pills on every row |
-| GET | `/api/ctv/referrals` | CTV (ctv.referrals.view.self) | — | List of referred clients across both DBs with status (earning / no visit), totals earned, LOB pills |
+| GET | `/api/ctv/referrals` | CTV (ctv.referrals.view.self) | — | Card-linked clients (`appointments.ctv_id` ∪ `saleorders.ctv_id` = self, latest card wins). Per-LOB `lob_links`; `services[]` = viewer earnings only. Not `referred_by_ctv_id`. |
+| GET | `/api/ctv/client-journeys` | CTV (ctv.dashboard.view) | — | Legacy `{ clients }` shape; delegates to same card-based builder as `/referrals`. |
 | GET | `/api/ctv/hierarchy` | CTV (ctv.dashboard.view) | — | `{ current, upline[], downline[], totals }` for the portal Network tab; `downline[]` is a flattened recursive tree from Dental + Cosmetic CTV partner rows |
 | GET | `/api/ctv/me` | CTV (ctv.dashboard.view) | — | Self profile from canonical CTV partner row: `{ id, name, email, phone, role: 'CTV' }`; frontend masks phone/email before rendering. |
 | PATCH | `/api/ctv/me` | CTV (ctv.dashboard.view) | `{ name }` | Updated self profile; trims/collapses whitespace, rejects blank or >120-char names, and mirrors the CTV `partners.name` row by UUID in Dental/Cosmetic when present. Errors: `P_NAME_REQUIRED`, `P_NAME_TOO_LONG`, `P_CTV_NOT_FOUND`. |

@@ -11,6 +11,18 @@ export type CtvLob = 'dental' | 'cosmetic';
 export type CtvServiceStatus = 'pending' | 'paid' | 'reversed' | string;
 export type CtvJourneyStage = 'referred' | 'visited' | 'serviced' | 'paid';
 
+export interface CtvReferralLobLink {
+  readonly lob: CtvLob;
+  readonly link_expires_at?: string | null;
+  readonly link_anchor_at?: string | null;
+  readonly link_active?: boolean;
+  readonly eligible?: boolean;
+  readonly linked_ctv_id?: string | null;
+  readonly linked_ctv_name?: string | null;
+  readonly stage?: CtvJourneyStage;
+  readonly stage_progress?: 1 | 2 | 3 | 4;
+}
+
 export interface CtvReferralService {
   readonly id: string;
   readonly serviceLineId: string | null;
@@ -45,7 +57,13 @@ export interface CtvReferral {
   readonly link_anchor_at?: string | null;
   readonly link_active?: boolean;
   readonly eligible?: boolean;
+  readonly linked_ctv_id?: string | null;
   readonly linked_ctv_name?: string | null;
+  /** card = client on Theo dõi via appointments.ctv_id and/or saleorders.ctv_id (not profile). */
+  readonly tracking_source?: 'card';
+  /** Per-LOB 6-month claim windows; dental and cosmetic are independent. */
+  readonly lob_links?: Partial<Record<CtvLob, CtvReferralLobLink>>;
+  readonly last_commission_at?: string | null;
 }
 
 export interface CtvReferralResponse {
@@ -85,6 +103,8 @@ export interface CtvHierarchyResponse {
   };
 }
 
+export type CtvCommissionAttributionKind = 'own_referral' | 'service_attached' | 'downline_override';
+
 export interface CtvCommissionRow {
   readonly id: string;
   readonly client_id?: string;
@@ -97,6 +117,14 @@ export interface CtvCommissionRow {
   readonly lob: CtvLob;
   readonly earned_at: string | null;
   readonly status: CtvServiceStatus;
+  /** MLM level on this earnings row (0 = direct on service card, 1+ = upline override). */
+  readonly level?: number;
+  readonly attribution_kind?: CtvCommissionAttributionKind;
+  readonly override_level?: number;
+  /** Level-0 CTV attached to the service (downline when viewer earns override). */
+  readonly attributed_ctv_id?: string | null;
+  readonly attributed_ctv_name?: string | null;
+  readonly client_referred_by_me?: boolean;
 }
 
 export interface CtvCommissionSummary {

@@ -9,6 +9,67 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 Do not remove failed checks until the defect is fixed and rerun.
 
 ---
+# TestSprite Plan: CTV gap-fix wave — tests + docs + governance 2026-06-15
+Feature/edit name: Close CTV tracking-vs-overview gap with integration tests, reclaim unit test, product-map/spec sync, CHANGELOG 0.37.19.
+
+Changed URLs / API routes / data flow:
+- URLs changed: none (`https://tmv.2checkin.com/ctv`).
+- API routes changed: none (behavior locked in v0.37.15–0.37.18); new tests assert `GET /api/ctv/referrals` → `ctvCardTrackingReferrals.js`.
+- Data flow: card discovery → computeCtvLink → per-LOB lob_links; commission remains saleorders.ctv_id; network client_count stays referred_by profile metric.
+- Edge cases: reclaim (A expired → B wins); dual-LOB lob_links; staff read ctv_id from card columns (documented).
+
+Execution checklist:
+- [x] PASS: Unit — `ctvReferrals.test.js` (3/3) route delegates to card builder, no referred_by SQL, lob_links shape.
+- [x] PASS: Unit — `ctvCardTrackingReferrals.test.js` spec §6.7 reclaim (A drops, B keeps).
+- [x] PASS: Governance — `product-map/domains/ctv.yaml` + spec §6 table + `docs/CHANGELOG.md` + `website/public/CHANGELOG.json` v0.37.19.
+- [x] PASS: Comments — `customerReferrer.js` commission source; `ctv.js` network client_count vs Theo dõi; `ctvActions.js` UNMOUNTED warning.
+- [ ] PENDING: Live — reclaim scenario: CTV-A link expired, CTV-B books/reclaims → B sees client on Theo dõi, A does not.
+
+---
+# TestSprite Plan: CTV per-LOB claim windows (dental ≠ cosmetic) 2026-06-15
+Feature/edit name: Dental and aesthetic each have independent 6-month link locks; cosmetic claimed does not block dental register (and vice versa).
+
+Changed URLs / API routes / data flow:
+- URLs changed: none (`https://tmv.2checkin.com/ctv` Theo dõi tab).
+- API routes changed: `GET /api/ctv/referrals` returns `lob_links.dental` / `lob_links.cosmetic`; `POST /api/ctv/clients` and discount-code customer create gate only the target LOB.
+- Data flow: per-LOB `computeCtvLink` → `mergeReferralsAcrossLobs` keeps separate windows; `ReferralFlipCard` renders one link bar per LOB.
+- Edge cases: same phone in both DBs — dental locked + cosmetic free shows eligible banner on aesthetic only; dual-LOB card on Theo dõi shows two link bars.
+
+Execution checklist:
+- [x] PASS: Unit — `ctvCardTrackingReferrals.test.js` independent per-LOB merge (dental active / cosmetic eligible).
+- [x] PASS: Unit — `ctvBookings.test.js` POST `/ctv/clients` allows dental when cosmetic-only claim (per-LOB locks).
+- [x] PASS: Unit — `ReferralFlipCard.test.tsx` per-LOB `lob_links` renders cosmetic eligible banner without dental banner.
+- [ ] PENDING: Live — client with dental card only: another CTV can still register/reclaim on cosmetic; Theo dõi shows separate LOB link state.
+
+---
+# TestSprite Plan: CTV Theo dõi card-based repopulation 2026-06-15
+Feature/edit name: Tracking tab lists clients from appointment/service cards only; same client can appear for multiple CTVs; earnings-only clients stay on Home.
+
+Changed URLs / API routes / data flow:
+- URLs changed: none (`https://tmv.2checkin.com/ctv` Theo dõi tab).
+- API routes changed: `GET /api/ctv/referrals` uses `ctvCardTrackingReferrals.js`; removed `mergeCommissionOnlyReferrals`.
+- Data flow: `appointments.ctv_id` ∪ `saleorders.ctv_id` → partner join → scoped service lines → global `computeCtvLink` → keep row only when `linkedCtvId === viewer`.
+- Edge cases: reclaim (CTV-B wins latest card); expired link still shows if you own winning card; ZZ_CTVCHECK earnings on Home but not on Theo dõi without card.
+
+Execution checklist:
+- [x] PASS: Unit — `ctvCardTrackingReferrals.test.js` (3/3).
+- [ ] PENDING: Live — deploy v0.37.15; confirm Theo dõi shows card clients only; Home still shows all earnings.
+
+---
+# TestSprite Plan: CTV commission provenance breadcrumbs + downline drill-down 2026-06-15
+Feature/edit name: CTV portal shows commission source trail on every earnings row; downline override taps open Giới thiệu/QR on the generating downline CTV.
+
+Changed URLs / API routes / data flow:
+- URLs changed: none (`https://tmv.2checkin.com/ctv` in-portal tabs only).
+- API routes changed: `GET /api/ctv/commission-summary` adds `level`, `attribution_kind`, `attributed_ctv_id`, `attributed_ctv_name`, `client_referred_by_me`.
+- Data flow: `commissionEngine` level field → `ctvCommissionAttribution` enrich → `CommissionProvenanceBreadcrumb` UI → `resolveCommissionNavigateTarget` routes tracking vs network.
+- Edge cases: level-0 own referral vs service-card attach; level-1+ override resolves level-0 CTV via same `service_line_id`; missing client_id still routes downline override.
+
+Execution checklist:
+- [x] PASS: Unit — `ctvCommissionAttribution.test.js` (6/6), `ctvCommissionNavigate.test.ts` (2/2).
+- [ ] PENDING: Live — deploy v0.37.13; tap downline-override row → Giới thiệu/QR highlights downline card; tap own-referral row → Theo dõi.
+
+---
 # TestSprite Plan: CTV recent-activity → tracking flip + search highlight 2026-06-14
 Feature/edit name: CTV portal home recent-activity rows open client tracking with flipped card, pre-filled search, and highlighted commission service.
 
@@ -28,7 +89,7 @@ Setup data and login state:
 
 Execution checklist:
 - [x] PASS: Unit — `ctvTrackingFocus.test.ts`, `CtvTrackingTab.test.tsx`, `ReferralFlipCard.test.tsx` (10/10).
-- [ ] PENDING: Live — tap recent-activity row on v0.37.12+; confirm flip + search highlight + service highlight screenshot.
+- [x] PASS: Live — tap recent-activity row on v0.37.12; Tracking opens, search prefilled/highlighted (`Lương Thị Ái Duyên`), card flipped (`aria-expanded=true`), service row visible — `docs/live-artifacts/live-verify-screenshots/tmv-ctv-activity-handoff-20260614-v03712.png`.
 
 ---
 # TestSprite Plan: NK3 aesthetic LOB pink accent + Aesthetic i18n 2026-06-14

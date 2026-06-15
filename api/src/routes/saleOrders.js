@@ -114,7 +114,7 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
         so.notes,
         COALESCE(so.sourceid, p.sourceid) AS sourceid,
         cs.name AS sourcename,
-        p.referred_by_ctv_id AS ctv_id,
+        so.ctv_id AS ctv_id,
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
         (SELECT sol.tooth_numbers FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_numbers,

@@ -93,7 +93,7 @@ describe('ReferralFlipCard', () => {
 
     await user.click(flipButton);
 
-    expect(screen.getByText('Services under this referred client')).toBeVisible();
+    expect(screen.getByText('Your commission lines for this client')).toBeVisible();
     expect(screen.getByText('Dental')).toBeVisible();
     expect(screen.getByRole('button', { name: /Back/i })).toBeVisible();
   });
@@ -140,6 +140,138 @@ describe('ReferralFlipCard', () => {
       screen.getByRole('button', { name: /show client tracking journey for seed client - nk3 ctv/i })
     ).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByText('Laser da mặt').closest('li')?.className).toMatch(/ring-orange-300/);
+  });
+
+  it('renders independent link bars per LOB when lob_links differ', () => {
+    localStorage.setItem('tg-lang', 'en');
+    const dualLob: CtvReferral = {
+      id: 'client-dual',
+      name: 'Dual LOB Client',
+      phone: '0900000099',
+      lobs: ['dental', 'cosmetic'],
+      total_earned: 0,
+      earned_count: 0,
+      service_count: 1,
+      status: 'earning',
+      referred_at: '2026-06-01T08:00:00.000Z',
+      services: [],
+      lob_links: {
+        dental: {
+          lob: 'dental',
+          link_expires_at: '2026-12-01T00:00:00.000Z',
+          link_anchor_at: '2026-06-01T00:00:00.000Z',
+          link_active: true,
+          eligible: false,
+          linked_ctv_name: 'CTV Dental',
+        },
+        cosmetic: {
+          lob: 'cosmetic',
+          link_expires_at: null,
+          link_anchor_at: null,
+          link_active: false,
+          eligible: true,
+          linked_ctv_name: null,
+        },
+      },
+    };
+    render(<ReferralFlipCard referral={dualLob} />);
+
+    expect(screen.getByTestId('ctv-eligible-banner-cosmetic')).toBeVisible();
+    expect(screen.queryByTestId('ctv-eligible-banner-dental')).not.toBeInTheDocument();
+    expect(screen.getAllByText('Dental').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Aesthetic').length).toBeGreaterThan(0);
+  });
+
+  it('highlights the focused LOB link section when focus.lob is set', () => {
+    localStorage.setItem('tg-lang', 'en');
+    const dualLob: CtvReferral = {
+      id: 'client-dual',
+      name: 'Dual LOB Client',
+      phone: '0900000099',
+      lobs: ['dental', 'cosmetic'],
+      total_earned: 0,
+      earned_count: 0,
+      service_count: 0,
+      status: 'earning',
+      referred_at: '2026-06-01T08:00:00.000Z',
+      services: [],
+      lob_links: {
+        dental: {
+          lob: 'dental',
+          link_expires_at: '2026-12-01T00:00:00.000Z',
+          link_anchor_at: '2026-06-01T00:00:00.000Z',
+          link_active: true,
+          eligible: false,
+          linked_ctv_name: 'CTV Dental',
+          stage_progress: 2,
+        },
+        cosmetic: {
+          lob: 'cosmetic',
+          link_expires_at: null,
+          link_anchor_at: null,
+          link_active: false,
+          eligible: true,
+          linked_ctv_name: null,
+          stage_progress: 4,
+        },
+      },
+    };
+
+    render(
+      <ReferralFlipCard
+        referral={dualLob}
+        focus={{
+          clientId: 'client-dual',
+          lob: 'dental',
+        }}
+      />
+    );
+
+    const dentalSection = screen.getByTestId('ctv-lob-link-dental');
+    expect(dentalSection.className).toMatch(/ring-orange/);
+    expect(screen.getByTestId('ctv-lob-link-cosmetic').className).not.toMatch(/ring-orange-300/);
+    expect(screen.getByText('2/4')).toBeVisible();
+  });
+
+  it('uses per-LOB stage_progress for dual-LOB referrals when focus LOB is absent', () => {
+    localStorage.setItem('tg-lang', 'en');
+    const dualLob: CtvReferral = {
+      id: 'client-dual',
+      name: 'Dual LOB Client',
+      phone: '0900000099',
+      lobs: ['dental', 'cosmetic'],
+      total_earned: 0,
+      earned_count: 0,
+      service_count: 0,
+      status: 'earning',
+      referred_at: '2026-06-01T08:00:00.000Z',
+      services: [],
+      stage_progress: 1,
+      lob_links: {
+        dental: {
+          lob: 'dental',
+          link_expires_at: '2026-12-01T00:00:00.000Z',
+          link_anchor_at: '2026-06-01T00:00:00.000Z',
+          link_active: true,
+          eligible: false,
+          linked_ctv_name: 'CTV Dental',
+          stage_progress: 2,
+        },
+        cosmetic: {
+          lob: 'cosmetic',
+          link_expires_at: '2026-12-01T00:00:00.000Z',
+          link_anchor_at: '2026-06-01T00:00:00.000Z',
+          link_active: true,
+          eligible: false,
+          linked_ctv_name: 'CTV Cosmetic',
+          stage_progress: 4,
+        },
+      },
+    };
+
+    render(<ReferralFlipCard referral={dualLob} />);
+
+    expect(screen.getByText('4/4')).toBeVisible();
   });
 
   it('shows 4/4 from server stage_progress for a paid client with no service lines (regression: was stuck at 1/4)', () => {

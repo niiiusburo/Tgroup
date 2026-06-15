@@ -6,6 +6,7 @@
 import { ChevronRight, Tag } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { CommissionProvenanceBreadcrumb } from '@/components/ctv/CommissionProvenanceBreadcrumb';
 import { formatVND } from '@/lib/formatting';
 import type { CtvCommissionRow, CtvCommissionSummary, CtvReferral } from '@/lib/api/ctv';
 import { useCtvLocale } from '@/lib/i18n/ctv';
@@ -76,11 +77,13 @@ export function CtvHomeTab({ summary, referrals, profileName, isLoading, onActiv
         <div className="mt-4 grid grid-cols-3 gap-3 text-center">
           <div>
             <p className="text-2xl font-bold text-gray-900">{referrals.length}</p>
-            <p className="mt-1 text-xs text-gray-500">{t('summary.referredClients')}</p>
+            <p className="mt-1 text-xs text-gray-500">{t('home.cardLinkedClients')}</p>
+            <p className="text-[10px] text-gray-400">{t('home.cardLinkedClientsHint')}</p>
           </div>
           <div className="border-x border-gray-100">
             <p className="text-2xl font-bold text-gray-900">{summary?.counts.pending ?? 0}</p>
-            <p className="mt-1 text-xs text-gray-500">{t('home.services')}</p>
+            <p className="mt-1 text-xs text-gray-500">{t('home.commissionServices')}</p>
+            <p className="text-[10px] text-gray-400">{t('home.commissionServicesHint')}</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-orange-600">{formatVND(paid).replace(/\s+đ$/, '')}</p>
@@ -92,11 +95,16 @@ export function CtvHomeTab({ summary, referrals, profileName, isLoading, onActiv
       <section className="mt-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
         <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-gray-500">{t('home.recentActivity')}</p>
         <p className="mt-1 text-xs text-gray-500">{t('home.recentActivityHint')}</p>
+        <p className="mt-1 text-[11px] font-medium text-orange-700/80">{t('home.recentActivityProvenanceHint')}</p>
         <div className="mt-3 space-y-2 text-sm">
           {(summary?.recent ?? []).slice(0, 5).map((row) => {
             const clientLabel = row.client_name || ctv.unknownClient();
             const serviceLabel = row.service_name || ctv.unknownService();
-            const clickable = !!onActivityClick && !!row.client_id;
+            const clickable =
+              !!onActivityClick &&
+              (!!row.client_id ||
+                row.attribution_kind === 'downline_override' ||
+                !!row.client_name);
 
             if (!clickable) {
               return (
@@ -120,11 +128,9 @@ export function CtvHomeTab({ summary, referrals, profileName, isLoading, onActiv
                 className="flex w-full items-center justify-between gap-3 rounded-xl border border-transparent px-1 py-2 text-left transition-colors hover:border-orange-100 hover:bg-orange-50/60 focus:outline-none focus:ring-2 focus:ring-orange-300/60"
                 aria-label={t('home.viewActivityFor', { client: clientLabel, service: serviceLabel })}
               >
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="truncate font-medium text-gray-900">{clientLabel}</p>
-                  <p className="text-xs text-gray-500">
-                    {serviceLabel} · {ctv.getLobLabel(row.lob)} · {ctv.getServiceStatusLabel(row.status)}
-                  </p>
+                  <CommissionProvenanceBreadcrumb row={row} compact className="mt-1" />
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <p className="font-bold text-emerald-600">+{formatVND(Math.abs(row.amount))}</p>

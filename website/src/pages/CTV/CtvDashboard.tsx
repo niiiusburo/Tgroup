@@ -21,13 +21,18 @@ import {
   type CtvProfile,
   type CtvReferral,
 } from '@/lib/api';
-import { cn, normalizeText } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { CtvCommissionTab } from './tabs/CtvCommissionTab';
 import { CtvHomeTab } from './tabs/CtvHomeTab';
 import { CtvMeTab } from './tabs/CtvMeTab';
 import { CtvNetworkTab } from './tabs/CtvNetworkTab';
 import { CtvTrackingTab } from './tabs/CtvTrackingTab';
 import type { CtvTrackingFocus } from './ctvTrackingFocus';
+import {
+  resolveCommissionNavigateTarget,
+  type CtvNetworkFocus,
+} from './ctvCommissionNavigate';
+import { ActionErrorToast } from '@/components/shared/ActionErrorToast';
 import { CtvReferModal } from '@/components/ctv/CtvReferModal';
 import { CtvRecruitModal } from '@/components/ctv/CtvRecruitModal';
 
@@ -64,35 +69,35 @@ export default function CtvDashboard() {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [trackingFocus, setTrackingFocus] = useState<CtvTrackingFocus | null>(null);
   const [trackingFocusKey, setTrackingFocusKey] = useState(0);
+  const [networkFocus, setNetworkFocus] = useState<CtvNetworkFocus | null>(null);
+  const [networkFocusKey, setNetworkFocusKey] = useState(0);
+  const [commissionSourceRow, setCommissionSourceRow] = useState<CtvCommissionRow | null>(null);
+  const [navigateToast, setNavigateToast] = useState<string | null>(null);
   const shouldReduceMotion = useReducedMotion();
 
   const handleCommissionNavigate = useCallback((row: CtvCommissionRow) => {
-    let clientId = row.client_id?.trim() || '';
-    if (!clientId && row.client_name) {
-      const needle = normalizeText(row.client_name);
-      const matchedReferral = referrals.find(
-        (referral) => normalizeText(referral.name ?? '') === needle
-      );
-      clientId = matchedReferral?.id?.trim() ?? '';
-    }
-    if (!clientId) {
+    const target = resolveCommissionNavigateTarget(row, referrals);
+    if (!target) {
+      setNavigateToast(t('tracking.navigateUnavailable'));
       setActiveTab('commission');
       return;
     }
-    setTrackingFocus({
-      clientId,
-      serviceLineId: row.service_line_id ?? null,
-      clientName: row.client_name,
-      serviceName: row.service_name,
-      lob: row.lob,
-      amount: row.amount,
-      status: row.status,
-      earnedAt: row.earned_at,
-    });
-    setTrackingFocusKey((value) => value + 1);
-    setActiveTab('tracking');
+
+    setCommissionSourceRow(target.row);
+    setTrackingFocus(null);
+    setNetworkFocus(null);
+
+    if (target.tab === 'network') {
+      setNetworkFocus(target.focus);
+      setNetworkFocusKey((value) => value + 1);
+      setActiveTab('network');
+    } else {
+      setTrackingFocus(target.focus);
+      setTrackingFocusKey((value) => value + 1);
+      setActiveTab('tracking');
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [referrals]);
+  }, [referrals, t]);
 
   const loadDashboard = useCallback(async () => {
     setIsLoading(true);
@@ -299,17 +304,28 @@ export default function CtvDashboard() {
               error={error}
               onRetry={() => void loadDashboard()}
               focus={trackingFocus}
-              onFocusClear={() => setTrackingFocus(null)}
+              commissionSource={commissionSourceRow}
+              onFocusClear={() => {
+                setTrackingFocus(null);
+                setCommissionSourceRow(null);
+              }}
             />
           ) : null}
           {activeTab === 'network' ? (
             <CtvNetworkTab
+              key={networkFocus ? `network-focus-${networkFocusKey}` : 'network-default'}
               hierarchy={hierarchy}
               isLoading={isHierarchyLoading}
               error={hierarchyError}
               onRetry={() => void loadHierarchy()}
               profile={profile}
               profileName={profileName}
+              focus={networkFocus}
+              commissionSource={commissionSourceRow}
+              onFocusClear={() => {
+                setNetworkFocus(null);
+                setCommissionSourceRow(null);
+              }}
             />
           ) : null}
           {activeTab === 'me' ? <CtvMeTab profile={profile} onProfileUpdated={setProfile} /> : null}
@@ -332,6 +348,10 @@ export default function CtvDashboard() {
             void loadHierarchy();
           }}
         />
+
+        {navigateToast ? (
+          <ActionErrorToast message={navigateToast} autoDismissMs={6000} />
+        ) : null}
 
         <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-gray-100 bg-white/95 shadow-[0_-2px_10px_rgba(249,115,22,0.05)] backdrop-blur">
           <div className="mx-auto flex max-w-[430px]">

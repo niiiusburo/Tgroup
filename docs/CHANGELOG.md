@@ -2,6 +2,60 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.37.20] — 2026-06-15 — CTV: viewer-only client history on Theo dõi
+### Changed
+- **Theo dõi flip-card services = viewer earnings only.** `GET /api/ctv/referrals` service rows now come from `earnings WHERE recipient_partner_id = viewer`, not all saleorder lines on the client. Another CTV's appointment/service cards never appear; journey stage still uses viewer-scoped operational cards.
+- **Flip-card copy** — EN/VI labels say "your commission lines" / "các dòng hoa hồng của bạn" instead of generic referred-client wording. — @agent — viewer isolation per stakeholder rule
+
+## [0.37.19] — 2026-06-15 — CTV gap-fix wave: tests, docs, governance sync
+### Changed (backend TRACK1)
+- **`GET /api/ctv/client-journeys` delegates to `buildCardTrackingReferrals`.** Drops `partners.referred_by_ctv_id` client discovery; maps card rows to legacy `{ clients }` journey shape.
+- **Staff reads expose authoritative card CTV.** `GET /api/SaleOrders`, `fetchSaleOrderById`, appointment create/update responses return `so.ctv_id` / `a.ctv_id`, not profile `referred_by_ctv_id`.
+- **`ctvCardTrackingReferrals` stage scoping.** `visitAgg` filters `appointments.ctv_id = viewer`; `payAgg` joins via `saleorders.ctv_id = viewer`.
+- **Discount verify reclaim** creates lightweight appointment stub (`ensureCtvTrackingAppointmentStub`) with `appointments.ctv_id = issuing CTV` after profile write — mirrors `POST /api/ctv/bookings` card pattern.
+### Added
+- **Route integration test `GET /api/ctv/referrals`.** `ctvReferrals.test.js` proves the handler delegates to `buildCardTrackingReferrals` (card-based) and never queries `referred_by_ctv_id`; asserts `lob_links` merge shape.
+- **Reclaim scenario unit test (spec §6.7).** `ctvCardTrackingReferrals.test.js` — CTV-A drops client after CTV-B wins latest card; B keeps it on Theo dõi.
+### Changed
+- **`product-map/domains/ctv.yaml` + workflow spec §6** synced: Tracking = card-based `/referrals`; commission = `saleorders.ctv_id`; client-journeys documented as profile-based alternate; staff read `ctv_id` from card columns noted.
+- **`customerReferrer.js` comment** corrected — commission from service-card `saleorders.ctv_id`, not profile `referred_by_ctv_id`.
+- **`GET /api/ctv/network` comment** — `client_count` is profile-based (`referred_by_ctv_id`), distinct from Theo dõi card count.
+- **`testbright.md`** gap-fix execution checklist with unit PASS items; live reclaim verify PENDING.
+### Fixed (frontend TRACK2)
+- **No synthetic tracking cards for commission-only clients.** Tapping Home/Commission for a client absent from `GET /referrals` opens Theo dõi with `tracking.focusMissingClient` banner instead of a fake 3/4 journey card.
+- **`resolveCommissionNavigateTarget` sets `commissionHistoryOnly`** when client not on referrals; `CtvDashboard` toast when client id cannot be resolved.
+### Changed (frontend TRACK2)
+- **`ReferralFlipCard`:** per-LOB `lob_links[].stage_progress` for journey ring; `focus.lob` highlights `data-testid="ctv-lob-link-{lob}"` section.
+- **Tracking i18n + Home metrics:** "card-linked" / "khách trên thẻ" copy; home row labels distinguish card count vs commission service count. — @agent — `docs/superpowers/specs/2026-06-15-ctv-portal-tracking-vs-overview-workflow.md` §5 TRACK2
+
+## [0.37.18] — 2026-06-15 — CTV: per-LOB claim windows (dental ≠ cosmetic)
+### Changed
+- **Theo dõi exposes `lob_links` per LOB** so a dental 6-month lock no longer OR-merges into cosmetic (and vice versa). `ReferralFlipCard` renders one link bar per LOB when both apply.
+- **`POST /api/ctv/clients` and discount-code customer create** only gate claims in the target LOB — cosmetic claimed does not block dental register. — @agent — cross-LOB independence per `docs/business-logic/ctv-referral-commission.md` §6
+
+## [0.37.17] — 2026-06-15 — CTV: appointment ctv_id on Theo dõi + 6-month reset (commission still service card)
+### Changed
+- **Theo dõi again includes `appointments.ctv_id`.** Appointment with CTV attached shows on tracking and participates in `computeCtvLink` (resets 6-month client ineligibility). Commission remains **saleorders.ctv_id only**; profile `referred_by_ctv_id` still does not grant money or tracking. — @agent — stakeholder correction on Diagram 4
+
+## [0.37.16] — 2026-06-15 — CTV: service card is final truth for commission + Theo dõi
+### Changed
+- **Theo dõi and L0 commission attribution use service cards only.** `GET /api/ctv/referrals` discovers clients from `saleorders.ctv_id` only (appointments removed). Link bar uses latest service card, not appointment. Level-0 earnings breadcrumbs are always `service_attached` — customer `referred_by_ctv_id` does not imply commission. Aligns with `docs/business-logic/ctv-referral-commission.md` §3. — @agent — stakeholder rule: thẻ DV is final truth
+
+## [0.37.15] — 2026-06-15 — CTV Theo dõi: card-based client list (appointments + service cards)
+### Changed
+- **`GET /api/ctv/referrals` repopulated from operational cards only.** Client discovery uses `appointments.ctv_id` and `saleorders.ctv_id` (not `partners.referred_by_ctv_id`). Service lines are scoped to cards where you are the CTV; `computeCtvLink` filters out clients whose latest winning card belongs to another CTV. Same client can appear for multiple CTVs when each holds their own card. Removed v0.37.14 `commission_only` earnings merge. — @agent — `docs/superpowers/specs/2026-06-15-ctv-portal-tracking-vs-overview-workflow.md`
+
+## [0.37.14] — 2026-06-15 — CTV Theo dõi: show commission-only clients (ZZ_* QA rows)
+### Added
+- **`GET /api/ctv/referrals` merges commission-only clients.** Any client with earnings for this CTV but not in `referred_by_ctv_id` list (e.g. `ZZ_CTVCHECK_*` QA partners, service-card attach) now appears on **Theo dõi** with `tracking_source: commission_only`, services from the earnings ledger, and an amber **Hoa hồng** badge. — @agent — CTV tracking transparency
+
+## [0.37.13] — 2026-06-15 — CTV portal: commission provenance breadcrumbs + downline drill-down
+### Added
+- **Commission source trail on every earnings row.** `GET /api/ctv/commission-summary` now returns `level`, `attribution_kind` (`own_referral` | `service_attached` | `downline_override`), `attributed_ctv_id/name`, and `client_referred_by_me`. Home + Commission tabs show colored badges and breadcrumb chains (Refferq-style affiliate breakdown pattern).
+- **Smart drill-down routing.** Tap own-referral/service-card rows → **Theo dõi** (client card). Tap downline-override rows → **Giới thiệu/QR** network tab with the generating downline CTV expanded, highlighted, and scrolled into view.
+### Changed
+- Recent-activity copy clarifies three commission sources instead of implying every row is a referred client. — @agent — CTV portal UX / earnings attribution transparency
+
 ## [0.37.12] — 2026-06-14 — CTV portal: harden recent-activity → tracking handoff
 ### Fixed
 - **Recent-activity drill-down now reliably flips and highlights.** Focus handoff remounts the tracking tab per navigation, scrolls to top, locks the referral card in flipped state while focus is active, resolves missing `client_id` via accent-insensitive referral name match, and normalizes DOM scroll targets + service-name matching. — @agent — CTV portal UX

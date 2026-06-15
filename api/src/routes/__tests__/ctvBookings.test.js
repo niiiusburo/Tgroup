@@ -521,42 +521,32 @@ describe('POST /ctv/clients (cross-LOB claim gate)', () => {
     };
   }
 
-  test('blocks register when the same phone is actively claimed in the OTHER LOB by a different CTV', async () => {
-    // The CTV calls /clients on the dental DB, but the same phone already
-    // exists in the cosmetic DB under a different CTV with an active claim.
-    // Previously this slipped through and created a duplicate partner row.
+  test('allows register in dental when the same phone is actively claimed only in cosmetic (per-LOB locks)', async () => {
     const dentalDb = { queryRows: jest.fn(), query: jest.fn() };
     const cosmeticDb = { queryRows: jest.fn(), query: jest.fn() };
     getDb.mockImplementation((lob) => (lob === 'dental' ? dentalDb : cosmeticDb));
 
-    // phone check: empty in dental, hit in cosmetic
     dentalDb.queryRows.mockResolvedValueOnce([]);
-    cosmeticDb.queryRows.mockResolvedValueOnce([{ id: 'client-claimed' }]);
-
-    getReferralClaimStatus.mockResolvedValueOnce({
-      ownerCtvId: 'ctv-other',
-      ownerName: 'Other CTV',
-      active: true,
-      expiresAt: new Date('2026-12-01'),
-    });
+    dentalDb.queryRows.mockResolvedValueOnce([{
+      id: 'new-dental-id', name: 'Dental Client', phone: '0909123456',
+      lob_scope: ['dental'], referred_by_ctv_id: 'ctv-me',
+      customer: true, active: true, datecreated: '2026-06-15T00:00:00.000Z',
+    }]);
 
     const handler = findRouteHandler(ctvRouter, '/clients', 'post');
     const req = {
       method: 'POST',
       url: '/ctv/clients',
-      body: { name: 'Stolen Client', phone: '0909123456', lob: 'dental' },
+      body: { name: 'Dental Client', phone: '0909123456', lob: 'dental' },
       user: { employeeId: 'ctv-me', is_ctv: true },
     };
     const res = makeRes();
     await handler(req, res);
 
-    expect(res.statusCode).toBe(400);
-    expect(res.jsonBody).toMatchObject({
-      error: { code: 'B_CLIENT_CLAIMED', ownerName: 'Other CTV' },
-    });
-    // No INSERT should have been issued on either DB.
-    expect(dentalDb.queryRows).toHaveBeenCalledTimes(1);
-    expect(cosmeticDb.queryRows).toHaveBeenCalledTimes(1);
+    expect(res.statusCode).toBe(201);
+    expect(res.jsonBody).toMatchObject({ id: 'new-dental-id' });
+    expect(getReferralClaimStatus).not.toHaveBeenCalled();
+    expect(cosmeticDb.queryRows).not.toHaveBeenCalled();
   });
 
   test('blocks register when the same phone already exists in the same LOB (U_DUPLICATE_PHONE)', async () => {
@@ -588,22 +578,13 @@ describe('POST /ctv/clients (cross-LOB claim gate)', () => {
     expect(res.jsonBody).toMatchObject({ error: { code: 'U_DUPLICATE_PHONE' } });
   });
 
-  test('allows cross-LOB register when the OTHER LOB match is lapsed (claim inactive)', async () => {
+  test('allows register in dental when phone is new to that LOB', async () => {
     const dentalDb = { queryRows: jest.fn(), query: jest.fn() };
     const cosmeticDb = { queryRows: jest.fn(), query: jest.fn() };
     getDb.mockImplementation((lob) => (lob === 'dental' ? dentalDb : cosmeticDb));
 
     dentalDb.queryRows.mockResolvedValueOnce([]);
-    cosmeticDb.queryRows.mockResolvedValueOnce([{ id: 'client-lapsed' }]);
 
-    getReferralClaimStatus.mockResolvedValueOnce({
-      ownerCtvId: 'ctv-old',
-      ownerName: 'Old CTV',
-      active: false,
-      expiresAt: new Date('2024-01-01'),
-    });
-
-    // INSERT partner row + RETURNING
     dentalDb.queryRows.mockResolvedValueOnce([{
       id: 'new-id', name: 'New Client', phone: '0909123456',
       lob_scope: ['dental'], referred_by_ctv_id: 'ctv-me',
@@ -662,12 +643,15 @@ describe('GET /ctv/commission-summary', () => {
     getDb.mockReturnValue(dbMock);
 
     // dental earnings: one paid item and one pending reversal (negative amount)
-    dbMock.queryRows.mockResolvedValueOnce([
-      { id: 'e-paid', client_id: 'c2', amount: '100000', status: 'paid', payout_id: null, earned_at: '2026-06-02', client_name: 'Paid Client' },
-      { id: 'e-rev', client_id: 'c1', amount: '-50000', status: 'pending', payout_id: null, earned_at: '2026-06-01', client_name: 'Reversed Client' },
-    ]);
-    // cosmetic earnings: none
-    dbMock.queryRows.mockResolvedValueOnce([]);
+    dbMock.queryRows
+      .mockResolvedValueOnce([
+        { id: 'e-paid', client_id: 'c2', amount: '100000', status: 'paid', payout_id: null, earned_at: '2026-06-02', client_name: 'Paid Client', level: 0, recipient_partner_id: 'ctv-1' },
+        { id: 'e-rev', client_id: 'c1', amount: '-50000', status: 'pending', payout_id: null, earned_at: '2026-06-01', client_name: 'Reversed Client', level: 0, recipient_partner_id: 'ctv-1' },
+      ])
+      // cosmetic earnings: none
+      .mockResolvedValueOnce([])
+      // enrichCommissionAttribution partner name lookups (dental + cosmetic)
+      .mockResolvedValue([]);
 
     const handler = findRouteHandler(ctvRouter, '/commission-summary', 'get');
     const req = { method: 'GET', url: '/ctv/commission-summary', user: { employeeId: 'ctv-1', is_ctv: true }, query: {} };

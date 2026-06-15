@@ -339,3 +339,25 @@ The documentation gate is enforced in:
 - `.github/workflows/pr-checks.yml` documentation-governance job
 
 Bypassing these gates with `--no-verify`, direct VPS edits, or direct pushes outside PR review is outside the normal project workflow and must be called out explicitly in the final recap.
+
+### MANDATORY EDIT PROTOCOL
+BEFORE any edit:
+1. graphify query the target — what is it, what connects to it
+2. CRG blast_radius — list ALL affected files/functions/tests
+3. LSP/find-references — every call site
+→ You must OUTPUT the blast-radius list before touching code.
+→ Acquire lock/ownership on every file in the radius, not just the target.
+DURING:
+4. Contracts/types first; let the type checker enumerate breakage.
+AFTER (all blocking, in order):
+5. Diagnostics clean → type check passes → affected tests + golden
+   fixtures pass. Pre-commit hook enforces this; never bypass with
+   --no-verify.
+ON SCHEMA CHANGE:
+6. Re-run DB introspection into the graph + blast_radius on affected
+   tables before merge.
+AFTER MERGE:
+7. Graph rebuilds via git hook; write decision + gotchas to DECISIONS.md
+   (or Mem0 if no Luffy files).
+CONFLICT RULE: graph/CRG = navigation truth for current code state;
+docs/memory = rationale. On contradiction, current code wins.

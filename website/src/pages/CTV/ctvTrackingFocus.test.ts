@@ -59,18 +59,20 @@ describe('ctvTrackingFocus', () => {
     expect(merged.services[0]?.serviceLineId).toBe('line-9');
   });
 
-  it('prepends a missing client when drilling down from recent activity', () => {
+  it('does not inject a synthetic referral when the focus client is missing from tracking', () => {
     const resolved = resolveReferralsForFocus([baseReferral], {
       clientId: 'client-2',
       clientName: 'Other Client',
       serviceName: 'Botox',
       lob: 'cosmetic',
       amount: 1000,
+      commissionHistoryOnly: true,
     });
 
-    expect(resolved).toHaveLength(2);
-    expect(resolved[0]?.id).toBe('client-2');
-    expect(resolved[0]?.services[0]?.serviceName).toBe('Botox');
+    expect(resolved).toHaveLength(1);
+    expect(resolved[0]?.id).toBe('client-1');
+    expect(resolved.some((referral) => referral.id === 'client-2')).toBe(false);
+    expect(resolved.some((referral) => referral.stage_progress === 3)).toBe(false);
   });
 
   it('highlights by service line id or service name', () => {

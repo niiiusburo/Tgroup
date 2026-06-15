@@ -9,7 +9,7 @@ import { CalendarDays, Check, ExternalLink, Link2, ReceiptText, RotateCcw, Spark
 import { cn } from '@/lib/utils';
 import { formatVND } from '@/lib/formatting';
 import { useCtvLocale } from '@/lib/i18n/ctv';
-import type { CtvLob, CtvReferral, CtvReferralService } from '@/lib/api/ctv';
+import type { CtvLob, CtvReferral, CtvReferralLobLink, CtvReferralService } from '@/lib/api/ctv';
 import { CtvLinkBar } from '@/components/shared';
 import {
   ctvReferralDomId,
@@ -23,16 +23,58 @@ interface ReferralFlipCardProps {
   readonly focus?: CtvTrackingFocus | null;
 }
 
+function resolveLobLinkRows(referral: CtvReferral): Array<{ lob: CtvLob; link: CtvReferralLobLink }> {
+  if (referral.lob_links && Object.keys(referral.lob_links).length > 0) {
+    return referral.lobs.flatMap((lob) => {
+      const link = referral.lob_links?.[lob];
+      return link ? [{ lob, link }] : [];
+    });
+  }
+  if (!referral.link_expires_at && !referral.eligible) return [];
+  return referral.lobs.map((lob) => ({
+    lob,
+    link: {
+      lob,
+      link_expires_at: referral.link_expires_at ?? null,
+      link_anchor_at: referral.link_anchor_at ?? null,
+      link_active: referral.link_active,
+      eligible: referral.eligible,
+      linked_ctv_name: referral.linked_ctv_name ?? null,
+    },
+  }));
+}
+
 function getLobClass(lob: CtvLob): string {
   return lob === 'cosmetic'
     ? 'bg-rose-50 text-rose-600 ring-rose-500/20'
     : 'bg-orange-50 text-orange-700 ring-orange-500/20';
 }
 
-function getProgress(referral: CtvReferral): { current: number; paid: boolean } {
-  // Prefer the server's activity-based stage (visited/serviced/paid from the real tables).
-  // A client who has paid shows 4/4 even with no recorded service line — which is the point:
-  // the CTV sees their client paid, regardless of whether a commission row was written.
+function resolveLobStageProgress(
+  referral: CtvReferral,
+  focusLob?: CtvLob | null
+): number | null {
+  if (focusLob && referral.lob_links?.[focusLob]?.stage_progress) {
+    return referral.lob_links[focusLob]!.stage_progress!;
+  }
+  const lobProgress = Object.values(referral.lob_links ?? {})
+    .map((link) => link?.stage_progress)
+    .filter((value): value is 1 | 2 | 3 | 4 => typeof value === 'number');
+  if (lobProgress.length > 0) {
+    return Math.max(...lobProgress);
+  }
+  return null;
+}
+
+function getProgress(
+  referral: CtvReferral,
+  focusLob?: CtvLob | null
+): { current: number; paid: boolean } {
+  // Prefer per-LOB stage when lob_links are present, then the server activity-based stage.
+  const lobSp = resolveLobStageProgress(referral, focusLob);
+  if (typeof lobSp === 'number' && lobSp >= 1 && lobSp <= 4) {
+    return { current: lobSp, paid: lobSp >= 4 };
+  }
   const sp = referral.stage_progress;
   if (typeof sp === 'number' && sp >= 1 && sp <= 4) {
     return { current: sp, paid: sp >= 4 };
@@ -116,7 +158,24 @@ export function ReferralFlipCard({
 
   const services = referral.services ?? [];
   const serviceCount = Math.max(referral.service_count ?? 0, services.length);
-  const progress = useMemo(() => getProgress(referral), [referral]);
+  const progress = useMemo(() => getProgress(referral, focus?.lob), [focus?.lob, referral]);
+  const lobLinkRows = useMemo(() => resolveLobLinkRows(referral), [referral]);
+
+  useEffect(() => {
+    if (!focus?.lob) return;
+    const timer = window.setTimeout(() => {
+      document
+        .querySelector(`[data-testid="ctv-lob-link-${focus.lob}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 220);
+    return () => window.clearTimeout(timer);
+  }, [focus?.lob, referral.id]);
+  const progressDimmed = useMemo(() => {
+    if (lobLinkRows.length > 0) {
+      return lobLinkRows.every(({ link }) => link.eligible);
+    }
+    return !!referral.eligible;
+  }, [lobLinkRows, referral.eligible]);
   const hasServices = serviceCount > 0;
 
   const steps = [
@@ -165,7 +224,9 @@ export function ReferralFlipCard({
                   {progress.current}/4
                 </div>
                 <div className="min-w-0">
-                  <h3 className="truncate text-sm font-bold text-gray-900">{referral.name}</h3>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <h3 className="min-w-0 truncate text-sm font-bold text-gray-900">{referral.name}</h3>
+                  </div>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">
                     {referral.lobs.map((lob) => (
                       <span
@@ -175,7 +236,9 @@ export function ReferralFlipCard({
                         {ctv.getLobLabel(lob)}
                       </span>
                     ))}
-                    <span className="text-[11px] font-medium text-gray-400">{ctv.formatShortDate(referral.referred_at)}</span>
+                    <span className="text-[11px] font-medium text-gray-400">
+                      {ctv.formatShortDate(referral.referred_at)}
+                    </span>
                   </div>
                 </div>
                 <div className="text-right">
@@ -193,7 +256,7 @@ export function ReferralFlipCard({
                 </div>
               </div>
 
-              <div className={cn('mt-7 grid grid-cols-4 gap-1.5', referral.eligible && 'opacity-40')}>
+              <div className={cn('mt-7 grid grid-cols-4 gap-1.5', progressDimmed && 'opacity-40')}>
                 {steps.map((step, index) => {
                   const number = index + 1;
                   const done = number < progress.current || (number === 4 && progress.paid);
@@ -222,26 +285,42 @@ export function ReferralFlipCard({
                 })}
               </div>
 
-              {(referral.link_expires_at || referral.eligible) && (
-                <div className="mt-4">
-                  {referral.eligible ? (
+              {lobLinkRows.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  {lobLinkRows.map(({ lob, link }) => (
                     <div
-                      className="flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-500/20"
-                      data-testid="ctv-eligible-banner"
+                      key={lob}
+                      data-testid={`ctv-lob-link-${lob}`}
+                      className={cn(
+                        'rounded-xl transition-shadow',
+                        focus?.lob === lob && 'bg-orange-50/80 p-2 ring-2 ring-orange-300/70'
+                      )}
                     >
-                      <span aria-hidden="true">⚠</span>
-                      {t('link.portalEligible')}
+                      {referral.lobs.length > 1 && (
+                        <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-gray-500">
+                          {ctv.getLobLabel(lob)}
+                        </p>
+                      )}
+                      {link.eligible ? (
+                        <div
+                          className="flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-500/20"
+                          data-testid={`ctv-eligible-banner-${lob}`}
+                        >
+                          <span aria-hidden="true">⚠</span>
+                          {t('link.portalEligible')}
+                        </div>
+                      ) : (
+                        <CtvLinkBar
+                          ctvName={link.linked_ctv_name ?? referral.name}
+                          anchorAt={link.link_anchor_at ?? null}
+                          expiresAt={link.link_expires_at ?? null}
+                          active={link.link_active ?? true}
+                          eligible={link.eligible ?? false}
+                          compact
+                        />
+                      )}
                     </div>
-                  ) : (
-                    <CtvLinkBar
-                      ctvName={referral.linked_ctv_name ?? referral.name}
-                      anchorAt={referral.link_anchor_at ?? null}
-                      expiresAt={referral.link_expires_at ?? null}
-                      active={referral.link_active ?? true}
-                      eligible={referral.eligible ?? false}
-                      compact
-                    />
-                  )}
+                  ))}
                 </div>
               )}
 

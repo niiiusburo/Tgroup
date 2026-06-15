@@ -6,6 +6,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { CommissionProvenanceBreadcrumb } from '@/components/ctv/CommissionProvenanceBreadcrumb';
 import { formatVND } from '@/lib/formatting';
 import type { CtvCommissionRow, CtvCommissionSummary } from '@/lib/api/ctv';
 import { cn } from '@/lib/utils';
@@ -30,15 +31,20 @@ function CommissionRow({
   const ctv = useCtvLocale();
   const clientLabel = row.client_name || ctv.unknownClient();
   const serviceLabel = row.service_name || ctv.unknownService();
-  const clickable = !!onRowClick && !!row.client_id;
+  const clickable =
+    !!onRowClick &&
+    (!!row.client_id ||
+      row.attribution_kind === 'downline_override' ||
+      !!row.client_name);
 
   const content = (
     <>
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-gray-900">{clientLabel}</p>
-        <p className="mt-1 text-xs text-gray-500">
-          {serviceLabel} · {ctv.getLobLabel(row.lob)} · {ctv.getServiceStatusLabel(row.status)}
+        <p className="mt-0.5 text-xs text-gray-500">
+          {serviceLabel} · {ctv.getServiceStatusLabel(row.status)}
         </p>
+        <CommissionProvenanceBreadcrumb row={row} compact className="mt-2" />
       </div>
       <p className="shrink-0 text-sm font-bold text-orange-600">{formatVND(Math.abs(row.amount))}</p>
     </>

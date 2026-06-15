@@ -1,6 +1,9 @@
 'use strict';
 
 /**
+ * WARNING: UNMOUNTED — this module is not required by server.js. Live handlers are inlined in
+ * api/src/routes/ctv.js. Do not edit here expecting runtime effect unless wiring is restored.
+ *
  * @crossref:domain[ctv]
  * @crossref:used-in[currently UNMOUNTED/dead — no consumer requires this module; live create/refer/network/booking handlers are inlined in api/src/routes/ctv.js (see ctvHelpers.js note)]
  * @crossref:uses[api/src/db.js (getDb dental+cosmetic — dbo.partners/appointments/earnings), api/src/routes/ctvHelpers.js, api/src/services/ctvNetwork.js, api/src/services/referralCard.js, api/src/services/referralClaim.js, product-map/domains/ctv.yaml]

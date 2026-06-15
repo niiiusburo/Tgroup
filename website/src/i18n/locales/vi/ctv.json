@@ -63,16 +63,37 @@
     "pendingCommission": "Hoa hồng chờ nhận",
     "thisMonth": "Tháng này",
     "services": "Dịch vụ",
+    "cardLinkedClients": "Trên thẻ",
+    "cardLinkedClientsHint": "Khách trên thẻ",
+    "commissionServices": "Dòng hoa hồng",
+    "commissionServicesHint": "Dịch vụ chờ chi trả",
     "paidOut": "Đã nhận",
     "recentActivity": "Hoạt động gần đây",
-    "recentActivityHint": "Mỗi dòng là hoa hồng từ thẻ dịch vụ của một khách bạn giới thiệu. Chạm để mở khách đó.",
+    "recentActivityHint": "Mỗi dòng là một khoản hoa hồng — nhãn màu cho biết nguồn (khách bạn giới thiệu, thẻ DV, hoặc tuyến dưới).",
+    "recentActivityProvenanceHint": "Chạm một dòng để đi tới khách (Theo dõi) hoặc CTV tuyến dưới (Giới thiệu/QR).",
     "viewActivityFor": "Xem {{client}} — {{service}}",
     "noActivityPlain": "Chưa có hoạt động gần đây."
+  },
+  "provenance": {
+    "ariaTrail": "Chuỗi nguồn hoa hồng",
+    "kindReferral": "Khách bạn giới thiệu",
+    "kindServiceCard": "Thẻ DV của bạn",
+    "kindDownline": "Từ tuyến dưới",
+    "youReferred": "Bạn giới thiệu",
+    "youOnServiceCard": "Bạn (thẻ DV)",
+    "yourOverride": "Bạn (cấp {{level}})",
+    "unknownDownline": "CTV tuyến dưới"
+  },
+  "network": {
+    "focusBreadcrumb": "Từ hoa hồng — tuyến dưới",
+    "focusHint": "CTV tuyến dưới được chọn vì họ gắn trên thẻ dịch vụ của khách này; bạn nhận hoa hồng cấp trên."
   },
   "tracking": {
     "focusBreadcrumb": "Từ hoa hồng",
     "focusHint": "Thẻ đã lật để hiện dịch vụ của khách này.",
-    "focusMissingClient": "Khách này chưa có trong danh sách theo dõi. Hoa hồng đến từ thẻ dịch vụ gắn với khách đó.",
+    "focusMissingClient": "Khách này không còn trên Theo dõi thẻ của bạn. Lịch sử hoa hồng vẫn có trên Trang chủ.",
+    "commissionHistoryOnly": "Chỉ lịch sử hoa hồng — khách không còn trên thẻ vận hành của bạn.",
+    "navigateUnavailable": "Không mở được Theo dõi — không khớp được khách cho dòng này.",
     "unknownClient": "Khách hàng",
     "clearFocus": "Bỏ chọn"
   },
@@ -110,10 +131,10 @@
     "passwordMin": "Mật khẩu mới phải có ít nhất 6 ký tự.",
     "passwordMismatch": "Mật khẩu mới chưa khớp."
   },
-  "title": "Theo dõi khách giới thiệu",
-  "subtitle": "Theo dõi khách được giới thiệu từ đặt lịch đến thanh toán",
-  "searchLabel": "Tìm khách giới thiệu",
-  "searchPlaceholder": "Tìm khách được giới thiệu...",
+  "title": "Theo dõi khách trên thẻ",
+  "subtitle": "Khách có lịch hẹn hoặc thẻ DV gắn CTV của bạn — hoa hồng chỉ từ thẻ DV (cửa sổ 6 tháng)",
+  "searchLabel": "Tìm khách trên thẻ",
+  "searchPlaceholder": "Tìm khách trên thẻ của bạn...",
   "filters": {
     "all": "Tất cả",
     "active": "Đang tiến hành",
@@ -121,7 +142,7 @@
     "waitingPayment": "Chờ thanh toán"
   },
   "summary": {
-    "referredClients": "Khách giới thiệu",
+    "referredClients": "Khách trên thẻ",
     "pending": "Dự kiến",
     "paid": "Đã nhận"
   },
@@ -242,13 +263,13 @@
     "paidToThem": "Đã trả cho họ",
     "noEarningSource": "Chưa có tuyến dưới nào phát sinh hoa hồng"
   },
-  "loading": "Đang tải khách giới thiệu...",
+  "loading": "Đang tải khách trên thẻ...",
   "errorTitle": "Không tải được dữ liệu CTV",
   "errorBody": "Vui lòng thử lại sau ít phút.",
   "retry": "Tải lại",
-  "emptyTitle": "Chưa có khách giới thiệu",
-  "emptyBody": "Khách được giới thiệu sẽ hiển thị ngay khi được gắn với mã CTV của bạn.",
-  "noSearchTitle": "Không tìm thấy khách giới thiệu",
+  "emptyTitle": "Chưa có khách trên thẻ",
+  "emptyBody": "Khách hiển thị khi CTV của bạn gắn trên lịch hẹn hoặc thẻ dịch vụ.",
+  "noSearchTitle": "Không tìm thấy khách trên thẻ",
   "noSearchBody": "Thử đổi từ khóa hoặc bộ lọc.",
   "lobs": {
     "dental": "Nha khoa",
@@ -309,8 +330,8 @@
     "showServicesFor": "Xem dịch vụ của {{name}}",
     "serviceCount": "{{count}} dịch vụ",
     "noServices": "Chưa có dịch vụ",
-    "servicesUnderReferral": "Dịch vụ của khách giới thiệu này",
-    "emptyBack": "Chưa có dịch vụ đã thanh toán nào được ghi nhận cho khách giới thiệu này.",
+    "servicesUnderReferral": "Các dòng hoa hồng của bạn với khách này",
+    "emptyBack": "Chưa có dòng hoa hồng nào của bạn với khách này trên thẻ của bạn.",
     "tapToReturn": "Chạm để quay lại hành trình theo dõi",
     "back": "Quay lại",
     "openCustomer": "Mở khách hàng",

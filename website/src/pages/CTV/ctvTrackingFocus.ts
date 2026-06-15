@@ -15,6 +15,8 @@ export interface CtvTrackingFocus {
   readonly amount?: number;
   readonly status?: CtvServiceStatus;
   readonly earnedAt?: string | null;
+  /** Client has earnings but is not on the card-linked tracking list. */
+  readonly commissionHistoryOnly?: boolean;
 }
 
 export function normalizeCtvClientId(id: string | null | undefined): string {
@@ -99,15 +101,21 @@ export function mergeReferralWithFocus(
   };
 }
 
+export function isFocusClientOnTracking(
+  referrals: CtvReferral[],
+  focus: CtvTrackingFocus | null | undefined
+): boolean {
+  if (!focus?.clientId) return false;
+  return referrals.some((referral) => ctvClientIdsMatch(referral.id, focus.clientId));
+}
+
 export function resolveReferralsForFocus(
   referrals: CtvReferral[],
   focus: CtvTrackingFocus | null | undefined
 ): CtvReferral[] {
   if (!focus?.clientId) return referrals;
   const existing = referrals.find((referral) => ctvClientIdsMatch(referral.id, focus.clientId));
-  if (!existing) {
-    return [buildSyntheticReferralFromFocus(focus), ...referrals];
-  }
+  if (!existing) return referrals;
   return referrals.map((referral) =>
     ctvClientIdsMatch(referral.id, focus.clientId)
       ? mergeReferralWithFocus(referral, focus)

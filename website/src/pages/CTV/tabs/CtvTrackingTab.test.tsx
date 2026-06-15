@@ -41,7 +41,7 @@ describe('CtvTrackingTab focus handoff', () => {
       />
     );
 
-    expect(screen.getByRole('searchbox', { name: /search referred clients/i })).toHaveValue(
+    expect(screen.getByRole('searchbox', { name: /search tracked clients/i })).toHaveValue(
       'Seed Client NK3 CTV'
     );
     expect(screen.getByText('1cc Filler Hàn')).toBeVisible();
@@ -49,5 +49,37 @@ describe('CtvTrackingTab focus handoff', () => {
     expect(
       screen.getByRole('button', { name: /show client tracking journey for seed client nk3 ctv/i })
     ).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('shows commission-history-only banner without a synthetic tracking card', () => {
+    localStorage.setItem('tg-lang', 'en');
+    render(
+      <CtvTrackingTab
+        referrals={referrals}
+        isLoading={false}
+        error={null}
+        onRetry={() => undefined}
+        focus={{
+          clientId: 'client-missing',
+          clientName: 'ZZ Commission Only',
+          serviceName: '1cc Filler Hàn',
+          lob: 'cosmetic',
+          amount: 72700,
+          status: 'reversed',
+          commissionHistoryOnly: true,
+        }}
+      />
+    );
+
+    expect(
+      screen.getByText(
+        /not on your card-linked tracking list.*commission history on home/i
+      )
+    ).toBeVisible();
+    expect(screen.getByText(/ZZ Commission Only · 1cc Filler Hàn/)).toBeVisible();
+    expect(screen.queryByText('3/4')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /show client tracking journey for zz commission only/i })
+    ).not.toBeInTheDocument();
   });
 });

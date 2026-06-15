@@ -8,10 +8,11 @@
 /**
  * customerReferrer.js — assign a CTV (Cộng tác viên) as a customer's commission referrer.
  *
- * The commission engine (commissionEngine.js, D13 priority #1) attributes paid-service
- * earnings to the CTV stored on the customer partner's `referred_by_ctv_id`. There was no
- * dashboard surface to set that field — services/appointments now expose a CTV selector that
- * routes through here.
+ * Commission money is attributed from **saleorders.ctv_id** on the service card
+ * (`commissionEngine.js` / `createEarningsForServiceCard`). `referred_by_ctv_id` on the
+ * customer partner is profile/claim bookkeeping only — it does not grant earnings by itself.
+ * Services/appointments expose a CTV selector that routes through here to keep profile +
+ * card columns aligned when staff explicitly assigns a CTV.
  *
  * `setCustomerReferrer` is "assign only": a null / empty / non-UUID `ctvId` is a NO-OP — it
  * never clears an existing referrer. CREATE paths use it so a not-prefilled selector can't

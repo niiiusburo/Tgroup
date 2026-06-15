@@ -3,7 +3,7 @@
  * @crossref:used-in[upline/downline hierarchy view: website/src/components/commission/CtvManagementTab.tsx, website/src/pages/CTV/tabs/CtvNetworkTab.tsx]
  * @crossref:uses[website/src/lib/api/ctv.ts (CtvHierarchyNode/CtvHierarchyResponse types), website/src/lib/i18n/ctv.ts, website/src/lib/utils.ts, product-map/domains/ctv.yaml]
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowDown,
   ArrowUp,
@@ -23,6 +23,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCtvLocale } from '@/lib/i18n/ctv';
 import type { CtvHierarchyNode, CtvHierarchyResponse } from '@/lib/api/ctv';
+import { ctvDownlineDomId } from '@/pages/CTV/ctvCommissionNavigate';
 import { cn } from '@/lib/utils';
 
 interface CtvHierarchyPanelProps {
@@ -30,6 +31,7 @@ interface CtvHierarchyPanelProps {
   readonly isLoading: boolean;
   readonly error: string | null;
   readonly onRetry: () => void;
+  readonly focusDownlineId?: string | null;
 }
 
 // Diacritic-insensitive normalize (đ→d) so "kien" matches "Kiên".
@@ -112,10 +114,12 @@ function NodeRow({
 function DownlineCard({
   node,
   expanded,
+  highlighted,
   onToggle,
 }: {
   readonly node: CtvHierarchyNode;
   readonly expanded: boolean;
+  readonly highlighted?: boolean;
   readonly onToggle: () => void;
 }) {
   const { t } = useTranslation('ctv');
@@ -125,7 +129,13 @@ function DownlineCard({
   const ratePct = earned > 0 ? Math.round((contribution / earned) * 1000) / 10 : 0;
 
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm shadow-gray-200/40">
+    <div
+      id={ctvDownlineDomId(node.id)}
+      className={cn(
+        'overflow-hidden rounded-lg border bg-white shadow-sm shadow-gray-200/40',
+        highlighted ? 'border-emerald-400 ring-2 ring-emerald-200' : 'border-gray-200'
+      )}
+    >
       <button type="button" onClick={onToggle} aria-expanded={expanded} className="flex w-full items-center gap-3 p-3 text-left">
         <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600">
           <UsersRound className="h-4 w-4" />
@@ -351,10 +361,30 @@ function PotentialFlipCard({
   );
 }
 
-export function CtvHierarchyPanel({ hierarchy, isLoading, error, onRetry }: CtvHierarchyPanelProps) {
+export function CtvHierarchyPanel({
+  hierarchy,
+  isLoading,
+  error,
+  onRetry,
+  focusDownlineId = null,
+}: CtvHierarchyPanelProps) {
   const { t } = useTranslation('ctv');
   const [query, setQuery] = useState('');
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    if (!focusDownlineId || isLoading) return;
+    const id = focusDownlineId.trim();
+    setExpandedIds((prev) => new Set(prev).add(id));
+    setQuery('');
+    const timer = window.setTimeout(() => {
+      document.getElementById(ctvDownlineDomId(id))?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }, 200);
+    return () => window.clearTimeout(timer);
+  }, [focusDownlineId, isLoading, hierarchy?.downline.length]);
 
   const downlineNodes = useMemo(() => hierarchy?.downline ?? [], [hierarchy]);
 
@@ -485,6 +515,10 @@ export function CtvHierarchyPanel({ hierarchy, isLoading, error, onRetry }: CtvH
                     key={`${node.id}:${node.lobs.join('-')}`}
                     node={node}
                     expanded={expandedIds.has(node.id)}
+                    highlighted={
+                      !!focusDownlineId &&
+                      node.id.trim().toLowerCase() === focusDownlineId.trim().toLowerCase()
+                    }
                     onToggle={() => toggleExpanded(node.id)}
                   />
                 ))}

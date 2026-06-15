@@ -63,9 +63,14 @@
     "pendingCommission": "Pending commission",
     "thisMonth": "This month",
     "services": "Services",
+    "cardLinkedClients": "On your cards",
+    "cardLinkedClientsHint": "Card-linked clients",
+    "commissionServices": "Commission lines",
+    "commissionServicesHint": "Pending service earnings",
     "paidOut": "Paid out",
     "recentActivity": "Recent activity",
-    "recentActivityHint": "Each row is a commission earned from a service card under one of your clients. Tap to open that client.",
+    "recentActivityHint": "Each row is one commission — the colored badge shows the source (your client, service card, or downline).",
+    "recentActivityProvenanceHint": "Tap a row to open the client (Tracking) or the downline CTV (Referrals/QR).",
     "viewActivityFor": "View {{client}} — {{service}}",
     "noActivityPlain": "No recent activity yet."
   },
@@ -103,17 +108,33 @@
     "passwordMin": "New password must be at least 6 characters.",
     "passwordMismatch": "New passwords do not match."
   },
+  "provenance": {
+    "ariaTrail": "Commission source trail",
+    "kindReferral": "Your referred client",
+    "kindServiceCard": "Your service card",
+    "kindDownline": "From downline",
+    "youReferred": "You referred",
+    "youOnServiceCard": "You (service card)",
+    "yourOverride": "You (level {{level}})",
+    "unknownDownline": "Downline CTV"
+  },
+  "network": {
+    "focusBreadcrumb": "From commission — downline",
+    "focusHint": "This downline CTV was attached on the client's service card; you earn the upline override."
+  },
   "tracking": {
     "focusBreadcrumb": "From commission",
     "focusHint": "Card flipped to show the service under this client.",
-    "focusMissingClient": "This client is not in your tracking list yet. Commission came from a service card attached to them.",
+    "focusMissingClient": "This client is not on your card-linked tracking list. You may still have commission history on Home.",
+    "commissionHistoryOnly": "Commission history only — this client is not on your operational cards.",
+    "navigateUnavailable": "Could not open tracking for this row — no client could be matched.",
     "unknownClient": "Client",
     "clearFocus": "Clear"
   },
-  "title": "Referred Client Tracking",
-  "subtitle": "Track referred clients from booking to payment",
-  "searchLabel": "Search referred clients",
-  "searchPlaceholder": "Search referred clients...",
+  "title": "Operational card tracking",
+  "subtitle": "Clients on your appointment or service cards — commission requires service card CTV (6-month window)",
+  "searchLabel": "Search tracked clients",
+  "searchPlaceholder": "Search clients on your cards...",
   "filters": {
     "all": "All",
     "active": "In progress",
@@ -121,7 +142,7 @@
     "waitingPayment": "Waiting payment"
   },
   "summary": {
-    "referredClients": "Referred clients",
+    "referredClients": "Card-linked clients",
     "pending": "Expected",
     "paid": "Received"
   },
@@ -242,13 +263,13 @@
     "paidToThem": "Paid to them",
     "noEarningSource": "No downline has generated commission yet"
   },
-  "loading": "Loading referred clients...",
+  "loading": "Loading card-linked clients...",
   "errorTitle": "CTV data could not load",
   "errorBody": "Please try again in a few minutes.",
   "retry": "Retry",
-  "emptyTitle": "No referred clients yet",
-  "emptyBody": "Referred clients will appear here once they are attached to your CTV code.",
-  "noSearchTitle": "No referred clients found",
+  "emptyTitle": "No card-linked clients yet",
+  "emptyBody": "Clients appear here when your CTV is on their appointment or service card.",
+  "noSearchTitle": "No card-linked clients found",
   "noSearchBody": "Try a different search or filter.",
   "lobs": {
     "dental": "Dental",
@@ -309,8 +330,8 @@
     "showServicesFor": "Show services for {{name}}",
     "serviceCount": "{{count}} services",
     "noServices": "No services yet",
-    "servicesUnderReferral": "Services under this referred client",
-    "emptyBack": "No paid services have been attributed to this referred client yet.",
+    "servicesUnderReferral": "Your commission lines for this client",
+    "emptyBack": "No commission lines for this client on your cards yet.",
     "tapToReturn": "Tap to return to the client tracking journey",
     "back": "Back",
     "openCustomer": "Open customer",

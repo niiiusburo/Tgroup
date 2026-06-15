@@ -5,7 +5,9 @@ summary: |
   Permissions: ctv.dashboard.view, ctv.commission.view.self, ctv.referrals.view.self (and lob.crossview for admins viewing CTV data).
   Single UI surface: mobile-first bilingual 5-tab dashboard (Home, Commission, Tracking, Network, Me) at /ctv with bottom nav and in-portal EN/VI toggle.
   /api/ctv/commission-summary aggregates earnings from BOTH physical DBs (tdental_demo.earnings + tcosmetic_demo.earnings) server-side for the authenticated CTV partner only (via recipient_partner_id).
-  /api/ctv/client-journeys composes self-owned referred clients from BOTH physical DBs and returns their referral-to-paid progress for the Tracking tab.
+  /api/ctv/referrals (Theo dõi / Tracking tab) lists clients from operational cards only (appointments.ctv_id ∪ saleorders.ctv_id) via ctvCardTrackingReferrals.js; computeCtvLink filters by latest winning card per LOB.
+  /api/ctv/client-journeys delegates to buildCardTrackingReferrals (same card set as GET /referrals) and maps to legacy journey shape for backward compat.
+  Commission (Home/Hoa hồng) requires saleorders.ctv_id on the service card; profile referred_by_ctv_id does not grant money.
   Shows pending/paid, LOB-tagged activity, referred clients across LOBs, split bars, etc. per visual companion. D13 recipient resolution powers the rows.
   CTV is the only surface that intentionally crosses the two DBs (composition in API, no SQL JOIN).
   CTV v3 business authority lives in docs/business-logic/ctv-referral-commission.md:
@@ -51,8 +53,9 @@ tables:
   - tdental_demo.dbo.ctv_discount_codes (discount QR codes; dental DB only; append usage audit)
 endpoints:
   - GET /api/ctv/commission-summary (auth: is_ctv + ctv.commission.view.self; returns aggregates + per-LOB breakdown + recent rows with source)
-  - GET /api/ctv/referrals (self referred partners/clients + status + earned)
-  - GET /api/ctv/client-journeys (self referred clients + referral/visit/service/payment stage)
+  - GET /api/ctv/referrals (Theo dõi: card-based — appointments.ctv_id ∪ saleorders.ctv_id; per-LOB lob_links + computeCtvLink 6mo window)
+  - GET /api/ctv/client-journeys (card-based via buildCardTrackingReferrals + journey stage mapping; same client authority as /referrals)
+  - GET /api/ctv/commission-summary (earnings ledger; L0 attribution from saleorders.ctv_id service cards only)
   - GET /api/ctv/me (profile)
   - PATCH /api/ctv/me (self display-name update)
   - POST /api/ctv/me/password (self password change)
