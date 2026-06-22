@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.37.21",
+    "date": "2026-06-22",
+    "commit": "pending",
+    "highlights": "NK3 service-card commission: delete now reverses pending earnings; backfill gated to prevent double-pay.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Service line delete reverses pending service-card CTV earnings when CTV_SERVICE_CARD_COMMISSION is on.",
+          "CTV referrer assign no longer runs payment-time backfill under the service-card model."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "serviceReversal and customerReferrer backfill tests cover NK3 flag on/off."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.37.20",
     "date": "2026-06-15",
     "commit": "pending",

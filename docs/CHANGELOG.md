@@ -2,6 +2,15 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.37.21] — 2026-06-22 — NK3: service-card commission reversal + backfill guard
+
+### Fixed
+- **`reverseServiceLine` reverses INV-003C service-card earnings on delete** (`api/src/services/serviceReversal.js`): when `CTV_SERVICE_CARD_COMMISSION=true` (NK3 only), pending `payment_id IS NULL` rows are cleared via `reverseServiceCardEarnings`; paid-out service-card earnings block delete with `B_COMMISSION_PAID_OUT`. Flag off → unchanged pay-as-paid path for NK/NK2. — @agent — INV-003C; NK3 audit P0
+- **Payment-time backfill skipped under service-card model** (`commissionEngine.backfillEarningsForClient`, `customerReferrer.setCustomerReferrer`): mirrors `payments.js` gate so NK3 CTV assign does not double-count against service-card earnings. — @agent — INV-003C
+
+### Testing
+- `serviceReversal.test.js` + `customerReferrer.backfill.test.js` — flag-on/off coverage for reversal and backfill skip.
+
 ## [0.37.20] — 2026-06-15 — CTV: viewer-only client history on Theo dõi
 ### Changed
 - **Theo dõi flip-card services = viewer earnings only.** `GET /api/ctv/referrals` service rows now come from `earnings WHERE recipient_partner_id = viewer`, not all saleorder lines on the client. Another CTV's appointment/service cards never appear; journey stage still uses viewer-scoped operational cards.

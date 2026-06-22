@@ -7,7 +7,12 @@
  * @crossref:function[reverseServiceLine -> service reversal, paid-earning guard, payment allocation guard]
  * @crossref:uses[api/src/services/commissionEngine.js, api/src/routes/saleOrderLines.js, product-map/domains/payments-deposits.yaml]
  */
-const { reverseOnRefund } = require('./commissionEngine');
+const { reverseOnRefund, reverseServiceCardEarnings } = require('./commissionEngine');
+
+// NK3-only (INV-003C): when off, NK/NK2 keep pay-as-paid reversal — no service-card path.
+function serviceCardCommissionEnabled() {
+  return process.env.CTV_SERVICE_CARD_COMMISSION === 'true' || process.env.CTV_SERVICE_CARD_COMMISSION === '1';
+}
 
 class ServiceReversalError extends Error {
   constructor(status, code, message, details = {}) {
@@ -56,6 +61,27 @@ async function reverseServiceLine({ lineId, lob = 'dental', txClient }) {
   const line = lineRows[0];
   if (!line) {
     throw new ServiceReversalError(404, 'B_SERVICE_LINE_NOT_FOUND', 'Sale order line not found');
+  }
+  if (serviceCardCommissionEnabled()) {
+    const paidOutServiceCardRows = await rowsFrom(
+      txClient,
+      `SELECT id
+         FROM dbo.earnings
+        WHERE service_line_id = $1
+          AND payment_id IS NULL
+          AND amount > 0
+          AND (status = 'paid' OR payout_id IS NOT NULL)
+        LIMIT 1`,
+      [lineId]
+    );
+    if (paidOutServiceCardRows.length > 0) {
+      throw new ServiceReversalError(
+        409,
+        'B_COMMISSION_PAID_OUT',
+        'Commission for this service has already been paid out — the service can no longer be reversed.',
+        { serviceLineId: lineId, earningId: paidOutServiceCardRows[0].id }
+      );
+    }
   }
 
   const orderId = line.orderid || null;
@@ -166,6 +192,15 @@ async function reverseServiceLine({ lineId, lob = 'dental', txClient }) {
     }
   }
 
+  let reversedServiceCardEarnings = [];
+  if (serviceCardCommissionEnabled()) {
+    reversedServiceCardEarnings = await reverseServiceCardEarnings({
+      serviceLineId: lineId,
+      lob,
+      txClient,
+    });
+  }
+
   const deletedRows = await rowsFrom(
     txClient,
     `UPDATE dbo.saleorderlines
@@ -199,6 +234,7 @@ async function reverseServiceLine({ lineId, lob = 'dental', txClient }) {
     voidedPayments,
     reversedAllocationTotal,
     reversedEarningsCount: reversedEarnings.length,
+    reversedServiceCardEarningsCount: reversedServiceCardEarnings.length,
   };
 }
 

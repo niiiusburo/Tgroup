@@ -2,12 +2,21 @@
 
 const { reverseServiceLine, ServiceReversalError } = require('../serviceReversal');
 
+jest.mock('../commissionEngine', () => ({
+  reverseOnRefund: jest.fn(async () => []),
+  reverseServiceCardEarnings: jest.fn(async () => []),
+}));
+
+const { reverseOnRefund, reverseServiceCardEarnings } = require('../commissionEngine');
+
+
 function makeClient({
   lineRows = [{ id: 'line-1', orderid: 'order-1' }],
   activeRows = [{ id: 'line-1' }],
   allocations = [],
   paidOutRows = [],
   mixedRows = [],
+  paidOutServiceCardRows = [],
   originalEarnings = [],
 } = {}) {
   const query = jest.fn(async (sql, params = []) => {
@@ -15,6 +24,7 @@ function makeClient({
     if (/FROM dbo\.saleorderlines\s+WHERE orderid/.test(sql)) return { rows: activeRows };
     if (/FROM dbo\.payment_allocations pa\s+JOIN dbo\.payments p/.test(sql)) return { rows: allocations };
     if (/FROM dbo\.earnings\s+WHERE payment_id = ANY/.test(sql)) return { rows: paidOutRows };
+    if (/FROM dbo\.earnings\s+WHERE service_line_id = \$1/.test(sql)) return { rows: paidOutServiceCardRows };
     if (/FROM dbo\.payment_allocations\s+WHERE payment_id = ANY/.test(sql)) return { rows: mixedRows };
     if (/FROM dbo\.earnings WHERE payment_id = \$1 AND amount > 0/.test(sql)) return { rows: originalEarnings };
     if (/INSERT INTO dbo\.earnings/.test(sql)) return { rows: [{ id: 'rev-1', amount: params[6], level: params[5], recipient_partner_id: params[1] }] };
@@ -29,6 +39,20 @@ function makeClient({
 }
 
 describe('reverseServiceLine', () => {
+  const envSnapshot = process.env.CTV_SERVICE_CARD_COMMISSION;
+
+  beforeEach(() => {
+    reverseOnRefund.mockClear();
+    reverseServiceCardEarnings.mockClear();
+    reverseServiceCardEarnings.mockResolvedValue([]);
+    delete process.env.CTV_SERVICE_CARD_COMMISSION;
+  });
+
+  afterAll(() => {
+    if (envSnapshot === undefined) delete process.env.CTV_SERVICE_CARD_COMMISSION;
+    else process.env.CTV_SERVICE_CARD_COMMISSION = envSnapshot;
+  });
+
   test('soft-deletes an unpaid service line and its empty parent order', async () => {
     const client = makeClient();
 
@@ -47,6 +71,7 @@ describe('reverseServiceLine', () => {
   });
 
   test('voids linked single-invoice payments and writes earnings reversals before deleting the service', async () => {
+    reverseOnRefund.mockResolvedValueOnce([{ id: 'rev-pay-1' }]);
     const client = makeClient({
       allocations: [{ payment_id: 'pay-1', invoice_id: 'order-1', dotkham_id: null, allocated_amount: '6000000' }],
       originalEarnings: [
@@ -62,7 +87,7 @@ describe('reverseServiceLine', () => {
       reversedEarningsCount: 1,
       deletedOrder: true,
     });
-    expect(client.query.mock.calls.some(([sql]) => /INSERT INTO dbo\.earnings/.test(sql))).toBe(true);
+    expect(reverseOnRefund).toHaveBeenCalled();
     expect(client.query.mock.calls.some(([sql]) => /DELETE FROM dbo\.payment_allocations/.test(sql))).toBe(true);
     expect(client.query.mock.calls.some(([sql]) => /UPDATE dbo\.payments/.test(sql))).toBe(true);
   });
@@ -106,5 +131,43 @@ describe('reverseServiceLine', () => {
 
     await expect(reverseServiceLine({ lineId: 'line-1', lob: 'cosmetic', txClient: client }))
       .rejects.toMatchObject({ code: 'B_PAYMENT_MIXED_ALLOCATIONS' });
+  });
+
+
+  test('reverses pending service-card earnings when deleting an unpaid line', async () => {
+    process.env.CTV_SERVICE_CARD_COMMISSION = 'true';
+    reverseServiceCardEarnings.mockResolvedValueOnce([
+      { id: 'rev-sc-1', amount: 100, level: 0, recipient_partner_id: 'ctv-1' },
+    ]);
+    const client = makeClient();
+
+    const result = await reverseServiceLine({ lineId: 'line-1', lob: 'cosmetic', txClient: client });
+
+    expect(reverseServiceCardEarnings).toHaveBeenCalledWith({
+      serviceLineId: 'line-1',
+      lob: 'cosmetic',
+      txClient: client,
+    });
+    expect(result.reversedServiceCardEarningsCount).toBe(1);
+  });
+
+  test('blocks reversal when service-card earnings are already paid out', async () => {
+    process.env.CTV_SERVICE_CARD_COMMISSION = 'true';
+    const client = makeClient({ paidOutServiceCardRows: [{ id: 'earn-paid' }] });
+
+    await expect(
+      reverseServiceLine({ lineId: 'line-1', lob: 'cosmetic', txClient: client })
+    ).rejects.toMatchObject({ status: 409, code: 'B_COMMISSION_PAID_OUT' });
+
+    expect(reverseServiceCardEarnings).not.toHaveBeenCalled();
+  });
+
+  test('skips service-card reversal when CTV_SERVICE_CARD_COMMISSION is off (NK/NK2)', async () => {
+    const client = makeClient({ paidOutServiceCardRows: [{ id: 'earn-paid' }] });
+
+    const result = await reverseServiceLine({ lineId: 'line-1', lob: 'dental', txClient: client });
+
+    expect(reverseServiceCardEarnings).not.toHaveBeenCalled();
+    expect(result.reversedServiceCardEarningsCount).toBe(0);
   });
 });

@@ -27,6 +27,11 @@
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// NK3-only (INV-003C): payment-time backfill is for pay-as-paid (NK/NK2); skip when service-card model is on.
+function serviceCardCommissionEnabled() {
+  return process.env.CTV_SERVICE_CARD_COMMISSION === 'true' || process.env.CTV_SERVICE_CARD_COMMISSION === '1';
+}
+
 function isUuid(value) {
   return typeof value === 'string' && UUID_RE.test(value.trim());
 }
@@ -79,7 +84,7 @@ async function setCustomerReferrer(q, customerId, ctvId, opts = {}) {
   // exists, so the CTV sees the real paid journey + commission. Non-fatal: a backfill failure
   // must never block the assignment. `q` is already bound to the request's LOB DB, so the
   // adapter ignores the lob arg and reuses it.
-  if (didAssign && opts && opts.lob) {
+  if (didAssign && opts && opts.lob && !serviceCardCommissionEnabled()) {
     try {
       const { backfillEarningsForClient } = require('./commissionEngine');
       await backfillEarningsForClient({

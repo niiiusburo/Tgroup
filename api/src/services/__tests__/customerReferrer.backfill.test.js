@@ -26,7 +26,17 @@ function makeQ(updateResult = [{ id: CUSTOMER_ID }]) {
 }
 
 describe('setCustomerReferrer — retroactive backfill trigger', () => {
-  beforeEach(() => backfillEarningsForClient.mockClear());
+  const envSnapshot = process.env.CTV_SERVICE_CARD_COMMISSION;
+
+  beforeEach(() => {
+    backfillEarningsForClient.mockClear();
+    delete process.env.CTV_SERVICE_CARD_COMMISSION;
+  });
+
+  afterAll(() => {
+    if (envSnapshot === undefined) delete process.env.CTV_SERVICE_CARD_COMMISSION;
+    else process.env.CTV_SERVICE_CARD_COMMISSION = envSnapshot;
+  });
 
   test('triggers backfill with the request lob after a successful assign', async () => {
     const q = makeQ();
@@ -57,5 +67,13 @@ describe('setCustomerReferrer — retroactive backfill trigger', () => {
     const q = makeQ();
     const result = await setCustomerReferrer(q, CUSTOMER_ID, CTV_ID, { lob: 'dental' });
     expect(result).toBe(true);
+  });
+
+  test('does NOT trigger payment-time backfill when CTV_SERVICE_CARD_COMMISSION is on (NK3)', async () => {
+    process.env.CTV_SERVICE_CARD_COMMISSION = 'true';
+    const q = makeQ();
+    const result = await setCustomerReferrer(q, CUSTOMER_ID, CTV_ID, { lob: 'cosmetic' });
+    expect(result).toBe(true);
+    expect(backfillEarningsForClient).not.toHaveBeenCalled();
   });
 });

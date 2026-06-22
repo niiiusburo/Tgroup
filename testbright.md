@@ -4938,3 +4938,30 @@ TestSprite execution items:
 - [x] PASS: 2026-06-11 06:01 ICT live NK login monitor rerun with `NODE_PATH=/Users/thuanle/Documents/TamTMV/Tgrouptest/website/node_modules node .tmp/nk_login_monitor_readonly.cjs` - `t@clinic.vn` logged in successfully; fallback `t@clinic.com` was not needed; `https://nk.2checkin.com/`, `/calendar`, and `/customers` all loaded nonblank with expected labels, 0 API errors, 0 console errors, and 0 page errors. Aggregate request noise included one aborted random non-API `HEAD` probe, treated as non-blocking because it was not `/api/` and did not affect visible UI. Evidence is in `docs/live-artifacts/nk-login-monitor/20260610T230059Z/redacted-safe/`.
 - [x] PASS: 2026-06-11 06:02 ICT live Cosmetic login monitor rerun with `NODE_PATH=/Users/thuanle/Documents/TamTMV/Tgrouptest/website/node_modules node .tmp/tmv_cosmetic_login_monitor_readonly.cjs` - `t@clinic.vn` logged in successfully; fallback `t@clinic.com` was not needed; app stayed visibly on `Thẩm mỹ`/Cosmetic; Dashboard `/`, Customers `/customers`, and Calendar `/calendar` loaded nonblank through visible navigation with 0 API errors, 0 console errors, and 0 visible error messages. Aggregate request noise included one aborted random non-API `HEAD` probe, treated as non-blocking because it was not `/api/` and did not affect visible UI. Evidence is in `docs/live-artifacts/tmv-cosmetic-login-monitor/20260610T230232Z-chrome/`.
 - [x] PASS: 2026-06-12 06:03 ICT live Cosmetic login monitor rerun with `node .tmp/tmv_cosmetic_login_monitor_readonly.cjs` - `t@clinic.vn` logged in successfully; fallback `t@clinic.com` was not needed; app stayed visibly on `Thẩm mỹ`/Cosmetic; Dashboard `/`, Customers `/customers`, and Calendar `/calendar` loaded nonblank through visible navigation with 0 API errors, 0 console errors, and 0 visible error messages. Aggregate request noise included one aborted random non-API `HEAD` probe, treated as non-blocking because it was not `/api/` and did not affect visible UI. Evidence is in `docs/live-artifacts/tmv-cosmetic-login-monitor/20260611T230258Z-chrome/`.
+
+---
+
+# TestSprite Plan: NK3 service-card commission flag wiring 2026-06-22
+Feature/edit name: NK3-only `CTV_SERVICE_CARD_COMMISSION=true` now gates service-line delete reversal + blocks legacy payment backfill double-count. NK/NK2 unchanged when flag is off (v0.37.21).
+
+Changed URLs / API routes / data flow:
+- API behavior changed (no new routes): `DELETE /api/SaleOrderLines/:id` and `DELETE /api/cosmetic/SaleOrderLines/:id` call `reverseServiceCardEarnings` only when `CTV_SERVICE_CARD_COMMISSION=true`; response adds `reversedServiceCardEarningsCount` on NK3.
+- `commissionEngine.backfillEarningsForClient` and `customerReferrer` referral attach skip legacy payment backfill when flag is on (mirrors `payments.js` guard).
+- URLs changed: none. NK (`nk.2checkin.com`) and NK2 stacks must not be redeployed for this fix.
+
+Affected roles and data flows:
+- Role: admin/staff deleting cosmetic/dental service lines on NK3 with pending service-card earnings (`payment_id IS NULL`).
+- Happy path: delete unpaid service line → pending service-card earnings reversed → line soft-deleted → `reversedServiceCardEarningsCount >= 1`.
+- Edge cases: paid-out service-card earnings still block delete with `B_COMMISSION_PAID_OUT`; flag off preserves legacy refund-only reversal (NK/NK2).
+- Regressions: no schema change; night guard invariant unchanged; no CTV portal UI change in this commit.
+
+Setup data and login state:
+- Target: NK3 only — live `https://tmv.2checkin.com` / `https://76-13-16-68.sslip.io`, DBs `tdental_nk3` + `tcosmetic_nk3`, env `CTV_SERVICE_CARD_COMMISSION=true`.
+- Login: admin `t@clinic.vn` on NK3 with `customers.edit` + `payment.void`.
+- Pre-deploy audit: live NK3 was v0.37.12 without `reverseServiceCardEarnings` import despite flag on; 36 pending cosmetic service-card earnings with `payment_id IS NULL`.
+
+Execution checks:
+- [x] PASS: `npx jest src/services/__tests__/serviceReversal.test.js src/services/__tests__/customerReferrer.backfill.test.js --runInBand` — 13/13 (flag on/off + paid-out guard + no backfill when flag on).
+- [ ] PENDING: Deploy v0.37.21 to `/opt/tgroup-nk3` only; confirm `version.json` commit + `serviceReversal.js` imports `reverseServiceCardEarnings`.
+- [ ] PENDING: NK3 live smoke — delete service line with pending service-card earning; expect `reversedServiceCardEarningsCount > 0` and earnings `status='reversed'`.
+- [ ] PENDING: Confirm NK (`nk.2checkin.com`) and NK2 version/containers unchanged after NK3-only deploy.

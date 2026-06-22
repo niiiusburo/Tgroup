@@ -211,6 +211,10 @@ async function reverseOnRefund({ originalPaymentId, refundPayment, lob, txClient
 async function backfillEarningsForClient({ clientId, lob, getDb: injectedGetDb = null }) {
   const empty = { paymentsScanned: 0, paymentsAttributed: 0, earningsCreated: 0 };
   if (!clientId || !lob) return empty;
+  // INV-003C / NK3: earnings are born at service-card create; payment-time backfill would double-count.
+  if (process.env.CTV_SERVICE_CARD_COMMISSION === 'true' || process.env.CTV_SERVICE_CARD_COMMISSION === '1') {
+    return empty;
+  }
   const db = _getDb(lob, injectedGetDb);
 
   const payments = await db.queryRows(
