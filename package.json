@@ -9,6 +9,7 @@
     "verify:docs": "bash scripts/verify-docs.sh",
     "verify:governance": "bash scripts/prompt-authority-check.sh && node scripts/verify-crossrefs.js && bash scripts/verify-docs.sh && git diff --check HEAD",
     "verify:migrations": "node scripts/verify-migration-additivity.js",
+    "verify:nk3": "bash scripts/nk3-verify-package.sh all",
     "preport:gates": "python3 scripts/nk3-to-nk2-preport-gates.py",
     "pack": "npm run pack:api && npm run pack:web && npm run pack:contracts && npm run pack:docs",
     "pack:api": "repomix api -o .repomix-packs/repomix-api.xml --quiet",

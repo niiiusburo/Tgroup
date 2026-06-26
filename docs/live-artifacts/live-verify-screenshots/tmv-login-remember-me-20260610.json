@@ -1,0 +1,12 @@
+{
+  "url": "https://tmv.2checkin.com/login",
+  "checkboxVisible": true,
+  "labelText": "Ghi nhớ đăng nhập 30 ngày",
+  "version": {
+    "version": "0.37.3",
+    "buildTime": "2026-06-10T14:11:57.800Z",
+    "gitCommit": "unknown",
+    "gitBranch": "unknown",
+    "environment": "development"
+  }
+}

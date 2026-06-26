@@ -4,21 +4,21 @@
       "command": "uvx",
       "args": [
         "code-review-graph",
-        "serve"
+        "serve",
+        "--repo",
+        "/Users/thuanle/Documents/TamTMV/Tgrouptest",
+        "--tools",
+        "get_impact_radius_tool,query_graph_tool,semantic_search_nodes_tool,detect_changes_tool,get_affected_flows_tool"
       ],
-      "type": "stdio"
-    },
-    "kilo": {
-      "command": "node",
-      "args": [
-        "/Users/thuanle/.config/kilo/kilo-mcp.js"
-      ],
-      "type": "stdio"
+      "type": "stdio",
+      "env": {
+        "CRG_TOOLS": "get_impact_radius_tool,query_graph_tool,semantic_search_nodes_tool,detect_changes_tool,get_affected_flows_tool"
+      }
     },
     "claude-mem": {
       "command": "node",
       "args": [
-        "/Users/thuanle/.claude/plugins/cache/thedotmack/claude-mem/10.6.2/scripts/mcp-server.cjs"
+        "/Users/thuanle/.claude/plugins/cache/thedotmack/claude-mem/12.3.8/scripts/mcp-server.cjs"
       ],
       "type": "stdio",
       "env": {

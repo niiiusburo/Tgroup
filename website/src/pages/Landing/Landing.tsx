@@ -8,7 +8,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { CtvReferModal } from '@/components/ctv/CtvReferModal';
 import './landing.css';
-import logo from './tam-logo-group.png';
+const logo = '/favicon.svg';
 
 /**
  * Tâm Group landing page.

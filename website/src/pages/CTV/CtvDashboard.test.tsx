@@ -266,7 +266,7 @@ describe('CtvDashboard', () => {
       expect(screen.getAllByText('Thuần Lê')[0]).toBeVisible();
     });
 
-    const searchBox = screen.getByRole('searchbox', { name: /tìm khách giới thiệu/i });
+    const searchBox = screen.getByRole('searchbox', { name: /tìm khách trên thẻ/i });
     await user.type(searchBox, 'thuan');
 
     expect(screen.queryByText('Seed Client - NK3 CTV')).not.toBeInTheDocument();

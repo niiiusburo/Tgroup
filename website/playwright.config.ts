@@ -34,9 +34,10 @@ export default defineConfig({
     // Public routes — no login required (fan discount landing, etc.)
     {
       name: 'public',
-      testMatch: /ctv-discount-landing\.spec\.ts/,
+      testMatch: /ctv-discount-landing\.spec\.ts|investor-phase2\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
+        channel: 'chrome',
         storageState: undefined,
         baseURL: 'http://127.0.0.1:5175',
       },

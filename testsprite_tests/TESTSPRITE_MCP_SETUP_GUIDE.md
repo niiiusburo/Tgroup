@@ -35,7 +35,7 @@ The `~/.claude/mcp-configs/mcp-servers.json` is a **template/reference file** wi
         "@testsprite/testsprite-mcp@latest"
       ],
       "env": {
-        "API_KEY": "sk-user-q2QVL6wkizXq5gfppeOOdb2he8AOFkuWgNdii4gOV8IM11OuwjF6QCjLkwwej6u1lvXktJKwsyKfCslpS6bobmTpoKJ51qQ078ogvf-DLw4v57Ra7M4aN0gi0SpbtlorOXo"
+        "API_KEY": "YOUR_TESTSPRITE_API_KEY"
       }
     }
   }

@@ -1,0 +1,43 @@
+name: Main CI
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22, 24]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Node modules
+        run: |
+          yarn install
+          yarn --cwd example install
+
+      - name: Lint
+        run: |
+          yarn lint
+
+      - name: Type Check
+        run: |
+          yarn typecheck
+
+      - name: Build
+        run: |
+          yarn build
+
+      - name: Test
+        run: |
+          yarn test

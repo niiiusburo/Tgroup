@@ -1,5 +1,50 @@
 [
   {
+    "version": "0.39.0",
+    "date": "2026-06-26",
+    "commit": "pending",
+    "highlights": "Investor Portal Phase 2: staff curation, admin provisioning, password reset.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Customers Investor column toggles client visibility per investor (current LOB).",
+          "Settings → Investors tab for admin create/deactivate with one-time initial password.",
+          "/investor/reset-password self-service password recovery (dev token in API response)."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "api/scripts/verify-investor-phase2.mjs (14-check API loop).",
+          "website/e2e/investor-phase2.spec.ts + phase2 Jest tests."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.38.0",
+    "date": "2026-06-26",
+    "commit": "pending",
+    "highlights": "Investor Portal MVP: email login, read-only shared client roster with privacy-safe fields.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Investor login at /investor/login (investor@clinic.vn / 123123 for local demo).",
+          "Read-only client roster at /investor with safe field projection (no PII/clinical data).",
+          "Backend /api/investor/* with distinct INVESTOR_JWT_SECRET and IDOR gate."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "api/src/routes/investor/__tests__/auth.test.js and clientRedaction.test.js."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.37.21",
     "date": "2026-06-22",
     "commit": "pending",

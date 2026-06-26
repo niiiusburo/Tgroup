@@ -1,0 +1,333 @@
+- generic [ref=e27]:
+  - complementary [ref=e28]:
+    - generic [ref=e32]: TD
+    - navigation [ref=e33]:
+      - link "Tổng quan" [ref=e34] [cursor=pointer]:
+        - /url: /
+        - img [ref=e36]
+      - link "Lịch" [ref=e38] [cursor=pointer]:
+        - /url: /calendar
+        - img [ref=e39]
+      - link "Khách hàng" [ref=e41] [cursor=pointer]:
+        - /url: /customers
+        - img [ref=e42]
+      - generic [ref=e47]:
+        - button "Phòng khám" [ref=e48] [cursor=pointer]:
+          - img [ref=e49]
+        - generic:
+          - generic:
+            - generic: Phòng khám
+            - generic:
+              - link "Dịch vụ":
+                - /url: /services
+                - img
+                - generic: Dịch vụ
+              - link "Danh mục dịch vụ":
+                - /url: /service-catalog
+                - img
+                - generic: Danh mục dịch vụ
+              - link "Kế hoạch thanh toán":
+                - /url: /payment
+                - img
+                - generic: Kế hoạch thanh toán
+      - generic [ref=e53]:
+        - button "Nhóm" [ref=e54] [cursor=pointer]:
+          - img [ref=e55]
+        - generic:
+          - generic:
+            - generic: Nhóm
+            - generic:
+              - link "Nhân viên":
+                - /url: /employees
+                - img
+                - generic: Nhân viên
+              - link "Hoa hồng Pro":
+                - /url: /commission
+                - img
+                - generic: Hoa hồng
+                - generic: Pro
+              - link "Chi nhánh":
+                - /url: /locations
+                - img
+                - generic: Chi nhánh
+      - generic [ref=e67]:
+        - button "Báo cáo" [ref=e68] [cursor=pointer]:
+          - img [ref=e69]
+        - generic:
+          - generic:
+            - generic: Báo cáo
+            - generic:
+              - link "Bảng điều khiển":
+                - /url: /reports/dashboard
+                - img
+                - generic: Bảng điều khiển
+              - link "Doanh thu":
+                - /url: /reports/revenue
+                - img
+                - generic: Doanh thu
+              - link "Lịch hẹn":
+                - /url: /reports/appointments
+                - img
+                - generic: Lịch hẹn
+              - link "Bác sĩ":
+                - /url: /reports/doctors
+                - img
+                - generic: Bác sĩ
+              - link "Khách hàng":
+                - /url: /reports/customers
+                - img
+                - generic: Khách hàng
+              - link "Chi nhánh":
+                - /url: /reports/locations
+                - img
+                - generic: Chi nhánh
+              - link "Dịch vụ":
+                - /url: /reports/services
+                - img
+                - generic: Dịch vụ
+              - link "Nhân viên":
+                - /url: /reports/employees
+                - img
+                - generic: Nhân viên
+      - generic [ref=e71]:
+        - button "Quản trị" [ref=e72] [cursor=pointer]:
+          - img [ref=e73]
+        - generic:
+          - generic:
+            - generic: Quản trị
+            - generic:
+              - link "Cài đặt":
+                - /url: /settings
+                - img
+                - generic: Cài đặt
+              - link "Phản hồi":
+                - /url: /feedback
+                - img
+                - generic: Phản hồi
+              - link "Quyền hạn":
+                - /url: /permissions
+                - img
+                - generic: Quyền hạn
+              - link "Mối quan hệ":
+                - /url: /relationships
+                - img
+                - generic: Mối quan hệ
+              - link "Thông báo":
+                - /url: /notifications
+                - img
+                - generic: Thông báo
+    - generic [ref=e76]:
+      - button [ref=e77] [cursor=pointer]:
+        - img [ref=e78]
+      - button "A" [ref=e80] [cursor=pointer]:
+        - generic [ref=e81]: A
+      - button "Switch language" [ref=e84] [cursor=pointer]:
+        - img [ref=e85]
+  - generic [ref=e88]:
+    - banner [ref=e89]:
+      - heading "Bảng điều khiển" [level=1] [ref=e1828]
+      - generic [ref=e92]:
+        - button "Thẩm mỹ" [ref=e94] [cursor=pointer]:
+          - img [ref=e95]
+          - generic [ref=e97]: Thẩm mỹ
+          - img [ref=e98]
+        - button "Tất cả chi nhánh" [ref=e101] [cursor=pointer]:
+          - img [ref=e102]
+          - generic [ref=e105]: Tất cả chi nhánh
+          - img [ref=e106]
+        - button "Quét nhanh khuôn mặt" [ref=e109] [cursor=pointer]:
+          - img [ref=e110]
+        - generic [ref=e116]:
+          - button "Phản hồi (6 mới)" [ref=e117] [cursor=pointer]:
+            - img [ref=e118]
+            - generic [ref=e120]: "6"
+          - status [ref=e1064]:
+            - generic [ref=e1066]:
+              - generic [ref=e1067]:
+                - paragraph [ref=e1068]: Có vấn đề?
+                - paragraph [ref=e1069]: Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc.
+              - button "Bỏ qua" [ref=e1070] [cursor=pointer]:
+                - img [ref=e1071]
+        - button [ref=e131] [cursor=pointer]:
+          - img [ref=e132]
+    - main [ref=e136]:
+      - navigation "Breadcrumb" [ref=e531]:
+        - list [ref=e532]:
+          - listitem [ref=e533]:
+            - link "Tổng quan" [ref=e534] [cursor=pointer]:
+              - /url: /
+              - img [ref=e535]
+              - generic [ref=e538]: Tổng quan
+          - listitem [ref=e1829]:
+            - img [ref=e1830]
+            - link "Báo cáo" [ref=e1832] [cursor=pointer]:
+              - /url: /reports
+              - generic [ref=e1833]: Báo cáo
+          - listitem [ref=e1834]:
+            - img [ref=e1835]
+            - generic [ref=e1838]: Bảng điều khiển
+      - generic [ref=e1839]:
+        - generic [ref=e1842]:
+          - img [ref=e1844]
+          - generic [ref=e1846]:
+            - heading "Báo cáo" [level=1] [ref=e1847]
+            - paragraph [ref=e1848]: Dashboard analytics & insights
+        - generic [ref=e1850]:
+          - button "Dashboard" [ref=e1851] [cursor=pointer]:
+            - img [ref=e1852]
+            - text: Dashboard
+          - button "Revenue" [ref=e1857] [cursor=pointer]:
+            - img [ref=e1858]
+            - text: Revenue
+          - button "Appointments" [ref=e1860] [cursor=pointer]:
+            - img [ref=e1861]
+            - text: Appointments
+          - button "Doctors" [ref=e1863] [cursor=pointer]:
+            - img [ref=e1864]
+            - text: Doctors
+          - button "Customers" [ref=e1868] [cursor=pointer]:
+            - img [ref=e1869]
+            - text: Customers
+          - button "Locations" [ref=e1874] [cursor=pointer]:
+            - img [ref=e1875]
+            - text: Locations
+          - button "Services" [ref=e1878] [cursor=pointer]:
+            - img [ref=e1879]
+            - text: Services
+          - button "Employees" [ref=e1881] [cursor=pointer]:
+            - img [ref=e1882]
+            - text: Employees
+        - generic [ref=e1894]:
+          - generic [ref=e1895]:
+            - generic [ref=e1896]: "Đang xem:"
+            - generic [ref=e1897]: 18 thg 5 – 16 thg 6, 2026
+            - generic [ref=e1898]: ·
+            - generic [ref=e1899]: Tất cả chi nhánh
+          - generic [ref=e1900]:
+            - generic [ref=e1901]:
+              - button "Hôm nay" [ref=e1902] [cursor=pointer]
+              - button "3 ngày" [ref=e1903] [cursor=pointer]
+              - button "1 tuần" [ref=e1904] [cursor=pointer]
+              - button "1 tháng" [ref=e1905] [cursor=pointer]
+              - button "90 ngày" [ref=e1906] [cursor=pointer]
+              - button "Tất cả" [ref=e1907] [cursor=pointer]
+            - generic [ref=e1908]:
+              - generic [ref=e1909]:
+                - generic [ref=e1910]:
+                  - img [ref=e1911]
+                  - text: Từ
+                - 'button "Từ: 18/05/2026" [ref=e1913] [cursor=pointer]':
+                  - img [ref=e1915]
+                  - generic [ref=e1917]: 18/05/2026
+                  - img [ref=e1918]
+              - generic [ref=e1920]: →
+              - generic [ref=e1921]:
+                - generic [ref=e1922]:
+                  - img [ref=e1923]
+                  - text: Đến
+                - 'button "Đến: 16/06/2026" [ref=e1925] [cursor=pointer]':
+                  - img [ref=e1927]
+                  - generic [ref=e1929]: 16/06/2026
+                  - img [ref=e1930]
+            - combobox [ref=e1932]:
+              - option "Tất cả chi nhánh" [selected]
+              - option "Thẩm mỹ Hồ Chí Minh"
+              - option "QA Final Location UPDATED"
+              - option "QA Verify 1779772770"
+              - option "Thẩm mỹ Hà Nội"
+        - generic [ref=e1934]:
+          - generic [ref=e1935]:
+            - generic [ref=e1938]:
+              - generic [ref=e1939]:
+                - generic [ref=e1940]: Doanh thu đã thu
+                - img [ref=e1943]
+              - generic [ref=e1945]: 2.031.518.281 ₫
+              - generic [ref=e1946]:
+                - img [ref=e1947]
+                - text: "-11.8% vs prev period"
+            - generic [ref=e1952]:
+              - generic [ref=e1953]:
+                - generic [ref=e1954]: Tổng lịch hẹn
+                - img [ref=e1957]
+              - generic [ref=e1959]: 289,173
+            - generic [ref=e1962]:
+              - generic [ref=e1963]:
+                - generic [ref=e1964]: Khách hàng mới
+                - img [ref=e1967]
+              - generic [ref=e1972]: 307,034
+            - generic [ref=e1975]:
+              - generic [ref=e1976]:
+                - generic [ref=e1977]: Còn nợ
+                - img [ref=e1980]
+              - generic [ref=e1982]: 273.061.052 ₫
+          - generic [ref=e1983]:
+            - generic [ref=e1984]:
+              - heading "Xu hướng doanh thu 12 tháng" [level=3] [ref=e1986]
+              - generic [ref=e1988]:
+                - generic [ref=e1989]:
+                  - generic [ref=e1990]: 2.152.829.000 ₫
+                  - generic "Tháng 6" [ref=e1995]
+                - generic [ref=e1996]:
+                  - generic [ref=e1997]: 7.115.610.000 ₫
+                  - generic "Tháng 7" [ref=e2002]
+                - generic [ref=e2003]:
+                  - generic [ref=e2004]: 2.920.464.000 ₫
+                  - generic "Tháng 8" [ref=e2009]
+                - generic [ref=e2010]:
+                  - generic [ref=e2011]: 2.643.488.000 ₫
+                  - generic "Tháng 9" [ref=e2016]
+                - generic [ref=e2017]:
+                  - generic [ref=e2018]: 3.461.004.000 ₫
+                  - generic "Tháng 10" [ref=e2023]
+                - generic [ref=e2024]:
+                  - generic [ref=e2025]: 2.902.425.000 ₫
+                  - generic "Tháng 11" [ref=e2030]
+                - generic [ref=e2031]:
+                  - generic [ref=e2032]: 2.623.243.000 ₫
+                  - generic "Tháng 12" [ref=e2037]
+                - generic [ref=e2038]:
+                  - generic [ref=e2039]: 3.427.929.000 ₫
+                  - generic "Tháng 1" [ref=e2044]
+                - generic [ref=e2045]:
+                  - generic [ref=e2046]: 8.476.113.000 ₫
+                  - generic "Tháng 2" [ref=e2051]
+                - generic [ref=e2052]:
+                  - generic [ref=e2053]: 2.718.128.000 ₫
+                  - generic "Tháng 3" [ref=e2058]
+                - generic [ref=e2059]:
+                  - generic [ref=e2060]: 2.706.532.000 ₫
+                  - generic "Tháng 4" [ref=e2065]
+                - generic [ref=e2066]:
+                  - generic [ref=e2067]: 1.641.813.000 ₫
+                  - generic "Tháng 5" [ref=e2072]
+                - generic [ref=e2073]:
+                  - generic [ref=e2074]: 1.767.511.000 ₫
+                  - generic "Tháng 6" [ref=e2079]
+            - generic [ref=e2080]:
+              - heading "Tỷ lệ lịch hẹn" [level=3] [ref=e2082]
+              - generic [ref=e2084]:
+                - generic [ref=e2085]:
+                  - img [ref=e2086]:
+                    - generic [ref=e2089]: 40%
+                  - generic [ref=e2090]: Hoàn thành
+                - generic [ref=e2091]:
+                  - img [ref=e2092]:
+                    - generic [ref=e2095]: 87%
+                  - generic [ref=e2096]: Tỷ lệ thu hồi
+          - generic [ref=e2097]:
+            - generic [ref=e2098]:
+              - generic [ref=e2099]: Đã xuất hóa đơn
+              - generic [ref=e2100]: 2.453.921.111 ₫
+              - generic [ref=e2101]: 124 lịch hẹn hoàn thành
+            - generic [ref=e2102]:
+              - generic [ref=e2103]: Đã thu
+              - generic [ref=e2104]: 2.130.728.000 ₫
+              - generic [ref=e2105]: 86.8% tỷ lệ thu hồi
+            - generic [ref=e2106]:
+              - generic [ref=e2107]: Còn nợ
+              - generic [ref=e2108]: 323.143.111 ₫
+              - generic [ref=e2109]: 53 lịch hủy
+    - button "v0.37.12 (37163f6)" [ref=e524] [cursor=pointer]:
+      - img [ref=e1060]
+      - generic [ref=e527]: v0.37.12
+      - generic [ref=e528]: (37163f6)

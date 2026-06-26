@@ -304,5 +304,15 @@
   },
   "states": {
     "loading": "Đang tải khách hàng..."
+  },
+  "investorVisibility": {
+    "column": "NĐT",
+    "noPermission": "Bạn không có quyền chia sẻ khách hàng với nhà đầu tư",
+    "noInvestors": "Hãy tạo nhà đầu tư trước tại Cài đặt → Nhà đầu tư",
+    "deletedClient": "Không thể chia sẻ khách hàng đã xóa",
+    "confirmOn": "Khách hàng này sẽ hiển thị với nhà đầu tư {{name}}.",
+    "selectInvestor": "Chọn nhà đầu tư",
+    "toggleLabel": "Hiển thị với {{investor}}",
+    "saveError": "Không cập nhật được trạng thái hiển thị. Vui lòng thử lại."
   }
 }

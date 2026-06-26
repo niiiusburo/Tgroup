@@ -1,0 +1,57 @@
+{
+  "startedAt": "2026-06-20T08:23:34.927Z",
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260620T082334Z-chrome",
+  "target": "https://tmv.2checkin.com",
+  "browser": "bundled Chromium via Playwright",
+  "loginAttempts": [
+    {
+      "email": "t@clinic.vn",
+      "succeeded": true,
+      "errors": [],
+      "urlAfter": "https://tmv.2checkin.com/",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260620T082334Z-chrome/login-after-t-clinic-vn.png"
+    }
+  ],
+  "accountWorked": "t@clinic.vn",
+  "loginSucceeded": true,
+  "cosmeticVisible": true,
+  "cosmeticBlocker": null,
+  "screens": [
+    {
+      "name": "Dashboard",
+      "url": "https://tmv.2checkin.com/",
+      "clickedNav": true,
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260620T082334Z-chrome/01-dashboard.png",
+      "cosmeticVisible": true,
+      "textLength": 3621,
+      "blank": false,
+      "visibleErrorCount": 0
+    },
+    {
+      "name": "Customers",
+      "url": "https://tmv.2checkin.com/customers",
+      "clickedNav": true,
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260620T082334Z-chrome/02-customers.png",
+      "cosmeticVisible": true,
+      "textLength": 2100,
+      "blank": false,
+      "visibleErrorCount": 0
+    },
+    {
+      "name": "Calendar",
+      "url": "https://tmv.2checkin.com/calendar",
+      "clickedNav": true,
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260620T082334Z-chrome/03-calendar.png",
+      "cosmeticVisible": true,
+      "textLength": 4291,
+      "blank": false,
+      "visibleErrorCount": 0
+    }
+  ],
+  "apiErrors": [],
+  "consoleErrors": [],
+  "failedRequests": [],
+  "visibleErrors": [],
+  "cosmeticHeaderScreenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260620T082334Z-chrome/00-cosmetic-header.png",
+  "finishedAt": "2026-06-20T08:23:46.293Z"
+}

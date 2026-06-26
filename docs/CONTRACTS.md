@@ -48,6 +48,9 @@
 | v1.0.34 | 2026-06-10 | Strict CTV commission attribution (DEC-20260610-01): `POST /api/SaleOrders` (+ `/api/cosmetic/SaleOrders`) no longer inherits the customer's `referred_by_ctv_id` when the payload omits `ctv_id` — the card stays CTV-less and creates zero earnings. Commission requires an explicit `ctv_id` in the payload. Field shapes unchanged. |
 | v1.0.33 | 2026-06-10 | CTV discount QR completion hardened (FM-20260610-02): on a `checked_in` code, the bound customer takes precedence over `createIfMissing`/submitted `customerLob` — completion never creates or rebinds a different client. Explicit `customerPartnerId` still honored. No field shapes changed. |
 | v1.0.35 | 2026-06-14 | Service-line reversal extended to service-card CTV earnings: `DELETE /api/SaleOrderLines/:id` (and the service-card delete path) now calls `reverseServiceCardEarnings` to clear pending service-card earnings (`payment_id IS NULL`) before soft-delete, and blocks the reversal with `B_COMMISSION_PAID_OUT` (HTTP 409) when paid-out service-card earnings exist. Response shape adds `reversedServiceCardEarningsCount: number`. Service-line delete no longer leaves orphan pending service-card earnings behind. NK3-only flag: `CTV_SERVICE_CARD_COMMISSION=true`. |
+| v1.0.36 | 2026-06-24 | Patient Portal AI chat support contract added: `/api/patient/chat/*` endpoints, `chat_sessions`, `chat_messages`, `support_kb_chunks` schemas, and mobile `ChatScreen`. AI replies are generated server-side via OpenAI `gpt-4o-mini`, Google Gemini, or DeepSeek with RAG context from `support_kb_chunks` (pgvector when available; keyword fallback otherwise). Human escalation creates a `support_tickets` row. Learning loop stores resolved-chat chunks with `approved=false` pending staff review. |
+| v1.0.38 | 2026-06-26 | Investor Portal Phase 2 contracts: `InvestorVisibilityPatchSchema`, `InvestorAdminCreateSchema`, `InvestorAdminUpdateSchema`, `InvestorPasswordResetRequestSchema`, `InvestorPasswordResetConfirmSchema`. Staff routes: `GET /api/investor-visibility`, `PATCH /api/Partners/:id/investor-visibility`, `GET|POST|PATCH /api/admin/investors`. Public: `POST /api/investor/auth/password-reset-request`, `POST /api/investor/auth/password-reset`. Permissions: `customers.set_investor_visibility`, `investors.manage`. |
+| v1.0.37 | 2026-06-26 | Investor Portal contract added: `/api/investor/auth/login`, `/api/investor/auth/me`, `/api/investor/clients`, `/api/investor/clients/:partnerId`. JWT payload `{ sub, type:'investor', lob }` signed with mandatory `INVESTOR_JWT_SECRET` (never `JWT_SECRET`). `InvestorClientResponseSchema` allow-list: `id, name, gender, birth_year, appointment_count, order_count, deposit_balance, outstanding_balance, status` only. Unflagged clients return 404. |
 
 ---
 
@@ -869,6 +872,67 @@ Feedback attachment behavior:
 }
 ```
 **Response 201:** `{ id: string }` (error_event row id)
+
+---
+
+### 1.12 Patient Portal Chat Support (AI + Human Escalation)
+
+All endpoints require a valid patient JWT (`Authorization: Bearer <patient token>`) and are scoped to `req.patient.partnerId`. Inference and API keys remain server-side.
+
+#### GET /api/patient/chat/sessions
+**Response 200:**
+```ts
+{
+  success: true;
+  sessions: Array<{
+    id: string;
+    status: 'ai' | 'human' | 'closed';
+    ticket_id?: string | null;
+    created_at: string;
+    updated_at: string;
+  }>;
+}
+```
+
+#### POST /api/patient/chat/sessions
+**Response 201:** `{ success: true; session: ChatSession }`
+
+#### GET /api/patient/chat/sessions/:id/messages
+**Response 200:**
+```ts
+{
+  success: true;
+  messages: Array<{
+    id: string;
+    role: 'patient' | 'ai' | 'staff' | 'system';
+    content: string;
+    metadata?: Record<string, unknown>;
+    created_at: string;
+  }>;
+}
+```
+
+#### POST /api/patient/chat/sessions/:id/messages
+**Body:** `{ content: string }`
+**Response 200:**
+```ts
+{
+  success: true;
+  reply: string;
+  escalated: boolean;
+  reason?: string;
+  ticketId?: string | null;
+}
+```
+The route persists the patient message, retrieves top-5 KB chunks via pgvector, calls the LLM, persists the AI reply, and auto-escalates to a `support_tickets` row when escalation rules fire.
+
+#### POST /api/patient/chat/sessions/:id/escalate
+**Body:** `{ reason?: string }` (defaults to `'patient_requested'`)
+**Response 200:** `{ success: true; ticketId: string }`
+
+#### POST /api/patient/chat/sessions/:id/learn
+**MVP only — patient-facing trigger.** Chunks the resolved conversation, redacts phone numbers, embeds it, and inserts into `support_kb_chunks` with `approved=false` pending staff review. In production this should move to a staff-only admin route.
+**Response 200:** `{ success: true; chunksStored: number; chunkIds?: string[] }`
 
 ---
 

@@ -2,7 +2,7 @@
 # Canonical mapping of all permission strings to backend routes, frontend routes, and UI components.
 
 meta:
-  total_backend_strings: 43
+  total_backend_strings: 45
   total_frontend_route_guards: 15
   total_nav_guards: 13
   wildcard: "*"
@@ -53,6 +53,17 @@ backend_permissions:
       - GET /api/Partners/:id/GetKPIs
       - GET /api/CustomerReceipts
       - GET /api/CustomerReceipts/:id
+  - string: customers.set_investor_visibility
+    routes:
+      - GET /api/investor-visibility
+      - PATCH /api/Partners/:id/investor-visibility
+  - string: investors.manage
+    routes:
+      - GET /api/admin/investors
+      - POST /api/admin/investors
+      - PATCH /api/admin/investors/:id
+      - GET /api/admin/investors/:id/clients
+      - GET /api/admin/investors/:id/audit
   - string: employees.view
     routes:
       - GET /api/Employees

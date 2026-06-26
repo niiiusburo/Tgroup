@@ -1,0 +1,22 @@
+### Result
+22. [POST] https://tmv.2checkin.com/api/Auth/login => [200] 
+35. [GET] https://tmv.2checkin.com/api/Appointments?offset=0&limit=200&date_from=2026-06-16&date_to=2026-06-16T23%3A59%3A59 => [200] 
+36. [GET] https://tmv.2checkin.com/api/Employees?offset=0&limit=500&active=all => [200] 
+37. [GET] https://tmv.2checkin.com/version.json?t=1781564607017 => [200] 
+38. [GET] https://tmv.2checkin.com/api/Companies?offset=0&limit=50 => [200] 
+39. [GET] https://tmv.2checkin.com/api/cosmetic/Appointments?offset=0&limit=200&date_from=2026-06-16&date_to=2026-06-16T23%3A59%3A59 => [200] 
+40. [GET] https://tmv.2checkin.com/api/cosmetic/Employees?offset=0&limit=500&active=all => [200] 
+41. [GET] https://tmv.2checkin.com/version.json?t=1781564607023 => [200] 
+42. [GET] https://tmv.2checkin.com/api/cosmetic/Companies?offset=0&limit=50 => [200] 
+43. [GET] https://tmv.2checkin.com/CHANGELOG.json?v=1781564607023 => [200] 
+44. [GET] https://tmv.2checkin.com/api/Feedback/unread-count => [200] 
+45. [GET] https://tmv.2checkin.com/version.json?t=1781564638025 => [200] 
+52. [GET] https://tmv.2checkin.com/api/cosmetic/Appointments?offset=0&limit=3000&date_from=2026-06-16&date_to=2026-06-16+23%3A59%3A59&calendar_mode=true&include_counts=false => [200] 
+53. [GET] https://tmv.2checkin.com/api/Feedback/unread-count => [200] 
+71. [GET] https://tmv.2checkin.com/api/cosmetic/Partners?offset=0&limit=20 => [200] 
+72. [GET] https://tmv.2checkin.com/api/cosmetic/Companies?offset=0&limit=50 => [200] 
+76. [POST] https://tmv.2checkin.com/api/cosmetic/Reports/dashboard => [200] 
+77. [GET] https://tmv.2checkin.com/api/cosmetic/Companies?offset=0&limit=50 => [200] 
+78. [GET] https://tmv.2checkin.com/api/Feedback/unread-count => [200] 
+
+Note: 59 static requests not shown, run with --static option to see them.

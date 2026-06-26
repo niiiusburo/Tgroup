@@ -31,6 +31,7 @@ function parseProfileTab(value: string | null): ProfileTab | null {
 }
 
 import { buildCustomerColumns } from "./Customers/CustomerColumns";
+import { useInvestorVisibilityColumn } from "@/hooks/useInvestorVisibilityColumn";
 import { CustomerListView } from "./Customers/CustomerListView";
 import { CustomerFormModal } from "./Customers/CustomerFormModal";
 import { CustomerProfileContent } from "./Customers/CustomerProfileContent";
@@ -176,6 +177,18 @@ export function Customers() {
     () => new Map(allLocations.map((l) => [l.id, l.name])),
     [allLocations],
   );
+
+  const partnerIds = useMemo(() => customers.map((c) => c.id), [customers]);
+  const {
+    canToggle: canSetInvestorVisibility,
+    batch: investorVisibilityBatch,
+    investors: lobInvestors,
+    hasInvestors,
+    toggleVisibility,
+  } = useInvestorVisibilityColumn(partnerIds);
+  const [selectedInvestorId, setSelectedInvestorId] = useState<string | null>(null);
+  const [visibilityError, setVisibilityError] = useState<string | null>(null);
+
   const customerColumns = useMemo(
     () =>
       buildCustomerColumns(
@@ -190,8 +203,33 @@ export function Customers() {
           });
         },
         t,
+        canSetInvestorVisibility
+          ? {
+              canToggle: canSetInvestorVisibility,
+              hasInvestors,
+              investors: lobInvestors,
+              batch: investorVisibilityBatch,
+              selectedInvestorId,
+              onSelectInvestor: setSelectedInvestorId,
+              onToggle: async (partnerId, investorId, next) => {
+                const result = await toggleVisibility(partnerId, investorId, next);
+                if (!result.ok) setVisibilityError(t("investorVisibility.saveError"));
+                return result;
+              },
+            }
+          : undefined,
       ),
-    [locationNameMap, canSoftDelete, t],
+    [
+      locationNameMap,
+      canSoftDelete,
+      t,
+      canSetInvestorVisibility,
+      hasInvestors,
+      lobInvestors,
+      investorVisibilityBatch,
+      selectedInvestorId,
+      toggleVisibility,
+    ],
   );
 
   const {
@@ -406,6 +444,7 @@ export function Customers() {
   return (
     <>
       {content}
+      {visibilityError && <ActionErrorToast message={visibilityError} />}
       <CustomerFormModal
         showForm={showForm}
         isEditMode={isEditMode}

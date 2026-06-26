@@ -1,0 +1,19 @@
+{
+  "entryPoints": ["src/**/*.ts"],
+  "exclude": [
+    "src/**/_*.ts",
+    "src/index.ts",
+    "src/web/**",
+    "src/node/**",
+    "src/g3_node/**",
+    "src/g3_web/**",
+    "src/g3_node_deprecated/**",
+    "src/g3_web_deprecated/**",
+    "src/vertex_internal/**",
+    "src/interactions-deprecated/**"
+  ],
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "visibilityFilters": {}
+}

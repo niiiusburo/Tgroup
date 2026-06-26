@@ -1,0 +1,574 @@
+- generic [ref=e25]:
+  - complementary [ref=e26]:
+    - generic [ref=e30]: TD
+    - navigation [ref=e31]:
+      - link "Tổng quan" [ref=e32] [cursor=pointer]:
+        - /url: /
+        - img [ref=e34]
+      - link "Lịch" [active] [ref=e36] [cursor=pointer]:
+        - /url: /calendar
+        - img [ref=e37]
+      - link "Khách hàng" [ref=e39] [cursor=pointer]:
+        - /url: /customers
+        - img [ref=e40]
+      - generic [ref=e45]:
+        - button "Phòng khám" [ref=e46] [cursor=pointer]:
+          - img [ref=e47]
+        - generic:
+          - generic:
+            - generic: Phòng khám
+            - generic:
+              - link "Dịch vụ":
+                - /url: /services
+                - img
+                - generic: Dịch vụ
+              - link "Danh mục dịch vụ":
+                - /url: /service-catalog
+                - img
+                - generic: Danh mục dịch vụ
+              - link "Kế hoạch thanh toán":
+                - /url: /payment
+                - img
+                - generic: Kế hoạch thanh toán
+      - generic [ref=e51]:
+        - button "Nhóm" [ref=e52] [cursor=pointer]:
+          - img [ref=e53]
+        - generic:
+          - generic:
+            - generic: Nhóm
+            - generic:
+              - link "Nhân viên":
+                - /url: /employees
+                - img
+                - generic: Nhân viên
+              - link "Hoa hồng Pro":
+                - /url: /commission
+                - img
+                - generic: Hoa hồng
+                - generic: Pro
+              - link "Chi nhánh":
+                - /url: /locations
+                - img
+                - generic: Chi nhánh
+      - generic [ref=e65]:
+        - button "Báo cáo" [ref=e66] [cursor=pointer]:
+          - img [ref=e67]
+        - generic:
+          - generic:
+            - generic: Báo cáo
+            - generic:
+              - link "Bảng điều khiển":
+                - /url: /reports/dashboard
+                - img
+                - generic: Bảng điều khiển
+              - link "Doanh thu":
+                - /url: /reports/revenue
+                - img
+                - generic: Doanh thu
+              - link "Lịch hẹn":
+                - /url: /reports/appointments
+                - img
+                - generic: Lịch hẹn
+              - link "Bác sĩ":
+                - /url: /reports/doctors
+                - img
+                - generic: Bác sĩ
+              - link "Khách hàng":
+                - /url: /reports/customers
+                - img
+                - generic: Khách hàng
+              - link "Chi nhánh":
+                - /url: /reports/locations
+                - img
+                - generic: Chi nhánh
+              - link "Dịch vụ":
+                - /url: /reports/services
+                - img
+                - generic: Dịch vụ
+              - link "Nhân viên":
+                - /url: /reports/employees
+                - img
+                - generic: Nhân viên
+      - generic [ref=e69]:
+        - button "Quản trị" [ref=e70] [cursor=pointer]:
+          - img [ref=e71]
+        - generic:
+          - generic:
+            - generic: Quản trị
+            - generic:
+              - link "Cài đặt":
+                - /url: /settings
+                - img
+                - generic: Cài đặt
+              - link "Phản hồi":
+                - /url: /feedback
+                - img
+                - generic: Phản hồi
+              - link "Quyền hạn":
+                - /url: /permissions
+                - img
+                - generic: Quyền hạn
+              - link "Mối quan hệ":
+                - /url: /relationships
+                - img
+                - generic: Mối quan hệ
+              - link "Thông báo":
+                - /url: /notifications
+                - img
+                - generic: Thông báo
+    - generic [ref=e74]:
+      - button [ref=e75] [cursor=pointer]:
+        - img [ref=e76]
+      - button "A" [ref=e78] [cursor=pointer]:
+        - generic [ref=e79]: A
+      - button "Switch language" [ref=e82] [cursor=pointer]:
+        - img [ref=e83]
+  - generic [ref=e86]:
+    - banner [ref=e87]:
+      - heading "Lịch" [level=1] [ref=e2095]
+      - generic [ref=e90]:
+        - button "Thẩm mỹ" [ref=e92] [cursor=pointer]:
+          - img [ref=e93]
+          - generic [ref=e95]: Thẩm mỹ
+          - img [ref=e96]
+        - button "Tất cả chi nhánh" [ref=e99] [cursor=pointer]:
+          - img [ref=e100]
+          - generic [ref=e103]: Tất cả chi nhánh
+          - img [ref=e104]
+        - button "Quét nhanh khuôn mặt" [ref=e107] [cursor=pointer]:
+          - img [ref=e108]
+        - button "Phản hồi (6 mới)" [ref=e649] [cursor=pointer]:
+          - img [ref=e116]
+          - generic [ref=e650]: "6"
+        - button [ref=e128] [cursor=pointer]:
+          - img [ref=e129]
+    - main [ref=e133]:
+      - navigation "Breadcrumb" [ref=e653]:
+        - list [ref=e654]:
+          - listitem [ref=e655]:
+            - link "Tổng quan" [ref=e656] [cursor=pointer]:
+              - /url: /
+              - img [ref=e657]
+              - generic [ref=e660]: Tổng quan
+          - listitem [ref=e2096]:
+            - img [ref=e2097]
+            - generic [ref=e2100]: Lịch
+      - generic [ref=e2101]:
+        - generic [ref=e2104]:
+          - img [ref=e2106]
+          - generic [ref=e2108]:
+            - heading "Lịch hẹn" [level=1] [ref=e2109]
+            - paragraph [ref=e2110]: Quản lý lịch hẹn khám bệnh
+        - generic [ref=e2111]:
+          - generic [ref=e2112]:
+            - button "Ngày" [ref=e2113] [cursor=pointer]
+            - button "Tuần" [ref=e2114] [cursor=pointer]
+            - button "Tháng" [ref=e2115] [cursor=pointer]
+          - generic [ref=e2116]:
+            - button "Previous" [ref=e2117] [cursor=pointer]:
+              - img [ref=e2118]
+            - button "Chủ Nhật, 21 tháng 6, 2026" [ref=e2121] [cursor=pointer]:
+              - img [ref=e2122]
+              - generic [ref=e2124]: Chủ Nhật, 21 tháng 6, 2026
+            - button "Next" [ref=e2125] [cursor=pointer]:
+              - img [ref=e2126]
+            - button "Hôm nay" [ref=e2128] [cursor=pointer]
+          - generic [ref=e2129]:
+            - generic [ref=e2130]:
+              - img
+              - textbox "Tìm kiếm khách hàng..." [ref=e2131]
+            - button "Xuất dữ liệu" [ref=e2133] [cursor=pointer]:
+              - img [ref=e2134]
+              - generic [ref=e2137]: Xuất dữ liệu
+              - img [ref=e2138]
+            - button "Bộ lọc" [ref=e2140] [cursor=pointer]:
+              - img [ref=e2141]
+              - generic [ref=e2143]: Bộ lọc
+            - button "Hẹn mới" [ref=e2144] [cursor=pointer]:
+              - img [ref=e2145]
+              - generic [ref=e2147]: Hẹn mới
+        - generic [ref=e2148]:
+          - generic [ref=e2150]:
+            - heading "Chủ Nhật, 21 tháng 6" [level=3] [ref=e2151]
+            - generic [ref=e2152]: 12 Lịch hẹn
+          - generic [ref=e2153]:
+            - button "Thêm lịch hẹn lúc 07:00" [ref=e2155] [cursor=pointer]:
+              - generic [ref=e2156]: 07:00
+              - img [ref=e2158]
+            - button "Thêm lịch hẹn lúc 07:30" [ref=e2160] [cursor=pointer]:
+              - generic [ref=e2161]: 07:30
+              - img [ref=e2163]
+            - button "Thêm lịch hẹn lúc 08:00" [ref=e2165] [cursor=pointer]:
+              - generic [ref=e2166]: 08:00
+              - img [ref=e2168]
+            - button "Thêm lịch hẹn lúc 08:30" [ref=e2170] [cursor=pointer]:
+              - generic [ref=e2171]: 08:30
+              - img [ref=e2173]
+            - button "Thêm lịch hẹn lúc 09:00" [ref=e2175] [cursor=pointer]:
+              - generic [ref=e2176]: 09:00
+              - img [ref=e2178]
+            - button "Thêm lịch hẹn lúc 09:30" [ref=e2180] [cursor=pointer]:
+              - generic [ref=e2181]: 09:30
+              - img [ref=e2183]
+            - button "Thêm lịch hẹn lúc 10:00" [ref=e2185] [cursor=pointer]:
+              - generic [ref=e2186]: 10:00
+              - img [ref=e2188]
+            - generic [ref=e2189]:
+              - generic [ref=e2190]:
+                - generic [ref=e2191]: 10:30
+                - generic [ref=e2193]: 1 Lịch hẹn
+              - generic [ref=e2195] [cursor=pointer]:
+                - generic [ref=e2196]:
+                  - generic [ref=e2197]: Đang hẹn
+                  - generic [ref=e2198]:
+                    - button "Check-in" [ref=e2199]:
+                      - img [ref=e2200]
+                    - button "Hủy hẹn" [ref=e2204]:
+                      - img [ref=e2205]
+                - heading "Ying" [level=5] [ref=e2208]:
+                  - button "Ying" [ref=e2210]
+                - generic [ref=e2211]:
+                  - generic [ref=e2212]:
+                    - img [ref=e2213]
+                    - generic [ref=e2215]: "0966365882"
+                  - img [ref=e2217]
+                  - generic [ref=e2220]:
+                    - img [ref=e2221]
+                    - generic [ref=e2226]: NGOCCH
+                  - generic [ref=e2227]:
+                    - img [ref=e2228]
+                    - generic [ref=e2231]: 10:45 · 30 phút
+                - paragraph [ref=e2232]: Tvv Ngọc , zalo Vân , khách c Phương Thảo 916376789 gth , lixi riêng
+                - button "✎" [ref=e2233]
+            - button "Thêm lịch hẹn lúc 11:00" [ref=e2235] [cursor=pointer]:
+              - generic [ref=e2236]: 11:00
+              - img [ref=e2238]
+            - button "Thêm lịch hẹn lúc 11:30" [ref=e2240] [cursor=pointer]:
+              - generic [ref=e2241]: 11:30
+              - img [ref=e2243]
+            - button "Thêm lịch hẹn lúc 12:00" [ref=e2245] [cursor=pointer]:
+              - generic [ref=e2246]: 12:00
+              - img [ref=e2248]
+            - button "Thêm lịch hẹn lúc 12:30" [ref=e2250] [cursor=pointer]:
+              - generic [ref=e2251]: 12:30
+              - img [ref=e2253]
+            - generic [ref=e2254]:
+              - generic [ref=e2255]:
+                - generic [ref=e2256]: 13:00
+                - generic [ref=e2258]: 3 Lịch hẹn
+              - generic [ref=e2259]:
+                - generic [ref=e2260] [cursor=pointer]:
+                  - generic [ref=e2261]:
+                    - generic [ref=e2262]: Đang hẹn
+                    - generic [ref=e2263]:
+                      - button "Check-in" [ref=e2264]:
+                        - img [ref=e2265]
+                      - button "Hủy hẹn" [ref=e2269]:
+                        - img [ref=e2270]
+                  - heading "Lê Thị Hồng" [level=5] [ref=e2273]:
+                    - button "Lê Thị Hồng" [ref=e2275]
+                  - generic [ref=e2276]:
+                    - generic [ref=e2277]:
+                      - img [ref=e2278]
+                      - generic [ref=e2280]: "0981458177"
+                    - generic [ref=e2281]:
+                      - img [ref=e2282]
+                      - generic [ref=e2285]: BS 11
+                    - generic [ref=e2286]:
+                      - img [ref=e2287]
+                      - generic [ref=e2292]: NGOCCH
+                    - generic [ref=e2293]:
+                      - img [ref=e2294]
+                      - generic [ref=e2297]: 13:00 · 30 phút
+                  - paragraph [ref=e2298]: cắt chỉ Mí shanghai + mở góc trong + góc ngoài _ 12/6/26 _ vanmt
+                  - button "✎" [ref=e2299]
+                - generic [ref=e2300] [cursor=pointer]:
+                  - generic [ref=e2301]:
+                    - generic [ref=e2302]: Đang hẹn
+                    - generic [ref=e2303]:
+                      - button "Check-in" [ref=e2304]:
+                        - img [ref=e2305]
+                      - button "Hủy hẹn" [ref=e2309]:
+                        - img [ref=e2310]
+                  - heading "Bảo Hân" [level=5] [ref=e2313]:
+                    - button "Bảo Hân" [ref=e2315]
+                  - generic [ref=e2316]:
+                    - generic [ref=e2317]:
+                      - img [ref=e2318]
+                      - generic [ref=e2320]: "0888800297"
+                    - generic [ref=e2321]:
+                      - img [ref=e2322]
+                      - generic [ref=e2325]: BS 21
+                    - generic [ref=e2326]:
+                      - img [ref=e2327]
+                      - generic [ref=e2332]: NGANOT
+                    - generic [ref=e2333]:
+                      - img [ref=e2334]
+                      - generic [ref=e2337]: 13:00 · 30 phút
+                  - paragraph [ref=e2338]: nhấn mí góc trong - Zalo Huệ cskh, tvv Ngân
+                  - button "✎" [ref=e2339]
+                - generic [ref=e2340] [cursor=pointer]:
+                  - generic [ref=e2341]:
+                    - generic [ref=e2342]: Đang hẹn
+                    - generic [ref=e2343]:
+                      - button "Check-in" [ref=e2344]:
+                        - img [ref=e2345]
+                      - button "Hủy hẹn" [ref=e2349]:
+                        - img [ref=e2350]
+                  - heading "hạ linh" [level=5] [ref=e2353]:
+                    - button "hạ linh" [ref=e2355]
+                  - generic [ref=e2356]:
+                    - generic [ref=e2357]:
+                      - img [ref=e2358]
+                      - generic [ref=e2360]: "0379150385"
+                    - img [ref=e2362]
+                    - generic [ref=e2365]:
+                      - img [ref=e2366]
+                      - generic [ref=e2369]: 13:00 · 30 phút
+                  - paragraph [ref=e2370]: sơn la - làm xong sớm 2h về sơn la rồi Báo filler 2tr/1cc, ban đầu hỏi tiêm tai cho dày hơn phong thủy hơn nên sale báo tuỳ tình trạng và nhu cầu thì áng 1-3cc bác sĩ khám và chỉ định, sau cúp máy lại hỏi thêm có tiêm tai vểnh không (báo có và không nói thêm là tốn bao nhiêu cc nữa) NGAPT1
+                  - button "✎" [ref=e2371]
+            - generic [ref=e2372]:
+              - generic [ref=e2373]:
+                - generic [ref=e2374]: 13:30
+                - generic [ref=e2376]: 2 Lịch hẹn
+              - generic [ref=e2377]:
+                - generic [ref=e2378] [cursor=pointer]:
+                  - generic [ref=e2379]:
+                    - generic [ref=e2380]: Đang hẹn
+                    - generic [ref=e2381]:
+                      - button "Check-in" [ref=e2382]:
+                        - img [ref=e2383]
+                      - button "Hủy hẹn" [ref=e2387]:
+                        - img [ref=e2388]
+                  - heading "Chị Hoa" [level=5] [ref=e2391]:
+                    - button "Chị Hoa" [ref=e2393]
+                  - generic [ref=e2394]:
+                    - generic [ref=e2395]:
+                      - img [ref=e2396]
+                      - generic [ref=e2398]: "0764423463"
+                    - generic [ref=e2399]:
+                      - img [ref=e2400]
+                      - generic [ref=e2403]: BS 11
+                    - generic [ref=e2404]:
+                      - img [ref=e2405]
+                      - generic [ref=e2410]: VYTDT
+                    - generic [ref=e2411]:
+                      - img [ref=e2412]
+                      - generic [ref=e2415]: 13:50 · 30 phút
+                  - paragraph [ref=e2416]: cắt chỉ Mí shanghai + cấy mỡ trung bì + góc ngoài _ 12/6/26 _ vanmt
+                  - button "✎" [ref=e2417]
+                - generic [ref=e2418] [cursor=pointer]:
+                  - generic [ref=e2419]:
+                    - generic [ref=e2420]: Đang hẹn
+                    - generic [ref=e2421]:
+                      - button "Check-in" [ref=e2422]:
+                        - img [ref=e2423]
+                      - button "Hủy hẹn" [ref=e2427]:
+                        - img [ref=e2428]
+                  - heading "Phạm Thị Thu" [level=5] [ref=e2431]:
+                    - button "Phạm Thị Thu" [ref=e2433]
+                  - generic [ref=e2434]:
+                    - generic [ref=e2435]:
+                      - img [ref=e2436]
+                      - generic [ref=e2438]: "968066869"
+                    - generic [ref=e2439]:
+                      - img [ref=e2440]
+                      - generic [ref=e2443]: BS 11
+                    - generic [ref=e2444]:
+                      - img [ref=e2445]
+                      - generic [ref=e2450]: NGOCCH
+                    - generic [ref=e2451]:
+                      - img [ref=e2452]
+                      - generic [ref=e2455]: 13:55 · 30 phút
+                  - paragraph [ref=e2456]: cắt chỉ Mí shanghai + cấy mỡ + sửa + góc ngoài _ 12/6/26 _ vanmt
+                  - button "✎" [ref=e2457]
+            - generic [ref=e2458]:
+              - generic [ref=e2459]:
+                - generic [ref=e2460]: 14:00
+                - generic [ref=e2462]: 4 Lịch hẹn
+              - generic [ref=e2463]:
+                - generic [ref=e2464] [cursor=pointer]:
+                  - generic [ref=e2465]:
+                    - generic [ref=e2466]: Đang hẹn
+                    - generic [ref=e2467]:
+                      - button "Check-in" [ref=e2468]:
+                        - img [ref=e2469]
+                      - button "Hủy hẹn" [ref=e2473]:
+                        - img [ref=e2474]
+                  - heading "NGUYỄN THỊ KIM LOAN" [level=5] [ref=e2477]:
+                    - button "NGUYỄN THỊ KIM LOAN" [ref=e2479]
+                  - generic [ref=e2480]:
+                    - generic [ref=e2481]:
+                      - img [ref=e2482]
+                      - generic [ref=e2484]: "0933818418"
+                    - generic [ref=e2485]:
+                      - img [ref=e2486]
+                      - generic [ref=e2489]: BS 28
+                    - generic [ref=e2490]:
+                      - img [ref=e2491]
+                      - generic [ref=e2496]: DIEPVTN
+                    - generic [ref=e2497]:
+                      - img [ref=e2498]
+                      - generic [ref=e2501]: 14:00 · 60 phút
+                  - paragraph [ref=e2502]: Cắt mí dưới,voucher cskh. zalo cskh Tuyết Anh, tv Diệp
+                  - button "✎" [ref=e2503]
+                - generic [ref=e2504] [cursor=pointer]:
+                  - generic [ref=e2505]:
+                    - generic [ref=e2506]: Đang hẹn
+                    - generic [ref=e2507]:
+                      - button "Check-in" [ref=e2508]:
+                        - img [ref=e2509]
+                      - button "Hủy hẹn" [ref=e2513]:
+                        - img [ref=e2514]
+                  - heading "Nguyễn Trần Cẩm Chi" [level=5] [ref=e2517]:
+                    - button "Nguyễn Trần Cẩm Chi" [ref=e2519]
+                  - generic [ref=e2520]:
+                    - generic [ref=e2521]:
+                      - img [ref=e2522]
+                      - generic [ref=e2524]: "363239431"
+                    - generic [ref=e2525]:
+                      - img [ref=e2526]
+                      - generic [ref=e2529]: BS 21
+                    - generic [ref=e2530]:
+                      - img [ref=e2531]
+                      - generic [ref=e2536]: NGANOT
+                    - generic [ref=e2537]:
+                      - img [ref=e2538]
+                      - generic [ref=e2541]: 14:05 · 30 phút
+                  - paragraph [ref=e2542]: cắt chỉ cắt mí trên + góc trong _12/6/26 _ vanmt
+                  - button "✎" [ref=e2543]
+                - generic [ref=e2544] [cursor=pointer]:
+                  - generic [ref=e2545]:
+                    - generic [ref=e2546]: Đang hẹn
+                    - generic [ref=e2547]:
+                      - button "Check-in" [ref=e2548]:
+                        - img [ref=e2549]
+                      - button "Hủy hẹn" [ref=e2553]:
+                        - img [ref=e2554]
+                  - heading "Đặng Thị Ánh" [level=5] [ref=e2557]:
+                    - button "Đặng Thị Ánh" [ref=e2559]
+                  - generic [ref=e2560]:
+                    - generic [ref=e2561]:
+                      - img [ref=e2562]
+                      - generic [ref=e2564]: "0862975446"
+                    - generic [ref=e2565]:
+                      - img [ref=e2566]
+                      - generic [ref=e2569]: BS 11
+                    - generic [ref=e2570]:
+                      - img [ref=e2571]
+                      - generic [ref=e2576]: VYTDT
+                    - generic [ref=e2577]:
+                      - img [ref=e2578]
+                      - generic [ref=e2581]: 14:05 · 30 phút
+                  - paragraph [ref=e2582]: "cắt chỉ bh mí trên _ 14/6/26 _ vanmt ( ngày làm đầu tiên : 28/12/25 )"
+                  - button "✎" [ref=e2583]
+                - generic [ref=e2584] [cursor=pointer]:
+                  - generic [ref=e2585]:
+                    - generic [ref=e2586]: Đang hẹn
+                    - generic [ref=e2587]:
+                      - button "Check-in" [ref=e2588]:
+                        - img [ref=e2589]
+                      - button "Hủy hẹn" [ref=e2593]:
+                        - img [ref=e2594]
+                  - heading "Quyên" [level=5] [ref=e2597]:
+                    - button "Quyên" [ref=e2599]
+                  - generic [ref=e2600]:
+                    - generic [ref=e2601]:
+                      - img [ref=e2602]
+                      - generic [ref=e2604]: "0364328426"
+                    - img [ref=e2606]
+                    - generic [ref=e2609]:
+                      - img [ref=e2610]
+                      - generic [ref=e2613]: 14:10 · 30 phút
+                  - paragraph [ref=e2614]: Đi cùng Uyên - tham khảo mũi, sale báo nâng thường 14999k, bọc đầu 5-7tr , hỏi công nghệ (sale báo thích nâng kín cũng dc nhưng qua bác thăm khám và chỉ định thì tối ưu hơn, hướng qua thăm khám vì mũi bạn này to đùng) còn trẻ. Nga pt1
+                  - button "✎" [ref=e2615]
+            - generic [ref=e2616]:
+              - generic [ref=e2617]:
+                - generic [ref=e2618]: 14:30
+                - generic [ref=e2620]: 1 Lịch hẹn
+              - generic [ref=e2622] [cursor=pointer]:
+                - generic [ref=e2623]:
+                  - generic [ref=e2624]: Đang hẹn
+                  - generic [ref=e2625]:
+                    - button "Check-in" [ref=e2626]:
+                      - img [ref=e2627]
+                    - button "Hủy hẹn" [ref=e2631]:
+                      - img [ref=e2632]
+                - heading "Khánh Linh" [level=5] [ref=e2635]:
+                  - button "Khánh Linh" [ref=e2637]
+                - generic [ref=e2638]:
+                  - generic [ref=e2639]:
+                    - img [ref=e2640]
+                    - generic [ref=e2642]: "0588668888"
+                  - img [ref=e2644]
+                  - generic [ref=e2647]:
+                    - img [ref=e2648]
+                    - generic [ref=e2653]: LINHTM
+                  - generic [ref=e2654]:
+                    - img [ref=e2655]
+                    - generic [ref=e2658]: 14:55 · 60 phút
+                - paragraph [ref=e2659]: tv filler - ưng làm luôn - Zalo Huệ cskh, tvv MLinh (qtam filler môi)
+                - button "✎" [ref=e2660]
+            - button "Thêm lịch hẹn lúc 15:00" [ref=e2662] [cursor=pointer]:
+              - generic [ref=e2663]: 15:00
+              - img [ref=e2665]
+            - generic [ref=e2666]:
+              - generic [ref=e2667]:
+                - generic [ref=e2668]: 15:30
+                - generic [ref=e2670]: 1 Lịch hẹn
+              - generic [ref=e2672] [cursor=pointer]:
+                - generic [ref=e2673]:
+                  - generic [ref=e2674]: Đang hẹn
+                  - generic [ref=e2675]:
+                    - button "Check-in" [ref=e2676]:
+                      - img [ref=e2677]
+                    - button "Hủy hẹn" [ref=e2681]:
+                      - img [ref=e2682]
+                - heading "Ngô Minh Ngọc" [level=5] [ref=e2685]:
+                  - button "Ngô Minh Ngọc" [ref=e2687]
+                - generic [ref=e2688]:
+                  - generic [ref=e2689]:
+                    - img [ref=e2690]
+                    - generic [ref=e2692]: "0707818954"
+                  - generic [ref=e2693]:
+                    - img [ref=e2694]
+                    - generic [ref=e2697]: BS 28
+                  - generic [ref=e2698]:
+                    - img [ref=e2699]
+                    - generic [ref=e2704]: DIEPVTN
+                  - generic [ref=e2705]:
+                    - img [ref=e2706]
+                    - generic [ref=e2709]: 15:30 · 45 phút
+                - paragraph [ref=e2710]: tv nhấn mí, zalo cskh Tuyết Anh, tv Diệp
+                - button "✎" [ref=e2711]
+            - button "Thêm lịch hẹn lúc 16:00" [ref=e2713] [cursor=pointer]:
+              - generic [ref=e2714]: 16:00
+              - img [ref=e2716]
+            - button "Thêm lịch hẹn lúc 16:30" [ref=e2718] [cursor=pointer]:
+              - generic [ref=e2719]: 16:30
+              - img [ref=e2721]
+            - button "Thêm lịch hẹn lúc 17:00" [ref=e2723] [cursor=pointer]:
+              - generic [ref=e2724]: 17:00
+              - img [ref=e2726]
+            - button "Thêm lịch hẹn lúc 17:30" [ref=e2728] [cursor=pointer]:
+              - generic [ref=e2729]: 17:30
+              - img [ref=e2731]
+            - button "Thêm lịch hẹn lúc 18:00" [ref=e2733] [cursor=pointer]:
+              - generic [ref=e2734]: 18:00
+              - img [ref=e2736]
+            - button "Thêm lịch hẹn lúc 18:30" [ref=e2738] [cursor=pointer]:
+              - generic [ref=e2739]: 18:30
+              - img [ref=e2741]
+            - button "Thêm lịch hẹn lúc 19:00" [ref=e2743] [cursor=pointer]:
+              - generic [ref=e2744]: 19:00
+              - img [ref=e2746]
+            - button "Thêm lịch hẹn lúc 19:30" [ref=e2748] [cursor=pointer]:
+              - generic [ref=e2749]: 19:30
+              - img [ref=e2751]
+            - button "Thêm lịch hẹn lúc 20:00" [ref=e2753] [cursor=pointer]:
+              - generic [ref=e2754]: 20:00
+              - img [ref=e2756]
+    - button "v0.37.12 (37163f6)" [ref=e644] [cursor=pointer]:
+      - img [ref=e2037]
+      - generic [ref=e647]: v0.37.12
+      - generic [ref=e648]: (37163f6)

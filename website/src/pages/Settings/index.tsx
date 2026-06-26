@@ -9,7 +9,8 @@
  */
 
 import { useState } from 'react';
-import { Settings as SettingsIcon, SlidersHorizontal, Shield, Globe, Building2, MessageSquare } from 'lucide-react';
+import { Settings as SettingsIcon, SlidersHorizontal, Shield, Globe, Building2, MessageSquare, Briefcase } from 'lucide-react';
+import { InvestorManagement } from '@/components/settings/InvestorManagement';
 import { SystemPreferencesContent } from '@/components/settings/SystemPreferencesContent';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { IpAccessControl } from '@/components/settings/IpAccessControl';
@@ -19,13 +20,14 @@ import { FeedbackAdminContent } from '@/components/settings/FeedbackAdminContent
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
-type SettingsTab = 'system' | 'bank' | 'ip' | 'feedback';
+type SettingsTab = 'system' | 'bank' | 'ip' | 'feedback' | 'investors';
 
-const ALL_TABS: { id: SettingsTab; label: string; icon: React.ReactNode; admin?: boolean }[] = [
+const ALL_TABS: { id: SettingsTab; label: string; icon: React.ReactNode; admin?: boolean; permission?: string }[] = [
   { id: 'system', label: 'System Settings', icon: <SlidersHorizontal className="w-5 h-5" /> },
   { id: 'bank', label: 'Bank Account', icon: <Building2 className="w-5 h-5" /> },
   { id: 'ip', label: 'IP Access Control', icon: <Shield className="w-5 h-5" /> },
   { id: 'feedback', label: 'Feedback', icon: <MessageSquare className="w-5 h-5" />, admin: true },
+  { id: 'investors', label: 'Investors', icon: <Briefcase className="w-5 h-5" />, permission: 'investors.manage' },
 ];
 
 export function Settings() {
@@ -34,7 +36,12 @@ export function Settings() {
   const isAdmin = hasPermission('permissions.view');
   const canEditSettings = hasPermission('settings.edit');
   const canEditFeedback = hasPermission('permissions.edit');
-  const TABS = ALL_TABS.filter((tab) => !tab.admin || isAdmin);
+  const canManageInvestors = hasPermission('investors.manage');
+  const TABS = ALL_TABS.filter((tab) => {
+    if (tab.permission) return canManageInvestors;
+    if (tab.admin) return isAdmin;
+    return true;
+  });
   const [activeTab, setActiveTab] = useState<SettingsTab>('system');
 
   return (
@@ -97,6 +104,7 @@ export function Settings() {
           {activeTab === 'bank' && <BankSettingsForm canEdit={canEditSettings} />}
           {activeTab === 'ip' && <IpAccessControl canEdit={canEditSettings} />}
           {activeTab === 'feedback' && <FeedbackAdminContent canEdit={canEditFeedback} />}
+          {activeTab === 'investors' && <InvestorManagement canEdit={canManageInvestors} />}
         </div>
       </div>
     </div>

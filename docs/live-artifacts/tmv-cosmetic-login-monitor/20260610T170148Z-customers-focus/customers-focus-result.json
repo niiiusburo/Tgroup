@@ -1,0 +1,116 @@
+{
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260610T170148Z-customers-focus",
+  "responses": [
+    {
+      "status": 200,
+      "method": "POST",
+      "url": "https://tmv.2checkin.com/api/Auth/login"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "https://tmv.2checkin.com/api/cosmetic/Appointments?offset=0&limit=200&date_from=2026-06-11&date_to=2026-06-11T23%3A59%3A59"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "https://tmv.2checkin.com/api/cosmetic/Companies?offset=0&limit=50"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "https://tmv.2checkin.com/api/cosmetic/Employees?offset=0&limit=500&active=all"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "https://tmv.2checkin.com/api/Feedback/unread-count"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "https://tmv.2checkin.com/api/Auth/me"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "https://tmv.2checkin.com/api/cosmetic/Companies?offset=0&limit=50"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "https://tmv.2checkin.com/api/cosmetic/Partners?offset=0&limit=20"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "https://tmv.2checkin.com/api/cosmetic/Companies?offset=0&limit=50"
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "url": "https://tmv.2checkin.com/api/Feedback/unread-count"
+    }
+  ],
+  "failedRequests": [
+    {
+      "method": "HEAD",
+      "url": "https://tmv.2checkin.com/baRGP8VEwlhua2UKhZ8AZQRsGSHwmR_UP6nnYN4zqCPozqBk6OPudMoVlmdkzhs6GeGNRGkaNy9D7qAJIfymyl_IJ-yg97ZiR8Zk_xhXgupCsMfpXzkConXMXt-Yw678TkSF_rFstcSwNpDCHnzfNrfdsJuy_k28ooK_ZF07jgPRMumsDH-AeB8SFF0bStyIiFtd_xZeYj55hxYDyCGSkvrMbjNZ520GZbCOqNtSsOUUTLZ2yfzdOeMm86G9-tkzuIvINBfHpxnZGQOBed-DDp6EkpRtDtKCg57J8N4a-01x6VfTIjsiTczx2yf2Qb1CELqKFqajJjDWem46w08GxuaKGtkIGiHCg6KHelxFx5wJcTonLZ9XBy5Js-sQIbn3OxCBsbxt3fuRTRHpo4gtuv9fZG0dnsLS_aii19PSnWMI8ARIJgphzCBl9eIUpCVSpY2yRymSg6_Dpk5D1KY",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "method": "HEAD",
+      "url": "https://tmv.2checkin.com/iseCCF6dOGE8UMm1AZyTv0r4XP4A1_gwef25TQfoRzpwsWpJR1g5DbItiJFO_P-g5Xy3askF6Tmc4puFNR-OKfAKDv08oKlz0nWdObaIdf6sDrf-nf423XNFIwHJsBTKIwmO60MtFcrvdiBAs-niYNVGjwESqVqTAfK7WCt1-PEdj9ylLu-NhQ7VJbLkODWH84l8ectdroyhcE-542AEUGH-D6hX5XFdtoM44TTY-NXBWVVltF18mvkDxVWZWZkTFxMZc_5WGYDIdkZVNBQh6SO3WmvsG5bszdHl5o_Fb8KL1i5MhucAO8QW2YxbiScxkwS2N_ePDx94eL84R1yycEiWIXXpgS4MvOR9JrP0FVCDjeqquSzmR8i34BNw4bPXFCUgGMW21dTsxKVzI-f95PVQPEbZXgtfpx9_U27PyCxDvHJH35TT-VtVuCRg9M2kazovTir23tn8NbiAHGGUOiZq",
+      "failure": "net::ERR_ABORTED"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "snapshots": [
+    {
+      "waitMs": 2000,
+      "url": "https://tmv.2checkin.com/customers",
+      "textLength": 552,
+      "textPreview": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Khách hàng Thẩm mỹ All Locations Có vấn đề? Nhấn vào đ",
+      "cosmeticVisible": true,
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260610T170148Z-customers-focus/customers-2000ms.png"
+    },
+    {
+      "waitMs": 5000,
+      "url": "https://tmv.2checkin.com/customers",
+      "textLength": 2059,
+      "textPreview": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Khách hàng Thẩm mỹ All Locations 6 Có vấn đề? Nhấn vào",
+      "cosmeticVisible": true,
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260610T170148Z-customers-focus/customers-5000ms.png"
+    },
+    {
+      "waitMs": 10000,
+      "url": "https://tmv.2checkin.com/customers",
+      "textLength": 2059,
+      "textPreview": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Khách hàng Thẩm mỹ All Locations 6 Có vấn đề? Nhấn vào",
+      "cosmeticVisible": true,
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260610T170148Z-customers-focus/customers-10000ms.png"
+    },
+    {
+      "waitMs": 20000,
+      "url": "https://tmv.2checkin.com/customers",
+      "textLength": 1944,
+      "textPreview": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Khách hàng Thẩm mỹ All Locations 6 Có vấn đề? Nhấn vào",
+      "cosmeticVisible": true,
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260610T170148Z-customers-focus/customers-20000ms.png"
+    },
+    {
+      "waitMs": 30000,
+      "url": "https://tmv.2checkin.com/customers",
+      "textLength": 1944,
+      "textPreview": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Khách hàng Thẩm mỹ All Locations 6 Có vấn đề? Nhấn vào",
+      "cosmeticVisible": true,
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260610T170148Z-customers-focus/customers-30000ms.png"
+    }
+  ],
+  "afterLogin": {
+    "url": "https://tmv.2checkin.com/",
+    "text": "TD PHÒNG KHÁM Dịch vụ Danh mục dịch vụ Kế hoạch thanh toán NHÓM Nhân viên Hoa hồng Pro Chi nhánh BÁO CÁO Bảng điều khiển Doanh thu Lịch hẹn Bác sĩ Khách hàng Chi nhánh Dịch vụ Nhân viên QUẢN TRỊ Cài đặt Phản hồi Quyền hạn Mối quan hệ Thông báo A Tổng quan Thẩm mỹ All Locations 6 Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc. Hẹn mới Lịch trình ngày Tất cả · 0 Đang chờ · 0 Đang khám · 0 Hoàn thành · 0 Không có bệnh nhân Bệnh nhân chờ check-in sẽ hiển thị ở đây TODAY'S S",
+    "cosmeticVisible": true
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "extends": "./node_modules/gts/tsconfig-google.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": ".",
+    "module": "es2020",
+    "target": "es2017",
+    "declaration": true,
+    "strict": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "lib": ["es2022", "dom", "dom.iterable"]
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"],
+  "exclude": [
+    "test/packaging/**/*",
+    "src/private/**/*",
+    "src/interactions-private/**/*",
+    "src/interactions-deprecated/**/*"
+  ],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "ES2020"
+    }
+  }
+}

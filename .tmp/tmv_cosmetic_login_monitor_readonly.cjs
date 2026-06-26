@@ -35,6 +35,16 @@ function isApiUrl(url) {
   return /\/api\//i.test(url);
 }
 
+async function closeWithTimeout(label, closeFn, timeoutMs = 5000) {
+  if (!closeFn) return;
+  await Promise.race([
+    closeFn(),
+    new Promise((resolve) => setTimeout(() => resolve(`${label} close timed out`), timeoutMs)),
+  ]).catch((error) => {
+    result.consoleErrors.push({ text: `${label} close failed: ${error.message || String(error)}`, location: {} });
+  });
+}
+
 async function collectVisibleErrors(page) {
   return page.evaluate(() => {
     const selectors = [
@@ -89,24 +99,35 @@ async function redactSensitiveDom(page) {
     while (walker.nextNode()) nodes.push(walker.currentNode);
     for (const node of nodes) {
       const value = node.textContent || '';
-      if (/0\d{8,10}/.test(value)) {
-        node.textContent = value.replace(/0\d{8,10}/g, '0xxxxxxxxx');
+      if (/\b(?:\+?84|0)?\d{8,10}\b/.test(value)) {
+        node.textContent = value.replace(/\b(?:\+?84|0)?\d{8,10}\b/g, '0xxxxxxxxx');
       }
     }
   }).catch(() => {});
   await page.addStyleTag({
     content: `
       table tbody td,
+      table tbody td *,
       [role="table"] [role="cell"],
+      [role="table"] [role="cell"] *,
       [data-radix-scroll-area-viewport] tbody td,
+      [data-radix-scroll-area-viewport] tbody td *,
       [class*="appointment"] div,
+      [class*="appointment"] div *,
       [class*="Appointment"] div,
+      [class*="Appointment"] div *,
       [class*="schedule"] div,
+      [class*="schedule"] div *,
       [class*="Schedule"] div,
+      [class*="Schedule"] div *,
       .fc-event-title,
+      .fc-event-title *,
       .fc-event-time,
+      .fc-event-time *,
       .fc-list-event-title,
-      .fc-list-event-time {
+      .fc-list-event-title *,
+      .fc-list-event-time,
+      .fc-list-event-time * {
         color: transparent !important;
         text-shadow: 0 0 7px rgba(15, 23, 42, 0.75) !important;
       }
@@ -241,9 +262,10 @@ async function captureScreen(page, screen, index) {
 
 (async () => {
   let browser;
+  let context;
   try {
     browser = await chromium.launch({ channel: 'chrome', headless: true });
-    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
+    context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
     const page = await context.newPage();
 
     page.on('console', (message) => {
@@ -301,7 +323,8 @@ async function captureScreen(page, screen, index) {
   } finally {
     result.finishedAt = new Date().toISOString();
     fs.writeFileSync(path.join(artifactDir, 'result.json'), `${JSON.stringify(result, null, 2)}\n`);
-    if (browser) await browser.close();
+    if (context) await closeWithTimeout('context', () => context.close());
+    if (browser) await closeWithTimeout('browser', () => browser.close());
     console.log(JSON.stringify(result, null, 2));
   }
 })().catch((error) => {

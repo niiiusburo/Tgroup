@@ -9,6 +9,27 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 Do not remove failed checks until the defect is fixed and rerun.
 
 ---
+# TestSprite Plan: Investor Portal MVP login 2026-06-26
+Feature/edit name: Investor Portal — email login + read-only shared client roster (v0.38.0).
+
+Changed URLs / API routes / data flow:
+- URLs: `http://127.0.0.1:5175/investor/login`, `http://127.0.0.1:5175/investor`
+- API: `POST /api/investor/auth/login`, `GET /api/investor/auth/me`, `GET /api/investor/clients`
+- Local demo creds: `investor@clinic.vn` / `123123` (seed via `node api/scripts/seed-investor-demo.js`)
+- Data flow: `investor_accounts` → JWT (`INVESTOR_JWT_SECRET`, `type:investor`) → `investor_clients` IDOR gate → safe projection only
+
+Execution checklist:
+- [x] PASS: API login returns token + investor profile.
+- [x] PASS: `GET /api/investor/clients` returns 3 seeded clients with no phone/email/clinical fields.
+- [x] PASS: Playwright — login → dashboard shows 3 rows; screenshot `docs/live-artifacts/live-verify-screenshots/investor-portal-login-2026-06-26.png`.
+- [x] PASS: `npm --prefix api test -- src/routes/investor/__tests__` (auth + redaction).
+- [x] PASS: Staff toggle `PATCH /Partners/:id/investor-visibility` + Customers Investor column (v0.39.0).
+- [x] PASS: Admin investor provisioning — Settings → Investors tab (`/api/admin/investors`).
+- [x] PASS: Investor password reset — `/investor/reset-password` + public reset API.
+- [x] PASS: `node api/scripts/verify-investor-phase2.mjs` — 14/14 API loop.
+- [x] PASS: `website/e2e/investor-phase2.spec.ts` — settings, customers column, reset UI, dashboard screenshots.
+
+---
 # TestSprite Plan: CTV gap-fix wave — tests + docs + governance 2026-06-15
 Feature/edit name: Close CTV tracking-vs-overview gap with integration tests, reclaim unit test, product-map/spec sync, CHANGELOG 0.37.19.
 
@@ -4962,6 +4983,6 @@ Setup data and login state:
 
 Execution checks:
 - [x] PASS: `npx jest src/services/__tests__/serviceReversal.test.js src/services/__tests__/customerReferrer.backfill.test.js --runInBand` — 13/13 (flag on/off + paid-out guard + no backfill when flag on).
-- [ ] PENDING: Deploy v0.37.21 to `/opt/tgroup-nk3` only; confirm `version.json` commit + `serviceReversal.js` imports `reverseServiceCardEarnings`.
+- [x] PASS: Deploy v0.37.21 to `/opt/tgroup-nk3` only (tarball `a53266eb2`, backup `app.bak-pre-v03721-20260622T014811Z`); live `version.json` → v0.37.21 / `a53266e` / `nk3-deploy`; `serviceReversal.js` imports `reverseServiceCardEarnings`; NK (`nk.2checkin.com` v0.32.44) and NK2 staging containers untouched.
 - [ ] PENDING: NK3 live smoke — delete service line with pending service-card earning; expect `reversedServiceCardEarningsCount > 0` and earnings `status='reversed'`.
 - [ ] PENDING: Confirm NK (`nk.2checkin.com`) and NK2 version/containers unchanged after NK3-only deploy.

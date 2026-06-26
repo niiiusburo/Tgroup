@@ -201,6 +201,25 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | **Feedback moderation attachments** | Permission declarations are covered indirectly, but no E2E covers admin reply upload, attachment persistence, deletion, or orphan-file cleanup | **Low** — partial UI/permission coverage exists. |
 | **IP Access backend enforcement** | Frontend component/types/validation tests exist, but middleware and `/api/IpAccess/*` route behavior lack focused backend integration tests | **Medium** — lockout and fail-open behavior are operationally sensitive. |
 
+### Patient Portal (iOS)
+
+| If you change... | Run these tests... | Why |
+|---|---|---|
+| `api/src/routes/patient/chat.js`, `api/src/services/ai/*.js`, `api/migrations/067_chat_support_ai.sql` | `npm --prefix api test` (server boot + route existence); focused chat service unit tests (to create under `api/src/services/ai/__tests__`) | AI chat touches patient PHI, support tickets, and external LLM calls; route auth and escalation logic must be regression-gated. |
+| `nk-patient-app/src/screens/chat/ChatScreen.tsx`, `nk-patient-app/src/hooks/useChat.ts`, `nk-patient-app/src/services/chatApi.ts` | `cd nk-patient-app && npx tsc --noEmit`; iOS simulator smoke: login → Support → Nhắn tin → send message → escalate | Mobile chat UI must stay typed, handle async AI replies, and preserve existing SupportScreen behavior. |
+| `nk-patient-app/src/navigation/MainNavigator.tsx`, `nk-patient-app/src/types/index.ts` | `cd nk-patient-app && npx tsc --noEmit`; navigation smoke across Home/Support/Chat modals | Route registration and param types must not break existing stack navigation. |
+| `product-map/domains/patient-portal.yaml`, `docs/CONTRACTS.md` §1.12, `product-map/contracts/api-index.md` | `npm run verify:governance` | Contract and domain changes must stay in sync with code. |
+
+### Investor Portal
+
+| If you change... | Run these tests... | Why |
+|---|---|---|
+| `api/src/routes/investor/`, `api/src/middleware/investorAuth.js`, `api/migrations/068_investor_portal.sql` | `npm --prefix api test -- src/routes/investor/__tests__` | Login type boundary, deactivation gate, and client redaction are security-critical. |
+| `website/src/pages/Investor/`, `website/src/contexts/InvestorAuthContext.tsx`, `website/src/lib/api/investor.ts` | `npm --prefix website run build`; browser: `http://127.0.0.1:5175/investor/login` → login → roster | Separate auth surface must not leak staff session or PII fields. |
+| `contracts/investor.ts`, `product-map/domains/investor-portal.yaml` | `npm run verify:governance` | Safe projection allow-list is the redaction contract. |
+| `api/migrations/069_investor_phase2.sql`, `api/src/routes/investor/adminStaff.js`, `staffVisibility.js`, `partners/investorVisibilityPatch.js` | `npm --prefix api test -- src/routes/investor/__tests__/phase2.test.js`; `node api/scripts/verify-investor-phase2.mjs` | Phase 2 staff curation, admin CRUD, password reset. |
+| `website/src/components/settings/InvestorManagement.tsx`, `InvestorVisibilityCell.tsx`, `InvestorResetPassword.tsx` | `npx playwright test e2e/investor-phase2.spec.ts` (127.0.0.1:5175 + API :3002) | Phase 2 UI surfaces + screenshots under `docs/live-artifacts/live-verify-screenshots/`. |
+
 ## Test Commands Quick Reference
 
 ```bash

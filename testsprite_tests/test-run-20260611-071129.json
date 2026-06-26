@@ -1,0 +1,148 @@
+{
+  "timestamp": "2026-06-11T07:11:29.514226",
+  "mode": "live",
+  "target_url": "https://tmv.2checkin.com",
+  "results": [
+    {
+      "id": "TC001",
+      "name": "Admin login reaches protected overview",
+      "status": "PASS",
+      "duration": 24.41,
+      "error": null
+    },
+    {
+      "id": "TC002",
+      "name": "Logout clears session",
+      "status": "PASS",
+      "duration": 19.44,
+      "error": null
+    },
+    {
+      "id": "TC003",
+      "name": "Invalid credentials are rejected",
+      "status": "PASS",
+      "duration": 17.35,
+      "error": null
+    },
+    {
+      "id": "TC004",
+      "name": "Admin can access core guarded pages",
+      "status": "PASS",
+      "duration": 19.32,
+      "error": null
+    },
+    {
+      "id": "TC005",
+      "name": "Sidebar exposes expected admin navigation",
+      "status": "PASS",
+      "duration": 16.52,
+      "error": null
+    },
+    {
+      "id": "TC006",
+      "name": "Admin can create a new TEST_SPRITE customer",
+      "status": "PASS",
+      "duration": 10.28,
+      "error": null
+    },
+    {
+      "id": "TC007",
+      "name": "Admin can edit the existing TEST_SPRITE customer",
+      "status": "PASS",
+      "duration": 15.19,
+      "error": null
+    },
+    {
+      "id": "TC008",
+      "name": "Customer profile mutation controls are visible for admin",
+      "status": "PASS",
+      "duration": 11.49,
+      "error": null
+    },
+    {
+      "id": "TC009",
+      "name": "Delete and hard delete require explicit confirmation",
+      "status": "PASS",
+      "duration": 11.78,
+      "error": null
+    },
+    {
+      "id": "TC010",
+      "name": "Employees page loads and search works",
+      "status": "PASS",
+      "duration": 8.6,
+      "error": null
+    },
+    {
+      "id": "TC011",
+      "name": "Employee creation should work for TESTSPRITE employee",
+      "status": "PASS",
+      "duration": 8.97,
+      "error": null
+    },
+    {
+      "id": "TC012",
+      "name": "Employee edit should work for TESTSPRITE employee",
+      "status": "PASS",
+      "duration": 13.87,
+      "error": null
+    },
+    {
+      "id": "TC013",
+      "name": "Permission board loads groups and employees",
+      "status": "PASS",
+      "duration": 8.82,
+      "error": null
+    },
+    {
+      "id": "TC014",
+      "name": "Employee create failure does not break permission surfaces",
+      "status": "PASS",
+      "duration": 10.86,
+      "error": null
+    },
+    {
+      "id": "TC015",
+      "name": "Reports protected routes render",
+      "status": "PASS",
+      "duration": 21.14,
+      "error": null
+    },
+    {
+      "id": "TC016",
+      "name": "Payment page renders without submitting money actions",
+      "status": "PASS",
+      "duration": 5.11,
+      "error": null
+    },
+    {
+      "id": "TC017",
+      "name": "Service catalog page renders and search/filter works",
+      "status": "PASS",
+      "duration": 8.3,
+      "error": null
+    },
+    {
+      "id": "TC018",
+      "name": "Settings page renders but does not save changes",
+      "status": "PASS",
+      "duration": 16.9,
+      "error": null
+    },
+    {
+      "id": "TC060",
+      "name": "TestSprite MCP CTV commission artifacts/config/results/screenshots",
+      "status": "PASS",
+      "duration": 0.13,
+      "error": null
+    }
+  ],
+  "summary": {
+    "total": 19,
+    "pass": 19,
+    "fail": 0,
+    "skip": 0,
+    "timeout": 0,
+    "error": 0
+  }
+}

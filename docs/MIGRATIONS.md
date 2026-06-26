@@ -90,8 +90,19 @@ Current inventory from disk:
 | 056 | `056_braces_commission_config.sql` | Adds Dental braces/orthodontics CTV tier override config | Dental-only tier config fields/seeds | Remove braces override config after Dental engine rollback | 2026-06 |
 | 057 | `057_payout_group_id.sql` | Links combined Dental+Cosmetic payout rows | Adds `payout_group_id` and related index | Drop field/index after combined payout rollback | 2026-06 |
 | 058 | `058_audit_logs.sql` | Adds audit log support for CTV hierarchy moves | Creates `audit_logs` table/indexes | Drop `audit_logs` after move-feature rollback | 2026-06 |
+| 059 | `059_ctv_never_staff_tier.sql` | Ensures CTV identity rows cannot be assigned staff-tier permissions | Permission tier guard inserts | Remove tier guard rows only after confirming no CTV holds staff-tier assignments | 2026-06 |
+| 060 | `060_earnings_payout_id_fk.sql` | Adds `payout_id` foreign-key relationship to earnings rows | `ALTER TABLE earnings ADD payout_id` + index | Drop column/index after payout rollback | 2026-06 |
+| 061 | `061_backfill_null_level_earnings.sql` | Backfills null `level` values on existing earnings rows | Data update | Restore nulls from backup if rollback required | 2026-06 |
+| 062 | `062_ctv_discount_codes.sql` | Creates `dbo.ctv_discount_codes` for CTV voucher QR staff verify | `CREATE TABLE ctv_discount_codes (...)` | `DROP TABLE ctv_discount_codes` | NK3 2026-06-08 |
+| 063 | `063_ctv_discount_codes_kol_parity.sql` | Extends discount codes for KOL parity (visitor fields, claimed/generated statuses) | `ALTER TABLE ctv_discount_codes ADD COLUMN ...`; widen status check | Reverse column adds + restore old status check | NK3 2026-06-08 |
+| 064 | `064_ctv_qr_discount_settings.sql` | Adds CTV QR discount global settings table | `CREATE TABLE ctv_qr_discount_settings` | `DROP TABLE ctv_qr_discount_settings` | NK3 2026-06 |
+| 065 | `065_ctv_discount_codes_payment_id.sql` | Links completed discount codes to a payment record | `ALTER TABLE ctv_discount_codes ADD payment_id` | Drop column after code rollback | NK3 2026-06 |
+| 066 | `066_patient_portal_tables.sql` | Creates patient portal tables: devices, consents, notifications, referrals, reviews, media, support_tickets, aftercare_instructions | Multiple `CREATE TABLE` statements | Drop patient portal tables in reverse dependency order | 2026-06 |
+| 067 | `067_chat_support_ai.sql` | Adds AI chat support tables (`chat_sessions`, `chat_messages`, `support_kb_chunks`) and enables `pgvector` extension for RAG | `CREATE EXTENSION vector`; create chat + KB tables + HNSW index | Drop chat/KB tables and indexes; `DROP EXTENSION vector` only if no other table uses it | 2026-06 |
+| 068 | `068_investor_portal.sql` | Creates investor portal tables: `investor_accounts`, `investor_clients`, `investor_view_audit` | Three `CREATE TABLE` statements + partial index | `DROP TABLE investor_view_audit, investor_clients, investor_accounts CASCADE` | 2026-06 |
+| 069 | `069_investor_phase2.sql` | Phase 2: `investor_password_reset_tokens` + grants `customers.set_investor_visibility`, `investors.manage` to admin group | `CREATE TABLE` + `INSERT group_permissions` | `DROP TABLE investor_password_reset_tokens`; delete permission rows | 2026-06 |
 
-**Total repository migration SQL files:** 67 files in `api/migrations/`.
+**Total repository migration SQL files:** 68 files in `api/migrations/`.
 
 | 062 | `062_ctv_discount_codes.sql` | Creates `dbo.ctv_discount_codes` for CTV voucher QR staff verify | `CREATE TABLE ctv_discount_codes (...)` | `DROP TABLE ctv_discount_codes` | NK3 2026-06-08 |
 | 063 | `063_ctv_discount_codes_kol_parity.sql` | Extends discount codes for KOL parity (visitor fields, claimed/generated statuses) | `ALTER TABLE ctv_discount_codes ADD COLUMN ...`; widen status check | Reverse column adds + restore old status check | NK3 2026-06-08 |

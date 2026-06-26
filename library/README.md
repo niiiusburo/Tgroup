@@ -25,6 +25,7 @@
 | `express-patterns/` | Express service-layer organization, route refactoring | `api/src/routes/`, `api/src/db/` |
 | `postgresql-patterns/` | PostgreSQL migrations, dual-DB topology, transactions | `api/migrations/`, `api/src/db/index.js` |
 | `testing-patterns/` | E2E, integration, contract testing | `website/e2e/`, `api/src/routes/__tests__/` |
+| `gen-ai-chat-support/` | Generative AI chatbot, RAG, human escalation, learning loop | `api/src/services/ai/`, `api/src/routes/patient/chat.js`, `nk-patient-app/src/screens/chat/` |
 
 ## Adding a reference
 

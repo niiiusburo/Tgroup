@@ -1,0 +1,683 @@
+- generic [ref=e25]:
+  - complementary [ref=e26]:
+    - generic [ref=e30]: TD
+    - navigation [ref=e31]:
+      - link "Tổng quan" [ref=e32] [cursor=pointer]:
+        - /url: /
+        - img [ref=e34]
+      - link "Lịch" [ref=e36] [cursor=pointer]:
+        - /url: /calendar
+        - img [ref=e37]
+      - link "Khách hàng" [ref=e39] [cursor=pointer]:
+        - /url: /customers
+        - img [ref=e40]
+      - generic [ref=e45]:
+        - button "Phòng khám" [active] [ref=e46] [cursor=pointer]:
+          - img [ref=e47]
+        - generic [ref=e1715]:
+          - generic [ref=e1716]: Phòng khám
+          - generic [ref=e1717]:
+            - link "Dịch vụ" [ref=e1718] [cursor=pointer]:
+              - /url: /services
+              - img [ref=e1719]
+              - generic [ref=e1723]: Dịch vụ
+            - link "Danh mục dịch vụ" [ref=e1724] [cursor=pointer]:
+              - /url: /service-catalog
+              - img [ref=e1725]
+              - generic [ref=e1727]: Danh mục dịch vụ
+            - link "Kế hoạch thanh toán" [ref=e1728] [cursor=pointer]:
+              - /url: /payment
+              - img [ref=e1729]
+              - generic [ref=e1731]: Kế hoạch thanh toán
+      - generic [ref=e51]:
+        - button "Nhóm" [ref=e52] [cursor=pointer]:
+          - img [ref=e53]
+        - generic:
+          - generic:
+            - generic: Nhóm
+            - generic:
+              - link "Nhân viên":
+                - /url: /employees
+                - img
+                - generic: Nhân viên
+              - link "Hoa hồng Pro":
+                - /url: /commission
+                - img
+                - generic: Hoa hồng
+                - generic: Pro
+              - link "Chi nhánh":
+                - /url: /locations
+                - img
+                - generic: Chi nhánh
+      - generic [ref=e65]:
+        - button "Báo cáo" [ref=e66] [cursor=pointer]:
+          - img [ref=e67]
+        - generic:
+          - generic:
+            - generic: Báo cáo
+            - generic:
+              - link "Bảng điều khiển":
+                - /url: /reports/dashboard
+                - img
+                - generic: Bảng điều khiển
+              - link "Doanh thu":
+                - /url: /reports/revenue
+                - img
+                - generic: Doanh thu
+              - link "Lịch hẹn":
+                - /url: /reports/appointments
+                - img
+                - generic: Lịch hẹn
+              - link "Bác sĩ":
+                - /url: /reports/doctors
+                - img
+                - generic: Bác sĩ
+              - link "Khách hàng":
+                - /url: /reports/customers
+                - img
+                - generic: Khách hàng
+              - link "Chi nhánh":
+                - /url: /reports/locations
+                - img
+                - generic: Chi nhánh
+              - link "Dịch vụ":
+                - /url: /reports/services
+                - img
+                - generic: Dịch vụ
+              - link "Nhân viên":
+                - /url: /reports/employees
+                - img
+                - generic: Nhân viên
+      - generic [ref=e69]:
+        - button "Quản trị" [ref=e70] [cursor=pointer]:
+          - img [ref=e71]
+        - generic:
+          - generic:
+            - generic: Quản trị
+            - generic:
+              - link "Cài đặt":
+                - /url: /settings
+                - img
+                - generic: Cài đặt
+              - link "Phản hồi":
+                - /url: /feedback
+                - img
+                - generic: Phản hồi
+              - link "Quyền hạn":
+                - /url: /permissions
+                - img
+                - generic: Quyền hạn
+              - link "Mối quan hệ":
+                - /url: /relationships
+                - img
+                - generic: Mối quan hệ
+              - link "Thông báo":
+                - /url: /notifications
+                - img
+                - generic: Thông báo
+    - generic [ref=e74]:
+      - button [ref=e75] [cursor=pointer]:
+        - img [ref=e76]
+      - button "A" [ref=e78] [cursor=pointer]:
+        - generic [ref=e79]: A
+      - button "Switch language" [ref=e82] [cursor=pointer]:
+        - img [ref=e83]
+  - generic [ref=e86]:
+    - banner [ref=e87]:
+      - heading "Khách hàng" [level=1] [ref=e1003]
+      - generic [ref=e90]:
+        - button "Thẩm mỹ" [ref=e92] [cursor=pointer]:
+          - img [ref=e93]
+          - generic [ref=e95]: Thẩm mỹ
+          - img [ref=e96]
+        - button "All Locations" [ref=e99] [cursor=pointer]:
+          - img [ref=e100]
+          - generic [ref=e103]: All Locations
+          - img [ref=e104]
+        - button "Quét nhanh khuôn mặt" [ref=e107] [cursor=pointer]:
+          - img [ref=e108]
+        - generic [ref=e114]:
+          - button "Phản hồi (6 mới)" [ref=e490] [cursor=pointer]:
+            - img [ref=e116]
+            - generic [ref=e491]: "6"
+          - status [ref=e1004]:
+            - generic [ref=e1006]:
+              - generic [ref=e1007]:
+                - paragraph [ref=e1008]: Có vấn đề?
+                - paragraph [ref=e1009]: Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc.
+              - button "Bỏ qua" [ref=e1010] [cursor=pointer]:
+                - img [ref=e1011]
+        - button [ref=e128] [cursor=pointer]:
+          - img [ref=e129]
+    - main [ref=e133]:
+      - navigation "Breadcrumb" [ref=e494]:
+        - list [ref=e495]:
+          - listitem [ref=e496]:
+            - link "Tổng quan" [ref=e497] [cursor=pointer]:
+              - /url: /
+              - img [ref=e498]
+              - generic [ref=e501]: Tổng quan
+          - listitem [ref=e1014]:
+            - img [ref=e1015]
+            - generic [ref=e1018]: Khách hàng
+      - generic [ref=e1019]:
+        - generic [ref=e1021]:
+          - generic [ref=e1022]:
+            - img [ref=e1024]
+            - generic [ref=e1029]:
+              - heading "Khách hàng" [level=1] [ref=e1030]
+              - paragraph [ref=e1031]: 12654 patients · 12654 active
+          - generic [ref=e1033]:
+            - button "Xuất dữ liệu" [ref=e1035] [cursor=pointer]:
+              - img [ref=e1036]
+              - generic [ref=e1039]: Xuất dữ liệu
+              - img [ref=e1040]
+            - button "Add Customer" [ref=e1042] [cursor=pointer]:
+              - img [ref=e1043]
+              - text: Add Customer
+        - generic [ref=e1044]:
+          - generic [ref=e1046]:
+            - img [ref=e1047]
+            - textbox "Tìm kiếm khách hàng..." [ref=e1050]
+          - generic [ref=e1051]:
+            - button "All Status" [ref=e1052] [cursor=pointer]
+            - button "Active" [ref=e1053] [cursor=pointer]
+            - button "Inactive" [ref=e1054] [cursor=pointer]
+            - button "Pending" [ref=e1055] [cursor=pointer]
+        - generic [ref=e1056]:
+          - table [ref=e1058]:
+            - rowgroup [ref=e1059]:
+              - row "Code Customer Phone Email Location Status Last Visit" [ref=e1060]:
+                - columnheader "Code" [ref=e1061] [cursor=pointer]:
+                  - generic [ref=e1062]: Code
+                - columnheader "Customer" [ref=e1063] [cursor=pointer]:
+                  - generic [ref=e1064]: Customer
+                - columnheader "Phone" [ref=e1065]:
+                  - generic [ref=e1066]: Phone
+                - columnheader "Email" [ref=e1067]:
+                  - generic [ref=e1068]: Email
+                - columnheader "Location" [ref=e1069] [cursor=pointer]:
+                  - generic [ref=e1070]: Location
+                - columnheader "Status" [ref=e1071] [cursor=pointer]:
+                  - generic [ref=e1072]: Status
+                - columnheader "Last Visit" [ref=e1073] [cursor=pointer]:
+                  - generic [ref=e1074]: Last Visit
+                - columnheader [ref=e1075]
+            - rowgroup [ref=e1076]:
+              - row "TM727434 L Lương Thị Ái Duyên 849209898 Thẩm mỹ Hà Nội Active 12 Jun 2026 Delete" [ref=e1077] [cursor=pointer]:
+                - cell "TM727434" [ref=e1078]:
+                  - generic [ref=e1079]: TM727434
+                - cell "L Lương Thị Ái Duyên" [ref=e1080]:
+                  - generic [ref=e1081]:
+                    - generic [ref=e1083]: L
+                    - generic [ref=e1084]: Lương Thị Ái Duyên
+                - cell "849209898" [ref=e1085]:
+                  - generic [ref=e1086]:
+                    - img [ref=e1087]
+                    - text: "849209898"
+                - cell [ref=e1089]:
+                  - img [ref=e1091]
+                - cell "Thẩm mỹ Hà Nội" [ref=e1094]:
+                  - generic [ref=e1095]:
+                    - img [ref=e1096]
+                    - text: Thẩm mỹ Hà Nội
+                - cell "Active" [ref=e1099]:
+                  - generic [ref=e1100]: Active
+                - cell "12 Jun 2026" [ref=e1102]
+                - cell "Delete" [ref=e1103]:
+                  - button "Delete" [ref=e1104]:
+                    - img [ref=e1105]
+              - row "TM186461 P Phạm Thị Thu 968066869 Thẩm mỹ Hà Nội Active 12 Jun 2026 Delete" [ref=e1108] [cursor=pointer]:
+                - cell "TM186461" [ref=e1109]:
+                  - generic [ref=e1110]: TM186461
+                - cell "P Phạm Thị Thu" [ref=e1111]:
+                  - generic [ref=e1112]:
+                    - generic [ref=e1114]: P
+                    - generic [ref=e1115]: Phạm Thị Thu
+                - cell "968066869" [ref=e1116]:
+                  - generic [ref=e1117]:
+                    - img [ref=e1118]
+                    - text: "968066869"
+                - cell [ref=e1120]:
+                  - img [ref=e1122]
+                - cell "Thẩm mỹ Hà Nội" [ref=e1125]:
+                  - generic [ref=e1126]:
+                    - img [ref=e1127]
+                    - text: Thẩm mỹ Hà Nội
+                - cell "Active" [ref=e1130]:
+                  - generic [ref=e1131]: Active
+                - cell "12 Jun 2026" [ref=e1133]
+                - cell "Delete" [ref=e1134]:
+                  - button "Delete" [ref=e1135]:
+                    - img [ref=e1136]
+              - row "TM425444 C Chị Ruby 0914681996 Thẩm mỹ Hà Nội Active 12 Jun 2026 Delete" [ref=e1139] [cursor=pointer]:
+                - cell "TM425444" [ref=e1140]:
+                  - generic [ref=e1141]: TM425444
+                - cell "C Chị Ruby" [ref=e1142]:
+                  - generic [ref=e1143]:
+                    - generic [ref=e1145]: C
+                    - generic [ref=e1146]: Chị Ruby
+                - cell "0914681996" [ref=e1147]:
+                  - generic [ref=e1148]:
+                    - img [ref=e1149]
+                    - text: "0914681996"
+                - cell [ref=e1151]:
+                  - img [ref=e1153]
+                - cell "Thẩm mỹ Hà Nội" [ref=e1156]:
+                  - generic [ref=e1157]:
+                    - img [ref=e1158]
+                    - text: Thẩm mỹ Hà Nội
+                - cell "Active" [ref=e1161]:
+                  - generic [ref=e1162]: Active
+                - cell "12 Jun 2026" [ref=e1164]
+                - cell "Delete" [ref=e1165]:
+                  - button "Delete" [ref=e1166]:
+                    - img [ref=e1167]
+              - row "TM405190 C Chị Cải 0326696425 Thẩm mỹ Hà Nội Active 12 Jun 2026 Delete" [ref=e1170] [cursor=pointer]:
+                - cell "TM405190" [ref=e1171]:
+                  - generic [ref=e1172]: TM405190
+                - cell "C Chị Cải" [ref=e1173]:
+                  - generic [ref=e1174]:
+                    - generic [ref=e1176]: C
+                    - generic [ref=e1177]: Chị Cải
+                - cell "0326696425" [ref=e1178]:
+                  - generic [ref=e1179]:
+                    - img [ref=e1180]
+                    - text: "0326696425"
+                - cell [ref=e1182]:
+                  - img [ref=e1184]
+                - cell "Thẩm mỹ Hà Nội" [ref=e1187]:
+                  - generic [ref=e1188]:
+                    - img [ref=e1189]
+                    - text: Thẩm mỹ Hà Nội
+                - cell "Active" [ref=e1192]:
+                  - generic [ref=e1193]: Active
+                - cell "12 Jun 2026" [ref=e1195]
+                - cell "Delete" [ref=e1196]:
+                  - button "Delete" [ref=e1197]:
+                    - img [ref=e1198]
+              - row "TM218532 P Phương Mai 0961693044 Thẩm mỹ Hà Nội Active 12 Jun 2026 Delete" [ref=e1201] [cursor=pointer]:
+                - cell "TM218532" [ref=e1202]:
+                  - generic [ref=e1203]: TM218532
+                - cell "P Phương Mai" [ref=e1204]:
+                  - generic [ref=e1205]:
+                    - generic [ref=e1207]: P
+                    - generic [ref=e1208]: Phương Mai
+                - cell "0961693044" [ref=e1209]:
+                  - generic [ref=e1210]:
+                    - img [ref=e1211]
+                    - text: "0961693044"
+                - cell [ref=e1213]:
+                  - img [ref=e1215]
+                - cell "Thẩm mỹ Hà Nội" [ref=e1218]:
+                  - generic [ref=e1219]:
+                    - img [ref=e1220]
+                    - text: Thẩm mỹ Hà Nội
+                - cell "Active" [ref=e1223]:
+                  - generic [ref=e1224]: Active
+                - cell "12 Jun 2026" [ref=e1226]
+                - cell "Delete" [ref=e1227]:
+                  - button "Delete" [ref=e1228]:
+                    - img [ref=e1229]
+              - row "TM253473 N Nguyễn Thuỳ Linh 0983762300 Thẩm mỹ Hà Nội Active 12 Jun 2026 Delete" [ref=e1232] [cursor=pointer]:
+                - cell "TM253473" [ref=e1233]:
+                  - generic [ref=e1234]: TM253473
+                - cell "N Nguyễn Thuỳ Linh" [ref=e1235]:
+                  - generic [ref=e1236]:
+                    - generic [ref=e1238]: "N"
+                    - generic [ref=e1239]: Nguyễn Thuỳ Linh
+                - cell "0983762300" [ref=e1240]:
+                  - generic [ref=e1241]:
+                    - img [ref=e1242]
+                    - text: "0983762300"
+                - cell [ref=e1244]:
+                  - img [ref=e1246]
+                - cell "Thẩm mỹ Hà Nội" [ref=e1249]:
+                  - generic [ref=e1250]:
+                    - img [ref=e1251]
+                    - text: Thẩm mỹ Hà Nội
+                - cell "Active" [ref=e1254]:
+                  - generic [ref=e1255]: Active
+                - cell "12 Jun 2026" [ref=e1257]
+                - cell "Delete" [ref=e1258]:
+                  - button "Delete" [ref=e1259]:
+                    - img [ref=e1260]
+              - row "TM202913 N Nguyễn Thị Thùy 0339661866 Thẩm mỹ Hà Nội Active 12 Jun 2026 Delete" [ref=e1263] [cursor=pointer]:
+                - cell "TM202913" [ref=e1264]:
+                  - generic [ref=e1265]: TM202913
+                - cell "N Nguyễn Thị Thùy" [ref=e1266]:
+                  - generic [ref=e1267]:
+                    - generic [ref=e1269]: "N"
+                    - generic [ref=e1270]: Nguyễn Thị Thùy
+                - cell "0339661866" [ref=e1271]:
+                  - generic [ref=e1272]:
+                    - img [ref=e1273]
+                    - text: "0339661866"
+                - cell [ref=e1275]:
+                  - img [ref=e1277]
+                - cell "Thẩm mỹ Hà Nội" [ref=e1280]:
+                  - generic [ref=e1281]:
+                    - img [ref=e1282]
+                    - text: Thẩm mỹ Hà Nội
+                - cell "Active" [ref=e1285]:
+                  - generic [ref=e1286]: Active
+                - cell "12 Jun 2026" [ref=e1288]
+                - cell "Delete" [ref=e1289]:
+                  - button "Delete" [ref=e1290]:
+                    - img [ref=e1291]
+              - row "TM496193 V VÕ THỊ KIM SƯƠNG 09729035096 Thẩm mỹ Hồ Chí Minh Active 11 Jun 2026 Delete" [ref=e1294] [cursor=pointer]:
+                - cell "TM496193" [ref=e1295]:
+                  - generic [ref=e1296]: TM496193
+                - cell "V VÕ THỊ KIM SƯƠNG" [ref=e1297]:
+                  - generic [ref=e1298]:
+                    - generic [ref=e1300]: V
+                    - generic [ref=e1301]: VÕ THỊ KIM SƯƠNG
+                - cell "09729035096" [ref=e1302]:
+                  - generic [ref=e1303]:
+                    - img [ref=e1304]
+                    - text: "09729035096"
+                - cell [ref=e1306]:
+                  - img [ref=e1308]
+                - cell "Thẩm mỹ Hồ Chí Minh" [ref=e1311]:
+                  - generic [ref=e1312]:
+                    - img [ref=e1313]
+                    - text: Thẩm mỹ Hồ Chí Minh
+                - cell "Active" [ref=e1316]:
+                  - generic [ref=e1317]: Active
+                - cell "11 Jun 2026" [ref=e1319]
+                - cell "Delete" [ref=e1320]:
+                  - button "Delete" [ref=e1321]:
+                    - img [ref=e1322]
+              - row "TM255275 K KEVIN LEE 09729035096 Thẩm mỹ Hồ Chí Minh Active 11 Jun 2026 Delete" [ref=e1325] [cursor=pointer]:
+                - cell "TM255275" [ref=e1326]:
+                  - generic [ref=e1327]: TM255275
+                - cell "K KEVIN LEE" [ref=e1328]:
+                  - generic [ref=e1329]:
+                    - generic [ref=e1331]: K
+                    - generic [ref=e1332]: KEVIN LEE
+                - cell "09729035096" [ref=e1333]:
+                  - generic [ref=e1334]:
+                    - img [ref=e1335]
+                    - text: "09729035096"
+                - cell [ref=e1337]:
+                  - img [ref=e1339]
+                - cell "Thẩm mỹ Hồ Chí Minh" [ref=e1342]:
+                  - generic [ref=e1343]:
+                    - img [ref=e1344]
+                    - text: Thẩm mỹ Hồ Chí Minh
+                - cell "Active" [ref=e1347]:
+                  - generic [ref=e1348]: Active
+                - cell "11 Jun 2026" [ref=e1350]
+                - cell "Delete" [ref=e1351]:
+                  - button "Delete" [ref=e1352]:
+                    - img [ref=e1353]
+              - row "TM568152 C Chị Trâm 0969471339 Thẩm mỹ Hồ Chí Minh Active 11 Jun 2026 Delete" [ref=e1356] [cursor=pointer]:
+                - cell "TM568152" [ref=e1357]:
+                  - generic [ref=e1358]: TM568152
+                - cell "C Chị Trâm" [ref=e1359]:
+                  - generic [ref=e1360]:
+                    - generic [ref=e1362]: C
+                    - generic [ref=e1363]: Chị Trâm
+                - cell "0969471339" [ref=e1364]:
+                  - generic [ref=e1365]:
+                    - img [ref=e1366]
+                    - text: "0969471339"
+                - cell [ref=e1368]:
+                  - img [ref=e1370]
+                - cell "Thẩm mỹ Hồ Chí Minh" [ref=e1373]:
+                  - generic [ref=e1374]:
+                    - img [ref=e1375]
+                    - text: Thẩm mỹ Hồ Chí Minh
+                - cell "Active" [ref=e1378]:
+                  - generic [ref=e1379]: Active
+                - cell "11 Jun 2026" [ref=e1381]
+                - cell "Delete" [ref=e1382]:
+                  - button "Delete" [ref=e1383]:
+                    - img [ref=e1384]
+              - row "TM742566 T TRẦN THỊ HẢI THỦY 0903193577 Thẩm mỹ Hồ Chí Minh Active 11 Jun 2026 Delete" [ref=e1387] [cursor=pointer]:
+                - cell "TM742566" [ref=e1388]:
+                  - generic [ref=e1389]: TM742566
+                - cell "T TRẦN THỊ HẢI THỦY" [ref=e1390]:
+                  - generic [ref=e1391]:
+                    - generic [ref=e1393]: T
+                    - generic [ref=e1394]: TRẦN THỊ HẢI THỦY
+                - cell "0903193577" [ref=e1395]:
+                  - generic [ref=e1396]:
+                    - img [ref=e1397]
+                    - text: "0903193577"
+                - cell [ref=e1399]:
+                  - img [ref=e1401]
+                - cell "Thẩm mỹ Hồ Chí Minh" [ref=e1404]:
+                  - generic [ref=e1405]:
+                    - img [ref=e1406]
+                    - text: Thẩm mỹ Hồ Chí Minh
+                - cell "Active" [ref=e1409]:
+                  - generic [ref=e1410]: Active
+                - cell "11 Jun 2026" [ref=e1412]
+                - cell "Delete" [ref=e1413]:
+                  - button "Delete" [ref=e1414]:
+                    - img [ref=e1415]
+              - row "TM729462 A Anh Trường 0936165290 Thẩm mỹ Hà Nội Active 11 Jun 2026 Delete" [ref=e1418] [cursor=pointer]:
+                - cell "TM729462" [ref=e1419]:
+                  - generic [ref=e1420]: TM729462
+                - cell "A Anh Trường" [ref=e1421]:
+                  - generic [ref=e1422]:
+                    - generic [ref=e1424]: A
+                    - generic [ref=e1425]: Anh Trường
+                - cell "0936165290" [ref=e1426]:
+                  - generic [ref=e1427]:
+                    - img [ref=e1428]
+                    - text: "0936165290"
+                - cell [ref=e1430]:
+                  - img [ref=e1432]
+                - cell "Thẩm mỹ Hà Nội" [ref=e1435]:
+                  - generic [ref=e1436]:
+                    - img [ref=e1437]
+                    - text: Thẩm mỹ Hà Nội
+                - cell "Active" [ref=e1440]:
+                  - generic [ref=e1441]: Active
+                - cell "11 Jun 2026" [ref=e1443]
+                - cell "Delete" [ref=e1444]:
+                  - button "Delete" [ref=e1445]:
+                    - img [ref=e1446]
+              - row "TM840473 C Chị Nhi 0933818418 Thẩm mỹ Hồ Chí Minh Active 11 Jun 2026 Delete" [ref=e1449] [cursor=pointer]:
+                - cell "TM840473" [ref=e1450]:
+                  - generic [ref=e1451]: TM840473
+                - cell "C Chị Nhi" [ref=e1452]:
+                  - generic [ref=e1453]:
+                    - generic [ref=e1455]: C
+                    - generic [ref=e1456]: Chị Nhi
+                - cell "0933818418" [ref=e1457]:
+                  - generic [ref=e1458]:
+                    - img [ref=e1459]
+                    - text: "0933818418"
+                - cell [ref=e1461]:
+                  - img [ref=e1463]
+                - cell "Thẩm mỹ Hồ Chí Minh" [ref=e1466]:
+                  - generic [ref=e1467]:
+                    - img [ref=e1468]
+                    - text: Thẩm mỹ Hồ Chí Minh
+                - cell "Active" [ref=e1471]:
+                  - generic [ref=e1472]: Active
+                - cell "11 Jun 2026" [ref=e1474]
+                - cell "Delete" [ref=e1475]:
+                  - button "Delete" [ref=e1476]:
+                    - img [ref=e1477]
+              - row "TM144798 N Nguyễn Trần Cẩm Chi 363239431 Unknown Active 11 Jun 2026 Delete" [ref=e1480] [cursor=pointer]:
+                - cell "TM144798" [ref=e1481]:
+                  - generic [ref=e1482]: TM144798
+                - cell "N Nguyễn Trần Cẩm Chi" [ref=e1483]:
+                  - generic [ref=e1484]:
+                    - generic [ref=e1486]: "N"
+                    - generic [ref=e1487]: Nguyễn Trần Cẩm Chi
+                - cell "363239431" [ref=e1488]:
+                  - generic [ref=e1489]:
+                    - img [ref=e1490]
+                    - text: "363239431"
+                - cell [ref=e1492]:
+                  - img [ref=e1494]
+                - cell "Unknown" [ref=e1497]:
+                  - generic [ref=e1498]:
+                    - img [ref=e1499]
+                    - text: Unknown
+                - cell "Active" [ref=e1502]:
+                  - generic [ref=e1503]: Active
+                - cell "11 Jun 2026" [ref=e1505]
+                - cell "Delete" [ref=e1506]:
+                  - button "Delete" [ref=e1507]:
+                    - img [ref=e1508]
+              - row "TM105139 Q Quý Nguyễn 0974713780 Thẩm mỹ Hồ Chí Minh Active 11 Jun 2026 Delete" [ref=e1511] [cursor=pointer]:
+                - cell "TM105139" [ref=e1512]:
+                  - generic [ref=e1513]: TM105139
+                - cell "Q Quý Nguyễn" [ref=e1514]:
+                  - generic [ref=e1515]:
+                    - generic [ref=e1517]: Q
+                    - generic [ref=e1518]: Quý Nguyễn
+                - cell "0974713780" [ref=e1519]:
+                  - generic [ref=e1520]:
+                    - img [ref=e1521]
+                    - text: "0974713780"
+                - cell [ref=e1523]:
+                  - img [ref=e1525]
+                - cell "Thẩm mỹ Hồ Chí Minh" [ref=e1528]:
+                  - generic [ref=e1529]:
+                    - img [ref=e1530]
+                    - text: Thẩm mỹ Hồ Chí Minh
+                - cell "Active" [ref=e1533]:
+                  - generic [ref=e1534]: Active
+                - cell "11 Jun 2026" [ref=e1536]
+                - cell "Delete" [ref=e1537]:
+                  - button "Delete" [ref=e1538]:
+                    - img [ref=e1539]
+              - row "TM883276 t thảo 0936355538 Thẩm mỹ Hà Nội Active 11 Jun 2026 Delete" [ref=e1542] [cursor=pointer]:
+                - cell "TM883276" [ref=e1543]:
+                  - generic [ref=e1544]: TM883276
+                - cell "t thảo" [ref=e1545]:
+                  - generic [ref=e1546]:
+                    - generic [ref=e1548]: t
+                    - generic [ref=e1549]: thảo
+                - cell "0936355538" [ref=e1550]:
+                  - generic [ref=e1551]:
+                    - img [ref=e1552]
+                    - text: "0936355538"
+                - cell [ref=e1554]:
+                  - img [ref=e1556]
+                - cell "Thẩm mỹ Hà Nội" [ref=e1559]:
+                  - generic [ref=e1560]:
+                    - img [ref=e1561]
+                    - text: Thẩm mỹ Hà Nội
+                - cell "Active" [ref=e1564]:
+                  - generic [ref=e1565]: Active
+                - cell "11 Jun 2026" [ref=e1567]
+                - cell "Delete" [ref=e1568]:
+                  - button "Delete" [ref=e1569]:
+                    - img [ref=e1570]
+              - row "TM583851 H Huyền Trân 0909390611 Thẩm mỹ Hồ Chí Minh Active 11 Jun 2026 Delete" [ref=e1573] [cursor=pointer]:
+                - cell "TM583851" [ref=e1574]:
+                  - generic [ref=e1575]: TM583851
+                - cell "H Huyền Trân" [ref=e1576]:
+                  - generic [ref=e1577]:
+                    - generic [ref=e1579]: H
+                    - generic [ref=e1580]: Huyền Trân
+                - cell "0909390611" [ref=e1581]:
+                  - generic [ref=e1582]:
+                    - img [ref=e1583]
+                    - text: "0909390611"
+                - cell [ref=e1585]:
+                  - img [ref=e1587]
+                - cell "Thẩm mỹ Hồ Chí Minh" [ref=e1590]:
+                  - generic [ref=e1591]:
+                    - img [ref=e1592]
+                    - text: Thẩm mỹ Hồ Chí Minh
+                - cell "Active" [ref=e1595]:
+                  - generic [ref=e1596]: Active
+                - cell "11 Jun 2026" [ref=e1598]
+                - cell "Delete" [ref=e1599]:
+                  - button "Delete" [ref=e1600]:
+                    - img [ref=e1601]
+              - row "TM387496 Y Ying 0966365882 Thẩm mỹ Hồ Chí Minh Active 11 Jun 2026 Delete" [ref=e1604] [cursor=pointer]:
+                - cell "TM387496" [ref=e1605]:
+                  - generic [ref=e1606]: TM387496
+                - cell "Y Ying" [ref=e1607]:
+                  - generic [ref=e1608]:
+                    - generic [ref=e1610]: "Y"
+                    - generic [ref=e1611]: Ying
+                - cell "0966365882" [ref=e1612]:
+                  - generic [ref=e1613]:
+                    - img [ref=e1614]
+                    - text: "0966365882"
+                - cell [ref=e1616]:
+                  - img [ref=e1618]
+                - cell "Thẩm mỹ Hồ Chí Minh" [ref=e1621]:
+                  - generic [ref=e1622]:
+                    - img [ref=e1623]
+                    - text: Thẩm mỹ Hồ Chí Minh
+                - cell "Active" [ref=e1626]:
+                  - generic [ref=e1627]: Active
+                - cell "11 Jun 2026" [ref=e1629]
+                - cell "Delete" [ref=e1630]:
+                  - button "Delete" [ref=e1631]:
+                    - img [ref=e1632]
+              - row "TM105539 P Phạm Phương 0988510983 Thẩm mỹ Hồ Chí Minh Active 11 Jun 2026 Delete" [ref=e1635] [cursor=pointer]:
+                - cell "TM105539" [ref=e1636]:
+                  - generic [ref=e1637]: TM105539
+                - cell "P Phạm Phương" [ref=e1638]:
+                  - generic [ref=e1639]:
+                    - generic [ref=e1641]: P
+                    - generic [ref=e1642]: Phạm Phương
+                - cell "0988510983" [ref=e1643]:
+                  - generic [ref=e1644]:
+                    - img [ref=e1645]
+                    - text: "0988510983"
+                - cell [ref=e1647]:
+                  - img [ref=e1649]
+                - cell "Thẩm mỹ Hồ Chí Minh" [ref=e1652]:
+                  - generic [ref=e1653]:
+                    - img [ref=e1654]
+                    - text: Thẩm mỹ Hồ Chí Minh
+                - cell "Active" [ref=e1657]:
+                  - generic [ref=e1658]: Active
+                - cell "11 Jun 2026" [ref=e1660]
+                - cell "Delete" [ref=e1661]:
+                  - button "Delete" [ref=e1662]:
+                    - img [ref=e1663]
+              - row "COS-HOSO-12257 D Dì Duyên 0976301995 Thẩm mỹ Hà Nội Active 31 May 2026 Delete" [ref=e1666] [cursor=pointer]:
+                - cell "COS-HOSO-12257" [ref=e1667]:
+                  - generic [ref=e1668]: COS-HOSO-12257
+                - cell "D Dì Duyên" [ref=e1669]:
+                  - generic [ref=e1670]:
+                    - generic [ref=e1672]: D
+                    - generic [ref=e1673]: Dì Duyên
+                - cell "0976301995" [ref=e1674]:
+                  - generic [ref=e1675]:
+                    - img [ref=e1676]
+                    - text: "0976301995"
+                - cell [ref=e1678]:
+                  - img [ref=e1680]
+                - cell "Thẩm mỹ Hà Nội" [ref=e1683]:
+                  - generic [ref=e1684]:
+                    - img [ref=e1685]
+                    - text: Thẩm mỹ Hà Nội
+                - cell "Active" [ref=e1688]:
+                  - generic [ref=e1689]: Active
+                - cell "31 May 2026" [ref=e1691]
+                - cell "Delete" [ref=e1692]:
+                  - button "Delete" [ref=e1693]:
+                    - img [ref=e1694]
+          - generic [ref=e1697]:
+            - generic [ref=e1698]: Showing 1–20 of 12654
+            - generic [ref=e1699]:
+              - button "Previous page" [disabled] [ref=e1700]:
+                - img [ref=e1701]
+              - button "1" [ref=e1703] [cursor=pointer]
+              - button "2" [ref=e1704] [cursor=pointer]
+              - button "3" [ref=e1705] [cursor=pointer]
+              - button "4" [ref=e1706] [cursor=pointer]
+              - generic [ref=e1707]: ...
+              - button "633" [ref=e1708] [cursor=pointer]
+              - button "Next page" [ref=e1709] [cursor=pointer]:
+                - img [ref=e1710]
+    - button "v0.37.5 (44449f7)" [ref=e485] [cursor=pointer]:
+      - img [ref=e1712]
+      - generic [ref=e488]: v0.37.5
+      - generic [ref=e489]: (44449f7)

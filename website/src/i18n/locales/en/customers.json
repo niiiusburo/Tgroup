@@ -304,5 +304,15 @@
   },
   "states": {
     "loading": "Loading patients..."
+  },
+  "investorVisibility": {
+    "column": "Investor",
+    "noPermission": "You do not have permission to share clients with investors",
+    "noInvestors": "Create an investor first in Settings → Investors",
+    "deletedClient": "Cannot share deleted clients",
+    "confirmOn": "This client will be visible to investor {{name}}.",
+    "selectInvestor": "Select investor",
+    "toggleLabel": "Visible to {{investor}}",
+    "saveError": "Could not update investor visibility. Please try again."
   }
 }

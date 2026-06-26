@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-06-14T09:31:41.702Z",
+  "url": "https://tmv.2checkin.com/",
+  "version": {
+    "version": "0.37.10",
+    "buildTime": "2026-06-14T09:21:57.632Z",
+    "gitCommit": "6430b5a",
+    "gitBranch": "nk3-deploy",
+    "environment": "development"
+  },
+  "dataLob": "cosmetic",
+  "accent500": "340 42% 64%"
+}

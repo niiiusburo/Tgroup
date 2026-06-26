@@ -166,3 +166,34 @@ These rules enforce the Contract-First Monorepo pattern on the existing Vite+Exp
 - Bump `website/package.json` version for every frontend change.
 - Run `bash scripts/sync-claude-mem.sh` after every session.
 
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+Rules:
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+
+### MANDATORY EDIT PROTOCOL
+BEFORE any edit:
+1. graphify query the target — what is it, what connects to it
+2. CRG blast_radius — list ALL affected files/functions/tests
+3. LSP/find-references — every call site
+→ You must OUTPUT the blast-radius list before touching code.
+→ Acquire lock/ownership on every file in the radius, not just the target.
+DURING:
+4. Contracts/types first; let the type checker enumerate breakage.
+AFTER (all blocking, in order):
+5. Diagnostics clean → type check passes → affected tests + golden
+   fixtures pass. Pre-commit hook enforces this; never bypass with
+   --no-verify.
+ON SCHEMA CHANGE:
+6. Re-run DB introspection into the graph + blast_radius on affected
+   tables before merge.
+AFTER MERGE:
+7. Graph rebuilds via git hook; write decision + gotchas to DECISIONS.md
+   (or Mem0 if no Luffy files).
+CONFLICT RULE: graph/CRG = navigation truth for current code state;
+docs/memory = rationale. On contradiction, current code wins.

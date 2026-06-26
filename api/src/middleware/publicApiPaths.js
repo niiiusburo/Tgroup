@@ -1,9 +1,8 @@
 'use strict';
-
 /**
- * @crossref:domain[ctv]
+ * @crossref:domain[auth,patient-portal]
  * @crossref:used-in[api/src/server.js global /api auth gate]
- * @crossref:uses[product-map/domains/ctv.yaml, api/src/routes/discountCodes.js (public QR landing/claim paths), api/src/routes/publicBangGia.js]
+ * @crossref:uses[product-map/domains/auth.yaml, product-map/domains/patient-portal.yaml]
  */
 
 /** Exact paths that skip requireAuth (login, health, telemetry, etc.). */
@@ -16,11 +15,16 @@ const PUBLIC_EXACT_PATHS = new Set([
   '/api/ipaccess/check',
   '/api/health',
   '/api/telemetry/version',
+  '/api/patient/auth/login',
+  '/api/patient/auth/register',
+  '/api/investor/auth/login',
+  '/api/investor/auth/password-reset-request',
+  '/api/investor/auth/password-reset',
 ]);
 
 /**
  * Returns true when the request may pass the global /api requireAuth gate.
- * Route-level guards (requireStaff, requireCtvSelf) still apply afterward.
+ * Route-level guards (requireStaff, requireCtvSelf, requirePatientAuth) still apply afterward.
  */
 function isPublicApiPath(fullPath, method = 'GET') {
   if (PUBLIC_EXACT_PATHS.has(fullPath)) return true;

@@ -1,0 +1,64 @@
+{
+  "login": {
+    "title": "Cổng Nhà Đầu Tư",
+    "subtitle": "Xem chỉ đọc các khách hàng được phòng khám chia sẻ với bạn.",
+    "email": "Email",
+    "emailPlaceholder": "ban@example.com",
+    "password": "Mật khẩu",
+    "rememberMe": "Ghi nhớ đăng nhập 7 ngày",
+    "signIn": "Đăng nhập",
+    "forgotPassword": "Quên mật khẩu?",
+    "errors": {
+      "invalidCredentials": "Email hoặc mật khẩu không đúng",
+      "rateLimited": "Đăng nhập quá nhiều lần. Vui lòng đợi vài phút rồi thử lại.",
+      "deactivated": "Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ phòng khám."
+    }
+  },
+  "dashboard": {
+    "title": "Khách hàng được chia sẻ",
+    "signOut": "Đăng xuất",
+    "clientCount": "{{count}} khách hàng được chia sẻ",
+    "lob": {
+      "dental": "Nha khoa",
+      "cosmetic": "Thẩm mỹ"
+    },
+    "columns": {
+      "name": "Họ tên",
+      "gender": "Giới tính",
+      "appointments": "Lịch hẹn",
+      "orders": "Đơn hàng",
+      "deposit": "Tạm ứng",
+      "outstanding": "Còn nợ",
+      "status": "Trạng thái"
+    },
+    "status": {
+      "active": "Hoạt động",
+      "inactive": "Ngưng"
+    },
+    "empty": {
+      "title": "Chưa có khách hàng nào được chia sẻ",
+      "message": "Khi nhân viên đánh dấu khách hàng hiển thị cho bạn, danh sách sẽ xuất hiện tại đây."
+    },
+    "errors": {
+      "fetchFailed": "Không tải được danh sách khách hàng.",
+      "retryHint": "Vui lòng tải lại trang hoặc đăng nhập lại."
+    }
+  },
+  "reset": {
+    "title": "Đặt lại mật khẩu",
+    "requestHint": "Nhập email tài khoản nhà đầu tư. Nếu tồn tại, bạn sẽ nhận hướng dẫn đặt lại.",
+    "confirmHint": "Nhập mã token và mật khẩu mới.",
+    "sendLink": "Gửi liên kết đặt lại",
+    "token": "Mã token",
+    "newPassword": "Mật khẩu mới",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "setPassword": "Đặt mật khẩu mới",
+    "backToLogin": "Quay lại đăng nhập",
+    "errors": {
+      "requestFailed": "Không xử lý được yêu cầu đặt lại.",
+      "confirmFailed": "Không đặt lại được mật khẩu.",
+      "weakPassword": "Mật khẩu phải có ít nhất 6 ký tự.",
+      "invalidToken": "Token không hợp lệ hoặc đã hết hạn."
+    }
+  }
+}

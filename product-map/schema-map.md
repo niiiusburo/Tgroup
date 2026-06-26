@@ -432,6 +432,19 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 
 ---
 
+## Investor Portal (migration 068 + 069)
+
+| Table | W | R | E | UI |
+|-------|---|---|---|---|
+| `dbo.investor_accounts` | Admin POST/PATCH `/api/admin/investors` | Investor login, admin list | `/api/admin/investors`, `/api/investor/auth/*` | Settings → Investors, `/investor/login` |
+| `dbo.investor_clients` | Staff PATCH `/api/Partners/:id/investor-visibility` | Investor client list (IDOR join) | `/api/investor/clients*` | Customers Investor column |
+| `dbo.investor_view_audit` | Investor login/list/detail | Admin audit GET | `/api/admin/investors/:id/audit` | — |
+| `dbo.investor_password_reset_tokens` | Password reset request | Password reset confirm | `/api/investor/auth/password-reset*` | `/investor/reset-password` |
+
+Apply 068 + 069 to **both** `tdental_demo` and `tcosmetic_demo` (or NK3 `tdental_nk3` / `tcosmetic_nk3`).
+
+---
+
 ## Schema Change Blast Radius Summary
 
 | If you change this table... | You must also review... |

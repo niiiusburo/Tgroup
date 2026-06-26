@@ -1,37 +1,52 @@
 #!/usr/bin/env sh
+HOOK_STATUS=0
 
 echo "🔎 Running documentation governance checks..."
-bash scripts/verify-docs.sh
+if ! bash scripts/verify-docs.sh; then
+  HOOK_STATUS=1
+fi
 
 if grep -R -n -E '<claude-mem-context>|</claude-mem-context>' \
   AGENTS.md ARCHITECTURE.md DESIGN.md BEHAVIOR.md DECISIONS.md docs product-map \
   --exclude='VERIFICATION.md'; then
   echo "❌ Generated memory block leaked into authority docs."
   echo "   Keep shared memory in .claude/memory.md only."
-  exit 1
+  HOOK_STATUS=1
 fi
 
 # Check if any website source or public files (excluding CHANGELOG/version files) are staged
 STAGED_WEBSITE=$(git diff --cached --name-only | grep -E '^website/(src/|public/([^C]|C[^H]|CH[^A]|CHA[^N]|CHAN[^G]|CHANG[^E]).*)' || true)
 
 if [ -z "$STAGED_WEBSITE" ]; then
-  exit 0
+  echo "No website source/public files staged; skipping website version gate."
+else
+  # Check if package.json version changed compared to origin/main
+  PKG_VERSION_MAIN=$(git show origin/main:website/package.json 2>/dev/null | grep '"version"' | head -1 | sed 's/.*: "\(.*\)",/\1/')
+  PKG_VERSION_HEAD=$(grep '"version"' website/package.json | head -1 | sed 's/.*: "\(.*\)",/\1/')
+
+  if [ "$PKG_VERSION_MAIN" = "$PKG_VERSION_HEAD" ]; then
+    echo "❌ Website files staged but version not bumped."
+    echo "   Run: node scripts/bump-version.mjs patch 'Your change summary'"
+    HOOK_STATUS=1
+  fi
+
+  # Verify docs changelog has a matching current-version entry
+  if ! grep -q "## \\[$PKG_VERSION_HEAD\\]" docs/CHANGELOG.md; then
+    echo "❌ docs/CHANGELOG.md does not contain an entry for website version $PKG_VERSION_HEAD."
+    HOOK_STATUS=1
+  else
+    echo "✅ Version + docs changelog bump verified."
+  fi
 fi
 
-# Check if package.json version changed compared to origin/main
-PKG_VERSION_MAIN=$(git show origin/main:website/package.json 2>/dev/null | grep '"version"' | head -1 | sed 's/.*: "\(.*\)",/\1/')
-PKG_VERSION_HEAD=$(grep '"version"' website/package.json | head -1 | sed 's/.*: "\(.*\)",/\1/')
-
-if [ "$PKG_VERSION_MAIN" = "$PKG_VERSION_HEAD" ]; then
-  echo "❌ Website files staged but version not bumped."
-  echo "   Run: node scripts/bump-version.mjs patch 'Your change summary'"
-  exit 1
+echo "Running hard machine gates..."
+if ! bash scripts/pre-commit-hard-gates.sh; then
+  HOOK_STATUS=1
 fi
 
-# Verify docs changelog has a matching current-version entry
-if ! grep -q "## \\[$PKG_VERSION_HEAD\\]" docs/CHANGELOG.md; then
-  echo "❌ docs/CHANGELOG.md does not contain an entry for website version $PKG_VERSION_HEAD."
-  exit 1
+if [ "$HOOK_STATUS" -ne 0 ]; then
+  echo "❌ Pre-commit checks failed."
+  exit "$HOOK_STATUS"
 fi
 
-echo "✅ Version + docs changelog bump verified."
+echo "✅ Pre-commit checks passed."

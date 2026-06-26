@@ -2,6 +2,85 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.39.0] — 2026-06-26 — Investor Portal Phase 2: staff curation, admin provisioning, password reset
+
+- **Staff:** Customers "Investor" column toggles `investor_clients` visibility per LOB (`customers.set_investor_visibility`).
+- **Admin:** Settings → Investors tab — create/deactivate accounts (`investors.manage`, `/api/admin/investors`).
+- **Investor:** `/investor/reset-password` + public reset API (dev token in response).
+- **Schema:** migration `069_investor_phase2.sql` — `investor_password_reset_tokens` + permission grants (both DBs).
+- **Contracts:** extended `contracts/investor.ts` Phase 2 Zod schemas.
+- **Verify:** `api/scripts/verify-investor-phase2.mjs` full API loop.
+
+## [0.38.0] — 2026-06-26 — Investor Portal: login + read-only client roster (MVP)
+
+### Added
+- **Investor portal backend** (`api/src/routes/investor/`, `api/src/middleware/investorAuth.js`): `POST /api/investor/auth/login`, `GET /api/investor/auth/me`, `GET /api/investor/clients`, `GET /api/investor/clients/:partnerId` with distinct `INVESTOR_JWT_SECRET`, LOB-pinned queries, IDOR gate, and Zod safe projection. — @agent — investor-portal domain
+- **Migration 068** (`api/migrations/068_investor_portal.sql`): `investor_accounts`, `investor_clients`, `investor_view_audit` tables. — @agent
+- **Contracts** (`contracts/investor.ts`): `InvestorClientResponseSchema` allow-list is the redaction boundary. — @agent
+- **Investor portal UI** (`website/src/pages/Investor/`, `/investor/login`, `/investor`): separate auth context, EN+VI i18n, client roster table. — @agent
+- **Demo seed** (`api/scripts/seed-investor-demo.js`): `investor@clinic.vn` / `123123` with sample visible clients. — @agent
+
+### Governance
+- `product-map/domains/investor-portal.yaml`, `docs/CONTRACTS.md` v1.0.37, `docs/MIGRATIONS.md` §068, `DECISIONS.md` DEC-20260625-IP-01, `docs/TEST-MATRIX.md` investor rows. — @agent
+
+## [0.38.1] — 2026-06-24 — Patient Portal: multi-provider AI + KB seed + keyword RAG fallback
+
+### Added
+- **KB seed script** (`api/scripts/seed-support-kb.js`): seeds 15 Vietnamese clinic FAQs into `support_kb_chunks` with embeddings when available. — @agent
+- **KB ingestion utilities** (`api/src/services/ai/kbIngestion.js`): `ingestChunk`, `ingestChunks`, `listChunks`, `updateChunk`, `deleteChunk` for content curators. — @agent
+
+### Changed
+- **AI provider config** (`api/src/services/ai/aiConfig.js`): now supports Google Gemini, OpenAI, and DeepSeek (OpenAI-compatible). Priority: Gemini > OpenAI > DeepSeek. — @agent
+- **RAG retrieval** (`api/src/services/ai/ragService.js`): falls back to accent-insensitive keyword search when the active provider does not support embeddings (e.g., DeepSeek) or pgvector is unavailable. — @agent
+- **Escalation prompt** (`api/src/services/ai/escalationService.js`) and **support system prompt** (`api/src/services/ai/ragService.js`): fixed Vietnamese word spacing (`ngườithật`, `trả lờibằng`, etc.). — @agent
+- **API env example** (`api/.env.example`): adds `DEEPSEEK_API_KEY`, `DEEPSEEK_CHAT_MODEL`, `DEEPSEEK_BASE_URL`. — @agent
+
+### Security
+- **Removed leaked API keys from tracked files.** Replaced exposed `sk-kimi-...` (Kimi), TestSprite `sk-user-...`, and Telegram bot token in `hermes/hermes-map.yaml`, `testsprite_tests/TESTSPRITE_MCP_SETUP_GUIDE.md`, `website/testsprite_tests/tmp/config.json`, and matching `.worktrees/*` copies with placeholder values. Also cleaned the same leaks in `Tgrouptest-auth-phone`. — @agent
+- Note: these keys remain in git history (commits `5c2956f5f` and `424afe65e`). Rotate them at the provider console; ask if you want history rewritten.
+
+### Governance
+- Updated `docs/CONTRACTS.md` v1.0.36 to reflect multi-provider AI and keyword RAG fallback. — @agent
+- Bumped `api/package.json` to `1.2.3`. — @agent
+
+## [0.38.0] — 2026-06-24 — Patient Portal: AI + human chat support with learning loop
+
+### Added
+- **Two-tier chat support backend** (`api/src/routes/patient/chat.js`, `api/src/services/ai/`): patient chat sessions, messages, RAG retrieval from `support_kb_chunks`, OpenAI `gpt-4o-mini` replies, and human escalation to `support_tickets`. — @agent — patient-portal domain
+- **Learning loop** (`api/src/services/ai/learningService.js`): resolved/escalated chat transcripts are chunked, PII-redacted, embedded, and stored in `support_kb_chunks` (pending staff `approved` flag) so the AI can answer similar questions later. — @agent
+- **Patient chat migration** (`api/migrations/067_chat_support_ai.sql`): adds `chat_sessions`, `chat_messages`, `support_kb_chunks`, pgvector extension, and HNSW index. — @agent
+- **Mobile chat screen** (`nk-patient-app/src/screens/chat/ChatScreen.tsx`) + `useChat` hook (`nk-patient-app/src/hooks/useChat.ts`) + `chatApi` service (`nk-patient-app/src/services/chatApi.ts`): custom UI matching NK iOS design tokens, AI replies, and one-tap human escalation. — @agent
+- **Generative AI reference library** (`library/gen-ai-chat-support/`): downloaded reference repos (Vercel AI SDK, OpenAI Node SDK, Google Gen AI SDK, react-native-gifted-chat) plus project-specific backend/mobile code samples and migration DDL. — @agent
+
+### Changed
+- **Support screen** (`nk-patient-app/src/screens/support/SupportScreen.tsx`): the previously placeholder "Nhắn tin" card now navigates to the AI chat screen; subtitle updated to "Chat với trợ lý AI". — @agent
+- **Patient portal navigation** (`nk-patient-app/src/navigation/MainNavigator.tsx`): registers `Chat` in the `HomeStack`. — @agent
+- **API env example** (`api/.env.example`): adds `OPENAI_API_KEY`, `AI_CHAT_MODEL`, `AI_EMBEDDING_MODEL`, `AI_TEMPERATURE`, `AI_MAX_TOKENS`, `AI_RAG_TOP_K`. — @agent
+
+### Governance
+- Updated `product-map/domains/patient-portal.yaml` with new tables, endpoints, and `Chat` surface. — @agent
+- Updated `docs/CONTRACTS.md` and `docs/MIGRATIONS.md` for chat support v1.0.36. — @agent
+- Bumped `nk-patient-app/package.json` to `1.1.0`. — @agent
+
+## [0.37.22] — 2026-06-24 — Patient Portal: organize treatments, appointments, finance, profile
+
+### Added
+- **Treatment detail screen** (`nk-patient-app/src/screens/treatments/TreatmentDetailScreen.tsx`) + `TreatmentsStack` navigation: patients can now tap any treatment to see service lines (`product_name`, quantity, price), visits (`dotkhams`), and step-by-step progress. — @agent
+- **Shared money components** (`nk-patient-app/src/components/agent3/MoneyRow.tsx`, `MoneySummary.tsx`): consistent label/amount/progress display reused on treatments list, treatment detail, and home dashboard. — @agent
+- **VietQR payment block** (`nk-patient-app/src/screens/finance/FinanceScreen.tsx`): generates QR from `company_bank_settings` when there is an outstanding balance and a supported bank BIN. — @agent
+- **Payment method / category / status label helpers** (`nk-patient-app/src/utils/status.ts`): maps raw DB values (`posted`, `draft`, `voided`, `bank_transfer`, `deposit`, etc.) to patient-friendly Vietnamese labels. — @agent
+
+### Changed
+- **Appointments list + detail** now fetch real `/appointments` data, show `product_name` as the service, filter by upcoming/past/all, display doctor/clinic, and use the clinic’s actual phone for the call button. — @agent
+- **Home dashboard** treatment card uses real `totalpaid / amounttotal` progress, mapped Vietnamese status labels, clinic/doctor/date range, and taps through to detail. Hero card shows real appointment status and doctor. — @agent
+- **Finance screen** loads real `/balance` and `/balance/payments`, organizes outstanding/total-paid/deposit cards, and renders payment history with status badges and method labels. — @agent
+- **Profile screen** now builds full DOB from `birthyear/birthmonth/birthday`, builds full address from `street/ward/district/city`, and wires all consent toggles to `PUT /profile/consents`. — @agent
+- **Backend `/api/patient/dashboard`** returns richer treatment and next-appointment fields (`totalpaid`, `doctor_name`, `company_name`, `datestart`, `dateend`, `product_name`, `company_phone`, etc.) so the home cards match the detail API. — @agent
+
+### Fixed
+- **Treatment status mapping** now handles `done` and `cancel` sale-order states. — @agent
+- **Pre-existing TypeScript errors** in `AnimatedCounter`, `useAnimatedButton`, and `AftercareScreen` so the project passes `tsc --noEmit`. — @agent
+
 ## [0.37.21] — 2026-06-22 — NK3: service-card commission reversal + backfill guard
 
 ### Fixed
@@ -1188,3 +1267,19 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 - TestSprite: Parallel test runner with 5 workers, ~38s full suite
 - TestSprite: MCP config fixed with correct API_KEY in ~/.claude.json
 - TestSprite: Added TESTSPRITE_STATUS.md and TESTSPRITE_MCP_SETUP_GUIDE.md
+
+## [1.33.0] - 2026-06-24
+### Added
+- Patient Portal iOS App (Expo React Native) — Phase 1
+- New API routes: `/api/patient/*` (auth, dashboard, appointments, treatments, balance, media, notifications, referrals, reviews, support, profile)
+- Patient auth middleware (`requirePatientAuth`) with separate JWT secret
+- New tables in tdental_demo: `patient_devices`, `patient_consents`, `patient_notifications`, `patient_referrals`, `service_reviews`, `patient_media`, `support_tickets`, `aftercare_instructions`
+- Migration 066: `api/migrations/066_patient_portal_tables.sql`
+- Patient registration = claim existing `partners` row by phone + set `password_hash`
+- VietQR payment display in patient app (reuses existing `company_bank_settings`)
+- Media plugin interface (MEDIA_SERVICE_URL + MEDIA_SERVICE_API_KEY) for external photo server
+- Product-map domain: `patient-portal.yaml`
+### Changed
+- `publicApiPaths.js`: added `/api/patient/auth/login` and `/api/patient/auth/register` to public paths
+- `server.js`: mounted `/api/patient` router
+- `.env.example`: added `PATIENT_JWT_SECRET`, `PATIENT_TOKEN_EXPIRY`, `MEDIA_SERVICE_URL`, `MEDIA_SERVICE_API_KEY`

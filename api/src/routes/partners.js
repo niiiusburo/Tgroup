@@ -11,6 +11,7 @@ const { getPartnerById } = require('./partners/getPartnerById');
 const { checkPartnerUnique, getPartnerKpis, listPartners } = require('./partners/readHandlers');
 const { createPartner, hardDeletePartner, softDeletePartner, updatePartner } = require('./partners/mutationHandlers');
 const { resolvePartner } = require('./partners/resolveHandler');
+const { patchInvestorVisibility } = require('./partners/investorVisibilityPatch');
 
 const router = express.Router();
 
@@ -18,6 +19,7 @@ router.get('/', requirePermission('customers.view'), listPartners);
 // declared before /:id to prevent Express matching these as an id param.
 router.get('/check-unique', requirePermission('customers.view'), checkPartnerUnique);
 router.get('/resolve', requirePermission('customers.view'), resolvePartner);
+router.patch('/:id/investor-visibility', requirePermission('customers.set_investor_visibility'), patchInvestorVisibility);
 router.get('/:id', requirePermission('customers.view'), getPartnerById);
 router.get('/:id/GetKPIs', requirePermission('customers.view'), getPartnerKpis);
 router.post('/', requirePermission('customers.add'), validate(PartnerCreateSchema), createPartner);

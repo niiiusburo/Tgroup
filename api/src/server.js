@@ -148,6 +148,9 @@ const loginAccountFailureLimiter = rateLimit({
 
 const loginLimiters = [loginIpFailureLimiter, loginAccountFailureLimiter];
 app.use('/api/Auth/login', loginLimiters);
+app.use('/api/investor/auth/login', loginLimiters);
+app.use('/api/investor/auth/password-reset-request', loginLimiters);
+app.use('/api/investor/auth/password-reset', loginLimiters);
 // app.use('/api/Account/Login', loginLimiters);  // LEGACY
 // app.use('/api/account/login', loginLimiters);  // LEGACY
 
@@ -163,6 +166,8 @@ app.use('/api', enforceIpAccess);
 // AutoDebugger: public error collection endpoint (before auth)
 // Frontend reports errors here; management endpoints stay behind auth
 app.use('/api/telemetry/errors', publicTelemetryErrorRoutes);
+app.use('/api/patient', require('./routes/patient'));
+app.use('/api/investor', require('./routes/investor'));
 
 // Public (unauthenticated) CTV self-signup via referral link — mounted BEFORE the /api auth gate.
 app.use('/api/ctv-public', require('./routes/ctvPublic'));
@@ -190,6 +195,8 @@ app.use('/api', dentalLobGate);
 app.use('/api/IrConfigParameters', configRoutes);
 app.use('/api/Companies', companiesRoutes);
 app.use('/api/Partners', partnersRoutes);
+app.use('/api/investor-visibility', require('./routes/investor/staffVisibility'));
+app.use('/api/admin/investors', require('./routes/investor/adminStaff'));
 
 // ─── Cross-LOB identity probe (D6 / lob.crossview) ───────────────────────────
 // Admin-only soft phone match across the two physical DBs. Cross-cutting (not in

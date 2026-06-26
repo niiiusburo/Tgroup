@@ -1,0 +1,30 @@
+{
+  "name": "Reports dashboard",
+  "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260615T170847Z-playwright/05-reports-dashboard.png",
+  "url": "https://tmv.2checkin.com/reports/dashboard",
+  "title": "TG Clinic - Clinic Management System",
+  "bodyLength": 1537,
+  "bodySample": "TD\nPHÒNG KHÁM\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\nBÁO CÁO\nBảng điều khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\nQUẢN TRỊ\nCài đặt\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nBảng điều khiển\nThẩm mỹ\nTất cả chi nhánh\n6\n\nCó vấn đề?\n\nNhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc.\n\nTổng quan\nBáo cáo\nBảng điều khiển\nBáo cáo\n\nDashboard analytics & insights\n\nDashboard\nRevenue\nAppointments\nDoctors\nCustomers\nLocations\nServices\nEmployees\nĐang xem:\n18 thg 5 – 16 thg 6, 2026\n·\nTất cả chi nhánh\nHôm nay\n3 ngày\n1 tuần\n1 tháng\n90 ngày\nTất cả\nTừ\n18/05/2026\n→\nĐến\n16/06/2026\nTất cả chi nhánh\nThẩm mỹ Hồ Chí Minh\nQA Final Location UPDATED\nQA Verify 1779772770\nThẩm mỹ Hà Nội\nDoanh thu đã thu\n2.129.440.324 ₫\n-11.8% vs prev period\nTổng lịch hẹn\n310,718\nKhách hàng mới\n342,507\nCòn nợ\n322.415.995 ₫\nXu hướng doanh thu 12 tháng\n2.152.829.000 ₫\nTháng 6\n7.115.610.000 ₫\nTháng 7\n2.920.464.000 ₫\nTháng 8\n2.643.488.000 ₫\nTháng 9\n3.461.004.000 ₫\nTháng 10\n2.902.425.000 ₫\nTháng 11\n2.623.243.000 ₫\nTháng 12\n3.427.929.000 ₫\nTháng 1\n8.476.113.000 ₫\nTháng 2\n2.718.128.000 ₫\nTháng 3\n2.706.532.000 ₫\nTháng 4\n1.641.813.000 ₫\nTháng 5\n1.767.511.000 ₫\nTháng 6\nTỷ lệ lịch hẹn\n40%\nHoàn thành\n87%\nTỷ lệ thu hồi\nĐã xuất hóa đơn\n2.453.921.111 ₫\n124 lịch hẹn hoàn thành\nĐã thu\n2.130.728.000 ₫\n86.8% tỷ lệ thu hồi\nCòn nợ\n323.143.111 ₫\n53 lịch hủy\nNEW IN THIS VERSION\n\nCTV recent-activity handoff hardened: forced flip, search highlight, scroll-to-client.\n\nView all changes\nv0.37.12\n(37163f6)",
+  "headings": [
+    "Bảng điều khiển",
+    "Báo cáo",
+    "Xu hướng doanh thu 12 tháng",
+    "Tỷ lệ lịch hẹn"
+  ],
+  "cosmeticVisible": true,
+  "navInfo": {
+    "found": true,
+    "text": "Bảng điều khiển",
+    "href": "/reports/dashboard",
+    "rect": {
+      "x": 67,
+      "y": 368,
+      "width": 162,
+      "height": 36
+    }
+  },
+  "visibleErrors": [],
+  "blank": false,
+  "badResponses": [],
+  "consoleErrors": []
+}

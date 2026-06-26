@@ -1,0 +1,42 @@
+name: NK3 Verify Packages
+
+on:
+  pull_request:
+    paths:
+      - 'api/**'
+      - 'website/**'
+      - 'scripts/nk3-verify-package.sh'
+      - 'product-map/**'
+      - 'docs/**'
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Package id or all'
+        required: true
+        default: 'nk3-services-money'
+
+jobs:
+  nk3-verify:
+    name: NK3 ${{ matrix.package }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - nk3-auth-identity
+          - nk3-lob-cosmetic
+          - nk3-services-money
+          - nk3-ctv-commission
+          - nk3-settings-governance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: api/package-lock.json
+      - name: Install API deps
+        run: npm ci
+        working-directory: api
+      - name: Run verification package
+        run: bash scripts/nk3-verify-package.sh ${{ matrix.package }}

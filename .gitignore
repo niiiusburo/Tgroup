@@ -128,3 +128,4 @@ __pycache__/
 
 # Auto-generated from local claude-mem DB each session — do not track (caused recurring dirty tree)
 .claude/memory.md
+.gitnexus

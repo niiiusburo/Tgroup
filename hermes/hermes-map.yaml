@@ -7,7 +7,7 @@ model: kimi-for-coding
 model_api_base: "https://api.kimi.com/coding/v1"
 
 model_api_keys:
-  kimi: "sk-kimi-hG5387anC2htih7IRzEUP7CiTQhegxnNiiz03kA7ZEaWTU6d0mvHfcFWM1Hs4fud"
+  kimi: "YOUR_KIMI_API_KEY"
   openai: ""
   anthropic: ""
 
@@ -27,7 +27,7 @@ screenshots:
   keep_days: 7
 
 telegram:
-  bot_token: "8702816219:AAEKwLZTsW2NrueeNhBaK7acZdtT035tfqc"
+  bot_token: "YOUR_TELEGRAM_BOT_TOKEN"
   chat_id: "760353533"
 
 restart_safety:

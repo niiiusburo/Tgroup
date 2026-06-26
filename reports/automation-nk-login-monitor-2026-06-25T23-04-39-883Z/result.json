@@ -1,0 +1,154 @@
+{
+  "outDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/reports/automation-nk-login-monitor-2026-06-25T23-04-39-883Z",
+  "login": {
+    "account": "t@clinic.vn",
+    "url": "https://nk.2checkin.com/",
+    "apiIssuesDuringLogin": []
+  },
+  "visibleError": "Không có bệnh nhân | Mai Bích Trang (BF) (DƯỠNG KHÔNG PHỤ CA NÀY)",
+  "apiIssues": [],
+  "failedRequests": [],
+  "consoleIssues": [],
+  "navCandidates": [
+    {
+      "text": "",
+      "href": "https://nk.2checkin.com/",
+      "visible": true
+    },
+    {
+      "text": "",
+      "href": "https://nk.2checkin.com/calendar",
+      "visible": true
+    },
+    {
+      "text": "",
+      "href": "https://nk.2checkin.com/customers",
+      "visible": true
+    },
+    {
+      "text": "Dịch vụ",
+      "href": "https://nk.2checkin.com/services",
+      "visible": true
+    },
+    {
+      "text": "Danh mục dịch vụ",
+      "href": "https://nk.2checkin.com/service-catalog",
+      "visible": true
+    },
+    {
+      "text": "Kế hoạch thanh toán",
+      "href": "https://nk.2checkin.com/payment",
+      "visible": true
+    },
+    {
+      "text": "Nhân viên",
+      "href": "https://nk.2checkin.com/employees",
+      "visible": true
+    },
+    {
+      "text": "Hoa hồngPro",
+      "href": "https://nk.2checkin.com/commission",
+      "visible": true
+    },
+    {
+      "text": "Chi nhánh",
+      "href": "https://nk.2checkin.com/locations",
+      "visible": true
+    },
+    {
+      "text": "Bảng điều khiển",
+      "href": "https://nk.2checkin.com/reports/dashboard",
+      "visible": true
+    },
+    {
+      "text": "Doanh thu",
+      "href": "https://nk.2checkin.com/reports/revenue",
+      "visible": true
+    },
+    {
+      "text": "Lịch hẹn",
+      "href": "https://nk.2checkin.com/reports/appointments",
+      "visible": true
+    },
+    {
+      "text": "Bác sĩ",
+      "href": "https://nk.2checkin.com/reports/doctors",
+      "visible": true
+    },
+    {
+      "text": "Khách hàng",
+      "href": "https://nk.2checkin.com/reports/customers",
+      "visible": true
+    },
+    {
+      "text": "Chi nhánh",
+      "href": "https://nk.2checkin.com/reports/locations",
+      "visible": true
+    },
+    {
+      "text": "Dịch vụ",
+      "href": "https://nk.2checkin.com/reports/services",
+      "visible": true
+    },
+    {
+      "text": "Nhân viên",
+      "href": "https://nk.2checkin.com/reports/employees",
+      "visible": true
+    },
+    {
+      "text": "Cài đặt",
+      "href": "https://nk.2checkin.com/settings",
+      "visible": true
+    },
+    {
+      "text": "Phản hồi",
+      "href": "https://nk.2checkin.com/feedback",
+      "visible": true
+    },
+    {
+      "text": "Quyền hạn",
+      "href": "https://nk.2checkin.com/permissions",
+      "visible": true
+    },
+    {
+      "text": "Mối quan hệ",
+      "href": "https://nk.2checkin.com/relationships",
+      "visible": true
+    },
+    {
+      "text": "Thông báo",
+      "href": "https://nk.2checkin.com/notifications",
+      "visible": true
+    }
+  ],
+  "screens": [
+    {
+      "label": "/",
+      "path": "/",
+      "url": "https://nk.2checkin.com/",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/reports/automation-nk-login-monitor-2026-06-25T23-04-39-883Z/01-screen-1.png",
+      "blank": false,
+      "obviousError": false,
+      "apiIssues": []
+    },
+    {
+      "label": "/customers",
+      "path": "/customers",
+      "url": "https://nk.2checkin.com/customers",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/reports/automation-nk-login-monitor-2026-06-25T23-04-39-883Z/02-customers.png",
+      "blank": false,
+      "obviousError": false,
+      "apiIssues": []
+    },
+    {
+      "label": "Dịch vụ",
+      "path": "/services",
+      "url": "https://nk.2checkin.com/services",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/reports/automation-nk-login-monitor-2026-06-25T23-04-39-883Z/03-Dich-vu.png",
+      "blank": false,
+      "obviousError": false,
+      "apiIssues": []
+    }
+  ],
+  "generatedAt": "2026-06-25T23:04:57.302Z"
+}

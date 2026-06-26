@@ -254,8 +254,11 @@ describe('Integration — Server boots cleanly', () => {
     for (const mount of activeMounts) {
       const match = mount.match(/require\('(\.\/routes\/[^']+)'\)/);
       if (match) {
-        const routePath = path.join(__dirname, '..', match[1] + '.js');
-        expect(() => fs.accessSync(routePath)).not.toThrow();
+        const basePath = path.join(__dirname, '..', match[1]);
+        const filePath = basePath + '.js';
+        const indexPath = path.join(basePath, 'index.js');
+        const exists = fs.existsSync(filePath) || fs.existsSync(indexPath);
+        expect(exists).toBe(true);
       }
     }
   });

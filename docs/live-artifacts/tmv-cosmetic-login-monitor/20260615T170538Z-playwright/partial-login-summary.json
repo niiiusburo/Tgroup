@@ -1,0 +1,342 @@
+{
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260615T170538Z-playwright",
+  "loginShot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260615T170538Z-playwright/00-login-page.png",
+  "primary": {
+    "identifier": "t@clinic.vn",
+    "url": "https://tmv.2checkin.com/",
+    "body": "TD\nPHÒNG KHÁM\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\nBÁO CÁO\nBảng điều khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\nQUẢN TRỊ\nCài đặt\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nTổng quan\nThẩm mỹ\nTất cả chi nhánh\n6\n\nCó vấn đề?\n\nNhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc.\n\nHẹn mới\nLịch trình ngày\nTất cả · 0\nĐang chờ · 0\nĐang khám · 0\nHoàn thành · 0\n\nKhông có bệnh nhân\n\nBệnh nhân chờ check-in sẽ hiển thị ở đây\n\nDỊCH VỤ / HOẠT ĐỘNG HÔM NAY\nDỊCH VỤ\tBỆNH NHÂN\tSL\tBÁC SĨ\tSỐ TIỀN\tTRẠNG THÁI\nDịch vụ sẽ hiển thị khi bệnh nhân được điều trị trong ngày.\nLỊCH HẸN HÔM NAY\nTất cả · 9\nĐã đến · 0\nĐã hủy · 0\nhạnh\n---\n09:30 · 30 phút\n0373865661\nĐang hẹn\nKhánh Ly\nBS 11\n10:00 · 30 phút\n0348880405\nĐang hẹn\nNguyễn Thu Huyền\nBS 8\nNGOCCH\n10:00 · 30 phút\n0363004036\nĐang hẹn\nNGUYỄN THỊ KIM PHƯỢNG\nBS 28\nMINHBQ\n10:00 · 90 phút\n0904429042\nĐang hẹn\nPhươnt ly\n---\n10:00 · 30 phút\n0979748997\nĐang hẹn\nChị Nhung\n---\n11:00 · 60 phút\n0912223328\nĐang hẹn\nChâu Anh\nBS 11\n13:00 · 30 phút\n0967358169\nĐang hẹn\nLÊ THỊ HUỲNH THI\nBS 28\nMINHBQ\n14:00 · 60 phút\n0765200996\nĐang hẹn\nBạn Thanh Thảo\nBS 25\nVYTDT\n16:00 · 15 phút\n0963215788\nĐang hẹn\nNEW IN THIS VERSION\n\nCTV recent-activity handoff hardened: forced flip, search highlight, scroll-to-client.\n\nView all changes\nv0.37.12\n(37163f6)",
+    "stillLogin": false
+  },
+  "fallback": null,
+  "accountWorked": "t@clinic.vn",
+  "afterLoginShot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260615T170538Z-playwright/01-after-login.png",
+  "afterInfo": {
+    "url": "https://tmv.2checkin.com/",
+    "title": "TG Clinic - Clinic Management System",
+    "body": "TD\nPHÒNG KHÁM\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\nBÁO CÁO\nBảng điều khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\nQUẢN TRỊ\nCài đặt\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nTổng quan\nThẩm mỹ\nTất cả chi nhánh\n6\n\nCó vấn đề?\n\nNhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc.\n\nHẹn mới\nLịch trình ngày\nTất cả · 0\nĐang chờ · 0\nĐang khám · 0\nHoàn thành · 0\n\nKhông có bệnh nhân\n\nBệnh nhân chờ check-in sẽ hiển thị ở đây\n\nDỊCH VỤ / HOẠT ĐỘNG HÔM NAY\nDỊCH VỤ\tBỆNH NHÂN\tSL\tBÁC SĨ\tSỐ TIỀN\tTRẠNG THÁI\nDịch vụ sẽ hiển thị khi bệnh nhân được điều trị trong ngày.\nLỊCH HẸN HÔM NAY\nTất cả · 9\nĐã đến · 0\nĐã hủy · 0\nhạnh\n---\n09:30 · 30 phút\n0373865661\nĐang hẹn\nKhánh Ly\nBS 11\n10:00 · 30 phút\n0348880405\nĐang hẹn\nNguyễn Thu Huyền\nBS 8\nNGOCCH\n10:00 · 30 phút\n0363004036\nĐang hẹn\nNGUYỄN THỊ KIM PHƯỢNG\nBS 28\nMINHBQ\n10:00 · 90 phút\n0904429042\nĐang hẹn\nPhươnt ly\n---\n10:00 · 30 phút\n0979748997\nĐang hẹn\nChị Nhung\n---\n11:00 · 60 phút\n0912223328\nĐang hẹn\nChâu Anh\nBS 11\n13:00 · 30 phút\n0967358169\nĐang hẹn\nLÊ THỊ HUỲNH THI\nBS 28\nMINHBQ\n14:00 · 60 phút\n0765200996\nĐang hẹn\nBạn Thanh Thảo\nBS 25\nVYTDT\n16:00 · 15 phút\n0963215788\nĐang hẹn\nNEW IN THIS VERSION\n\nCTV recent-activity handoff hardened: forced flip, search highlight, scroll-to-client.\n\nView all changes\nv0.37.12\n(37163f6)",
+    "links": [
+      {
+        "i": 1,
+        "tag": "a",
+        "text": "",
+        "href": "https://tmv.2checkin.com/",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 2,
+        "tag": "a",
+        "text": "",
+        "href": "https://tmv.2checkin.com/calendar",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 3,
+        "tag": "a",
+        "text": "",
+        "href": "https://tmv.2checkin.com/customers",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 5,
+        "tag": "a",
+        "text": "Dịch vụ",
+        "href": "https://tmv.2checkin.com/services",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 6,
+        "tag": "a",
+        "text": "Danh mục dịch vụ",
+        "href": "https://tmv.2checkin.com/service-catalog",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 7,
+        "tag": "a",
+        "text": "Kế hoạch thanh toán",
+        "href": "https://tmv.2checkin.com/payment",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 9,
+        "tag": "a",
+        "text": "Nhân viên",
+        "href": "https://tmv.2checkin.com/employees",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 10,
+        "tag": "a",
+        "text": "Hoa hồng\nPro",
+        "href": "https://tmv.2checkin.com/commission",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 11,
+        "tag": "a",
+        "text": "Chi nhánh",
+        "href": "https://tmv.2checkin.com/locations",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 13,
+        "tag": "a",
+        "text": "Bảng điều khiển",
+        "href": "https://tmv.2checkin.com/reports/dashboard",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 14,
+        "tag": "a",
+        "text": "Doanh thu",
+        "href": "https://tmv.2checkin.com/reports/revenue",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 15,
+        "tag": "a",
+        "text": "Lịch hẹn",
+        "href": "https://tmv.2checkin.com/reports/appointments",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 16,
+        "tag": "a",
+        "text": "Bác sĩ",
+        "href": "https://tmv.2checkin.com/reports/doctors",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 17,
+        "tag": "a",
+        "text": "Khách hàng",
+        "href": "https://tmv.2checkin.com/reports/customers",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 18,
+        "tag": "a",
+        "text": "Chi nhánh",
+        "href": "https://tmv.2checkin.com/reports/locations",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 19,
+        "tag": "a",
+        "text": "Dịch vụ",
+        "href": "https://tmv.2checkin.com/reports/services",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 20,
+        "tag": "a",
+        "text": "Nhân viên",
+        "href": "https://tmv.2checkin.com/reports/employees",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 22,
+        "tag": "a",
+        "text": "Cài đặt",
+        "href": "https://tmv.2checkin.com/settings",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 23,
+        "tag": "a",
+        "text": "Phản hồi",
+        "href": "https://tmv.2checkin.com/feedback",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 24,
+        "tag": "a",
+        "text": "Quyền hạn",
+        "href": "https://tmv.2checkin.com/permissions",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 25,
+        "tag": "a",
+        "text": "Mối quan hệ",
+        "href": "https://tmv.2checkin.com/relationships",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 26,
+        "tag": "a",
+        "text": "Thông báo",
+        "href": "https://tmv.2checkin.com/notifications",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 28,
+        "tag": "button",
+        "text": "A",
+        "href": "",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 29,
+        "tag": "button",
+        "text": "Switch language",
+        "href": "",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 31,
+        "tag": "button",
+        "text": "Thẩm mỹ",
+        "href": "",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 32,
+        "tag": "button",
+        "text": "Tất cả chi nhánh",
+        "href": "",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 33,
+        "tag": "button",
+        "text": "Quét nhanh khuôn mặt",
+        "href": "",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 34,
+        "tag": "button",
+        "text": "6",
+        "href": "",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 35,
+        "tag": "button",
+        "text": "Bỏ qua",
+        "href": "",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 37,
+        "tag": "button",
+        "text": "Hẹn mới",
+        "href": "",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 38,
+        "tag": "button",
+        "text": "Tất cả · 0",
+        "href": "",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 39,
+        "tag": "button",
+        "text": "Đang chờ · 0",
+        "href": "",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 40,
+        "tag": "button",
+        "text": "Đang khám · 0",
+        "href": "",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 41,
+        "tag": "button",
+        "text": "Hoàn thành · 0",
+        "href": "",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 42,
+        "tag": "button",
+        "text": "Tất cả · 9",
+        "href": "",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 43,
+        "tag": "button",
+        "text": "Đã đến · 0",
+        "href": "",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 44,
+        "tag": "button",
+        "text": "Đã hủy · 0",
+        "href": "",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 63,
+        "tag": "button",
+        "text": "NEW IN THIS VERSION\n\nCTV recent-activity handoff hardened: forced flip, search highlight, scroll-to-client.\n\nView all ch",
+        "href": "",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 64,
+        "tag": "button",
+        "text": "Dismiss release notes",
+        "href": "",
+        "role": "",
+        "disabled": false
+      },
+      {
+        "i": 65,
+        "tag": "button",
+        "text": "v0.37.12\n(37163f6)",
+        "href": "",
+        "role": "",
+        "disabled": false
+      }
+    ]
+  },
+  "badResponses": [],
+  "consoleErrors": []
+}

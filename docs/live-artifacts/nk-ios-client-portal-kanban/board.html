@@ -1,0 +1,1587 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NK iOS Client Portal Kanban</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #18212f;
+      --muted: #667085;
+      --line: #d9e0e9;
+      --surface: #ffffff;
+      --paper: #f4f7fb;
+      --keep: #14785c;
+      --keep-soft: #e3f4ee;
+      --remove: #b4323a;
+      --remove-soft: #fae7e8;
+      --review: #2f5f9f;
+      --review-soft: #e6eefb;
+      --accent: #0f766e;
+      --amber: #925f12;
+      --amber-soft: #fff1d6;
+      --shadow: 0 14px 32px rgba(28, 39, 62, 0.12);
+      --radius: 8px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(255, 255, 255, 0.94);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+    }
+
+    .topbar-inner {
+      max-width: 1540px;
+      margin: 0 auto;
+      padding: 18px 24px 14px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 3vw, 38px);
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: var(--muted);
+      max-width: 980px;
+      line-height: 1.45;
+    }
+
+    .source-pill {
+      white-space: nowrap;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: #f9fbfd;
+      color: #39465a;
+      font-weight: 650;
+      font-size: 13px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f7f9fc;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 0 12px;
+      min-height: 42px;
+    }
+
+    .search input {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--ink);
+      min-width: 0;
+    }
+
+    .control {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #ffffff;
+      color: var(--ink);
+      padding: 0 12px;
+      outline: 0;
+    }
+
+    .primary-action,
+    .quiet-action {
+      min-height: 42px;
+      border-radius: var(--radius);
+      font-weight: 750;
+      padding: 0 14px;
+    }
+
+    .primary-action {
+      background: var(--ink);
+      color: white;
+    }
+
+    .quiet-action {
+      background: #eef2f7;
+      color: #2d3648;
+    }
+
+    .summary-band {
+      max-width: 1540px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px 24px 4px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(120px, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px;
+      min-width: 0;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .metric-value {
+      margin-top: 4px;
+      font-size: 24px;
+      font-weight: 850;
+      letter-spacing: 0;
+    }
+
+    .board {
+      max-width: 1540px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 14px 24px 28px;
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr) minmax(260px, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .column {
+      min-height: calc(100vh - 225px);
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .column-header {
+      position: sticky;
+      top: 130px;
+      z-index: 5;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .column-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 850;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--review);
+    }
+
+    .dot.keep {
+      background: var(--keep);
+    }
+
+    .dot.remove {
+      background: var(--remove);
+    }
+
+    .count {
+      color: var(--muted);
+      font-weight: 750;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .card-list {
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 0 rgba(20, 33, 49, 0.03);
+      overflow: hidden;
+    }
+
+    .card[data-decision="keep"] {
+      border-color: rgba(20, 120, 92, 0.35);
+      background: linear-gradient(0deg, rgba(227, 244, 238, 0.72), rgba(255, 255, 255, 1) 42%);
+    }
+
+    .card[data-decision="remove"] {
+      border-color: rgba(180, 50, 58, 0.32);
+      background: linear-gradient(0deg, rgba(250, 231, 232, 0.66), rgba(255, 255, 255, 1) 42%);
+    }
+
+    .card-main {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.22;
+      letter-spacing: 0;
+    }
+
+    .priority {
+      font-size: 12px;
+      font-weight: 850;
+      border-radius: 999px;
+      padding: 4px 8px;
+      white-space: nowrap;
+      color: #263247;
+      background: #eef2f7;
+    }
+
+    .priority.must {
+      color: #0e4f3e;
+      background: var(--keep-soft);
+    }
+
+    .priority.should {
+      color: #274e8f;
+      background: var(--review-soft);
+    }
+
+    .priority.later {
+      color: #794a06;
+      background: var(--amber-soft);
+    }
+
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 7px;
+      color: #475467;
+      background: #f8fafc;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .summary {
+      margin: 0;
+      color: #344054;
+      line-height: 1.44;
+      font-size: 14px;
+    }
+
+    details {
+      border-top: 1px solid #edf1f6;
+    }
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 10px 12px;
+      color: #43516a;
+      font-weight: 750;
+      font-size: 13px;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .details-body {
+      padding: 0 12px 12px;
+      display: grid;
+      gap: 8px;
+      color: #3f4a5f;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .detail-row {
+      display: grid;
+      gap: 3px;
+    }
+
+    .detail-label {
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 8px;
+      border-top: 1px solid #edf1f6;
+      padding: 10px 12px 12px;
+    }
+
+    .card-action {
+      min-height: 34px;
+      border-radius: 7px;
+      font-weight: 820;
+      color: #263247;
+      background: #eef2f7;
+      padding: 0 10px;
+    }
+
+    .card-action.keep {
+      background: var(--keep-soft);
+      color: var(--keep);
+    }
+
+    .card-action.remove {
+      background: var(--remove-soft);
+      color: var(--remove);
+    }
+
+    .card-action.reset {
+      width: 38px;
+      color: #526071;
+      padding: 0;
+    }
+
+    .empty {
+      border: 1px dashed #cbd5e1;
+      border-radius: var(--radius);
+      padding: 22px 14px;
+      color: var(--muted);
+      text-align: center;
+      background: rgba(255, 255, 255, 0.54);
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 40;
+      background: #152033;
+      color: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 12px 14px;
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: 180ms ease;
+      max-width: min(420px, calc(100vw - 40px));
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .decision-drawer {
+      position: fixed;
+      inset: auto 20px 20px auto;
+      width: min(520px, calc(100vw - 40px));
+      max-height: min(620px, calc(100vh - 40px));
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      z-index: 50;
+      display: none;
+      overflow: hidden;
+    }
+
+    .decision-drawer.open {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .drawer-head,
+    .drawer-foot {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .drawer-foot {
+      border-bottom: 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .drawer-title {
+      font-weight: 850;
+    }
+
+    .drawer-body {
+      padding: 12px;
+      overflow: auto;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 360px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px;
+      color: var(--ink);
+      background: #fbfdff;
+      line-height: 1.45;
+      outline: 0;
+    }
+
+    @media (max-width: 1100px) {
+      .toolbar {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .summary-band {
+        grid-template-columns: repeat(3, minmax(120px, 1fr));
+      }
+
+      .board {
+        grid-template-columns: 1fr;
+      }
+
+      .column {
+        min-height: auto;
+      }
+
+      .column-header {
+        top: 148px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .topbar-inner,
+      .summary-band,
+      .board {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .title-row {
+        display: grid;
+      }
+
+      .source-pill {
+        width: fit-content;
+        white-space: normal;
+      }
+
+      .toolbar,
+      .summary-band {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        grid-template-columns: 1fr;
+      }
+
+      .card-action.reset {
+        width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="title-row">
+          <div>
+            <h1>NK iOS Client Portal Kanban</h1>
+            <p class="subtitle">Quick decision board for the client-facing iPhone app. Review each proposed screen or module, then click Keep or Remove. Decisions are saved in this browser with localStorage.</p>
+          </div>
+          <div class="source-pill">Spec seed: Order 22/6/2026</div>
+        </div>
+
+        <div class="toolbar" aria-label="Board controls">
+          <label class="search" for="searchInput">
+            <span aria-hidden="true">Search</span>
+            <input id="searchInput" type="search" placeholder="screen, model, payment, referral, chat...">
+          </label>
+          <select id="typeFilter" class="control" aria-label="Filter by type">
+            <option value="all">All types</option>
+            <option value="screen">Screens</option>
+            <option value="module">Model modules</option>
+            <option value="service">Services and jobs</option>
+            <option value="admin">Admin back-office</option>
+            <option value="risk">Risks and decisions</option>
+          </select>
+          <select id="priorityFilter" class="control" aria-label="Filter by priority">
+            <option value="all">All priorities</option>
+            <option value="must">Must have</option>
+            <option value="should">Should have</option>
+            <option value="later">Later</option>
+          </select>
+          <button class="primary-action" id="exportButton" type="button">Export decisions</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="summary-band" aria-label="Decision summary">
+      <div class="metric">
+        <div class="metric-label">Total cards</div>
+        <div class="metric-value" id="totalMetric">0</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Review queue</div>
+        <div class="metric-value" id="reviewMetric">0</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Keep</div>
+        <div class="metric-value" id="keepMetric">0</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Remove</div>
+        <div class="metric-value" id="removeMetric">0</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Completion</div>
+        <div class="metric-value" id="doneMetric">0%</div>
+      </div>
+    </section>
+
+    <section class="board" aria-label="Kanban board">
+      <section class="column" aria-labelledby="reviewTitle">
+        <div class="column-header">
+          <div class="column-title"><span class="dot"></span><span id="reviewTitle">Review Queue</span></div>
+          <span class="count" id="reviewCount">0 cards</span>
+        </div>
+        <div class="card-list" id="reviewList"></div>
+      </section>
+
+      <section class="column" aria-labelledby="keepTitle">
+        <div class="column-header">
+          <div class="column-title"><span class="dot keep"></span><span id="keepTitle">Keep For App</span></div>
+          <span class="count" id="keepCount">0 cards</span>
+        </div>
+        <div class="card-list" id="keepList"></div>
+      </section>
+
+      <section class="column" aria-labelledby="removeTitle">
+        <div class="column-header">
+          <div class="column-title"><span class="dot remove"></span><span id="removeTitle">Remove / Park</span></div>
+          <span class="count" id="removeCount">0 cards</span>
+        </div>
+        <div class="card-list" id="removeList"></div>
+      </section>
+    </section>
+  </main>
+
+  <aside class="decision-drawer" id="decisionDrawer" aria-label="Exported decisions">
+    <div class="drawer-head">
+      <div class="drawer-title">Decision export</div>
+      <button class="quiet-action" id="closeDrawer" type="button">Close</button>
+    </div>
+    <div class="drawer-body">
+      <textarea id="decisionOutput" spellcheck="false"></textarea>
+    </div>
+    <div class="drawer-foot">
+      <button class="primary-action" id="copyButton" type="button">Copy</button>
+      <button class="quiet-action" id="resetButton" type="button">Reset board</button>
+    </div>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const STORAGE_KEY = 'nk-ios-kanban-decisions-v1';
+
+    const cards = [
+      {
+        id: 'auth-claim',
+        type: 'screen',
+        priority: 'must',
+        area: 'Access',
+        title: 'Login / Claim Account',
+        summary: 'Patient signs in or claims an existing NK customer profile using phone, OTP, and clinic identity match.',
+        includes: 'Phone OTP, DOB or profile verifier, consent checkbox, device trust, forgot access path.',
+        data: 'PatientAccount, AuthOtp, SessionDevice, ConsentProfile.',
+        open: 'How will legacy NK customers be invited and matched without duplicate partners?'
+      },
+      {
+        id: 'home-dashboard',
+        type: 'screen',
+        priority: 'must',
+        area: 'Home',
+        title: 'Home Dashboard',
+        summary: 'First screen after login with next appointment, treatment status, due payment, points, and quick actions.',
+        includes: 'Next visit card, treatment progress strip, pay now, request appointment, chat, referral CTA.',
+        data: 'PatientSummary, AppointmentNext, BalanceSnapshot, LoyaltyBalance.',
+        open: 'Decide whether home is clinic-branded content or purely operational.'
+      },
+      {
+        id: 'appointments-list',
+        type: 'screen',
+        priority: 'must',
+        area: 'Appointments',
+        title: 'Appointments Timeline',
+        summary: 'Patient sees appointment history and upcoming bookings in one mobile timeline.',
+        includes: 'Upcoming, completed, cancelled/no-show, doctor, location, service purpose, status labels.',
+        data: 'Appointment, AppointmentStatus, ClinicLocation, ProviderProfile.',
+        open: 'Map NK appointment states into patient-safe wording.'
+      },
+      {
+        id: 'appointment-detail',
+        type: 'screen',
+        priority: 'must',
+        area: 'Appointments',
+        title: 'Appointment Detail',
+        summary: 'Detailed view for one visit, including directions, preparation notes, payment prompt, and follow-up survey.',
+        includes: 'Visit time, location, doctor, services, prep notes, reschedule CTA, after-visit review CTA.',
+        data: 'Appointment, TreatmentEpisode, ServiceLine, ReviewPrompt.',
+        open: 'Which clinical notes are safe to expose to patients?'
+      },
+      {
+        id: 'slot-browser',
+        type: 'screen',
+        priority: 'must',
+        area: 'Appointments',
+        title: 'Available Slots Browser',
+        summary: 'Patient checks free clinic slots and proposes a booking time.',
+        includes: 'Date picker, branch, doctor optional, service reason, preferred times, waitlist fallback.',
+        data: 'AvailabilitySlot, ProviderSchedule, AppointmentRequest.',
+        open: 'Need backend availability contract; current admin calendar is not enough for public self-booking.'
+      },
+      {
+        id: 'booking-request',
+        type: 'screen',
+        priority: 'must',
+        area: 'Appointments',
+        title: 'Request Appointment',
+        summary: 'Patient submits a request that staff can accept, adjust, or reject.',
+        includes: 'Reason, preferred branch/time, notes, photo attachment optional, confirmation state.',
+        data: 'AppointmentRequest, RequestStatus, IntakeAttachment.',
+        open: 'Is this immediate booking or staff-confirmed booking? Safer default is staff-confirmed.'
+      },
+      {
+        id: 'treatment-journey',
+        type: 'screen',
+        priority: 'must',
+        area: 'Treatment',
+        title: 'Treatment Journey',
+        summary: 'Patient tracks the full treatment process across phases, visits, photos, and next steps.',
+        includes: 'Current phase, phase timeline, completed milestones, next required action, linked appointments.',
+        data: 'TreatmentEpisode, TreatmentStage, Appointment, CareInstruction.',
+        open: 'Define clinical phase taxonomy for orthodontic, implant, cosmetic, and general dental journeys.'
+      },
+      {
+        id: 'treatment-detail',
+        type: 'screen',
+        priority: 'should',
+        area: 'Treatment',
+        title: 'Treatment Detail',
+        summary: 'Deep view of one treatment episode with service cards, doctor, estimates, and care plan.',
+        includes: 'Plan summary, stage list, finance link, attached images, care instructions.',
+        data: 'DotKham, DotKhamStep, SaleOrderLine, TreatmentMedia.',
+        open: 'DotKham terminology should be hidden from client copy.'
+      },
+      {
+        id: 'oral-photo-gallery',
+        type: 'screen',
+        priority: 'must',
+        area: 'Treatment',
+        title: 'Oral Condition Photo Gallery',
+        summary: 'Patient reviews mouth/teeth photos by treatment stage to see progress.',
+        includes: 'Before/after compare, stage filter, clinic-uploaded photos, optional patient-uploaded photos.',
+        data: 'TreatmentMedia, MediaStage, MediaConsent, SecureImageUrl.',
+        open: 'Need privacy rules for clinical image exposure, retention, and download/share permissions.'
+      },
+      {
+        id: 'care-instructions',
+        type: 'screen',
+        priority: 'should',
+        area: 'Treatment',
+        title: 'Aftercare Instructions',
+        summary: 'Personalized care instructions after each revisit or service.',
+        includes: 'Do/don\'t checklist, medicine note, warning signs, contact clinic button.',
+        data: 'CareInstruction, VisitOutcome, NotificationTemplate.',
+        open: 'Who authors instructions: doctor, service catalog template, or staff?'
+      },
+      {
+        id: 'notifications-inbox',
+        type: 'screen',
+        priority: 'must',
+        area: 'Notifications',
+        title: 'Notification Inbox',
+        summary: 'Central place for appointment reminders, post-visit check-ins, offers, reviews, and payment notices.',
+        includes: 'Unread badges, message categories, action buttons, deep links, archive/read state.',
+        data: 'NotificationMessage, NotificationReadState, NotificationDeepLink.',
+        open: 'Current admin notifications page is placeholder; mobile needs real message history.'
+      },
+      {
+        id: 'notification-preferences',
+        type: 'screen',
+        priority: 'should',
+        area: 'Notifications',
+        title: 'Notification Preferences',
+        summary: 'Patient controls push, SMS/Zalo, email, offers, reminders, and quiet hours.',
+        includes: 'Push permission, channel toggles, marketing opt-in, language, quiet hours.',
+        data: 'NotificationPreference, ConsentProfile, DevicePushToken.',
+        open: 'Must split transactional reminders from promotional consent.'
+      },
+      {
+        id: 'finance-overview',
+        type: 'screen',
+        priority: 'must',
+        area: 'Finance',
+        title: 'Finance / Balance Overview',
+        summary: 'Patient sees outstanding balance, upcoming due amount, paid history, and installment plan.',
+        includes: 'Total debt, due now, payment plan, invoices, deposits, receipts, finance support CTA.',
+        data: 'BalanceSnapshot, Receivable, PaymentLedger, MonthlyPlan.',
+        open: 'Need patient-safe balance API; admin payment records are high-blast and must be filtered.'
+      },
+      {
+        id: 'payment-checkout',
+        type: 'screen',
+        priority: 'must',
+        area: 'Finance',
+        title: 'Online Payment Checkout',
+        summary: 'Patient pays due amounts in-app using bank transfer/VietQR and later MoMo/ZaloPay if enabled.',
+        includes: 'Amount picker, invoice allocation, method select, QR, confirmation, receipt.',
+        data: 'PaymentIntent, PaymentMethod, PaymentAllocationPreview, Receipt.',
+        open: 'Payment gateway reconciliation and over-allocation rules must match NK payment invariants.'
+      },
+      {
+        id: 'receipt-history',
+        type: 'screen',
+        priority: 'should',
+        area: 'Finance',
+        title: 'Receipt History',
+        summary: 'Patient reviews payment history and downloads receipts.',
+        includes: 'Receipt list, filters, invoice/service links, downloadable receipt, support dispute button.',
+        data: 'PaymentLedger, Receipt, PaymentAllocation.',
+        open: 'Decide whether to expose internal receipt numbers or generated client receipt IDs.'
+      },
+      {
+        id: 'installment-plan',
+        type: 'screen',
+        priority: 'should',
+        area: 'Finance',
+        title: 'Installment Plan',
+        summary: 'Patient sees installment schedule and pays due installments.',
+        includes: 'Plan progress, upcoming due date, paid/missed states, payment action.',
+        data: 'MonthlyPlan, PlanInstallment, PaymentIntent.',
+        open: 'Current monthly plan route can mark installment paid without ledger row; reconcile before mobile exposure.'
+      },
+      {
+        id: 'referral-entry',
+        type: 'screen',
+        priority: 'must',
+        area: 'Referral',
+        title: 'Refer Family Member',
+        summary: 'Patient submits a referral lead for a relative or friend.',
+        includes: 'Name, phone, relationship, desired service, branch, note, consent confirmation.',
+        data: 'ReferralLead, ReferralConsent, AppointmentRequest.',
+        open: 'Patient referral is adjacent to CTV but not identical; define whether patients become CTV accounts.'
+      },
+      {
+        id: 'referral-status',
+        type: 'screen',
+        priority: 'must',
+        area: 'Referral',
+        title: 'Referral Status Tracker',
+        summary: 'Patient tracks whether referred person was contacted, booked, visited, or converted.',
+        includes: 'Status timeline, privacy-safe lead labels, staff contact state, reward estimate.',
+        data: 'ReferralLead, ReferralStatusEvent, ReferralAttribution.',
+        open: 'Protect referred person privacy; app may show coarse statuses only.'
+      },
+      {
+        id: 'referral-commission',
+        type: 'screen',
+        priority: 'should',
+        area: 'Referral',
+        title: 'Referral Reward / Commission Status',
+        summary: 'Patient sees referral payout or reward status if the program pays cash or credit.',
+        includes: 'Earned, pending, approved, paid, payout method, clinic policy note.',
+        data: 'ReferralReward, PayoutStatus, EarningsLedger.',
+        open: 'Need product decision: patient loyalty credit vs CTV-style cash commission.'
+      },
+      {
+        id: 'loyalty-wallet',
+        type: 'screen',
+        priority: 'must',
+        area: 'Loyalty',
+        title: 'Loyalty Points Wallet',
+        summary: 'Patient sees points earned from payments, services, reviews, and promotions.',
+        includes: 'Current points, tier, earning history, expiring points, earn rules.',
+        data: 'LoyaltyAccount, LoyaltyPointLedger, LoyaltyRule.',
+        open: 'No current NK loyalty model found; define earning source and anti-abuse rules.'
+      },
+      {
+        id: 'rewards-catalog',
+        type: 'screen',
+        priority: 'should',
+        area: 'Loyalty',
+        title: 'Rewards Redemption',
+        summary: 'Patient converts points into services, discounts, or wallet credit.',
+        includes: 'Reward catalog, eligibility, redemption code, staff approval state.',
+        data: 'RewardCatalog, RewardRedemption, DiscountCode.',
+        open: 'Need accounting decision for points redeemed as money vs service discount.'
+      },
+      {
+        id: 'live-chat',
+        type: 'screen',
+        priority: 'must',
+        area: 'Support',
+        title: 'Realtime Live Chat',
+        summary: 'Patient chats with app staff in real time from inside the portal.',
+        includes: 'Thread list, live chat room, attachments, operating hours, escalation to call back.',
+        data: 'ChatThread, ChatMessage, ChatAttachment, StaffPresence.',
+        open: 'Choose real-time transport and staffing workflow; current feedback thread system is async.'
+      },
+      {
+        id: 'callback-request',
+        type: 'screen',
+        priority: 'must',
+        area: 'Support',
+        title: 'Request Call Back',
+        summary: 'Patient asks staff to contact them about scheduling, finance, treatment, or support.',
+        includes: 'Topic, preferred time, phone confirmation, urgency, status tracking.',
+        data: 'SupportTicket, CallbackRequest, TicketStatusEvent.',
+        open: 'Should callback be separate from chat or a ticket type?'
+      },
+      {
+        id: 'service-review',
+        type: 'screen',
+        priority: 'must',
+        area: 'Feedback',
+        title: 'Service Review',
+        summary: 'Patient rates quality/service after each revisit or treatment event.',
+        includes: 'Star rating, NPS, staff/service tags, free text, follow-up permission.',
+        data: 'ServiceReview, ReviewPrompt, Appointment, TreatmentEpisode.',
+        open: 'Need post-visit automation trigger and duplicate-review guard.'
+      },
+      {
+        id: 'complaint-feedback',
+        type: 'screen',
+        priority: 'must',
+        area: 'Feedback',
+        title: 'Complaint / Suggestion',
+        summary: 'Patient sends feedback, optionally anonymous, with attachments.',
+        includes: 'Anonymous toggle, topic, message, photos, contact permission, status.',
+        data: 'FeedbackThread, FeedbackMessage, FeedbackAttachment, AnonymityPolicy.',
+        open: 'Existing feedback domain can help, but anonymous patient identity rules need a clear contract.'
+      },
+      {
+        id: 'profile-account',
+        type: 'screen',
+        priority: 'must',
+        area: 'Profile',
+        title: 'Profile & Account',
+        summary: 'Patient manages profile basics, language, contact info, linked family profiles, and logout.',
+        includes: 'Name, phone, email, DOB, language, family member switcher, support ID.',
+        data: 'PatientAccount, PartnerProfile, FamilyLink, LocalePreference.',
+        open: 'Define which fields patients can edit directly vs request staff update.'
+      },
+      {
+        id: 'privacy-security',
+        type: 'screen',
+        priority: 'must',
+        area: 'Profile',
+        title: 'Privacy & Device Security',
+        summary: 'Patient controls consent, biometric unlock, active sessions, and data privacy preferences.',
+        includes: 'Face ID unlock, device list, revoke sessions, marketing consent, photo consent.',
+        data: 'ConsentProfile, SessionDevice, DeviceBiometricSetting, AuditEvent.',
+        open: 'Need iOS secure storage rules and consent audit log.'
+      },
+      {
+        id: 'help-faq',
+        type: 'screen',
+        priority: 'later',
+        area: 'Support',
+        title: 'Help / FAQ',
+        summary: 'Lightweight help center for appointment, payment, referral, and treatment questions.',
+        includes: 'FAQ categories, clinic policy pages, emergency contact guidance.',
+        data: 'HelpArticle, ClinicPolicy, SupportTopic.',
+        open: 'Can be static content in first release if staff support is available.'
+      },
+      {
+        id: 'module-patient-account',
+        type: 'module',
+        priority: 'must',
+        area: 'Model',
+        title: 'PatientAccount',
+        summary: 'Mobile-safe identity layer linked to NK partner/customer rows.',
+        includes: 'Patient ID, partner ID, phones, profile completeness, account status.',
+        data: 'dbo.partners plus mobile account table or auth mapping.',
+        open: 'Avoid duplicate customer records when claiming app access.'
+      },
+      {
+        id: 'module-consent',
+        type: 'module',
+        priority: 'must',
+        area: 'Model',
+        title: 'ConsentProfile',
+        summary: 'Durable consent record for marketing, push, SMS/Zalo, photo visibility, and anonymous feedback.',
+        includes: 'Consent channel, version, accepted at, revoked at, source.',
+        data: 'ConsentProfile, AuditEvent.',
+        open: 'Consent text versioning is required before promotions and clinical photo sharing.'
+      },
+      {
+        id: 'module-appointment',
+        type: 'module',
+        priority: 'must',
+        area: 'Model',
+        title: 'Appointment + Request Models',
+        summary: 'Patient-facing appointment objects and staff-confirmed request lifecycle.',
+        includes: 'Appointment, AvailabilitySlot, AppointmentRequest, RequestStatusEvent.',
+        data: 'dbo.appointments, provider schedules, patient request table.',
+        open: 'Separate admin appointment edits from patient proposals.'
+      },
+      {
+        id: 'module-treatment',
+        type: 'module',
+        priority: 'must',
+        area: 'Model',
+        title: 'TreatmentEpisode + Stage',
+        summary: 'Client-friendly treatment wrapper around NK service and clinical history records.',
+        includes: 'Episode, phase/stage, milestone, provider, next action.',
+        data: 'dotkhams, dotkhamsteps, saleorderlines, appointments.',
+        open: 'Requires translation from internal dental records into patient-safe journey wording.'
+      },
+      {
+        id: 'module-treatment-media',
+        type: 'module',
+        priority: 'must',
+        area: 'Model',
+        title: 'TreatmentMedia',
+        summary: 'Secure image model for oral condition photos by phase.',
+        includes: 'Media type, stage, capture date, uploader, consent, signed URL.',
+        data: 'Existing customer photo storage plus new stage metadata if missing.',
+        open: 'Need stage tags and signed-media access controls.'
+      },
+      {
+        id: 'module-notification',
+        type: 'module',
+        priority: 'must',
+        area: 'Model',
+        title: 'NotificationMessage',
+        summary: 'Unified transactional and promotional notification object.',
+        includes: 'Category, body, channel, deep link, read state, delivery status.',
+        data: 'NotificationMessage, DevicePushToken, NotificationPreference.',
+        open: 'Must distinguish appointment, aftercare, offer, review, and payment notices.'
+      },
+      {
+        id: 'module-balance',
+        type: 'module',
+        priority: 'must',
+        area: 'Model',
+        title: 'BalanceSnapshot + Receivable',
+        summary: 'Patient-safe financial view of due, overdue, paid, deposits, and installment obligations.',
+        includes: 'Due now, total outstanding, receivable lines, plan schedule, currency.',
+        data: 'saleorders, payments, payment_allocations, monthlyplans.',
+        open: 'Balance math must reuse existing payment invariants, not a parallel calculation.'
+      },
+      {
+        id: 'module-payment-intent',
+        type: 'module',
+        priority: 'must',
+        area: 'Model',
+        title: 'PaymentIntent',
+        summary: 'Safe payment workflow object before money is posted into NK ledgers.',
+        includes: 'Intent amount, method, allocation preview, provider reference, expiration, status.',
+        data: 'PaymentIntent, PaymentLedger, PaymentAllocationPreview.',
+        open: 'Need idempotency, reconciliation, expired QR handling, and staff-visible exceptions.'
+      },
+      {
+        id: 'module-referral-lead',
+        type: 'module',
+        priority: 'must',
+        area: 'Model',
+        title: 'ReferralLead + Attribution',
+        summary: 'Referral record from patient submission through booking and reward eligibility.',
+        includes: 'Lead contact, privacy state, status events, attribution, reward link.',
+        data: 'partners, appointments, CTV/referral claim concepts, reward ledger.',
+        open: 'Clarify whether this reuses CTV booking mechanics or a simpler patient referral lane.'
+      },
+      {
+        id: 'module-loyalty',
+        type: 'module',
+        priority: 'must',
+        area: 'Model',
+        title: 'LoyaltyPointLedger',
+        summary: 'Append-only ledger for points earned, reversed, expired, and redeemed.',
+        includes: 'Event source, points, balance after, expiry, related payment/review/service.',
+        data: 'New loyalty tables likely required.',
+        open: 'Avoid mutable point balances without an audit ledger.'
+      },
+      {
+        id: 'module-chat-ticket',
+        type: 'module',
+        priority: 'must',
+        area: 'Model',
+        title: 'ChatThread + SupportTicket',
+        summary: 'Conversation model that can support realtime chat, callbacks, feedback, and complaint escalation.',
+        includes: 'Thread, messages, participants, assignment, status, attachments.',
+        data: 'Existing feedback_threads may be extended or kept separate from live chat.',
+        open: 'Realtime chat and feedback inbox need a shared staff operating model.'
+      },
+      {
+        id: 'module-review',
+        type: 'module',
+        priority: 'must',
+        area: 'Model',
+        title: 'ServiceReview',
+        summary: 'Structured review submitted after a visit or treatment step.',
+        includes: 'Rating, tags, text, staff/service links, follow-up permission, moderation state.',
+        data: 'Appointment, ServiceReview, ReviewPrompt.',
+        open: 'Need moderation and admin visibility workflow before publishing or reporting.'
+      },
+      {
+        id: 'service-appointment-reminder',
+        type: 'service',
+        priority: 'must',
+        area: 'Automation',
+        title: 'Appointment Reminder Job',
+        summary: 'Automatically reminds patients before upcoming appointments.',
+        includes: 'Reminder schedule, quiet hours, channel fallback, delivery log.',
+        data: 'Appointment, NotificationMessage, NotificationDelivery.',
+        open: 'Set timing rules: 24h/2h, cancellation behavior, missed delivery handling.'
+      },
+      {
+        id: 'service-post-visit-checkin',
+        type: 'service',
+        priority: 'must',
+        area: 'Automation',
+        title: 'Post-Visit Check-In Job',
+        summary: 'Sends follow-up question after every revisit.',
+        includes: 'Timing, care instruction link, symptom question, escalation to staff.',
+        data: 'Appointment, TreatmentEpisode, NotificationMessage, SupportTicket.',
+        open: 'Define which appointment statuses count as a completed revisit.'
+      },
+      {
+        id: 'service-review-prompt',
+        type: 'service',
+        priority: 'must',
+        area: 'Automation',
+        title: 'Review Prompt Job',
+        summary: 'Prompts quality/service evaluation after each revisit.',
+        includes: 'Deduping, deep link to review screen, reminder if not completed.',
+        data: 'ReviewPrompt, Appointment, ServiceReview.',
+        open: 'Should review prompt be separate from post-visit check-in or same workflow?'
+      },
+      {
+        id: 'service-payment-due',
+        type: 'service',
+        priority: 'must',
+        area: 'Automation',
+        title: 'Payment Due Notification Job',
+        summary: 'Notifies patient when payment or installment comes due.',
+        includes: 'Due date scan, overdue state, pay-now link, staff escalation.',
+        data: 'BalanceSnapshot, MonthlyPlan, NotificationMessage.',
+        open: 'Requires reliable due-date source and no false overdue notices.'
+      },
+      {
+        id: 'service-offer-campaigns',
+        type: 'service',
+        priority: 'should',
+        area: 'Automation',
+        title: 'Offer Campaign Sender',
+        summary: 'Sends promotional offers to opted-in patients.',
+        includes: 'Audience, consent filter, campaign schedule, deep link, opt-out.',
+        data: 'Campaign, NotificationPreference, DiscountCode.',
+        open: 'Marketing consent and throttling must be defined before release.'
+      },
+      {
+        id: 'service-push-infra',
+        type: 'service',
+        priority: 'must',
+        area: 'Platform',
+        title: 'iOS Push Infrastructure',
+        summary: 'Registers APNs device tokens and delivers push notifications.',
+        includes: 'Token registration, environment split, delivery receipts, token invalidation.',
+        data: 'DevicePushToken, NotificationDelivery, SessionDevice.',
+        open: 'Need APNs keys, bundle ID, environment handling, and retry policy.'
+      },
+      {
+        id: 'service-media-access',
+        type: 'service',
+        priority: 'must',
+        area: 'Platform',
+        title: 'Secure Media Access',
+        summary: 'Serves oral condition photos through patient-authorized signed URLs.',
+        includes: 'Access check, thumbnail generation, signed URL expiry, audit log.',
+        data: 'TreatmentMedia, MediaAccessGrant, AuditEvent.',
+        open: 'Do not expose raw upload paths in the mobile app.'
+      },
+      {
+        id: 'admin-portal-review',
+        type: 'admin',
+        priority: 'must',
+        area: 'Back Office',
+        title: 'Staff Portal Queue',
+        summary: 'Admin/staff queue for appointment requests, callbacks, complaints, referrals, and payment exceptions.',
+        includes: 'Unified triage, assignment, SLA, status changes, patient message history.',
+        data: 'SupportTicket, AppointmentRequest, ReferralLead, PaymentException.',
+        open: 'Client app creates work for staff; release needs the staff side too.'
+      },
+      {
+        id: 'admin-referral-review',
+        type: 'admin',
+        priority: 'must',
+        area: 'Back Office',
+        title: 'Referral Management',
+        summary: 'Staff manages patient-submitted referrals and reward eligibility.',
+        includes: 'Lead list, duplicate checks, status update, attribution, reward approval.',
+        data: 'ReferralLead, ReferralStatusEvent, ReferralReward.',
+        open: 'Avoid conflicts with existing CTV commission workflows.'
+      },
+      {
+        id: 'admin-loyalty-rules',
+        type: 'admin',
+        priority: 'should',
+        area: 'Back Office',
+        title: 'Loyalty Rules Admin',
+        summary: 'Staff configures points earning, expiry, redemption, and manual adjustments.',
+        includes: 'Rule builder, audit log, approval for adjustments, reward catalog.',
+        data: 'LoyaltyRule, LoyaltyPointLedger, RewardCatalog.',
+        open: 'Manual adjustments require permissions and audit trail.'
+      },
+      {
+        id: 'admin-notification-templates',
+        type: 'admin',
+        priority: 'must',
+        area: 'Back Office',
+        title: 'Notification Templates Admin',
+        summary: 'Staff configures transactional templates and campaign messages.',
+        includes: 'Template editor, variables, preview, language, approval, send logs.',
+        data: 'NotificationTemplate, Campaign, NotificationDelivery.',
+        open: 'Current /notifications page is placeholder, so this is a product gap.'
+      },
+      {
+        id: 'risk-data-segmentation',
+        type: 'risk',
+        priority: 'must',
+        area: 'Risk',
+        title: 'Patient Data Segmentation',
+        summary: 'Every mobile API must filter to the authenticated patient and safe family profiles only.',
+        includes: 'Row-level ownership, no staff-only fields, audit logs, secure direct object reference checks.',
+        data: 'PatientAccount, FamilyLink, AuditEvent.',
+        open: 'High-risk area: do not expose admin routes directly to mobile.'
+      },
+      {
+        id: 'risk-family-access',
+        type: 'risk',
+        priority: 'should',
+        area: 'Risk',
+        title: 'Family Member Access Rules',
+        summary: 'Defines whether a patient can manage relatives, children, or referred family profiles.',
+        includes: 'Guardian/relative link, consent, scope of viewing, switcher.',
+        data: 'FamilyLink, ConsentProfile, PatientAccount.',
+        open: 'Required if family referrals and family profile switching are both included.'
+      },
+      {
+        id: 'risk-payments',
+        type: 'risk',
+        priority: 'must',
+        area: 'Risk',
+        title: 'Payment Reconciliation Boundary',
+        summary: 'Online payment intents must reconcile cleanly into NK payment ledgers without corrupting balances.',
+        includes: 'Idempotency, provider callback, manual exception queue, allocation preview.',
+        data: 'PaymentIntent, PaymentLedger, PaymentAllocation.',
+        open: 'Money-flow semgrep/security review required when implementing.'
+      },
+      {
+        id: 'risk-mvp-scope',
+        type: 'risk',
+        priority: 'must',
+        area: 'Risk',
+        title: 'MVP Scope Gate',
+        summary: 'First iOS release should avoid shipping every advanced workflow before staff operations are ready.',
+        includes: 'Must-have release scope, phase 2 parking lot, staff readiness, API readiness.',
+        data: 'ReleasePlan, FeatureFlag, SupportRunbook.',
+        open: 'Candidate MVP: auth, home, appointments, treatment photos, balance, payment, referrals, notifications, feedback, chat/callback.'
+      }
+    ];
+
+    const state = {
+      decisions: loadDecisions(),
+      query: '',
+      type: 'all',
+      priority: 'all'
+    };
+
+    const lists = {
+      review: document.getElementById('reviewList'),
+      keep: document.getElementById('keepList'),
+      remove: document.getElementById('removeList')
+    };
+
+    const metrics = {
+      total: document.getElementById('totalMetric'),
+      review: document.getElementById('reviewMetric'),
+      keep: document.getElementById('keepMetric'),
+      remove: document.getElementById('removeMetric'),
+      done: document.getElementById('doneMetric'),
+      reviewCount: document.getElementById('reviewCount'),
+      keepCount: document.getElementById('keepCount'),
+      removeCount: document.getElementById('removeCount')
+    };
+
+    document.getElementById('searchInput').addEventListener('input', (event) => {
+      state.query = event.target.value.trim().toLowerCase();
+      render();
+    });
+
+    document.getElementById('typeFilter').addEventListener('change', (event) => {
+      state.type = event.target.value;
+      render();
+    });
+
+    document.getElementById('priorityFilter').addEventListener('change', (event) => {
+      state.priority = event.target.value;
+      render();
+    });
+
+    document.getElementById('exportButton').addEventListener('click', openExport);
+    document.getElementById('closeDrawer').addEventListener('click', closeExport);
+    document.getElementById('copyButton').addEventListener('click', copyExport);
+    document.getElementById('resetButton').addEventListener('click', resetBoard);
+
+    render();
+
+    function loadDecisions() {
+      try {
+        const raw = window.localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function saveDecisions() {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state.decisions));
+    }
+
+    function setDecision(id, decision) {
+      if (decision === 'review') {
+        delete state.decisions[id];
+      } else {
+        state.decisions[id] = decision;
+      }
+
+      saveDecisions();
+      render();
+      const card = cards.find((item) => item.id === id);
+      showToast(`${card.title} moved to ${labelForDecision(decision)}.`);
+    }
+
+    function labelForDecision(decision) {
+      if (decision === 'keep') return 'Keep';
+      if (decision === 'remove') return 'Remove';
+      return 'Review Queue';
+    }
+
+    function getDecision(card) {
+      return state.decisions[card.id] || 'review';
+    }
+
+    function passesFilters(card) {
+      const haystack = [
+        card.title,
+        card.summary,
+        card.area,
+        card.type,
+        card.priority,
+        card.includes,
+        card.data,
+        card.open
+      ].join(' ').toLowerCase();
+
+      return (state.type === 'all' || card.type === state.type)
+        && (state.priority === 'all' || card.priority === state.priority)
+        && (!state.query || haystack.includes(state.query));
+    }
+
+    function render() {
+      Object.values(lists).forEach((list) => {
+        list.innerHTML = '';
+      });
+
+      const visible = cards.filter(passesFilters);
+      const grouped = {
+        review: [],
+        keep: [],
+        remove: []
+      };
+
+      visible.forEach((card) => {
+        grouped[getDecision(card)].push(card);
+      });
+
+      Object.entries(grouped).forEach(([decision, group]) => {
+        if (!group.length) {
+          lists[decision].appendChild(emptyState(decision));
+          return;
+        }
+
+        group.forEach((card) => {
+          lists[decision].appendChild(createCard(card, decision));
+        });
+      });
+
+      updateMetrics(visible, grouped);
+    }
+
+    function emptyState(decision) {
+      const div = document.createElement('div');
+      div.className = 'empty';
+      div.textContent = decision === 'review'
+        ? 'No cards waiting for review.'
+        : `No cards in ${labelForDecision(decision)}.`;
+      return div;
+    }
+
+    function createCard(card, decision) {
+      const article = document.createElement('article');
+      article.className = 'card';
+      article.dataset.cardId = card.id;
+      article.dataset.type = card.type;
+      article.dataset.priority = card.priority;
+      article.dataset.decision = decision;
+
+      article.innerHTML = `
+        <div class="card-main">
+          <div class="card-top">
+            <h2>${escapeHtml(card.title)}</h2>
+            <span class="priority ${card.priority}">${priorityLabel(card.priority)}</span>
+          </div>
+          <div class="card-meta">
+            <span class="tag">${typeLabel(card.type)}</span>
+            <span class="tag">${escapeHtml(card.area)}</span>
+          </div>
+          <p class="summary">${escapeHtml(card.summary)}</p>
+        </div>
+        <details>
+          <summary>Screen contents / data model</summary>
+          <div class="details-body">
+            <div class="detail-row">
+              <span class="detail-label">Inside the screen</span>
+              <span>${escapeHtml(card.includes)}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Model modules</span>
+              <span>${escapeHtml(card.data)}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Decision note</span>
+              <span>${escapeHtml(card.open)}</span>
+            </div>
+          </div>
+        </details>
+        <div class="actions">
+          <button class="card-action keep" type="button" data-action="keep">Keep</button>
+          <button class="card-action remove" type="button" data-action="remove">Remove</button>
+          <button class="card-action reset" type="button" data-action="review" aria-label="Move back to review">Reset</button>
+        </div>
+      `;
+
+      article.querySelectorAll('[data-action]').forEach((button) => {
+        button.addEventListener('click', () => {
+          setDecision(card.id, button.dataset.action);
+        });
+      });
+
+      return article;
+    }
+
+    function updateMetrics(visible, grouped) {
+      const total = cards.length;
+      const review = cards.filter((card) => getDecision(card) === 'review').length;
+      const keep = cards.filter((card) => getDecision(card) === 'keep').length;
+      const remove = cards.filter((card) => getDecision(card) === 'remove').length;
+      const done = Math.round(((keep + remove) / total) * 100);
+
+      metrics.total.textContent = String(total);
+      metrics.review.textContent = String(review);
+      metrics.keep.textContent = String(keep);
+      metrics.remove.textContent = String(remove);
+      metrics.done.textContent = `${done}%`;
+
+      metrics.reviewCount.textContent = `${grouped.review.length} shown`;
+      metrics.keepCount.textContent = `${grouped.keep.length} shown`;
+      metrics.removeCount.textContent = `${grouped.remove.length} shown`;
+    }
+
+    function priorityLabel(priority) {
+      if (priority === 'must') return 'Must';
+      if (priority === 'should') return 'Should';
+      return 'Later';
+    }
+
+    function typeLabel(type) {
+      const labels = {
+        screen: 'Screen',
+        module: 'Model',
+        service: 'Service',
+        admin: 'Admin',
+        risk: 'Risk'
+      };
+      return labels[type] || type;
+    }
+
+    function buildExport() {
+      const groups = {
+        keep: [],
+        review: [],
+        remove: []
+      };
+
+      cards.forEach((card) => {
+        groups[getDecision(card)].push(card);
+      });
+
+      const lines = [
+        '# NK iOS Client Portal Decisions',
+        '',
+        `Generated: ${new Date().toLocaleString()}`,
+        `Cards: ${cards.length}`,
+        '',
+        section('Keep', groups.keep),
+        section('Review Queue', groups.review),
+        section('Remove / Park', groups.remove)
+      ];
+
+      return lines.join('\n');
+    }
+
+    function section(title, group) {
+      if (!group.length) return `## ${title}\n\n- None\n`;
+      return [
+        `## ${title}`,
+        '',
+        ...group.map((card) => `- [${priorityLabel(card.priority)}] ${card.title} (${typeLabel(card.type)} / ${card.area}) - ${card.summary}`)
+      ].join('\n') + '\n';
+    }
+
+    function openExport() {
+      document.getElementById('decisionOutput').value = buildExport();
+      document.getElementById('decisionDrawer').classList.add('open');
+    }
+
+    function closeExport() {
+      document.getElementById('decisionDrawer').classList.remove('open');
+    }
+
+    async function copyExport() {
+      const output = document.getElementById('decisionOutput');
+      output.select();
+      try {
+        await navigator.clipboard.writeText(output.value);
+        showToast('Decision export copied.');
+      } catch (error) {
+        document.execCommand('copy');
+        showToast('Decision export selected for copying.');
+      }
+    }
+
+    function resetBoard() {
+      const confirmed = window.confirm('Reset every Keep/Remove decision back to Review Queue?');
+      if (!confirmed) return;
+      state.decisions = {};
+      saveDecisions();
+      render();
+      closeExport();
+      showToast('Board reset.');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => {
+        toast.classList.remove('show');
+      }, 1800);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+  </script>
+</body>
+</html>

@@ -10,6 +10,7 @@ import { Layout } from '@/components/Layout';
 import { LocationProvider } from '@/contexts/LocationContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { InvestorAuthProvider, useInvestorAuth } from '@/contexts/InvestorAuthContext';
 import { BusinessUnitProvider, useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { TimezoneProvider } from '@/contexts/TimezoneContext';
 import { Login } from '@/pages';
@@ -46,6 +47,9 @@ const Landing = lazy(() => import('@/pages/Landing').then(m => ({ default: m.Lan
 const JoinCtv = lazy(() => import('@/pages/CTV/JoinCtv').then(m => ({ default: m.JoinCtv })));
 const VerifyDiscount = lazy(() => import('@/pages/VerifyDiscount'));
 const CtvDiscountLanding = lazy(() => import('@/pages/CtvDiscountLanding'));
+const InvestorLogin = lazy(() => import('@/pages/Investor/InvestorLogin').then(m => ({ default: m.InvestorLogin })));
+const InvestorDashboard = lazy(() => import('@/pages/Investor/InvestorDashboard').then(m => ({ default: m.InvestorDashboard })));
+const InvestorResetPassword = lazy(() => import('@/pages/Investor/InvestorResetPassword').then(m => ({ default: m.InvestorResetPassword })));
 
 /**
  * Access Denied page — shown when authenticated but lacking permission
@@ -168,6 +172,13 @@ function LoginRoute() {
   return <Login />;
 }
 
+function InvestorLoginRoute() {
+  const { isAuthenticated, isLoading } = useInvestorAuth();
+  if (isLoading) return <AuthLoading />;
+  if (isAuthenticated) return <Navigate to="/investor" replace />;
+  return <InvestorLogin />;
+}
+
 function AppRoutes({ children }: { readonly children: React.ReactNode }) {
   const { currentLOB } = useBusinessUnit();
   return <Routes key={currentLOB}>{children}</Routes>;
@@ -209,6 +220,7 @@ function AdminCatchAllRedirect() {
 function App() {
   return (
     <AuthProvider>
+      <InvestorAuthProvider>
       <TimezoneProvider>
         <LocationProvider>
           <BusinessUnitProvider>
@@ -235,6 +247,12 @@ function App() {
                       </CTVRouteGuard>
                     }
                   />
+                </Route>
+                {/* @crossref:route[path="/investor/*"] — read-only investor portal */}
+                <Route path="/investor" element={<Outlet />}>
+                  <Route path="login" element={<InvestorLoginRoute />} />
+                  <Route path="reset-password" element={<InvestorResetPassword />} />
+                  <Route index element={<InvestorDashboard />} />
                 </Route>
                 {import.meta.env.DEV && (
                   <Route path="/test/address" element={<AddressAutocompleteTest />} />
@@ -442,6 +460,7 @@ function App() {
           </BusinessUnitProvider>
         </LocationProvider>
       </TimezoneProvider>
+      </InvestorAuthProvider>
     </AuthProvider>
   );
 }

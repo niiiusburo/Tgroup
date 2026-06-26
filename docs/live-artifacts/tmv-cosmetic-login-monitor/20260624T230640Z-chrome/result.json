@@ -1,0 +1,113 @@
+{
+  "checkedAt": "2026-06-24T23:07:00.516Z",
+  "baseUrl": "https://tmv.2checkin.com",
+  "workedAccount": "t@clinic.vn",
+  "loginSucceeded": true,
+  "loginAttempts": [
+    {
+      "email": "t@clinic.vn",
+      "ok": true,
+      "visibleError": "",
+      "apiErrorsDuringAttempt": [],
+      "finalUrl": "https://tmv.2checkin.com/"
+    }
+  ],
+  "version": {
+    "version": "0.37.21",
+    "buildTime": "2026-06-22T01:49:32.586Z",
+    "gitCommit": "a53266e",
+    "gitBranch": "nk3-deploy",
+    "environment": "development"
+  },
+  "cosmetic": {
+    "clicked": true,
+    "navCosmeticVisible": true,
+    "dentalOnlyVisible": false,
+    "cosmeticApiSeen": true,
+    "localStorageLob": {},
+    "blocker": ""
+  },
+  "cosmeticEvidence": [
+    {
+      "step": "post-login-body",
+      "hasCosmeticText": true,
+      "hasDentalText": false,
+      "url": "https://tmv.2checkin.com/",
+      "sample": "TD\n[name]\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\n[name]\n[name] khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\n[name]\n[name]\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nTổng quan\nThẩm mỹ\nTất cả chi nhánh\n6\n\nCó v[name]?\n\nNhấn v[name] báo cho chúng tôi — mọi phản h[name]\n\nHẹn mới\nLịch trình ngày\nTất cả · 0\nĐang chờ · 0\nĐang khám · 0\nHoàn thành · 0\n\nKhông có bệnh nhân\n\nBệnh nhân chờ check-in sẽ hiển thị ở đây\n\n"
+    },
+    {
+      "step": "after-cosmetic-selection",
+      "clicked": true,
+      "navCosmeticVisible": true,
+      "dentalOnlyVisible": false,
+      "cosmeticApiSeen": true,
+      "localStorageLob": {},
+      "url": "https://tmv.2checkin.com/",
+      "sample": "TD\n[name]\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\n[name]\n[name] khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\n[name]\n[name]\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nTổng quan\nThẩm mỹ\nNha khoa\nThẩm mỹ\nTất cả chi nhánh\n6\n\nCó v[name]?\n\nNhấn v[name] báo cho chúng tôi — mọi phản h[name]\n\nHẹn mới\nLịch trình ngày\nTất cả · 0\nĐang chờ · 0\nĐang khám · 0\nHoàn thành · 0\n\nKhông có bệnh nhân\n\nBệnh nhân chờ check-in sẽ"
+    }
+  ],
+  "aggregate": {
+    "apiErrors": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": []
+  },
+  "screens": [
+    {
+      "name": "Dashboard",
+      "path": "/",
+      "finalUrl": "https://tmv.2checkin.com/",
+      "clickedSelector": "a[href=\"/\"]",
+      "usedFallbackGoto": false,
+      "bodyChars": 1255,
+      "blank": false,
+      "loading": false,
+      "visibleError": false,
+      "expectedText": true,
+      "apiErrors": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260624T230640Z-chrome/redacted-safe/01-dashboard.png",
+      "textSample": "TD\n[name]\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\n[name]\n[name] khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\n[name]\n[name]\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nTổng quan\nThẩm mỹ\nTất cả chi nhánh\n6\n\nCó v[name]?\n\nNhấn v[name] báo cho chúng tôi — mọi phản h[name]\n\n••• •••\n•••• ••••• ••••\n••• •• • •\n•••• ••• • •\n•••• •••• • •\n•••• ••••• • •\n\n••••• •• •••• ••••\n\n•••• •••• ••• •••••••• •• •••• ••• • •••\n\n•••• •• • •••• •••• •••"
+    },
+    {
+      "name": "Customers",
+      "path": "/customers",
+      "finalUrl": "https://tmv.2checkin.com/customers",
+      "clickedSelector": "a[href=\"/customers\"]",
+      "usedFallbackGoto": false,
+      "bodyChars": 2155,
+      "blank": false,
+      "loading": false,
+      "visibleError": false,
+      "expectedText": true,
+      "apiErrors": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260624T230640Z-chrome/redacted-safe/02-customers.png",
+      "textSample": "TD\n[name]\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\n[name]\n[name] khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\n[name]\n[name]\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nKhách hàng\nThẩm mỹ\nTất cả chi nhánh\n6\n\nCó v[name]?\n\nNhấn v[name] báo cho chúng tôi — mọi phản h[name]\n\nTổng quan\nKhách hàng\nKhách hàng\n\n12741 patients · 12741 active\n\nXuất dữ liệu\n[name]\n[name]\nActive\nInactive\nPending\nCODE\n\t\nCUSTOMER\n\t\nPHONE\n\t\nEMAIL\n\t\nLOCATION\n\t\nST"
+    },
+    {
+      "name": "Calendar",
+      "path": "/calendar",
+      "finalUrl": "https://tmv.2checkin.com/calendar",
+      "clickedSelector": "a[href=\"/calendar\"]",
+      "usedFallbackGoto": false,
+      "bodyChars": 1539,
+      "blank": false,
+      "loading": false,
+      "visibleError": false,
+      "expectedText": true,
+      "apiErrors": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260624T230640Z-chrome/redacted-safe/03-calendar.png",
+      "textSample": "TD\n[name]\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\n[name]\n[name] khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\n[name]\n[name]\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nLịch\nThẩm mỹ\nTất cả chi nhánh\n6\n•••• ••••\nLịch\nLịch hẹn\n\nQuản lý lịch hẹn khám bệnh\n\nNgày\nTuần\nTháng\n[name], 25 tháng 6, 2026\nHôm nay\nXuất dữ liệu\nBộ lọc\nHẹn mới\n[name], 25 tháng 6\n7 Lịch hẹn\n07:00\n07:30\n08:00\n08:30\n09:00\n09:30\n10:00\n1 Lịch hẹn\nĐang hẹn\n[name]\n[pho"
+    }
+  ],
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260624T230640Z-chrome",
+  "safeDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260624T230640Z-chrome/redacted-safe"
+}

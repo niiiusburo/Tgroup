@@ -537,7 +537,84 @@ See cosmetic-clients.yaml, business-unit.yaml for details.
 - GET /api/me/lob-scope — returns current user's { lob_scope: string[], is_ctv: boolean, available_lobs: string[] }
 - Augmented on login/me responses
 
+## Patient Portal (`/api/patient`)
+
+Patient-facing iOS portal routes. All routes require a patient JWT (`Authorization: Bearer <patient-token>`) issued by `/api/patient/auth/login` and scoped to `req.patient.partnerId`.
+
+### Auth
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| POST | `/auth/login` | Public | `{ phone, password }` | `{ success, token, patient }` |
+| POST | `/auth/register` | Public | `{ phone, password, confirmPassword }` | `{ success }` |
+| POST | `/auth/refresh` | Public | `{ token? }` | `{ success, token, patient }` |
+| POST | `/auth/device` | Patient JWT | `{ deviceToken, platform }` | `{ success }` |
+| GET | `/auth/me` | Patient JWT | — | `{ success, patient }` |
+
+### Core
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/dashboard` | Patient JWT | — | Dashboard cards (appointments, treatments, balance) |
+| GET | `/appointments` | Patient JWT | — | Patient appointments list |
+| GET | `/appointments/:id` | Patient JWT | — | Appointment detail |
+| GET | `/treatments` | Patient JWT | — | Treatment plans list |
+| GET | `/treatments/:id` | Patient JWT | — | Treatment detail |
+| GET | `/balance` | Patient JWT | — | Outstanding, total paid, deposit balance |
+| GET | `/balance/payments` | Patient JWT | — | Payment history |
+| GET | `/media` | Patient JWT | — | Patient media gallery |
+| POST | `/media` | Patient JWT | FormData (`image`, `type`, `label?`) | Uploaded media item |
+| GET | `/notifications` | Patient JWT | — | Notification list |
+| PATCH | `/notifications/:id/read` | Patient JWT | — | Mark notification read |
+| PATCH | `/notifications/read-all` | Patient JWT | — | Mark all notifications read |
+| GET | `/referrals` | Patient JWT | — | Patient referral list |
+| POST | `/referrals` | Patient JWT | `{ referredName, referredPhone, referredEmail? }` | Created referral |
+| GET | `/reviews` | Patient JWT | — | Service reviews |
+| POST | `/reviews` | Patient JWT | `{ saleOrderId, rating, comment? }` | Created review |
+
+### Support & Chat
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/support` | Patient JWT | — | `{ success, tickets: SupportTicket[] }` |
+| POST | `/support` | Patient JWT | `{ type, subject, description }` | `{ success, ticketId }` |
+| GET | `/chat/sessions` | Patient JWT | — | `{ success, sessions: ChatSession[] }` |
+| POST | `/chat/sessions` | Patient JWT | — | `{ success, session: ChatSession }` |
+| GET | `/chat/sessions/:id/messages` | Patient JWT | — | `{ success, messages: ChatMessage[] }` |
+| POST | `/chat/sessions/:id/messages` | Patient JWT | `{ content }` | `{ success, reply, escalated, reason?, ticketId? }` |
+| POST | `/chat/sessions/:id/escalate` | Patient JWT | `{ reason? }` | `{ success, ticketId }` |
+| POST | `/chat/sessions/:id/learn` | Patient JWT | — | `{ success, chunksStored, chunkIds? }` |
+
+AI chat replies are generated server-side via OpenAI (`gpt-4o-mini` by default) with RAG context from `support_kb_chunks` when `pgvector` is available. Human escalation creates a `support_tickets` row. The `/learn` endpoint (MVP) chunks a resolved conversation and stores it in `support_kb_chunks` with `approved=false` pending staff review.
+
+### Profile
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/profile` | Patient JWT | — | Patient profile |
+| PUT | `/profile` | Patient JWT | `{ name?, email?, gender?, date_of_birth?, address? }` | Updated profile |
+| PUT | `/profile/consents` | Patient JWT | `{ marketing_push?, marketing_sms?, marketing_email?, photo_visible?, data_sharing? }` | Updated consents |
+| POST | `/profile/change-password` | Patient JWT | `{ currentPassword, newPassword, confirmPassword }` | Password changed |
+
 ## Common Response Patterns
+
+## Investor Portal (`/api/investor`)
+
+Read-only external portal. Investor JWT (`type:'investor'`) signed with `INVESTOR_JWT_SECRET`. LOB-pinned: all queries use `getQuery(investor.lob)`.
+
+### Auth
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| POST | `/auth/login` | Public | `{ email, password }` | `{ success, token, investor, permissions }` |
+| GET | `/auth/me` | Investor JWT | — | `{ success, investor, permissions }` |
+
+### Clients (safe projection only)
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/clients` | Investor JWT | `offset?, limit?` | `{ success, offset, limit, totalItems, items[] }` |
+| GET | `/clients/:partnerId` | Investor JWT | — | `{ success, client }` or 404 if not visible |
 
 ### Paginated List
 ```json

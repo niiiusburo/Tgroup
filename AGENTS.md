@@ -20,6 +20,7 @@ Supporting context:
 
 - `website/agents.md` is the frontend build and component-architecture reference.
 - `website/design.md` is the detailed frontend visual-token reference.
+- **NK mobile app (separate repo — NOT in this tree):** The patient-facing mobile app — "Tấm Dentist", slug `nk-patient-portal`, bundle `com.nkclinic.patient` — lives **outside this repo** at `/Users/thuanle/Documents/TamTMV/nk-patient-app`. It is an **Expo SDK 52 / React Native 0.85** app (own `master` git repo, with its own `AGENTS.md`, `CLAUDE.md`, and `design.md`). It consumes **this** backend over `EXPO_PUBLIC_API_URL` (default `https://nk.2checkin.com`). For any mobile / patient-app / "NK mobile" work, `cd /Users/thuanle/Documents/TamTMV/nk-patient-app` and read **that** repo's authority docs first — do not look for the mobile app under `website/`.
 - `notes/` is historical/operational reference, not higher authority than the root stack.
 - `.claude/memory.md` is shared session memory, not policy.
 - `IDEA.md` is a non-authority inbox until an idea is promoted into authority docs.

@@ -1,0 +1,131 @@
+{
+  "generatedAt": "2026-06-15T17:09:08.404Z",
+  "artifactDir": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260615T170847Z-playwright",
+  "loginScreenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260615T170847Z-playwright/00-login-page.png",
+  "primary": {
+    "identifier": "t@clinic.vn",
+    "url": "https://tmv.2checkin.com/",
+    "stillLogin": false,
+    "visibleText": "TD\nPHÒNG KHÁM\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\nBÁO CÁO\nBảng điều khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\nQUẢN TRỊ\nCài đặt\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nTổng quan\nThẩm mỹ\nTất cả chi nhánh\n\nCó vấn đề?\n\nNhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc.\n\nHẹn mới\nLịch trình ngày\nTất cả · 0\nĐang chờ · 0\nĐang khám · 0\nHoàn thành · 0\n\nKhông có bệnh nhân\n\nBệnh nhân chờ check-in sẽ hiển thị ở đây\n\nDỊCH VỤ / HOẠT ĐỘNG HÔM NAY\nDỊCH VỤ\tBỆNH NHÂN\tSL\tBÁC SĨ\tSỐ TIỀN\tTRẠNG THÁI\nDịch vụ sẽ hiển thị khi bệnh nhân được điều trị trong ngày.\nLỊCH HẸN HÔM NAY\nTất cả · 9\nĐã đến · 0\nĐã hủy · 0\nhạnh\n---\n09:30 · 30 phút\n0373865661\nĐang hẹn\nKhánh Ly\nBS 11\n10:00 · 30 phút\n0348880405\nĐang hẹn\nNguyễn Thu Huyền\nBS 8\nNGOCCH\n10:00 · 30 phút\n0363004036\nĐang hẹn\nNGUYỄN THỊ KIM PHƯỢNG\nBS 28\nMINHBQ\n10:00 · 90 phút\n0904429042\nĐang hẹn\nPhươnt ly\n---\n10:00 · 30 phút\n0979748997\nĐang hẹn\nChị Nhung\n---\n11:00 · 60 phút\n0912223328\nĐang hẹn\nChâu Anh\nBS 11\n13:00 · 30 phút\n0967358169\nĐang hẹn\nLÊ THỊ HUỲNH THI\nBS 28\nMINHBQ\n14:00 · 60 phút\n0765200996\nĐang hẹn\nBạn Thanh Thảo\nBS 25\nVYTDT\n16:00 · 15 phút\n0963215788\nĐang hẹn\nNEW IN THIS VERSION\n\nCTV recent-activity handoff hardened: forced flip, search highlight, scroll-to-client.\n\nView all changes\nv0.37.12\n(37163f6)"
+  },
+  "fallback": null,
+  "failedLoginScreenshot": null,
+  "accountWorked": "t@clinic.vn",
+  "cosmeticVisible": true,
+  "dentalVisibleSelected": false,
+  "loginCompletion": {
+    "name": "Post-login dashboard",
+    "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260615T170847Z-playwright/01-post-login-dashboard.png",
+    "url": "https://tmv.2checkin.com/",
+    "title": "TG Clinic - Clinic Management System",
+    "bodyLength": 1342,
+    "bodySample": "TD\nPHÒNG KHÁM\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\nBÁO CÁO\nBảng điều khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\nQUẢN TRỊ\nCài đặt\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nTổng quan\nThẩm mỹ\nTất cả chi nhánh\n6\n\nCó vấn đề?\n\nNhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc.\n\nHẹn mới\nLịch trình ngày\nTất cả · 0\nĐang chờ · 0\nĐang khám · 0\nHoàn thành · 0\n\nKhông có bệnh nhân\n\nBệnh nhân chờ check-in sẽ hiển thị ở đây\n\nDỊCH VỤ / HOẠT ĐỘNG HÔM NAY\nDỊCH VỤ\tBỆNH NHÂN\tSL\tBÁC SĨ\tSỐ TIỀN\tTRẠNG THÁI\nDịch vụ sẽ hiển thị khi bệnh nhân được điều trị trong ngày.\nLỊCH HẸN HÔM NAY\nTất cả · 9\nĐã đến · 0\nĐã hủy · 0\nhạnh\n---\n09:30 · 30 phút\n0373865661\nĐang hẹn\nKhánh Ly\nBS 11\n10:00 · 30 phút\n0348880405\nĐang hẹn\nNguyễn Thu Huyền\nBS 8\nNGOCCH\n10:00 · 30 phút\n0363004036\nĐang hẹn\nNGUYỄN THỊ KIM PHƯỢNG\nBS 28\nMINHBQ\n10:00 · 90 phút\n0904429042\nĐang hẹn\nPhươnt ly\n---\n10:00 · 30 phút\n0979748997\nĐang hẹn\nChị Nhung\n---\n11:00 · 60 phút\n0912223328\nĐang hẹn\nChâu Anh\nBS 11\n13:00 · 30 phút\n0967358169\nĐang hẹn\nLÊ THỊ HUỲNH THI\nBS 28\nMINHBQ\n14:00 · 60 phút\n0765200996\nĐang hẹn\nBạn Thanh Thảo\nBS 25\nVYTDT\n16:00 · 15 phút\n0963215788\nĐang hẹn\nNEW IN THIS VERSION\n\nCTV recent-activity handoff hardened: forced flip, search highlight, scroll-to-client.\n\nView all changes\nv0.37.12\n(37163f6)",
+    "headings": [
+      "Tổng quan",
+      "Lịch trình ngày",
+      "DỊCH VỤ / HOẠT ĐỘNG HÔM NAY",
+      "LỊCH HẸN HÔM NAY"
+    ],
+    "visibleErrors": [],
+    "blank": false,
+    "cosmeticVisible": true
+  },
+  "screens": [
+    {
+      "name": "Calendar",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260615T170847Z-playwright/02-calendar.png",
+      "url": "https://tmv.2checkin.com/calendar",
+      "title": "TG Clinic - Clinic Management System",
+      "bodyLength": 2567,
+      "bodySample": "TD\nPHÒNG KHÁM\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\nBÁO CÁO\nBảng điều khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\nQUẢN TRỊ\nCài đặt\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nLịch\nThẩm mỹ\nTất cả chi nhánh\n6\nTổng quan\nLịch\nLịch hẹn\n\nQuản lý lịch hẹn khám bệnh\n\nNgày\nTuần\nTháng\nThứ Ba, 16 tháng 6, 2026\nHôm nay\nXuất dữ liệu\nBộ lọc\nHẹn mới\nThứ Ba, 16 tháng 6\n9 Lịch hẹn\n07:00\n07:30\n08:00\n08:30\n09:00\n09:30\n1 Lịch hẹn\nĐang hẹn\nhạnh\n0373865661\n09:30 · 30 phút\n\nkhách khó - hỏi từ 2025 - kì kèo giá cả. TLBS không cần gọi, để sale care qua. báo cắt 8tr - sửa 3-10 tr tùy tình trạng (chị cũng báo là qua bác kiểm tra xem là cần sửa hay chỉ cần cắt lần 2 để cho qua gặp bs vì khách kì kèo nguyên 1 năm rồi) tặng voucher 500k + 1 dịch vụ nhỏ đi kèm theo ưu đãi hiện hành. đang rủ 1 bạn nữa đi chung. nếu bạn cũng làm thì thêm voucher 500k giới thiệu nữa. chiều 15: tối chị nhắn time tại đang rủ bạn qua cùng luôn\n\n✎\n10:00\n4 Lịch hẹn\nĐang hẹn\nKhánh Ly\n0348880405\nBS 11\n10:00 · 30 phút\n\nHanhNP, yêu cầu bác sĩ 11, cắt mí 8tr, mở góc trong 8tr8, đã cọc 500k ck TP ngày 12/03/2026, tặng dao nnc\n\n✎\nĐang hẹn\nPhươnt ly\n0979748997\n10:00 · 30 phút\n\nMí - báo phễu 5999 - mí tự nhiên 8 tr. tặng 1 dịch vụ nhỏ theo ưu đãi hiện hành . nga pt1\n\n✎\nĐang hẹn\nNGUYỄN THỊ KIM PHƯỢNG\n0904429042\nBS 28\nMINHBQ\n10:00 · 90 phút\n\nTK + BH - CẮT MÍ TRÊN + CẮT MÍ DƯỚI + CẤY MỠ MÍ TRÊN BS28 MINH - 14/9/23\n\n✎\nĐang hẹn\nNguyễn Thu Huyền\n0363004036\nBS 8\nNGOCCH\n10:00 · 30 phút\n\nTK Slim plus mỡ má + gò 2L - 6/4/26 - Huevm : Khách tk định kì.\n\n✎\n10:30\n11:00\n1 Lịch hẹn\nĐang hẹn\nChị Nhung\n0912223328\n11:00 · 60 phút\n\n8/6 muốn cắt mí báo giá 5tr999k, tặng vocher 500k, chưa làm qua gì, đã có người quen làm ở Tấm. SALE PHƯƠNG NHI.\n\n✎\n11:30\n12:00\n12:30\n13:00\n1 Lịch hẹn\nĐang hẹn\nChâu Anh\n0967358169\nBS 11\n13:00 · 30 phút\n\nHanhNP, yêu cầu bác sĩ 11, 25t chưa can thiệp, sale tv nhấn mí 5tr, cắt mí 8tr, qua tư vấn trc ưng cọc lại tầm đầu tháng 7 làm\n\n✎\n13:30\n14:00\n1 Lịch hẹn\nĐang hẹn\nLÊ THỊ HUỲNH THI\n0765200996\nBS 28\nMINHBQ\n14:00 · 60 phút\n\nTK + BH hạ size mí + cấy mỡ - CẮT MÍ TRÊN + MỞ GÓC TRONG + CẤY MỠ MÍ TRÊN bs28 MINH - 19/11/24. *TV cắt mí dưới, ưng làm luôn. Zalo cskh Tuyết Anh, tvv Minh\n\n✎\n14:30\n15:00\n15:30\n16:00\n1 Lịch hẹn\nĐang hẹn\nBạn Thanh Thảo\n0963215788\nBS 25\nVYTDT\n16:00 · 15 phút\n\nDặm 0,2cc hcc mắt - 2/6/26 Huevm\n\n✎\n16:30\n17:00\n17:30\n18:00\n18:30\n19:00\n19:30\n20:00\nNEW IN THIS VERSION\n\nCTV recent-activity handoff hardened: forced flip, search highlight, scroll-to-client.\n\nView all changes\nv0.37.12\n(37163f6)",
+      "headings": [
+        "Lịch",
+        "Lịch hẹn",
+        "Thứ Ba, 16 tháng 6",
+        "Bộ lọc",
+        "Bác sĩ",
+        "Trạng thái",
+        "Nhãn màu"
+      ],
+      "visibleErrors": [
+        "500"
+      ],
+      "blank": false,
+      "cosmeticVisible": true
+    },
+    {
+      "name": "Customers",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260615T170847Z-playwright/03-customers.png",
+      "url": "https://tmv.2checkin.com/customers",
+      "title": "TG Clinic - Clinic Management System",
+      "bodyLength": 2362,
+      "bodySample": "TD\nPHÒNG KHÁM\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\nBÁO CÁO\nBảng điều khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\nQUẢN TRỊ\nCài đặt\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nKhách hàng\nThẩm mỹ\nTất cả chi nhánh\n6\n\nCó vấn đề?\n\nNhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc.\n\nTổng quan\nKhách hàng\nKhách hàng\n\n12665 patients · 12665 active\n\nXuất dữ liệu\nAdd Customer\nAll Status\nActive\nInactive\nPending\nCODE\n\t\nCUSTOMER\n\t\nPHONE\n\t\nEMAIL\n\t\nLOCATION\n\t\nSTATUS\n\t\nLAST VISIT\n\t\n\nTM412838\t\nN\nNhi Yến Phan\n\t\n0941807960\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t14 Jun 2026\t\n\nTM842042\t\nN\nNguyễn Thị Luyến\n\t\n0877094230\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t14 Jun 2026\t\n\nTM828804\t\nC\nChị Vạn XUân\n\t\n0335999819\n\t\n\t\nThẩm mỹ Hồ Chí Minh\n\t\nActive\t14 Jun 2026\t\n\nTM643364\t\nh\nhạnh\n\t\n0373865661\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t14 Jun 2026\t\n\nTM282817\t\nM\nMy Nguyen\n\t\n0936033555\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t14 Jun 2026\t\n\nTM950565\t\nN\nNhã Phương\n\t\n0974357800\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t14 Jun 2026\t\n\nTM898342\t\nK\nKhánh Linh\n\t\n0588668888\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t13 Jun 2026\t\n\nTM793897\t\nC\nChâu Anh\n\t\n0967358169\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t13 Jun 2026\t\n\nTM771944\t\nL\nLÊ THỊ HUỲNH THI\n\t\n0765200996\n\t\n\t\nThẩm mỹ Hồ Chí Minh\n\t\nActive\t13 Jun 2026\t\n\nTM500029\t\nN\nNGUYỄN THỊ KIM PHƯỢNG\n\t\n0904429042\n\t\n\t\nThẩm mỹ Hồ Chí Minh\n\t\nActive\t13 Jun 2026\t\n\nTM331921\t\nN\nNguyễn Thu Thủy\n\t\n0946388071\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t13 Jun 2026\t\n\nTM568152\t\nC\nChị Trâm\n\t\n0969471339\n\t\n\t\nThẩm mỹ Hồ Chí Minh\n\t\nActive\t13 Jun 2026\t\n\nTM727434\t\nL\nLương Thị Ái Duyên\n\t\n849209898\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t12 Jun 2026\t\n\nTM186461\t\nP\nPhạm Thị Thu\n\t\n968066869\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t12 Jun 2026\t\n\nTM425444\t\nC\nChị Ruby\n\t\n0914681996\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t12 Jun 2026\t\n\nTM405190\t\nC\nChị Cải\n\t\n0326696425\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t12 Jun 2026\t\n\nTM218532\t\nP\nPhương Mai\n\t\n0961693044\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t12 Jun 2026\t\n\nTM496193\t\nV\nVÕ THỊ KIM SƯƠNG\n\t\n09729035096\n\t\n\t\nThẩm mỹ Hồ Chí Minh\n\t\nActive\t11 Jun 2026\t\n\nTM255275\t\nK\nKEVIN LEE\n\t\n09729035096\n\t\n\t\nThẩm mỹ Hồ Chí Minh\n\t\nActive\t11 Jun 2026\t\n\nCOS-HOSO-12257\t\nD\nDì Duyên\n\t\n0976301995\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t31 May 2026\t\nShowing 1–20 of 12665\n1\n2\n3\n4\n...\n634\nNEW IN THIS VERSION\n\nCTV recent-activity handoff hardened: forced flip, search highlight, scroll-to-client.\n\nView all changes\nv0.37.12\n(37163f6)",
+      "headings": [
+        "Khách hàng",
+        "Khách hàng"
+      ],
+      "visibleErrors": [
+        "500"
+      ],
+      "blank": false,
+      "cosmeticVisible": true
+    },
+    {
+      "name": "Services click note",
+      "href": "/services",
+      "note": "Normal click was intercepted from https://tmv.2checkin.com/customers; forced click used on same nav link. Original error: locator.click: Timeout 10000ms exceeded."
+    },
+    {
+      "name": "Services",
+      "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260615T170847Z-playwright/04-services.png",
+      "url": "https://tmv.2checkin.com/customers",
+      "title": "TG Clinic - Clinic Management System",
+      "bodyLength": 2236,
+      "bodySample": "TD\nPHÒNG KHÁM\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\nBÁO CÁO\nBảng điều khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\nQUẢN TRỊ\nCài đặt\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nKhách hàng\nThẩm mỹ\nTất cả chi nhánh\n6\n\nCó vấn đề?\n\nNhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc.\n\nTổng quan\nKhách hàng\nKhách hàng\n\n12665 patients · 12665 active\n\nXuất dữ liệu\nAdd Customer\nAll Status\nActive\nInactive\nPending\nCODE\n\t\nCUSTOMER\n\t\nPHONE\n\t\nEMAIL\n\t\nLOCATION\n\t\nSTATUS\n\t\nLAST VISIT\n\t\n\nCOS-HOSO-12257\t\nD\nDì Duyên\n\t\n0976301995\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t31 May 2026\t\n\nTM186461\t\nP\nPhạm Thị Thu\n\t\n968066869\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t12 Jun 2026\t\n\nTM218532\t\nP\nPhương Mai\n\t\n0961693044\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t12 Jun 2026\t\n\nTM255275\t\nK\nKEVIN LEE\n\t\n09729035096\n\t\n\t\nThẩm mỹ Hồ Chí Minh\n\t\nActive\t11 Jun 2026\t\n\nTM282817\t\nM\nMy Nguyen\n\t\n0936033555\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t14 Jun 2026\t\n\nTM331921\t\nN\nNguyễn Thu Thủy\n\t\n0946388071\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t13 Jun 2026\t\n\nTM405190\t\nC\nChị Cải\n\t\n0326696425\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t12 Jun 2026\t\n\nTM412838\t\nN\nNhi Yến Phan\n\t\n0941807960\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t14 Jun 2026\t\n\nTM425444\t\nC\nChị Ruby\n\t\n0914681996\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t12 Jun 2026\t\n\nTM496193\t\nV\nVÕ THỊ KIM SƯƠNG\n\t\n09729035096\n\t\n\t\nThẩm mỹ Hồ Chí Minh\n\t\nActive\t11 Jun 2026\t\n\nTM500029\t\nN\nNGUYỄN THỊ KIM PHƯỢNG\n\t\n0904429042\n\t\n\t\nThẩm mỹ Hồ Chí Minh\n\t\nActive\t13 Jun 2026\t\n\nTM568152\t\nC\nChị Trâm\n\t\n0969471339\n\t\n\t\nThẩm mỹ Hồ Chí Minh\n\t\nActive\t13 Jun 2026\t\n\nTM643364\t\nh\nhạnh\n\t\n0373865661\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t14 Jun 2026\t\n\nTM727434\t\nL\nLương Thị Ái Duyên\n\t\n849209898\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t12 Jun 2026\t\n\nTM771944\t\nL\nLÊ THỊ HUỲNH THI\n\t\n0765200996\n\t\n\t\nThẩm mỹ Hồ Chí Minh\n\t\nActive\t13 Jun 2026\t\n\nTM793897\t\nC\nChâu Anh\n\t\n0967358169\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t13 Jun 2026\t\n\nTM828804\t\nC\nChị Vạn XUân\n\t\n0335999819\n\t\n\t\nThẩm mỹ Hồ Chí Minh\n\t\nActive\t14 Jun 2026\t\n\nTM842042\t\nN\nNguyễn Thị Luyến\n\t\n0877094230\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t14 Jun 2026\t\n\nTM898342\t\nK\nKhánh Linh\n\t\n0588668888\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t13 Jun 2026\t\n\nTM950565\t\nN\nNhã Phương\n\t\n0974357800\n\t\n\t\nThẩm mỹ Hà Nội\n\t\nActive\t14 Jun 2026\t\nShowing 1–20 of 12665\n1\n2\n3\n4\n...\n634\nv0.37.12\n(37163f6)",
+      "headings": [
+        "Khách hàng",
+        "Khách hàng"
+      ],
+      "visibleErrors": [
+        "500"
+      ],
+      "blank": false,
+      "cosmeticVisible": true
+    }
+  ],
+  "badResponses": [],
+  "consoleErrors": [],
+  "notes": {
+    "inAppBrowserScreenshotBlocker": "Timed out running CDP command \"Page.captureScreenshot\" for tab 1; screenshots captured with standalone Playwright + installed Google Chrome."
+  },
+  "thirdScreenSupplement": {
+    "name": "Reports dashboard",
+    "screenshot": "/Users/thuanle/Documents/TamTMV/Tgrouptest/docs/live-artifacts/tmv-cosmetic-login-monitor/20260615T170847Z-playwright/05-reports-dashboard.png",
+    "url": "https://tmv.2checkin.com/reports/dashboard",
+    "title": "TG Clinic - Clinic Management System",
+    "bodyLength": 1537,
+    "bodySample": "TD\nPHÒNG KHÁM\nDịch vụ\nDanh mục dịch vụ\nKế hoạch thanh toán\nNHÓM\nNhân viên\nHoa hồng\nPro\nChi nhánh\nBÁO CÁO\nBảng điều khiển\nDoanh thu\nLịch hẹn\nBác sĩ\nKhách hàng\nChi nhánh\nDịch vụ\nNhân viên\nQUẢN TRỊ\nCài đặt\nPhản hồi\nQuyền hạn\nMối quan hệ\nThông báo\nA\nBảng điều khiển\nThẩm mỹ\nTất cả chi nhánh\n6\n\nCó vấn đề?\n\nNhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc.\n\nTổng quan\nBáo cáo\nBảng điều khiển\nBáo cáo\n\nDashboard analytics & insights\n\nDashboard\nRevenue\nAppointments\nDoctors\nCustomers\nLocations\nServices\nEmployees\nĐang xem:\n18 thg 5 – 16 thg 6, 2026\n·\nTất cả chi nhánh\nHôm nay\n3 ngày\n1 tuần\n1 tháng\n90 ngày\nTất cả\nTừ\n18/05/2026\n→\nĐến\n16/06/2026\nTất cả chi nhánh\nThẩm mỹ Hồ Chí Minh\nQA Final Location UPDATED\nQA Verify 1779772770\nThẩm mỹ Hà Nội\nDoanh thu đã thu\n2.129.440.324 ₫\n-11.8% vs prev period\nTổng lịch hẹn\n310,718\nKhách hàng mới\n342,507\nCòn nợ\n322.415.995 ₫\nXu hướng doanh thu 12 tháng\n2.152.829.000 ₫\nTháng 6\n7.115.610.000 ₫\nTháng 7\n2.920.464.000 ₫\nTháng 8\n2.643.488.000 ₫\nTháng 9\n3.461.004.000 ₫\nTháng 10\n2.902.425.000 ₫\nTháng 11\n2.623.243.000 ₫\nTháng 12\n3.427.929.000 ₫\nTháng 1\n8.476.113.000 ₫\nTháng 2\n2.718.128.000 ₫\nTháng 3\n2.706.532.000 ₫\nTháng 4\n1.641.813.000 ₫\nTháng 5\n1.767.511.000 ₫\nTháng 6\nTỷ lệ lịch hẹn\n40%\nHoàn thành\n87%\nTỷ lệ thu hồi\nĐã xuất hóa đơn\n2.453.921.111 ₫\n124 lịch hẹn hoàn thành\nĐã thu\n2.130.728.000 ₫\n86.8% tỷ lệ thu hồi\nCòn nợ\n323.143.111 ₫\n53 lịch hủy\nNEW IN THIS VERSION\n\nCTV recent-activity handoff hardened: forced flip, search highlight, scroll-to-client.\n\nView all changes\nv0.37.12\n(37163f6)",
+    "headings": [
+      "Bảng điều khiển",
+      "Báo cáo",
+      "Xu hướng doanh thu 12 tháng",
+      "Tỷ lệ lịch hẹn"
+    ],
+    "cosmeticVisible": true,
+    "navInfo": {
+      "found": true,
+      "text": "Bảng điều khiển",
+      "href": "/reports/dashboard",
+      "rect": {
+        "x": 67,
+        "y": 368,
+        "width": 162,
+        "height": 36
+      }
+    },
+    "visibleErrors": [],
+    "blank": false,
+    "badResponses": [],
+    "consoleErrors": []
+  }
+}

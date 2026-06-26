@@ -13,6 +13,7 @@
 | `express-patterns/` | ✅ Complete | ExpressRef | 7 | ✅ | MIT |
 | `postgresql-patterns/` | ✅ Complete | PostgresRef | 7 | ✅ | MIT |
 | `testing-patterns/` | ✅ Complete | TestingRef | 5 | ✅ | MIT, ISC |
+| `gen-ai-chat-support/` | ✅ Complete | GenAIRef | 4 | ✅ | MIT, Apache-2.0 |
 
 **Legend:** ✅ Complete | 🚧 In progress | 🔍 Needs review
 

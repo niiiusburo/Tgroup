@@ -15,6 +15,16 @@ Decision:
 Consequences:
 ```
 
+## DEC-20260625-IP-01: Investor identity in separate `investor_accounts` table
+
+**Status:** Accepted
+
+**Context:** AGENTS.md states `partners` is the canonical identity/auth source. Investors are external, non-clinical stakeholders — not customers or staff. Patient portal stores creds on `partners` because patients are customers.
+
+**Decision:** Use dedicated `dbo.investor_accounts` + `dbo.investor_clients` join for per-investor visibility. Investors are LOB-pinned (`dental`|`cosmetic`); all queries use `getQuery(investor.lob)`. JWT uses mandatory distinct `INVESTOR_JWT_SECRET` with `type:'investor'`.
+
+**Consequences:** Governance deviation from single-table identity is explicit. No investor rows in `partners`. Staff toggle and admin provision routes deferred to a follow-up phase; MVP ships login + read-only client list.
+
 ## DEC-20260519-01 to DEC-20260519-16: Cosmetic LOB v2 Design Decisions (D1–D16)
 
 **Status:** Accepted (from approved 2026-05-18-cosmetic-line-of-business-design-v2.md + PLAN.md specialist reviews)

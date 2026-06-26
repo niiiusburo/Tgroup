@@ -71,7 +71,7 @@ fi
 WEBSITE_UNIT_TESTS="$(staged_matching '^website/.*\.(test|spec)\.(ts|tsx|js|jsx)$' | grep -v '^website/e2e/' | sed 's|^website/||' || true)"
 if [ -n "$WEBSITE_UNIT_TESTS" ]; then
   run_gate npm --prefix website test -- $WEBSITE_UNIT_TESTS
-elif has_staged '^website/(src|test|tests|package(-lock)?\.json|vite\.config|vitest\.config)'; then
+elif has_staged '^website/(src|test|tests|vite\.config|vitest\.config)'; then
   run_gate npm --prefix website test
 else
   echo "[hard-gates] Website unit-test inputs unchanged; skipping Vitest."

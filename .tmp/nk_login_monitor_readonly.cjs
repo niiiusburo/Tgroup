@@ -99,6 +99,22 @@ async function login(page) {
 }
 
 async function applyPrivacyMask(page) {
+  await page.evaluate(() => {
+    const protectedRoots = Array.from(document.querySelectorAll('main, [role="main"]'));
+    if (!protectedRoots.length) return;
+
+    const maskText = (value) => value.replace(/[^\s]/g, '•');
+    for (const root of protectedRoots) {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      for (const node of nodes) {
+        const text = node.textContent || '';
+        if (text.trim()) node.textContent = maskText(text);
+      }
+    }
+  }).catch(() => {});
+
   await page.addStyleTag({
     content: `
       tbody, [role="rowgroup"], .customer-card, .patient-card,

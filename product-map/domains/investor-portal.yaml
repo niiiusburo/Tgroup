@@ -1,0 +1,59 @@
+name: Investor Portal
+summary: |
+  Read-only external portal for investors. Admin-provisioned accounts log in with email+password,
+  see only clients explicitly shared via investor_clients join, with privacy-safe field projection.
+  Phase 2 adds staff curation (Customers column), admin provisioning (Settings), and password reset.
+owns:
+  - api/src/middleware/investorAuth.js
+  - api/src/routes/investor/
+  - api/src/routes/investor/adminStaff.js
+  - api/src/routes/investor/staffVisibility.js
+  - api/src/routes/partners/investorVisibilityPatch.js
+  - website/src/pages/Investor/
+  - website/src/components/settings/InvestorManagement.tsx
+  - website/src/components/customer/InvestorVisibilityCell.tsx
+  - website/src/contexts/InvestorAuthContext.tsx
+  - website/src/lib/api/investor.ts
+  - website/src/lib/api/investorAdmin.ts
+  - website/src/lib/api/investorVisibility.ts
+  - contracts/investor.ts
+reads:
+  - api/src/db.js (getQuery per investor.lob)
+  - dbo.partners (safe projection only)
+writes:
+  - dbo.investor_accounts
+  - dbo.investor_clients
+  - dbo.investor_view_audit
+  - dbo.investor_password_reset_tokens
+tables:
+  - dbo.investor_accounts
+  - dbo.investor_clients
+  - dbo.investor_view_audit
+  - dbo.investor_password_reset_tokens
+  - dbo.partners (read-only via IDOR gate)
+endpoints:
+  - POST /api/investor/auth/login
+  - GET /api/investor/auth/me
+  - POST /api/investor/auth/password-reset-request
+  - POST /api/investor/auth/password-reset
+  - GET /api/investor/clients
+  - GET /api/investor/clients/:partnerId
+  - GET /api/investor-visibility
+  - PATCH /api/Partners/:id/investor-visibility
+  - GET /api/admin/investors
+  - POST /api/admin/investors
+  - PATCH /api/admin/investors/:id
+permissions:
+  - customers.set_investor_visibility
+  - investors.manage
+ui_surfaces:
+  - /investor/login
+  - /investor/reset-password
+  - /investor (client roster)
+  - /customers (investor visibility column)
+  - /settings (investors tab)
+impact_tests:
+  - api/src/routes/investor/__tests__/auth.test.js
+  - api/src/routes/investor/__tests__/clientRedaction.test.js
+  - api/src/routes/investor/__tests__/phase2.test.js
+  - api/scripts/verify-investor-phase2.mjs
