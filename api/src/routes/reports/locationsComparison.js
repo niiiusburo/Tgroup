@@ -2,6 +2,7 @@ const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
 const { err, validDate, validUUID, dateCompanyFilter } = require('./helpers');
+const { resolveInvestorScope } = require('../../services/permissionService');
 
 const router = express.Router();
 
@@ -12,6 +13,8 @@ router.post('/locations/comparison', requirePermission('reports.view'), async (r
     const { dateFrom, dateTo } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo)) return err(res, 400, 'Invalid params');
 
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+
     const af = dateCompanyFilter(dateFrom, dateTo, null, 'date');
     // Offset sf params by af.idx so $N is correct in combined query
     const sfConds = [];
@@ -19,7 +22,16 @@ router.post('/locations/comparison', requirePermission('reports.view'), async (r
     let sfIdx = af.idx;
     if (dateFrom) { sfConds.push(`datecreated::date >= $${sfIdx}`); sfParams.push(dateFrom); sfIdx++; }
     if (dateTo) { sfConds.push(`datecreated::date <= $${sfIdx}`); sfParams.push(dateTo); sfIdx++; }
-    const sfWhere = sfConds.length ? 'AND ' + sfConds.join(' AND ') : '';
+    let afWhere = af.where;
+    let soWhere = sfWhere;
+    if (investorScope.isInvestor) {
+      sfParams.push(investorScope.allowedCustomerIds);
+      const investorIdx = sfIdx;
+      afWhere += ` AND partnerid = ANY($${investorIdx}::uuid[])`;
+      soWhere = (sfConds.length ? 'AND ' + sfConds.join(' AND ') : '') + ` AND partnerid = ANY($${investorIdx}::uuid[])`;
+    } else {
+      soWhere = sfConds.length ? 'AND ' + sfConds.join(' AND ') : '';
+    }
 
     const locations = await query(
       `SELECT c.id, c.name, c.active,
@@ -29,17 +41,23 @@ router.post('/locations/comparison', requirePermission('reports.view'), async (r
               COALESCE(so.order_count, 0) as order_count,
               COALESCE(emp.cnt, 0) as employee_count
        FROM dbo.companies c
-       LEFT JOIN (SELECT companyid, COUNT(*) as cnt, SUM(CASE WHEN state='done' THEN 1 ELSE 0 END) as done FROM dbo.appointments WHERE 1=1 ${af.where} GROUP BY companyid) appt ON appt.companyid=c.id
-       LEFT JOIN (SELECT companyid, COUNT(*) as order_count, COALESCE(SUM(totalpaid),0) as revenue FROM dbo.saleorders WHERE isdeleted=false AND state='sale' ${sfWhere} GROUP BY companyid) so ON so.companyid=c.id
+       LEFT JOIN (SELECT companyid, COUNT(*) as cnt, SUM(CASE WHEN state='done' THEN 1 ELSE 0 END) as done FROM dbo.appointments WHERE 1=1 ${afWhere} GROUP BY companyid) appt ON appt.companyid=c.id
+       LEFT JOIN (SELECT companyid, COUNT(*) as order_count, COALESCE(SUM(totalpaid),0) as revenue FROM dbo.saleorders WHERE isdeleted=false AND state='sale' ${soWhere} GROUP BY companyid) so ON so.companyid=c.id
        LEFT JOIN (SELECT companyid, COUNT(*) as cnt FROM dbo.partners WHERE employee=true AND isdeleted=false GROUP BY companyid) emp ON emp.companyid=c.id
        ORDER BY revenue DESC`, sfParams);
 
     // Location growth trend
+    let trendParams = [dateFrom, dateTo];
+    let trendWhere = 'a.date::date >= $1 AND a.date::date <= $2';
+    if (investorScope.isInvestor) {
+      trendParams.push(investorScope.allowedCustomerIds);
+      trendWhere += ` AND a.partnerid = ANY($${trendParams.length}::uuid[])`;
+    }
     const trend = await query(
       `SELECT c.name, DATE_TRUNC('month', a.date) as month, COUNT(*) as cnt
        FROM dbo.companies c
-       JOIN dbo.appointments a ON a.companyid=c.id AND a.date::date >= $1 AND a.date::date <= $2
-       GROUP BY c.name, month ORDER BY c.name, month`, [dateFrom, dateTo]);
+       JOIN dbo.appointments a ON a.companyid=c.id AND ${trendWhere}
+       GROUP BY c.name, month ORDER BY c.name, month`, trendParams);
 
     return res.json({ success: true, data: {
       locations: locations.map(l => ({ ...l, appointmentCount: parseInt(l.appointment_count), doneCount: parseInt(l.done_count), revenue: parseFloat(l.revenue), orderCount: parseInt(l.order_count), employeeCount: parseInt(l.employee_count) })),

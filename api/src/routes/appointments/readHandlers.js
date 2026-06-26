@@ -1,6 +1,7 @@
 const { query } = require('../../db');
 const { errorResponse, isValidISODate, isValidUUID, VALID_STATES } = require('./helpers');
 const { addAccentInsensitiveSearchCondition } = require('../../utils/search');
+const { resolveInvestorScope } = require('../../services/permissionService');
 
 /**
  * GET /api/Appointments
@@ -144,6 +145,14 @@ async function listAppointments(req, res) {
         search,
         paramIdx,
       });
+    }
+
+    // Investor scope: restrict to appointments for customers explicitly assigned to this investor
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      params.push(investorScope.allowedCustomerIds);
+      conditions.push(`a.partnerid = ANY($${paramIdx}::uuid[])`);
+      paramIdx++;
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -400,6 +409,13 @@ async function getAppointmentById(req, res) {
     );
 
     if (!rows || rows.length === 0) {
+      return errorResponse(res, 404, 'NOT_FOUND', 'Appointment not found');
+    }
+
+    // Investor scope: a non-assigned customer's appointment is indistinguishable from
+    // a missing one (404 — fail-closed, no existence disclosure).
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(rows[0].partnerid)) {
       return errorResponse(res, 404, 'NOT_FOUND', 'Appointment not found');
     }
 

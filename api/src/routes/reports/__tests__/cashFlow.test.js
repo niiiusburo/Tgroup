@@ -8,6 +8,9 @@ jest.mock('../../../middleware/auth', () => ({
 
 jest.mock('../../../services/permissionService', () => ({
   resolveEffectivePermissions: jest.fn(),
+  // cashFlow.js scopes results via resolveInvestorScope; default to non-investor
+  // so the existing (staff) assertions hold. clearAllMocks keeps this impl.
+  resolveInvestorScope: jest.fn().mockResolvedValue({ isInvestor: false, allowedCustomerIds: [] }),
 }));
 
 const express = require('express');

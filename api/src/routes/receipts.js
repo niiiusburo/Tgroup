@@ -1,6 +1,8 @@
 const express = require('express');
 const { query } = require('../db');
 const { addAccentInsensitiveSearchCondition } = require('../utils/search');
+const { requirePermission } = require('../middleware/auth');
+const { resolveInvestorScope } = require('../services/permissionService');
 
 const router = express.Router();
 
@@ -11,7 +13,7 @@ const router = express.Router();
  *
  * CB-02: Phiếu thu (Receipts) - Customer payment receipts
  */
-router.get('/', async (req, res) => {
+router.get('/', requirePermission('payment.view'), async (req, res) => {
   try {
     const {
       offset = '0',
@@ -77,6 +79,14 @@ router.get('/', async (req, res) => {
         search,
         paramIdx,
       });
+    }
+
+    // Investor scope: restrict receipts to the investor's assigned customers.
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      conditions.push(`cr.partnerid = ANY($${paramIdx}::uuid[])`);
+      params.push(investorScope.allowedCustomerIds);
+      paramIdx++;
     }
 
     const whereClause = conditions.join(' AND ');
@@ -180,7 +190,7 @@ router.get('/', async (req, res) => {
  * GET /api/CustomerReceipts/:id
  * Returns: Single customer receipt with full details
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', requirePermission('payment.view'), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -230,6 +240,12 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Receipt not found' });
     }
 
+    // Investor scope: a receipt for a non-assigned customer is invisible (404).
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(rows[0].partnerid)) {
+      return res.status(404).json({ error: 'Receipt not found' });
+    }
+
     const receipt = rows[0];
     receipt.dotkhams = [];
     receipt.appointments = [];
@@ -247,9 +263,18 @@ router.get('/:id', async (req, res) => {
  * GET /api/CustomerReceipts/:id/GetPayments
  * Returns: Payments linked to this receipt
  */
-router.get('/:id/GetPayments', async (req, res) => {
+router.get('/:id/GetPayments', requirePermission('payment.view'), async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Investor scope: only expose payments for a receipt the investor may see.
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      const owner = await query('SELECT partnerid FROM customerreceipts WHERE id = $1', [id]);
+      if (owner.length === 0 || !investorScope.allowedCustomerIds.includes(owner[0].partnerid)) {
+        return res.status(404).json({ error: 'Receipt not found' });
+      }
+    }
 
     const payments = await query(
       `SELECT

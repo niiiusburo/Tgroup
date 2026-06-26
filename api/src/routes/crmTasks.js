@@ -1,6 +1,8 @@
 const express = require('express');
 const { query } = require('../db');
 const { addAccentInsensitiveSearchCondition } = require('../utils/search');
+const { requirePermission } = require('../middleware/auth');
+const { resolveInvestorScope } = require('../services/permissionService');
 
 const router = express.Router();
 
@@ -11,7 +13,7 @@ const router = express.Router();
  *
  * WORK-01: Công việc (Work/Tasks) - Task management
  */
-router.get('/GetPagedV2', async (req, res) => {
+router.get('/GetPagedV2', requirePermission('customers.view'), async (req, res) => {
   try {
     const {
       offset = '0',
@@ -77,6 +79,15 @@ router.get('/GetPagedV2', async (req, res) => {
         search,
         paramIdx,
       });
+    }
+
+    // Investor scope: restrict tasks to the investor's assigned customers.
+    // Tasks not tied to a customer (partnerid NULL) fall outside scope.
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      conditions.push(`ct.partnerid = ANY($${paramIdx}::uuid[])`);
+      params.push(investorScope.allowedCustomerIds);
+      paramIdx++;
     }
 
     const whereClause = conditions.join(' AND ');
@@ -246,7 +257,7 @@ router.get('/Types', async (req, res) => {
  * GET /api/CrmTasks/:id
  * Returns: Single task with full details
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', requirePermission('customers.view'), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -304,6 +315,13 @@ router.get('/:id', async (req, res) => {
     );
 
     if (!rows || rows.length === 0) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+
+    // Investor scope: a task for a non-assigned customer (or with no customer)
+    // is indistinguishable from missing (404).
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(rows[0].partnerid)) {
       return res.status(404).json({ error: 'Task not found' });
     }
 

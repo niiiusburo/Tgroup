@@ -2,6 +2,7 @@ const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
 const { err, validDate, validUUID, resolveReportCompanyScope, datePaymentScopeFilter } = require('./helpers');
+const { resolveInvestorScope } = require('../../services/permissionService');
 
 const router = express.Router();
 
@@ -166,7 +167,15 @@ router.post('/cash-flow/summary', requirePermission('reports.view'), async (req,
     const scope = await resolveReportCompanyScope(req, res, companyId);
     if (!scope) return;
 
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+
     const f = datePaymentScopeFilter(dateFrom, dateTo, scope, 'COALESCE(p.payment_date, p.created_at)', 'p');
+    let fWhere = f.where;
+    let params = [...f.params];
+    if (investorScope.isInvestor) {
+      params.push(investorScope.allowedCustomerIds);
+      fWhere += ` AND p.customer_id = ANY($${f.params.length + 1}::uuid[])`;
+    }
     const rows = await query(
       `SELECT
          p.id,
@@ -179,9 +188,9 @@ router.post('/cash-flow/summary', requirePermission('reports.view'), async (req,
          p.bank_amount,
          COALESCE(p.payment_date, p.created_at) AS report_date
        FROM dbo.payments p
-       WHERE p.status IN ('posted', 'voided') ${f.where}
+       WHERE p.status IN ('posted', 'voided') ${fWhere}
        ORDER BY report_date ASC`,
-      f.params
+      params
     );
 
     return res.json({ success: true, data: summarizeCashFlow(rows) });

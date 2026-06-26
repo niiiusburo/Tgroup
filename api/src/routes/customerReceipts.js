@@ -2,6 +2,7 @@ const express = require('express');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
 const { addAccentInsensitiveSearchCondition } = require('../utils/search');
+const { resolveInvestorScope } = require('../services/permissionService');
 
 const router = express.Router();
 
@@ -54,6 +55,14 @@ router.get('/', requirePermission('customers.view'), async (req, res) => {
         search,
         paramIdx,
       });
+    }
+
+    // Investor scope: restrict to allowed customers
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      params.push(investorScope.allowedCustomerIds);
+      conditions.push(`cr.partnerid = ANY($${paramIdx}::uuid[])`);
+      paramIdx++;
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -190,6 +199,12 @@ router.get('/:id', requirePermission('customers.view'), async (req, res) => {
     );
 
     if (!rows || rows.length === 0) {
+      return res.status(404).json({ error: 'Customer receipt not found' });
+    }
+
+    // Investor scope: membership check
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(rows[0].partnerid)) {
       return res.status(404).json({ error: 'Customer receipt not found' });
     }
 

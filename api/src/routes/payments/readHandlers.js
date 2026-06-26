@@ -1,6 +1,7 @@
 const { query } = require("../../db");
 const { mapAllocations } = require("./helpers");
 const { addAccentInsensitiveSearchCondition, normalizedSql } = require("../../utils/search");
+const { resolveInvestorScope } = require("../../services/permissionService");
 
 function mapPaymentRow(row, allocations = []) {
   return {
@@ -187,6 +188,15 @@ async function listPayments(req, res) {
     `;
 
     sql = appendPaymentFilters({ sql, params, customerId, serviceId, type, search });
+
+    // Investor scope: restrict to the customers explicitly assigned to this investor
+    // (fail-closed — empty allowlist yields zero rows).
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      params.push(investorScope.allowedCustomerIds);
+      sql += ` AND p.customer_id = ANY($${params.length}::uuid[])`;
+    }
+
     sql += ` ORDER BY p.created_at DESC LIMIT $` + (params.length + 1) + ` OFFSET $` + (params.length + 2);
     params.push(parseInt(limit), parseInt(offset));
 
@@ -206,12 +216,21 @@ async function listPayments(req, res) {
     }
 
     const count = paymentCountWhere({ customerId, serviceId, type, search });
+    let countWhere = count.where;
+    const countParams = [...count.params];
+
+    // Apply investor scope to count query as well
+    if (investorScope.isInvestor) {
+      countParams.push(investorScope.allowedCustomerIds);
+      countWhere += ` AND p.customer_id = ANY($${countParams.length}::uuid[])`;
+    }
+
     let countResult = await query(
       `SELECT COUNT(*)
        FROM payments p
        LEFT JOIN partners partner ON partner.id = p.customer_id
-       WHERE ${count.where}`,
-      count.params
+       WHERE ${countWhere}`,
+      countParams
     );
     let totalItems = parseInt(countResult[0]?.count || 0);
 
@@ -304,6 +323,15 @@ async function listDeposits(req, res) {
     `;
 
     sql = appendDepositFilters({ sql, params, customerId, dateFrom, dateTo, receiptNumber, type });
+
+    // Investor scope: restrict to the customers explicitly assigned to this investor
+    // (fail-closed — empty allowlist yields zero rows).
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      params.push(investorScope.allowedCustomerIds);
+      sql += ` AND p.customer_id = ANY($${params.length}::uuid[])`;
+    }
+
     const countSql = `SELECT COUNT(*) FROM payments p ${sql.slice(sql.indexOf("FROM payments p") + "FROM payments p".length)}`;
     const countResult = await query(countSql, [...params]);
     const totalItems = parseInt(countResult[0]?.count || 0);
@@ -352,6 +380,14 @@ async function listDepositUsage(req, res) {
       sql += ` AND p.payment_date <= $` + params.length;
     }
 
+    // Investor scope: restrict to the customers explicitly assigned to this investor
+    // (fail-closed — empty allowlist yields zero rows).
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      params.push(investorScope.allowedCustomerIds);
+      sql += ` AND p.customer_id = ANY($` + params.length + `::uuid[])`;
+    }
+
     const countSql = `SELECT COUNT(*) FROM payments p ${sql.slice(sql.indexOf("FROM payments p") + "FROM payments p".length)}`;
     const countResult = await query(countSql, [...params]);
     const totalItems = parseInt(countResult[0]?.count || 0);
@@ -386,6 +422,14 @@ async function getPaymentById(req, res) {
     );
     if (rows.length === 0) return res.status(404).json({ error: "Payment not found" });
 
+    const paymentRow = rows[0];
+
+    // Investor scope: check membership, 404 if not allowed (no existence disclosure)
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(paymentRow.customer_id)) {
+      return res.status(404).json({ error: "Payment not found" });
+    }
+
     let allocations = [];
     try {
       allocations = await loadPaymentAllocations([id]);
@@ -393,7 +437,7 @@ async function getPaymentById(req, res) {
       console.warn("Payment allocations query failed, returning empty allocations:", allocErr.message);
     }
 
-    res.json(mapPaymentRow(rows[0], allocations));
+    res.json(mapPaymentRow(paymentRow, allocations));
   } catch (error) {
     console.error("Error fetching payment:", error);
     res.status(500).json({ error: "Failed to fetch payment" });

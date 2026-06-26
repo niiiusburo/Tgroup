@@ -1,6 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
+const { resolveInvestorScope } = require('../services/permissionService');
 
 const router = express.Router();
 
@@ -58,6 +59,8 @@ async function foreignKeyExists(table, id) {
 router.post('/GetSumary', requirePermission('reports.view'), async (req, res) => {
   try {
     const { dateFrom = '', dateTo = '', companyId = '' } = req.body;
+
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
 
     // Validate companyId if provided
     if (companyId) {
@@ -118,6 +121,12 @@ router.post('/GetSumary', requirePermission('reports.view'), async (req, res) =>
       paymentIdx++;
     }
 
+    if (investorScope.isInvestor) {
+      paymentConditions.push(`ap.partnerid = ANY($${paymentIdx}::uuid[])`);
+      paymentParams.push(investorScope.allowedCustomerIds);
+      paymentIdx++;
+    }
+
     const paymentWhere = paymentConditions.join(' AND ');
 
     // Get today's payments by type
@@ -156,6 +165,12 @@ router.post('/GetSumary', requirePermission('reports.view'), async (req, res) =>
 
       yesterdayConditions.push(`ap.paymentdate = $${yesterdayIdx}`);
       yesterdayParams.push(yesterdayStr);
+      yesterdayIdx++;
+
+      if (investorScope.isInvestor) {
+        yesterdayConditions.push(`ap.partnerid = ANY($${yesterdayIdx}::uuid[])`);
+        yesterdayParams.push(investorScope.allowedCustomerIds);
+      }
 
       yesterdayWhere = yesterdayConditions.join(' AND ');
 

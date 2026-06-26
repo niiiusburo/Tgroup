@@ -2,6 +2,7 @@ const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
 const { err, validDate, validUUID } = require('./helpers');
+const { resolveInvestorScope } = require('../../services/permissionService');
 const {
   SERVICE_REVENUE_PAYMENT_CONDITION,
   ALLOCATION_TOTALS_CTE,
@@ -20,6 +21,8 @@ router.post('/services/breakdown', requirePermission('reports.view'), async (req
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+
     // Products by category
     const cats = await query(
       `SELECT pc.name as category, COUNT(p.id) as product_count,
@@ -30,6 +33,12 @@ router.post('/services/breakdown', requirePermission('reports.view'), async (req
        GROUP BY pc.name ORDER BY product_count DESC`);
 
     const f = buildPaymentRevenueFilter({ dateFrom, dateTo, companyId });
+    let fWhere = f.where;
+    let params = [...f.params];
+    if (investorScope.isInvestor) {
+      params.push(investorScope.allowedCustomerIds);
+      fWhere += ` AND so.partnerid = ANY($${f.params.length + 1}::uuid[])`;
+    }
     // Revenue by category via posted payment allocations.
     const revByCat = await query(
       `WITH line_totals AS (
@@ -72,8 +81,8 @@ router.post('/services/breakdown', requirePermission('reports.view'), async (req
        LEFT JOIN line_totals lt ON lt.orderid=so.id
        JOIN dbo.products pr ON pr.id=sol.productid
        JOIN dbo.productcategories pc ON pc.id=pr.categid
-       WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${f.where}
-       GROUP BY pc.name ORDER BY revenue DESC`, f.params);
+       WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${fWhere}
+       GROUP BY pc.name ORDER BY revenue DESC`, params);
 
     // Revenue by source via posted payment allocations.
     const revBySource = await query(
@@ -85,8 +94,8 @@ router.post('/services/breakdown', requirePermission('reports.view'), async (req
        LEFT JOIN dbo.payment_allocations pa ON pa.invoice_id=so.id
        LEFT JOIN dbo.payments p ON p.id=pa.payment_id
        LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
-       WHERE (pa.id IS NULL OR (${SERVICE_REVENUE_PAYMENT_CONDITION} ${f.where}))
-       GROUP BY cs.name ORDER BY revenue DESC`, f.params);
+       WHERE (pa.id IS NULL OR (${SERVICE_REVENUE_PAYMENT_CONDITION} ${fWhere}))
+       GROUP BY cs.name ORDER BY revenue DESC`, params);
 
     // Popular products
     const popular = await query(
