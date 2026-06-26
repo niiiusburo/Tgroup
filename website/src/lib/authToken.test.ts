@@ -6,6 +6,7 @@ import {
   clearAuthToken,
   getAuthToken,
   getRememberMePreference,
+  isAuthTokenExpired,
   setAuthToken,
   setRememberMePreference,
 } from './authToken';
@@ -31,6 +32,10 @@ describe('authToken', () => {
     expect(getAuthToken()).toBe('session-token');
   });
 
+  it('defaults remember-me preference to true for first-time visitors', () => {
+    expect(getRememberMePreference()).toBe(true);
+  });
+
   it('persists remember-me checkbox preference separately from active session', () => {
     setRememberMePreference(true);
     expect(getRememberMePreference()).toBe(true);
@@ -38,5 +43,16 @@ describe('authToken', () => {
     expect(getRememberMePreference()).toBe(true);
     clearAuthToken(true);
     expect(getRememberMePreference()).toBe(false);
+  });
+
+  it('detects expired JWT payloads', () => {
+    const header = btoa(JSON.stringify({ alg: 'none', typ: 'JWT' }));
+    const payload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) - 60 }));
+    const expired = `${header}.${payload}.sig`;
+    expect(isAuthTokenExpired(expired)).toBe(true);
+
+    const freshPayload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600 }));
+    const fresh = `${header}.${freshPayload}.sig`;
+    expect(isAuthTokenExpired(fresh)).toBe(false);
   });
 });

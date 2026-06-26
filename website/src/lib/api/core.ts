@@ -8,7 +8,7 @@
  * API Client core - fetch wrapper, error handling, and shared types
  * Consumed by all lib/api/* domain modules.
  */
-import { clearAuthToken, getAuthToken } from '@/lib/authToken';
+import { clearAuthToken, getAuthToken, isAuthTokenExpired } from '@/lib/authToken';
 import { API_URL } from './apiBaseUrl';
 
 // Re-export for backward compatibility — new code should prefer './apiBaseUrl'.
@@ -101,8 +101,11 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
 
   if (!res.ok) {
     if (res.status === 401) {
-      clearAuthToken();
-      window.dispatchEvent(new CustomEvent(AUTH_UNAUTHORIZED_EVENT));
+      const activeToken = getAuthToken();
+      if (!activeToken || isAuthTokenExpired(activeToken)) {
+        clearAuthToken();
+        window.dispatchEvent(new CustomEvent(AUTH_UNAUTHORIZED_EVENT));
+      }
     }
 
     // Report to AutoDebugger pipeline (production only, 5xx only).

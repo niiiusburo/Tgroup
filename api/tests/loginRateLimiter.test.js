@@ -226,7 +226,7 @@ describe('login rate limiter', () => {
     expect(meRes.body.user.lob_scope).toEqual(['cosmetic']);
   });
 
-  it('issues a 30-day token when rememberMe is true', async () => {
+  it('issues a 60-day token when rememberMe is true', async () => {
     const jwt = require('jsonwebtoken');
     const app = loadApp({ passwordMatches: true });
 
@@ -237,8 +237,8 @@ describe('login rate limiter', () => {
     expect(loginRes.status).toBe(200);
     const decoded = jwt.decode(loginRes.body.token);
     expect(decoded.remember).toBe(true);
-    expect(decoded.exp - decoded.iat).toBeGreaterThan(29 * 24 * 60 * 60);
-    expect(decoded.exp - decoded.iat).toBeLessThanOrEqual(30 * 24 * 60 * 60);
+    expect(decoded.exp - decoded.iat).toBeGreaterThan(59 * 24 * 60 * 60);
+    expect(decoded.exp - decoded.iat).toBeLessThanOrEqual(60 * 24 * 60 * 60);
   });
 
   it('keeps the default 24-hour token when rememberMe is omitted', async () => {

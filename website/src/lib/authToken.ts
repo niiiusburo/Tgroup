@@ -10,22 +10,39 @@ export const REMEMBER_SESSION_KEY = 'tgclinic_remember';
 
 export function getRememberMePreference(): boolean {
   try {
-    return localStorage.getItem(REMEMBER_PREF_KEY) === '1';
+    const stored = localStorage.getItem(REMEMBER_PREF_KEY);
+    if (stored === null) return true;
+    return stored === '1';
   } catch {
-    return false;
+    return true;
   }
 }
 
 export function setRememberMePreference(rememberMe: boolean): void {
   try {
-    if (rememberMe) {
-      localStorage.setItem(REMEMBER_PREF_KEY, '1');
-    } else {
-      localStorage.removeItem(REMEMBER_PREF_KEY);
-    }
+    localStorage.setItem(REMEMBER_PREF_KEY, rememberMe ? '1' : '0');
   } catch {
     // Ignore storage errors
   }
+}
+
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const segment = token.split('.')[1];
+    if (!segment) return null;
+    const normalized = segment.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+    return JSON.parse(atob(padded)) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+export function isAuthTokenExpired(token: string, skewMs = 30_000): boolean {
+  const payload = decodeJwtPayload(token);
+  const exp = payload?.exp;
+  if (typeof exp !== 'number') return true;
+  return exp * 1000 <= Date.now() + skewMs;
 }
 
 export function getAuthToken(): string | null {
@@ -58,7 +75,7 @@ export function clearAuthToken(clearRememberPreference = false): void {
     sessionStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(REMEMBER_SESSION_KEY);
     if (clearRememberPreference) {
-      localStorage.removeItem(REMEMBER_PREF_KEY);
+      localStorage.setItem(REMEMBER_PREF_KEY, '0');
     }
   } catch {
     // Ignore storage errors
