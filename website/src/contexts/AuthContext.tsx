@@ -16,6 +16,7 @@ import { AUTH_UNAUTHORIZED_EVENT } from '@/lib/api/core';
 import {
   clearAuthToken,
   getAuthToken,
+  getRememberMePreference,
   setAuthToken,
 } from '@/lib/authToken';
 import {
@@ -81,6 +82,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     fetchMe()
       .then((res) => {
+        const activeToken = getAuthToken();
+        if (activeToken && getRememberMePreference()) {
+          setAuthToken(activeToken, true);
+        }
         setState({
           user: res.user,
           permissions: res.permissions,

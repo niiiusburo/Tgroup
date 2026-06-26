@@ -2,6 +2,16 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.37.22] — 2026-06-26 — NK login persistence / Remember Me hardening
+
+### Changed
+- **Remember Me defaults on for first-time logins** (`website/src/lib/authToken.ts`, `website/src/pages/Login.tsx`): checkbox starts checked; explicit opt-out persists as `tgclinic_remember_pref=0`.
+- **Remembered JWT lifetime extended to 60 days** (`api/src/routes/auth.js`): aligns with `docs/SECURITY.md` / WF-001; unchecked sessions remain 24h in `sessionStorage`.
+- **Session restore hardening** (`website/src/contexts/AuthContext.tsx`, `website/src/lib/api/core.ts`): successful `/Auth/me` re-promotes remembered tokens to `localStorage`; transient 401s no longer wipe a still-valid JWT.
+
+### Testing
+- `website/src/lib/authToken.test.ts`, `api/tests/loginRateLimiter.test.js` — default preference + 60d expiry coverage.
+
 ## [0.37.21] — 2026-06-22 — NK3: service-card commission reversal + backfill guard
 
 ### Fixed
