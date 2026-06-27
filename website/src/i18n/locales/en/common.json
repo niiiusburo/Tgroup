@@ -361,5 +361,25 @@
   "deleteConfirmDefault": "Are you sure you want to delete this item? This action cannot be undone.",
   "linkedDataWarning": "Linked Data Warning",
   "updateAvailable": "Update Available",
-  "whatsNew": "What's New"
+  "whatsNew": "What's New",
+  "checkIn": {
+    "title": "Check In",
+    "subtitle": "Look at the camera to check in",
+    "scanning": "Scanning for face...",
+    "verifying": "Verifying...",
+    "capture": "Capture",
+    "tryAgain": "Try again",
+    "welcomeBack": "Welcome back!",
+    "welcomeBackName": "Welcome back, {{name}}",
+    "youAreCheckedIn": "You're checked in.",
+    "noMatchTitle": "We could not recognize you",
+    "noMatchHint": "Please check in at the front desk.",
+    "multipleTitle": "Multiple possible matches",
+    "multipleHint": "Please check in at the front desk.",
+    "errorTitle": "Something went wrong",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "cameraError": "Cannot access camera. Check permissions.",
+    "captureFailed": "Capture failed. Please try again.",
+    "footer": "Identity check-in only. No login required."
+  }
 }

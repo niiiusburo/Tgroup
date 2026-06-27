@@ -73,6 +73,7 @@ const placesRoutes = require('./routes/places');
 const bankSettingsRoutes = require('./routes/bankSettings');
 const externalCheckupsRoutes = require('./routes/externalCheckups');
 const faceRecognitionRoutes = require('./routes/faceRecognition');
+const faceCheckinRoutes = require('./routes/faceCheckin');  // PUBLIC check-in kiosk (no-auth, recognize-only) — docs/FACE-ID-SCOPE.md
 const feedbackRoutes = require('./routes/feedback');
 const reportsRoutes = require('./routes/reports');
 const telemetryRoutes = require('./routes/telemetry');
@@ -267,6 +268,10 @@ app.use('/api/WebsitePages', websitePagesRoutes);
 app.use('/api/settings', bankSettingsRoutes);
 app.use('/api/ExternalCheckups', externalCheckupsRoutes);
 app.use('/api/face', faceRecognitionRoutes);
+
+// PUBLIC Face ID check-in kiosk (iPad, no login). MUST stay public — see docs/FACE-ID-SCOPE.md.
+// Registered in publicApiPaths.js so it skips the global requireAuth gate.
+app.use('/api/public/face', faceCheckinRoutes);
 app.use('/api/Feedback', feedbackRoutes);
 app.use('/api/Reports', reportsRoutes);
 app.use('/api/telemetry', telemetryRoutes);

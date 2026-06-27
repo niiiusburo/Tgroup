@@ -16,6 +16,8 @@ const PUBLIC_EXACT_PATHS = new Set([
   '/api/ipaccess/check',
   '/api/health',
   '/api/telemetry/version',
+  // PUBLIC Face ID check-in kiosk (iPad, no login) — docs/FACE-ID-SCOPE.md
+  '/api/public/face/checkin',
 ]);
 
 /**

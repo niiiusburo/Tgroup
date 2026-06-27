@@ -15,6 +15,16 @@ Decision:
 Consequences:
 ```
 
+## DEC-20260625-IP-01: Investor identity in separate `investor_accounts` table
+
+**Status:** Accepted
+
+**Context:** AGENTS.md states `partners` is the canonical identity/auth source. Investors are external, non-clinical stakeholders — not customers or staff. Patient portal stores creds on `partners` because patients are customers.
+
+**Decision:** Use dedicated `dbo.investor_accounts` + `dbo.investor_clients` join for per-investor visibility. Investors are LOB-pinned (`dental`|`cosmetic`); all queries use `getQuery(investor.lob)`. JWT uses mandatory distinct `INVESTOR_JWT_SECRET` with `type:'investor'`.
+
+**Consequences:** Governance deviation from single-table identity is explicit. No investor rows in `partners`. Staff toggle and admin provision routes deferred to a follow-up phase; MVP ships login + read-only client list.
+
 ## DEC-20260519-01 to DEC-20260519-16: Cosmetic LOB v2 Design Decisions (D1–D16)
 
 **Status:** Accepted (from approved 2026-05-18-cosmetic-line-of-business-design-v2.md + PLAN.md specialist reviews)
@@ -205,3 +215,16 @@ References:
 **Context:** 5 stale pre-cutover earnings rows violating the no-CTV rule sat unnoticed for ~3 weeks until a manual audit.
 **Decision:** `scripts/nk3-commission-audit.sh` runs nightly on the VPS (cron 18:00 UTC = 01:00 ICT) against `tdental_nk3` + `tcosmetic_nk3`, checking: (1) ACTIVE (status<>'reversed') net earnings on no-CTV services, (2) ACTIVE earnings to non-CTV recipients, (3) ACTIVE earnings with no service line. Violations alert the project Telegram chat (`/opt/tgroup/scripts/telegram.env`, chmod 600 — token NOT in the repo).
 **Consequences:** Wrong commission is caught within 24h instead of by accident. Script failure also alerts. Silent when clean.
+
+## DEC-20260627-01: Face ID is Check-In/Identity-Verify Only (HARD CONSTRAINT)
+
+**Status:** Accepted (user directive 2026-06-27, overriding any prior assumption)
+**Context:** Face ID must not be used for login of any kind. It exists solely to verify a client's identity at check-in on a dedicated iPad kiosk at clinic locations. It never authenticates, never issues a JWT, never attaches to a session.
+**Decision:**
+- Face ID = check-in identity verify only. NOT login. NOT client login. NOT staff login.
+- New public `/check-in` kiosk page (no `ProtectedRoute`, no `useAuth`, no JWT).
+- New public `/api/public/face/check-in` endpoint (recognize-only, minimal PHI, respects LOB).
+- Existing `/api/face/recognize|register|re-register|status` stay admin-only (JWT + customers.view/edit).
+- Check-in response returns only identity greeting (first name + last initial). No financials, no history.
+**Consequences:** Any future Face ID work must be check-in shaped. Login-shaped Face ID work is rejected. See `docs/FACE-ID-SCOPE.md` for the full contract + anti-patterns.
+**See:** `docs/FACE-ID-SCOPE.md`

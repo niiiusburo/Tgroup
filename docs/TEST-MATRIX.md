@@ -106,6 +106,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | `website/src/components/customer/CustomerProfile/` | `CustomerProfile.test.tsx`, `website/e2e/customer-profile-crud.spec.ts` | Profile tabs (appointments, services, payments, photos). |
 | `website/src/components/customer/HealthCheckupUploadForm.tsx` date field | `npm --prefix website test -- src/components/ui/DatePicker.test.tsx`; customer profile health-check upload browser smoke | Health-check upload dates must keep the same required-date behavior without relying on native browser date validation or mobile native date popups. |
 | `api/src/routes/faceRecognition.js` | `api/tests/faceRecognition.test.js` | Face registration, re-registration, recognition, and provider routing. |
+| `api/src/routes/faceCheckin.js` (PUBLIC, no-auth) | `api/tests/faceCheckin.test.js` | PUBLIC Face ID check-in kiosk: recognize-only, no JWT, minimal-PHI greeting, rate-limit, ambiguous=count-only, admin `/api/face/*` still 401 regression. See `docs/FACE-ID-SCOPE.md`. |
 
 ### Services Catalog
 
@@ -173,8 +174,10 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | If you change... | Run these tests... | Why |
 |---|---|---|
 | `api/src/routes/externalCheckups.js` | `api/src/routes/__tests__/externalCheckups.test.js` | Hosoonline auth, patient search, image proxy. |
+| `website/src/pages/CheckIn/CheckIn.tsx` (PUBLIC kiosk) | `website/src/pages/CheckIn/CheckIn.test.tsx` | Public `/checkin` iPad kiosk: renders WITHOUT AuthProvider, no useAuth, no `/api/face/recognize` calls, recognizes via `/api/public/face/checkin` only. |
 | `website/src/components/shared/FaceCaptureModal.tsx` / `website/src/components/shared/useFaceCaptureController.ts` / `website/src/components/shared/faceCaptureEngine.ts` | `website/src/components/shared/FaceCaptureModal.test.tsx`, `website/src/components/shared/faceCaptureEngine.test.ts`, `website/src/components/customer/CustomerCameraWidget.test.tsx`, `website/src/components/shared/GlobalFaceIdButton.test.tsx`, `website/src/hooks/__tests__/useFaceRecognition.test.ts` | Camera lifetime, no-face messaging, auto-capture gating, and caller error propagation. |
 | `api/src/routes/faceRecognition.js` | `api/tests/faceRecognition.test.js` | Face register/re-register/recognize API contract in local and CompreFace modes. |
+| `api/src/routes/faceCheckin.js` | `api/tests/faceCheckin.test.js` | PUBLIC recognize-only check-in contract; greeting-only PHI; rate-limit; admin route regression guard. |
 | `api/src/services/comprefaceClient.js` / `api/src/services/comprefaceFaceProvider.js` | `api/src/services/__tests__/comprefaceClient.test.js`, `api/src/services/__tests__/comprefaceFaceProvider.test.js` | CompreFace multipart file upload, subject/example calls, health check, no-face normalization, and partner subject mapping. |
 | Future SMS/Zalo provider adapters and messaging provider env (`api/src/services/messaging*`, `api/src/providers/sms*`, `api/src/providers/zalo*`) | Provider contract tests with dry-run, failed response, invalid phone, template rejection, delivery status, and retry/backoff cases | External messaging providers must remain optional, auditable, and safe to disable without blocking appointment/calendar workflows. |
 | `face-service/` Python code | `api/tests/faceRecognition.integration.test.js`, manual face-service health check | Local-provider model inference and embedding generation. |

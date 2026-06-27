@@ -45,6 +45,7 @@ const CtvDashboard = lazy(() => import('@/pages/CTV/CtvDashboard'));
 const Landing = lazy(() => import('@/pages/Landing').then(m => ({ default: m.Landing })));
 const JoinCtv = lazy(() => import('@/pages/CTV/JoinCtv').then(m => ({ default: m.JoinCtv })));
 const VerifyDiscount = lazy(() => import('@/pages/VerifyDiscount'));
+const CheckIn = lazy(() => import('@/pages/CheckIn/CheckIn').then(m => ({ default: m.CheckIn })));
 const CtvDiscountLanding = lazy(() => import('@/pages/CtvDiscountLanding'));
 
 /**
@@ -178,6 +179,7 @@ function AdminCatchAllRedirect() {
   const { pathname } = useLocation();
   if (
     pathname.startsWith('/ctv/') ||
+    pathname === '/checkin' ||
     pathname === '/verify-discount' ||
     pathname === '/welcome' ||
     pathname === '/login'
@@ -220,6 +222,8 @@ function App() {
                 {/* @crossref:route[path="/welcome", component=Landing] — public Tâm Group landing (ported from CTV app) */}
                 <Route path="/welcome" element={<Landing />} />
                 {/* @crossref:route[path="/verify-discount"] — staff scans CTV voucher QR */}
+                {/* @crossref:route[path="/checkin", component=CheckIn] — PUBLIC Face ID kiosk (iPad, no login) — docs/FACE-ID-SCOPE.md */}
+                <Route path="/checkin" element={<CheckIn />} />
                 <Route path="/verify-discount" element={<VerifyDiscount />} />
                 {/* @crossref:route[path="/ctv/*"] — CTV portal + public join + fan discount landing */}
                 <Route path="/ctv" element={<Outlet />}>
