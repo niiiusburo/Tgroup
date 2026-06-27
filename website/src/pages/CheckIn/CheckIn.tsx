@@ -86,7 +86,7 @@ export function CheckIn() {
 
   // Mark capturing once controller is active.
   useEffect(() => {
-    if (controller.detectionState !== 'idle' && status.kind === 'idle') {
+    if (status.kind === 'idle') {
       setStatus({ kind: 'capturing' });
     }
   }, [controller.detectionState, status.kind]);
@@ -179,7 +179,7 @@ export function CheckIn() {
         )}
 
         {/* Idle scanning indicator over camera */}
-        {showCamera && controller.detectionState !== 'idle' && (
+        {showCamera && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-black/60 backdrop-blur rounded-full text-xs flex items-center gap-2">
             <ScanFace className="w-4 h-4" aria-hidden />
             <span>{t('checkIn.scanning', 'Scanning for face...')}</span>
