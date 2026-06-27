@@ -132,12 +132,14 @@ export function Customers() {
   const canVoidPayment = hasPermission("payment.void");
   const permissionGroupId = permissions?.groupId?.trim().toLowerCase();
   const permissionGroupName = permissions?.groupName?.trim().toLowerCase();
+  const isInvestorGroup = permissionGroupName === "investor";
   const canManageInvestorVisibility =
-    permissionGroupId === "11111111-0000-0000-0000-000000000001" ||
-    permissionGroupName === "admin" ||
-    permissionGroupName === "super admin" ||
-    permissionGroupName === "system administrator" ||
-    hasPermission("*");
+    !isInvestorGroup &&
+    (permissionGroupId === "11111111-0000-0000-0000-000000000001" ||
+      permissionGroupName === "admin" ||
+      permissionGroupName === "super admin" ||
+      permissionGroupName === "system administrator" ||
+      hasPermission("*"));
 
   const {
     customers,

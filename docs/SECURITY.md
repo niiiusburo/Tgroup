@@ -52,7 +52,7 @@ Staff → /login form → POST /api/Auth/login
 | Doctor | `appointments.view`, `appointments.edit`, `services.edit` | Clinical workflows only |
 | Receptionist | `appointments.add`, `appointments.edit`, `customers.view`, `customers.add`, `payment.add` | Front-desk operations |
 | Cashier | `payment.add`, `payment.view`, `customers.view` | Money collection |
-| Investor | `customers.view`, `customers.view_all`, `appointments.view`, `payment.view`, `services.view`, `reports.view`, `calendar.view`, `locations.view` | Normal employee identity with read-only customer allowlist in `dbo.investor_clients`; list permission is still backend-scoped |
+| Investor | Staff-shell explicit permissions such as `overview.view`, `calendar.view`, `customers.*`, `appointments.*`, `payment.*`, `reports.view`, `permissions.view`, `permissions.edit` | Normal employee identity with customer-linked data scoped by `dbo.investor_clients`; no wildcard `*`; role/employee self-escalation and investor allowlist curation are handler-blocked |
 
 ### Permission Resolution Order
 
@@ -62,7 +62,7 @@ Staff → /login form → POST /api/Auth/login
 
 Effective permissions = (Group ∪ Grants) − Revokes, then filtered by location scope at the UI level.
 
-Investor customer scope is an additional backend data filter. Only employee identities whose permission group name is exactly `investor` are scoped through `dbo.investor_clients`; everyone else keeps the existing behavior. On NK2, investor passwords may be stored in `dbo.investor_accounts` instead of `partners.password_hash` so the shared `tdental_demo` database does not create a production-login-capable NK account before NK production has the same investor filters.
+Investor customer scope is an additional backend data filter. Only employee identities whose permission group name is exactly `investor` are scoped through `dbo.investor_clients`; everyone else keeps the existing behavior. The investor group resolves to an explicit staff-style permission set so the employee shell does not hide normal pages or controls, but it is never granted wildcard `*` access. Customer-linked reads/writes must apply the allowlist; role/employee mutation endpoints block investor callers even when the UI exposes those controls. On NK2, investor passwords may be stored in `dbo.investor_accounts` instead of `partners.password_hash` so the shared `tdental_demo` database does not create a production-login-capable NK account before NK production has the same investor filters.
 
 Investor allowlist curation is Admin-only. `/customers` may render the Investor checkbox only for Admin-class users, and `GET /api/Partners/investor-visibility` plus `PATCH /api/Partners/:id/investor-visibility` require `permissions.edit` and a handler-level Admin-class check before reading or writing `dbo.investor_clients`.
 

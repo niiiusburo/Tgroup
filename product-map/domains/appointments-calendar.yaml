@@ -61,7 +61,7 @@ invariants:
   - Appointment edit saves must persist changed clinic/location values by writing `appointments.companyid` and returning the refreshed `companyid/companyname`.
   - Appointment exports must serialize the same `appointments.date` calendar value shown in `/calendar`, include `time` when present, and allow phone searches through `partners.phone`.
   - Appointment customer selectors must search by customer code as well as name, phone, and email.
-  - Investor employees may view appointments only for allowlisted customers; appointment creation/edit remains blocked by the seeded read-only investor permission group.
+  - Investor employees may view/create/edit appointments only for allowlisted customers; the staff-shell permission set makes calendar controls visible, and route-level IDOR guards keep appointment mutations scoped.
 impact_tests:
   - api/src/routes/appointments/__tests__/readHandlers.test.js
   - api/tests/investorIdorScoping.test.js

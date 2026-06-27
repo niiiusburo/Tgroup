@@ -20,7 +20,7 @@ owns:
   - website/src/hooks/useCustomerProfile.ts
 reads:
   - api/src/db.js
-  - dbo.investor_clients (investor allowlist for customer/profile reads)
+  - dbo.investor_clients (investor allowlist for customer/profile reads, writes, and Face ID recognition)
 writes:
   - dbo.partners (insert/update/soft-delete/hard-delete)
   - dbo.customersources (CRUD via customerSources route)
@@ -82,6 +82,8 @@ ui_invariants:
   - Customer phone is not a durable unique identity. Phone may overlap another phone or match a customer code (`partners.ref`) and must not block customer create/edit saves.
   - Customer DOB date parts imported as blank or zero values must normalize to null on create/update; nonblank invalid day/month values still fail validation.
   - Investor employees must see only customers listed in `dbo.investor_clients`; list/profile/KPI/receipt/balance/service reads must return empty or 404 for non-allowlisted customer records.
+  - Investor customer creates are allowed by the staff-shell permission set and must auto-insert the new customer into that investor's `dbo.investor_clients` allowlist.
+  - Investor customer edits, soft deletes, hard deletes, Face ID register/re-register/status, and recognition responses must be scoped to allowlisted customers before mutating or returning identifiers.
   - Admin-class users may curate investor visibility from the `/customers` Investor checkbox; non-admin staff and investor users must not see that column.
 jobs:
   - none (archive scripts in api/scripts/archive/ are stale)
@@ -108,6 +110,7 @@ impact_tests:
   - api/tests/investorIdorScoping.test.js
   - api/tests/investorScopeRoutePermissions.test.js
   - api/src/routes/partners/__tests__/investorVisibility.test.js
+  - api/tests/faceRecognition.test.js
   - website/src/pages/Customers/CustomerColumns.test.tsx
   - website/src/__tests__/customer-deep-link.test.tsx
 risk_level: high

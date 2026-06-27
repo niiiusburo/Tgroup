@@ -14,6 +14,16 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.48] — 2026-06-27
+### Changed
+- **Investor now uses the staff shell with scoped customer data:** The `investor` group resolves to explicit staff-style permissions so `/`, `/calendar`, `/customers`, `/payment`, `/reports`, settings/admin views, and normal customer controls are visible without granting wildcard `*`. Customer-linked reads/writes, Face ID recognition/status, appointments, payments, and reports remain scoped to checked customers in `dbo.investor_clients`. — @agent — explicit product decision updating INV-021 / UC-022.
+
+### Security
+- Investor callers are blocked from permission-group and employee role mutations even when the staff shell exposes those controls, and the investor visibility checkbox/API still require Admin-class state that explicitly excludes the `investor` group. Investor-created customers are auto-added to that investor's allowlist. — @agent — preserves INV-021 and INV-022.
+
+### Tested
+- `cd api && JWT_SECRET=test-secret npx jest src/services/__tests__/permissionService.test.js tests/investorAccountsMigration.test.js tests/investorIdorScoping.test.js tests/investorAdminMutationGuards.test.js src/routes/partners/__tests__/investorVisibility.test.js tests/readRoutePermissions.test.js tests/investorScopeRoutePermissions.test.js tests/faceRecognition.test.js --runInBand`; `cd website && npx vitest run src/__tests__/App.route-permissions.test.tsx src/pages/Customers/CustomerColumns.test.tsx src/hooks/__tests__/useInvestorVisibilityColumn.test.tsx`; `npm --prefix website run build`; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off api/src/services/permissionService.js api/src/routes/partners/mutationHandlers.js api/src/routes/partners/investorVisibility.js api/src/routes/permissions.js api/src/routes/employees/mutations.js api/src/routes/faceRecognition.js api/migrations/048_investor_customer_scope.sql website/src/pages/Customers.tsx`; `npm run verify:governance`; live NK2 v0.32.48 health/login/scoped Partners/staff-route Playwright checks passed; NK production v0.32.44 health and investor-login rejection stayed unchanged. — @agent
+
 ## [0.32.47] — 2026-06-27
 ### Added
 - **Admin-only investor customer checkbox:** Admin-class users now see an Investor checkbox in the `/customers` search/list table. Checking it adds the customer to the active NK2 investor allowlist; unchecking keeps the row but marks it hidden. Non-admin employees do not see the column. — @agent — preserves INV-021 and new INV-022.

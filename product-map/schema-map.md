@@ -277,7 +277,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | **R** | `permissions.js`, `auth.js` middleware, `auth.js` route |
 | **E** | Via `/api/Permissions/groups` and `/api/Permissions/resolve/*` |
 | **UI** | PermissionMatrix, PermissionBoard |
-| **Risk** | **High** — permission strings are free text; typos in backend seeding or frontend checks cause silent 403s. Investor seed may include `customers.view_all` only as read-list access because customer rows remain scoped by `dbo.investor_clients`. |
+| **Risk** | **High** — permission strings are free text; typos in backend seeding or frontend checks cause silent 403s. Investor seed/resolution may include staff-shell permission strings but must not include wildcard `*`; customer-linked data remains scoped by `dbo.investor_clients`. |
 
 ### dbo.employee_permissions
 
@@ -315,11 +315,11 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 |-----------|-------|
 | **Primary Key** | `id` (uuid) |
 | **Foreign Keys** | `investor_id` → partners (employee investor), `partner_id` → partners (customer) |
-| **W** | Migration/admin tooling and Admin-only `PATCH /api/Partners/:id/investor-visibility` |
-| **R** | `permissionService.resolveInvestorScope()` and customer-touching route/report filters |
-| **E** | Indirect through customer, appointment, payment, service, dashboard, and report endpoints for users in the `investor` permission group |
+| **W** | Migration/admin tooling, Admin-only `PATCH /api/Partners/:id/investor-visibility`, and investor customer create auto-allowlisting |
+| **R** | `permissionService.resolveInvestorScope()` and customer-touching route/report/write/Face ID filters |
+| **E** | Indirect through customer, appointment, payment, service, dashboard, Face ID, and report endpoints for users in the `investor` permission group |
 | **UI** | Admin-only Investor checkbox in `/customers`; investor users never see curation controls |
-| **Risk** | **High** — NK and NK2 currently share `tdental_demo`; migration is additive but physically lands in the shared DB. Empty allowlists must return no customer data for investor users, including when the frontend has `customers.view_all` for list rendering. |
+| **Risk** | **High** — NK and NK2 currently share `tdental_demo`; migration is additive but physically lands in the shared DB. Empty allowlists must return no customer data for investor users even when the frontend has staff-shell permissions for normal page/control rendering. |
 
 ---
 

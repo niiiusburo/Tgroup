@@ -7,6 +7,7 @@ jest.mock('../../db', () => ({
 
 const { query } = require('../../db');
 const {
+  INVESTOR_STAFF_PERMISSIONS,
   resolveEffectivePermissions,
   hasPermission,
   resolveInvestorScope,
@@ -121,6 +122,31 @@ describe('permissionService', () => {
 
       await resolveEffectivePermissions('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
       expect(query).toHaveBeenCalledTimes(4); // 1 partner + 3 parallel
+    });
+
+    it('expands investor into staff-shell permissions without wildcard', async () => {
+      query.mockResolvedValueOnce([{ tier_id: 'group-investor', group_name: 'investor' }]);
+      query.mockResolvedValueOnce([{ permission: 'customers.view' }, { permission: '*' }]);
+      query.mockResolvedValueOnce([]);
+      query.mockResolvedValueOnce([]);
+
+      const result = await resolveEffectivePermissions('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
+      expect(result.effectivePermissions).not.toContain('*');
+      expect(result.effectivePermissions).toEqual(
+        expect.arrayContaining([
+          'overview.view',
+          'calendar.view',
+          'customers.add',
+          'customers.edit',
+          'payment.add',
+          'payment.void',
+          'permissions.view',
+          'permissions.edit',
+        ])
+      );
+      for (const permission of INVESTOR_STAFF_PERMISSIONS) {
+        expect(result.effectivePermissions).toContain(permission);
+      }
     });
   });
 

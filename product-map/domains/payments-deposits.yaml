@@ -108,4 +108,4 @@ notes:
     `payment.void`. `payment.edit` alone must not grant refund, delete, void,
     PATCH, or proof-upload access unless the code changes.
   - Payment allocation flows can update `dotkhams.amountresidual`, so DotKhams route/schema drift belongs in payment verification even though `/api/DotKhams` itself is read-only.
-  - Investor employees receive `payment.view` only. Payment, receipt, account-payment, monthly-plan, and deposit reads must be scoped to allowlisted customers; write/refund/void routes remain blocked by missing permissions in the seeded investor group.
+  - Investor employees receive the staff-shell payment permissions (`payment.view/add/edit/refund/void` and export) without wildcard access. Payment, receipt, account-payment, monthly-plan, and deposit reads/writes must be scoped to allowlisted customers before mutating payment state.

@@ -10,6 +10,30 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK2 Investor Staff Shell With Checked-Customer Scope 2026-06-27
+
+Feature/edit name: NK2 investor staff-shell permissions with allowlisted customer data (v0.32.48)
+
+Changed URLs / API routes / data flow:
+- URLs: `https://nk2.2checkin.com/`, `/calendar`, `/customers`, `/payment`, `/reports`, `/settings`, `/permissions`
+- APIs: `GET /api/Auth/me`, customer/appointment/payment/Face ID routes, `GET/PATCH /api/Partners/*`, `PUT /api/Permissions/*`, `PUT /api/Employees/*`
+- Data flow: investor login -> explicit staff-shell permissions -> `resolveInvestorScope()` -> `dbo.investor_clients` checked-customer filters.
+
+Affected roles and data flows:
+- Investor user: sees the regular staff shell and normal controls, but customer-linked responses/mutations are limited to checked customers.
+- Admin staff: still owns the Investor checkbox and can curate `dbo.investor_clients`.
+- NK production: must remain unchanged by the NK2 scoped deploy.
+
+Execution checklist:
+- [x] PASS: Backend unit/integration guard set - `cd api && JWT_SECRET=test-secret npx jest src/services/__tests__/permissionService.test.js tests/investorAccountsMigration.test.js tests/investorIdorScoping.test.js tests/investorAdminMutationGuards.test.js src/routes/partners/__tests__/investorVisibility.test.js tests/readRoutePermissions.test.js tests/investorScopeRoutePermissions.test.js tests/faceRecognition.test.js --runInBand` passed 8 suites / 117 tests.
+- [x] PASS: Frontend route/checkbox guard set - `cd website && npx vitest run src/__tests__/App.route-permissions.test.tsx src/pages/Customers/CustomerColumns.test.tsx src/hooks/__tests__/useInvestorVisibilityColumn.test.tsx` passed 2 files / 6 tests.
+- [x] PASS: Build, Semgrep, and governance pass after docs/version updates - `npm --prefix website run build` passed, scoped `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off ...` scanned 8 changed Face/permission/customer files with 0 findings, and `npm run verify:governance` passed.
+- [x] PASS: Live NK2 investor `/api/Auth/me` returns staff-shell permissions without `*`, `/api/Partners?limit=20` remains checked-customer scoped, and `GET /api/Partners/investor-visibility` returns 403 for investor - live `POST /api/Auth/login` returned 200 for `investor@2checkin.com`; `/api/Auth/me` returned group `investor`, 47 effective permissions, no wildcard, and no missing staff-shell route/action permissions; `/api/Partners?limit=20` returned total 24, matching 24 visible rows in `dbo.investor_clients`; `/api/Partners/investor-visibility` returned 403 `ADMIN_REQUIRED`.
+- [x] PASS: Live NK2 screenshot shows investor regular staff shell with Overview/Calendar/Customers/Payment/Reports/Admin navigation - Playwright route walk rendered 13 staff routes with no Access Denied or login redirect; screenshot `output/playwright/nk2-investor-staff-shell-20260627/investor-overview-staff-shell-expanded.png`.
+- [x] PASS: Live NK production version/health/login behavior stays unchanged - `https://nk.2checkin.com/version.json` stayed `0.32.44` / `ff65634`, `/api/health` stayed healthy, and `POST https://nk.2checkin.com/api/Auth/login` with the NK2 investor credential returned 401.
+
+---
+
 # TestSprite Plan: NK2 Admin Investor Visibility Checkbox 2026-06-27
 
 Feature/edit name: NK2 admin-only customer visibility checkbox for investor allowlist (v0.32.47)
@@ -22,7 +46,7 @@ Changed URLs / API routes / data flow:
 Affected roles and data flows:
 - Admin staff: sees the Investor checkbox and can add/remove customer visibility.
 - Non-admin staff: does not see the checkbox and gets `403 ADMIN_REQUIRED` on direct API calls.
-- Investor user: remains read-only and sees only `dbo.investor_clients.is_visible=true` customers.
+- Investor user: cannot self-curate the checkbox and sees only `dbo.investor_clients.is_visible=true` customers.
 
 Execution checklist:
 - [x] PASS: API unit - `cd api && JWT_SECRET=test-secret npx jest src/routes/partners/__tests__/investorVisibility.test.js tests/readRoutePermissions.test.js --runInBand` passed 2 suites / 28 tests.
@@ -54,7 +78,7 @@ User roles:
 
 Happy paths:
 - Investor credential logs in on `https://nk2.2checkin.com`.
-- `GET /api/Auth/me` returns the `investor` permission group and only view permissions.
+- `GET /api/Auth/me` returns the `investor` permission group and the current staff-shell permissions.
 - Investor customer list/profile/report routes are scoped to `dbo.investor_clients`; `customers.view_all` only allows listing that scoped allowlist.
 
 Edge cases:
@@ -65,7 +89,7 @@ Edge cases:
 Regressions:
 - Normal active staff login continues to use `partners.password_hash`.
 - NK production `/version.json` and `/api/health` stay unchanged/healthy.
-- Investor group remains view-only; no customer/payment/appointment write permissions are granted.
+- Investor group remains customer-allowlist scoped; no wildcard `*` or permission/employee self-escalation is granted.
 - The `/` dashboard still requires `overview.view`, but child routes must use their own route permissions.
 
 Setup/login state:
@@ -77,7 +101,7 @@ TestSprite execution items:
 - [x] PASS: Verify NK2 investor can open `/customers` with customer view/list permissions and without `overview.view` - screenshot `output/playwright/nk2-investor-activation-20260627/nk2-investor-customers-mobile-954ae5c.png` shows the customer list instead of access denied.
 - [x] PASS: Verify the same credential fails on NK production login - live `POST https://nk.2checkin.com/api/Auth/login` returned 401 `Invalid email or password`.
 - [x] PASS: Verify `resolveInvestorScope()` returns the expected allowlisted customer IDs - live NK2 `/api/Partners?limit=20` returned `totalItems: 10` and `itemCount: 10`, matching the allowlist count.
-- [x] PASS: Verify investor group permissions are view-only with no unexpected write permissions - live `/api/Auth/me` returned only view/list permissions: customers, appointments, payment, services, reports, calendar, locations.
+- [x] PASS: Historical v0.32.46 check before staff-shell expansion - live `/api/Auth/me` returned only view/list permissions at that release.
 - [x] PASS: Verify NK production version and health remain unchanged after activation - `https://nk.2checkin.com/version.json` stayed `0.32.44` / `ff65634`; `/api/health` stayed healthy.
 
 ---
@@ -2054,13 +2078,13 @@ TestSprite execution items:
 
 # TestSprite Plan: NK2 Investor Customer Scoping (2026-06-27, v0.32.39)
 
-Feature/edit name: NK2 investor customer scoping, employee-based read-only investor role
+Feature/edit name: NK2 investor customer scoping, employee-based scoped investor role (historical first phase)
 
 Changed URLs and resources:
 - No frontend route or page is added in this branch.
 - Backend route filtering: Customers/Partners, Appointments, Payments, Receipts, AccountPayments, DotKhams, MonthlyPlans, SaleOrders, SaleOrderLines, DashboardReports, Commissions, and Reports subroutes.
 - Backend permission service: `api/src/services/permissionService.js` adds `resolveInvestorScope()`.
-- Migration: `api/migrations/048_investor_customer_scope.sql` creates `dbo.investor_clients` and seeds a view-only `investor` permission group.
+- Migration: `api/migrations/048_investor_customer_scope.sql` creates `dbo.investor_clients`; current v0.32.48 seeds/augments the `investor` group with staff-shell permissions without wildcard access.
 
 Data flow:
 - A normal employee logs in through the existing Auth flow.
@@ -2083,7 +2107,7 @@ Expected behavior:
 | Investor employee opens an allowlisted customer profile | Profile and related appointments/services/payments/receipts render for that customer. |
 | Investor employee opens a non-allowlisted customer URL directly | API returns 404 or an empty scoped result; no customer details leak. |
 | Investor employee opens reports/dashboard | Aggregates include only allowlisted customer records. |
-| Investor employee tries customer/payment/appointment/monthly-plan writes | Request is blocked by missing write permission (`customers.edit`, `payment.add/edit/refund/void`, `appointments.add/edit`). |
+| Investor employee tries customer/payment/appointment/monthly-plan writes | Current v0.32.48 behavior allows the staff-shell controls only for checked customers; non-allowlisted targets are rejected by investor scope guards. |
 | Normal staff/admin opens the same reports | Aggregates match pre-investor behavior and canonical revenue tests. |
 
 Edge cases:
@@ -2094,7 +2118,7 @@ Edge cases:
 - Migration runs on a DB without `public.permission_groups` mirror -> skips public mirror safely.
 
 Regressions:
-- The `investor` permission seed must remain read-only.
+- The `investor` permission seed must remain explicit/no-wildcard and customer-allowlist scoped.
 - Existing NK/NK2 employees must not be assigned to `investor` by migration.
 - Canonical revenue formulas must not change for non-investors.
 - Shared NK/NK2 DB means migration 048 must not run without backup plus explicit approval.
@@ -2110,7 +2134,7 @@ TestSprite execution items:
 - [ ] PENDING: After explicit DB approval, run migration 048 and verify existing staff/admin behavior is unchanged.
 - [ ] PENDING: Create/assign one investor employee and one allowlisted customer, then verify the customer list/profile/report scoping paths above.
 - [ ] PENDING: Try non-allowlisted customer/profile/payment/service direct URLs as investor and confirm 404/empty scoped results.
-- [ ] PENDING: Try write/refund/void endpoints as investor and confirm permission denial.
+- [ ] PENDING: Try write/refund/void endpoints as investor against allowlisted and non-allowlisted customers; confirm only checked-customer targets can proceed.
 - [ ] PENDING: Re-check NK live read-only smoke (`/version.json`, `/api/health`, normal login if approved) after migration because the DB is shared.
 
 ---

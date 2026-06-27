@@ -1,8 +1,23 @@
 const express = require('express');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
+const { resolveInvestorScope } = require('../services/permissionService');
 
 const router = express.Router();
+
+async function assertNotInvestorMutation(req, res) {
+  const investorScope = await resolveInvestorScope(req.user?.employeeId);
+  if (investorScope.isInvestor) {
+    res.status(403).json({
+      error: {
+        code: 'E_INVESTOR_PERMISSION_MUTATION_FORBIDDEN',
+        message: 'Nhà đầu tư không thể chỉnh sửa phân quyền',
+      },
+    });
+    return false;
+  }
+  return true;
+}
 
 /**
  * GET /api/Permissions/groups
@@ -42,6 +57,8 @@ router.get('/groups', requirePermission('permissions.view'), async (req, res) =>
  */
 router.post('/groups', requirePermission('permissions.edit'), async (req, res) => {
   try {
+    const canMutate = await assertNotInvestorMutation(req, res);
+    if (!canMutate) return null;
     const { name, color = '#94A3B8', description = null, permissions = [] } = req.body;
 
     if (!name) {
@@ -89,6 +106,8 @@ router.post('/groups', requirePermission('permissions.edit'), async (req, res) =
  */
 router.put('/groups/:groupId', requirePermission('permissions.edit'), async (req, res) => {
   try {
+    const canMutate = await assertNotInvestorMutation(req, res);
+    if (!canMutate) return null;
     const { groupId } = req.params;
     const { name, color, description, permissions = [] } = req.body;
 
@@ -248,6 +267,8 @@ router.get('/employees', requirePermission('permissions.view'), async (req, res)
  */
 router.put('/employees/:employeeId', requirePermission('permissions.edit'), async (req, res) => {
   try {
+    const canMutate = await assertNotInvestorMutation(req, res);
+    if (!canMutate) return null;
     const { employeeId } = req.params;
     const { groupId, locScope = 'assigned', locationIds = [], overrides = { grant: [], revoke: [] } } = req.body;
 

@@ -8,6 +8,7 @@ const { findMatches, registerSample, replaceAllSamples, getFaceStatus, FaceQuali
 const { getFaceRecognitionProvider } = require('../services/faceRecognitionRuntime');
 const comprefaceFaceProvider = require('../services/comprefaceFaceProvider');
 const { recordFaceDiagnostic } = require('../services/faceDiagnostics');
+const { resolveInvestorScope } = require('../services/permissionService');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
@@ -35,6 +36,45 @@ function isComprefaceProvider() {
   return getFaceRecognitionProvider() === 'compreface';
 }
 
+function isAllowedForInvestor(investorScope, partnerId) {
+  return !investorScope.isInvestor || investorScope.allowedCustomerIds.includes(partnerId);
+}
+
+function filterRecognitionForInvestor(recognition, investorScope) {
+  if (!investorScope.isInvestor) return recognition;
+
+  const allowedIds = new Set(investorScope.allowedCustomerIds);
+  const candidates = (recognition.candidates || []).filter((c) => allowedIds.has(c.partnerId));
+  const match = recognition.match && allowedIds.has(recognition.match.partnerId)
+    ? recognition.match
+    : null;
+
+  return {
+    ...recognition,
+    match,
+    candidates: match ? [] : candidates,
+    privateDiagnostics: {
+      ...(recognition.privateDiagnostics || {}),
+      investorScopeFiltered: true,
+      investorAllowedCount: investorScope.allowedCustomerIds.length,
+      returnedCandidateCount: match ? 0 : candidates.length,
+      returnedMatch: Boolean(match),
+    },
+  };
+}
+
+async function assertInvestorPartnerAccess(req, res, partnerId) {
+  const investorScope = await resolveInvestorScope(req.user?.employeeId);
+  if (!isAllowedForInvestor(investorScope, partnerId)) {
+    res.status(403).json({
+      error: 'E_INVESTOR_CUSTOMER_NOT_ALLOWED',
+      message: 'Bạn không có quyền với khách hàng này',
+    });
+    return null;
+  }
+  return investorScope;
+}
+
 /**
  * POST /api/face/recognize
  * Body: multipart/form-data with field `image`
@@ -49,13 +89,15 @@ router.post('/recognize', requirePermission('customers.view'), upload.single('im
     }
 
     let engine = null;
-    const recognition = provider === 'compreface'
+    const rawRecognition = provider === 'compreface'
       ? await comprefaceFaceProvider.recognizeFace(req.file.buffer, req.file.mimetype)
       : await (async () => {
           const { embedding, model, quality } = await getEmbedding(req.file.buffer, req.file.mimetype);
           engine = { model, quality };
           return findMatches(embedding);
         })();
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    const recognition = filterRecognitionForInvestor(rawRecognition, investorScope);
     const { match, candidates, privateDiagnostics } = recognition;
 
     const duration = Date.now() - start;
@@ -112,6 +154,8 @@ router.post('/register', requirePermission('customers.edit'), upload.single('ima
     if (!partnerRows || partnerRows.length === 0) {
       return res.status(404).json({ error: 'PARTNER_NOT_FOUND', message: 'Customer not found or deleted' });
     }
+    const investorAccess = await assertInvestorPartnerAccess(req, res, partnerId);
+    if (!investorAccess) return null;
 
     let sampleId;
     let sampleCount;
@@ -180,6 +224,8 @@ router.post(
       if (!partnerRows || partnerRows.length === 0) {
         return res.status(404).json({ error: 'PARTNER_NOT_FOUND', message: 'Customer not found or deleted' });
       }
+      const investorAccess = await assertInvestorPartnerAccess(req, res, partnerId);
+      if (!investorAccess) return null;
 
       let sampleIds;
       let sampleCount;
@@ -243,6 +289,8 @@ router.get('/status/:partnerId', requirePermission('customers.view'), async (req
     if (!partnerRows || partnerRows.length === 0) {
       return res.status(404).json({ error: 'PARTNER_NOT_FOUND', message: 'Customer not found' });
     }
+    const investorAccess = await assertInvestorPartnerAccess(req, res, partnerId);
+    if (!investorAccess) return null;
 
     const status = isComprefaceProvider()
       ? await comprefaceFaceProvider.getFaceStatus(partnerId)

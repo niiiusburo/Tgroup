@@ -72,9 +72,9 @@ When `COSMETIC_LOB_ENABLED=false` the entire family returns 503.
 
 CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin route.
 
-## Investor Customer Scope (read-only employee extension)
+## Investor Customer Scope (staff-shell employee extension)
 
-Investor users are normal employee identities whose `partners.tier_id` points to a permission group named `investor`. On NK2, their login password can live in `dbo.investor_accounts` so shared NK/NK2 databases do not create a production-login-capable `partners.password_hash` before NK production has investor filters. When `resolveInvestorScope()` detects the `investor` group, customer-touching reads and aggregates are filtered through `dbo.investor_clients`.
+Investor users are normal employee identities whose `partners.tier_id` points to a permission group named `investor`. On NK2, their login password can live in `dbo.investor_accounts` so shared NK/NK2 databases do not create a production-login-capable `partners.password_hash` before NK production has investor filters. When `resolveInvestorScope()` detects the `investor` group, customer-touching reads, writes, recognition responses, and aggregates are filtered through `dbo.investor_clients`.
 
 Affected endpoint families:
 - `/api/Partners`, `/api/CustomerBalance`, `/api/CustomerReceipts`, `/api/DotKhams`
@@ -83,7 +83,7 @@ Affected endpoint families:
 - `/api/Payments`, `/api/AccountPayments`, `/api/Receipts`, `/api/MonthlyPlans`
 - `/api/Reports`, `/api/DashboardReports`, `/api/Commissions`
 
-Contract invariant: non-investor employees keep existing unscoped behavior. Investor employees with an empty allowlist receive empty/404 scoped results. The seeded investor group is view/list-only, including `customers.view_all` for the scoped customer page, and does not grant customer, appointment, payment, refund, void, or monthly-plan write permissions.
+Contract invariant: non-investor employees keep existing unscoped behavior. Investor employees with an empty allowlist receive empty/404 scoped results. The investor group resolves to explicit staff-shell permissions without wildcard `*`; permission/employee self-escalation and investor allowlist curation remain server-blocked.
 
 ## Account (`/api/Account`)
 

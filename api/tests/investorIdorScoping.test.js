@@ -22,6 +22,10 @@ jest.mock('../src/middleware/auth', () => ({
   requirePermission: () => (_req, _res, next) => next(),
 }));
 
+jest.mock('uuid', () => ({
+  v4: jest.fn(() => 'new-customer-id'),
+}));
+
 const mockResolveInvestorScope = jest.fn();
 jest.mock('../src/services/permissionService', () => ({
   resolveInvestorScope: (...args) => mockResolveInvestorScope(...args),
@@ -56,6 +60,13 @@ function asInvestor() {
 }
 function asStaff() {
   mockResolveInvestorScope.mockResolvedValue({ isInvestor: false, allowedCustomerIds: [] });
+}
+
+function mockRes() {
+  return {
+    status: jest.fn(function status() { return this; }),
+    json: jest.fn(function json() { return this; }),
+  };
 }
 
 beforeEach(() => {
@@ -215,5 +226,50 @@ describe('monthlyPlans investor WRITE scoping (IDOR on mutations)', () => {
     query.mockResolvedValueOnce([{ customer_id: FORBIDDEN }]);
     await request(makeApp('/api/MonthlyPlans', router)).delete('/api/MonthlyPlans/plan-1');
     expect(pool.connect).not.toHaveBeenCalled();
+  });
+});
+
+describe('partners investor WRITE scoping', () => {
+  const { createPartner, hardDeletePartner, softDeletePartner } = require('../src/routes/partners/mutationHandlers');
+
+  it('POST /api/Partners: investor-created customers are auto-added to their allowlist', async () => {
+    asInvestor();
+    query
+      .mockResolvedValueOnce([{ id: 'new-customer-id', customer: true, name: 'New Customer' }])
+      .mockResolvedValueOnce([]);
+
+    const req = {
+      user: { employeeId: 'investor-1' },
+      body: { name: 'New Customer', phone: '0901' },
+    };
+    const res = mockRes();
+
+    await createPartner(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(query.mock.calls[1][0]).toContain('INSERT INTO dbo.investor_clients');
+    expect(query.mock.calls[1][1]).toEqual(['investor-1', 'new-customer-id']);
+  });
+
+  it('PATCH /:id/soft-delete: investor cannot delete a non-assigned customer', async () => {
+    asInvestor();
+    const req = { user: { employeeId: 'investor-1' }, params: { id: FORBIDDEN } };
+    const res = mockRes();
+
+    await softDeletePartner(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('DELETE /:id/hard-delete: investor cannot hard-delete a non-assigned customer', async () => {
+    asInvestor();
+    const req = { user: { employeeId: 'investor-1' }, params: { id: FORBIDDEN } };
+    const res = mockRes();
+
+    await hardDeletePartner(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(query).not.toHaveBeenCalled();
   });
 });

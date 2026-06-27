@@ -64,9 +64,10 @@ behavior:
   - Effective location access is the employee primary branch from partners.companyid plus any additional rows in employee_location_scope.
   - Permission strings for dangerous or vendor-write actions should stay action-level. Current split examples: `payment.add`, `payment.refund`, `payment.void`, `external_checkups.create`, and `external_checkups.upload`.
   - Investor identities are normal employees assigned to the `investor` permission group. NK2 investor passwords may live in `dbo.investor_accounts` so shared NK/NK2 databases do not make staging investor credentials production-login-capable through `partners.password_hash`.
-  - `resolveInvestorScope()` reads `dbo.investor_clients` and returns a fail-closed customer allowlist for all customer-touching reads.
-  - The seeded investor permission group is read/list-only. It may include `customers.view_all` so the customer page can list the backend-scoped allowlist, but it must not include customer, appointment, payment, refund, void, or monthly-plan write permissions unless a future approved product decision changes INV-021.
-  - Investor allowlist curation requires `permissions.edit` plus Admin-class permission state; do not expose the Customers Investor checkbox or allow `dbo.investor_clients` writes to non-admin employees.
+  - `resolveInvestorScope()` reads `dbo.investor_clients` and returns a fail-closed customer allowlist for all customer-touching reads and writes.
+  - The investor permission group resolves to an explicit staff-shell permission set without wildcard `*`, so the normal employee UI is visible while customer-linked data remains allowlist-scoped.
+  - Investor role/employee mutation endpoints must block self-escalation even when the staff-shell permission set includes `permissions.edit` and `employees.edit`.
+  - Investor allowlist curation requires `permissions.edit` plus Admin-class permission state that explicitly excludes the `investor` group; do not expose the Customers Investor checkbox or allow `dbo.investor_clients` writes to non-admin employees.
 affected_by:
   - Any change to dbo.partners schema (especially password_hash, employee, active, isdeleted columns)
   - Any change to dbo.investor_accounts or the NK2 credential fallback
@@ -80,8 +81,10 @@ impact_tests:
   - api/tests/readRoutePermissions.test.js
   - api/src/services/__tests__/permissionService.test.js
   - api/tests/investorIdorScoping.test.js
+  - api/tests/investorAdminMutationGuards.test.js
   - api/tests/investorScopeRoutePermissions.test.js
   - api/src/routes/partners/__tests__/investorVisibility.test.js
+  - api/tests/faceRecognition.test.js
   - website/e2e/auth-setup.spec.ts
   - website/e2e/permissions-check.spec.ts
   - website/e2e/permissions-matrix.spec.ts

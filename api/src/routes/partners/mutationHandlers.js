@@ -11,6 +11,19 @@ function sanitizeUuids(o) {
   for (const f of UUID_FIELDS) if (o[f] === '' || o[f] === undefined) o[f] = null;
 }
 
+function isInvestorCustomerAllowed(investorScope, customerId) {
+  return !investorScope.isInvestor || investorScope.allowedCustomerIds.includes(customerId);
+}
+
+function sendInvestorCustomerDenied(res, action = 'thực hiện thao tác với') {
+  return res.status(403).json({
+    error: {
+      code: 'E_INVESTOR_CUSTOMER_NOT_ALLOWED',
+      message: `Bạn không có quyền ${action} khách hàng này`,
+    },
+  });
+}
+
 /**
  * POST /api/Partners
  * Creates a new customer/partner
@@ -18,15 +31,7 @@ function sanitizeUuids(o) {
  */
 async function createPartner(req, res) {
   try {
-    // Investors manage only customers explicitly assigned to them; they cannot
-    // create brand-new customers (owner/admin creates + assigns). Defensive —
-    // the 'investor' group is also not granted customers.add.
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
-    if (investorScope.isInvestor) {
-      return res.status(403).json({
-        error: { code: 'E_INVESTOR_CANNOT_CREATE_CUSTOMERS', message: 'Nhà đầu tư không thể tạo khách hàng mới' },
-      });
-    }
     sanitizeUuids(req.body);
     const {
       name,
@@ -151,7 +156,19 @@ async function createPartner(req, res) {
       ]
     );
 
-    return res.status(201).json(result[0]);
+    const created = result[0];
+    if (investorScope.isInvestor && created?.customer === true) {
+      await query(
+        `INSERT INTO dbo.investor_clients (investor_id, partner_id, is_visible, datecreated, lastupdated)
+         VALUES ($1, $2, true, NOW(), NOW())
+         ON CONFLICT (investor_id, partner_id) DO UPDATE
+           SET is_visible = true,
+               lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`,
+        [req.user.employeeId, created.id]
+      );
+    }
+
+    return res.status(201).json(created);
   } catch (err) {
     console.error('Error creating partner:', err);
     const pg = err || {};
@@ -198,10 +215,8 @@ async function updatePartner(req, res) {
 
     // Investor scope: may only edit customers explicitly assigned to them.
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
-    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(id)) {
-      return res.status(403).json({
-        error: { code: 'E_INVESTOR_CUSTOMER_NOT_ALLOWED', message: 'Bạn không có quyền chỉnh sửa khách hàng này' },
-      });
+    if (!isInvestorCustomerAllowed(investorScope, id)) {
+      return sendInvestorCustomerDenied(res, 'chỉnh sửa');
     }
 
     // Check email uniqueness (case-insensitive) excluding this partner
@@ -279,6 +294,11 @@ async function softDeletePartner(req, res) {
   try {
     const { id } = req.params;
 
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (!isInvestorCustomerAllowed(investorScope, id)) {
+      return sendInvestorCustomerDenied(res, 'xóa');
+    }
+
     const result = await query(
       `UPDATE partners SET
         isdeleted = true,
@@ -308,6 +328,11 @@ async function softDeletePartner(req, res) {
 async function hardDeletePartner(req, res) {
   try {
     const { id } = req.params;
+
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (!isInvestorCustomerAllowed(investorScope, id)) {
+      return sendInvestorCustomerDenied(res, 'xóa vĩnh viễn');
+    }
 
     const existing = await query(
       'SELECT id FROM partners WHERE id = $1 AND customer = true',

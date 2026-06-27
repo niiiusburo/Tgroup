@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.32.48",
+    "date": "2026-06-27",
+    "commit": "pending",
+    "highlights": "NK2 investor now sees the normal staff shell while customer-linked data remains limited to checked customers.",
+    "sections": [
+      {
+        "title": "Investor Access",
+        "items": [
+          "Investor permissions now open Overview, Calendar, Customers, Payments, Reports, Settings, and other staff pages without wildcard access.",
+          "Customer, appointment, payment, Face ID, and report data still flows through dbo.investor_clients so unchecked customers stay hidden.",
+          "Investor-created customers are automatically checked into that investor's allowlist."
+        ]
+      },
+      {
+        "title": "Security",
+        "items": [
+          "Investor users cannot curate the investor customer checkbox and cannot edit permission groups or employee role assignments.",
+          "Face recognition responses are filtered to checked customers before returning matches or candidate names."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.47",
     "date": "2026-06-27",
     "commit": "pending",

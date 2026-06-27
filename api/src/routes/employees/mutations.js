@@ -3,8 +3,23 @@ const { query, pool } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
 const { fetchLocationScopeIds } = require('./locationScopes');
 const { getVietnamNow } = require('../../lib/dateUtils');
+const { resolveInvestorScope } = require('../../services/permissionService');
 
 const router = express.Router();
+
+async function assertNotInvestorEmployeeMutation(req, res) {
+  const investorScope = await resolveInvestorScope(req.user?.employeeId);
+  if (investorScope.isInvestor) {
+    res.status(403).json({
+      error: {
+        code: 'E_INVESTOR_EMPLOYEE_MUTATION_FORBIDDEN',
+        message: 'Nhà đầu tư không thể chỉnh sửa nhân sự',
+      },
+    });
+    return false;
+  }
+  return true;
+}
 
 /**
  * POST /api/Employees
@@ -14,6 +29,9 @@ const router = express.Router();
 router.post('/', requirePermission('employees.edit'), async (req, res) => {
   const client = await pool.connect();
   try {
+    const canMutate = await assertNotInvestorEmployeeMutation(req, res);
+    if (!canMutate) return null;
+
     const {
       name,
       phone = null,
@@ -126,6 +144,9 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
 router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
   const client = await pool.connect();
   try {
+    const canMutate = await assertNotInvestorEmployeeMutation(req, res);
+    if (!canMutate) return null;
+
     const { id } = req.params;
     const {
       name,
@@ -279,6 +300,9 @@ router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
  */
 router.delete('/:id', requirePermission('employees.edit'), async (req, res) => {
   try {
+    const canMutate = await assertNotInvestorEmployeeMutation(req, res);
+    if (!canMutate) return null;
+
     const { id } = req.params;
 
     const result = await query(

@@ -106,4 +106,25 @@ describe('App route permissions', () => {
     expect(await screen.findByText('accessDenied.title')).toBeInTheDocument();
     expect(screen.queryByText('Overview Page')).not.toBeInTheDocument();
   });
+
+  it('opens the staff shell routes when investor has staff-style permissions', async () => {
+    authState.value.permissions.effectivePermissions = [
+      'overview.view',
+      'calendar.view',
+      'customers.view',
+      'employees.view',
+      'locations.view',
+      'services.view',
+      'website.view',
+      'reports.view',
+      'commission.view',
+      'settings.view',
+      'notifications.view',
+      'permissions.view',
+      'payment.view',
+    ];
+
+    renderAt('/');
+    expect(await screen.findByText('Overview Page')).toBeInTheDocument();
+  });
 });

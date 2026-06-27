@@ -12,14 +12,19 @@ describe('Migration 048: investor customer scope', () => {
     content = fs.readFileSync(scopeMigrationPath, 'utf8');
   });
 
-  it('seeds only read permissions needed for scoped investor browsing', () => {
+  it('seeds staff-shell permissions without wildcard access', () => {
     expect(content).toContain('customers.view');
     expect(content).toContain('customers.view_all');
+    expect(content).toContain('overview.view');
     expect(content).toContain('appointments.view');
+    expect(content).toContain('appointments.add');
+    expect(content).toContain('appointments.edit');
     expect(content).toContain('payment.view');
-    expect(content).not.toMatch(/customers\.(add|edit|delete|hard_delete)/);
-    expect(content).not.toMatch(/payment\.(add|edit|refund|void)/);
-    expect(content).not.toMatch(/appointments\.(add|edit|delete)/);
+    expect(content).toContain('payment.add');
+    expect(content).toContain('payment.refund');
+    expect(content).toContain('permissions.view');
+    expect(content).toContain('permissions.edit');
+    expect(content).not.toMatch(/'\*'/);
   });
 });
 

@@ -7,6 +7,11 @@ jest.mock('../src/middleware/auth', () => ({
   requirePermission: () => (_req, _res, next) => next(),
 }));
 
+const mockResolveInvestorScope = jest.fn(async () => ({ isInvestor: false, allowedCustomerIds: [] }));
+jest.mock('../src/services/permissionService', () => ({
+  resolveInvestorScope: (...args) => mockResolveInvestorScope(...args),
+}));
+
 const request = require('supertest');
 const app = require('../src/server');
 
@@ -69,6 +74,7 @@ afterEach(() => {
 describe('POST /api/face/recognize', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockResolveInvestorScope.mockResolvedValue({ isInvestor: false, allowedCustomerIds: [] });
   });
 
   it('returns 400 when image is missing', async () => {
@@ -309,11 +315,46 @@ describe('POST /api/face/recognize', () => {
     }));
     expect(getEmbedding).not.toHaveBeenCalled();
   });
+
+  it('filters recognized matches and candidates to the investor allowlist', async () => {
+    mockResolveInvestorScope.mockResolvedValue({ isInvestor: true, allowedCustomerIds: ['p-1'] });
+    getEmbedding.mockResolvedValue({
+      embedding: [0.1, 0.2, 0.3],
+      model: { recognizer: 'sface', version: 'v1' },
+      quality: { detectionScore: 0.95, faceCount: 1 },
+    });
+    findMatches.mockResolvedValue({
+      match: { partnerId: 'p-2', name: 'Bob', code: 'T002', phone: '0902', confidence: 0.91 },
+      candidates: [
+        { partnerId: 'p-1', name: 'Alice', code: 'T001', phone: '0901', confidence: 0.88 },
+        { partnerId: 'p-3', name: 'Charlie', code: 'T003', phone: '0903', confidence: 0.87 },
+      ],
+      privateDiagnostics: { reasonCode: 'TEST' },
+    });
+
+    const res = await request(app)
+      .post('/api/face/recognize')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(200);
+    expect(res.body.match).toBeNull();
+    expect(res.body.candidates).toEqual([
+      expect.objectContaining({ partnerId: 'p-1', name: 'Alice' }),
+    ]);
+    expect(recordFaceDiagnostic).toHaveBeenCalledWith(expect.objectContaining({
+      privateDiagnostics: expect.objectContaining({
+        investorScopeFiltered: true,
+        returnedCandidateCount: 1,
+      }),
+    }));
+  });
 });
 
 describe('POST /api/face/register', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockResolveInvestorScope.mockResolvedValue({ isInvestor: false, allowedCustomerIds: [] });
   });
 
   it('returns 400 when partnerId is missing', async () => {
@@ -550,11 +591,28 @@ describe('POST /api/face/register', () => {
     );
     expect(registerSample).not.toHaveBeenCalled();
   });
+
+  it('rejects investor registration for a non-checked customer', async () => {
+    mockResolveInvestorScope.mockResolvedValue({ isInvestor: true, allowedCustomerIds: ['p-allowed'] });
+    query.mockResolvedValueOnce([{ id: 'p-forbidden', name: 'Blocked' }]);
+
+    const res = await request(app)
+      .post('/api/face/register')
+      .field('partnerId', 'p-forbidden')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(403);
+    expect(res.body.error).toBe('E_INVESTOR_CUSTOMER_NOT_ALLOWED');
+    expect(registerSample).not.toHaveBeenCalled();
+    expect(comprefaceFaceProvider.registerFace).not.toHaveBeenCalled();
+  });
 });
 
 describe('POST /api/face/re-register', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockResolveInvestorScope.mockResolvedValue({ isInvestor: false, allowedCustomerIds: [] });
   });
 
   it('re-registers a batch through local face-service by default', async () => {
@@ -625,6 +683,7 @@ describe('POST /api/face/re-register', () => {
 describe('GET /api/face/status/:partnerId', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockResolveInvestorScope.mockResolvedValue({ isInvestor: false, allowedCustomerIds: [] });
   });
 
   it('returns face registration status for an existing customer', async () => {
@@ -692,5 +751,19 @@ describe('GET /api/face/status/:partnerId', () => {
       .set('Authorization', 'Bearer fake-token');
 
     expect(res.status).toBe(404);
+  });
+
+  it('rejects investor status checks for a non-checked customer', async () => {
+    mockResolveInvestorScope.mockResolvedValue({ isInvestor: true, allowedCustomerIds: ['p-allowed'] });
+    query.mockResolvedValueOnce([{ id: 'p-forbidden' }]);
+
+    const res = await request(app)
+      .get('/api/face/status/p-forbidden')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(403);
+    expect(res.body.error).toBe('E_INVESTOR_CUSTOMER_NOT_ALLOWED');
+    expect(getFaceStatus).not.toHaveBeenCalled();
+    expect(comprefaceFaceProvider.getFaceStatus).not.toHaveBeenCalled();
   });
 });

@@ -12,6 +12,7 @@
 
 | Version | Date | Scope |
 |---|---|---|
+| v1.0.8 | 2026-06-27 | Investor group now resolves to explicit staff-shell permissions while customer-linked data remains scoped by `dbo.investor_clients`; investor role/employee self-escalation and allowlist curation stay server-blocked. |
 | v1.0.7 | 2026-06-27 | Admin-only investor allowlist curation added: `GET /api/Partners/investor-visibility` and `PATCH /api/Partners/:id/investor-visibility` read/write `dbo.investor_clients` only after `permissions.edit` and Admin-class handler validation. |
 | v1.0.6 | 2026-06-27 | Backend investor scope helper added: `resolveInvestorScope()` returns a fail-closed customer allowlist for employees in the `investor` permission group. |
 | v1.0.0 | 2026-05-13 | Initial contract freeze covering all active API routes, shared types, and integration boundaries. |
@@ -603,9 +604,9 @@ body: { visible: boolean }
 **Behavior:**
 1. `GET /api/Partners/investor-visibility` resolves the one active mapped `dbo.investor_accounts` row whose partner is assigned to group `investor`, then returns `{ investorId, customerIds }` for visible allowlist rows.
 2. `PATCH /api/Partners/:id/investor-visibility` validates the customer UUID and boolean `visible`, verifies the target is an active customer, resolves the active investor, then upserts `dbo.investor_clients` when visible or sets `is_visible=false` when hidden.
-3. The `/customers` Investor checkbox is rendered only for Admin-class users. Investor employee users remain read-only and never see this curation control.
+3. The `/customers` Investor checkbox is rendered only for Admin-class users. Investor employee users do not see this curation control even though their staff-shell permission set includes `permissions.edit`.
 
-**Invariants:** This is an admin curation surface over INV-021, not an investor self-service feature. The investor portal remains read-only and scoped by `resolveInvestorScope()`.
+**Invariants:** This is an admin curation surface over INV-021, not an investor self-service feature. Investor users may see a staff-like shell, but the curation API excludes the `investor` group and customer-linked data remains scoped by `resolveInvestorScope()`.
 
 ### 2.3 resolveInvestorScope (Backend Auth)
 
@@ -624,7 +625,7 @@ async function resolveInvestorScope(employeeId: string | undefined): Promise<{
 3. If the group name is not exactly `investor`, return non-investor scope and do not query `dbo.investor_clients`.
 4. If the group name is `investor`, read visible `partner_id` rows from `dbo.investor_clients` and return them as the customer allowlist.
 
-**Invariants:** Investors use normal employee identity and permission resolution, even when NK2 credentials are stored in `dbo.investor_accounts`. Empty allowlists fail closed. The seeded `investor` group is view-only per INV-021.
+**Invariants:** Investors use normal employee identity and permission resolution, even when NK2 credentials are stored in `dbo.investor_accounts`. Empty allowlists fail closed. The `investor` group resolves to explicit staff-shell permissions without wildcard `*`; customer-linked reads/writes must still apply the allowlist, and permission/employee mutation endpoints block investor self-escalation.
 
 ### 2.4 query (Database Access)
 

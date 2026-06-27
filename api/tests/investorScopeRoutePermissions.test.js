@@ -66,7 +66,7 @@ describe('newly-secured customer-data routes are permission-gated', () => {
     expectGate(r, 'get', '/:id/GetPayments', 'payment.view');
   });
 
-  it('commissions routes require commission.view (investor lacks it → auto-403)', () => {
+  it('commissions routes require commission.view', () => {
     const r = require('../src/routes/commissions');
     expectGate(r, 'get', '/', 'commission.view');
     expectGate(r, 'get', '/SaleOrderLinePartnerCommissions', 'commission.view');

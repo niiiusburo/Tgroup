@@ -2,6 +2,64 @@
 
 const { query } = require('../db');
 
+const INVESTOR_GROUP_NAME = 'investor';
+
+// Investor should see the same staff shell as an employee, but without wildcard
+// access. The group name still activates customer allowlist scoping below.
+const INVESTOR_STAFF_PERMISSIONS = [
+  'overview.view',
+  'calendar.view',
+  'calendar.edit',
+  'appointments.view',
+  'appointments.add',
+  'appointments.edit',
+  'appointments.export',
+  'customers.view',
+  'customers.view_all',
+  'customers.view.all',
+  'customers.add',
+  'customers.edit',
+  'customers.delete',
+  'customers.hard_delete',
+  'customers.export',
+  'services.view',
+  'services.add',
+  'services.edit',
+  'services.export',
+  'products.export',
+  'payment.view',
+  'payment.add',
+  'payment.edit',
+  'payment.refund',
+  'payment.void',
+  'payments.export',
+  'reports.view',
+  'reports.export',
+  'commission.view',
+  'commission.edit',
+  'employees.view',
+  'employees.edit',
+  'locations.view',
+  'locations.add',
+  'locations.edit',
+  'settings.view',
+  'settings.edit',
+  'notifications.view',
+  'notifications.edit',
+  'permissions.view',
+  'permissions.edit',
+  'relationships.view',
+  'website.view',
+  'website.edit',
+  'external_checkups.view',
+  'external_checkups.create',
+  'external_checkups.upload',
+];
+
+function isInvestorGroup(groupName) {
+  return String(groupName || '').trim().toLowerCase() === INVESTOR_GROUP_NAME;
+}
+
 /**
  * SINGLE SOURCE OF TRUTH for permission resolution.
  *
@@ -85,8 +143,12 @@ async function resolveEffectivePermissions(employeeId) {
   const granted = overrideRows.filter(r => r.override_type === 'grant').map(r => r.permission);
   const revoked = overrideRows.filter(r => r.override_type === 'revoke').map(r => r.permission);
 
-  const effectiveSet = new Set([...basePerms, ...granted]);
+  const investorStaffPerms = isInvestorGroup(groupName) ? INVESTOR_STAFF_PERMISSIONS : [];
+  const effectiveSet = new Set([...basePerms, ...granted, ...investorStaffPerms]);
   for (const p of revoked) effectiveSet.delete(p);
+  if (isInvestorGroup(groupName)) {
+    effectiveSet.delete('*');
+  }
 
   return {
     groupId,
@@ -137,7 +199,7 @@ async function resolveInvestorScope(employeeId) {
     [employeeId]
   );
 
-  const isInvestor = groupRows.length > 0 && groupRows[0].group_name === 'investor';
+  const isInvestor = groupRows.length > 0 && isInvestorGroup(groupRows[0].group_name);
   if (!isInvestor) {
     return { isInvestor: false, allowedCustomerIds: [] };
   }
@@ -151,4 +213,10 @@ async function resolveInvestorScope(employeeId) {
   return { isInvestor: true, allowedCustomerIds: rows.map(r => r.partner_id) };
 }
 
-module.exports = { resolveEffectivePermissions, hasPermission, resolveInvestorScope };
+module.exports = {
+  INVESTOR_STAFF_PERMISSIONS,
+  isInvestorGroup,
+  resolveEffectivePermissions,
+  hasPermission,
+  resolveInvestorScope,
+};

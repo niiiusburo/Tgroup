@@ -68,6 +68,22 @@ describe('partner investor visibility handlers', () => {
     expect(query).not.toHaveBeenCalled();
   });
 
+  it('rejects investor callers even if a future override grants wildcard-like access', async () => {
+    resolveEffectivePermissions.mockResolvedValue({
+      groupName: 'investor',
+      effectivePermissions: ['*', 'permissions.edit'],
+    });
+
+    const res = mockResponse();
+    await listInvestorVisibility(ADMIN_REQ, res);
+
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith({
+      error: { code: 'ADMIN_REQUIRED', message: 'Admin access required' },
+    });
+    expect(query).not.toHaveBeenCalled();
+  });
+
   it('upserts a visible customer allowlist row', async () => {
     mockAdmin();
     query

@@ -20,6 +20,7 @@ function isAdminPermissions(permissions) {
   const groupId = String(permissions?.groupId || '').trim().toLowerCase();
   const groupName = String(permissions?.groupName || '').trim().toLowerCase();
   const effectivePermissions = permissions?.effectivePermissions || [];
+  if (groupName === 'investor') return false;
   return (
     groupId === '11111111-0000-0000-0000-000000000001' ||
     groupName === 'admin' ||

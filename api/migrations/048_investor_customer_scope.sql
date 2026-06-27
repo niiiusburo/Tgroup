@@ -8,10 +8,11 @@
 -- Dental only. Models the employee_location_scope pattern (migration 005),
 -- but keyed by customer (partner_id) instead of location (company_id).
 --
--- The investor group is granted read-only access to assigned customers and
--- related operational views. It is deliberately NOT granted customer,
--- appointment, or payment write permissions; existing requirePermission gates
--- auto-403 those endpoints for investors before route-level IDOR guards run.
+-- The investor group is granted a staff-style explicit permission set so the
+-- regular employee shell does not hide pages or controls. It is deliberately
+-- NOT granted wildcard access; customer-linked reads/writes are still
+-- scoped by dbo.investor_clients, and role/employee self-escalation is blocked
+-- in route handlers.
 
 -- 1) Allowlist: which customers an investor may see.
 CREATE TABLE IF NOT EXISTS dbo.investor_clients (
@@ -26,15 +27,57 @@ CREATE TABLE IF NOT EXISTS dbo.investor_clients (
 CREATE INDEX IF NOT EXISTS idx_investor_clients_investor ON dbo.investor_clients(investor_id) WHERE is_visible = true;
 CREATE INDEX IF NOT EXISTS idx_investor_clients_partner  ON dbo.investor_clients(partner_id);
 
--- 2) Seed the 'investor' permission group + minimal permission set per schema.
+-- 2) Seed the 'investor' permission group + staff-shell permission set.
 DO $$
 DECLARE
   inv_perms TEXT[] := ARRAY[
+    'overview.view',
+    'calendar.view',
+    'calendar.edit',
+    'appointments.view',
+    'appointments.add',
+    'appointments.edit',
+    'appointments.export',
     'customers.view',
     'customers.view_all',
-    'appointments.view',
+    'customers.view.all',
+    'customers.add',
+    'customers.edit',
+    'customers.delete',
+    'customers.hard_delete',
+    'customers.export',
+    'services.view',
+    'services.add',
+    'services.edit',
+    'services.export',
+    'products.export',
     'payment.view',
-    'services.view','reports.view','calendar.view','locations.view'
+    'payment.add',
+    'payment.edit',
+    'payment.refund',
+    'payment.void',
+    'payments.export',
+    'reports.view',
+    'reports.export',
+    'commission.view',
+    'commission.edit',
+    'employees.view',
+    'employees.edit',
+    'locations.view',
+    'locations.add',
+    'locations.edit',
+    'settings.view',
+    'settings.edit',
+    'notifications.view',
+    'notifications.edit',
+    'permissions.view',
+    'permissions.edit',
+    'relationships.view',
+    'website.view',
+    'website.edit',
+    'external_checkups.view',
+    'external_checkups.create',
+    'external_checkups.upload'
   ];
   perm TEXT;
   gid UUID;
