@@ -112,6 +112,7 @@ export function CheckIn() {
   const controller = useFaceCaptureController({
     // iPad kiosk: clients face the screen, so default to the FRONT ('user') camera.
     // (was 'environment' which is the back camera — wrong for a wall-mounted kiosk.)
+    defaultFacingMode: 'user',
     isOpen: status.kind === 'idle' || status.kind === 'capturing',
     captureMode: 'single',
     cameraErrorMessage: t('checkIn.cameraError', 'Cannot access camera. Check permissions.'),

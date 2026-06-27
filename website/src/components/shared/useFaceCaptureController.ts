@@ -38,6 +38,9 @@ interface UseFaceCaptureControllerOptions {
   readonly cameraErrorMessage: string;
   readonly captureFailedMessage: string;
   readonly onCapture: (image: Blob, images?: readonly Blob[]) => void | Promise<void>;
+  // Default camera to use on mount. Defaults to 'environment' (back camera).
+  // Kiosks where the client faces the screen should pass 'user' (front camera).
+  readonly defaultFacingMode?: CameraFacingMode;
 }
 
 export function useFaceCaptureController({
@@ -46,6 +49,7 @@ export function useFaceCaptureController({
   cameraErrorMessage,
   captureFailedMessage,
   onCapture,
+  defaultFacingMode = 'environment',
 }: UseFaceCaptureControllerOptions) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -54,7 +58,7 @@ export function useFaceCaptureController({
   const [error, setError] = useState<string | null>(null);
   const [captureError, setCaptureError] = useState<string | null>(null);
   const [isStarting, setIsStarting] = useState(false);
-  const [facingMode, setFacingMode] = useState<CameraFacingMode>('environment');
+  const [facingMode, setFacingMode] = useState<CameraFacingMode>(defaultFacingMode);
   const [detectionState, setDetectionState] = useState<DetectionState>('scanning');
   const [detectionScore, setDetectionScore] = useState(0);
   const [poseIndex, setPoseIndex] = useState(0);
