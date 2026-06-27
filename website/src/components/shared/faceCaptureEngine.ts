@@ -35,16 +35,16 @@ export async function getCameraStream(facingMode: CameraFacingMode) {
     {
       video: {
         facingMode: { ideal: facingMode },
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
       },
       audio: false,
     },
     {
       video: {
         facingMode: { exact: facingMode },
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
       },
       audio: false,
     },
@@ -177,22 +177,25 @@ export function captureVideoFrame(video: HTMLVideoElement | null) {
     return Promise.resolve(null);
   }
 
-  // Center-crop to a square so the face fills more of the frame. CompreFace
-  // recognition quality drops sharply when the face occupies <20% of the image,
-  // which is the typical case for a 1280x720 wide shot from an iPad kiosk.
-  // Square crop keeps the face large without zooming (no interpolation artifacts).
+  // Tight center-crop so the face fills ~50%+ of the frame CompreFace receives.
+  // CompreFace's face detector returns NO_FACE when the face is <20% of the image;
+  // at 1920x1080 the face is ~12% uncropped. We crop to 60% of the smaller
+  // dimension, centered. This zooms on the face without upscaling (no artifacts).
+  // Output is then resized to a CompreFace-friendly 600x600 square.
   const vw = video.videoWidth;
   const vh = video.videoHeight;
-  const side = Math.min(vw, vh);
-  const sx = Math.round((vw - side) / 2);
-  const sy = Math.round((vh - side) / 2);
-
+  const minSide = Math.min(vw, vh);
+  const cropSide = Math.round(minSide * 0.6);   // tighter than full min-side
+  const sx = Math.round((vw - cropSide) / 2);
+  const sy = Math.round((vh - cropSide) / 2);
+  const OUT = 600;                              // CompreFace's sweet spot
   const canvas = document.createElement('canvas');
-  canvas.width = side;
-  canvas.height = side;
+  canvas.width = OUT;
+  canvas.height = OUT;
   const ctx = canvas.getContext('2d');
   if (!ctx) return Promise.resolve(null);
-  ctx.drawImage(video, sx, sy, side, side, 0, 0, side, side);
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(video, sx, sy, cropSide, cropSide, 0, 0, OUT, OUT);
 
   return new Promise<Blob | null>((resolve) => {
     canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.95);

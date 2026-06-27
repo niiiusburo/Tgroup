@@ -206,15 +206,42 @@ export function CheckIn() {
       </header>
 
       <div className="relative w-full max-w-md aspect-[3/4] sm:aspect-square rounded-3xl overflow-hidden bg-black shadow-2xl ring-1 ring-white/10">
-        {/* Live camera feed */}
+        {/* Live camera feed.
+            PRIVACY BLUR: the user-facing display is blurred ~60% so clients
+            don't see a sharp image of themselves. The blur is a CSS overlay
+            (backdrop-filter) on top of the live video; the underlying <video>
+            stays sharp so canvas capture (drawImage) still gets a clean frame
+            for CompreFace. */}
         {showCamera && (
-          <video
-            ref={controller.videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="absolute inset-0 w-full h-full object-cover"
-          />
+          <>
+            <video
+              ref={controller.videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            {/* Privacy blur overlay — pure CSS, never touches the capture path */}
+            <div
+              aria-hidden
+              className="absolute inset-0 w-full h-full pointer-events-none"
+              style={{
+                backdropFilter: 'blur(18px)',
+                WebkitBackdropFilter: 'blur(18px)',
+                backgroundColor: 'rgba(15, 23, 42, 0.15)',
+              }}
+            />
+            {/* Subtle silhouette guide so clients know where to stand */}
+            <div
+              aria-hidden
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            >
+              <div
+                className="rounded-full border-2 border-white/25"
+                style={{ width: '38%', aspectRatio: '3/4', maxHeight: '70%' }}
+              />
+            </div>
+          </>
         )}
 
         {/* Status overlays */}
