@@ -35,6 +35,7 @@ const Payment = lazy(() => import('@/pages/Payment').then(m => ({ default: m.Pay
 const Feedback = lazy(() => import('@/pages/Feedback').then(m => ({ default: m.Feedback })));
 const Services = lazy(() => import('@/pages/Services').then(m => ({ default: m.Services })));
 const ServiceCatalog = lazy(() => import('@/pages/ServiceCatalog').then(m => ({ default: m.ServiceCatalog })));
+const CheckIn = lazy(() => import('@/pages/CheckIn/CheckIn').then(m => ({ default: m.CheckIn })));
 
 /**
  * Access Denied page — shown when authenticated but lacking permission
@@ -137,7 +138,8 @@ function LoginRoute() {
  *   /relationships -> Relationships,
  *   /commission -> Commission,
  *   /reports -> Reports,
- *   /notifications -> Notifications
+ *   /notifications -> Notifications,
+ *   /checkin -> public Face ID check-in kiosk
  * ]
  */
 function App() {
@@ -149,6 +151,8 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<LoginRoute />} />
+          {/* @crossref:route[path="/checkin", component=CheckIn] public Face ID kiosk; no ProtectedRoute */}
+          <Route path="/checkin" element={<CheckIn />} />
           {import.meta.env.DEV && (
             <Route path="/test/address" element={<AddressAutocompleteTest />} />
           )}

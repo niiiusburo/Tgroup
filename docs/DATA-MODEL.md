@@ -124,8 +124,8 @@ erDiagram
 | `isdeleted` | boolean | DEFAULT false |
 | `tier_id` | uuid | FK → permission_groups |
 | `salestaffid` | uuid | FK → partners (self-ref, employee) |
-| `face_subject_id` | text | face engine ID |
-| `face_registered_at` | timestamp | |
+| `face_subject_id` | text | face provider subject ID; in CompreFace mode this is `partners.id` |
+| `face_registered_at` | timestamp | last successful provider-verified face registration |
 | `last_login` | timestamp | |
 | `startworkdate` | timestamp | |
 | `wage` | numeric | |
@@ -374,7 +374,7 @@ erDiagram
 | `created_at` | timestamp | DEFAULT NOW() |
 | `deleted_at` | timestamp | soft delete |
 
-**Note:** This table currently lives in supplemental migration `api/src/db/migrations/046_customer_face_embeddings.sql`, not the canonical `api/migrations/` sequence. `FACE_RECOGNITION_PROVIDER=local` reads active rows here. `FACE_RECOGNITION_PROVIDER=compreface` stores face examples in CompreFace and uses `partners.face_subject_id` / `face_registered_at` as the local status bridge.
+**Note:** This table currently lives in supplemental migration `api/src/db/migrations/046_customer_face_embeddings.sql`, not the canonical `api/migrations/` sequence. `FACE_RECOGNITION_PROVIDER=local` reads active rows here. `FACE_RECOGNITION_PROVIDER=compreface` stores face examples in CompreFace and uses `partners.face_subject_id` / `face_registered_at` as the local status bridge. CompreFace status must also query CompreFace for the subject's actual face count; `face_subject_id` alone is not proof that a usable face exists.
 
 ---
 
@@ -565,6 +565,9 @@ Rows in `dbo.permission_groups` with `is_system = true` must not be deletable th
 
 ### INV-SCHEMA-006 — Face Embedding Dimension
 If `dbo.customer_face_embeddings` exists and the local provider is active, the embedding vector must be 128 dimensions (SFace model). Changing dimensions requires a migration to recreate the column and re-register all locally stored faces. CompreFace mode does not write embedding vectors into this table.
+
+### INV-SCHEMA-006A — CompreFace Status Must Be Provider-Backed
+In CompreFace mode, a customer is Face ID registered only when `dbo.partners.face_subject_id` is set and the CompreFace `/faces?subject=` endpoint returns at least one saved example. Registration must verify CompreFace persistence before updating `face_registered_at`.
 
 ### INV-SCHEMA-007 — Receipt Number Year Partition
 `payments.receipt_number` uses a per-year counter. The sequence MUST reset on January 1st of each calendar year. The generation function uses `EXTRACT(YEAR FROM NOW())` as the partition key.

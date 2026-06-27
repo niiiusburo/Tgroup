@@ -4,6 +4,7 @@ jest.mock('../comprefaceClient', () => ({
   recognize: jest.fn(),
   createSubject: jest.fn(),
   addExample: jest.fn(),
+  listFaces: jest.fn(),
   deleteSubject: jest.fn(),
 }));
 
@@ -69,12 +70,14 @@ describe('comprefaceFaceProvider', () => {
   it('creates a subject, adds an example, and marks partner face status', async () => {
     comprefaceClient.createSubject.mockResolvedValue({ subject: 'partner-1' });
     comprefaceClient.addExample.mockResolvedValue({ image_id: 'img-1' });
+    comprefaceClient.listFaces.mockResolvedValue({ faces: [{ image_id: 'img-1' }], total: 1 });
     query.mockResolvedValue([{ face_registered_at: '2026-05-17T10:00:00' }]);
 
     const result = await provider.registerFace('partner-1', Buffer.from('face'), 'image/jpeg');
 
     expect(comprefaceClient.createSubject).toHaveBeenCalledWith('partner-1');
     expect(comprefaceClient.addExample).toHaveBeenCalledWith('partner-1', expect.any(Buffer), 'image/jpeg');
+    expect(comprefaceClient.listFaces).toHaveBeenCalledWith('partner-1');
     expect(query).toHaveBeenCalledWith(expect.stringContaining('UPDATE dbo.partners'), [
       'partner-1',
       'partner-1',
@@ -88,6 +91,7 @@ describe('comprefaceFaceProvider', () => {
     exists.status = 409;
     comprefaceClient.createSubject.mockRejectedValue(exists);
     comprefaceClient.addExample.mockResolvedValue({ image_id: 'img-1' });
+    comprefaceClient.listFaces.mockResolvedValue({ faces: [{ image_id: 'img-1' }], total: 1 });
     query.mockResolvedValue([{ face_registered_at: '2026-05-17T10:00:00' }]);
 
     const result = await provider.registerFace('partner-1', Buffer.from('face'), 'image/jpeg');
@@ -107,5 +111,43 @@ describe('comprefaceFaceProvider', () => {
       status: 422,
       message: 'No face detected',
     });
+  });
+
+  it('does not mark a partner registered when CompreFace stores zero examples', async () => {
+    comprefaceClient.createSubject.mockResolvedValue({ subject: 'partner-1' });
+    comprefaceClient.addExample.mockResolvedValue({ image_id: 'img-1' });
+    comprefaceClient.listFaces.mockResolvedValue({ faces: [], total: 0 });
+
+    await expect(provider.registerFace('partner-1', Buffer.from('face'), 'image/jpeg')).rejects.toMatchObject({
+      code: 'COMPREFACE_REGISTER_VERIFY_FAILED',
+      status: 502,
+    });
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('reports unregistered when DB has a subject but CompreFace has no face examples', async () => {
+    query.mockResolvedValue([{ face_subject_id: 'partner-1', face_registered_at: '2026-05-17T10:00:00' }]);
+    comprefaceClient.listFaces.mockResolvedValue({ faces: [], total: 0 });
+
+    const result = await provider.getFaceStatus('partner-1');
+
+    expect(result).toEqual({
+      partnerId: 'partner-1',
+      registered: false,
+      sampleCount: 0,
+      lastRegisteredAt: null,
+      provider: 'compreface',
+    });
+  });
+
+  it('reports CompreFace sample count from the provider instead of assuming one sample', async () => {
+    query.mockResolvedValue([{ face_subject_id: 'partner-1', face_registered_at: '2026-05-17T10:00:00' }]);
+    comprefaceClient.listFaces.mockResolvedValue({ faces: [{}, {}, {}], total: 3 });
+
+    const result = await provider.getFaceStatus('partner-1');
+
+    expect(result.registered).toBe(true);
+    expect(result.sampleCount).toBe(3);
+    expect(result.lastRegisteredAt).toBe('2026-05-17T10:00:00');
   });
 });

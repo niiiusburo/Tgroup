@@ -237,6 +237,41 @@ describe('comprefaceClient', () => {
     });
   });
 
+  describe('listFaces', () => {
+    it('lists face examples for a subject', async () => {
+      const { listFaces } = loadClient({ COMPREFACE_URL: 'http://compreface-test' });
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        text: async () => JSON.stringify({
+          faces: [{ image_id: 'img-1' }],
+          total_elements: 1,
+        }),
+      });
+
+      const result = await listFaces('p 1');
+
+      expect(result.total).toBe(1);
+      expect(result.faces).toHaveLength(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.stringContaining('/faces?subject=p%201'),
+        expect.objectContaining({ method: 'GET' }),
+      );
+    });
+
+    it('falls back to content arrays when CompreFace response shape differs', async () => {
+      const { listFaces } = loadClient();
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        text: async () => JSON.stringify({ content: [{ id: 'face-1' }] }),
+      });
+
+      const result = await listFaces('p1');
+
+      expect(result.total).toBe(1);
+      expect(result.faces).toEqual([{ id: 'face-1' }]);
+    });
+  });
+
   describe('deleteSubject', () => {
     it('deletes subject by id', async () => {
       const { deleteSubject } = loadClient();

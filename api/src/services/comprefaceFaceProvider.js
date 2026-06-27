@@ -4,6 +4,7 @@ const {
   recognize,
   createSubject,
   addExample,
+  listFaces,
   deleteSubject,
 } = require("./comprefaceClient");
 const { query } = require("../db");
@@ -35,6 +36,12 @@ function sampleIdFromResponse(response, fallback) {
     response?.face?.id ||
     fallback
   );
+}
+
+function faceCountFromList(response) {
+  const total = Number(response?.total);
+  if (Number.isFinite(total)) return total;
+  return Array.isArray(response?.faces) ? response.faces.length : 0;
 }
 
 function isNoFaceError(err) {
@@ -179,7 +186,40 @@ async function markPartnerRegistered(partnerId, subjectId) {
     throw new ComprefaceFaceError("PARTNER_NOT_FOUND", "Customer not found or deleted", 404);
   }
 
-  return rows[0]?.face_registered_at || null;
+  const registeredAt = rows[0]?.face_registered_at || null;
+  if (!registeredAt) {
+    throw new ComprefaceFaceError(
+      "PARTNER_REGISTER_MARK_FAILED",
+      "Face example saved, but customer registration timestamp was not recorded",
+      500
+    );
+  }
+
+  return registeredAt;
+}
+
+async function verifySubjectHasFaces(subjectId, expectedMinimum = 1) {
+  let response;
+  try {
+    response = await listFaces(subjectId);
+  } catch (err) {
+    throw new ComprefaceFaceError(
+      "COMPREFACE_STATUS_ERROR",
+      err.message || "Failed to verify Compreface subject examples",
+      err.status || 502
+    );
+  }
+
+  const sampleCount = faceCountFromList(response);
+  if (sampleCount < expectedMinimum) {
+    throw new ComprefaceFaceError(
+      "COMPREFACE_REGISTER_VERIFY_FAILED",
+      "Face example was not saved in Compreface",
+      502
+    );
+  }
+
+  return sampleCount;
 }
 
 async function registerFace(partnerId, imageBuffer, mimetype) {
@@ -197,10 +237,11 @@ async function registerFace(partnerId, imageBuffer, mimetype) {
     );
   }
 
+  const sampleCount = await verifySubjectHasFaces(subjectId, 1);
   const faceRegisteredAt = await markPartnerRegistered(partnerId, subjectId);
   return {
     sampleId: sampleIdFromResponse(response, subjectId),
-    sampleCount: 1,
+    sampleCount,
     faceRegisteredAt,
   };
 }
@@ -235,10 +276,11 @@ async function replaceFaceSamples(partnerId, files) {
     sampleIds.push(sampleIdFromResponse(response, `${subjectId}:${idx}`));
   }
 
+  const sampleCount = await verifySubjectHasFaces(subjectId, sampleIds.length);
   const faceRegisteredAt = await markPartnerRegistered(partnerId, subjectId);
   return {
     sampleIds,
-    sampleCount: sampleIds.length,
+    sampleCount,
     faceRegisteredAt,
   };
 }
@@ -256,11 +298,23 @@ async function getFaceStatus(partnerId) {
   }
 
   const subjectId = rows[0]?.face_subject_id || null;
+  if (!subjectId) {
+    return {
+      partnerId,
+      registered: false,
+      sampleCount: 0,
+      lastRegisteredAt: null,
+      provider: "compreface",
+    };
+  }
+
+  const sampleCount = await verifySubjectHasFaces(subjectId, 0);
+  const registered = sampleCount > 0;
   return {
     partnerId,
-    registered: Boolean(subjectId),
-    sampleCount: subjectId ? 1 : 0,
-    lastRegisteredAt: rows[0]?.face_registered_at || null,
+    registered,
+    sampleCount,
+    lastRegisteredAt: registered ? rows[0]?.face_registered_at || null : null,
     provider: "compreface",
   };
 }

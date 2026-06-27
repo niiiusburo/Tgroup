@@ -90,6 +90,30 @@ async function addExample(subjectId, imageBuffer, mimetype = 'image/jpeg') {
 }
 
 /**
+ * List saved face examples for a subject.
+ * @param {string} subjectId
+ * @returns {Promise<{faces: unknown[], total: number}>}
+ */
+async function listFaces(subjectId) {
+  const data = await comprefaceFetch(`/faces?subject=${encodeURIComponent(subjectId)}`, {
+    method: 'GET',
+  });
+
+  const faces = Array.isArray(data?.faces)
+    ? data.faces
+    : Array.isArray(data?.content)
+      ? data.content
+      : Array.isArray(data?.result)
+        ? data.result
+        : [];
+  const total = Number(data?.total_elements ?? data?.total ?? faces.length);
+  return {
+    faces,
+    total: Number.isFinite(total) ? total : faces.length,
+  };
+}
+
+/**
  * Delete a subject and all its examples.
  * @param {string} subjectId
  */
@@ -120,6 +144,7 @@ module.exports = {
   recognize,
   createSubject,
   addExample,
+  listFaces,
   deleteSubject,
   healthCheck,
 };

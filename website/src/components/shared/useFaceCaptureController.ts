@@ -29,12 +29,13 @@ const ADAPTIVE_THRESHOLD_RELAX_MEDIUM = 0.15;
 const ADAPTIVE_THRESHOLD_RELAX_DEEP = 0.25;
 const ADAPTIVE_THRESHOLD_FLOOR_MEDIUM = 0.45;
 const ADAPTIVE_THRESHOLD_FLOOR_DEEP = 0.35;
-const FORCE_CAPTURE_TICKS = 60; // ~15.6s
-const FORCE_CAPTURE_MIN_SCORE = 0.15;
+const FORCE_CAPTURE_TICKS = 30; // ~8s
+const FORCE_CAPTURE_MIN_SCORE = 0.25;
 
 interface UseFaceCaptureControllerOptions {
   readonly isOpen: boolean;
   readonly captureMode: FaceCaptureMode;
+  readonly initialFacingMode?: CameraFacingMode;
   readonly cameraErrorMessage: string;
   readonly captureFailedMessage: string;
   readonly onCapture: (image: Blob, images?: readonly Blob[]) => void | Promise<void>;
@@ -43,6 +44,7 @@ interface UseFaceCaptureControllerOptions {
 export function useFaceCaptureController({
   isOpen,
   captureMode,
+  initialFacingMode = 'environment',
   cameraErrorMessage,
   captureFailedMessage,
   onCapture,
@@ -54,7 +56,7 @@ export function useFaceCaptureController({
   const [error, setError] = useState<string | null>(null);
   const [captureError, setCaptureError] = useState<string | null>(null);
   const [isStarting, setIsStarting] = useState(false);
-  const [facingMode, setFacingMode] = useState<CameraFacingMode>('environment');
+  const [facingMode, setFacingMode] = useState<CameraFacingMode>(initialFacingMode);
   const [detectionState, setDetectionState] = useState<DetectionState>('scanning');
   const [detectionScore, setDetectionScore] = useState(0);
   const [poseIndex, setPoseIndex] = useState(0);
@@ -174,8 +176,12 @@ export function useFaceCaptureController({
           video.srcObject = stream;
           try {
             await video.play();
-          } catch {
-            // autoplay + playsInline cover browsers that block play().
+          } catch (playErr) {
+            const name = playErr instanceof Error ? playErr.name : 'PlayError';
+            if (name === 'NotAllowedError' || name === 'AbortError') {
+              if (mounted) setError('Camera blocked by browser. Allow camera access and reload.');
+              console.error('[FaceCapture] video.play() rejected:', name, playErr);
+            }
           }
         }
       } catch {

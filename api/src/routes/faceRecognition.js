@@ -225,8 +225,12 @@ router.get('/status/:partnerId', requirePermission('customers.view'), async (req
       : await getFaceStatus(partnerId);
     return res.json(status);
   } catch (err) {
-    console.error('[FaceStatus] error:', err);
-    return res.status(500).json({ error: 'INTERNAL_ERROR', message: 'Failed to load face status' });
+    const mapped = mapEngineError(err);
+    console.error('[FaceStatus] error:', mapped.code, mapped.message);
+    if (mapped.code === 'ENGINE_ERROR') {
+      return res.status(500).json({ error: 'INTERNAL_ERROR', message: 'Failed to load face status' });
+    }
+    return res.status(mapped.status).json({ error: mapped.code, message: mapped.message });
   }
 });
 

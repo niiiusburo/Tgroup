@@ -357,6 +357,28 @@ Face error responses:
 - `NO_FACE` is HTTP 422 when the local provider or CompreFace cannot detect a face in the submitted image.
 - Frontend capture callers must keep the camera modal open on `NO_FACE`, show "Không phát hiện khuôn mặt" / "Face not detected", and dismiss capture only through an explicit close/cancel action.
 
+#### POST /api/public/face/checkin
+**Audience:** public `/checkin` kiosk or phone/tablet check-in page. No JWT required.
+**Body:** `multipart/form-data` with `image: File`
+**Response 200:**
+```ts
+{ ok: true; result: 'match'; greeting: string | null }
+| { ok: true; result: 'multiple'; candidates: number }
+| { ok: true; result: 'no_match' }
+```
+**Error response:** `{ ok: false; reason: string; message: string }`
+
+Privacy/security contract:
+- Recognize-only; never registers or re-registers faces.
+- Returns only a minimal greeting on match and never returns `partnerId`, phone, customer code, confidence score, or candidate identities.
+- Rate-limited per source IP.
+- Reuses the configured Face ID provider. In CompreFace mode, subjects still map to `partners.id`.
+
+#### GET /api/face/status/:partnerId
+**Response 200:** `{ partnerId: string; registered: boolean; sampleCount: number; lastRegisteredAt: string | null; provider?: 'local' | 'compreface' }`
+
+CompreFace mode status is provider-backed: `registered` is true only when `partners.face_subject_id` exists and CompreFace currently returns at least one face example for that subject. A stale DB subject with zero CompreFace examples must report `registered: false`.
+
 ---
 
 ### 1.7 Permissions
@@ -605,6 +627,7 @@ async function query(text: string, params?: any[]): Promise<any[]>
 - `GET /api/v1/recognition/subjects` — service health/key check
 - `POST /api/v1/recognition/subjects` — create subject using `partners.id`
 - `POST /api/v1/recognition/faces` — register face
+- `GET /api/v1/recognition/faces?subject=:subjectId` — verify subject examples for registration/status
 - `POST /api/v1/recognition/recognize` — recognize face
 - `DELETE /api/v1/recognition/subjects/:subjectId` — reset subject during re-registration
 **Headers:** `x-api-key: COMPREFACE_API_KEY`

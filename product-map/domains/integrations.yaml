@@ -5,6 +5,7 @@ summary: |
   Both integration families are optional features gated by env configuration.
 owns:
   - api/src/routes/faceRecognition.js
+  - api/src/routes/faceCheckin.js
   - api/src/routes/externalCheckups.js
   - api/src/routes/publicTelemetryErrors.js
   - api/src/services/faceEngineClient.js
@@ -14,6 +15,7 @@ owns:
   - website/src/components/customer/CustomerCameraWidget.tsx
   - website/src/components/shared/FaceCaptureModal.tsx
   - website/src/components/modules/PatientCheckIn.tsx
+  - website/src/pages/CheckIn/CheckIn.tsx
   - website/src/hooks/useFaceRecognition.ts
   - website/src/hooks/useExternalCheckups.ts
 reads:
@@ -41,6 +43,7 @@ endpoints:
   - POST /api/face/register
   - POST /api/face/re-register
   - GET  /api/face/status/:partnerId
+  - POST /api/public/face/checkin
   - GET  /api/ExternalCheckups/images/:imageName
   - GET  /api/ExternalCheckups/:customerCode
   - POST /api/ExternalCheckups/:customerCode/patient
@@ -48,6 +51,7 @@ endpoints:
   - POST https://open.larksuite.com/open-apis/bot/v2/hook/* (outbound only, optional)
 ui_surfaces:
   - PatientCheckIn
+  - /checkin public Face ID kiosk
   - CustomerCameraWidget
   - FaceCaptureModal
   - HealthCheckupGallery
@@ -73,6 +77,7 @@ notes:
   - Lark feedback alerts are optional and env-gated. The API process posts a text alert to the configured T-Group custom bot webhook only after a manual feedback thread or auto-detected telemetry feedback thread has committed locally.
   - `FACE_RECOGNITION_PROVIDER=local` uses the Python FastAPI face-service with OpenCV YuNet (detection) and SFace (128-dim embedding extraction).
   - `FACE_RECOGNITION_PROVIDER=compreface` uses CompreFace recognition subjects keyed by `partners.id`; TGClinic still updates `partners.face_subject_id` and `face_registered_at`.
+  - CompreFace registration/status must query `/faces?subject=<partners.id>`; `partners.face_subject_id` without at least one CompreFace example is not a registered face.
   - Compreface services are defined in docker-compose.yml but are not required for core app startup.
   - "Hosoonline is currently mixed-contract: login credentials take precedence for image reads (`Authorization: Bearer <token>` plus access_token cookie); `HOSOONLINE_API_KEY` / `X-API-Key` remains as fallback for older patient health-checkup endpoints."
   - The current observed Hosoonline website contract logs in through `/api/auth/login`, searches appointment media through `/api/appointments/search?q=<customerCode>&page=<page>`, and fetches bytes through `/api/appointments/image/:imageName`.

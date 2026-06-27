@@ -142,7 +142,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | **R** | `faceRecognition.js` |
 | **E** | `POST /api/face/*` |
 | **UI** | CustomerCameraWidget, PatientCheckIn, FaceCaptureModal |
-| **Risk** | **High** — in local provider mode, embedding dimension must match the model (128 for SFace). Changing the local face model requires re-registering all local embeddings. CompreFace mode stores examples in CompreFace and uses `partners.face_subject_id` for status. Soft-delete via `deleted_at` preserves local audit history. |
+| **Risk** | **High** — in local provider mode, embedding dimension must match the model (128 for SFace). Changing the local face model requires re-registering all local embeddings. CompreFace mode stores examples in CompreFace and must verify actual `/faces?subject=` example count before status reports registered. Soft-delete via `deleted_at` preserves local audit history. |
 
 ### dbo.appointments
 

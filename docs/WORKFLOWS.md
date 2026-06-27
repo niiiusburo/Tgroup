@@ -329,6 +329,8 @@ sequenceDiagram
 - Configured Face ID provider down → fallback to manual check-in (UC-008).
 - Embedding dimension mismatch → recognition accuracy degrades or crashes.
 
+**Public kiosk variant:** `/checkin` uses the same provider path but calls `POST /api/public/face/checkin` without JWT. That route is recognize-only, rate-limited, and returns only `{ result, greeting? | candidates? }`; it never returns partner IDs, phone numbers, customer codes, confidence scores, or candidate identities.
+
 ---
 
 ## WF-008 — TDental CSV Import (One-Time / Sync)

@@ -214,7 +214,7 @@ describe('FaceCaptureModal', () => {
     // When the browser has no native FaceDetector (Safari, Firefox, iOS), the
     // engine falls back to quality-only scoring instead of showing "no face"
     // and stalling. The modal should stay open and keep scanning until either
-    // a high-quality frame triggers capture or the 15s force-capture safety
+    // a high-quality frame triggers capture or the force-capture safety
     // net fires.
     vi.useFakeTimers();
     mockVideoWidth = 640;
@@ -306,13 +306,13 @@ describe('FaceCaptureModal', () => {
     });
   });
 
-  it('requests the back camera first and can flip to the front camera', async () => {
+  it('requests an iOS-friendly back camera first and can flip to the front camera', async () => {
     render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
 
     await vi.waitFor(() => {
       expect(mockGetUserMedia).toHaveBeenCalledWith(
         expect.objectContaining({
-          video: expect.objectContaining({ facingMode: { exact: 'environment' } }),
+          video: expect.objectContaining({ facingMode: { ideal: 'environment' } }),
           audio: false,
         }),
       );
@@ -323,11 +323,21 @@ describe('FaceCaptureModal', () => {
     await vi.waitFor(() => {
       expect(mockGetUserMedia).toHaveBeenCalledWith(
         expect.objectContaining({
-          video: expect.objectContaining({ facingMode: { exact: 'user' } }),
+          video: expect.objectContaining({ facingMode: { ideal: 'user' } }),
           audio: false,
         }),
       );
     });
+  });
+
+  it('shows a camera error when the browser blocks video playback', async () => {
+    const blocked = new Error('Playback blocked');
+    blocked.name = 'NotAllowedError';
+    mockPlay.mockRejectedValueOnce(blocked);
+
+    render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
+
+    expect(await screen.findByText(/Camera blocked by browser/i)).toBeInTheDocument();
   });
 
   it('has close button with X icon', async () => {

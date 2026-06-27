@@ -109,6 +109,7 @@ Investor customer scope is an additional backend data filter, not a login type. 
 | `POST /api/Auth/login` | 5 failures / 15 min per email+IP | Brute-force protection |
 | `POST /api/Auth/login` | 20 failures / 15 min per IP | Network-wide cap |
 | `POST /api/telemetry/errors` | 100 req / min per IP | Public ingestion abuse prevention |
+| `POST /api/public/face/checkin` | 5 req / 5 sec burst and 10 req / min sustained per IP | Public Face ID recognition abuse prevention |
 
 **Implementation:** `express-rate-limit` in `api/src/server.js` for login; custom counter in `api/src/routes/auth.js` for email-scoped lockout.
 
@@ -119,6 +120,7 @@ Investor customer scope is an additional backend data filter, not a login type. 
 - **File Uploads:** `feedback_attachments` uses `multer` + `sharp` for image resizing. Max file size enforced by nginx `client_max_body_size 25m`.
 - **Outbound Lark alerts:** Feedback alerts send bounded text previews and metadata only after the feedback transaction commits. Attachment bytes are not forwarded. `api/src/services/larkNotifier.js` only accepts HTTPS custom bot URLs on `open.larksuite.com` or `open.feishu.cn` and supports optional Lark signature verification through `LARK_FEEDBACK_WEBHOOK_SECRET`. Fields that cross the boundary into Lark: feedback content preview (≤900 chars), thread ID, reporter (employee ID/name), page URL or page path (may contain query params with patient identifiers), screen size, attachment count, and for auto-detected alerts the error type, error message preview (≤900 chars), route, and API endpoint/method. The inbox link in `auto` alerts is pinned to `TGROUP_PUBLIC_URL` and ignores client-supplied `Origin`/`Referer` to prevent phishing redirects through the unauthenticated `/api/telemetry/errors` endpoint.
 - **CORS:** `ALLOWED_ORIGINS` whitelist in `api/src/server.js`. Dev origin regex allows `localhost` ports.
+- **Public Face ID kiosk:** `POST /api/public/face/checkin` is intentionally unauthenticated but recognize-only. It must not return `partnerId`, phone, code, confidence, candidate identities, or any token/session material.
 
 ## Network Security
 

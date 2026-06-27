@@ -1949,3 +1949,65 @@ TestSprite execution items:
 - [ ] PENDING: Try non-allowlisted customer/profile/payment/service direct URLs as investor and confirm 404/empty scoped results.
 - [ ] PENDING: Try write/refund/void endpoints as investor and confirm permission denial.
 - [ ] PENDING: Re-check NK live read-only smoke (`/version.json`, `/api/health`, normal login if approved) after migration because the DB is shared.
+
+---
+
+# TestSprite Plan: NK2 Public Face ID Kiosk + CompreFace Status Repair (2026-06-27, v0.32.40)
+
+Feature/edit name: NK2 public Face ID kiosk durability and provider-backed Face ID status
+
+Changed URLs and resources:
+- Frontend public route: `/checkin`
+- Backend public route: `POST /api/public/face/checkin`
+- Backend protected Face ID routes remain: `POST /api/face/register`, `POST /api/face/re-register`, `GET /api/face/status/:partnerId`
+- CompreFace client/provider: `GET /api/v1/recognition/faces?subject=<partnerId>` verifies saved examples.
+
+Data flow:
+- Desktop/customer profile registration still requires authenticated `customers.edit`.
+- In CompreFace mode, registration creates/uses subject `partners.id`, uploads the image, then verifies CompreFace returns at least one face example before updating `dbo.partners.face_subject_id` / `face_registered_at`.
+- Public `/checkin` posts only an image to the public check-in endpoint, which recognizes and returns only a greeting/no-match/multiple-count result.
+
+Roles affected:
+- Existing authenticated staff: same protected Face ID flow, but stale CompreFace rows now show unregistered instead of false success.
+- Public kiosk/phone user: can attempt Face ID check-in without login.
+- Admin/front desk: re-registers any customer whose DB subject exists but provider example count is zero.
+
+Expected behavior:
+
+| Visit / action | Expected result |
+|---|---|
+| Desktop registers a face on customer profile | API returns success only after CompreFace `/faces?subject=` reports at least one example. |
+| Customer has `face_subject_id` but CompreFace has zero examples | `GET /api/face/status/:partnerId` returns `registered: false`, `sampleCount: 0`, `lastRegisteredAt: null`. |
+| Phone opens `/checkin` | Public page renders without login and starts the camera flow. |
+| Phone opens `/checkin` on iOS/Safari | Camera startup requests the front camera first and falls back through iOS-friendly constraints instead of failing on `facingMode: exact`. |
+| Phone submits a matching face | Public API returns `{ ok: true, result: 'match', greeting }`; response contains no partner ID, phone, code, score, or candidate identity. |
+| Phone submits no-match face | Public API returns `{ ok: true, result: 'no_match' }`; page asks user to check in at the desk. |
+| Phone submits ambiguous face | Public API returns only `{ ok: true, result: 'multiple', candidates: <count> }`. |
+| Repeated public attempts exceed limit | API returns HTTP 429 with `reason: rate_limited`. |
+| NK live production checked after NK2 deploy | NK `/version.json` and container set remain unchanged. |
+
+Edge cases:
+- CompreFace subject create 409 (already exists) should continue to register examples.
+- CompreFace upload success but `/faces?subject=` returns zero examples must not update DB as registered.
+- Public route remains recognize-only and must never write appointment/customer/Face ID data.
+- `/checkin` must not import `useAuth`, navigate to `/customers/:id`, or call protected `/api/face/recognize`.
+
+Regressions:
+- Protected global Face ID button and customer profile registration still work.
+- Local provider (`FACE_RECOGNITION_PROVIDER=local`) still uses `dbo.customer_face_embeddings`.
+- `version.json` must report the Docker build commit instead of `unknown` when build args are passed.
+
+Setup data and login state:
+- Use one safe NK2 customer whose Face ID may be replaced.
+- Full phone proof requires real camera permissions on the phone browser.
+- No schema migration is required for this fix.
+
+TestSprite execution items:
+- [x] DONE 2026-06-27: Local API tests covered CompreFace example-count verification, stale provider status, public no-auth route, privacy-minimized response, and rate limiting.
+- [x] DONE 2026-06-27: Local frontend tests covered `/checkin` rendering without AuthProvider, front-camera startup, iOS-friendly camera constraints, playback-block error surfacing, and public Face ID API wrapper behavior.
+- [ ] PENDING: Deploy v0.32.40 to NK2 only, verify `/version.json` reports v0.32.40 and the deployed commit.
+- [ ] PENDING: Verify `https://nk2.2checkin.com/api/health` is healthy with `faceProvider: "compreface"`.
+- [ ] PENDING: Verify public route missing-image response returns HTTP 400 without auth.
+- [ ] PENDING: Capture screenshot of `https://nk2.2checkin.com/checkin`.
+- [ ] PENDING: Re-register the affected customer on desktop if status shows unregistered, then test phone `/checkin` with the same face.
+- [ ] PENDING: Verify NK live production version/container set remains unchanged after NK2 deploy.

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { recognizeFace, registerFace, getFaceStatus } from '../partners';
+import { recognizeFace, registerFace, getFaceStatus, publicFaceCheckIn } from '../partners';
 
 describe('Face Recognition API client', () => {
   const originalFetch = global.fetch;
@@ -227,6 +227,66 @@ describe('Face Recognition API client', () => {
       });
 
       await expect(getFaceStatus('unknown')).rejects.toThrow();
+    });
+  });
+
+  describe('publicFaceCheckIn', () => {
+    it('posts to the public endpoint without an Authorization header', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ ok: true, result: 'match', greeting: 'Kevin P.' }),
+      });
+
+      const result = await publicFaceCheckIn(new Blob(['image']));
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        'http://localhost:3002/api/public/face/checkin',
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.any(FormData),
+        }),
+      );
+      expect(mockFetch.mock.calls[0][1]).not.toHaveProperty('headers');
+      expect(result).toEqual({ ok: true, result: 'match', greeting: 'Kevin P.' });
+    });
+
+    it('throws ApiError with backend reason for public check-in errors', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 429,
+        json: async () => ({ ok: false, reason: 'rate_limited', message: 'Too fast' }),
+      });
+
+      await expect(publicFaceCheckIn(new Blob(['image']))).rejects.toMatchObject({
+        status: 429,
+        code: 'rate_limited',
+        message: 'Too fast',
+      });
+    });
+
+    it('rejects malformed success payloads', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ ok: true, result: 'unexpected' }),
+      });
+
+      await expect(publicFaceCheckIn(new Blob(['image']))).rejects.toMatchObject({
+        code: 'INVALID_FACE_CHECKIN_RESPONSE',
+      });
+    });
+
+    it('rejects malformed multiple-match success payloads', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ ok: true, result: 'multiple' }),
+      });
+
+      await expect(publicFaceCheckIn(new Blob(['image']))).rejects.toMatchObject({
+        code: 'INVALID_FACE_CHECKIN_RESPONSE',
+      });
     });
   });
 

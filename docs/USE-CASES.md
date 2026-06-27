@@ -66,7 +66,8 @@ When a use case is created or materially edited, add one compact `Traceability` 
   3. Waits for high-quality sample (size, lighting, angle).
   4. Sends image to `POST /api/face/register` with `partnerId` and image buffer.
   5. Backend uses the configured Face ID provider: local SFace stores 128-dim embeddings in `dbo.customer_face_embeddings`; CompreFace stores examples under subject `partners.id`.
-  6. Updates `partners.face_subject_id` and `face_registered_at`.
+  6. In CompreFace mode, verifies that CompreFace now returns at least one face example for the subject.
+  7. Updates `partners.face_subject_id` and `face_registered_at`.
 - **Alternate flows:**
   - **AF-1 No face detected:** Camera stays open; shows "Không phát hiện khuôn mặt" / "Face not detected"; only explicit close/cancel dismisses capture.
   - **AF-2 Face too small:** Quality feedback "Xin vui lòng tiến lại gần".
@@ -160,6 +161,27 @@ When a use case is created or materially edited, add one compact `Traceability` 
 
 ---
 
+## UC-007A — Public Face ID Kiosk Check-In
+
+- **Actor:** Patient / Front Desk phone or tablet
+- **Trigger:** Open public `/checkin` and look at the camera.
+- **Preconditions:** Camera available; customer has provider-verified Face ID registration (UC-003).
+- **Main flow:**
+  1. Page opens without login and starts front-camera capture using iOS-friendly camera constraints.
+  2. Frontend posts image to `POST /api/public/face/checkin`.
+  3. Backend runs recognize-only Face ID with the configured provider.
+  4. If exactly one high-confidence match exists, API returns a minimal greeting only.
+  5. Page shows success briefly, then resets for the next customer.
+- **Alternate flows:**
+  - **AF-1 No match:** API returns `{ result: 'no_match' }`; page tells customer to check in at the desk.
+  - **AF-2 Multiple candidates:** API returns only candidate count; page tells customer to check in at the desk.
+  - **AF-3 Abuse/repeat attempts:** API returns HTTP 429 and the page shows the retry message.
+- **Postconditions:** No database write and no session/token is issued. Appointment arrival remains a separate staff-confirmed workflow unless a later product decision changes it.
+- **Invariants touched:** INV-SCHEMA-006A (CompreFace provider-backed status), public Face ID privacy boundary.
+- **Traceability:** Related WF: WF-007. Contracts/routes: `POST /api/public/face/checkin`. Tests: `api/src/routes/__tests__/faceCheckin.test.js`, `website/src/pages/CheckIn/CheckIn.test.tsx`, `website/src/lib/api/__tests__/faceRecognition.test.ts`, `website/src/components/shared/FaceCaptureModal.test.tsx`. Product-map domains: `customers-partners`, `integrations`.
+
+---
+
 ## UC-008 — Check In Patient Manually
 
 - **Actor:** Receptionist
@@ -172,8 +194,6 @@ When a use case is created or materially edited, add one compact `Traceability` 
   4. UI moves card to "Hôm nay" section.
 - **Postconditions:** Same as UC-007.
 - **Invariants touched:** None additional.
-
----
 
 ## UC-009 — Record Service Delivered (Convert Appointment)
 

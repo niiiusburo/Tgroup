@@ -14,6 +14,21 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.40] — 2026-06-27
+### Added
+- **Public NK2 Face ID kiosk:** `/checkin` is now a committed public phone/tablet route backed by `POST /api/public/face/checkin`, with no JWT requirement, recognize-only behavior, per-IP rate limits, and privacy-minimized responses. — @agent — UC-007A public Face ID kiosk.
+
+### Fixed
+- **CompreFace Face ID status is provider-backed:** Registration verifies CompreFace saved at least one face example before updating `partners.face_registered_at`, and status now reports unregistered when the DB has `face_subject_id` but CompreFace has zero examples. — @agent — INV-SCHEMA-006A.
+- **Phone Face ID camera startup:** The public `/checkin` kiosk starts on the front camera and the shared capture engine now tries iOS-friendly `facingMode: ideal` constraints before exact constraints, preventing Safari camera startup from failing before recognition. — @agent — UC-007A.
+- **Vite release metadata honors Docker build args:** `website/vite.config.ts` now prefers `GIT_SHA` / `GIT_BRANCH` so `/version.json` can show the deployed commit in NK2 builds. — @agent — production proofability.
+
+### Security
+- Public Face ID check-in returns only a greeting, no-match, or ambiguous count; it does not expose `partnerId`, phone, customer code, confidence score, candidate identities, or tokens. — @agent — public kiosk privacy boundary.
+
+### Tested
+- `cd api && JWT_SECRET=test npx jest src/services/__tests__/comprefaceClient.test.js src/services/__tests__/comprefaceFaceProvider.test.js src/routes/__tests__/faceCheckin.test.js tests/faceRecognition.test.js --runInBand`; `cd website && npx vitest run src/pages/CheckIn/CheckIn.test.tsx src/lib/api/__tests__/faceRecognition.test.ts src/components/shared/FaceCaptureModal.test.tsx`; `npm --prefix website run build`; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off <changed Face ID paths>`; `bash scripts/verify-docs.sh`; `npm run verify:governance`. — @agent
+
 ## [0.32.39] — 2026-06-27
 ### Added
 - **NK2 investor customer scoping:** Investors remain normal employee accounts in `dbo.partners`, but the `investor` permission group plus `dbo.investor_clients` allowlist now scopes customer, appointment, payment, service, and report reads to explicitly assigned customers. The seeded investor group is view-only; write/refund/void permissions are not granted. — @agent — preserves INV-008 and new INV-021.

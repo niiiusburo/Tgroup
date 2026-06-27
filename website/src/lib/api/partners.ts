@@ -1,4 +1,4 @@
-import { apiFetch, type PaginatedResponse } from './core';
+import { ApiError, API_URL, apiFetch, type PaginatedResponse } from './core';
 
 // ─── Partners (Customers) ─────────────────────────────────────────
 
@@ -195,6 +195,11 @@ export interface FaceStatusResult {
   lastRegisteredAt: string | null;
 }
 
+export type PublicFaceCheckInResult =
+  | { ok: true; result: 'match'; greeting: string | null }
+  | { ok: true; result: 'multiple'; candidates: number }
+  | { ok: true; result: 'no_match' };
+
 export function recognizeFace(image: Blob) {
   const formData = new FormData();
   formData.append('image', image, 'face.jpg');
@@ -228,4 +233,43 @@ export function reregisterFace(partnerId: string, images: readonly Blob[], sourc
     method: 'POST',
     body: formData as unknown as Record<string, unknown>,
   });
+}
+
+export async function publicFaceCheckIn(image: Blob): Promise<PublicFaceCheckInResult> {
+  const formData = new FormData();
+  formData.append('image', image, 'face.jpg');
+  const res = await fetch(`${API_URL}/public/face/checkin`, {
+    method: 'POST',
+    body: formData,
+  });
+  const body = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    throw new ApiError({
+      status: res.status,
+      code: typeof body?.reason === 'string' ? body.reason : undefined,
+      message: typeof body?.message === 'string' ? body.message : 'Face check-in failed',
+      body,
+    });
+  }
+
+  const isValidResult =
+    Boolean(body) &&
+    body.ok === true &&
+    (
+      (body.result === 'match' && (typeof body.greeting === 'string' || body.greeting === null)) ||
+      (body.result === 'multiple' && typeof body.candidates === 'number') ||
+      body.result === 'no_match'
+    );
+
+  if (!isValidResult) {
+    throw new ApiError({
+      status: res.status,
+      code: 'INVALID_FACE_CHECKIN_RESPONSE',
+      message: 'Invalid face check-in response',
+      body,
+    });
+  }
+
+  return body as PublicFaceCheckInResult;
 }

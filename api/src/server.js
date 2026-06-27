@@ -49,6 +49,7 @@ const placesRoutes = require('./routes/places');
 const bankSettingsRoutes = require('./routes/bankSettings');
 const externalCheckupsRoutes = require('./routes/externalCheckups');
 const faceRecognitionRoutes = require('./routes/faceRecognition');
+const faceCheckinRoutes = require('./routes/faceCheckin');
 const feedbackRoutes = require('./routes/feedback');
 const reportsRoutes = require('./routes/reports');
 const telemetryRoutes = require('./routes/telemetry');
@@ -130,6 +131,7 @@ const PUBLIC_PATHS = new Set([
   '/api/IpAccess/check',
   '/api/ipaccess/check',
   '/api/health',
+  '/api/public/face/checkin',
 ]);
 
 app.use('/api', (req, res, next) => {
@@ -177,6 +179,7 @@ app.use('/api/WebsitePages', websitePagesRoutes);
 app.use('/api/settings', bankSettingsRoutes);
 app.use('/api/ExternalCheckups', externalCheckupsRoutes);
 app.use('/api/face', faceRecognitionRoutes);
+app.use('/api/public/face', faceCheckinRoutes);
 app.use('/api/Feedback', feedbackRoutes);
 app.use('/api/Reports', reportsRoutes);
 app.use('/api/telemetry', telemetryRoutes);
