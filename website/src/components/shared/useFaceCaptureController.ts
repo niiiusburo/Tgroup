@@ -29,8 +29,8 @@ const ADAPTIVE_THRESHOLD_RELAX_MEDIUM = 0.15;
 const ADAPTIVE_THRESHOLD_RELAX_DEEP = 0.25;
 const ADAPTIVE_THRESHOLD_FLOOR_MEDIUM = 0.45;
 const ADAPTIVE_THRESHOLD_FLOOR_DEEP = 0.35;
-const FORCE_CAPTURE_TICKS = 60; // ~15.6s
-const FORCE_CAPTURE_MIN_SCORE = 0.15;
+const FORCE_CAPTURE_TICKS = 30; // ~8s — was 60; iOS UX stalls were perceived as broken
+const FORCE_CAPTURE_MIN_SCORE = 0.25; // was 0.15; raised to keep junk frames out of compreface
 
 interface UseFaceCaptureControllerOptions {
   readonly isOpen: boolean;
@@ -174,8 +174,19 @@ export function useFaceCaptureController({
           video.srcObject = stream;
           try {
             await video.play();
-          } catch {
-            // autoplay + playsInline cover browsers that block play().
+          } catch (playErr) {
+            // iOS low-power mode rejects play() with NotAllowedError/AbortError.
+            // Without this, videoWidth stays 0 and the user stares at a black
+            // screen forever. Surface it as a real error so the kiosk shows
+            // "Cannot access camera" instead of failing silently.
+            const name = playErr instanceof Error ? playErr.name : 'PlayError';
+            if (name === 'NotAllowedError' || name === 'AbortError') {
+              if (mounted) setError('Camera blocked by browser (Low Power Mode?). Disable Low Power and reload.');
+              // Tag with a recognizable substring so the kiosk telemetry picks it up.
+              console.error('[FaceCapture] video.play() rejected:', name, playErr);
+            }
+            // NotSupportedError or other: ignore (some browsers need user gesture,
+            // which the kiosk's tap-to-capture provides).
           }
         }
       } catch {

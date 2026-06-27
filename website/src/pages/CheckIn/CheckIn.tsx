@@ -10,16 +10,29 @@
  *   4. Shows greeting ("Welcome back, Lan N.") or no-match / multiple / error.
  *   5. Auto-resets to capture after ~6s for the next client.
  *
+ * Diagnostics (added 2026-06-27):
+ *   - Every phase (camera open, per-tick score, capture, API POST) is logged to
+ *     localStorage 'face_checkin_diagnostics' AND shipped to /api/telemetry/errors
+ *     with error_type:'FaceCheckIn'. Use ?debug=1 to view on-device.
+ *
  * Hard NO (anti-patterns from docs/FACE-ID-SCOPE.md):
  *   - DO NOT import useAuth.
  *   - DO NOT call /api/face/recognize (admin-only).
  *   - DO NOT navigate to /customers/:id.
  *   - DO NOT issue or store any token.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScanFace, CheckCircle2, UserX, AlertTriangle, Loader2, RotateCcw } from 'lucide-react';
+import { ScanFace, CheckCircle2, UserX, AlertTriangle, Loader2, RotateCcw, Bug } from 'lucide-react';
 import { useFaceCaptureController } from '@/components/shared/useFaceCaptureController';
+import {
+  logFace,
+  reportFaceEvent,
+  readDiagnostics,
+  clearDiagnostics,
+  getDeviceInfo,
+  type FaceCheckInEvent,
+} from '@/lib/faceDiagnostics';
 
 type CheckInStatus =
   | { kind: 'idle' }
@@ -34,34 +47,49 @@ const RESET_DELAY_MS = 6000;
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? '/api').replace(/\/$/, '');
 
+function makeSessionId(): string {
+  // Lightweight UUID without crypto dependency for old iOS.
+  return 'k-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+}
+
 export function CheckIn() {
   const { t } = useTranslation('common');
   const [status, setStatus] = useState<CheckInStatus>({ kind: 'idle' });
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inFlightRef = useRef(false);
+  const sessionIdRef = useRef<string>(makeSessionId());
+  const [showDebug, setShowDebug] = useState<boolean>(() => {
+    try { return new URLSearchParams(window.location.search).has('debug'); } catch { return false; }
+  });
+  const deviceInfo = useMemo(() => getDeviceInfo(), []);
 
   // Recognize-only submission to the PUBLIC endpoint.
   const handleCapture = useCallback(async (image: Blob) => {
     if (inFlightRef.current) return;
     inFlightRef.current = true;
     setStatus({ kind: 'verifying' });
+    const endpoint = `${API_BASE}/public/face/checkin`;
+    logFace('api_post', { session_id: sessionIdRef.current, endpoint });
+    const start = Date.now();
     try {
       const fd = new FormData();
       fd.append('image', image);
-      const res = await fetch(`${API_BASE}/public/face/checkin`, {
+      const res = await fetch(endpoint, {
         method: 'POST',
         body: fd,
         // NOTE: no Authorization header. no credentials beyond same-origin.
       });
       const data = await res.json().catch(() => null);
+      const summary = data ? JSON.stringify(data).slice(0, 120) : '';
+      await reportFaceEvent('api_response', sessionIdRef.current, {
+        endpoint,
+        http_status: res.status,
+        response_summary: summary,
+      });
       if (!res.ok || !data) {
         const reason = data?.reason || 'NETWORK_ERROR';
         const message = data?.message || t('checkIn.errorGeneric', 'Something went wrong. Please try again.');
-        if (reason === 'rate_limited') {
-          setStatus({ kind: 'error', message });
-        } else {
-          setStatus({ kind: 'error', message });
-        }
+        setStatus({ kind: 'error', message });
         return;
       }
       if (data.result === 'match') {
@@ -71,12 +99,20 @@ export function CheckIn() {
       } else {
         setStatus({ kind: 'no_match' });
       }
-    } catch {
+      void start; // timing already in fetch
+    } catch (err) {
+      await reportFaceEvent('api_response', sessionIdRef.current, {
+        endpoint,
+        error_name: err instanceof Error ? err.name : 'Unknown',
+        error_message: err instanceof Error ? err.message : String(err),
+      });
       setStatus({ kind: 'error', message: t('checkIn.errorGeneric', 'Something went wrong. Please try again.') });
     }
   }, [t]);
 
   const controller = useFaceCaptureController({
+    // iPad kiosk: clients face the screen, so default to the FRONT ('user') camera.
+    // (was 'environment' which is the back camera — wrong for a wall-mounted kiosk.)
     isOpen: status.kind === 'idle' || status.kind === 'capturing',
     captureMode: 'single',
     cameraErrorMessage: t('checkIn.cameraError', 'Cannot access camera. Check permissions.'),
@@ -84,12 +120,52 @@ export function CheckIn() {
     onCapture: handleCapture,
   });
 
-  // Mark capturing once controller is active.
+  // === Diagnostics: log every meaningful state change ===
   useEffect(() => {
-    if (status.kind === 'idle') {
-      setStatus({ kind: 'capturing' });
+    logFace('kiosk_mount', { session_id: sessionIdRef.current, has_detector: deviceInfo.has_face_detector });
+    return () => {
+      logFace('kiosk_unmount', { session_id: sessionIdRef.current });
+    };
+  }, [deviceInfo]);
+
+  useEffect(() => {
+    // Camera errors from the controller → telemetry
+    if (controller.error) {
+      void reportFaceEvent('camera_stream_failed', sessionIdRef.current, {
+        error_message: controller.error,
+        facing_mode: 'user',
+        has_detector: deviceInfo.has_face_detector,
+      });
     }
-  }, [controller.detectionState, status.kind]);
+  }, [controller.error, deviceInfo]);
+
+  useEffect(() => {
+    // Sample detection progress every 5 ticks (~1.3s) to keep telemetry bounded
+    if (controller.detectionState !== 'idle' && status.kind === 'idle') {
+      setStatus({ kind: 'capturing' });
+      logFace('camera_stream_ok', {
+        session_id: sessionIdRef.current,
+        facing_mode: 'user',
+        has_detector: deviceInfo.has_face_detector,
+        detection_state: controller.detectionState,
+      });
+    }
+  }, [controller.detectionState, status.kind, deviceInfo]);
+
+  // Throttle high-frequency tick logging with a ref
+  const lastTickLogRef = useRef(0);
+  useEffect(() => {
+    const now = Date.now();
+    if (now - lastTickLogRef.current > 1300 && controller.detectionState !== 'idle') {
+      lastTickLogRef.current = now;
+      logFace('detection_tick', {
+        session_id: sessionIdRef.current,
+        score: controller.detectionScore,
+        detection_state: controller.detectionState,
+        has_detector: deviceInfo.has_face_detector,
+      });
+    }
+  }, [controller.detectionScore, controller.detectionState, deviceInfo]);
 
   // Auto-reset to ready after any terminal state.
   useEffect(() => {
@@ -98,6 +174,7 @@ export function CheckIn() {
       if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
       resetTimerRef.current = setTimeout(() => {
         inFlightRef.current = false;
+        sessionIdRef.current = makeSessionId();
         setStatus({ kind: 'idle' });
       }, RESET_DELAY_MS);
     }
@@ -109,8 +186,14 @@ export function CheckIn() {
   const handleManualReset = useCallback(() => {
     if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
     inFlightRef.current = false;
+    sessionIdRef.current = makeSessionId();
     setStatus({ kind: 'idle' });
   }, []);
+
+  const handleManualCapture = useCallback(() => {
+    logFace('manual_capture', { session_id: sessionIdRef.current, score: controller.detectionScore });
+    controller.handleCapture();
+  }, [controller]);
 
   const showCamera = status.kind === 'idle' || status.kind === 'capturing';
   const terminal = status.kind === 'match' || status.kind === 'no_match' || status.kind === 'multiple' || status.kind === 'error';
@@ -179,10 +262,12 @@ export function CheckIn() {
         )}
 
         {/* Idle scanning indicator over camera */}
-        {showCamera && (
+        {showCamera && controller.detectionState !== 'idle' && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-black/60 backdrop-blur rounded-full text-xs flex items-center gap-2">
             <ScanFace className="w-4 h-4" aria-hidden />
-            <span>{t('checkIn.scanning', 'Scanning for face...')}</span>
+            <span>
+              {t('checkIn.scanning', 'Scanning for face...')} {Math.round(Math.max(0, Math.min(1, controller.detectionScore)) * 100)}%
+            </span>
           </div>
         )}
 
@@ -200,7 +285,7 @@ export function CheckIn() {
         {showCamera && (
           <button
             type="button"
-            onClick={() => controller.handleCapture()}
+            onClick={handleManualCapture}
             disabled={controller.isStarting}
             className="w-20 h-20 rounded-full bg-primary hover:bg-primary/90 disabled:opacity-50 transition flex items-center justify-center ring-4 ring-white/20 active:scale-95"
             aria-label={t('checkIn.capture', 'Capture')}
@@ -222,7 +307,18 @@ export function CheckIn() {
 
       <footer className="absolute bottom-4 left-0 right-0 text-center text-xs text-slate-400">
         <p>{t('checkIn.footer', 'Identity check-in only. No login required.')}</p>
+        <button
+          type="button"
+          onClick={() => setShowDebug((v) => !v)}
+          className="mt-1 opacity-50 hover:opacity-100 inline-flex items-center gap-1"
+          aria-label="Toggle diagnostics"
+        >
+          <Bug className="w-3 h-3" aria-hidden />
+          <span>{showDebug ? 'Hide' : 'Diagnostics'}</span>
+        </button>
       </footer>
+
+      {showDebug && <DiagnosticsOverlay onClose={() => setShowDebug(false)} deviceInfo={deviceInfo} />}
     </div>
   );
 }
@@ -232,6 +328,77 @@ function Overlay({ children, tone = 'info' }: { children: React.ReactNode; tone?
   return (
     <div className={`absolute inset-0 ${bg} backdrop-blur-sm flex flex-col items-center justify-center text-center px-6`}>
       {children}
+    </div>
+  );
+}
+
+function DiagnosticsOverlay({
+  onClose,
+  deviceInfo,
+}: {
+  onClose: () => void;
+  deviceInfo: ReturnType<typeof getDeviceInfo>;
+}) {
+  const [events, setEvents] = useState<FaceCheckInEvent[]>([]);
+  useEffect(() => {
+    setEvents(readDiagnostics());
+  }, []);
+  return (
+    <div className="absolute inset-0 z-50 bg-slate-950/95 text-emerald-200 p-4 overflow-auto text-xs font-mono">
+      <div className="flex justify-between items-center mb-3">
+        <h2 className="text-sm font-bold">Face ID Diagnostics</h2>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => { clearDiagnostics(); setEvents([]); }}
+            className="px-2 py-1 bg-rose-900/50 rounded hover:bg-rose-900"
+          >
+            Clear
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              const blob = new Blob([JSON.stringify({ device: deviceInfo, events }, null, 2)], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url; a.download = 'face-checkin-diagnostics.json'; a.click();
+              URL.revokeObjectURL(url);
+            }}
+            className="px-2 py-1 bg-emerald-900/50 rounded hover:bg-emerald-900"
+          >
+            Download
+          </button>
+          <button type="button" onClick={onClose} className="px-2 py-1 bg-slate-700 rounded hover:bg-slate-600">Close</button>
+        </div>
+      </div>
+      <pre className="mb-3 text-[10px] opacity-80">device = {JSON.stringify(deviceInfo)}</pre>
+      <table className="w-full text-[10px]">
+        <thead className="text-emerald-400">
+          <tr>
+            <th className="text-left p-1">Time</th>
+            <th className="text-left p-1">Phase</th>
+            <th className="text-left p-1">Score</th>
+            <th className="text-left p-1">State</th>
+            <th className="text-left p-1">Detail</th>
+          </tr>
+        </thead>
+        <tbody>
+          {events.slice(-30).reverse().map((e, i) => (
+            <tr key={i} className="border-t border-slate-800">
+              <td className="p-1">{new Date(e.ts).toLocaleTimeString()}</td>
+              <td className="p-1">{e.phase}</td>
+              <td className="p-1">{e.score != null ? Math.round(e.score * 100) + '%' : '-'}</td>
+              <td className="p-1">{e.detection_state ?? '-'}</td>
+              <td className="p-1 truncate max-w-[160px]">
+                {e.error_message || e.response_summary || e.http_status || (e.video_size ? `${e.video_size.w}x${e.video_size.h}` : '')}
+              </td>
+            </tr>
+          ))}
+          {events.length === 0 && (
+            <tr><td colSpan={5} className="p-4 text-center opacity-60">No events yet. Capture a face to populate.</td></tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }

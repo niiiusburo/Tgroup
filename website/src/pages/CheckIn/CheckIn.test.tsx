@@ -1,5 +1,5 @@
 /**
- * CheckIn page test — verifies the public kiosk invariant.
+ * CheckIn page test — verifies the public kiosk invariant + diagnostics wiring.
  *
  * Per docs/FACE-ID-SCOPE.md:
  *  - Page renders WITHOUT AuthProvider (public route).
@@ -9,8 +9,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-// NOTE: react-i18next is globally mocked by src/test/setup.ts (useTranslation -> translateForTest).
-// No I18nextProvider wrapper needed — CheckIn.tsx's useTranslation() will pick up the mock.
 
 // Stub the camera controller so we don't need real getUserMedia.
 vi.mock('@/components/shared/useFaceCaptureController', () => ({
@@ -28,6 +26,15 @@ vi.mock('@/components/shared/useFaceCaptureController', () => ({
     handleCapture: vi.fn(),
     handleSwitchCamera: vi.fn(),
   }),
+}));
+
+// Stub the diagnostics module so we don't hit localStorage / fetch in unit tests.
+vi.mock('@/lib/faceDiagnostics', () => ({
+  logFace: vi.fn(),
+  reportFaceEvent: vi.fn(async () => false),
+  readDiagnostics: vi.fn(() => []),
+  clearDiagnostics: vi.fn(),
+  getDeviceInfo: vi.fn(() => ({ ios: false, safari: false, has_media_devices: true, has_face_detector: true })),
 }));
 
 // Mock fetch so we never hit the network.
@@ -49,11 +56,10 @@ describe('CheckIn kiosk page (public, no-auth)', () => {
     fetchMock.mockReset();
   });
 
-  it('renders title + subtitle without crashing (no AuthProvider needed)', async () => {
+  it('renders title without crashing (no AuthProvider needed)', async () => {
     renderCheckIn();
-    // Title from i18n key checkIn.title — accepts EN "Check In" or VI "Điểm danh"
     await waitFor(() => {
-      const titles = screen.getAllByText(/check in|điểm danh/i);
+      const titles = screen.getAllByText(/check in/i);
       expect(titles.length).toBeGreaterThan(0);
     });
   });
@@ -61,7 +67,6 @@ describe('CheckIn kiosk page (public, no-auth)', () => {
   it('renders the kiosk without an AuthProvider (public route invariant)', async () => {
     const { container } = renderCheckIn();
     await waitFor(() => {
-      // Page container must be present.
       expect(container.firstChild).not.toBeNull();
       // No login form / token / useAuth artifact leaked into the DOM.
       expect(container.textContent).not.toMatch(/sign in|log in|password|token|jwt/i);

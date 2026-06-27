@@ -27,7 +27,19 @@ export function stopStream(stream: MediaStream | null) {
 }
 
 export async function getCameraStream(facingMode: CameraFacingMode) {
+  // iOS Safari rejects facingMode:{exact} more aggressively than desktop Chrome,
+  // and on a kiosk the front ('user') camera is the one clients face. Try
+  // {ideal} first (iOS-friendly), fall back to {exact} (Chrome honors exact),
+  // then {video:true}. Each failure is logged by the caller via faceDiagnostics.
   const constraints: MediaStreamConstraints[] = [
+    {
+      video: {
+        facingMode: { ideal: facingMode },
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+      },
+      audio: false,
+    },
     {
       video: {
         facingMode: { exact: facingMode },
@@ -37,11 +49,9 @@ export async function getCameraStream(facingMode: CameraFacingMode) {
       audio: false,
     },
     {
-      video: {
-        facingMode: { ideal: facingMode },
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-      },
+      // Last resort: any camera. Better to capture from the "wrong" side than
+      // to stare at a black screen on an iPad.
+      video: { width: { ideal: 1280 }, height: { ideal: 720 } },
       audio: false,
     },
     { video: true, audio: false },
