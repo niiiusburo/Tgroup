@@ -277,7 +277,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | **R** | `permissions.js`, `auth.js` middleware, `auth.js` route |
 | **E** | Via `/api/Permissions/groups` and `/api/Permissions/resolve/*` |
 | **UI** | PermissionMatrix, PermissionBoard |
-| **Risk** | **High** — permission strings are free text; typos in backend seeding or frontend checks cause silent 403s. |
+| **Risk** | **High** — permission strings are free text; typos in backend seeding or frontend checks cause silent 403s. Investor seed may include `customers.view_all` only as read-list access because customer rows remain scoped by `dbo.investor_clients`. |
 
 ### dbo.employee_permissions
 
@@ -319,7 +319,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | **R** | `permissionService.resolveInvestorScope()` and customer-touching route/report filters |
 | **E** | Indirect through customer, appointment, payment, service, dashboard, and report endpoints for users in the `investor` permission group |
 | **UI** | Investor customer assignment UI is not shipped in this branch; allowlist rows are deployment/admin data |
-| **Risk** | **High** — NK and NK2 currently share `tdental_demo`; migration is additive but physically lands in the shared DB. Empty allowlists must return no customer data for investor users. |
+| **Risk** | **High** — NK and NK2 currently share `tdental_demo`; migration is additive but physically lands in the shared DB. Empty allowlists must return no customer data for investor users, including when the frontend has `customers.view_all` for list rendering. |
 
 ---
 

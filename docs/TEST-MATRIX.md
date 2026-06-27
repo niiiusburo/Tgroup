@@ -35,6 +35,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | `api/src/routes/auth.js` | Same as above + `api/tests/authInvestorLogin.test.js`, `website/e2e/auth-setup.spec.ts` | Login payload shape changes break frontend AuthContext; NK2 investor credential fallback must not create production-login-capable partner passwords. |
 | `api/src/services/permissionService.js` | `api/tests/readRoutePermissions.test.js`, `api/src/services/__tests__/permissionService.test.js`, `api/tests/investorIdorScoping.test.js`, `api/tests/investorScopeRoutePermissions.test.js`, `website/e2e/permissions-*.spec.ts` | Effective permission divergence causes 403s; investor employees must stay scoped to `dbo.investor_clients` and view-only routes. |
 | `website/src/contexts/AuthContext.tsx` | `website/e2e/auth-setup.spec.ts`, `website/e2e/permissions-check.spec.ts` | Auth state hydration affects every protected page. |
+| `website/src/App.tsx` (ProtectedRoute/layout guards) | `website/src/__tests__/App.route-permissions.test.tsx`, all E2E specs that navigate protected routes | Parent layout guards must not require `overview.view` before child routes check their own permissions; investor users need customer/report routes without dashboard access. |
 | `website/src/constants/index.ts` (ROUTE_PERMISSIONS) | All E2E specs that navigate protected routes | Route guard changes may hide/show pages incorrectly. |
 
 ### API & Frontend Bridge

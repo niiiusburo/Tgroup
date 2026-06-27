@@ -83,7 +83,7 @@ Affected endpoint families:
 - `/api/Payments`, `/api/AccountPayments`, `/api/Receipts`, `/api/MonthlyPlans`
 - `/api/Reports`, `/api/DashboardReports`, `/api/Commissions`
 
-Contract invariant: non-investor employees keep existing unscoped behavior. Investor employees with an empty allowlist receive empty/404 scoped results. The seeded investor group is view-only and does not grant customer, appointment, payment, refund, void, or monthly-plan write permissions.
+Contract invariant: non-investor employees keep existing unscoped behavior. Investor employees with an empty allowlist receive empty/404 scoped results. The seeded investor group is view/list-only, including `customers.view_all` for the scoped customer page, and does not grant customer, appointment, payment, refund, void, or monthly-plan write permissions.
 
 ## Account (`/api/Account`)
 

@@ -31,6 +31,7 @@ DO $$
 DECLARE
   inv_perms TEXT[] := ARRAY[
     'customers.view',
+    'customers.view_all',
     'appointments.view',
     'payment.view',
     'services.view','reports.view','calendar.view','locations.view'

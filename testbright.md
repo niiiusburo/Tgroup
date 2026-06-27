@@ -17,6 +17,7 @@ Feature/edit name: NK2 investor credential activation with production-auth isola
 Changed URLs and API routes:
 - `POST /api/Auth/login`
 - `GET /api/Auth/me`
+- `GET /customers` frontend route guard
 - Existing investor-scoped customer, appointment, payment, service, dashboard, and report routes.
 
 Affected data flows:
@@ -31,7 +32,7 @@ User roles:
 Happy paths:
 - Investor credential logs in on `https://nk2.2checkin.com`.
 - `GET /api/Auth/me` returns the `investor` permission group and only view permissions.
-- Investor customer list/profile/report routes are scoped to `dbo.investor_clients`.
+- Investor customer list/profile/report routes are scoped to `dbo.investor_clients`; `customers.view_all` only allows listing that scoped allowlist.
 
 Edge cases:
 - Same credential fails on `https://nk.2checkin.com/api/Auth/login`.
@@ -42,17 +43,19 @@ Regressions:
 - Normal active staff login continues to use `partners.password_hash`.
 - NK production `/version.json` and `/api/health` stay unchanged/healthy.
 - Investor group remains view-only; no customer/payment/appointment write permissions are granted.
+- The `/` dashboard still requires `overview.view`, but child routes must use their own route permissions.
 
 Setup/login state:
 - Use the generated NK2 investor username/password from the deployment recap.
 - Keep the mapped `dbo.partners` identity inactive or without `partners.password_hash` when NK production lacks investor filters.
 
 TestSprite execution items:
-- [ ] PENDING: Verify NK2 investor login succeeds and returns the `investor` permission group.
-- [ ] PENDING: Verify the same credential fails on NK production login.
-- [ ] PENDING: Verify `resolveInvestorScope()` returns the expected allowlisted customer IDs.
-- [ ] PENDING: Verify investor group permissions are view-only with no unexpected write permissions.
-- [ ] PENDING: Verify NK production version and health remain unchanged after activation.
+- [x] PASS: Verify NK2 investor login succeeds and returns the `investor` permission group - live `POST https://nk2.2checkin.com/api/Auth/login` returned 200; `GET /api/Auth/me` returned group `investor`.
+- [x] PASS: Verify NK2 investor can open `/customers` with customer view/list permissions and without `overview.view` - screenshot `output/playwright/nk2-investor-activation-20260627/nk2-investor-customers-mobile-954ae5c.png` shows the customer list instead of access denied.
+- [x] PASS: Verify the same credential fails on NK production login - live `POST https://nk.2checkin.com/api/Auth/login` returned 401 `Invalid email or password`.
+- [x] PASS: Verify `resolveInvestorScope()` returns the expected allowlisted customer IDs - live NK2 `/api/Partners?limit=20` returned `totalItems: 10` and `itemCount: 10`, matching the allowlist count.
+- [x] PASS: Verify investor group permissions are view-only with no unexpected write permissions - live `/api/Auth/me` returned only view/list permissions: customers, appointments, payment, services, reports, calendar, locations.
+- [x] PASS: Verify NK production version and health remain unchanged after activation - `https://nk.2checkin.com/version.json` stayed `0.32.44` / `ff65634`; `/api/health` stayed healthy.
 
 ---
 

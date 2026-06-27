@@ -52,7 +52,7 @@ Staff → /login form → POST /api/Auth/login
 | Doctor | `appointments.view`, `appointments.edit`, `services.edit` | Clinical workflows only |
 | Receptionist | `appointments.add`, `appointments.edit`, `customers.view`, `customers.add`, `payment.add` | Front-desk operations |
 | Cashier | `payment.add`, `payment.view`, `customers.view` | Money collection |
-| Investor | `customers.view`, `appointments.view`, `payment.view`, `services.view`, `reports.view`, `calendar.view`, `locations.view` | Normal employee identity with read-only customer allowlist in `dbo.investor_clients` |
+| Investor | `customers.view`, `customers.view_all`, `appointments.view`, `payment.view`, `services.view`, `reports.view`, `calendar.view`, `locations.view` | Normal employee identity with read-only customer allowlist in `dbo.investor_clients`; list permission is still backend-scoped |
 
 ### Permission Resolution Order
 

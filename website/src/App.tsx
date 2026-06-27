@@ -90,7 +90,7 @@ function AuthLoading() {
  */
 interface ProtectedRouteProps {
   readonly children: React.ReactNode;
-  readonly path: string;
+  readonly path?: string;
 }
 
 function ProtectedRoute({ children, path }: ProtectedRouteProps) {
@@ -104,7 +104,7 @@ function ProtectedRoute({ children, path }: ProtectedRouteProps) {
     return <Navigate to="/ctv" replace />;
   }
 
-  const requiredPermission = ROUTE_PERMISSIONS[path];
+  const requiredPermission = path ? ROUTE_PERMISSIONS[path] : undefined;
   if (requiredPermission && !hasPermission(requiredPermission)) {
     return <AccessDenied />;
   }
@@ -161,13 +161,20 @@ function App() {
           <Route
             path="/"
             element={
-              <ProtectedRoute path="/">
+              <ProtectedRoute>
                 <Layout />
               </ProtectedRoute>
             }
           >
             {/* @crossref:route[path="/", component=Overview] */}
-            <Route index element={<Overview />} />
+            <Route
+              index
+              element={
+                <ProtectedRoute path={ROUTES.OVERVIEW}>
+                  <Overview />
+                </ProtectedRoute>
+              }
+            />
 
             {/* @crossref:route[path="/calendar", component=Calendar] */}
             <Route

@@ -367,7 +367,7 @@ erDiagram
 
 **Indexes:** `idx_investor_clients_investor` (partial where `is_visible = true`), `idx_investor_clients_partner`.
 
-**Note:** Investors are employee identities in `dbo.partners` assigned to the `investor` permission group. This allowlist is read by `resolveInvestorScope()` and must fail closed when empty.
+**Note:** Investors are employee identities in `dbo.partners` assigned to the `investor` permission group. This allowlist is read by `resolveInvestorScope()` and must fail closed when empty. The seeded group may include `customers.view_all` only as a read-list permission; backend queries still constrain visible customers to `dbo.investor_clients`.
 
 ---
 

@@ -442,7 +442,7 @@ When a use case is created or materially edited, add one compact `Traceability` 
 
 - **Actor:** Investor employee
 - **Trigger:** Investor logs in and opens customer, service, payment, appointment, or report surfaces.
-- **Preconditions:** Employee identity row exists in `dbo.partners` with `employee=true`; `partners.tier_id` points to permission group `investor`; NK2 credential rows may live in `dbo.investor_accounts` when the shared DB must not expose a production-capable `partners.password_hash`; `dbo.investor_clients` contains the customers they may see; actor has only view permissions from the seeded investor group.
+- **Preconditions:** Employee identity row exists in `dbo.partners` with `employee=true`; `partners.tier_id` points to permission group `investor`; NK2 credential rows may live in `dbo.investor_accounts` when the shared DB must not expose a production-capable `partners.password_hash`; `dbo.investor_clients` contains the customers they may see; actor has only view/list permissions from the seeded investor group.
 - **Main flow:**
   1. Investor logs in through `POST /api/Auth/login`; NK2 first checks normal active staff credentials, then scoped `dbo.investor_accounts` credentials for investor identities.
   2. Backend resolves effective permissions and `resolveInvestorScope()`.

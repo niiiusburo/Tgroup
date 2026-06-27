@@ -65,7 +65,7 @@ behavior:
   - Permission strings for dangerous or vendor-write actions should stay action-level. Current split examples: `payment.add`, `payment.refund`, `payment.void`, `external_checkups.create`, and `external_checkups.upload`.
   - Investor identities are normal employees assigned to the `investor` permission group. NK2 investor passwords may live in `dbo.investor_accounts` so shared NK/NK2 databases do not make staging investor credentials production-login-capable through `partners.password_hash`.
   - `resolveInvestorScope()` reads `dbo.investor_clients` and returns a fail-closed customer allowlist for all customer-touching reads.
-  - The seeded investor permission group is read-only. It must not include customer, appointment, payment, refund, void, or monthly-plan write permissions unless a future approved product decision changes INV-021.
+  - The seeded investor permission group is read/list-only. It may include `customers.view_all` so the customer page can list the backend-scoped allowlist, but it must not include customer, appointment, payment, refund, void, or monthly-plan write permissions unless a future approved product decision changes INV-021.
 affected_by:
   - Any change to dbo.partners schema (especially password_hash, employee, active, isdeleted columns)
   - Any change to dbo.investor_accounts or the NK2 credential fallback

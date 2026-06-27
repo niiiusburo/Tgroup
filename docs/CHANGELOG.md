@@ -14,6 +14,13 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.46] — 2026-06-27
+### Fixed
+- **Investor route access no longer inherits overview permission:** The authenticated layout route is now auth-only, and `overview.view` is enforced only on the `/` index route so NK2 investors with `customers.view` can open `/customers` without requiring dashboard access. The investor seed now includes the read-only `customers.view_all` list permission so the customer page can list the backend-scoped allowlist instead of forcing search-first mode. — @agent — fixes the live post-deploy `Không có quyền truy cập` route guard and empty customer page found during investor activation proof.
+
+### Tested
+- `cd website && npx vitest run src/__tests__/App.route-permissions.test.tsx`; `cd api && JWT_SECRET=test-secret npx jest tests/investorAccountsMigration.test.js --runInBand`; `npm --prefix website run build`; `npm run verify:governance`. Live NK2 screenshot proof follows deployment. — @agent
+
 ## [0.32.45] — 2026-06-27
 ### Security
 - **NK2 investor credentials are isolated from NK production auth:** `POST /api/Auth/login` now falls back to `dbo.investor_accounts` only for mapped `investor` identities after normal active staff login fails, so NK2 can issue investor credentials without storing a production-login-capable `partners.password_hash` in the shared NK/NK2 database. — @agent — preserves INV-021 while NK production remains on older code.
