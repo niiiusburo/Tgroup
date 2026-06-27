@@ -354,6 +354,7 @@
     "title": "Điểm danh",
     "subtitle": "Nhìn vào máy ảnh để điểm danh",
     "scanning": "Đang quét khuôn mặt...",
+    "noFaceRetry": "Chưa thấy rõ khuôn mặt. Tiếp tục nhìn vào máy ảnh.",
     "verifying": "Đang xác nhận...",
     "capture": "Chụp",
     "tryAgain": "Thử lại",

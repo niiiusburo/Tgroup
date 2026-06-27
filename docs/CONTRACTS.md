@@ -367,6 +367,7 @@ Face error responses:
 | { ok: true; result: 'no_match' }
 ```
 **Error response:** `{ ok: false; reason: string; message: string }`
+- Public scanner callers must keep scanning on transient provider errors (`NO_FACE`, `MULTIPLE_FACES`, `LOW_QUALITY`) instead of ending the kiosk flow on the first bad frame.
 
 Privacy/security contract:
 - Recognize-only; never registers or re-registers faces.

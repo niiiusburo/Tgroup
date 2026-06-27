@@ -354,6 +354,7 @@
     "title": "Check In",
     "subtitle": "Look at the camera to check in",
     "scanning": "Scanning for face...",
+    "noFaceRetry": "Face not clear yet. Keep looking at the camera.",
     "verifying": "Verifying...",
     "capture": "Capture",
     "tryAgain": "Try again",

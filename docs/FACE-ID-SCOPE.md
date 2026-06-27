@@ -12,6 +12,8 @@ Hard rules:
 - Rate-limit per source IP.
 - Appointment arrival writes remain staff-confirmed unless a later product decision changes the workflow.
 - Start with the front-facing camera (`facingMode: user`) and use iOS-friendly `ideal` camera constraints before `exact` constraints so Safari can choose an available camera.
+- Preserve the full camera frame for provider upload. The preview may be softened for privacy, but the submitted JPEG must be unblurred and must not center-crop away portrait iPhone/iPad framing.
+- Treat `NO_FACE`, `MULTIPLE_FACES`, and `LOW_QUALITY` provider errors as transient scanner states in the public kiosk. Keep the camera scanning and only show terminal front-desk fallback for real no-match/multiple-match outcomes or repeated failures.
 
 ## Provider Status Rule
 

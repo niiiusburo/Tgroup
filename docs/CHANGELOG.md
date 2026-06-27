@@ -14,6 +14,13 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.43] — 2026-06-27
+### Fixed
+- **NK2 iPhone Face ID scanner stability:** `/checkin` now preserves the full camera frame for CompreFace instead of sending a tight center crop, and transient `NO_FACE` / `MULTIPLE_FACES` / `LOW_QUALITY` provider errors keep the public kiosk scanning instead of ending the flow on a single bad frame. — @agent — UC-007A iPhone Safari no-face regression.
+
+### Tested
+- `cd website && npx vitest run src/pages/CheckIn/CheckIn.test.tsx src/components/shared/faceCaptureEngine.test.ts src/components/shared/FaceCaptureModal.test.tsx src/lib/api/__tests__/faceRecognition.test.ts src/i18n/__tests__/i18n-coverage.test.ts`; `npm --prefix website run build`; `npm run verify:governance`; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off <changed public Face ID files>`. — @agent
+
 ## [0.32.42] — 2026-06-27
 ### Added
 - **Hidden Face ID diagnostics:** Public `/checkin` and authenticated `POST /api/face/recognize` now write server-only JSONL diagnostics under `uploads/face-diagnostics/` with provider, device class, thresholds, score margin, top candidate hashes, reason code, latency, and error metadata for later tuning. — @agent — UC-007A ambiguous-match refinement.

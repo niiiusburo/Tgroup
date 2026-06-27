@@ -175,20 +175,38 @@ export function captureVideoFrame(video: HTMLVideoElement | null) {
 
   const videoWidth = video.videoWidth;
   const videoHeight = video.videoHeight;
-  const minSide = Math.min(videoWidth, videoHeight);
-  const cropSide = Math.round(minSide * 0.6);
-  const sx = Math.round((videoWidth - cropSide) / 2);
-  const sy = Math.round((videoHeight - cropSide) / 2);
-  const outputSize = 600;
+  const outputMaxSide = 960;
+  const scale = outputMaxSide / Math.max(videoWidth, videoHeight);
+  const outputWidth = Math.max(1, Math.round(videoWidth * scale));
+  const outputHeight = Math.max(1, Math.round(videoHeight * scale));
   const canvas = document.createElement('canvas');
-  canvas.width = outputSize;
-  canvas.height = outputSize;
+  canvas.width = outputWidth;
+  canvas.height = outputHeight;
   const ctx = canvas.getContext('2d');
   if (!ctx) return Promise.resolve(null);
   ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(video, sx, sy, cropSide, cropSide, 0, 0, outputSize, outputSize);
+  ctx.drawImage(video, 0, 0, videoWidth, videoHeight, 0, 0, outputWidth, outputHeight);
 
   return new Promise<Blob | null>((resolve) => {
-    canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.95);
+    canvas.toBlob((blob) => {
+      if (blob) {
+        resolve(blob);
+        return;
+      }
+
+      try {
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+        const [meta, encoded] = dataUrl.split(',');
+        const mime = meta.match(/^data:(.*?);base64$/)?.[1] || 'image/jpeg';
+        const binary = atob(encoded);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i += 1) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        resolve(new Blob([bytes], { type: mime }));
+      } catch {
+        resolve(null);
+      }
+    }, 'image/jpeg', 0.92);
   });
 }

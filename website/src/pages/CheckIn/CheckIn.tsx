@@ -10,7 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, CheckCircle2, Loader2, RotateCcw, ScanFace, SwitchCamera, UserX } from 'lucide-react';
 import { useFaceCaptureController } from '@/components/shared/useFaceCaptureController';
-import { publicFaceCheckIn } from '@/lib/api';
+import { ApiError, publicFaceCheckIn } from '@/lib/api';
 
 type CheckInStatus =
   | { kind: 'idle' }
@@ -22,20 +22,47 @@ type CheckInStatus =
   | { kind: 'error'; message: string };
 
 const RESET_DELAY_MS = 6000;
+const RETRY_NOTICE_DELAY_MS = 2200;
+const MAX_TRANSIENT_FACE_RETRIES = 4;
+const TRANSIENT_FACE_ERROR_CODES = new Set(['NO_FACE', 'MULTIPLE_FACES', 'LOW_QUALITY']);
+
+function isTransientFaceError(err: unknown) {
+  return err instanceof ApiError && err.status === 422 && Boolean(err.code && TRANSIENT_FACE_ERROR_CODES.has(err.code));
+}
 
 export function CheckIn() {
   const { t } = useTranslation('common');
   const [status, setStatus] = useState<CheckInStatus>({ kind: 'idle' });
+  const [scanNotice, setScanNotice] = useState<string | null>(null);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryNoticeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inFlightRef = useRef(false);
+  const transientRetryCountRef = useRef(0);
+
+  const clearRetryNotice = useCallback(() => {
+    if (retryNoticeTimerRef.current) clearTimeout(retryNoticeTimerRef.current);
+    retryNoticeTimerRef.current = null;
+    setScanNotice(null);
+  }, []);
+
+  const resetScanner = useCallback(() => {
+    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    resetTimerRef.current = null;
+    clearRetryNotice();
+    inFlightRef.current = false;
+    transientRetryCountRef.current = 0;
+    setStatus({ kind: 'idle' });
+  }, [clearRetryNotice]);
 
   const handleCapture = useCallback(async (image: Blob) => {
     if (inFlightRef.current) return;
     inFlightRef.current = true;
+    clearRetryNotice();
     setStatus({ kind: 'verifying' });
 
     try {
       const data = await publicFaceCheckIn(image);
+      transientRetryCountRef.current = 0;
       if (data.result === 'match') {
         setStatus({ kind: 'match', greeting: data.greeting });
       } else if (data.result === 'multiple') {
@@ -44,12 +71,24 @@ export function CheckIn() {
         setStatus({ kind: 'no_match' });
       }
     } catch (err) {
+      if (isTransientFaceError(err) && transientRetryCountRef.current < MAX_TRANSIENT_FACE_RETRIES) {
+        transientRetryCountRef.current += 1;
+        inFlightRef.current = false;
+        setScanNotice(t('checkIn.noFaceRetry', 'Face not clear yet. Keep looking at the camera.'));
+        setStatus({ kind: 'capturing' });
+        retryNoticeTimerRef.current = setTimeout(() => {
+          retryNoticeTimerRef.current = null;
+          setScanNotice(null);
+        }, RETRY_NOTICE_DELAY_MS);
+        return;
+      }
+
       const message = err instanceof Error
         ? err.message
         : t('checkIn.errorGeneric', 'Something went wrong. Please try again.');
       setStatus({ kind: 'error', message });
     }
-  }, [t]);
+  }, [clearRetryNotice, t]);
 
   const controller = useFaceCaptureController({
     isOpen: status.kind === 'idle' || status.kind === 'capturing',
@@ -71,19 +110,20 @@ export function CheckIn() {
     if (terminal) {
       if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
       resetTimerRef.current = setTimeout(() => {
-        inFlightRef.current = false;
-        setStatus({ kind: 'idle' });
+        resetScanner();
       }, RESET_DELAY_MS);
     }
     return () => {
       if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
     };
-  }, [status.kind]);
+  }, [resetScanner, status.kind]);
 
   const handleManualReset = useCallback(() => {
-    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
-    inFlightRef.current = false;
-    setStatus({ kind: 'idle' });
+    resetScanner();
+  }, [resetScanner]);
+
+  useEffect(() => () => {
+    if (retryNoticeTimerRef.current) clearTimeout(retryNoticeTimerRef.current);
   }, []);
 
   const showCamera = status.kind === 'idle' || status.kind === 'capturing';
@@ -164,7 +204,7 @@ export function CheckIn() {
         {showCamera && (
           <div className="absolute left-1/2 top-4 flex -translate-x-1/2 items-center gap-2 rounded-lg bg-gray-900/70 px-4 py-2 text-xs font-medium text-white backdrop-blur">
             <ScanFace className="h-4 w-4" aria-hidden />
-            <span>{t('checkIn.scanning', 'Scanning for face...')}</span>
+            <span>{scanNotice || t('checkIn.scanning', 'Scanning for face...')}</span>
           </div>
         )}
 

@@ -10,6 +10,50 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK2 iPhone Face ID Scanner Stability 2026-06-27
+
+Feature/edit name: Public `/checkin` full-frame capture and transient no-face retry
+
+Changed URLs and API routes:
+- `https://nk2.2checkin.com/checkin`
+- `POST /api/public/face/checkin`
+- No public response shape change.
+
+Affected data flows:
+- Public camera capture now uploads a full-frame JPEG from the video stream instead of a tight center crop.
+- `NO_FACE`, `MULTIPLE_FACES`, and `LOW_QUALITY` provider errors are treated as retryable scanner hints for the public kiosk.
+- Hidden Face ID diagnostics remain server-only and continue to record provider outcomes.
+
+User roles:
+- Public patient/front-desk kiosk user on iPhone/iPad/Android/desktop.
+- Operator reviewing VPS diagnostics.
+
+Happy paths:
+- iPhone Safari opens `/checkin`, uses the front camera, uploads a full-frame JPEG, and reaches match when the enrolled user is centered.
+- Desktop Chrome still matches through the same public route.
+
+Edge cases:
+- One bad frame returning `NO_FACE` does not freeze the kiosk; scanning continues.
+- Repeated transient no-face failures eventually show the existing terminal error so a user is not trapped forever.
+- Safari `canvas.toBlob()` null fallback still uploads a JPEG blob.
+
+Regressions:
+- Public client still does not show scores, candidate identities, partner IDs, phones, or customer codes.
+- Privacy blur stays on the preview only, not on the submitted frame.
+- Flip-camera button remains visible.
+
+Setup/login state:
+- No login required.
+- Use NK2 staging and compare `/app/uploads/face-diagnostics` before/after live attempts.
+
+TestSprite execution items:
+- [ ] PENDING: Verify iPhone Safari `/checkin` keeps scanning after one `NO_FACE` response.
+- [ ] PENDING: Verify full-frame capture dimensions are used for portrait and landscape video in tests.
+- [ ] PENDING: Verify desktop Chrome still matches Kevin after deployment.
+- [ ] PENDING: Verify live diagnostics show iPhone attempts as match/no_match/retry outcomes rather than terminal first-frame failure.
+
+---
+
 # TestSprite Plan: Hidden Face ID Diagnostics 2026-06-27
 
 Feature/edit name: Hidden server-side Face ID diagnostics for NK2 public and staff recognition
