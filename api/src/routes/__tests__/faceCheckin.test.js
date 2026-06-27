@@ -47,6 +47,10 @@ jest.mock('../../services/comprefaceFaceProvider', () => ({
   },
 }));
 
+jest.mock('../../services/faceDiagnostics', () => ({
+  recordFaceDiagnostic: jest.fn(),
+}));
+
 jest.mock('../../db', () => ({
   query: jest.fn(),
 }));
@@ -55,6 +59,7 @@ const request = require('supertest');
 const app = require('../../server');
 const { requireAuth } = require('../../middleware/auth');
 const comprefaceFaceProvider = require('../../services/comprefaceFaceProvider');
+const { recordFaceDiagnostic } = require('../../services/faceDiagnostics');
 const faceCheckinRoutes = require('../faceCheckin');
 
 describe('POST /api/public/face/checkin', () => {
@@ -95,6 +100,14 @@ describe('POST /api/public/face/checkin', () => {
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ ok: true, result: 'match', greeting: 'Kevin P.' });
     expect(JSON.stringify(res.body)).not.toMatch(/p-1|0901|G\\+26|0\\.99/);
+    expect(recordFaceDiagnostic).toHaveBeenCalledWith(expect.objectContaining({
+      flow: 'public_checkin',
+      provider: 'compreface',
+      recognition: {
+        match: expect.objectContaining({ partnerId: 'p-1' }),
+        candidates: [],
+      },
+    }));
   });
 
   it('returns only the candidate count for ambiguous matches', async () => {
@@ -112,6 +125,16 @@ describe('POST /api/public/face/checkin', () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ ok: true, result: 'multiple', candidates: 2 });
+    expect(JSON.stringify(res.body)).not.toMatch(/p-1|p-2|0901|0902|A1|B1|0\\.82|0\\.81/);
+    expect(recordFaceDiagnostic).toHaveBeenCalledWith(expect.objectContaining({
+      flow: 'public_checkin',
+      recognition: {
+        match: null,
+        candidates: expect.arrayContaining([
+          expect.objectContaining({ partnerId: 'p-1', confidence: 0.82 }),
+        ]),
+      },
+    }));
   });
 
   it('rate-limits repeated public attempts', async () => {

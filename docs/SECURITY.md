@@ -120,7 +120,7 @@ Investor customer scope is an additional backend data filter, not a login type. 
 - **File Uploads:** `feedback_attachments` uses `multer` + `sharp` for image resizing. Max file size enforced by nginx `client_max_body_size 25m`.
 - **Outbound Lark alerts:** Feedback alerts send bounded text previews and metadata only after the feedback transaction commits. Attachment bytes are not forwarded. `api/src/services/larkNotifier.js` only accepts HTTPS custom bot URLs on `open.larksuite.com` or `open.feishu.cn` and supports optional Lark signature verification through `LARK_FEEDBACK_WEBHOOK_SECRET`. Fields that cross the boundary into Lark: feedback content preview (≤900 chars), thread ID, reporter (employee ID/name), page URL or page path (may contain query params with patient identifiers), screen size, attachment count, and for auto-detected alerts the error type, error message preview (≤900 chars), route, and API endpoint/method. The inbox link in `auto` alerts is pinned to `TGROUP_PUBLIC_URL` and ignores client-supplied `Origin`/`Referer` to prevent phishing redirects through the unauthenticated `/api/telemetry/errors` endpoint.
 - **CORS:** `ALLOWED_ORIGINS` whitelist in `api/src/server.js`. Dev origin regex allows `localhost` ports.
-- **Public Face ID kiosk:** `POST /api/public/face/checkin` is intentionally unauthenticated but recognize-only. It must not return `partnerId`, phone, code, confidence, candidate identities, or any token/session material.
+- **Public Face ID kiosk:** `POST /api/public/face/checkin` is intentionally unauthenticated but recognize-only. It must not return `partnerId`, phone, code, confidence, candidate identities, or any token/session material. Hidden Face ID diagnostics are server-only: they hash subject/IP/user-agent identifiers and must not store raw images, raw embeddings, names, phone numbers, customer codes, raw partner IDs, or tokens.
 
 ## Network Security
 
@@ -136,8 +136,9 @@ Investor customer scope is an additional backend data filter, not a login type. 
 | `payment_allocations` | Links payments to invoices (immutable) |
 | `exports_audit` | Who downloaded what export when |
 | `error_events` + `error_fix_attempts` | Frontend errors and admin fix attempts |
+| `uploads/face-diagnostics/*.jsonl` | Hidden Face ID recognition attempts, provider decisions, score margins, hashed candidate IDs, and error metadata for tuning/debugging |
 
-**Note:** There is no unified audit log table. Financial audit relies on `payments`, `payment_allocations`, and `saleorder_state_logs`.
+**Note:** There is no unified audit log table. Financial audit relies on `payments`, `payment_allocations`, and `saleorder_state_logs`. Face ID diagnostics are file-backed operational records, not public static assets; only `/uploads/feedback` is exposed through nginx/API static serving.
 
 ## Security Incident Response
 

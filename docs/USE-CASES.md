@@ -171,15 +171,16 @@ When a use case is created or materially edited, add one compact `Traceability` 
   2. Page shows a softened privacy preview plus a visible flip-camera control; captured frames remain unblurred and center-cropped for the Face ID provider.
   3. Frontend posts image to `POST /api/public/face/checkin`.
   4. Backend runs recognize-only Face ID with the configured provider.
-  5. If exactly one high-confidence match exists, API returns a minimal greeting only.
-  6. Page shows success briefly, then resets for the next customer.
+  5. Backend writes a hidden server-side diagnostic attempt record with provider, device class, thresholds, top-score margin, hashed candidate IDs, reason code, latency, and error metadata.
+  6. If exactly one high-confidence match exists, API returns a minimal greeting only.
+  7. Page shows success briefly, then resets for the next customer.
 - **Alternate flows:**
   - **AF-1 No match:** API returns `{ result: 'no_match' }`; page tells customer to check in at the desk.
   - **AF-2 Multiple candidates:** API returns only candidate count; page tells customer to check in at the desk.
   - **AF-3 Abuse/repeat attempts:** API returns HTTP 429 and the page shows the retry message.
-- **Postconditions:** No database write and no session/token is issued. Appointment arrival remains a separate staff-confirmed workflow unless a later product decision changes it.
+- **Postconditions:** No database write and no session/token is issued. A server-only diagnostic JSONL record may be written under `uploads/face-diagnostics/` without raw images, names, phones, codes, or raw partner IDs. Appointment arrival remains a separate staff-confirmed workflow unless a later product decision changes it.
 - **Invariants touched:** INV-SCHEMA-006A (CompreFace provider-backed status), public Face ID privacy boundary.
-- **Traceability:** Related WF: WF-007. Contracts/routes: `POST /api/public/face/checkin`. Tests: `api/src/routes/__tests__/faceCheckin.test.js`, `website/src/pages/CheckIn/CheckIn.test.tsx`, `website/src/lib/api/__tests__/faceRecognition.test.ts`, `website/src/components/shared/FaceCaptureModal.test.tsx`. Product-map domains: `customers-partners`, `integrations`.
+- **Traceability:** Related WF: WF-007. Contracts/routes: `POST /api/public/face/checkin`. Tests: `api/src/routes/__tests__/faceCheckin.test.js`, `api/src/services/__tests__/faceDiagnostics.test.js`, `website/src/pages/CheckIn/CheckIn.test.tsx`, `website/src/lib/api/__tests__/faceRecognition.test.ts`, `website/src/components/shared/FaceCaptureModal.test.tsx`. Product-map domains: `customers-partners`, `integrations`.
 
 ---
 

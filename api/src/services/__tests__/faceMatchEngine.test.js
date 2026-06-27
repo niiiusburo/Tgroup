@@ -140,6 +140,15 @@ describe('findMatches', () => {
     expect(result.match).toBeNull();
     expect(result.candidates.length).toBeGreaterThan(0);
     expect(result.candidates[0].partnerId).toBe('p1');
+    expect(result.privateDiagnostics).toMatchObject({
+      provider: 'local',
+      reasonCode: 'AMBIGUOUS_MARGIN_TOO_SMALL',
+      candidatesConsidered: 2,
+      topCandidates: [
+        expect.objectContaining({ rank: 1, partnerId: 'p1' }),
+        expect.objectContaining({ rank: 2, partnerId: 'p2' }),
+      ],
+    });
   });
 
   it('groups multiple samples per customer and uses best score', async () => {

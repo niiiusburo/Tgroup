@@ -14,6 +14,15 @@ const CANDIDATE_THRESHOLD = parseFloat(process.env.FACE_CANDIDATE_THRESHOLD || "
 const AUTO_MATCH_MARGIN = parseFloat(process.env.FACE_AUTO_MATCH_MARGIN || "0.03");
 const MAX_CANDIDATES = parseInt(process.env.FACE_MAX_CANDIDATES || "3", 10);
 
+function policyDiagnostics() {
+  return {
+    autoMatchThreshold: AUTO_MATCH_THRESHOLD,
+    candidateThreshold: CANDIDATE_THRESHOLD,
+    autoMatchMargin: AUTO_MATCH_MARGIN,
+    maxCandidates: MAX_CANDIDATES,
+  };
+}
+
 class ComprefaceFaceError extends Error {
   constructor(code, message, status = 500) {
     super(message);
@@ -122,6 +131,21 @@ async function recognizeFace(imageBuffer, mimetype) {
   const sorted = Array.from(byPartner.values()).sort((a, b) => b.score - a.score);
   const top = sorted[0];
   const second = sorted[1];
+  const scoreMargin = top && second ? top.score - second.score : null;
+  const baseDiagnostics = {
+    provider: "compreface",
+    policy: policyDiagnostics(),
+    model: { recognizer: "compreface" },
+    rawProviderResults: rawResults.length,
+    rawSubjectCount: subjects.length,
+    candidatesConsidered: sorted.length,
+    scoreMargin,
+    topCandidates: sorted.slice(0, MAX_CANDIDATES).map((c, index) => ({
+      rank: index + 1,
+      partnerId: c.partnerId,
+      score: c.score,
+    })),
+  };
 
   if (
     top &&
@@ -137,6 +161,10 @@ async function recognizeFace(imageBuffer, mimetype) {
         confidence: parseFloat(top.score.toFixed(4)),
       },
       candidates: [],
+      privateDiagnostics: {
+        ...baseDiagnostics,
+        reasonCode: second ? "AUTO_MATCH_MARGIN_CONFIRMED" : "AUTO_MATCH_SINGLE_CANDIDATE",
+      },
     };
   }
 
@@ -153,10 +181,21 @@ async function recognizeFace(imageBuffer, mimetype) {
           phone: c.phone,
           confidence: parseFloat(c.score.toFixed(4)),
         })),
+      privateDiagnostics: {
+        ...baseDiagnostics,
+        reasonCode: second ? "AMBIGUOUS_MARGIN_TOO_SMALL" : "CANDIDATE_BELOW_AUTO_THRESHOLD",
+      },
     };
   }
 
-  return { match: null, candidates: [] };
+  return {
+    match: null,
+    candidates: [],
+    privateDiagnostics: {
+      ...baseDiagnostics,
+      reasonCode: sorted.length > 0 ? "NO_SCORE_ABOVE_CANDIDATE_THRESHOLD" : "NO_MAPPED_PROVIDER_SUBJECTS",
+    },
+  };
 }
 
 async function ensureSubject(subjectId) {

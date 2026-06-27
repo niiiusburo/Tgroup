@@ -38,6 +38,14 @@ describe('comprefaceFaceProvider', () => {
     expect(result.match.partnerId).toBe('partner-1');
     expect(result.match.confidence).toBe(0.93);
     expect(result.candidates).toEqual([]);
+    expect(result.privateDiagnostics).toMatchObject({
+      provider: 'compreface',
+      reasonCode: 'AUTO_MATCH_SINGLE_CANDIDATE',
+      candidatesConsidered: 1,
+      topCandidates: [
+        expect.objectContaining({ rank: 1, partnerId: 'partner-1', score: 0.93 }),
+      ],
+    });
   });
 
   it('returns candidates when the top score is plausible but below auto-match', async () => {
@@ -53,6 +61,35 @@ describe('comprefaceFaceProvider', () => {
     expect(result.match).toBeNull();
     expect(result.candidates).toHaveLength(1);
     expect(result.candidates[0].partnerId).toBe('partner-1');
+    expect(result.privateDiagnostics).toMatchObject({
+      reasonCode: 'CANDIDATE_BELOW_AUTO_THRESHOLD',
+      rawProviderResults: 1,
+      candidatesConsidered: 1,
+    });
+  });
+
+  it('records private diagnostics when Compreface scores are ambiguous', async () => {
+    comprefaceClient.recognize.mockResolvedValue([
+      { subject: 'partner-1', similarity: 0.86 },
+      { subject: 'partner-2', similarity: 0.85 },
+    ]);
+    query.mockResolvedValue([
+      { id: 'partner-1', name: 'Alice', phone: '0901', code: 'T001', face_subject_id: 'partner-1' },
+      { id: 'partner-2', name: 'Bob', phone: '0902', code: 'T002', face_subject_id: 'partner-2' },
+    ]);
+
+    const result = await provider.recognizeFace(Buffer.from('face'), 'image/jpeg');
+
+    expect(result.match).toBeNull();
+    expect(result.candidates).toHaveLength(2);
+    expect(result.privateDiagnostics).toMatchObject({
+      reasonCode: 'AMBIGUOUS_MARGIN_TOO_SMALL',
+      scoreMargin: 0.010000000000000009,
+      topCandidates: [
+        expect.objectContaining({ rank: 1, partnerId: 'partner-1', score: 0.86 }),
+        expect.objectContaining({ rank: 2, partnerId: 'partner-2', score: 0.85 }),
+      ],
+    });
   });
 
   it('maps Compreface recognize no-face responses to NO_FACE instead of engine error', async () => {

@@ -371,6 +371,7 @@ Face error responses:
 Privacy/security contract:
 - Recognize-only; never registers or re-registers faces.
 - Returns only a minimal greeting on match and never returns `partnerId`, phone, customer code, confidence score, or candidate identities.
+- The server may write hidden diagnostic records for tuning/debugging, but those records are not part of the API response and must not include raw images, raw embeddings, names, phone numbers, customer codes, or raw partner IDs.
 - Rate-limited per source IP.
 - Reuses the configured Face ID provider. In CompreFace mode, subjects still map to `partners.id`.
 

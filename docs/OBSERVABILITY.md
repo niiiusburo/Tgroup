@@ -32,6 +32,23 @@ All API logs are written to stdout/stderr and collected by Docker logging driver
 
 **Migration goal:** Move all routes to structured logging via `api/src/infrastructure/logging/logger.js`.
 
+### Hidden Face ID Diagnostics
+
+`POST /api/public/face/checkin` and authenticated `POST /api/face/recognize` write server-only JSONL diagnostics when `FACE_DIAGNOSTICS_ENABLED` is not `false`.
+
+- File path: `${FACE_DIAGNOSTICS_DIR:-/app/uploads/face-diagnostics}/face-diagnostics-YYYY-MM-DD.jsonl`.
+- Docker volume: the API service mounts `./uploads:/app/uploads`, so records survive API container restart.
+- Docker logs: each attempt also emits one redacted `[FaceDiagnostic] {...}` summary.
+- Contents: attempt ID, flow, provider, hashed IP/user-agent/subject identifiers, device class/browser/OS, upload size/mime type, model/quality fields when available, thresholds, top candidate scores, score margin, decision reason, latency, and error code/status.
+- Explicit exclusions: raw images, raw embeddings, names, phone numbers, customer codes, raw partner IDs, tokens, and session material.
+
+VPS inspection:
+
+```bash
+docker exec tgroup-staging-api sh -lc 'tail -20 /app/uploads/face-diagnostics/face-diagnostics-$(date -u +%F).jsonl'
+docker logs --since 30m tgroup-staging-api 2>&1 | grep '\[FaceDiagnostic\]'
+```
+
 ### Frontend Error Reporting
 
 - **Production only:** `apiFetch` reports API errors to the AutoDebugger pipeline.

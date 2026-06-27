@@ -10,6 +10,53 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: Hidden Face ID Diagnostics 2026-06-27
+
+Feature/edit name: Hidden server-side Face ID diagnostics for NK2 public and staff recognition
+
+Changed URLs and API routes:
+- `POST /api/public/face/checkin`
+- `POST /api/face/recognize`
+- No public response shape change.
+
+Affected data flows:
+- Each submitted Face ID recognition attempt writes a server-only JSONL record under `uploads/face-diagnostics/`.
+- Records include provider, device class, thresholds, top-score margin, hashed candidate IDs, reason code, latency, and error metadata.
+- Records must not include raw images, raw embeddings, names, phone numbers, customer codes, raw partner IDs, or tokens.
+
+User roles:
+- Public patient/front-desk kiosk user.
+- Authenticated staff using Face ID recognition/rescue flows.
+- Operator reviewing VPS diagnostics through SSH/Docker only.
+
+Happy paths:
+- Public `/checkin` returns the same minimal match/no-match/multiple payload while a hidden diagnostic record is written.
+- Authenticated `POST /api/face/recognize` still returns staff-visible match/candidates but not `privateDiagnostics`.
+- Ambiguous provider results include hashed top candidates, top1/top2 scores, score margin, and reason code in the server diagnostic.
+
+Edge cases:
+- No-face/engine errors still return existing API errors and write a diagnostic error record.
+- `FACE_DIAGNOSTICS_ENABLED=false` disables writes without blocking recognition.
+- Diagnostic write failure logs `[FaceDiagnostic] write_failed` but does not fail check-in.
+
+Regressions:
+- Public response must not leak `partnerId`, phone, code, confidence score, candidate identities, or `privateDiagnostics`.
+- Only `/uploads/feedback` is publicly served; `uploads/face-diagnostics` remains server-only.
+- Existing CompreFace/local threshold decisions remain unchanged.
+
+Setup/login state:
+- Use NK2 staging for live verification after deploy.
+- Use `docker exec tgroup-staging-api sh -lc 'tail -20 /app/uploads/face-diagnostics/face-diagnostics-$(date -u +%F).jsonl'` for operator proof.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `/checkin` match/no-match/multiple responses are unchanged after a camera attempt.
+- [ ] PENDING: Verify ambiguous attempts create a hidden JSONL line with `decision.manualReviewRequired=true`, hashed candidate IDs, top scores, and score margin.
+- [ ] PENDING: Verify diagnostic JSONL does not contain raw names, phone numbers, customer codes, raw partner IDs, raw embeddings, or image bytes.
+- [ ] PENDING: Verify authenticated `POST /api/face/recognize` does not serialize `privateDiagnostics` in the response.
+- [ ] PENDING: Verify `FACE_DIAGNOSTICS_ENABLED=false` disables diagnostic writes while recognition still works.
+
+---
+
 # TestSprite Plan: NK2 Employee Feedback Revenue Source + Customer Profile Save 2026-06-01
 
 Feature/edit name: Revenue-by-source card on Revenue report and legacy DOB validation fix for customer profile save

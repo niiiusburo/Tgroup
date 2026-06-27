@@ -16,6 +16,16 @@ const AUTO_MATCH_MARGIN = parseFloat(process.env.FACE_AUTO_MATCH_MARGIN || "0.03
 const MAX_CANDIDATES = parseInt(process.env.FACE_MAX_CANDIDATES || "3", 10);
 const MIN_QUALITY = parseFloat(process.env.FACE_MIN_QUALITY || "0.55");
 
+function policyDiagnostics() {
+  return {
+    autoMatchThreshold: AUTO_MATCH_THRESHOLD,
+    candidateThreshold: CANDIDATE_THRESHOLD,
+    autoMatchMargin: AUTO_MATCH_MARGIN,
+    maxCandidates: MAX_CANDIDATES,
+    minQuality: MIN_QUALITY,
+  };
+}
+
 class FaceQualityError extends Error {
   constructor(message, detectionScore) {
     super(message);
@@ -73,7 +83,7 @@ function computeCentroid(embeddings) {
  *   - Whichever is higher decides — protects against both pose variance
  *     and a single noisy sample dragging the customer down.
  *
- * Returns: { match, candidates }
+ * Returns: { match, candidates, privateDiagnostics }
  *   match: best customer when auto-match rules pass
  *   candidates: up to MAX_CANDIDATES when plausible but not safe
  */
@@ -88,7 +98,17 @@ async function findMatches(embedding) {
   );
 
   if (!rows || rows.length === 0) {
-    return { match: null, candidates: [] };
+    return {
+      match: null,
+      candidates: [],
+      privateDiagnostics: {
+        provider: "local",
+        policy: policyDiagnostics(),
+        reasonCode: "NO_REGISTERED_SAMPLES",
+        candidatesConsidered: 0,
+        topCandidates: [],
+      },
+    };
   }
 
   // Group all active embeddings per customer.
@@ -133,6 +153,20 @@ async function findMatches(embedding) {
 
   const top = sorted[0];
   const second = sorted[1];
+  const scoreMargin = top && second ? top.score - second.score : null;
+  const baseDiagnostics = {
+    provider: "local",
+    policy: policyDiagnostics(),
+    model: { recognizer: "sface" },
+    candidatesConsidered: sorted.length,
+    scoreMargin,
+    topCandidates: sorted.slice(0, MAX_CANDIDATES).map((c, index) => ({
+      rank: index + 1,
+      partnerId: c.partnerId,
+      score: c.score,
+      sampleCount: c.sampleCount,
+    })),
+  };
 
   // Auto-match: top score >= threshold AND beats second by margin
   if (
@@ -149,6 +183,10 @@ async function findMatches(embedding) {
         confidence: parseFloat(top.score.toFixed(4)),
       },
       candidates: [],
+      privateDiagnostics: {
+        ...baseDiagnostics,
+        reasonCode: second ? "AUTO_MATCH_MARGIN_CONFIRMED" : "AUTO_MATCH_SINGLE_CANDIDATE",
+      },
     };
   }
 
@@ -164,10 +202,24 @@ async function findMatches(embedding) {
         phone: c.phone,
         confidence: parseFloat(c.score.toFixed(4)),
       }));
-    return { match: null, candidates };
+    return {
+      match: null,
+      candidates,
+      privateDiagnostics: {
+        ...baseDiagnostics,
+        reasonCode: second ? "AMBIGUOUS_MARGIN_TOO_SMALL" : "CANDIDATE_BELOW_AUTO_THRESHOLD",
+      },
+    };
   }
 
-  return { match: null, candidates: [] };
+  return {
+    match: null,
+    candidates: [],
+    privateDiagnostics: {
+      ...baseDiagnostics,
+      reasonCode: "NO_SCORE_ABOVE_CANDIDATE_THRESHOLD",
+    },
+  };
 }
 
 /**

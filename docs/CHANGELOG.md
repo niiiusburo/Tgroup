@@ -14,6 +14,16 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.42] — 2026-06-27
+### Added
+- **Hidden Face ID diagnostics:** Public `/checkin` and authenticated `POST /api/face/recognize` now write server-only JSONL diagnostics under `uploads/face-diagnostics/` with provider, device class, thresholds, score margin, top candidate hashes, reason code, latency, and error metadata for later tuning. — @agent — UC-007A ambiguous-match refinement.
+
+### Security
+- Face ID diagnostics hash subject/IP/user-agent values and do not store raw images, raw embeddings, names, phone numbers, customer codes, or raw partner IDs; the public client response remains unchanged and privacy-minimized. — @agent — public kiosk biometric privacy boundary.
+
+### Tested
+- `cd api && JWT_SECRET=test npx jest src/services/__tests__/faceDiagnostics.test.js src/services/__tests__/faceMatchEngine.test.js src/services/__tests__/comprefaceFaceProvider.test.js src/routes/__tests__/faceCheckin.test.js tests/faceRecognition.test.js --runInBand`. — @agent
+
 ## [0.32.41] — 2026-06-27
 ### Fixed
 - **NK2 public Face ID iPhone regression:** `/checkin` now keeps the visible flip-camera control, starts from the front camera via `defaultFacingMode: "user"`, and restores the softened privacy preview without blurring the captured frame sent to CompreFace. — @agent — UC-007A.

@@ -11,6 +11,7 @@ owns:
   - api/src/services/faceEngineClient.js
   - api/src/services/comprefaceClient.js (legacy fallback)
   - api/src/services/faceMatchEngine.js
+  - api/src/services/faceDiagnostics.js
   - api/src/services/larkNotifier.js
   - website/src/components/customer/CustomerCameraWidget.tsx
   - website/src/components/shared/FaceCaptureModal.tsx
@@ -22,6 +23,9 @@ reads:
   - api/src/db.js
   - process.env.FACE_SERVICE_URL
   - process.env.FACE_RECOGNITION_PROVIDER
+  - process.env.FACE_DIAGNOSTICS_ENABLED
+  - process.env.FACE_DIAGNOSTICS_DIR
+  - process.env.FACE_DIAGNOSTICS_HASH_SALT
   - process.env.COMPREFACE_URL
   - process.env.COMPREFACE_API_KEY
   - process.env.HOSOONLINE_BASE_URL
@@ -34,6 +38,7 @@ reads:
 writes:
   - dbo.partners (face_subject_id, face_registered_at)
   - dbo.customer_face_embeddings
+  - api/uploads/face-diagnostics/ (hidden JSONL diagnostics)
   - api/uploads/feedback/ (indirect, shared storage)
 tables:
   - dbo.partners
@@ -70,6 +75,9 @@ affected_by:
 impact_tests:
   - website/src/hooks/__tests__/useFaceRecognition.test.ts
   - api/tests/faceRecognition.test.js
+  - api/src/services/__tests__/faceDiagnostics.test.js
+  - api/src/services/__tests__/faceMatchEngine.test.js
+  - api/src/services/__tests__/comprefaceFaceProvider.test.js
   - api/src/routes/__tests__/externalCheckups.test.js
   - website/src/components/customer/AuthenticatedCheckupImage.test.tsx
 risk_level: medium
@@ -79,6 +87,7 @@ notes:
   - `FACE_RECOGNITION_PROVIDER=compreface` uses CompreFace recognition subjects keyed by `partners.id`; TGClinic still updates `partners.face_subject_id` and `face_registered_at`.
   - CompreFace registration/status must query `/faces?subject=<partners.id>`; `partners.face_subject_id` without at least one CompreFace example is not a registered face.
   - Public `/checkin` must keep a visible flip-camera control and softened on-screen privacy preview while sending an unblurred, center-cropped capture frame to the Face ID provider.
+  - Public and staff Face ID recognition write hidden diagnostics under `uploads/face-diagnostics/` with hashed subject/IP/user-agent identifiers, thresholds, top-score margin, reason codes, and latency; diagnostics must not store raw images, raw embeddings, names, phones, customer codes, or raw partner IDs.
   - Compreface services are defined in docker-compose.yml but are not required for core app startup.
   - "Hosoonline is currently mixed-contract: login credentials take precedence for image reads (`Authorization: Bearer <token>` plus access_token cookie); `HOSOONLINE_API_KEY` / `X-API-Key` remains as fallback for older patient health-checkup endpoints."
   - The current observed Hosoonline website contract logs in through `/api/auth/login`, searches appointment media through `/api/appointments/search?q=<customerCode>&page=<page>`, and fetches bytes through `/api/appointments/image/:imageName`.

@@ -29,6 +29,17 @@ describe('.env.example', () => {
     }
   });
 
+  it('contains hidden Face ID diagnostics variables', () => {
+    const required = [
+      'FACE_DIAGNOSTICS_ENABLED',
+      'FACE_DIAGNOSTICS_DIR',
+      'FACE_DIAGNOSTICS_HASH_SALT',
+    ];
+    for (const key of required) {
+      expect(content).toContain(key);
+    }
+  });
+
   it('contains the Face ID provider switch', () => {
     expect(content).toContain('FACE_RECOGNITION_PROVIDER');
   });

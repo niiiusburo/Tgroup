@@ -49,6 +49,9 @@ jest.mock('../src/services/comprefaceFaceProvider', () => ({
     }
   },
 }));
+jest.mock('../src/services/faceDiagnostics', () => ({
+  recordFaceDiagnostic: jest.fn(),
+}));
 jest.mock('../src/db', () => ({
   query: jest.fn(),
 }));
@@ -56,6 +59,7 @@ jest.mock('../src/db', () => ({
 const { getEmbedding } = require('../src/services/faceEngineClient');
 const { findMatches, registerSample, replaceAllSamples, getFaceStatus } = require('../src/services/faceMatchEngine');
 const comprefaceFaceProvider = require('../src/services/comprefaceFaceProvider');
+const { recordFaceDiagnostic } = require('../src/services/faceDiagnostics');
 const { query } = require('../src/db');
 
 afterEach(() => {
@@ -107,6 +111,19 @@ describe('POST /api/face/recognize', () => {
     expect(res.body.match.partnerId).toBe('p-1');
     expect(res.body.match.name).toBe('Alice');
     expect(res.body.candidates).toEqual([]);
+    expect(res.body.privateDiagnostics).toBeUndefined();
+    expect(recordFaceDiagnostic).toHaveBeenCalledWith(expect.objectContaining({
+      flow: 'staff_recognize',
+      provider: 'local',
+      recognition: {
+        match: expect.objectContaining({ partnerId: 'p-1' }),
+        candidates: [],
+      },
+      engine: {
+        model: { recognizer: 'sface', version: 'v1' },
+        quality: { detectionScore: 0.95, faceCount: 1 },
+      },
+    }));
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[FaceRecognize]'));
     consoleSpy.mockRestore();
   });
@@ -133,6 +150,7 @@ describe('POST /api/face/recognize', () => {
     expect(res.body.match).toBeNull();
     expect(res.body.candidates).toHaveLength(1);
     expect(res.body.candidates[0].partnerId).toBe('p-1');
+    expect(res.body.privateDiagnostics).toBeUndefined();
   });
 
   it('returns no-match when no candidate reaches threshold', async () => {
@@ -276,10 +294,19 @@ describe('POST /api/face/recognize', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.match.partnerId).toBe('p-2');
+    expect(res.body.privateDiagnostics).toBeUndefined();
     expect(comprefaceFaceProvider.recognizeFace).toHaveBeenCalledWith(
       expect.any(Buffer),
       'image/jpeg'
     );
+    expect(recordFaceDiagnostic).toHaveBeenCalledWith(expect.objectContaining({
+      flow: 'staff_recognize',
+      provider: 'compreface',
+      recognition: {
+        match: expect.objectContaining({ partnerId: 'p-2' }),
+        candidates: [],
+      },
+    }));
     expect(getEmbedding).not.toHaveBeenCalled();
   });
 });

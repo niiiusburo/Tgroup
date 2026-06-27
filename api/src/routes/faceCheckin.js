@@ -21,6 +21,7 @@ const { getEmbedding, FaceEngineError } = require('../services/faceEngineClient'
 const { findMatches, FaceQualityError } = require('../services/faceMatchEngine');
 const { getFaceRecognitionProvider } = require('../services/faceRecognitionRuntime');
 const comprefaceFaceProvider = require('../services/comprefaceFaceProvider');
+const { recordFaceDiagnostic } = require('../services/faceDiagnostics');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
@@ -101,19 +102,34 @@ function nameToGreeting(rawName) {
 
 router.post('/checkin', rateLimiter, upload.single('image'), async (req, res) => {
   const start = Date.now();
+  const provider = isComprefaceProvider() ? 'compreface' : 'local';
   try {
     if (!req.file) {
       return res.status(400).json({ ok: false, reason: 'MISSING_IMAGE', message: 'Missing image file' });
     }
 
-    const { match, candidates } = isComprefaceProvider()
+    let engine = null;
+    const recognition = provider === 'compreface'
       ? await comprefaceFaceProvider.recognizeFace(req.file.buffer, req.file.mimetype)
       : await (async () => {
-          const { embedding } = await getEmbedding(req.file.buffer, req.file.mimetype);
+          const { embedding, model, quality } = await getEmbedding(req.file.buffer, req.file.mimetype);
+          engine = { model, quality };
           return findMatches(embedding);
         })();
+    const { match, candidates, privateDiagnostics } = recognition;
 
     const duration = Date.now() - start;
+    await recordFaceDiagnostic({
+      flow: 'public_checkin',
+      req,
+      provider,
+      image: req.file,
+      recognition: { match, candidates },
+      privateDiagnostics,
+      engine,
+      durationMs: duration,
+    });
+
     console.log(
       `[FaceCheckIn/public] result=${match ? 'match' : candidates.length ? 'multiple' : 'no_match'} duration=${duration}ms ip=${(req.ip || '').replace(/^::ffff:/, '')}`
     );
@@ -127,6 +143,14 @@ router.post('/checkin', rateLimiter, upload.single('image'), async (req, res) =>
     return res.json({ ok: true, result: 'no_match' });
   } catch (err) {
     const mapped = mapEngineError(err);
+    await recordFaceDiagnostic({
+      flow: 'public_checkin',
+      req,
+      provider,
+      image: req.file,
+      durationMs: Date.now() - start,
+      error: mapped,
+    });
     console.error('[FaceCheckIn/public] error:', mapped.code, mapped.message);
     return res.status(mapped.status).json({ ok: false, reason: mapped.code, message: mapped.message });
   }

@@ -342,7 +342,7 @@ Lark alert contract: when `LARK_FEEDBACK_WEBHOOK_URL` is configured, `POST /api/
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| POST | `/recognize` | Perm:`customers.view` | FormData (`image`) | `{ match: FaceCandidate \| null, candidates: FaceCandidate[] }`; provider selected by `FACE_RECOGNITION_PROVIDER=local|compreface` |
+| POST | `/recognize` | Perm:`customers.view` | FormData (`image`) | `{ match: FaceCandidate \| null, candidates: FaceCandidate[] }`; provider selected by `FACE_RECOGNITION_PROVIDER=local|compreface`; writes hidden server-side Face ID diagnostics when enabled and never returns `privateDiagnostics` |
 | POST | `/register` | Perm:`customers.edit` | FormData (`partnerId`, `image`, optional `source`) | `{ success: true, partnerId, sampleId, sampleCount, faceRegisteredAt }` |
 | POST | `/re-register` | Perm:`customers.edit` | FormData (`partnerId`, repeated `images`, optional `source`) | `{ success: true, partnerId, sampleIds, sampleCount, faceRegisteredAt }` |
 | GET | `/status/:partnerId` | Perm:`customers.view` | — | `{ partnerId, registered, sampleCount, lastRegisteredAt, provider? }`; CompreFace mode verifies actual `/faces?subject=` example count |
@@ -351,7 +351,7 @@ Lark alert contract: when `LARK_FEEDBACK_WEBHOOK_URL` is configured, `POST /api/
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| POST | `/checkin` | Public | FormData (`image`) | `{ ok: true, result: 'match', greeting }`, `{ ok: true, result: 'no_match' }`, or `{ ok: true, result: 'multiple', candidates: count }`; recognize-only and privacy-minimized |
+| POST | `/checkin` | Public | FormData (`image`) | `{ ok: true, result: 'match', greeting }`, `{ ok: true, result: 'no_match' }`, or `{ ok: true, result: 'multiple', candidates: count }`; recognize-only and privacy-minimized; writes hidden server-side diagnostics without exposing names, raw IDs, scores, or candidate identities |
 
 ## External Checkups (`/api/ExternalCheckups`)
 
