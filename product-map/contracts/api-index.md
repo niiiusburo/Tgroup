@@ -13,7 +13,7 @@
 
 | Method | Path | Auth | Body | Response |
 |--------|------|------|------|----------|
-| POST | `/login` | Public | `{ email, password }` | `{ token, user (with is_ctv?, lob_scope?), permissions }` |
+| POST | `/login` | Public | `{ email, password }` | `{ token, user (with is_ctv?, lob_scope?), permissions }`; tries normal active `partners.password_hash` first, then NK2 `dbo.investor_accounts` for mapped investor identities |
 | GET | `/me` | Auth | — | `{ user (with is_ctv?, lob_scope?), permissions }` |
 | POST | `/change-password` | Auth | `{ oldPassword, newPassword }` | `{ success, message }` |
 
@@ -74,7 +74,7 @@ CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin ro
 
 ## Investor Customer Scope (read-only employee extension)
 
-Investor users are normal employee accounts whose `partners.tier_id` points to a permission group named `investor`. When `resolveInvestorScope()` detects that group, customer-touching reads and aggregates are filtered through `dbo.investor_clients`.
+Investor users are normal employee identities whose `partners.tier_id` points to a permission group named `investor`. On NK2, their login password can live in `dbo.investor_accounts` so shared NK/NK2 databases do not create a production-login-capable `partners.password_hash` before NK production has investor filters. When `resolveInvestorScope()` detects the `investor` group, customer-touching reads and aggregates are filtered through `dbo.investor_clients`.
 
 Affected endpoint families:
 - `/api/Partners`, `/api/CustomerBalance`, `/api/CustomerReceipts`, `/api/DotKhams`

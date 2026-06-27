@@ -14,6 +14,16 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.45] — 2026-06-27
+### Security
+- **NK2 investor credentials are isolated from NK production auth:** `POST /api/Auth/login` now falls back to `dbo.investor_accounts` only for mapped `investor` identities after normal active staff login fails, so NK2 can issue investor credentials without storing a production-login-capable `partners.password_hash` in the shared NK/NK2 database. — @agent — preserves INV-021 while NK production remains on older code.
+
+### Added
+- **Investor credential migration:** `049_investor_accounts_nk2_credentials.sql` adds the additive `dbo.investor_accounts` table and case-insensitive email index for NK2 investor password hashes. — @agent — deploy safety for shared `tdental_demo`.
+
+### Tested
+- `cd api && JWT_SECRET=test-secret npx jest tests/authInvestorLogin.test.js tests/investorAccountsMigration.test.js tests/investorIdorScoping.test.js tests/investorScopeRoutePermissions.test.js src/services/__tests__/permissionService.test.js --runInBand`; `cd api && JWT_SECRET=test-secret npx jest tests/loginRateLimiter.test.js --runInBand`; `npm --prefix website run build`; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off api/src/routes/auth.js api/migrations/049_investor_accounts_nk2_credentials.sql api/tests/authInvestorLogin.test.js api/tests/investorAccountsMigration.test.js`; `npm run verify:governance`. Live NK2/NK proof follows deployment. — @agent
+
 ## [0.32.43] — 2026-06-27
 ### Fixed
 - **NK2 iPhone Face ID scanner stability:** `/checkin` now preserves the full camera frame for CompreFace instead of sending a tight center crop, and transient `NO_FACE` / `MULTIPLE_FACES` / `LOW_QUALITY` provider errors keep the public kiosk scanning instead of ending the flow on a single bad frame. — @agent — UC-007A iPhone Safari no-face regression.

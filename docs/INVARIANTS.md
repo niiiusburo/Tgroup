@@ -72,9 +72,9 @@
 **Cite when:** Adding backend list routes, changing `LocationContext`, or implementing multi-location features.
 
 ### INV-021 — Investor Employee Allowlist Scope
-**Rule:** An investor is a normal employee account (`dbo.partners.employee = true`) assigned to the `investor` permission group. Investor-visible customer data MUST be restricted by `dbo.investor_clients` on every customer-touching read and aggregate, and the seeded group MUST stay view-only unless an explicit product decision changes it.
-**Rationale:** Investors need customer-specific visibility without a parallel user system or broad clinic access. Empty allowlists fail closed.
-**Enforced by:** `resolveInvestorScope()` in `api/src/services/permissionService.js`, migration `048_investor_customer_scope.sql`, focused investor IDOR and route-permission tests.
+**Rule:** An investor is a normal employee identity (`dbo.partners.employee = true`) assigned to the `investor` permission group. Investor-visible customer data MUST be restricted by `dbo.investor_clients` on every customer-touching read and aggregate, and the seeded group MUST stay view-only unless an explicit product decision changes it. On shared NK/NK2 databases, NK2 investor passwords may live in `dbo.investor_accounts` so the same credential cannot authenticate on older NK production code through `partners.password_hash`.
+**Rationale:** Investors need customer-specific visibility without broad clinic access. Empty allowlists fail closed. The NK2 credential fallback prevents a staging investor login from becoming a production login before production has the same data filters.
+**Enforced by:** `resolveInvestorScope()` in `api/src/services/permissionService.js`, `api/src/routes/auth.js` investor credential fallback, migrations `048_investor_customer_scope.sql` and `049_investor_accounts_nk2_credentials.sql`, focused investor auth, IDOR, and route-permission tests.
 **Cite when:** Editing auth/permission resolution, customer/profile reads, appointments, payments, service records, reports, or investor allowlist migration/admin flows.
 
 ---

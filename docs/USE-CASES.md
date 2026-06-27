@@ -442,9 +442,9 @@ When a use case is created or materially edited, add one compact `Traceability` 
 
 - **Actor:** Investor employee
 - **Trigger:** Investor logs in and opens customer, service, payment, appointment, or report surfaces.
-- **Preconditions:** Employee row exists in `dbo.partners` with `employee=true`; `partners.tier_id` points to permission group `investor`; `dbo.investor_clients` contains the customers they may see; actor has only view permissions from the seeded investor group.
+- **Preconditions:** Employee identity row exists in `dbo.partners` with `employee=true`; `partners.tier_id` points to permission group `investor`; NK2 credential rows may live in `dbo.investor_accounts` when the shared DB must not expose a production-capable `partners.password_hash`; `dbo.investor_clients` contains the customers they may see; actor has only view permissions from the seeded investor group.
 - **Main flow:**
-  1. Investor logs in through the normal employee login flow.
+  1. Investor logs in through `POST /api/Auth/login`; NK2 first checks normal active staff credentials, then scoped `dbo.investor_accounts` credentials for investor identities.
   2. Backend resolves effective permissions and `resolveInvestorScope()`.
   3. Investor opens `/customers` or a customer-linked report/API route.
   4. Backend applies the `dbo.investor_clients` customer allowlist to reads and aggregates.
@@ -453,6 +453,6 @@ When a use case is created or materially edited, add one compact `Traceability` 
   - **AF-1 Empty allowlist:** Investor sees empty lists/aggregates and no customer detail.
   - **AF-2 Direct URL to non-allowlisted customer:** Backend returns 404 or an empty scoped result.
   - **AF-3 Write attempt:** Existing `requirePermission` gates deny customer, appointment, payment, refund, void, or monthly-plan mutations because the seeded investor group is read-only.
-- **Postconditions:** Investor can inspect assigned customers without seeing unrelated clinic data or using a parallel user system.
+- **Postconditions:** Investor can inspect assigned customers without seeing unrelated clinic data. On shared NK/NK2 databases, the credential can work on NK2 while failing on older NK production code that only accepts active `partners.password_hash` staff logins.
 - **Invariants touched:** INV-001 (partners UUID identity), INV-008 (shared permission resolution), INV-021 (investor employee allowlist scope).
-- **Traceability:** Related WF: none yet. Contracts/routes: `resolveInvestorScope()` plus existing customer, appointment, payment, service, dashboard, and report routes. Data/tables: `dbo.partners`, `dbo.permission_groups`, `dbo.group_permissions`, `dbo.investor_clients`. Tests: `api/src/services/__tests__/permissionService.test.js`, `api/tests/investorIdorScoping.test.js`, `api/tests/investorScopeRoutePermissions.test.js`, `api/src/routes/reports/__tests__/cashFlow.test.js`. Product-map domains: `auth`, `customers-partners`, `appointments-calendar`, `payments-deposits`, `reports-analytics`.
+- **Traceability:** Related WF: none yet. Contracts/routes: `POST /api/Auth/login`, `resolveInvestorScope()` plus existing customer, appointment, payment, service, dashboard, and report routes. Data/tables: `dbo.partners`, `dbo.permission_groups`, `dbo.group_permissions`, `dbo.investor_accounts`, `dbo.investor_clients`. Tests: `api/tests/authInvestorLogin.test.js`, `api/src/services/__tests__/permissionService.test.js`, `api/tests/investorIdorScoping.test.js`, `api/tests/investorScopeRoutePermissions.test.js`, `api/src/routes/reports/__tests__/cashFlow.test.js`. Product-map domains: `auth`, `customers-partners`, `appointments-calendar`, `payments-deposits`, `reports-analytics`.

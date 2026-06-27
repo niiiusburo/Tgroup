@@ -10,6 +10,52 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK2 Investor Credential Activation 2026-06-27
+
+Feature/edit name: NK2 investor credential activation with production-auth isolation
+
+Changed URLs and API routes:
+- `POST /api/Auth/login`
+- `GET /api/Auth/me`
+- Existing investor-scoped customer, appointment, payment, service, dashboard, and report routes.
+
+Affected data flows:
+- NK2 login first uses normal active staff credentials, then falls back to `dbo.investor_accounts` only for mapped `investor` identities.
+- Investor authorization still comes from `partners.tier_id`, `group_permissions`, and `dbo.investor_clients`.
+- The shared NK/NK2 database can hold an inactive/no-password partner identity so NK production's older auth path cannot use the same username/password.
+
+User roles:
+- Investor user on NK2 staging.
+- Admin/operator verifying NK production remains unaffected.
+
+Happy paths:
+- Investor credential logs in on `https://nk2.2checkin.com`.
+- `GET /api/Auth/me` returns the `investor` permission group and only view permissions.
+- Investor customer list/profile/report routes are scoped to `dbo.investor_clients`.
+
+Edge cases:
+- Same credential fails on `https://nk.2checkin.com/api/Auth/login`.
+- Empty allowlist returns no customer data.
+- Wrong password does not update `dbo.investor_accounts.last_login`.
+
+Regressions:
+- Normal active staff login continues to use `partners.password_hash`.
+- NK production `/version.json` and `/api/health` stay unchanged/healthy.
+- Investor group remains view-only; no customer/payment/appointment write permissions are granted.
+
+Setup/login state:
+- Use the generated NK2 investor username/password from the deployment recap.
+- Keep the mapped `dbo.partners` identity inactive or without `partners.password_hash` when NK production lacks investor filters.
+
+TestSprite execution items:
+- [ ] PENDING: Verify NK2 investor login succeeds and returns the `investor` permission group.
+- [ ] PENDING: Verify the same credential fails on NK production login.
+- [ ] PENDING: Verify `resolveInvestorScope()` returns the expected allowlisted customer IDs.
+- [ ] PENDING: Verify investor group permissions are view-only with no unexpected write permissions.
+- [ ] PENDING: Verify NK production version and health remain unchanged after activation.
+
+---
+
 # TestSprite Plan: NK2 iPhone Face ID Scanner Stability 2026-06-27
 
 Feature/edit name: Public `/checkin` full-frame capture and transient no-face retry

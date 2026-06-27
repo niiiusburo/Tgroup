@@ -16,9 +16,11 @@ owns:
 reads:
   - api/src/routes/partners.js (reads employee user record)
   - api/src/db.js (shared pool)
+  - dbo.investor_accounts (NK2 investor credential fallback)
   - dbo.investor_clients (investor allowlist resolution)
 writes:
   - dbo.partners (password_hash, last_login)
+  - dbo.investor_accounts (last_login for NK2 investor credential fallback)
   - dbo.employee_permissions (upsert on permission update)
   - dbo.permission_overrides (grant/revoke edits)
   - dbo.employee_location_scope (location access edits)
@@ -29,6 +31,7 @@ tables:
   - dbo.employee_permissions
   - dbo.permission_overrides
   - dbo.employee_location_scope
+  - dbo.investor_accounts
   - dbo.investor_clients
 endpoints:
   - POST /api/Auth/login
@@ -60,15 +63,18 @@ behavior:
   - Failed-login lockout is scoped to normalized email plus client IP, with a higher IP-wide failure cap to preserve brute-force protection without blocking every staff member behind one clinic network.
   - Effective location access is the employee primary branch from partners.companyid plus any additional rows in employee_location_scope.
   - Permission strings for dangerous or vendor-write actions should stay action-level. Current split examples: `payment.add`, `payment.refund`, `payment.void`, `external_checkups.create`, and `external_checkups.upload`.
-  - Investor accounts are normal employees assigned to the `investor` permission group. `resolveInvestorScope()` reads `dbo.investor_clients` and returns a fail-closed customer allowlist for all customer-touching reads.
+  - Investor identities are normal employees assigned to the `investor` permission group. NK2 investor passwords may live in `dbo.investor_accounts` so shared NK/NK2 databases do not make staging investor credentials production-login-capable through `partners.password_hash`.
+  - `resolveInvestorScope()` reads `dbo.investor_clients` and returns a fail-closed customer allowlist for all customer-touching reads.
   - The seeded investor permission group is read-only. It must not include customer, appointment, payment, refund, void, or monthly-plan write permissions unless a future approved product decision changes INV-021.
 affected_by:
   - Any change to dbo.partners schema (especially password_hash, employee, active, isdeleted columns)
+  - Any change to dbo.investor_accounts or the NK2 credential fallback
   - Any change to permission system tables schema
   - Any change to dbo.investor_clients or investor permission seed rows
   - Changes to JWT_SECRET env var
   - Changes to api/src/server.js PUBLIC_PATHS set
 impact_tests:
+  - api/tests/authInvestorLogin.test.js
   - api/tests/loginRateLimiter.test.js
   - api/tests/readRoutePermissions.test.js
   - api/src/services/__tests__/permissionService.test.js

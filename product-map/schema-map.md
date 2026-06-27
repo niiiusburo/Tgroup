@@ -323,6 +323,20 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 
 ---
 
+### dbo.investor_accounts
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Key** | `id` (uuid) |
+| **Foreign Keys** | `partner_id` → partners (employee investor identity) |
+| **W** | `api/src/routes/auth.js` updates `last_login`; deployment/admin setup writes credential rows |
+| **R** | `api/src/routes/auth.js` only after active `partners.password_hash` login does not match |
+| **E** | `POST /api/Auth/login` |
+| **UI** | None; this is an NK2 shared-DB credential boundary |
+| **Risk** | **High** — must not grant permissions directly. It exists so NK2 investor credentials can work while older NK production auth cannot log in the inactive/no-password partner row. |
+
+---
+
 ## Config / Meta Entities
 
 ### dbo.systempreferences

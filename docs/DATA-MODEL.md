@@ -337,6 +337,22 @@ erDiagram
 | `employee_id` | uuid | FK → partners |
 | `company_id` | uuid | FK → companies |
 
+#### `dbo.investor_accounts`
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | uuid | PK, DEFAULT gen_random_uuid() |
+| `partner_id` | uuid | UNIQUE, FK → partners(id), ON DELETE CASCADE |
+| `email` | text | NOT NULL, unique by lower(email) index |
+| `password_hash` | text | NOT NULL |
+| `active` | boolean | NOT NULL DEFAULT true |
+| `last_login` | timestamp | nullable |
+| `datecreated` | timestamp | DEFAULT NOW() |
+| `lastupdated` | timestamp | DEFAULT NOW() |
+
+**Indexes:** `idx_investor_accounts_email_lower` unique on `lower(email)`, `idx_investor_accounts_partner_active` partial where `active = true`.
+
+**Note:** This is a credential table for NK2 investor login when NK and NK2 share `tdental_demo`. It maps to a `partners` investor identity but lets the partner remain inactive/no-password for older NK production auth.
+
 #### `dbo.investor_clients`
 | Column | Type | Constraints |
 |---|---|---|
@@ -351,7 +367,7 @@ erDiagram
 
 **Indexes:** `idx_investor_clients_investor` (partial where `is_visible = true`), `idx_investor_clients_partner`.
 
-**Note:** Investors are normal employee rows in `dbo.partners` assigned to the `investor` permission group. This allowlist is read by `resolveInvestorScope()` and must fail closed when empty.
+**Note:** Investors are employee identities in `dbo.partners` assigned to the `investor` permission group. This allowlist is read by `resolveInvestorScope()` and must fail closed when empty.
 
 ---
 

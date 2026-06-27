@@ -570,6 +570,23 @@ async function resolveEffectivePermissions(employeeId: string): Promise<{
 3. Read `permission_overrides` for employee; apply grants/revokes.
 4. Return deduplicated array.
 
+### 2.2A POST /api/Auth/login Investor Credential Fallback
+
+**File:** `api/src/routes/auth.js`
+
+```ts
+POST /api/Auth/login
+body: { email: string; password: string }
+```
+
+**Algorithm:**
+1. Normalize email by trimming and lowercasing.
+2. Try the normal active employee login path against `dbo.partners.password_hash`.
+3. If no active staff credential matches, try `dbo.investor_accounts` where `active = true`, mapped partner is `employee=true`, not deleted, and assigned to permission group `investor`.
+4. Sign the existing staff JWT shape with `employeeId` set to the mapped partner id; do not expose a new token type.
+
+**Invariants:** `dbo.investor_accounts` is an NK2 credential boundary for shared NK/NK2 databases. It must not grant permissions by itself; all authorization still comes from `partners.tier_id`, `group_permissions`, and `resolveInvestorScope()`. A partner can remain inactive and have no `partners.password_hash`, so the same username/password fails against older NK production code that only supports active partner credentials.
+
 ### 2.3 resolveInvestorScope (Backend Auth)
 
 **File:** `api/src/services/permissionService.js`
@@ -587,7 +604,7 @@ async function resolveInvestorScope(employeeId: string | undefined): Promise<{
 3. If the group name is not exactly `investor`, return non-investor scope and do not query `dbo.investor_clients`.
 4. If the group name is `investor`, read visible `partner_id` rows from `dbo.investor_clients` and return them as the customer allowlist.
 
-**Invariants:** Investors are normal employee accounts, not a second user type. Empty allowlists fail closed. The seeded `investor` group is view-only per INV-021.
+**Invariants:** Investors use normal employee identity and permission resolution, even when NK2 credentials are stored in `dbo.investor_accounts`. Empty allowlists fail closed. The seeded `investor` group is view-only per INV-021.
 
 ### 2.4 query (Database Access)
 

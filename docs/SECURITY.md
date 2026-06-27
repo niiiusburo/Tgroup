@@ -52,7 +52,7 @@ Staff → /login form → POST /api/Auth/login
 | Doctor | `appointments.view`, `appointments.edit`, `services.edit` | Clinical workflows only |
 | Receptionist | `appointments.add`, `appointments.edit`, `customers.view`, `customers.add`, `payment.add` | Front-desk operations |
 | Cashier | `payment.add`, `payment.view`, `customers.view` | Money collection |
-| Investor | `customers.view`, `appointments.view`, `payment.view`, `services.view`, `reports.view`, `calendar.view`, `locations.view` | Normal employee account with read-only customer allowlist in `dbo.investor_clients` |
+| Investor | `customers.view`, `appointments.view`, `payment.view`, `services.view`, `reports.view`, `calendar.view`, `locations.view` | Normal employee identity with read-only customer allowlist in `dbo.investor_clients` |
 
 ### Permission Resolution Order
 
@@ -62,7 +62,7 @@ Staff → /login form → POST /api/Auth/login
 
 Effective permissions = (Group ∪ Grants) − Revokes, then filtered by location scope at the UI level.
 
-Investor customer scope is an additional backend data filter, not a login type. Only employees whose permission group name is exactly `investor` are scoped through `dbo.investor_clients`; everyone else keeps the existing behavior.
+Investor customer scope is an additional backend data filter. Only employee identities whose permission group name is exactly `investor` are scoped through `dbo.investor_clients`; everyone else keeps the existing behavior. On NK2, investor passwords may be stored in `dbo.investor_accounts` instead of `partners.password_hash` so the shared `tdental_demo` database does not create a production-login-capable NK account before NK production has the same investor filters.
 
 ### Dangerous Permissions (Require Explicit Assignment)
 
