@@ -140,6 +140,8 @@ function LoginRoute() {
  *   /notifications -> Notifications
  * ]
  */
+const CheckIn = lazy(() => import('@/pages/CheckIn/CheckIn').then(m => ({ default: m.CheckIn })));
+
 function App() {
   return (
     <AuthProvider>
@@ -149,6 +151,8 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<LoginRoute />} />
+          {/* @crossref:route[path="/checkin", component=CheckIn] — PUBLIC Face ID kiosk (iPad, no login) — docs/FACE-ID-SCOPE.md */}
+          <Route path="/checkin" element={<CheckIn />} />
           {import.meta.env.DEV && (
             <Route path="/test/address" element={<AddressAutocompleteTest />} />
           )}

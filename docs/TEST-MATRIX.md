@@ -65,6 +65,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | `website/src/components/forms/AddCustomerForm/` | `AddCustomerForm.test.tsx`, `website/e2e/customer-create-save.spec.ts` | New-customer intake is high-frequency workflow. |
 | `website/src/components/customer/CustomerProfile/` | `CustomerProfile.test.tsx`, `website/e2e/customer-profile-crud.spec.ts` | Profile tabs (appointments, services, payments, photos). |
 | `api/src/routes/faceRecognition.js` | `api/tests/faceRecognition.test.js` | Face registration, re-registration, recognition, and provider routing. |
+| `api/src/routes/faceCheckin.js` (PUBLIC, no-auth) | `api/tests/faceCheckin.test.js` | PUBLIC Face ID check-in kiosk: recognize-only, no JWT, minimal-PHI greeting, rate-limit, ambiguous=count-only, admin `/api/face/*` still 401 regression. See `docs/FACE-ID-SCOPE.md`. |
 
 ### Employees & HR
 
@@ -114,6 +115,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 |---|---|---|
 | `api/src/routes/externalCheckups.js` | `api/src/routes/__tests__/externalCheckups.test.js` | Hosoonline auth, patient search, image proxy. |
 | `docker-compose.yml` / `.env.example` Lark feedback env vars | `api/tests/envExampleValidation.test.js`, `api/src/services/__tests__/larkNotifier.test.js` | Ensures the webhook/secret are documented as backend-only env and notifier accepts only the intended Lark/Feishu custom bot endpoints. |
+| `website/src/pages/CheckIn/CheckIn.tsx` (PUBLIC kiosk) | `website/src/pages/CheckIn/CheckIn.test.tsx` | Public `/checkin` iPad kiosk: renders WITHOUT AuthProvider, no useAuth, no `/api/face/recognize` calls, recognizes via `/api/public/face/checkin` only. |
 | `website/src/components/shared/FaceCaptureModal.tsx` / `website/src/components/shared/useFaceCaptureController.ts` / `website/src/components/shared/faceCaptureEngine.ts` | `website/src/components/shared/FaceCaptureModal.test.tsx`, `website/src/components/shared/faceCaptureEngine.test.ts`, `website/src/components/customer/CustomerCameraWidget.test.tsx`, `website/src/components/shared/GlobalFaceIdButton.test.tsx`, `website/src/hooks/__tests__/useFaceRecognition.test.ts` | Camera lifetime, no-face messaging, auto-capture gating, and caller error propagation. |
 | `api/src/routes/faceRecognition.js` | `api/tests/faceRecognition.test.js` | Face register/re-register/recognize API contract in local and CompreFace modes. |
 | `api/src/services/comprefaceClient.js` / `api/src/services/comprefaceFaceProvider.js` | `api/src/services/__tests__/comprefaceClient.test.js`, `api/src/services/__tests__/comprefaceFaceProvider.test.js` | CompreFace multipart file upload, subject/example calls, health check, no-face normalization, and partner subject mapping. |

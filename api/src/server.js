@@ -49,6 +49,7 @@ const placesRoutes = require('./routes/places');
 const bankSettingsRoutes = require('./routes/bankSettings');
 const externalCheckupsRoutes = require('./routes/externalCheckups');
 const faceRecognitionRoutes = require('./routes/faceRecognition');
+const faceCheckinRoutes = require('./routes/faceCheckin');  // PUBLIC check-in kiosk (no-auth) — docs/FACE-ID-SCOPE.md
 const feedbackRoutes = require('./routes/feedback');
 const reportsRoutes = require('./routes/reports');
 const telemetryRoutes = require('./routes/telemetry');
@@ -130,6 +131,8 @@ const PUBLIC_PATHS = new Set([
   '/api/IpAccess/check',
   '/api/ipaccess/check',
   '/api/health',
+  // PUBLIC Face ID check-in kiosk (iPad, no login) — docs/FACE-ID-SCOPE.md
+  '/api/public/face/checkin',
 ]);
 
 app.use('/api', (req, res, next) => {
@@ -177,6 +180,8 @@ app.use('/api/WebsitePages', websitePagesRoutes);
 app.use('/api/settings', bankSettingsRoutes);
 app.use('/api/ExternalCheckups', externalCheckupsRoutes);
 app.use('/api/face', faceRecognitionRoutes);
+// PUBLIC Face ID check-in kiosk (iPad, no login). MUST stay public — see docs/FACE-ID-SCOPE.md.
+app.use('/api/public/face', faceCheckinRoutes);
 app.use('/api/Feedback', feedbackRoutes);
 app.use('/api/Reports', reportsRoutes);
 app.use('/api/telemetry', telemetryRoutes);

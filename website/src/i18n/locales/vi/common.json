@@ -349,5 +349,25 @@
   "deleteConfirmDefault": "Bạn có chắc muốn xóa mục này? Không thể hoàn tác.",
   "linkedDataWarning": "Cảnh báo dữ liệu liên kết",
   "updateAvailable": "Có bản cập nhật",
-  "whatsNew": "Có gì mới"
+  "whatsNew": "Có gì mới",
+  "checkIn": {
+    "title": "Điểm danh",
+    "subtitle": "Nhìn vào máy ảnh để điểm danh",
+    "scanning": "Đang quét khuôn mặt...",
+    "verifying": "Đang xác nhận...",
+    "capture": "Chụp",
+    "tryAgain": "Thử lại",
+    "welcomeBack": "Chào mừng trở lại!",
+    "welcomeBackName": "Chào mừng trở lại, {{name}}",
+    "youAreCheckedIn": "Bạn đã điểm danh.",
+    "noMatchTitle": "Không nhận ra được khuôn mặt",
+    "noMatchHint": "Vui lòng điểm danh tại quầy.",
+    "multipleTitle": "Có nhiều kết quả phù hợp",
+    "multipleHint": "Vui lòng điểm danh tại quầy.",
+    "errorTitle": "Đã xảy ra lỗi",
+    "errorGeneric": "Đã xảy ra lỗi. Vui lòng thử lại.",
+    "cameraError": "Không truy cập được máy ảnh. Kiểm tra quyền.",
+    "captureFailed": "Chụp không thành công. Vui lòng thử lại.",
+    "footer": "Chỉ xác nhận danh tính. Không cần đăng nhập."
+  }
 }
