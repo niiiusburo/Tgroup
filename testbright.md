@@ -27,9 +27,9 @@ Affected roles and data flows:
 Execution checklist:
 - [x] PASS: API unit - `cd api && JWT_SECRET=test-secret npx jest src/routes/partners/__tests__/investorVisibility.test.js tests/readRoutePermissions.test.js --runInBand` passed 2 suites / 28 tests.
 - [x] PASS: UI unit - `cd website && npx vitest run src/pages/Customers/CustomerColumns.test.tsx src/hooks/__tests__/useCustomers.permissions.test.ts` passed 2 files / 11 tests.
-- [ ] PENDING: Live NK2 - admin sees checkbox and API returns allowlist count.
-- [ ] PENDING: Live NK2 - investor user does not see the checkbox and still sees only allowlisted customers.
-- [ ] PENDING: Live NK - production site version/health unchanged.
+- [x] PASS: Live NK2 - admin sees checkbox and API returns allowlist count - `GET /api/Partners/investor-visibility` returned 200 with 10 IDs; idempotent PATCH returned 200 `visible:true`; screenshot `output/playwright/nk2-investor-checkbox-20260627/admin-customers-investor-checkbox.png`.
+- [x] PASS: Live NK2 - investor user does not see the checkbox and still sees only allowlisted customers - login returned group `investor`, `/api/Partners?limit=20` returned total 10, screenshot `output/playwright/nk2-investor-checkbox-20260627/investor-customers-no-checkbox.png` has zero checkboxes.
+- [x] PASS: Live NK - production site version/health unchanged - `https://nk.2checkin.com/version.json` stayed `0.32.44` / `ff65634`; `/api/health` stayed healthy.
 
 ---
 
