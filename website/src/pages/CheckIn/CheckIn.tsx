@@ -8,7 +8,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, CheckCircle2, Loader2, RotateCcw, ScanFace, UserX } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Loader2, RotateCcw, ScanFace, SwitchCamera, UserX } from 'lucide-react';
 import { useFaceCaptureController } from '@/components/shared/useFaceCaptureController';
 import { publicFaceCheckIn } from '@/lib/api';
 
@@ -54,7 +54,7 @@ export function CheckIn() {
   const controller = useFaceCaptureController({
     isOpen: status.kind === 'idle' || status.kind === 'capturing',
     captureMode: 'single',
-    initialFacingMode: 'user',
+    defaultFacingMode: 'user',
     cameraErrorMessage: t('checkIn.cameraError', 'Cannot access camera. Check permissions.'),
     captureFailedMessage: t('checkIn.captureFailed', 'Capture failed. Please try again.'),
     onCapture: handleCapture,
@@ -102,13 +102,20 @@ export function CheckIn() {
 
       <main className="relative w-full max-w-md aspect-[3/4] sm:aspect-square overflow-hidden rounded-xl bg-gray-900 shadow-2xl ring-1 ring-gray-200">
         {showCamera && (
-          <video
-            ref={controller.videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="absolute inset-0 h-full w-full object-cover"
-          />
+          <>
+            <video
+              ref={controller.videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div
+              aria-hidden
+              data-testid="checkin-privacy-blur"
+              className="pointer-events-none absolute inset-0 bg-gray-950/15 backdrop-blur-[14px]"
+            />
+          </>
         )}
 
         {status.kind === 'verifying' && (
@@ -159,6 +166,18 @@ export function CheckIn() {
             <ScanFace className="h-4 w-4" aria-hidden />
             <span>{t('checkIn.scanning', 'Scanning for face...')}</span>
           </div>
+        )}
+
+        {showCamera && (
+          <button
+            type="button"
+            onClick={controller.handleSwitchCamera}
+            disabled={controller.isStarting}
+            className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-gray-900/70 text-white shadow-sm backdrop-blur transition hover:bg-gray-800/80 active:scale-[0.98] disabled:opacity-50"
+            aria-label={t('checkIn.flipCamera', 'Flip camera')}
+          >
+            <SwitchCamera className="h-5 w-5" aria-hidden />
+          </button>
         )}
 
         {showCamera && controller.error && (

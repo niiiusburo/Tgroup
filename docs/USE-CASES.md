@@ -168,10 +168,11 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Preconditions:** Camera available; customer has provider-verified Face ID registration (UC-003).
 - **Main flow:**
   1. Page opens without login and starts front-camera capture using iOS-friendly camera constraints.
-  2. Frontend posts image to `POST /api/public/face/checkin`.
-  3. Backend runs recognize-only Face ID with the configured provider.
-  4. If exactly one high-confidence match exists, API returns a minimal greeting only.
-  5. Page shows success briefly, then resets for the next customer.
+  2. Page shows a softened privacy preview plus a visible flip-camera control; captured frames remain unblurred and center-cropped for the Face ID provider.
+  3. Frontend posts image to `POST /api/public/face/checkin`.
+  4. Backend runs recognize-only Face ID with the configured provider.
+  5. If exactly one high-confidence match exists, API returns a minimal greeting only.
+  6. Page shows success briefly, then resets for the next customer.
 - **Alternate flows:**
   - **AF-1 No match:** API returns `{ result: 'no_match' }`; page tells customer to check in at the desk.
   - **AF-2 Multiple candidates:** API returns only candidate count; page tells customer to check in at the desk.

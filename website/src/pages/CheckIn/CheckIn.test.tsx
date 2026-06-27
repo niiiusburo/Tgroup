@@ -1,7 +1,9 @@
-import { describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { CheckIn } from './CheckIn';
+
+const mockHandleSwitchCamera = vi.hoisted(() => vi.fn());
 
 const mockUseFaceCaptureController = vi.hoisted(() => vi.fn(() => ({
   videoRef: { current: null },
@@ -15,7 +17,7 @@ const mockUseFaceCaptureController = vi.hoisted(() => vi.fn(() => ({
   isProfileCapture: false,
   currentPose: { id: 'center', labelKey: 'center', fallbackLabel: 'Center', hintKey: 'hint', fallbackHint: 'Look forward' },
   handleCapture: vi.fn(),
-  handleSwitchCamera: vi.fn(),
+  handleSwitchCamera: mockHandleSwitchCamera,
 })));
 
 vi.mock('@/components/shared/useFaceCaptureController', () => ({
@@ -36,6 +38,10 @@ function renderCheckIn() {
 }
 
 describe('CheckIn kiosk page', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('renders without an AuthProvider because it is a public route', async () => {
     const { container } = renderCheckIn();
 
@@ -50,8 +56,23 @@ describe('CheckIn kiosk page', () => {
 
     await waitFor(() => {
       expect(mockUseFaceCaptureController).toHaveBeenCalledWith(
-        expect.objectContaining({ initialFacingMode: 'user' }),
+        expect.objectContaining({ defaultFacingMode: 'user' }),
       );
     });
+  });
+
+  it('keeps the public preview privacy-blurred without blurring the capture video', async () => {
+    renderCheckIn();
+
+    expect(await screen.findByTestId('checkin-privacy-blur')).toHaveClass('backdrop-blur-[14px]');
+    expect(document.querySelector('video')?.className).not.toContain('blur-');
+  });
+
+  it('lets the user flip cameras from the public kiosk page', async () => {
+    renderCheckIn();
+
+    fireEvent.click(await screen.findByLabelText(/flip camera|đổi camera|checkIn\.flipCamera/i));
+
+    expect(mockHandleSwitchCamera).toHaveBeenCalledTimes(1);
   });
 });

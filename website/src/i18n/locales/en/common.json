@@ -368,6 +368,7 @@
     "errorGeneric": "Something went wrong. Please try again.",
     "cameraError": "Cannot access camera. Check permissions.",
     "captureFailed": "Capture failed. Please try again.",
-    "footer": "Identity check-in only. No login required."
+    "footer": "Identity check-in only. No login required.",
+    "flipCamera": "Flip camera"
   }
 }

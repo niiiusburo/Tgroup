@@ -368,6 +368,7 @@
     "errorGeneric": "Đã xảy ra lỗi. Vui lòng thử lại.",
     "cameraError": "Không truy cập được máy ảnh. Kiểm tra quyền.",
     "captureFailed": "Chụp không thành công. Vui lòng thử lại.",
-    "footer": "Chỉ xác nhận danh tính. Không cần đăng nhập."
+    "footer": "Chỉ xác nhận danh tính. Không cần đăng nhập.",
+    "flipCamera": "Đổi camera"
   }
 }

@@ -78,6 +78,7 @@ notes:
   - `FACE_RECOGNITION_PROVIDER=local` uses the Python FastAPI face-service with OpenCV YuNet (detection) and SFace (128-dim embedding extraction).
   - `FACE_RECOGNITION_PROVIDER=compreface` uses CompreFace recognition subjects keyed by `partners.id`; TGClinic still updates `partners.face_subject_id` and `face_registered_at`.
   - CompreFace registration/status must query `/faces?subject=<partners.id>`; `partners.face_subject_id` without at least one CompreFace example is not a registered face.
+  - Public `/checkin` must keep a visible flip-camera control and softened on-screen privacy preview while sending an unblurred, center-cropped capture frame to the Face ID provider.
   - Compreface services are defined in docker-compose.yml but are not required for core app startup.
   - "Hosoonline is currently mixed-contract: login credentials take precedence for image reads (`Authorization: Bearer <token>` plus access_token cookie); `HOSOONLINE_API_KEY` / `X-API-Key` remains as fallback for older patient health-checkup endpoints."
   - The current observed Hosoonline website contract logs in through `/api/auth/login`, searches appointment media through `/api/appointments/search?q=<customerCode>&page=<page>`, and fetches bytes through `/api/appointments/image/:imageName`.

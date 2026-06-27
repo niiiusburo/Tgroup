@@ -14,6 +14,14 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.41] — 2026-06-27
+### Fixed
+- **NK2 public Face ID iPhone regression:** `/checkin` now keeps the visible flip-camera control, starts from the front camera via `defaultFacingMode: "user"`, and restores the softened privacy preview without blurring the captured frame sent to CompreFace. — @agent — UC-007A.
+- **Phone Face ID capture framing:** shared capture now requests higher-resolution camera frames and center-crops to a 600x600 JPEG so the face fills more of the provider input on iPhone/iPad. — @agent — UC-007A no-face/no-match prevention.
+
+### Tested
+- `cd website && npx vitest run src/pages/CheckIn/CheckIn.test.tsx src/components/shared/faceCaptureEngine.test.ts src/components/shared/FaceCaptureModal.test.tsx src/lib/api/__tests__/faceRecognition.test.ts`; `npm --prefix website run build`; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off <changed public Face ID files>`; `npm run verify:governance`. NK2 live proof follows deploy. — @agent
+
 ## [0.32.40] — 2026-06-27
 ### Added
 - **Public NK2 Face ID kiosk:** `/checkin` is now a committed public phone/tablet route backed by `POST /api/public/face/checkin`, with no JWT requirement, recognize-only behavior, per-IP rate limits, and privacy-minimized responses. — @agent — UC-007A public Face ID kiosk.

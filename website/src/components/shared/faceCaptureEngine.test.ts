@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { analyzeFrame } from './faceCaptureEngine';
+import { analyzeFrame, captureVideoFrame } from './faceCaptureEngine';
 
 describe('faceCaptureEngine', () => {
   const createReadyFrameData = () => {
@@ -24,6 +24,12 @@ describe('faceCaptureEngine', () => {
       configurable: true,
       value: vi.fn(() => mockCanvasContext as unknown as CanvasRenderingContext2D),
     });
+    Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
+      configurable: true,
+      value: vi.fn((callback: BlobCallback) => {
+        callback(new Blob(['face'], { type: 'image/jpeg' }));
+      }),
+    });
   });
 
   afterEach(() => {
@@ -47,5 +53,24 @@ describe('faceCaptureEngine', () => {
     const result = await analyzeFrame(createVideo(), null, false);
 
     expect(result.ready).toBe(true);
+  });
+
+  it('center-crops captured frames for CompreFace while keeping a fixed square output', async () => {
+    const video = createVideo();
+
+    await captureVideoFrame(video);
+
+    expect(mockCanvasContext.drawImage).toHaveBeenLastCalledWith(
+      video,
+      176,
+      96,
+      288,
+      288,
+      0,
+      0,
+      600,
+      600,
+    );
+    expect(HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(expect.any(Function), 'image/jpeg', 0.95);
   });
 });

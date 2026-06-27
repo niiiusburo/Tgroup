@@ -1952,7 +1952,7 @@ TestSprite execution items:
 
 ---
 
-# TestSprite Plan: NK2 Public Face ID Kiosk + CompreFace Status Repair (2026-06-27, v0.32.40)
+# TestSprite Plan: NK2 Public Face ID Kiosk + CompreFace Status Repair (2026-06-27, v0.32.41)
 
 Feature/edit name: NK2 public Face ID kiosk durability and provider-backed Face ID status
 
@@ -1980,6 +1980,8 @@ Expected behavior:
 | Customer has `face_subject_id` but CompreFace has zero examples | `GET /api/face/status/:partnerId` returns `registered: false`, `sampleCount: 0`, `lastRegisteredAt: null`. |
 | Phone opens `/checkin` | Public page renders without login and starts the camera flow. |
 | Phone opens `/checkin` on iOS/Safari | Camera startup requests the front camera first and falls back through iOS-friendly constraints instead of failing on `facingMode: exact`. |
+| Phone views the camera preview | The on-screen preview is privacy-softened while captured frames remain sharp for recognition. |
+| Phone needs a different camera | A visible flip-camera button switches between front and back camera constraints. |
 | Phone submits a matching face | Public API returns `{ ok: true, result: 'match', greeting }`; response contains no partner ID, phone, code, score, or candidate identity. |
 | Phone submits no-match face | Public API returns `{ ok: true, result: 'no_match' }`; page asks user to check in at the desk. |
 | Phone submits ambiguous face | Public API returns only `{ ok: true, result: 'multiple', candidates: <count> }`. |
@@ -2005,7 +2007,8 @@ Setup data and login state:
 TestSprite execution items:
 - [x] DONE 2026-06-27: Local API tests covered CompreFace example-count verification, stale provider status, public no-auth route, privacy-minimized response, and rate limiting.
 - [x] DONE 2026-06-27: Local frontend tests covered `/checkin` rendering without AuthProvider, front-camera startup, iOS-friendly camera constraints, playback-block error surfacing, and public Face ID API wrapper behavior.
-- [ ] PENDING: Deploy v0.32.40 to NK2 only, verify `/version.json` reports v0.32.40 and the deployed commit.
+- [x] DONE 2026-06-27: Regression tests cover public `/checkin` front-camera default, visible flip-camera button, privacy blur overlay, and center-cropped 600x600 Face ID capture.
+- [ ] PENDING: Deploy v0.32.41 to NK2 only, verify `/version.json` reports v0.32.41 and the deployed commit.
 - [ ] PENDING: Verify `https://nk2.2checkin.com/api/health` is healthy with `faceProvider: "compreface"`.
 - [ ] PENDING: Verify public route missing-image response returns HTTP 400 without auth.
 - [ ] PENDING: Capture screenshot of `https://nk2.2checkin.com/checkin`.

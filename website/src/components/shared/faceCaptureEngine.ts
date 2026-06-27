@@ -33,16 +33,16 @@ export async function getCameraStream(facingMode: CameraFacingMode) {
     {
       video: {
         facingMode: { ideal: facingMode },
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
       },
       audio: false,
     },
     {
       video: {
         facingMode: { exact: facingMode },
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
       },
       audio: false,
     },
@@ -173,14 +173,22 @@ export function captureVideoFrame(video: HTMLVideoElement | null) {
     return Promise.resolve(null);
   }
 
+  const videoWidth = video.videoWidth;
+  const videoHeight = video.videoHeight;
+  const minSide = Math.min(videoWidth, videoHeight);
+  const cropSide = Math.round(minSide * 0.6);
+  const sx = Math.round((videoWidth - cropSide) / 2);
+  const sy = Math.round((videoHeight - cropSide) / 2);
+  const outputSize = 600;
   const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
+  canvas.width = outputSize;
+  canvas.height = outputSize;
   const ctx = canvas.getContext('2d');
   if (!ctx) return Promise.resolve(null);
-  ctx.drawImage(video, 0, 0);
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(video, sx, sy, cropSide, cropSide, 0, 0, outputSize, outputSize);
 
   return new Promise<Blob | null>((resolve) => {
-    canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.92);
+    canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.95);
   });
 }
