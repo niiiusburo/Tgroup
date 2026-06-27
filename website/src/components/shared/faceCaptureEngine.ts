@@ -177,14 +177,24 @@ export function captureVideoFrame(video: HTMLVideoElement | null) {
     return Promise.resolve(null);
   }
 
+  // Center-crop to a square so the face fills more of the frame. CompreFace
+  // recognition quality drops sharply when the face occupies <20% of the image,
+  // which is the typical case for a 1280x720 wide shot from an iPad kiosk.
+  // Square crop keeps the face large without zooming (no interpolation artifacts).
+  const vw = video.videoWidth;
+  const vh = video.videoHeight;
+  const side = Math.min(vw, vh);
+  const sx = Math.round((vw - side) / 2);
+  const sy = Math.round((vh - side) / 2);
+
   const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
+  canvas.width = side;
+  canvas.height = side;
   const ctx = canvas.getContext('2d');
   if (!ctx) return Promise.resolve(null);
-  ctx.drawImage(video, 0, 0);
+  ctx.drawImage(video, sx, sy, side, side, 0, 0, side, side);
 
   return new Promise<Blob | null>((resolve) => {
-    canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.92);
+    canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.95);
   });
 }

@@ -84,9 +84,36 @@ export function useFaceCaptureController({
       if (i > 0) await new Promise((r) => setTimeout(r, BURST_FRAME_INTERVAL_MS));
       const frameBlob = await captureVideoFrame(video);
       if (!frameBlob) continue;
-      // requireFace=false: if detector is null we still want a numeric quality score
-      // back, not a 0.45-penalty cap that would skew "best" selection.
-      const { score } = await analyzeFrame(video, detector, detector !== null);
+      // IMPORTANT: score the SAME frame we just captured, not the live video.
+      // On iOS, capture has ~80-150ms latency vs live video, so scoring the live
+      // video would often pick a frame whose blob is blurrier than the score
+      // suggested. We build a throwaway <img> from the blob and score that.
+      // requireFace=false so detector-null (iOS Safari) still gets a real score.
+      let score = 0;
+      try {
+        const url = URL.createObjectURL(frameBlob);
+        const probe = new Image();
+        await new Promise<void>((resolve, reject) => {
+          probe.onload = () => resolve();
+          probe.onerror = () => reject(new Error('probe failed'));
+          probe.src = url;
+        });
+        // analyzeFrame expects a HTMLVideoElement; for an <img>, we synthesize the
+        // minimal shape it uses (videoWidth/videoHeight + drawImage target).
+        const imgLike = probe as unknown as HTMLVideoElement;
+        // Provide the props analyzeFrame reads via getImageData on a canvas:
+        // we re-use estimateFrameQuality path by passing the image as the source.
+        // analyzeFrame reads video.videoWidth/videoHeight; patch them onto the probe.
+        (imgLike as unknown as { videoWidth: number }).videoWidth = probe.naturalWidth;
+        (imgLike as unknown as { videoHeight: number }).videoHeight = probe.naturalHeight;
+        const analyzed = await analyzeFrame(imgLike, detector, detector !== null);
+        score = analyzed.score;
+        URL.revokeObjectURL(url);
+      } catch {
+        // Fallback: score the live video (old behavior) — better than nothing.
+        const fallback = await analyzeFrame(video, detector, detector !== null);
+        score = fallback.score;
+      }
       frames.push({ blob: frameBlob, score });
     }
     if (frames.length === 0) return null;

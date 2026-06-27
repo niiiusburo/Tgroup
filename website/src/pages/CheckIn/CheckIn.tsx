@@ -23,7 +23,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScanFace, CheckCircle2, UserX, AlertTriangle, Loader2, RotateCcw, Bug } from 'lucide-react';
+import { ScanFace, CheckCircle2, UserX, AlertTriangle, Loader2, RotateCcw, Bug, SwitchCamera } from 'lucide-react';
 import { useFaceCaptureController } from '@/components/shared/useFaceCaptureController';
 import {
   logFace,
@@ -283,15 +283,30 @@ export function CheckIn() {
       {/* Capture + reset controls — iPad-sized touch targets */}
       <div className="mt-8 flex flex-col items-center gap-3">
         {showCamera && (
-          <button
-            type="button"
-            onClick={handleManualCapture}
-            disabled={controller.isStarting}
-            className="w-20 h-20 rounded-full bg-primary hover:bg-primary/90 disabled:opacity-50 transition flex items-center justify-center ring-4 ring-white/20 active:scale-95"
-            aria-label={t('checkIn.capture', 'Capture')}
-          >
-            <ScanFace className="w-8 h-8 text-white" aria-hidden />
-          </button>
+          <div className="flex items-center gap-6">
+            <button
+              type="button"
+              onClick={() => controller.handleSwitchCamera()}
+              disabled={controller.isStarting}
+              className="w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-50 transition flex items-center justify-center active:scale-95"
+              aria-label={t('checkIn.flipCamera', 'Flip camera')}
+              title={t('checkIn.flipCamera', 'Flip camera')}
+            >
+              <SwitchCamera className="w-6 h-6 text-white" aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={handleManualCapture}
+              disabled={controller.isStarting}
+              className="w-20 h-20 rounded-full bg-primary hover:bg-primary/90 disabled:opacity-50 transition flex items-center justify-center ring-4 ring-white/20 active:scale-95"
+              aria-label={t('checkIn.capture', 'Capture')}
+            >
+              <ScanFace className="w-8 h-8 text-white" aria-hidden />
+            </button>
+            <div className="w-14 h-14" aria-hidden>
+              {/* spacer to keep capture button centered */}
+            </div>
+          </div>
         )}
         {terminal && (
           <button
