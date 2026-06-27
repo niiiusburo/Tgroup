@@ -22,6 +22,7 @@ owns:
   - website/src/hooks/useBankSettings.ts
 reads:
   - api/src/db.js
+  - dbo.investor_clients (investor allowlist for payment/deposit reads)
 writes:
   - dbo.payments
   - dbo.payment_allocations
@@ -42,6 +43,7 @@ tables:
   - dbo.companies
   - dbo.saleorders
   - dbo.dotkhams
+  - dbo.investor_clients
 endpoints:
   - GET    /api/DotKhams
   - GET    /api/DotKhams/:id
@@ -93,6 +95,8 @@ impact_tests:
   - website/e2e/vps-payment-history.spec.ts
   - website/src/components/payment/__tests__/PaymentForm.submit.test.tsx
   - website/src/lib/allocatePaymentSources.test.ts
+  - api/tests/investorIdorScoping.test.js
+  - api/tests/investorScopeRoutePermissions.test.js
 risk_level: high
 notes:
   - "`payments` is the canonical money row; `payment_allocations` is the canonical link from payments to saleorders or dotkhams."
@@ -104,3 +108,4 @@ notes:
     `payment.void`. `payment.edit` alone must not grant refund, delete, void,
     PATCH, or proof-upload access unless the code changes.
   - Payment allocation flows can update `dotkhams.amountresidual`, so DotKhams route/schema drift belongs in payment verification even though `/api/DotKhams` itself is read-only.
+  - Investor employees receive `payment.view` only. Payment, receipt, account-payment, monthly-plan, and deposit reads must be scoped to allowlisted customers; write/refund/void routes remain blocked by missing permissions in the seeded investor group.

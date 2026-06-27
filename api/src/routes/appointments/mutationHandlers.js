@@ -1,5 +1,6 @@
 const { query } = require('../../db');
 const { errorResponse, foreignKeyExists, isValidISODate, isValidUUID, readBodyField, VALID_STATES } = require('./helpers');
+const { resolveInvestorScope } = require('../../services/permissionService');
 
 const VIETNAM_NOW_SQL = `(NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh')`;
 
@@ -75,6 +76,12 @@ async function createAppointment(req, res) {
 
     if (doctorId && !(await foreignKeyExists('employees', doctorId))) {
       return errorResponse(res, 404, 'DOCTOR_NOT_FOUND', 'Doctor with given doctorId does not exist');
+    }
+
+    // Investor scope: validate that the appointment is being created for an allowed customer
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(partnerId)) {
+      return errorResponse(res, 403, 'E_INVESTOR_CUSTOMER_NOT_ALLOWED', 'Bạn không có quyền với khách hàng này');
     }
 
     // Generate appointment name (AP + sequence)
@@ -216,9 +223,15 @@ async function updateAppointment(req, res) {
     }
 
     // Check if appointment exists
-    const existing = await query('SELECT id FROM appointments WHERE id = $1', [id]);
+    const existing = await query('SELECT id, partnerid FROM appointments WHERE id = $1', [id]);
     if (!existing || existing.length === 0) {
       return errorResponse(res, 404, 'NOT_FOUND', 'Appointment not found');
+    }
+
+    // Investor scope: validate that the appointment being updated is for an allowed customer
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(existing[0].partnerid)) {
+      return errorResponse(res, 403, 'E_INVESTOR_CUSTOMER_NOT_ALLOWED', 'Bạn không có quyền với khách hàng này');
     }
 
     // Check foreign key constraints after validation and existence check

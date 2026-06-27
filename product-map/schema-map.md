@@ -2,7 +2,7 @@
 
 > Database entity map: relationships, writers, readers, endpoints, and frontend surfaces.
 
-> Migration inventory: 53 SQL files under `api/migrations/` as of 2026-05-17 local file inventory. Duplicate numeric prefixes exist, so treat filename order as inventory, not a strict linear version sequence.
+> Migration inventory: 54 SQL files under `api/migrations/` as of 2026-06-27 local file inventory. Duplicate numeric prefixes exist, so treat filename order as inventory, not a strict linear version sequence.
 
 ## Legend
 
@@ -124,7 +124,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | Attribute | Value |
 |-----------|-------|
 | **Primary Key** | `id` (uuid) |
-| **Key Relationships** | FK `companyid` → companies; conceptually parent of `appointments.partnerid`, `appointments.doctorid`, `payments.partnerid`, `saleorders.partner_id`, `dotkhams.partnerid`, `dotkhams.doctorid`, `monthlyplans.partnerid`, `employee_permissions.employee_id`, `permission_overrides.employee_id`, `employee_location_scope.employee_id` |
+| **Key Relationships** | FK `companyid` → companies; conceptually parent of `appointments.partnerid`, `appointments.doctorid`, `payments.partnerid`, `saleorders.partner_id`, `dotkhams.partnerid`, `dotkhams.doctorid`, `monthlyplans.partnerid`, `employee_permissions.employee_id`, `permission_overrides.employee_id`, `employee_location_scope.employee_id`, `investor_clients.investor_id`, `investor_clients.partner_id` |
 | **Discriminator Columns** | `customer` (bool), `employee` (bool), `isdoctor` (bool), `isassistant` (bool), `isreceptionist` (bool) |
 | **W** | `api/src/routes/partners.js`, `api/src/routes/employees.js`, `api/src/routes/auth.js` (password_hash, last_login), `api/src/routes/faceRecognition.js` (face_subject_id), `api/src/routes/permissions.js` (tier_id) |
 | **R** | `partners.js`, `appointments.js`, `payments.js`, `reports.js`, `employees.js`, `auth.js`, `faceRecognition.js`, `dashboardReports.js`, `commissions.js`, employee revenue export builder |
@@ -308,6 +308,18 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | **E** | Via `/api/Permissions/employees` and `/api/Auth/me` |
 | **UI** | FilterByLocation (locks when single location), LocationSelector |
 | **Risk** | **High** — empty scope currently treated as "all" or "none" depending on consumer; logic must stay consistent. |
+
+### dbo.investor_clients
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Key** | `id` (uuid) |
+| **Foreign Keys** | `investor_id` → partners (employee investor), `partner_id` → partners (customer) |
+| **W** | Migration/admin allowlist tooling only; no customer write path owns this table |
+| **R** | `permissionService.resolveInvestorScope()` and customer-touching route/report filters |
+| **E** | Indirect through customer, appointment, payment, service, dashboard, and report endpoints for users in the `investor` permission group |
+| **UI** | Investor customer assignment UI is not shipped in this branch; allowlist rows are deployment/admin data |
+| **Risk** | **High** — NK and NK2 currently share `tdental_demo`; migration is additive but physically lands in the shared DB. Empty allowlists must return no customer data for investor users. |
 
 ---
 

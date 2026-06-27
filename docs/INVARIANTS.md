@@ -71,6 +71,12 @@
 **Enforced by:** Most `api/src/routes/*.js` list handlers lack location scoping SQL.
 **Cite when:** Adding backend list routes, changing `LocationContext`, or implementing multi-location features.
 
+### INV-021 — Investor Employee Allowlist Scope
+**Rule:** An investor is a normal employee account (`dbo.partners.employee = true`) assigned to the `investor` permission group. Investor-visible customer data MUST be restricted by `dbo.investor_clients` on every customer-touching read and aggregate, and the seeded group MUST stay view-only unless an explicit product decision changes it.
+**Rationale:** Investors need customer-specific visibility without a parallel user system or broad clinic access. Empty allowlists fail closed.
+**Enforced by:** `resolveInvestorScope()` in `api/src/services/permissionService.js`, migration `048_investor_customer_scope.sql`, focused investor IDOR and route-permission tests.
+**Cite when:** Editing auth/permission resolution, customer/profile reads, appointments, payments, service records, reports, or investor allowlist migration/admin flows.
+
 ---
 
 ## Money & Payment Invariants
@@ -177,3 +183,4 @@
 |---|---|---|---|
 | 2026-05-13 | INV-001..INV-020 | Initial invariant set created | feat/complete-documentation-stack |
 | 2026-05-13 | INC-20260506-01, INC-20260506-02 | Incident-derived invariants added | feat/complete-documentation-stack |
+| 2026-06-27 | INV-021 | Added investor employee allowlist scope invariant | codex/nk2-investor-scope |

@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.32.39",
+    "date": "2026-06-27",
+    "commit": "pending",
+    "highlights": "NK2 can now run read-only investor employee accounts scoped to assigned customers.",
+    "sections": [
+      {
+        "title": "Investor Access",
+        "items": [
+          "Investors remain normal employee accounts and are identified by the existing permission group system.",
+          "Customer, appointment, service, payment, receipt, dashboard, and report reads are filtered through the new investor customer allowlist.",
+          "The seeded investor group is view-only and does not grant customer, appointment, payment, refund, void, or monthly-plan write permissions."
+        ]
+      },
+      {
+        "title": "Operations",
+        "items": [
+          "Migration 048 creates dbo.investor_clients and the read-only investor group, but must be explicitly approved before running because NK and NK2 share the tdental_demo database.",
+          "Existing staff/admin behavior is unchanged unless an employee is assigned to the investor group."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.37",
     "date": "2026-05-21",
     "commit": "pending",

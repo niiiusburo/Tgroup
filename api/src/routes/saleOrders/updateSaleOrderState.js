@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { query } = require('../../db');
+const { resolveInvestorScope } = require('../../services/permissionService');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
 
 async function updateSaleOrderState(req, res) {
@@ -14,11 +15,19 @@ async function updateSaleOrderState(req, res) {
     }
 
     const oldRows = await query(
-      `SELECT state FROM saleorders WHERE id = $1 AND isdeleted = false`,
+      `SELECT state, partnerid FROM saleorders WHERE id = $1 AND isdeleted = false`,
       [id],
     );
     if (!oldRows || oldRows.length === 0) {
       return res.status(404).json({ error: 'Sale order not found' });
+    }
+
+    // Investor scope: validate the order's customer
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(oldRows[0].partnerid)) {
+      return res.status(403).json({
+        error: { code: 'E_INVESTOR_CUSTOMER_NOT_ALLOWED', message: 'Bạn không có quyền với khách hàng này' },
+      });
     }
 
     const oldState = oldRows[0].state;

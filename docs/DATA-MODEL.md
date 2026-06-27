@@ -7,7 +7,7 @@
 ## Schema Statistics
 
 - **Tables / Views:** Baseline schema plus migration-added objects; verify the target database for an exact live count before sync/deploy decisions.
-- **Migrations:** 53 canonical SQL files in `api/migrations/`; 2 supplemental SQL files in `api/src/db/migrations/` need consolidation or an explicit runbook decision.
+- **Migrations:** 54 canonical SQL files in `api/migrations/`; 2 supplemental SQL files in `api/src/db/migrations/` need consolidation or an explicit runbook decision.
 - **Schema:** `dbo`
 - **Date handling:** `types.setTypeParser(1082, (val) => val)` returns DATE as plain `YYYY-MM-DD` strings. API process runs with `TZ=Asia/Ho_Chi_Minh`.
 
@@ -38,6 +38,7 @@ erDiagram
     partners ||--o{ employee_permissions : has
     partners ||--o{ permission_overrides : has
     partners ||--o{ employee_location_scope : scoped
+    partners ||--o{ investor_clients : "investor/customer"
     partners ||--o{ feedback_threads : authors
     partners ||--o{ feedback_messages : authors
     partners ||--o{ hr_payslips : receives
@@ -336,6 +337,22 @@ erDiagram
 | `employee_id` | uuid | FK → partners |
 | `company_id` | uuid | FK → companies |
 
+#### `dbo.investor_clients`
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | uuid | PK, DEFAULT gen_random_uuid() |
+| `investor_id` | uuid | FK → partners(id), ON DELETE CASCADE |
+| `partner_id` | uuid | FK → partners(id), ON DELETE CASCADE |
+| `is_visible` | boolean | NOT NULL DEFAULT true |
+| `datecreated` | timestamp | DEFAULT NOW() |
+| `lastupdated` | timestamp | DEFAULT NOW() |
+
+**Unique:** `(investor_id, partner_id)`.
+
+**Indexes:** `idx_investor_clients_investor` (partial where `is_visible = true`), `idx_investor_clients_partner`.
+
+**Note:** Investors are normal employee rows in `dbo.partners` assigned to the `investor` permission group. This allowlist is read by `resolveInvestorScope()` and must fail closed when empty.
+
 ---
 
 ### Face Recognition
@@ -542,6 +559,9 @@ Soft-deleted rows (`isdeleted = true`) are hidden from normal queries but still 
 
 ### INV-SCHEMA-005 — Permission Group System Protection
 Rows in `dbo.permission_groups` with `is_system = true` must not be deletable through the admin UI. System groups are seed data required for baseline permission resolution.
+
+### INV-SCHEMA-005A — Investor Allowlist Fail-Closed
+`dbo.investor_clients` is the only customer allowlist for employees in the `investor` group. If an investor has zero visible rows, customer-linked reads and aggregates must return no customer data.
 
 ### INV-SCHEMA-006 — Face Embedding Dimension
 If `dbo.customer_face_embeddings` exists and the local provider is active, the embedding vector must be 128 dimensions (SFace model). Changing dimensions requires a migration to recreate the column and re-register all locally stored faces. CompreFace mode does not write embedding vectors into this table.

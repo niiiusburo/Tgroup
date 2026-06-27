@@ -412,3 +412,24 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Postconditions:** Staff can inspect long migrated clinical notes without breaking dense profile layout.
 - **Invariants touched:** INV-015 (expandable overflow), INV-016 (i18n), INV-017 (dense list scroll).
 - **Traceability:** Related WF: WF-014. Contracts/routes: `GET /api/Partners/:id`, `GET /api/DotKhams`. Data/tables: `dbo.partners.medicalhistory`, `dbo.dotkhams`, `dbo.dotkhamsteps`. Tests: `website/src/components/customer/CustomerProfile.test.tsx`, `website/src/hooks/__tests__/useCustomerProfile.date-normalization.test.tsx`, no dedicated DotKham tooltip regression yet. Product-map domains: `customers-partners`, `services-catalog`, `payments-deposits` when DotKham allocations are shown.
+
+---
+
+## UC-022 — Investor Views Assigned Customers
+
+- **Actor:** Investor employee
+- **Trigger:** Investor logs in and opens customer, service, payment, appointment, or report surfaces.
+- **Preconditions:** Employee row exists in `dbo.partners` with `employee=true`; `partners.tier_id` points to permission group `investor`; `dbo.investor_clients` contains the customers they may see; actor has only view permissions from the seeded investor group.
+- **Main flow:**
+  1. Investor logs in through the normal employee login flow.
+  2. Backend resolves effective permissions and `resolveInvestorScope()`.
+  3. Investor opens `/customers` or a customer-linked report/API route.
+  4. Backend applies the `dbo.investor_clients` customer allowlist to reads and aggregates.
+  5. Frontend renders only allowlisted customer data using existing pages.
+- **Alternate flows:**
+  - **AF-1 Empty allowlist:** Investor sees empty lists/aggregates and no customer detail.
+  - **AF-2 Direct URL to non-allowlisted customer:** Backend returns 404 or an empty scoped result.
+  - **AF-3 Write attempt:** Existing `requirePermission` gates deny customer, appointment, payment, refund, void, or monthly-plan mutations because the seeded investor group is read-only.
+- **Postconditions:** Investor can inspect assigned customers without seeing unrelated clinic data or using a parallel user system.
+- **Invariants touched:** INV-001 (partners UUID identity), INV-008 (shared permission resolution), INV-021 (investor employee allowlist scope).
+- **Traceability:** Related WF: none yet. Contracts/routes: `resolveInvestorScope()` plus existing customer, appointment, payment, service, dashboard, and report routes. Data/tables: `dbo.partners`, `dbo.permission_groups`, `dbo.group_permissions`, `dbo.investor_clients`. Tests: `api/src/services/__tests__/permissionService.test.js`, `api/tests/investorIdorScoping.test.js`, `api/tests/investorScopeRoutePermissions.test.js`, `api/src/routes/reports/__tests__/cashFlow.test.js`. Product-map domains: `auth`, `customers-partners`, `appointments-calendar`, `payments-deposits`, `reports-analytics`.

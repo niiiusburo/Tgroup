@@ -1,6 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
+const { resolveInvestorScope } = require('../services/permissionService');
 
 const router = express.Router();
 
@@ -69,6 +70,14 @@ router.get('/', async (req, res) => {
     if (partnerId) {
       conditions.push(`sol.orderpartnerid = $${paramIdx}`);
       params.push(partnerId);
+      paramIdx++;
+    }
+
+    // Investor scope: restrict to the customers explicitly assigned to this investor
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      params.push(investorScope.allowedCustomerIds);
+      conditions.push(`sol.orderpartnerid = ANY($${paramIdx}::uuid[])`);
       paramIdx++;
     }
 
@@ -229,6 +238,27 @@ router.get('/', async (req, res) => {
 router.delete('/:id', requirePermission('customers.edit'), async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Fetch the line to get the order and check customer
+    const lineRows = await query(
+      `SELECT sol.orderid, so.partnerid
+       FROM saleorderlines sol
+       JOIN saleorders so ON so.id = sol.orderid
+       WHERE sol.id = $1 AND sol.isdeleted = false`,
+      [id]
+    );
+
+    if (!lineRows || lineRows.length === 0) {
+      return res.status(404).json({ error: 'Sale order line not found' });
+    }
+
+    // Investor scope: validate the order's customer
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(lineRows[0].partnerid)) {
+      return res.status(403).json({
+        error: { code: 'E_INVESTOR_CUSTOMER_NOT_ALLOWED', message: 'Bạn không có quyền với khách hàng này' },
+      });
+    }
 
     const rows = await query(
       `UPDATE saleorderlines

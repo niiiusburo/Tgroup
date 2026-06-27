@@ -5,6 +5,7 @@ const { requirePermission } = require("../middleware/auth");
 const { validate } = require("../middleware/validate");
 const { PaymentCreateSchema, PaymentUpdateSchema } = require("@tgroup/contracts");
 const { generateReceiptNumber, mapAllocations, rowsFrom, validateAllocationResidual } = require("./payments/helpers");
+const { resolveInvestorScope } = require("../services/permissionService");
 const {
   getPaymentById,
   listDepositUsage,
@@ -32,6 +33,12 @@ router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema)
 
     if (!customer_id || amount === undefined || amount === null || !method || parseFloat(amount) <= 0) {
       return res.status(400).json({ error: "customer_id, positive amount, and method are required" });
+    }
+
+    // Investor scope: validate write access to target customer
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(customer_id)) {
+      return res.status(403).json({ error: { code: 'E_INVESTOR_CUSTOMER_NOT_ALLOWED', message: 'Bạn không có quyền với khách hàng này' } });
     }
 
     // Determine payment_category explicitly
@@ -175,6 +182,12 @@ router.post("/refund", requirePermission('payment.refund'), async (req, res) => 
       return res.status(400).json({ error: "customer_id, positive amount, and method are required" });
     }
 
+    // Investor scope: validate write access to target customer
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(customer_id)) {
+      return res.status(403).json({ error: { code: 'E_INVESTOR_CUSTOMER_NOT_ALLOWED', message: 'Bạn không có quyền với khách hàng này' } });
+    }
+
     const receipt_number = await generateReceiptNumber();
 
     const result = await query(
@@ -239,7 +252,22 @@ router.patch("/:id", requirePermission('payment.add'), validate(PaymentUpdateSch
       return res.status(400).json({ error: "No valid fields to update" });
     }
 
+    // Investor scope: fetch the payment's customer_id and validate access
     values.push(id);
+    const paymentCheckResult = await query(
+      "SELECT customer_id FROM payments WHERE id = $1",
+      [id]
+    );
+    if (paymentCheckResult.length === 0) {
+      return res.status(404).json({ error: "Payment not found" });
+    }
+    const paymentCustomerId = paymentCheckResult[0].customer_id;
+
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(paymentCustomerId)) {
+      return res.status(403).json({ error: { code: 'E_INVESTOR_CUSTOMER_NOT_ALLOWED', message: 'Bạn không có quyền với khách hàng này' } });
+    }
+
     const sql = `UPDATE payments SET ${fields.join(", ")} WHERE id = $${values.length} RETURNING *`;
     const result = await query(sql, values);
 
@@ -273,6 +301,23 @@ router.delete("/:id", requirePermission('payment.void'), async (req, res) => {
   const { id } = req.params;
   const client = await pool.connect();
   try {
+    // Investor scope: fetch the payment's customer_id and validate access
+    const paymentCheckResult = await client.query(
+      "SELECT customer_id FROM payments WHERE id = $1",
+      [id]
+    );
+    if (paymentCheckResult.rows.length === 0) {
+      client.release();
+      return res.status(404).json({ error: "Payment not found" });
+    }
+    const paymentCustomerId = paymentCheckResult.rows[0].customer_id;
+
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(paymentCustomerId)) {
+      client.release();
+      return res.status(403).json({ error: { code: 'E_INVESTOR_CUSTOMER_NOT_ALLOWED', message: 'Bạn không có quyền với khách hàng này' } });
+    }
+
     await client.query("BEGIN");
 
     const allocationsToReverse = await client.query(
@@ -319,6 +364,23 @@ router.post("/:id/void", requirePermission('payment.void'), async (req, res) => 
   const { reason } = req.body || {};
   const client = await pool.connect();
   try {
+    // Investor scope: fetch the payment's customer_id and validate access
+    const paymentCheckResult = await client.query(
+      "SELECT customer_id FROM payments WHERE id = $1",
+      [id]
+    );
+    if (paymentCheckResult.rows.length === 0) {
+      client.release();
+      return res.status(404).json({ error: "Payment not found" });
+    }
+    const paymentCustomerId = paymentCheckResult.rows[0].customer_id;
+
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(paymentCustomerId)) {
+      client.release();
+      return res.status(403).json({ error: { code: 'E_INVESTOR_CUSTOMER_NOT_ALLOWED', message: 'Bạn không có quyền với khách hàng này' } });
+    }
+
     await client.query("BEGIN");
 
     const allocationsToReverse = await client.query(
@@ -369,6 +431,21 @@ router.post("/:id/proof", requirePermission('payment.add'), async (req, res) => 
 
     if (!proofImageBase64 || typeof proofImageBase64 !== "string" || !proofImageBase64.startsWith("data:image/")) {
       return res.status(400).json({ error: "proofImageBase64 must be a non-empty string starting with data:image/" });
+    }
+
+    // Investor scope: fetch the payment's customer_id and validate access
+    const paymentCheckResult = await query(
+      "SELECT customer_id FROM payments WHERE id = $1",
+      [id]
+    );
+    if (paymentCheckResult.length === 0) {
+      return res.status(404).json({ error: "Payment not found" });
+    }
+    const paymentCustomerId = paymentCheckResult[0].customer_id;
+
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(paymentCustomerId)) {
+      return res.status(403).json({ error: { code: 'E_INVESTOR_CUSTOMER_NOT_ALLOWED', message: 'Bạn không có quyền với khách hàng này' } });
     }
 
     const result = await query(

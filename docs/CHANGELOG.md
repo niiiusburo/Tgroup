@@ -14,6 +14,16 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.39] — 2026-06-27
+### Added
+- **NK2 investor customer scoping:** Investors remain normal employee accounts in `dbo.partners`, but the `investor` permission group plus `dbo.investor_clients` allowlist now scopes customer, appointment, payment, service, and report reads to explicitly assigned customers. The seeded investor group is view-only; write/refund/void permissions are not granted. — @agent — preserves INV-008 and new INV-021.
+
+### Docs
+- Documented migration 048, investor allowlist blast radius, product-map domains, TestSprite coverage, and the test matrix for read-only investor scoping. — @agent — schema/data-model governance for `dbo.investor_clients`.
+
+### Tested
+- `npm --prefix api ci`; `cd api && JWT_SECRET=test-secret npx jest tests/investorIdorScoping.test.js tests/investorScopeRoutePermissions.test.js src/services/__tests__/permissionService.test.js src/routes/reports/__tests__/cashFlow.test.js --runInBand`; `cd api && JWT_SECRET=test-secret npx jest src/routes/reports/__tests__/revenueRecognition.test.js src/routes/reports/__tests__/servicesBreakdown.test.js src/services/reports/__tests__/canonicalRevenue.test.js --runInBand`; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off` on changed production API JS returned 0 findings; `bash scripts/verify-docs.sh`; `npm run verify:governance`; `npm --prefix website ci`; `npm --prefix website run build`. Full changed-file Semgrep also ran and reported two local Express test-harness CSRF warnings in `api/src/routes/reports/__tests__/cashFlow.test.js`, with no production findings. — @agent
+
 ## [0.32.38] — 2026-06-01
 ### Fixed
 - **Customer profile saves no longer fail on migrated blank DOB parts.** The shared `@tgroup/contracts` partner schema now normalizes blank, `0`, and `"0"` birthday/birthmonth/birthyear values to `null` before validation, so unrelated edits on migrated customer records are not blocked while real invalid days/months still fail. — @agent — UC-001 customer profile edit.

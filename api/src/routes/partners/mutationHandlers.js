@@ -1,4 +1,5 @@
 const { query } = require('../../db');
+const { resolveInvestorScope } = require('../../services/permissionService');
 
 const UUID_FIELDS = [
   'companyid','titleid','agentid','countryid','stateid',
@@ -17,6 +18,15 @@ function sanitizeUuids(o) {
  */
 async function createPartner(req, res) {
   try {
+    // Investors manage only customers explicitly assigned to them; they cannot
+    // create brand-new customers (owner/admin creates + assigns). Defensive —
+    // the 'investor' group is also not granted customers.add.
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      return res.status(403).json({
+        error: { code: 'E_INVESTOR_CANNOT_CREATE_CUSTOMERS', message: 'Nhà đầu tư không thể tạo khách hàng mới' },
+      });
+    }
     sanitizeUuids(req.body);
     const {
       name,
@@ -184,6 +194,14 @@ async function updatePartner(req, res) {
 
     if (!existing || existing.length === 0) {
       return res.status(404).json({ error: 'Partner not found' });
+    }
+
+    // Investor scope: may only edit customers explicitly assigned to them.
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(id)) {
+      return res.status(403).json({
+        error: { code: 'E_INVESTOR_CUSTOMER_NOT_ALLOWED', message: 'Bạn không có quyền chỉnh sửa khách hàng này' },
+      });
     }
 
     // Check email uniqueness (case-insensitive) excluding this partner

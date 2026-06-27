@@ -6,7 +6,11 @@ jest.mock('../../db', () => ({
 }));
 
 const { query } = require('../../db');
-const { resolveEffectivePermissions, hasPermission } = require('../permissionService');
+const {
+  resolveEffectivePermissions,
+  hasPermission,
+  resolveInvestorScope,
+} = require('../permissionService');
 
 beforeEach(() => {
   query.mockReset();
@@ -156,6 +160,56 @@ describe('permissionService', () => {
 
       const result = await hasPermission('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', 'any.permission');
       expect(result).toBe(true);
+    });
+  });
+
+  describe('resolveInvestorScope', () => {
+    const VALID_ID = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+
+    it('returns not-investor for an invalid employeeId without touching the DB', async () => {
+      const result = await resolveInvestorScope('not-a-uuid');
+      expect(result).toEqual({ isInvestor: false, allowedCustomerIds: [] });
+      expect(query).not.toHaveBeenCalled();
+    });
+
+    it('returns not-investor for an empty employeeId', async () => {
+      const result = await resolveInvestorScope(undefined);
+      expect(result).toEqual({ isInvestor: false, allowedCustomerIds: [] });
+      expect(query).not.toHaveBeenCalled();
+    });
+
+    it('returns not-investor when no employee/group row is found', async () => {
+      query.mockResolvedValueOnce([]); // group lookup empty
+      const result = await resolveInvestorScope(VALID_ID);
+      expect(result).toEqual({ isInvestor: false, allowedCustomerIds: [] });
+    });
+
+    it('returns not-investor (and never reads the allowlist) for a non-investor group', async () => {
+      query.mockResolvedValueOnce([{ group_name: 'Admin' }]); // group lookup
+      const result = await resolveInvestorScope(VALID_ID);
+      expect(result).toEqual({ isInvestor: false, allowedCustomerIds: [] });
+      expect(query).toHaveBeenCalledTimes(1); // short-circuits before investor_clients
+    });
+
+    it('returns the visible allowlist for an investor with assigned customers', async () => {
+      query.mockResolvedValueOnce([{ group_name: 'investor' }]); // group lookup
+      query.mockResolvedValueOnce([
+        { partner_id: 'cust-1' },
+        { partner_id: 'cust-2' },
+      ]); // investor_clients
+      const result = await resolveInvestorScope(VALID_ID);
+      expect(result).toEqual({ isInvestor: true, allowedCustomerIds: ['cust-1', 'cust-2'] });
+      // the allowlist query must scope by investor + visibility flag
+      expect(query.mock.calls[1][0]).toContain('FROM dbo.investor_clients');
+      expect(query.mock.calls[1][0]).toContain('is_visible = true');
+      expect(query.mock.calls[1][1]).toEqual([VALID_ID]);
+    });
+
+    it('fails closed: an investor with no assigned customers yields an empty allowlist', async () => {
+      query.mockResolvedValueOnce([{ group_name: 'investor' }]); // group lookup
+      query.mockResolvedValueOnce([]); // no investor_clients rows
+      const result = await resolveInvestorScope(VALID_ID);
+      expect(result).toEqual({ isInvestor: true, allowedCustomerIds: [] });
     });
   });
 });

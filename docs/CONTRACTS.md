@@ -12,6 +12,7 @@
 
 | Version | Date | Scope |
 |---|---|---|
+| v1.0.6 | 2026-06-27 | Backend investor scope helper added: `resolveInvestorScope()` returns a fail-closed customer allowlist for employees in the `investor` permission group. |
 | v1.0.0 | 2026-05-13 | Initial contract freeze covering all active API routes, shared types, and integration boundaries. |
 | v1.0.1 | 2026-05-17 | Contract documentation aligned to live payment method enum, report API, and operational export registry. |
 | v1.0.2 | 2026-05-18 | Reconfirmed `@tgroup/contracts` payment method enum and generated contract artifacts are limited to live methods only. |
@@ -545,7 +546,26 @@ async function resolveEffectivePermissions(employeeId: string): Promise<{
 3. Read `permission_overrides` for employee; apply grants/revokes.
 4. Return deduplicated array.
 
-### 2.3 query (Database Access)
+### 2.3 resolveInvestorScope (Backend Auth)
+
+**File:** `api/src/services/permissionService.js`
+
+```ts
+async function resolveInvestorScope(employeeId: string | undefined): Promise<{
+  isInvestor: boolean;
+  allowedCustomerIds: string[];
+}>
+```
+
+**Algorithm:**
+1. Return `{ isInvestor: false, allowedCustomerIds: [] }` when `employeeId` is missing or not a UUID.
+2. Read the employee's `partners.tier_id` joined to `permission_groups.name`.
+3. If the group name is not exactly `investor`, return non-investor scope and do not query `dbo.investor_clients`.
+4. If the group name is `investor`, read visible `partner_id` rows from `dbo.investor_clients` and return them as the customer allowlist.
+
+**Invariants:** Investors are normal employee accounts, not a second user type. Empty allowlists fail closed. The seeded `investor` group is view-only per INV-021.
+
+### 2.4 query (Database Access)
 
 **File:** `api/src/db.js`
 

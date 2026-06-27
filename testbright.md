@@ -1886,3 +1886,66 @@ TestSprite execution items:
 - [ ] PENDING: After deploy, logout + log back in, confirm hint reappears.
 - [ ] PENDING: After deploy, open /reports/revenue, confirm cash flow chart dates readable on production data (will have ~30 bars there).
 - [ ] PENDING: Regression on /reports/appointments weekly trend — confirm labels readable when data spans many weeks.
+
+---
+
+# TestSprite Plan: NK2 Investor Customer Scoping (2026-06-27, v0.32.39)
+
+Feature/edit name: NK2 investor customer scoping, employee-based read-only investor role
+
+Changed URLs and resources:
+- No frontend route or page is added in this branch.
+- Backend route filtering: Customers/Partners, Appointments, Payments, Receipts, AccountPayments, DotKhams, MonthlyPlans, SaleOrders, SaleOrderLines, DashboardReports, Commissions, and Reports subroutes.
+- Backend permission service: `api/src/services/permissionService.js` adds `resolveInvestorScope()`.
+- Migration: `api/migrations/048_investor_customer_scope.sql` creates `dbo.investor_clients` and seeds a view-only `investor` permission group.
+
+Data flow:
+- A normal employee logs in through the existing Auth flow.
+- If their `partners.tier_id` points to a permission group named `investor`, `resolveInvestorScope()` reads visible customer IDs from `dbo.investor_clients`.
+- Customer-touching list/detail/report queries add an `ANY($n::uuid[])` allowlist predicate for investors.
+- Non-investor employees keep the existing unscoped behavior.
+
+Roles affected:
+- Existing non-investor employees: no behavior change.
+- Investor employees: can view only allowlisted customer data; empty allowlist returns no customer data.
+- Admin/owner: must create the employee, assign the `investor` group, and populate `dbo.investor_clients` before the investor can see any customer.
+
+Expected behavior:
+
+| Visit / action | Expected result |
+|---|---|
+| Existing NK2 staff login before migration | Same behavior as v0.32.38; no investor group exists, no customer queries are scoped. |
+| Existing NK2 staff login after migration | Same behavior; the new group is assigned to nobody by default. |
+| Investor employee with empty allowlist opens `/customers` | Customer list is empty; API returns success with no non-allowlisted customer rows. |
+| Investor employee opens an allowlisted customer profile | Profile and related appointments/services/payments/receipts render for that customer. |
+| Investor employee opens a non-allowlisted customer URL directly | API returns 404 or an empty scoped result; no customer details leak. |
+| Investor employee opens reports/dashboard | Aggregates include only allowlisted customer records. |
+| Investor employee tries customer/payment/appointment/monthly-plan writes | Request is blocked by missing write permission (`customers.edit`, `payment.add/edit/refund/void`, `appointments.add/edit`). |
+| Normal staff/admin opens the same reports | Aggregates match pre-investor behavior and canonical revenue tests. |
+
+Edge cases:
+- `employeeId` missing or not a UUID -> non-investor scope, no extra SQL.
+- Employee is not in group `investor` -> no `dbo.investor_clients` query.
+- Investor has no allowlist rows -> fail closed to zero customer rows.
+- Investor allowlist contains one customer -> all customer-linked reads are limited to that customer.
+- Migration runs on a DB without `public.permission_groups` mirror -> skips public mirror safely.
+
+Regressions:
+- The `investor` permission seed must remain read-only.
+- Existing NK/NK2 employees must not be assigned to `investor` by migration.
+- Canonical revenue formulas must not change for non-investors.
+- Shared NK/NK2 DB means migration 048 must not run without backup plus explicit approval.
+
+Setup data and login state:
+- Pre-migration NK2 code deploy can be smoke-tested with existing staff accounts only.
+- Full investor QA requires migration 048 plus one employee assigned to the `investor` group and at least one row in `dbo.investor_clients`.
+- Because NK and NK2 currently share `tdental_demo`, any migration/allowlist setup must use the shared-DB approval path.
+
+TestSprite execution items:
+- [ ] PENDING: Deploy code to NK2 only, verify `/version.json` reports `0.32.39` and NK `/version.json` remains unchanged.
+- [ ] PENDING: Before migration, log into NK2 as normal staff and verify customers/reports still load.
+- [ ] PENDING: After explicit DB approval, run migration 048 and verify existing staff/admin behavior is unchanged.
+- [ ] PENDING: Create/assign one investor employee and one allowlisted customer, then verify the customer list/profile/report scoping paths above.
+- [ ] PENDING: Try non-allowlisted customer/profile/payment/service direct URLs as investor and confirm 404/empty scoped results.
+- [ ] PENDING: Try write/refund/void endpoints as investor and confirm permission denial.
+- [ ] PENDING: Re-check NK live read-only smoke (`/version.json`, `/api/health`, normal login if approved) after migration because the DB is shared.

@@ -19,6 +19,7 @@ owns:
   - website/src/hooks/useExport.ts
 reads:
   - api/src/db.js
+  - dbo.investor_clients (investor allowlist for scoped aggregates)
 writes:
   - dbo.exports_audit (preview/download audit rows only)
 tables:
@@ -34,6 +35,7 @@ tables:
   - dbo.monthlyplans
   - dbo.planinstallments
   - dbo.exports_audit
+  - dbo.investor_clients
 endpoints:
   - POST /api/Reports/dashboard
   - POST /api/Reports/revenue/summary
@@ -98,6 +100,9 @@ impact_tests:
   - api/src/routes/reports/__tests__/cashFlow.test.js
   - api/src/routes/reports/__tests__/revenueRecognition.test.js
   - api/src/routes/reports/__tests__/servicesBreakdown.test.js
+  - api/tests/investorIdorScoping.test.js
+  - api/tests/investorScopeRoutePermissions.test.js
+  - api/src/services/__tests__/permissionService.test.js
   - website/e2e/export-downloads.spec.ts
   - website/src/__tests__/useVersionCheck.test.ts (indirect)
 risk_level: medium
@@ -124,3 +129,4 @@ notes:
     and branch filters; cash-flow cards remain raw cash-movement context and are
     not the paid-revenue source of truth.
   - Overview Zone 1 and Zone 3 searches must be accent-insensitive so unaccented input matches Vietnamese names and labels with diacritics.
+  - Investor employees must receive report/dashboard aggregates filtered to `dbo.investor_clients`. Normal staff/admin report formulas must remain unchanged, including canonical posted-revenue calculations.

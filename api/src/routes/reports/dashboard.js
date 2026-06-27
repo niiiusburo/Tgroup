@@ -5,6 +5,7 @@ const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
 const { getVietnamToday } = require('../../lib/dateUtils');
 const { err, validDate, validUUID, dateCompanyFilter } = require('./helpers');
+const { resolveInvestorScope } = require('../../services/permissionService');
 const {
   getCanonicalRevenue,
   getCanonicalRevenueByMonth,
@@ -12,14 +13,36 @@ const {
 
 const router = express.Router();
 
+function applyInvestorPartnerScope(filter, column, investorScope) {
+  const params = [...filter.params];
+  let where = filter.where;
+  if (investorScope.isInvestor) {
+    params.push(investorScope.allowedCustomerIds);
+    where += ` AND ${column} = ANY($${params.length}::uuid[])`;
+  }
+  return { where, params };
+}
+
+function investorRevenueFilters(baseFilters, investorScope) {
+  return investorScope.isInvestor
+    ? { ...baseFilters, allowedCustomerIds: investorScope.allowedCustomerIds }
+    : baseFilters;
+}
+
 router.post('/', requirePermission('reports.view'), async (req, res) => {
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+
     // Invoiced/outstanding still come from saleorders — they are different concepts
     // than "collected revenue" (which now matches the Excel canonical formula below).
-    const so = dateCompanyFilter(dateFrom, dateTo, companyId, 'datecreated');
+    const so = applyInvestorPartnerScope(
+      dateCompanyFilter(dateFrom, dateTo, companyId, 'datecreated'),
+      'partnerid',
+      investorScope
+    );
     // No state filter — matches Revenue page behavior. Filtering to state='sale' alone
     // excludes 99%+ of orders (most live in 'pending'/'completed') and shrinks the
     // invoiced/outstanding KPIs by ~3 orders of magnitude.
@@ -29,10 +52,14 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
        FROM dbo.saleorders WHERE isdeleted=false ${so.where}`, so.params);
 
     // Collected revenue — single source of truth shared with the Excel revenue-flat export.
-    const curPaid = await getCanonicalRevenue({ dateFrom, dateTo, companyId });
+    const curPaid = await getCanonicalRevenue(investorRevenueFilters({ dateFrom, dateTo, companyId }, investorScope));
 
     // Appointments
-    const af = dateCompanyFilter(dateFrom, dateTo, companyId, 'date');
+    const af = applyInvestorPartnerScope(
+      dateCompanyFilter(dateFrom, dateTo, companyId, 'date'),
+      'partnerid',
+      investorScope
+    );
     const appt = await query(
       // 'completed' is the canonical finished state in this DB (~84% of appointments);
       // 'done' is a legacy spelling kept for backward compat with older imports.
@@ -42,7 +69,11 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
        FROM dbo.appointments WHERE 1=1 ${af.where}`, af.params);
 
     // New customers
-    const cf = dateCompanyFilter(dateFrom, dateTo, companyId, 'datecreated');
+    const cf = applyInvestorPartnerScope(
+      dateCompanyFilter(dateFrom, dateTo, companyId, 'datecreated'),
+      'id',
+      investorScope
+    );
     const cust = await query(
       `SELECT COUNT(*) as new_customers FROM dbo.partners WHERE customer=true AND isdeleted=false ${cf.where}`, cf.params);
 
@@ -52,13 +83,17 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
     const prevFromDate = new Date(new Date(prevTo + 'T00:00:00Z') - days * 86400000);
     const prevFrom = prevFromDate.toISOString().split('T')[0];
 
-    const prevPaid = await getCanonicalRevenue({ dateFrom: prevFrom, dateTo: prevTo, companyId });
+    const prevPaid = await getCanonicalRevenue(investorRevenueFilters({ dateFrom: prevFrom, dateTo: prevTo, companyId }, investorScope));
     const revChange = prevPaid > 0 ? ((curPaid - prevPaid) / prevPaid * 100).toFixed(1) : null;
 
-    const curAppt = parseInt(appt[0]?.total || 0);
-    const paf = dateCompanyFilter(prevFrom, prevTo, companyId, 'date');
+    const curAppt = parseInt(appt[0]?.total || 0, 10);
+    const paf = applyInvestorPartnerScope(
+      dateCompanyFilter(prevFrom, prevTo, companyId, 'date'),
+      'partnerid',
+      investorScope
+    );
     const prevAppt = await query(`SELECT COUNT(*) as total FROM dbo.appointments WHERE 1=1 ${paf.where}`, paf.params);
-    const prevApptCount = parseInt(prevAppt[0]?.total || 0);
+    const prevApptCount = parseInt(prevAppt[0]?.total || 0, 10);
     const apptChange = prevApptCount > 0 ? ((curAppt - prevApptCount) / prevApptCount * 100).toFixed(1) : null;
 
     // 12-month revenue trend — canonical (matches Excel) for the revenue line.
@@ -67,16 +102,23 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
     const trendFromDate = new Date(new Date(today + 'T00:00:00Z') - 365 * 86400000);
     const trendFrom = trendFromDate.toISOString().split('T')[0];
 
-    const canonicalMonths = await getCanonicalRevenueByMonth({ dateFrom: trendFrom, dateTo: today, companyId });
+    const canonicalMonths = await getCanonicalRevenueByMonth(
+      investorRevenueFilters({ dateFrom: trendFrom, dateTo: today, companyId }, investorScope)
+    );
+    const invoicedFilter = dateCompanyFilter(trendFrom, today, companyId, 'datecreated');
+    const invoicedParams = [...invoicedFilter.params];
+    let invoicedWhere = invoicedFilter.where;
+    if (investorScope.isInvestor) {
+      invoicedParams.push(investorScope.allowedCustomerIds);
+      invoicedWhere += ` AND partnerid = ANY($${invoicedParams.length}::uuid[])`;
+    }
     const invoicedByMonth = await query(
       `SELECT DATE_TRUNC('month', datecreated) as month,
               COALESCE(SUM(amounttotal),0) as invoiced
        FROM dbo.saleorders
-       WHERE isdeleted=false
-         AND datecreated::date >= $1 AND datecreated::date <= $2
-         ${companyId ? 'AND companyid = $3' : ''}
+       WHERE isdeleted=false ${invoicedWhere}
        GROUP BY month`,
-      companyId ? [trendFrom, today, companyId] : [trendFrom, today]);
+      invoicedParams);
 
     const invoicedMap = new Map();
     for (const row of invoicedByMonth) {
@@ -104,8 +146,8 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
       success: true,
       data: {
         revenue: { invoiced: parseFloat(rev[0]?.invoiced || 0), paid: curPaid, outstanding: parseFloat(rev[0]?.outstanding || 0), change: revChange ? parseFloat(revChange) : null },
-        appointments: { total: curAppt, done: parseInt(appt[0]?.done || 0), cancelled: parseInt(appt[0]?.cancelled || 0), change: apptChange ? parseFloat(apptChange) : null },
-        customers: { newCustomers: parseInt(cust[0]?.new_customers || 0) },
+        appointments: { total: curAppt, done: parseInt(appt[0]?.done || 0, 10), cancelled: parseInt(appt[0]?.cancelled || 0, 10), change: apptChange ? parseFloat(apptChange) : null },
+        customers: { newCustomers: parseInt(cust[0]?.new_customers || 0, 10) },
         trend,
       }
     });

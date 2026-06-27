@@ -19,6 +19,7 @@ owns:
   - website/src/hooks/useCustomerProfile.ts
 reads:
   - api/src/db.js
+  - dbo.investor_clients (investor allowlist for customer/profile reads)
 writes:
   - dbo.partners (insert/update/soft-delete/hard-delete)
   - dbo.customersources (CRUD via customerSources route)
@@ -31,6 +32,7 @@ tables:
   - dbo.saleorders (read-only in KPIs)
   - dbo.payments (read-only in balance)
   - dbo.dotkhams (read-only in receipts/profile)
+  - dbo.investor_clients
 endpoints:
   - GET    /api/Partners
   - GET    /api/Partners/check-unique
@@ -70,6 +72,7 @@ ui_invariants:
   - Employee assignment suggestions in customer forms must hide inactive employees so TDental duplicate staff records do not appear as selectable options.
   - Customer phone is not a durable unique identity. Phone may overlap another phone or match a customer code (`partners.ref`) and must not block customer create/edit saves.
   - Customer DOB date parts imported as blank or zero values must normalize to null on create/update; nonblank invalid day/month values still fail validation.
+  - Investor employees must see only customers listed in `dbo.investor_clients`; list/profile/KPI/receipt/balance/service reads must return empty or 404 for non-allowlisted customer records.
 jobs:
   - none (archive scripts in api/scripts/archive/ are stale)
 shared_types:
@@ -83,11 +86,14 @@ affected_by:
   - Changes to dbo.partners schema (NOT NULL constraints recently caused login breakage)
   - Changes to dbo.companies (location name display)
   - Permission string changes (customers.view, customers.add, customers.edit, customers.delete, customers.hard_delete)
+  - Changes to dbo.investor_clients or `resolveInvestorScope()`
 impact_tests:
   - website/e2e/customer-create-save.spec.ts
   - website/e2e/customer-profile-crud.spec.ts
   - website/e2e/customer-persistence-sweep.spec.ts
   - website/e2e/face-recognition related flows
   - api/src/routes/partners/__tests__/searchFilters.test.js
+  - api/tests/investorIdorScoping.test.js
+  - api/tests/investorScopeRoutePermissions.test.js
   - website/src/__tests__/customer-deep-link.test.tsx
 risk_level: high

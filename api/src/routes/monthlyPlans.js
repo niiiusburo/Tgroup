@@ -6,6 +6,7 @@ const express = require('express');
 const { query, pool } = require('../db');
 const { requirePermission } = require('../middleware/auth');
 const { accentInsensitiveSearchCondition, normalizeVietnamese } = require('../utils/search');
+const { resolveInvestorScope } = require('../services/permissionService');
 
 const router = express.Router();
 
@@ -13,11 +14,11 @@ const router = express.Router();
 router.get('/', requirePermission('payment.view'), async (req, res) => {
   try {
     const { company_id, status, customer_id, search } = req.query;
-    
+
     let sql = `
-      SELECT 
+      SELECT
         mp.id, mp.customer_id, mp.company_id, mp.treatment_description,
-        mp.total_amount, mp.down_payment, mp.installment_amount, 
+        mp.total_amount, mp.down_payment, mp.installment_amount,
         mp.number_of_installments, mp.start_date, mp.status, mp.notes,
         mp.created_at, mp.updated_at,
         p.name as customer_name
@@ -48,6 +49,14 @@ router.get('/', requirePermission('payment.view'), async (req, res) => {
       sql += ` AND ${accentInsensitiveSearchCondition(['p.name', 'mp.treatment_description'], paramCount, paramCount + 1)}`;
       params.push(`%${String(search).trim()}%`, `%${normalizeVietnamese(search)}%`);
       paramCount += 2;
+    }
+
+    // Investor scope: restrict to allowed customers
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      paramCount++;
+      sql += ` AND mp.customer_id = ANY($${paramCount}::uuid[])`;
+      params.push(investorScope.allowedCustomerIds);
     }
 
     sql += ' ORDER BY mp.created_at DESC';
@@ -126,14 +135,20 @@ router.get('/', requirePermission('payment.view'), async (req, res) => {
 router.get('/:id', requirePermission('payment.view'), async (req, res) => {
   try {
     const plans = await query(
-      `SELECT mp.*, p.name as customer_name 
-       FROM dbo.monthlyplans mp 
-       LEFT JOIN dbo.partners p ON mp.customer_id = p.id 
+      `SELECT mp.*, p.name as customer_name
+       FROM dbo.monthlyplans mp
+       LEFT JOIN dbo.partners p ON mp.customer_id = p.id
        WHERE mp.id = $1`,
       [req.params.id]
     );
 
     if (plans.length === 0) {
+      return res.status(404).json({ error: 'Plan not found' });
+    }
+
+    // Investor scope: membership check
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(plans[0].customer_id)) {
       return res.status(404).json({ error: 'Plan not found' });
     }
 
@@ -181,6 +196,12 @@ router.post('/', requirePermission('payment.edit'), async (req, res) => {
 
     if (!customer_id || !total_amount || !number_of_installments || !start_date) {
       return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Investor scope: validate customer access
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(customer_id)) {
+      return res.status(403).json({ error: { code: 'E_INVESTOR_CUSTOMER_NOT_ALLOWED', message: 'Bạn không có quyền với khách hàng này' } });
     }
 
     // Invariants: downPayment-less-than-total + installmentSum.equals-remaining (CRITICAL)
@@ -269,6 +290,15 @@ router.post('/', requirePermission('payment.edit'), async (req, res) => {
 // PUT /api/MonthlyPlans/:id - Update plan
 router.put('/:id', requirePermission('payment.edit'), async (req, res) => {
   try {
+    // Investor write-scope: a plan for a non-assigned customer is invisible (404).
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      const owner = await query('SELECT customer_id FROM dbo.monthlyplans WHERE id = $1', [req.params.id]);
+      if (owner.length === 0 || !investorScope.allowedCustomerIds.includes(owner[0].customer_id)) {
+        return res.status(404).json({ error: 'Plan not found' });
+      }
+    }
+
     const { treatment_description, total_amount, down_payment, status, notes, invoice_ids } = req.body;
 
     // Invariant: downPayment-less-than-total (CRITICAL) on PUT
@@ -406,6 +436,15 @@ async function doDeletePlan(req, res) {
 // DELETE /api/MonthlyPlans/:id - Delete plan (transactional)
 router.delete('/:id', requirePermission('payment.edit'), async (req, res) => {
   try {
+    // Investor write-scope: a plan for a non-assigned customer is invisible (404).
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      const owner = await query('SELECT customer_id FROM dbo.monthlyplans WHERE id = $1', [req.params.id]);
+      if (owner.length === 0 || !investorScope.allowedCustomerIds.includes(owner[0].customer_id)) {
+        return res.status(404).json({ error: 'Plan not found' });
+      }
+    }
+
     // DELETE_BODY — transactional per invariant monthlyPlan.noDelete-if-paid-installments
     return await doDeletePlan(req, res);
   } catch (err) {
@@ -417,6 +456,15 @@ router.delete('/:id', requirePermission('payment.edit'), async (req, res) => {
 // PUT /api/MonthlyPlans/:id/installments/:installmentId/pay - Mark installment paid
 router.put('/:id/installments/:installmentId/pay', requirePermission('payment.edit'), async (req, res) => {
   try {
+    // Investor write-scope: a plan for a non-assigned customer is invisible (404).
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      const owner = await query('SELECT customer_id FROM dbo.monthlyplans WHERE id = $1', [req.params.id]);
+      if (owner.length === 0 || !investorScope.allowedCustomerIds.includes(owner[0].customer_id)) {
+        return res.status(404).json({ error: 'Plan not found' });
+      }
+    }
+
     const { paid_amount, paid_date } = req.body;
 
     // Update installment

@@ -1,6 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const { addAccentInsensitiveSearchCondition } = require('../utils/search');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -12,7 +13,7 @@ const router = express.Router();
  * COM-01: Hoa hồng ngưới giới thiệu (Agent commission)
  * COM-02: Hoa hồng nhân viên (Employee commission)
  */
-router.get('/', async (req, res) => {
+router.get('/', requirePermission('commission.view'), async (req, res) => {
   try {
     const {
       offset = '0',
@@ -135,7 +136,7 @@ router.get('/', async (req, res) => {
  * GET /api/SaleOrderLinePartnerCommissions
  * Returns: Commission records for partners/employees
  */
-router.get('/SaleOrderLinePartnerCommissions', async (req, res) => {
+router.get('/SaleOrderLinePartnerCommissions', requirePermission('commission.view'), async (req, res) => {
   try {
     const {
       offset = '0',
@@ -232,7 +233,7 @@ router.get('/SaleOrderLinePartnerCommissions', async (req, res) => {
  * GET /api/Commissions/:id
  * Returns: Single commission scheme with details
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', requirePermission('commission.view'), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -294,7 +295,7 @@ router.get('/:id', async (req, res) => {
  * GET /api/Commissions/:id/Histories
  * Returns: Commission calculation histories
  */
-router.get('/:id/Histories', async (req, res) => {
+router.get('/:id/Histories', requirePermission('commission.view'), async (req, res) => {
   try {
     const { id } = req.params;
     const { offset = '0', limit = '20' } = req.query;

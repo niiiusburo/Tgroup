@@ -52,6 +52,7 @@ Staff → /login form → POST /api/Auth/login
 | Doctor | `appointments.view`, `appointments.edit`, `services.edit` | Clinical workflows only |
 | Receptionist | `appointments.add`, `appointments.edit`, `customers.view`, `customers.add`, `payment.add` | Front-desk operations |
 | Cashier | `payment.add`, `payment.view`, `customers.view` | Money collection |
+| Investor | `customers.view`, `appointments.view`, `payment.view`, `services.view`, `reports.view`, `calendar.view`, `locations.view` | Normal employee account with read-only customer allowlist in `dbo.investor_clients` |
 
 ### Permission Resolution Order
 
@@ -60,6 +61,8 @@ Staff → /login form → POST /api/Auth/login
 3. **Location scope** (`employee_location_scope` — restricts visible locations)
 
 Effective permissions = (Group ∪ Grants) − Revokes, then filtered by location scope at the UI level.
+
+Investor customer scope is an additional backend data filter, not a login type. Only employees whose permission group name is exactly `investor` are scoped through `dbo.investor_clients`; everyone else keeps the existing behavior.
 
 ### Dangerous Permissions (Require Explicit Assignment)
 

@@ -72,6 +72,19 @@ When `COSMETIC_LOB_ENABLED=false` the entire family returns 503.
 
 CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin route.
 
+## Investor Customer Scope (read-only employee extension)
+
+Investor users are normal employee accounts whose `partners.tier_id` points to a permission group named `investor`. When `resolveInvestorScope()` detects that group, customer-touching reads and aggregates are filtered through `dbo.investor_clients`.
+
+Affected endpoint families:
+- `/api/Partners`, `/api/CustomerBalance`, `/api/CustomerReceipts`, `/api/DotKhams`
+- `/api/Appointments`
+- `/api/SaleOrders`, `/api/SaleOrderLines`
+- `/api/Payments`, `/api/AccountPayments`, `/api/Receipts`, `/api/MonthlyPlans`
+- `/api/Reports`, `/api/DashboardReports`, `/api/Commissions`
+
+Contract invariant: non-investor employees keep existing unscoped behavior. Investor employees with an empty allowlist receive empty/404 scoped results. The seeded investor group is view-only and does not grant customer, appointment, payment, refund, void, or monthly-plan write permissions.
+
 ## Account (`/api/Account`)
 
 | Method | Path | Auth | Body | Response |

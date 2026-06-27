@@ -1,6 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
+const { resolveInvestorScope } = require('../services/permissionService');
 const { createSaleOrder } = require('./saleOrders/createSaleOrder');
 const { getSaleOrderById } = require('./saleOrders/getSaleOrderById');
 const { updateSaleOrder } = require('./saleOrders/updateSaleOrder');
@@ -76,6 +77,14 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
     if (company_id) {
       conditions.push(`so.companyid = $${paramIdx}`);
       params.push(company_id);
+      paramIdx++;
+    }
+
+    // Investor scope: restrict to the customers explicitly assigned to this investor
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      params.push(investorScope.allowedCustomerIds);
+      conditions.push(`so.partnerid = ANY($${paramIdx}::uuid[])`);
       paramIdx++;
     }
 
@@ -181,6 +190,12 @@ router.get('/lines', requirePermission('services.view'), async (req, res) => {
 
     if (!partner_id) {
       return res.status(400).json({ error: 'partner_id is required' });
+    }
+
+    // Investor scope: check if the requested partner_id is allowed
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(partner_id)) {
+      return res.status(404).json({ error: 'Partner not found' });
     }
 
     const offsetNum = parseInt(offset, 10);

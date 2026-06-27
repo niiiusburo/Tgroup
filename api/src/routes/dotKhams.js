@@ -1,6 +1,8 @@
 const express = require('express');
 const { query } = require('../db');
+const { requirePermission } = require('../middleware/auth');
 const { addAccentInsensitiveSearchCondition } = require('../utils/search');
+const { resolveInvestorScope } = require('../services/permissionService');
 
 const router = express.Router();
 
@@ -9,7 +11,7 @@ const router = express.Router();
  * Query params: partner_id, offset, limit, search, sortField, sortOrder
  * Returns: customer's examination rounds
  */
-router.get('/', async (req, res) => {
+router.get('/', requirePermission('customers.view'), async (req, res) => {
   try {
     const {
       partner_id,
@@ -54,6 +56,14 @@ router.get('/', async (req, res) => {
         search,
         paramIdx,
       });
+    }
+
+    // Investor scope: restrict to allowed customers
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      params.push(investorScope.allowedCustomerIds);
+      conditions.push(`dk.partnerid = ANY($${paramIdx}::uuid[])`);
+      paramIdx++;
     }
 
     const whereClause = conditions.join(' AND ');
@@ -164,7 +174,7 @@ router.get('/', async (req, res) => {
  * GET /api/DotKhams/:id
  * Returns: single dot kham with details
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', requirePermission('customers.view'), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -217,6 +227,12 @@ router.get('/:id', async (req, res) => {
     );
 
     if (!rows || rows.length === 0) {
+      return res.status(404).json({ error: 'Dot kham not found' });
+    }
+
+    // Investor scope: membership check
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(rows[0].partnerid)) {
       return res.status(404).json({ error: 'Dot kham not found' });
     }
 

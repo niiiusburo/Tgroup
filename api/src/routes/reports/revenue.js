@@ -2,6 +2,7 @@ const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
 const { err, validDate, validUUID } = require('./helpers');
+const { resolveInvestorScope } = require('../../services/permissionService');
 const {
   SERVICE_REVENUE_PAYMENT_CONDITION,
   ALLOCATION_TOTALS_CTE,
@@ -40,6 +41,8 @@ router.post('/revenue/summary', requirePermission('reports.view'), async (req, r
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
@@ -49,11 +52,20 @@ router.post('/revenue/summary', requirePermission('reports.view'), async (req, r
       orderCompanyCol: 'companyid',
       paymentCompanyCol: 'so.companyid',
     });
+    let orderWhere = f.orderWhere;
+    let paymentWhere = f.paymentWhere;
+    let params = [...f.params];
+    if (investorScope.isInvestor) {
+      params.push(investorScope.allowedCustomerIds);
+      const paramIdx = f.params.length + 1;
+      orderWhere += ` AND partnerid = ANY($${paramIdx}::uuid[])`;
+      paymentWhere += ` AND so.partnerid = ANY($${paramIdx}::uuid[])`;
+    }
     const orders = await query(
       `SELECT state, COUNT(*) as cnt, COALESCE(SUM(amounttotal),0) as total,
               COALESCE(SUM(residual),0) as outstanding
-       FROM dbo.saleorders WHERE isdeleted=false ${f.orderWhere}
-       GROUP BY state`, f.params);
+       FROM dbo.saleorders WHERE isdeleted=false ${orderWhere}
+       GROUP BY state`, params);
 
     const paidByState = await query(
       `WITH ${ALLOCATION_TOTALS_CTE}
@@ -62,8 +74,8 @@ router.post('/revenue/summary', requirePermission('reports.view'), async (req, r
        JOIN dbo.payments p ON p.id = pa.payment_id
        LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
        JOIN dbo.saleorders so ON so.id = pa.invoice_id AND so.isdeleted=false
-       WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${f.paymentWhere}
-       GROUP BY so.state`, f.params);
+       WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${paymentWhere}
+       GROUP BY so.state`, params);
 
     const methods = await query(
       `WITH ${ALLOCATION_TOTALS_CTE}
@@ -72,8 +84,8 @@ router.post('/revenue/summary', requirePermission('reports.view'), async (req, r
        JOIN dbo.payments p ON p.id = pa.payment_id
        LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
        JOIN dbo.saleorders so ON so.id = pa.invoice_id AND so.isdeleted=false
-       WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${f.paymentWhere}
-       GROUP BY p.method, p.status`, f.params);
+       WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${paymentWhere}
+       GROUP BY p.method, p.status`, params);
 
     const ordersWithPaid = mergePaidByKey(orders, paidByState, 'state');
     return res.json({ success: true, data: { orders: ordersWithPaid.map(o => ({ ...o, cnt: toInt(o.cnt), total: toNumber(o.total), paid: toNumber(o.paid), outstanding: toNumber(o.outstanding) })), payments: methods.map(m => ({ ...m, cnt: toInt(m.cnt), total: toNumber(m.total) })) } });
@@ -87,6 +99,8 @@ router.post('/revenue/trend', requirePermission('reports.view'), async (req, res
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
@@ -96,13 +110,22 @@ router.post('/revenue/trend', requirePermission('reports.view'), async (req, res
       orderCompanyCol: 'companyid',
       paymentCompanyCol: 'so.companyid',
     });
+    let orderWhere = f.orderWhere;
+    let paymentWhere = f.paymentWhere;
+    let params = [...f.params];
+    if (investorScope.isInvestor) {
+      params.push(investorScope.allowedCustomerIds);
+      const paramIdx = f.params.length + 1;
+      orderWhere += ` AND partnerid = ANY($${paramIdx}::uuid[])`;
+      paymentWhere += ` AND so.partnerid = ANY($${paramIdx}::uuid[])`;
+    }
     const trend = await query(
       `SELECT DATE_TRUNC('month', datecreated) as month,
               COUNT(*) as order_count,
               COALESCE(SUM(amounttotal),0) as invoiced,
               COALESCE(SUM(residual),0) as outstanding
-       FROM dbo.saleorders WHERE isdeleted=false ${f.orderWhere}
-       GROUP BY month ORDER BY month`, f.params);
+       FROM dbo.saleorders WHERE isdeleted=false ${orderWhere}
+       GROUP BY month ORDER BY month`, params);
 
     const paidTrend = await query(
       `WITH ${ALLOCATION_TOTALS_CTE}
@@ -112,8 +135,8 @@ router.post('/revenue/trend', requirePermission('reports.view'), async (req, res
        JOIN dbo.payments p ON p.id = pa.payment_id
        LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
        JOIN dbo.saleorders so ON so.id = pa.invoice_id AND so.isdeleted=false
-       WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${f.paymentWhere}
-       GROUP BY month ORDER BY month`, f.params);
+       WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${paymentWhere}
+       GROUP BY month ORDER BY month`, params);
 
     const paidMap = new Map(paidTrend.map(row => [String(row.month), toNumber(row.paid)]));
     const trendMap = new Map();
@@ -145,6 +168,8 @@ router.post('/revenue/by-location', requirePermission('reports.view'), async (re
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
@@ -154,13 +179,22 @@ router.post('/revenue/by-location', requirePermission('reports.view'), async (re
       orderCompanyCol: 'so.companyid',
       paymentCompanyCol: 'so.companyid',
     });
+    let orderWhere = f.orderWhere;
+    let paymentWhere = f.paymentWhere;
+    let params = [...f.params];
+    if (investorScope.isInvestor) {
+      params.push(investorScope.allowedCustomerIds);
+      const paramIdx = f.params.length + 1;
+      orderWhere += ` AND so.partnerid = ANY($${paramIdx}::uuid[])`;
+      paymentWhere += ` AND so.partnerid = ANY($${paramIdx}::uuid[])`;
+    }
     const rows = await query(
       `WITH order_totals AS (
          SELECT so.companyid, COUNT(so.id) as order_count,
                 COALESCE(SUM(so.amounttotal),0) as invoiced,
                 COALESCE(SUM(so.residual),0) as outstanding
          FROM dbo.saleorders so
-         WHERE so.isdeleted=false ${f.orderWhere}
+         WHERE so.isdeleted=false ${orderWhere}
          GROUP BY so.companyid
        ),
        ${ALLOCATION_TOTALS_CTE},
@@ -170,7 +204,7 @@ router.post('/revenue/by-location', requirePermission('reports.view'), async (re
          JOIN dbo.payments p ON p.id = pa.payment_id
          LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
          JOIN dbo.saleorders so ON so.id = pa.invoice_id AND so.isdeleted=false
-         WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${f.paymentWhere}
+         WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${paymentWhere}
          GROUP BY so.companyid
        )
        SELECT c.id, c.name, COALESCE(ot.order_count,0) as order_count,
@@ -180,7 +214,7 @@ router.post('/revenue/by-location', requirePermission('reports.view'), async (re
        FROM dbo.companies c
        LEFT JOIN order_totals ot ON ot.companyid=c.id
        LEFT JOIN paid_totals pt ON pt.companyid=c.id
-       ORDER BY paid DESC`, f.params);
+       ORDER BY paid DESC`, params);
 
     return res.json({ success: true, data: rows.map(r => ({ ...r, orderCount: toInt(r.order_count), invoiced: toNumber(r.invoiced), paid: toNumber(r.paid), outstanding: toNumber(r.outstanding) })) });
   } catch (e) { console.error('reports/revenue/by-location:', e); return err(res, 500, 'Internal error'); }

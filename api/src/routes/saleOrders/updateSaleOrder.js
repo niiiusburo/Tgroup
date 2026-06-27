@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { query } = require('../../db');
+const { resolveInvestorScope } = require('../../services/permissionService');
 const { calculateSaleOrderPaymentStateFromAllocations } = require('../../lib/saleOrderTotals');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
 
@@ -27,6 +28,24 @@ async function updateSaleOrder(req, res) {
 
     if (amounttotal != null && parseFloat(amounttotal) < 0) {
       return res.status(400).json({ error: 'amounttotal must be >= 0' });
+    }
+
+    // Fetch the existing order to check the current customer
+    const existingOrderRows = await query(
+      `SELECT partnerid FROM saleorders WHERE id = $1 AND isdeleted = false`,
+      [id],
+    );
+    if (!existingOrderRows || existingOrderRows.length === 0) {
+      return res.status(404).json({ error: 'Sale order not found' });
+    }
+    const targetPartnerId = partnerid || existingOrderRows[0].partnerid;
+
+    // Investor scope: validate the target customer
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(targetPartnerId)) {
+      return res.status(403).json({
+        error: { code: 'E_INVESTOR_CUSTOMER_NOT_ALLOWED', message: 'Bạn không có quyền với khách hàng này' },
+      });
     }
     if (quantity != null && !isNaN(parseFloat(quantity)) && parseFloat(quantity) < 0) {
       return res.status(400).json({ error: 'quantity must be >= 0' });

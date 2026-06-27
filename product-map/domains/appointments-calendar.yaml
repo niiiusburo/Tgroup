@@ -15,6 +15,7 @@ owns:
   - website/src/lib/api/appointments.ts
 reads:
   - api/src/db.js
+  - dbo.investor_clients (investor allowlist for appointment reads)
 writes:
   - dbo.appointments (insert/update)
   - dbo.crmteams (read-only for team names)
@@ -27,6 +28,7 @@ tables:
   - dbo.saleorders (linked order)
   - dbo.dotkhams (linked record)
   - dbo.crmteams
+  - dbo.investor_clients
 endpoints:
   - GET  /api/Appointments
   - GET  /api/Appointments/:id
@@ -59,8 +61,11 @@ invariants:
   - Appointment edit saves must persist changed clinic/location values by writing `appointments.companyid` and returning the refreshed `companyid/companyname`.
   - Appointment exports must serialize the same `appointments.date` calendar value shown in `/calendar`, include `time` when present, and allow phone searches through `partners.phone`.
   - Appointment customer selectors must search by customer code as well as name, phone, and email.
+  - Investor employees may view appointments only for allowlisted customers; appointment creation/edit remains blocked by the seeded read-only investor permission group.
 impact_tests:
   - api/src/routes/appointments/__tests__/readHandlers.test.js
+  - api/tests/investorIdorScoping.test.js
+  - api/tests/investorScopeRoutePermissions.test.js
   - api/src/routes/appointments/__tests__/mutationHandlers.test.js
   - api/src/services/exports/__tests__/appointmentsExport.test.js
   - website/src/components/appointments/unified/__tests__/appointmentForm.mapper.test.ts
