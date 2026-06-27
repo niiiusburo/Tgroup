@@ -112,8 +112,10 @@ PUT handler-level validation: `companyId` (when present) must be a UUID (`400 IN
 | GET | `/resolve` | Perm:`customers.view` | `?key` (UUID, customer ref, or normalized phone) | `{ matchedBy, partner }`, 404 `CUSTOMER_NOT_FOUND`, or 409 `CUSTOMER_LOOKUP_AMBIGUOUS` with candidates |
 | GET | `/:id` | Perm:`customers.view` | — | Partner detail |
 | GET | `/:id/GetKPIs` | Perm:`customers.view` | — | KPI stats |
+| GET | `/investor-visibility` | Perm:`permissions.edit` + Admin class | — | `{ investorId, customerIds }` for the active NK2 investor allowlist |
 | POST | `/` | Perm:`customers.add` | Partner fields | Created partner |
 | PUT | `/:id` | Perm:`customers.edit` | Partner fields | Updated partner |
+| PATCH | `/:id/investor-visibility` | Perm:`permissions.edit` + Admin class | `{ visible: boolean }` | Upsert/hide `dbo.investor_clients` for the active NK2 investor |
 | PATCH | `/:id/soft-delete` | Perm:`customers.delete` | — | Soft-deleted partner |
 | DELETE | `/:id/hard-delete` | Perm:`customers.hard_delete` | — | Hard-deleted partner |
 

@@ -3,6 +3,7 @@ const { requirePermission } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');
 const { PartnerCreateSchema, PartnerUpdateSchema } = require('@tgroup/contracts');
 const { getPartnerById } = require('./partners/getPartnerById');
+const { listInvestorVisibility, setInvestorVisibility } = require('./partners/investorVisibility');
 const { checkPartnerUnique, getPartnerKpis, listPartners } = require('./partners/readHandlers');
 const { createPartner, hardDeletePartner, softDeletePartner, updatePartner } = require('./partners/mutationHandlers');
 const { resolvePartner } = require('./partners/resolveHandler');
@@ -13,6 +14,8 @@ router.get('/', requirePermission('customers.view'), listPartners);
 // declared before /:id to prevent Express matching these as an id param.
 router.get('/check-unique', requirePermission('customers.view'), checkPartnerUnique);
 router.get('/resolve', requirePermission('customers.view'), resolvePartner);
+router.get('/investor-visibility', requirePermission('permissions.edit'), listInvestorVisibility);
+router.patch('/:id/investor-visibility', requirePermission('permissions.edit'), setInvestorVisibility);
 router.get('/:id', requirePermission('customers.view'), getPartnerById);
 router.get('/:id/GetKPIs', requirePermission('customers.view'), getPartnerKpis);
 router.post('/', requirePermission('customers.add'), validate(PartnerCreateSchema), createPartner);

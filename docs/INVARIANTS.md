@@ -77,6 +77,12 @@
 **Enforced by:** `resolveInvestorScope()` in `api/src/services/permissionService.js`, `api/src/routes/auth.js` investor credential fallback, migrations `048_investor_customer_scope.sql` and `049_investor_accounts_nk2_credentials.sql`, focused investor auth, IDOR, and route-permission tests.
 **Cite when:** Editing auth/permission resolution, customer/profile reads, appointments, payments, service records, reports, or investor allowlist migration/admin flows.
 
+### INV-022 — Investor Allowlist Is Admin-Curated
+**Rule:** `dbo.investor_clients` may be changed from the web UI only through the `/customers` Investor checkbox, and that checkbox must render only for Admin-class users. The backend `GET /api/Partners/investor-visibility` and `PATCH /api/Partners/:id/investor-visibility` routes must require `permissions.edit` plus an Admin-class handler check. Investor/read-only users and non-admin staff must never see the curation checkbox or mutate the allowlist.
+**Rationale:** Checking the box grants an external investor account customer visibility. The investor role itself is read-only, and operational staff should not accidentally widen investor access.
+**Enforced by:** `api/src/routes/partners/investorVisibility.js`, `api/tests/readRoutePermissions.test.js`, `api/src/routes/partners/__tests__/investorVisibility.test.js`, `website/src/pages/Customers.tsx`, and `website/src/pages/Customers/CustomerColumns.test.tsx`.
+**Cite when:** Editing investor allowlist UI/API behavior, permission groups, or `dbo.investor_clients`.
+
 ---
 
 ## Money & Payment Invariants

@@ -295,5 +295,10 @@
   },
   "states": {
     "loading": "Đang tải khách hàng..."
+  },
+  "investorVisibility": {
+    "column": "Nhà đầu tư",
+    "toggleLabel": "Hiển thị {{name}} cho nhà đầu tư",
+    "updateError": "Không thể cập nhật quyền hiển thị cho nhà đầu tư. Vui lòng thử lại."
   }
 }

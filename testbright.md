@@ -10,6 +10,29 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK2 Admin Investor Visibility Checkbox 2026-06-27
+
+Feature/edit name: NK2 admin-only customer visibility checkbox for investor allowlist (v0.32.47)
+
+Changed URLs / API routes / data flow:
+- URL: `https://nk2.2checkin.com/customers`
+- API: `GET /api/Partners/investor-visibility`, `PATCH /api/Partners/:id/investor-visibility`
+- Data flow: Admin checkbox -> `dbo.investor_clients` -> investor scoped `/customers` list/profile/report reads.
+
+Affected roles and data flows:
+- Admin staff: sees the Investor checkbox and can add/remove customer visibility.
+- Non-admin staff: does not see the checkbox and gets `403 ADMIN_REQUIRED` on direct API calls.
+- Investor user: remains read-only and sees only `dbo.investor_clients.is_visible=true` customers.
+
+Execution checklist:
+- [x] PASS: API unit - `cd api && JWT_SECRET=test-secret npx jest src/routes/partners/__tests__/investorVisibility.test.js tests/readRoutePermissions.test.js --runInBand` passed 2 suites / 28 tests.
+- [x] PASS: UI unit - `cd website && npx vitest run src/pages/Customers/CustomerColumns.test.tsx src/hooks/__tests__/useCustomers.permissions.test.ts` passed 2 files / 11 tests.
+- [ ] PENDING: Live NK2 - admin sees checkbox and API returns allowlist count.
+- [ ] PENDING: Live NK2 - investor user does not see the checkbox and still sees only allowlisted customers.
+- [ ] PENDING: Live NK - production site version/health unchanged.
+
+---
+
 # TestSprite Plan: NK2 Investor Credential Activation 2026-06-27
 
 Feature/edit name: NK2 investor credential activation with production-auth isolation

@@ -12,6 +12,7 @@
 
 | Version | Date | Scope |
 |---|---|---|
+| v1.0.7 | 2026-06-27 | Admin-only investor allowlist curation added: `GET /api/Partners/investor-visibility` and `PATCH /api/Partners/:id/investor-visibility` read/write `dbo.investor_clients` only after `permissions.edit` and Admin-class handler validation. |
 | v1.0.6 | 2026-06-27 | Backend investor scope helper added: `resolveInvestorScope()` returns a fail-closed customer allowlist for employees in the `investor` permission group. |
 | v1.0.0 | 2026-05-13 | Initial contract freeze covering all active API routes, shared types, and integration boundaries. |
 | v1.0.1 | 2026-05-17 | Contract documentation aligned to live payment method enum, report API, and operational export registry. |
@@ -586,6 +587,25 @@ body: { email: string; password: string }
 4. Sign the existing staff JWT shape with `employeeId` set to the mapped partner id; do not expose a new token type.
 
 **Invariants:** `dbo.investor_accounts` is an NK2 credential boundary for shared NK/NK2 databases. It must not grant permissions by itself; all authorization still comes from `partners.tier_id`, `group_permissions`, and `resolveInvestorScope()`. A partner can remain inactive and have no `partners.password_hash`, so the same username/password fails against older NK production code that only supports active partner credentials.
+
+### 2.2B Admin Investor Customer Visibility
+
+**Files:** `api/src/routes/partners.js`, `api/src/routes/partners/investorVisibility.js`, `website/src/pages/Customers/*`
+
+```ts
+GET /api/Partners/investor-visibility
+PATCH /api/Partners/:id/investor-visibility
+body: { visible: boolean }
+```
+
+**Auth:** Both routes require `permissions.edit` from route middleware and then re-resolve the caller. The handler allows only Admin-class users: canonical Admin group id, `Admin`, `Super Admin`, `System Administrator`, or wildcard `*`. Non-admin callers receive `403 ADMIN_REQUIRED` and no `dbo.investor_clients` query/write runs.
+
+**Behavior:**
+1. `GET /api/Partners/investor-visibility` resolves the one active mapped `dbo.investor_accounts` row whose partner is assigned to group `investor`, then returns `{ investorId, customerIds }` for visible allowlist rows.
+2. `PATCH /api/Partners/:id/investor-visibility` validates the customer UUID and boolean `visible`, verifies the target is an active customer, resolves the active investor, then upserts `dbo.investor_clients` when visible or sets `is_visible=false` when hidden.
+3. The `/customers` Investor checkbox is rendered only for Admin-class users. Investor employee users remain read-only and never see this curation control.
+
+**Invariants:** This is an admin curation surface over INV-021, not an investor self-service feature. The investor portal remains read-only and scoped by `resolveInvestorScope()`.
 
 ### 2.3 resolveInvestorScope (Backend Auth)
 

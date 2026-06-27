@@ -16,8 +16,24 @@ function formatDate(dateStr: string): string {
   return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-export function buildCustomerColumns(locationNameMap: Map<string, string>, canSoftDelete: boolean, onSoftDelete: (id: string, name: string) => void, t: (key: string) => string): readonly Column<Customer>[] {
-  return [
+interface InvestorVisibilityColumn {
+  readonly enabled: boolean;
+  readonly label: string;
+  readonly loading: boolean;
+  readonly updatingIds: ReadonlySet<string>;
+  readonly isVisible: (customerId: string) => boolean;
+  readonly onChange: (customerId: string, visible: boolean) => void;
+  readonly getToggleLabel: (name: string) => string;
+}
+
+export function buildCustomerColumns(
+  locationNameMap: Map<string, string>,
+  canSoftDelete: boolean,
+  onSoftDelete: (id: string, name: string) => void,
+  t: (key: string) => string,
+  investorVisibility?: InvestorVisibilityColumn,
+): readonly Column<Customer>[] {
+  const columns: Column<Customer>[] = [
     {
       key: 'code',
       header: 'Code',
@@ -29,6 +45,37 @@ export function buildCustomerColumns(locationNameMap: Map<string, string>, canSo
         </span>
       ),
     },
+  ];
+
+  if (investorVisibility?.enabled) {
+    columns.push({
+      key: 'investorVisible',
+      header: investorVisibility.label,
+      sortable: false,
+      width: '86px',
+      render: (row) => {
+        const checked = investorVisibility.isVisible(row.id);
+        const updating = investorVisibility.updatingIds.has(row.id);
+        return (
+          <label
+            className="inline-flex min-h-8 items-center justify-center rounded-lg px-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <input
+              type="checkbox"
+              checked={checked}
+              disabled={investorVisibility.loading || updating}
+              onChange={(e) => investorVisibility.onChange(row.id, e.target.checked)}
+              aria-label={investorVisibility.getToggleLabel(row.name)}
+              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
+            />
+          </label>
+        );
+      },
+    });
+  }
+
+  columns.push(
     {
       key: 'name',
       header: 'Customer',
@@ -111,5 +158,7 @@ export function buildCustomerColumns(locationNameMap: Map<string, string>, canSo
         ) : null
       ),
     },
-  ];
+  );
+
+  return columns;
 }

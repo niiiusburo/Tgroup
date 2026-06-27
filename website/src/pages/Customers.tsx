@@ -22,6 +22,7 @@ import { CustomerListView } from "./Customers/CustomerListView";
 import { CustomerFormModal } from "./Customers/CustomerFormModal";
 import { CustomerProfileContent } from "./Customers/CustomerProfileContent";
 import { useCustomerDetailController } from "./Customers/useCustomerDetailController";
+import { useInvestorVisibility } from "./Customers/useInvestorVisibility";
 
 /**
  * Customers Page - Patient records with search, filters, table, and profile view
@@ -117,7 +118,7 @@ export function Customers() {
     setProfileTab("profile");
   }, [selectedCustomerId]);
 
-  const { hasPermission } = useAuth();
+  const { hasPermission, permissions } = useAuth();
 
   // Check permissions
   const canEditCustomers = hasPermission("customers.edit");
@@ -129,6 +130,14 @@ export function Customers() {
   const canRefundPayment = hasPermission("payment.refund");
   const canEditPayment = hasPermission("payment.edit");
   const canVoidPayment = hasPermission("payment.void");
+  const permissionGroupId = permissions?.groupId?.trim().toLowerCase();
+  const permissionGroupName = permissions?.groupName?.trim().toLowerCase();
+  const canManageInvestorVisibility =
+    permissionGroupId === "11111111-0000-0000-0000-000000000001" ||
+    permissionGroupName === "admin" ||
+    permissionGroupName === "super admin" ||
+    permissionGroupName === "system administrator" ||
+    hasPermission("*");
 
   const {
     customers,
@@ -151,6 +160,7 @@ export function Customers() {
   } = useCustomers(undefined, { paginated: true });
 
   const { allLocations } = useLocations();
+  const investorVisibility = useInvestorVisibility(canManageInvestorVisibility);
   const locationNameMap = useMemo(
     () => new Map(allLocations.map((l) => [l.id, l.name])),
     [allLocations],
@@ -169,8 +179,26 @@ export function Customers() {
           });
         },
         t,
+        {
+          enabled: canManageInvestorVisibility,
+          label: t("investorVisibility.column"),
+          loading: investorVisibility.loading,
+          updatingIds: investorVisibility.updatingIds,
+          isVisible: investorVisibility.isVisible,
+          onChange: investorVisibility.setVisible,
+          getToggleLabel: (name) => t("investorVisibility.toggleLabel", { name }),
+        },
       ),
-    [locationNameMap, canSoftDelete, t],
+    [
+      canManageInvestorVisibility,
+      canSoftDelete,
+      investorVisibility.isVisible,
+      investorVisibility.loading,
+      investorVisibility.setVisible,
+      investorVisibility.updatingIds,
+      locationNameMap,
+      t,
+    ],
   );
 
   const {
@@ -363,6 +391,9 @@ export function Customers() {
       minSearchLength={minSearchLength}
       canAddCustomers={canAddCustomers}
       canExportCustomers={canExportCustomers}
+      investorVisibilityError={
+        investorVisibility.error ? t("investorVisibility.updateError") : null
+      }
       onAddCustomer={() => { setIsEditMode(false); setShowForm(true); }}
       onRowClick={(row) => navigate(`/customers/${row.id}`)}
       emptyMessage={t("table.noData", { ns: "common" })}

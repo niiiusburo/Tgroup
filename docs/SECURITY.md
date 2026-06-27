@@ -64,6 +64,8 @@ Effective permissions = (Group ∪ Grants) − Revokes, then filtered by locatio
 
 Investor customer scope is an additional backend data filter. Only employee identities whose permission group name is exactly `investor` are scoped through `dbo.investor_clients`; everyone else keeps the existing behavior. On NK2, investor passwords may be stored in `dbo.investor_accounts` instead of `partners.password_hash` so the shared `tdental_demo` database does not create a production-login-capable NK account before NK production has the same investor filters.
 
+Investor allowlist curation is Admin-only. `/customers` may render the Investor checkbox only for Admin-class users, and `GET /api/Partners/investor-visibility` plus `PATCH /api/Partners/:id/investor-visibility` require `permissions.edit` and a handler-level Admin-class check before reading or writing `dbo.investor_clients`.
+
 ### Dangerous Permissions (Require Explicit Assignment)
 
 | Permission | Action | Why Dangerous |
@@ -74,6 +76,7 @@ Investor customer scope is an additional backend data filter. Only employee iden
 | `payment.delete` | Remove payment row | Destroys financial record |
 | `settings.system` | Change system preferences | Can break app behavior |
 | `permissions.edit` | Modify permission groups | Privilege escalation |
+| `permissions.edit` + Admin class | Mark customers visible to investor accounts | External customer allowlist write in `dbo.investor_clients` |
 | `external_checkups.upload` | Upload to Hosoonline | Writes to external system |
 
 ### Sensitive-Action Approval Thresholds

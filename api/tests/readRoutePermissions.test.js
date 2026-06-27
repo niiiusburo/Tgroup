@@ -46,6 +46,7 @@ describe('owned backend read route permissions', () => {
     ['partners', require('../src/routes/partners'), [
       ['/', 'customers.view'],
       ['/check-unique', 'customers.view'],
+      ['/investor-visibility', 'permissions.edit'],
       ['/:id', 'customers.view'],
       ['/:id/GetKPIs', 'customers.view'],
     ]],
@@ -89,6 +90,14 @@ describe('owned backend read route permissions', () => {
     for (const [path, permission] of cases) {
       expectRoutePermission(router, 'get', path, permission);
     }
+  });
+});
+
+describe('investor visibility mutation route permissions', () => {
+  const partnerRouter = require('../src/routes/partners');
+
+  it('PATCH /:id/investor-visibility requires permission editing access', () => {
+    expectRoutePermission(partnerRouter, 'patch', '/:id/investor-visibility', 'permissions.edit');
   });
 });
 

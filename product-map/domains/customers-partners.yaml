@@ -39,10 +39,12 @@ endpoints:
   - GET    /api/Partners
   - GET    /api/Partners/check-unique
   - GET    /api/Partners/resolve
+  - GET    /api/Partners/investor-visibility
   - GET    /api/Partners/:id
   - GET    /api/Partners/:id/GetKPIs
   - POST   /api/Partners
   - PUT    /api/Partners/:id
+  - PATCH  /api/Partners/:id/investor-visibility
   - PATCH  /api/Partners/:id/soft-delete
   - DELETE /api/Partners/:id/hard-delete
   - GET    /api/CustomerBalance/:id
@@ -80,6 +82,7 @@ ui_invariants:
   - Customer phone is not a durable unique identity. Phone may overlap another phone or match a customer code (`partners.ref`) and must not block customer create/edit saves.
   - Customer DOB date parts imported as blank or zero values must normalize to null on create/update; nonblank invalid day/month values still fail validation.
   - Investor employees must see only customers listed in `dbo.investor_clients`; list/profile/KPI/receipt/balance/service reads must return empty or 404 for non-allowlisted customer records.
+  - Admin-class users may curate investor visibility from the `/customers` Investor checkbox; non-admin staff and investor users must not see that column.
 jobs:
   - none (archive scripts in api/scripts/archive/ are stale)
 shared_types:
@@ -94,6 +97,7 @@ affected_by:
   - Changes to dbo.companies (location name display)
   - Permission string changes (customers.view, customers.add, customers.edit, customers.delete, customers.hard_delete)
   - Changes to dbo.investor_clients or `resolveInvestorScope()`
+  - Changes to admin investor visibility endpoints or CustomerColumns investor checkbox behavior
 impact_tests:
   - website/e2e/customer-create-save.spec.ts
   - website/e2e/customer-profile-crud.spec.ts
@@ -103,5 +107,7 @@ impact_tests:
   - api/src/routes/partners/__tests__/searchFilters.test.js
   - api/tests/investorIdorScoping.test.js
   - api/tests/investorScopeRoutePermissions.test.js
+  - api/src/routes/partners/__tests__/investorVisibility.test.js
+  - website/src/pages/Customers/CustomerColumns.test.tsx
   - website/src/__tests__/customer-deep-link.test.tsx
 risk_level: high

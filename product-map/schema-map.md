@@ -315,10 +315,10 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 |-----------|-------|
 | **Primary Key** | `id` (uuid) |
 | **Foreign Keys** | `investor_id` → partners (employee investor), `partner_id` → partners (customer) |
-| **W** | Migration/admin allowlist tooling only; no customer write path owns this table |
+| **W** | Migration/admin tooling and Admin-only `PATCH /api/Partners/:id/investor-visibility` |
 | **R** | `permissionService.resolveInvestorScope()` and customer-touching route/report filters |
 | **E** | Indirect through customer, appointment, payment, service, dashboard, and report endpoints for users in the `investor` permission group |
-| **UI** | Investor customer assignment UI is not shipped in this branch; allowlist rows are deployment/admin data |
+| **UI** | Admin-only Investor checkbox in `/customers`; investor users never see curation controls |
 | **Risk** | **High** — NK and NK2 currently share `tdental_demo`; migration is additive but physically lands in the shared DB. Empty allowlists must return no customer data for investor users, including when the frontend has `customers.view_all` for list rendering. |
 
 ---

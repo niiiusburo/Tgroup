@@ -28,6 +28,7 @@ interface CustomerListViewProps {
   readonly minSearchLength: number;
   readonly canAddCustomers: boolean;
   readonly canExportCustomers?: boolean;
+  readonly investorVisibilityError?: string | null;
   readonly onAddCustomer: () => void;
   readonly onRowClick: (row: Customer) => void;
   readonly emptyMessage: string;
@@ -70,6 +71,7 @@ export function CustomerListView({
   minSearchLength,
   canAddCustomers,
   canExportCustomers = false,
+  investorVisibilityError = null,
   onAddCustomer,
   onRowClick,
   emptyMessage,
@@ -151,6 +153,12 @@ export function CustomerListView({
           ))}
         </div>
       </div>
+
+      {investorVisibilityError && (
+        <p role="alert" className="text-sm text-red-600">
+          {investorVisibilityError}
+        </p>
+      )}
 
       {searchRequired && !searchTerm && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">

@@ -14,6 +14,16 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.47] — 2026-06-27
+### Added
+- **Admin-only investor customer checkbox:** Admin-class users now see an Investor checkbox in the `/customers` search/list table. Checking it adds the customer to the active NK2 investor allowlist; unchecking keeps the row but marks it hidden. Non-admin employees do not see the column. — @agent — preserves INV-021 and new INV-022.
+
+### Security
+- `GET /api/Partners/investor-visibility` and `PATCH /api/Partners/:id/investor-visibility` require `permissions.edit` plus an Admin-class permission state in the handler, so direct non-admin calls cannot mutate `dbo.investor_clients`. — @agent — investor allowlist hardening.
+
+### Tested
+- `cd api && JWT_SECRET=test-secret npx jest src/routes/partners/__tests__/investorVisibility.test.js tests/readRoutePermissions.test.js --runInBand`; `cd website && npx vitest run src/pages/Customers/CustomerColumns.test.tsx src/hooks/__tests__/useCustomers.permissions.test.ts`; `npm --prefix website run build`; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off <investor visibility files>`; `npm run verify:governance`. Live NK2/NK proof follows deployment. — @agent
+
 ## [0.32.46] — 2026-06-27
 ### Fixed
 - **Investor route access no longer inherits overview permission:** The authenticated layout route is now auth-only, and `overview.view` is enforced only on the `/` index route so NK2 investors with `customers.view` can open `/customers` without requiring dashboard access. The investor seed now includes the read-only `customers.view_all` list permission so the customer page can list the backend-scoped allowlist instead of forcing search-first mode. — @agent — fixes the live post-deploy `Không có quyền truy cập` route guard and empty customer page found during investor activation proof.

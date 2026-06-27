@@ -295,5 +295,10 @@
   },
   "states": {
     "loading": "Loading patients..."
+  },
+  "investorVisibility": {
+    "column": "Investor",
+    "toggleLabel": "Show {{name}} to investor",
+    "updateError": "Could not update investor visibility. Please try again."
   }
 }

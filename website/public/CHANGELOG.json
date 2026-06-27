@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.32.47",
+    "date": "2026-06-27",
+    "commit": "pending",
+    "highlights": "Admins can curate which customers are visible to the NK2 investor account from the customer list.",
+    "sections": [
+      {
+        "title": "Investor Access",
+        "items": [
+          "The /customers table shows an Investor checkbox only for Admin-class users.",
+          "Checking the box adds the customer to dbo.investor_clients for the active investor account; unchecking marks it hidden.",
+          "Non-admin employees and investor users do not see the curation column."
+        ]
+      },
+      {
+        "title": "Security",
+        "items": [
+          "Investor visibility APIs require permissions.edit plus a handler-level Admin-class check before reading or writing the allowlist."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.39",
     "date": "2026-06-27",
     "commit": "pending",
