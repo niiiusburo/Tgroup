@@ -87,7 +87,6 @@ export function CheckIn() {
         response_summary: summary,
       });
       if (!res.ok || !data) {
-        const reason = data?.reason || 'NETWORK_ERROR';
         const message = data?.message || t('checkIn.errorGeneric', 'Something went wrong. Please try again.');
         setStatus({ kind: 'error', message });
         return;
