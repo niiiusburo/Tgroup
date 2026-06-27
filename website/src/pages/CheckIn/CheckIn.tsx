@@ -141,7 +141,7 @@ export function CheckIn() {
 
   useEffect(() => {
     // Sample detection progress every 5 ticks (~1.3s) to keep telemetry bounded
-    if (controller.detectionState !== 'idle' && status.kind === 'idle') {
+    if (status.kind === 'idle') {
       setStatus({ kind: 'capturing' });
       logFace('camera_stream_ok', {
         session_id: sessionIdRef.current,
@@ -156,7 +156,7 @@ export function CheckIn() {
   const lastTickLogRef = useRef(0);
   useEffect(() => {
     const now = Date.now();
-    if (now - lastTickLogRef.current > 1300 && controller.detectionState !== 'idle') {
+    if (now - lastTickLogRef.current > 1300 ) {
       lastTickLogRef.current = now;
       logFace('detection_tick', {
         session_id: sessionIdRef.current,
@@ -262,7 +262,7 @@ export function CheckIn() {
         )}
 
         {/* Idle scanning indicator over camera */}
-        {showCamera && controller.detectionState !== 'idle' && (
+        {showCamera && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-black/60 backdrop-blur rounded-full text-xs flex items-center gap-2">
             <ScanFace className="w-4 h-4" aria-hidden />
             <span>
