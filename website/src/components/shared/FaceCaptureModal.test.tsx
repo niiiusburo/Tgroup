@@ -309,7 +309,8 @@ describe('FaceCaptureModal', () => {
       // (fix/face-id-checkin-nk@1f2a06fe5).
       const overlay = document.querySelector('[data-testid="face-modal-privacy-blur"]');
       expect(overlay).toBeInTheDocument();
-      expect(overlay?.className ?? '').toContain('backdrop-blur-');
+      expect(overlay?.className ?? '').toContain('backdrop-blur-[3px]');
+      expect(overlay?.className ?? '').toContain('bg-gray-950/10');
       expect(document.querySelector('video')?.className ?? '').not.toContain('blur-');
     });
   });

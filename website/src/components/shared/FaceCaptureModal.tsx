@@ -87,8 +87,8 @@ export function FaceCaptureModal({
               <div className="relative aspect-[3/4] sm:aspect-[4/3] rounded-xl overflow-hidden bg-gray-900">
                 {/*
                   Live video stays sharp so canvas capture (drawImage) gives the
-                  embedding engine a clean frame. Privacy blur is applied as a
-                  SEPARATE backdrop-filter overlay so the captured pixel buffer
+                  embedding engine a clean frame. Privacy blur is a light
+                  separate backdrop-filter overlay so the captured pixel buffer
                   is never touched. See fix/face-id-checkin-nk@1f2a06fe5 for the
                   proven iOS NO_FACE root cause this avoids.
                 */}
@@ -101,7 +101,7 @@ export function FaceCaptureModal({
                 <div
                 aria-hidden
                 data-testid="face-modal-privacy-blur"
-                className="absolute inset-0 pointer-events-none bg-gray-950/15 backdrop-blur-[14px]" />
+                className="absolute inset-0 pointer-events-none bg-gray-950/10 backdrop-blur-[3px]" />
                 {isStarting && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20" aria-live="polite">
                     <Loader2 className="w-5 h-5 text-white animate-spin" />

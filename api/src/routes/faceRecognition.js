@@ -12,6 +12,7 @@ const { resolveInvestorScope } = require('../services/permissionService');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+const FACE_RECOGNITION_VERSION = 'face-recognition-0.32.51';
 
 function sha256Hex(buffer) {
   return crypto.createHash('sha256').update(buffer).digest('hex');
@@ -78,7 +79,7 @@ async function assertInvestorPartnerAccess(req, res, partnerId) {
 /**
  * POST /api/face/recognize
  * Body: multipart/form-data with field `image`
- * Returns: { match, candidates }
+ * Returns: { match, candidates, recognitionVersion }
  */
 router.post('/recognize', requirePermission('customers.view'), upload.single('image'), async (req, res) => {
   const start = Date.now();
@@ -112,9 +113,9 @@ router.post('/recognize', requirePermission('customers.view'), upload.single('im
       durationMs: duration,
     });
 
-    console.log(`[FaceRecognize] result=${match ? 'match' : candidates.length ? 'candidates' : 'no_match'} duration=${duration}ms`);
+    console.log(`[FaceRecognize] version=${FACE_RECOGNITION_VERSION} result=${match ? 'match' : candidates.length ? 'candidates' : 'no_match'} duration=${duration}ms`);
 
-    return res.json({ match, candidates });
+    return res.json({ match, candidates, recognitionVersion: FACE_RECOGNITION_VERSION });
   } catch (err) {
     const mapped = mapEngineError(err);
     await recordFaceDiagnostic({

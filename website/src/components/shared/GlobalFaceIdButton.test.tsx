@@ -6,7 +6,9 @@ import { fetchPartners, registerFace } from '@/lib/api';
 const navigateMock = vi.fn();
 const recognizeMock = vi.fn();
 const resetMock = vi.fn();
-let recognizeState: { status: 'idle' | 'no_match' } = { status: 'idle' };
+let recognizeState: { status: 'idle' } | { status: 'no_match'; recognitionVersion?: string | null } = {
+  status: 'idle',
+};
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
@@ -67,7 +69,7 @@ describe('GlobalFaceIdButton', () => {
   });
 
   it('registers a no-match auto-captured face to a searched customer', async () => {
-    recognizeState = { status: 'no_match' };
+    recognizeState = { status: 'no_match', recognitionVersion: 'face-recognition-0.32.51' };
     vi.mocked(fetchPartners).mockResolvedValue({
       items: [
         {
@@ -90,6 +92,7 @@ describe('GlobalFaceIdButton', () => {
     fireEvent.click(await screen.findByText('Mock capture'));
 
     expect(await screen.findByText('No customer matched')).toBeInTheDocument();
+    expect(screen.getAllByText('v0.32.51')).toHaveLength(2);
 
     fireEvent.change(screen.getByPlaceholderText('Name, phone, or code...'), {
       target: { value: 'T146292' },

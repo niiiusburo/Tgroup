@@ -63,6 +63,19 @@ describe('faceCaptureEngine', () => {
     expect(result.ready).toBe(true);
   });
 
+  it('analyzes the raw video element so overlay blur cannot affect face detection', async () => {
+    const video = createVideo();
+    const detector = {
+      detect: vi.fn().mockResolvedValue([{ boundingBox: { width: 220, height: 260 } }]),
+    };
+
+    const result = await analyzeFrame(video, detector as unknown as FaceDetector, true);
+
+    expect(detector.detect).toHaveBeenCalledWith(video);
+    expect(mockCanvasContext.drawImage).toHaveBeenLastCalledWith(video, 0, 0, 96, 128);
+    expect(result.ready).toBe(true);
+  });
+
   it('tight-crops the landscape frame to 60% of the smaller side so the face fills more of the image CompreFace/face-service receive', async () => {
     // The full frame on a 1920x1080 front camera leaves the face at ~12% of
     // the shipped image, below the ~20% NO_FACE threshold of both CompreFace

@@ -153,7 +153,7 @@ export function CheckIn() {
             <div
               aria-hidden
               data-testid="checkin-privacy-blur"
-              className="pointer-events-none absolute inset-0 bg-gray-950/15 backdrop-blur-[14px]"
+              className="pointer-events-none absolute inset-0 bg-gray-950/10 backdrop-blur-[3px]"
             />
           </>
         )}

@@ -65,7 +65,8 @@ describe('CheckIn kiosk page', () => {
   it('keeps the public preview privacy-blurred without blurring the capture video', async () => {
     renderCheckIn();
 
-    expect(await screen.findByTestId('checkin-privacy-blur')).toHaveClass('backdrop-blur-[14px]');
+    expect(await screen.findByTestId('checkin-privacy-blur')).toHaveClass('backdrop-blur-[3px]');
+    expect(await screen.findByTestId('checkin-privacy-blur')).toHaveClass('bg-gray-950/10');
     expect(document.querySelector('video')?.className).not.toContain('blur-');
   });
 

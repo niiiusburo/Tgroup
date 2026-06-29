@@ -11,9 +11,9 @@ import {
 type RecognitionState =
   | { status: 'idle' }
   | { status: 'processing' }
-  | { status: 'success'; match: FaceCandidate }
-  | { status: 'candidates'; candidates: FaceCandidate[] }
-  | { status: 'no_match' }
+  | { status: 'success'; match: FaceCandidate; recognitionVersion?: string | null }
+  | { status: 'candidates'; candidates: FaceCandidate[]; recognitionVersion?: string | null }
+  | { status: 'no_match'; recognitionVersion?: string | null }
   | { status: 'error'; message: string };
 
 type RegisterState =
@@ -39,11 +39,19 @@ export function useFaceRecognition() {
     try {
       const result = await recognizeFace(image);
       if (result.match) {
-        setRecognizeState({ status: 'success', match: result.match });
+        setRecognizeState({
+          status: 'success',
+          match: result.match,
+          recognitionVersion: result.recognitionVersion,
+        });
       } else if (result.candidates && result.candidates.length > 0) {
-        setRecognizeState({ status: 'candidates', candidates: result.candidates });
+        setRecognizeState({
+          status: 'candidates',
+          candidates: result.candidates,
+          recognitionVersion: result.recognitionVersion,
+        });
       } else {
-        setRecognizeState({ status: 'no_match' });
+        setRecognizeState({ status: 'no_match', recognitionVersion: result.recognitionVersion });
       }
       return result;
     } catch (err) {

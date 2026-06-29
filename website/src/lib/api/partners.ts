@@ -192,6 +192,7 @@ export interface FaceCandidate {
 export interface FaceMatchResult {
   match: FaceCandidate | null;
   candidates: FaceCandidate[];
+  recognitionVersion?: string | null;
 }
 
 export interface FaceRegisterResult {

@@ -14,6 +14,13 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.51] — 2026-06-29
+### Changed
+- **NK2 Face ID now exposes its recognizer version and uses a lighter privacy preview:** The header Face ID control shows `v0.32.51`, `POST /api/face/recognize` returns `recognitionVersion: "face-recognition-0.32.51"`, and public/staff camera previews use a light 3px overlay blur while face detection and JPEG capture still read the raw video element. Existing samples are unchanged. — @agent — preserves the Face ID diagnostics/privacy invariant while making the recognizer version visible.
+
+### Tested
+- `cd website && npx vitest run src/pages/CheckIn/CheckIn.test.tsx src/components/shared/FaceCaptureModal.test.tsx src/components/shared/faceCaptureEngine.test.ts src/components/shared/GlobalFaceIdButton.test.tsx src/hooks/__tests__/useFaceRecognition.test.ts src/lib/api/__tests__/faceRecognition.test.ts` passed 6 files / 71 tests; `cd api && JWT_SECRET=test-secret npx jest tests/faceRecognition.test.js --runInBand` passed 1 suite / 36 tests; `npm --prefix website run build` passed; `npm --prefix website run lint` passed with existing warnings only; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off api/src/routes/faceRecognition.js website/src/components/shared/FaceCaptureModal.tsx website/src/pages/CheckIn/CheckIn.tsx website/src/components/shared/faceCaptureEngine.ts website/src/components/shared/useFaceCaptureController.ts website/src/components/shared/GlobalFaceIdButton.tsx website/src/hooks/useFaceRecognition.ts website/src/lib/api/partners.ts` found 0 findings; `npm run verify:governance` passed; local Playwright proof captured `v0.32.51` staff header and `/checkin` `backdrop-blur-[3px]` with unblurred video. — @agent
+
 ## [0.32.48] — 2026-06-27
 ### Changed
 - **Investor now uses the staff shell with scoped customer data:** The `investor` group resolves to explicit staff-style permissions so `/`, `/calendar`, `/customers`, `/payment`, `/reports`, settings/admin views, and normal customer controls are visible without granting wildcard `*`. Customer-linked reads/writes, Face ID recognition/status, appointments, payments, and reports remain scoped to checked customers in `dbo.investor_clients`. — @agent — explicit product decision updating INV-021 / UC-022.

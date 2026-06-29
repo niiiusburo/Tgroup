@@ -10,6 +10,32 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK2 Face ID Version Badge And Light Preview Blur 2026-06-29
+
+Feature/edit name: NK2 Face ID recognizer version visibility plus lighter preview blur (v0.32.51)
+
+Changed URLs / API routes / data flow:
+- URL: `https://nk2.2checkin.com/customers` and any staff-shell route with the shared header.
+- API: `POST /api/face/recognize`
+- Data flow: staff header Face ID button -> `FaceCaptureModal` -> `/api/face/recognize` -> result popover shows the NK2 Face ID version metadata.
+- UI data flow: staff and public camera preview -> light overlay-only privacy blur -> raw `video` element remains the input for native face detection and canvas JPEG capture.
+
+Affected roles and data flows:
+- Staff/admin users see the visible Face ID `v0.32.51` badge.
+- Staff/admin and public `/checkin` users see only the light 3px preview blur instead of the previous 14px blur.
+- Existing registered faces and samples are not rewritten; only recognition response metadata changes.
+- Face detection and JPEG capture keep using the raw camera frame, so the blur cannot degrade provider input.
+- NK3 is out of scope for this worktree.
+
+Execution checklist:
+- [x] PASS: Focused frontend and backend Face ID tests prove `recognitionVersion` is returned/carried/displayed and preview blur remains overlay-only - `cd website && npx vitest run src/pages/CheckIn/CheckIn.test.tsx src/components/shared/FaceCaptureModal.test.tsx src/components/shared/faceCaptureEngine.test.ts src/components/shared/GlobalFaceIdButton.test.tsx src/hooks/__tests__/useFaceRecognition.test.ts src/lib/api/__tests__/faceRecognition.test.ts` passed 6 files / 71 tests; `cd api && JWT_SECRET=test-secret npx jest tests/faceRecognition.test.js --runInBand` passed 1 suite / 36 tests.
+- [x] PASS: Website build/typecheck and governance checks pass with the `0.32.51` version bump - `npm --prefix website run build` passed, `npm --prefix website run lint` passed with existing warnings only, and `npm run verify:governance` passed.
+- [x] PASS: Scoped Semgrep finds no security blockers on the touched Face ID route/client/UI files - `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off api/src/routes/faceRecognition.js website/src/components/shared/FaceCaptureModal.tsx website/src/pages/CheckIn/CheckIn.tsx website/src/components/shared/faceCaptureEngine.ts website/src/components/shared/useFaceCaptureController.ts website/src/components/shared/GlobalFaceIdButton.tsx website/src/hooks/useFaceRecognition.ts website/src/lib/api/partners.ts` scanned 8 files with 0 findings.
+- [x] PASS: Local NK2 worktree screenshot/DOM proof shows the staff Customers header version badge and the `/checkin` preview blur class is `backdrop-blur-[3px]` with the video unblurred - Playwright screenshots: `output/playwright/nk2-face-version-20260629/customers-header-face-id-v03251.png`, `output/playwright/nk2-face-version-20260629/checkin-light-privacy-blur-v03251.png`; DOM proof: overlay `bg-gray-950/10 backdrop-blur-[3px]`, video class `absolute inset-0 h-full w-full object-cover`, `videoHasBlur: false`.
+- [ ] PENDING: Live NK2 deployment proof shows `v0.32.51` on the staff header Face ID control and confirms NK production/NK3 are untouched.
+
+---
+
 # TestSprite Plan: NK2 Investor Staff Shell With Checked-Customer Scope 2026-06-27
 
 Feature/edit name: NK2 investor staff-shell permissions with allowlisted customer data (v0.32.48)
