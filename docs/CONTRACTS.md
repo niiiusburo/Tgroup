@@ -56,6 +56,11 @@
   };
 }
 ```
+Investor users (`permission_groups.name = "investor"`) intentionally return
+`permissions.locations = []` even when their mapped employee has a primary
+branch. Investor scope is customer-based through `dbo.investor_clients`; the
+frontend must remain on all locations unless a user explicitly filters further.
+
 **Errors:** 400 (missing fields), 401 (invalid credentials), 429 (rate limited).
 
 #### GET /api/Auth/me
@@ -564,13 +569,18 @@ async function resolveEffectivePermissions(employeeId: string): Promise<{
   effectivePermissions: string[];
   tierId: string | null;
   groupName: string | null;
+  locations: { id: string; name: string }[];
 }>
 ```
 **Algorithm:**
 1. Read `partners.tier_id`.
 2. Read `group_permissions.permission_string` WHERE `group_id = tier_id`.
 3. Read `permission_overrides` for employee; apply grants/revokes.
-4. Return deduplicated array.
+4. Read the employee's primary branch plus `employee_location_scope` rows.
+5. If the permission group is `investor`, expand the explicit staff-shell
+   permission list, remove wildcard `*`, and return `locations: []` so customer
+   allowlist scope remains the only automatic investor data boundary.
+6. Return deduplicated permissions and location access for non-investor staff.
 
 ### 2.2A POST /api/Auth/login Investor Credential Fallback
 
@@ -625,7 +635,7 @@ async function resolveInvestorScope(employeeId: string | undefined): Promise<{
 3. If the group name is not exactly `investor`, return non-investor scope and do not query `dbo.investor_clients`.
 4. If the group name is `investor`, read visible `partner_id` rows from `dbo.investor_clients` and return them as the customer allowlist.
 
-**Invariants:** Investors use normal employee identity and permission resolution, even when NK2 credentials are stored in `dbo.investor_accounts`. Empty allowlists fail closed. The `investor` group resolves to explicit staff-shell permissions without wildcard `*`; customer-linked reads/writes must still apply the allowlist, and permission/employee mutation endpoints block investor self-escalation.
+**Invariants:** Investors use normal employee identity and permission resolution, even when NK2 credentials are stored in `dbo.investor_accounts`. Empty allowlists fail closed. The `investor` group resolves to explicit staff-shell permissions without wildcard `*`; `permissions.locations` stays empty for investors so the frontend does not auto-apply a home-branch filter; customer-linked reads/writes must still apply the allowlist, and permission/employee mutation endpoints block investor self-escalation.
 
 ### 2.4 query (Database Access)
 

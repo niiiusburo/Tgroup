@@ -14,6 +14,13 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.49] — 2026-06-29
+### Fixed
+- **Investor calendar no longer auto-filters to the home clinic:** `resolveEffectivePermissions()` now returns empty auth `locations` for the `investor` group while preserving the explicit staff-shell permissions and customer allowlist guards. This keeps `/calendar` on all locations so allowlisted appointments populate instead of disappearing behind the investor employee's primary branch. — @agent — preserves INV-021 and CON-Auth-login.
+
+### Tested
+- `cd api && JWT_SECRET=test-secret npx jest src/services/__tests__/permissionService.test.js tests/investorIdorScoping.test.js tests/investorScopeRoutePermissions.test.js --runInBand`; `cd api && JWT_SECRET=test-secret npx jest tests/authInvestorLogin.test.js tests/readRoutePermissions.test.js tests/investorAdminMutationGuards.test.js src/routes/partners/__tests__/investorVisibility.test.js --runInBand`; `npm --prefix website run build`; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off api/src/services/permissionService.js api/src/services/__tests__/permissionService.test.js`; `npm run verify:governance`. Live NK2 proof follows deployment. — @agent
+
 ## [0.32.48] — 2026-06-27
 ### Changed
 - **Investor now uses the staff shell with scoped customer data:** The `investor` group resolves to explicit staff-style permissions so `/`, `/calendar`, `/customers`, `/payment`, `/reports`, settings/admin views, and normal customer controls are visible without granting wildcard `*`. Customer-linked reads/writes, Face ID recognition/status, appointments, payments, and reports remain scoped to checked customers in `dbo.investor_clients`. — @agent — explicit product decision updating INV-021 / UC-022.

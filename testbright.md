@@ -10,6 +10,33 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK2 Investor Calendar All-Location Scope 2026-06-29
+
+Feature/edit name: NK2 investor calendar all-location scope (v0.32.49)
+
+Changed URLs / API routes / data flow:
+- URL: `https://nk2.2checkin.com/calendar`
+- APIs: `GET /api/Auth/me`, `GET /api/Appointments`
+- Data flow: investor auth -> staff-shell permissions with `permissions.locations: []` -> frontend location context remains `all` -> appointment route applies `dbo.investor_clients` customer allowlist.
+
+Expected Behavior:
+
+| Visit / action | Expected result |
+|---|---|
+| Investor opens `/calendar` on NK2 | Calendar loads the day view without redirecting or showing Access Denied. |
+| Investor auth response has a primary partner company in the database | `permissions.locations` is empty for the investor group, so the frontend does not auto-lock to that company. |
+| Calendar loads June 29, 2026 | Allowlisted customer appointments are visible; live database count before the fix was 119 allowlisted appointments for the day and 0 in the investor employee's home company. |
+| Non-investor staff opens calendar | Existing primary/additional location behavior is unchanged. |
+
+Execution checklist:
+- [x] PASS: Backend permission regression covers investor auth locations staying empty - `cd api && JWT_SECRET=test-secret npx jest src/services/__tests__/permissionService.test.js tests/investorIdorScoping.test.js tests/investorScopeRoutePermissions.test.js --runInBand` passed 3 suites / 46 tests.
+- [x] PASS: Investor IDOR and route-permission tests still pass - `cd api && JWT_SECRET=test-secret npx jest tests/authInvestorLogin.test.js tests/readRoutePermissions.test.js tests/investorAdminMutationGuards.test.js src/routes/partners/__tests__/investorVisibility.test.js --runInBand` passed 4 suites / 33 tests.
+- [x] PASS: Build, Semgrep, and governance pass after docs/version updates - `npm --prefix website run build` passed for v0.32.49, Semgrep scanned `permissionService.js` and its test with 0 findings, and `npm run verify:governance` passed.
+- [ ] PENDING: Live NK2 `/api/Auth/me` returns investor staff-shell permissions, no wildcard, and `locations: []`.
+- [ ] PENDING: Live NK2 `/calendar` screenshot shows populated appointments for the investor.
+
+---
+
 # TestSprite Plan: NK2 Investor Staff Shell With Checked-Customer Scope 2026-06-27
 
 Feature/edit name: NK2 investor staff-shell permissions with allowlisted customer data (v0.32.48)

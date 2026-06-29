@@ -98,6 +98,7 @@ async function resolveEffectivePermissions(employeeId) {
 
   const groupId = partnerRows[0].tier_id;
   const groupName = partnerRows[0].group_name;
+  const isInvestor = isInvestorGroup(groupName);
 
   if (!groupId) {
     return { groupId: null, groupName: null, effectivePermissions: [], locations: [] };
@@ -143,10 +144,10 @@ async function resolveEffectivePermissions(employeeId) {
   const granted = overrideRows.filter(r => r.override_type === 'grant').map(r => r.permission);
   const revoked = overrideRows.filter(r => r.override_type === 'revoke').map(r => r.permission);
 
-  const investorStaffPerms = isInvestorGroup(groupName) ? INVESTOR_STAFF_PERMISSIONS : [];
+  const investorStaffPerms = isInvestor ? INVESTOR_STAFF_PERMISSIONS : [];
   const effectiveSet = new Set([...basePerms, ...granted, ...investorStaffPerms]);
   for (const p of revoked) effectiveSet.delete(p);
-  if (isInvestorGroup(groupName)) {
+  if (isInvestor) {
     effectiveSet.delete('*');
   }
 
@@ -154,7 +155,9 @@ async function resolveEffectivePermissions(employeeId) {
     groupId,
     groupName,
     effectivePermissions: [...effectiveSet],
-    locations: locationRows.map(l => ({ id: l.id, name: l.name })),
+    // Investor scope is customer-based via dbo.investor_clients. Returning the
+    // home branch here makes the frontend auto-filter calendar data to one clinic.
+    locations: isInvestor ? [] : locationRows.map(l => ({ id: l.id, name: l.name })),
   };
 }
 

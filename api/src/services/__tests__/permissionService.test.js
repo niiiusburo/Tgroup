@@ -124,14 +124,15 @@ describe('permissionService', () => {
       expect(query).toHaveBeenCalledTimes(4); // 1 partner + 3 parallel
     });
 
-    it('expands investor into staff-shell permissions without wildcard', async () => {
+    it('expands investor into staff-shell permissions without wildcard or auth locations', async () => {
       query.mockResolvedValueOnce([{ tier_id: 'group-investor', group_name: 'investor' }]);
       query.mockResolvedValueOnce([{ permission: 'customers.view' }, { permission: '*' }]);
       query.mockResolvedValueOnce([]);
-      query.mockResolvedValueOnce([]);
+      query.mockResolvedValueOnce([{ id: 'home-loc', name: 'Home Clinic' }]);
 
       const result = await resolveEffectivePermissions('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
       expect(result.effectivePermissions).not.toContain('*');
+      expect(result.locations).toEqual([]);
       expect(result.effectivePermissions).toEqual(
         expect.arrayContaining([
           'overview.view',

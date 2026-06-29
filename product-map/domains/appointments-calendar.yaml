@@ -62,6 +62,7 @@ invariants:
   - Appointment exports must serialize the same `appointments.date` calendar value shown in `/calendar`, include `time` when present, and allow phone searches through `partners.phone`.
   - Appointment customer selectors must search by customer code as well as name, phone, and email.
   - Investor employees may view/create/edit appointments only for allowlisted customers; the staff-shell permission set makes calendar controls visible, and route-level IDOR guards keep appointment mutations scoped.
+  - Investor auth location scope must stay empty so `/calendar` loads all allowlisted customer appointments instead of auto-filtering to the investor employee's home clinic.
 impact_tests:
   - api/src/routes/appointments/__tests__/readHandlers.test.js
   - api/tests/investorIdorScoping.test.js
