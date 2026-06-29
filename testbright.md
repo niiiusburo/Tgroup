@@ -10,6 +10,35 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK2 Investor Visible-Client Scope Hardening 2026-06-29
+
+Feature/edit name: NK2 investor staff-shell visible-client scope hardening (v0.32.52)
+
+Changed URLs / API routes / data flow:
+- URL: `https://nk2.2checkin.com/calendar`
+- URL: `https://nk2.2checkin.com/payment`
+- URL: `https://nk2.2checkin.com/reports`
+- APIs: `GET /api/Appointments`, `GET /api/Payments`, `POST /api/Reports/cash-flow/summary`
+- Data flow: investor auth -> staff-shell permissions with `permissions.locations: []` -> customer-linked reads filter by `dbo.investor_clients`.
+
+Expected Behavior:
+
+| Visit / action | Expected result |
+|---|---|
+| Investor opens `/calendar` on June 29, 2026 | Calendar stays on all locations and shows only checked-customer appointments. |
+| Investor requests payments for a checked customer | Modern payments load; legacy `accountpayments` fallback is allowed only for that checked customer. |
+| Investor manually requests payments for an unchecked customer | Response is empty; the legacy fallback is not queried. |
+| Investor opens cash-flow report with a branch filter | Report accepts the branch/date filter and still applies the checked-customer allowlist. |
+| Non-investor staff uses calendar/payments/reports | Existing location and report scoping behavior is unchanged. |
+
+Execution checklist:
+- [x] PASS: Focused backend tests cover all-location investor calendar filtering, blocked legacy-payment fallback for unchecked customers, and branch-filtered cash-flow with checked-customer scope - `cd api && JWT_SECRET=test-secret npx jest src/routes/appointments/__tests__/readHandlers.test.js tests/paymentsLegacyFallback.test.js src/routes/reports/__tests__/cashFlow.test.js --runInBand --no-coverage` passed 3 suites / 17 tests.
+- [x] PASS: Broader investor backend regression suite still passes for auth, route permissions, IDOR guards, admin mutation guards, and visibility controls - `cd api && JWT_SECRET=test-secret npx jest src/services/__tests__/permissionService.test.js tests/investorIdorScoping.test.js tests/investorScopeRoutePermissions.test.js tests/investorAdminMutationGuards.test.js tests/authInvestorLogin.test.js src/routes/partners/__tests__/investorVisibility.test.js --runInBand --no-coverage` passed 6 suites / 56 tests.
+- [x] PASS: Scoped Semgrep finds no production security blockers in changed investor payment/report runtime surfaces - production-file scan over `api/src/routes/payments/readHandlers.js api/src/routes/reports/helpers.js` found 0 findings; the broader changed-file scan found 2 CSRF audit findings only in the temporary Express apps inside `api/src/routes/reports/__tests__/cashFlow.test.js`.
+- [x] PASS: Governance/build checks pass - `npm run verify:governance` passed and `npm --prefix website run build` passed for v0.32.52.
+
+---
+
 # TestSprite Plan: NK2 Face ID Version Badge And Light Preview Blur 2026-06-29
 
 Feature/edit name: NK2 Face ID recognizer version visibility plus lighter preview blur (v0.32.51)

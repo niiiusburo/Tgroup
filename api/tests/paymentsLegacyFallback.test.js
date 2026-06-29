@@ -12,6 +12,11 @@ jest.mock('../src/db', () => ({
 
 jest.mock('uuid', () => ({ v4: jest.fn(() => 'mock-uuid') }));
 
+const mockResolveInvestorScope = jest.fn();
+jest.mock('../src/services/permissionService', () => ({
+  resolveInvestorScope: (...args) => mockResolveInvestorScope(...args),
+}));
+
 const request = require('supertest');
 const app = require('../src/server');
 const { query } = require('../src/db');
@@ -19,6 +24,7 @@ const { query } = require('../src/db');
 describe('GET /api/Payments legacy fallback', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockResolveInvestorScope.mockResolvedValue({ isInvestor: false, allowedCustomerIds: [] });
   });
 
   it('includes canceled accountpayments as voided payment history when modern payment rows are absent', async () => {
@@ -77,5 +83,28 @@ describe('GET /api/Payments legacy fallback', () => {
       expect.objectContaining({ id: 'posted-payment', status: 'posted', amount: 1000000 }),
       expect.objectContaining({ id: 'canceled-payment', status: 'voided', amount: 2000000 }),
     ]);
+  });
+
+  it('does not run the legacy accountpayments fallback for a non-allowlisted investor customer', async () => {
+    mockResolveInvestorScope.mockResolvedValue({
+      isInvestor: true,
+      allowedCustomerIds: ['allowed-customer-id'],
+    });
+    query.mockImplementation(async (sql) => {
+      if (sql.includes('ip_access_settings')) return [{ mode: 'disabled' }];
+      if (sql.includes('ip_access_entries')) return [];
+      if (sql.includes('FROM payments p') && sql.includes('SELECT COUNT')) return [{ count: '0' }];
+      if (sql.includes('FROM payments p')) return [];
+      if (sql.includes('FROM accountpayments')) {
+        throw new Error('forbidden legacy fallback query');
+      }
+      throw new Error(`Unexpected query: ${sql}`);
+    });
+
+    const res = await request(app).get('/api/Payments?customerId=forbidden-customer-id&type=payments');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ items: [], totalItems: 0 });
+    expect(query.mock.calls.some(([sql]) => sql.includes('FROM accountpayments'))).toBe(false);
   });
 });

@@ -41,10 +41,14 @@ function hasAllLocationReportAccess(permissionState = {}) {
   return permissions.has('*') || groupName === 'admin' || groupName === 'super admin';
 }
 
+function usesCustomerBasedInvestorScope(permissionState = {}) {
+  return String(permissionState.groupName || '').trim().toLowerCase() === 'investor';
+}
+
 async function resolveReportCompanyScope(req, res, companyId) {
   const permissionState = await resolveEffectivePermissions(req.user?.employeeId);
 
-  if (hasAllLocationReportAccess(permissionState)) {
+  if (hasAllLocationReportAccess(permissionState) || usesCustomerBasedInvestorScope(permissionState)) {
     return { companyIds: companyId ? [companyId] : null };
   }
 

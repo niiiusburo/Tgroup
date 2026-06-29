@@ -74,7 +74,7 @@ CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin ro
 
 ## Investor Customer Scope (staff-shell employee extension)
 
-Investor users are normal employee identities whose `partners.tier_id` points to a permission group named `investor`. On NK2, their login password can live in `dbo.investor_accounts` so shared NK/NK2 databases do not create a production-login-capable `partners.password_hash` before NK production has investor filters. When `resolveInvestorScope()` detects the `investor` group, customer-touching reads, writes, recognition responses, and aggregates are filtered through `dbo.investor_clients`.
+Investor users are normal employee identities whose `partners.tier_id` points to a permission group named `investor`. On NK2, their login password can live in `dbo.investor_accounts` so shared NK/NK2 databases do not create a production-login-capable `partners.password_hash` before NK production has investor filters. When `resolveInvestorScope()` detects the `investor` group, customer-touching reads, writes, recognition responses, legacy fallbacks, branch/date report filters, and aggregates are filtered through `dbo.investor_clients`.
 
 Affected endpoint families:
 - `/api/Partners`, `/api/CustomerBalance`, `/api/CustomerReceipts`, `/api/DotKhams`
@@ -83,7 +83,7 @@ Affected endpoint families:
 - `/api/Payments`, `/api/AccountPayments`, `/api/Receipts`, `/api/MonthlyPlans`
 - `/api/Reports`, `/api/DashboardReports`, `/api/Commissions`
 
-Contract invariant: non-investor employees keep existing unscoped behavior. Investor employees with an empty allowlist receive empty/404 scoped results. The investor group resolves to explicit staff-shell permissions without wildcard `*`; permission/employee self-escalation and investor allowlist curation remain server-blocked.
+Contract invariant: non-investor employees keep existing unscoped behavior. Investor employees with an empty allowlist receive empty/404 scoped results. The investor group resolves to explicit staff-shell permissions without wildcard `*`; payment legacy fallback reads may run only for checked customers, report branch filters compose with the checked-customer allowlist, and permission/employee self-escalation plus investor allowlist curation remain server-blocked.
 
 ## Account (`/api/Account`)
 
@@ -181,7 +181,7 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/` | Perm:`payment.view` | `?customerId, serviceId, limit, offset, type` (`payments` \| `deposits` \| `all`) | `{ items[], totalItems }` (+ legacy fallback) |
+| GET | `/` | Perm:`payment.view` | `?customerId, serviceId, limit, offset, type` (`payments` \| `deposits` \| `all`) | `{ items[], totalItems }` (+ legacy fallback only when investor `customerId` is checked) |
 | GET | `/deposits` | Perm:`payment.view` | `?customerId, dateFrom, dateTo, receiptNumber, type, limit, offset` | `{ items[], totalItems }` |
 | GET | `/deposit-usage` | Perm:`payment.view` | `?customerId, dateFrom, dateTo, limit, offset` | `{ items[], totalItems }` |
 | GET | `/:id` | Perm:`payment.view` | — | Payment with allocations |
@@ -256,7 +256,7 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 | POST | `/revenue/by-source` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: [{ id, name, orderCount, paid }] }` |
 | POST | `/revenue/payment-plans` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { plans[], installments[] } }` |
 | POST | `/revenue/rules` | Perm:`reports.view` | — | Revenue recognition rule metadata |
-| POST | `/cash-flow/summary` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { moneyIn, moneyOut, netCashFlow, internalDepositUsed, adjustments, categories[], trend[] } }` |
+| POST | `/cash-flow/summary` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { moneyIn, moneyOut, netCashFlow, internalDepositUsed, adjustments, categories[], trend[] } }`; investor `companyId` filters compose with checked customers |
 | POST | `/appointments/summary` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { total, done, cancelled, completionRate, cancellationRate, conversionRate, states[], repeatCustomers, newCustomers } }` |
 | POST | `/appointments/trend` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { trend[], peakHours[] } }` |
 | POST | `/doctors/performance` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: [{ id, name, totalAppointments, done, cancelled, revenue, unassigned? }] }` |

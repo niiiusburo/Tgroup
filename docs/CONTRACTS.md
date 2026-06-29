@@ -12,6 +12,7 @@
 
 | Version | Date | Scope |
 |---|---|---|
+| v1.0.9 | 2026-06-29 | Investor customer allowlist scope explicitly covers payment legacy fallback reads and report branch/date filters; branch filters compose with `dbo.investor_clients` instead of replacing it. |
 | v1.0.8 | 2026-06-27 | Investor group now resolves to explicit staff-shell permissions while customer-linked data remains scoped by `dbo.investor_clients`; investor role/employee self-escalation and allowlist curation stay server-blocked. |
 | v1.0.7 | 2026-06-27 | Admin-only investor allowlist curation added: `GET /api/Partners/investor-visibility` and `PATCH /api/Partners/:id/investor-visibility` read/write `dbo.investor_clients` only after `permissions.edit` and Admin-class handler validation. |
 | v1.0.6 | 2026-06-27 | Backend investor scope helper added: `resolveInvestorScope()` returns a fail-closed customer allowlist for employees in the `investor` permission group. |
@@ -200,6 +201,7 @@ Optional DOB date parts (`birthday`, `birthmonth`, `birthyear`) normalize `""`, 
 **Query:** `customerId?`, `serviceId?`, `limit?`, `offset?`, `type? = payments|deposits|all`
 **Auth:** Requires `payment.view`.
 **Response:** `{ items: Payment[], totalItems: number }` with allocation metadata where available.
+**Investor scope:** For `investor` callers, modern payment rows must be filtered by `dbo.investor_clients`. The legacy `accountpayments` fallback may run only when `customerId` is present and that customer is in the investor allowlist; non-allowlisted customer filters return an empty payment result instead of querying fallback rows.
 
 #### GET /api/Payments/deposits
 **Query:** `customerId?`, `dateFrom?`, `dateTo?`, `receiptNumber?`, `type?`, `limit?`, `offset?`
@@ -420,6 +422,7 @@ All current `/api/Reports` endpoints use `POST`, require `reports.view`, and ret
 }
 ```
 Date-scoped endpoints accept `{ dateFrom?: 'YYYY-MM-DD'; dateTo?: 'YYYY-MM-DD'; companyId?: string }` unless noted.
+For `investor` callers, report date and `companyId` filters compose with the `dbo.investor_clients` customer allowlist. Branch filters may narrow checked-customer data, but must not replace or bypass the customer allowlist.
 
 | Endpoint | Body | `data` shape |
 |---|---|---|
@@ -639,7 +642,7 @@ async function resolveInvestorScope(employeeId: string | undefined): Promise<{
 3. If the group name is not exactly `investor`, return non-investor scope and do not query `dbo.investor_clients`.
 4. If the group name is `investor`, read visible `partner_id` rows from `dbo.investor_clients` and return them as the customer allowlist.
 
-**Invariants:** Investors use normal employee identity and permission resolution, even when NK2 credentials are stored in `dbo.investor_accounts`. Empty allowlists fail closed. The `investor` group resolves to explicit staff-shell permissions without wildcard `*`; `permissions.locations` stays empty for investors so the frontend does not auto-apply a home-branch filter; customer-linked reads/writes must still apply the allowlist, and permission/employee mutation endpoints block investor self-escalation.
+**Invariants:** Investors use normal employee identity and permission resolution, even when NK2 credentials are stored in `dbo.investor_accounts`. Empty allowlists fail closed. The `investor` group resolves to explicit staff-shell permissions without wildcard `*`; `permissions.locations` stays empty for investors so the frontend does not auto-apply a home-branch filter; customer-linked reads/writes, legacy fallbacks, branch/date report filters, and aggregates must still apply the allowlist; and permission/employee mutation endpoints block investor self-escalation.
 
 ### 2.4 query (Database Access)
 

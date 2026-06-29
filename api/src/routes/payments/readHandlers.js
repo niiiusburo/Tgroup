@@ -169,6 +169,12 @@ async function loadLegacyRows({ customerId, limit, offset }) {
   );
 }
 
+function investorMayReadCustomer(investorScope, customerId) {
+  if (!investorScope.isInvestor || !customerId) return true;
+  const requested = String(customerId).toLowerCase();
+  return investorScope.allowedCustomerIds.some((id) => String(id).toLowerCase() === requested);
+}
+
 async function listPayments(req, res) {
   try {
     const { customerId, serviceId, limit = 100, offset = 0, type, search } = req.query;
@@ -198,6 +204,7 @@ async function listPayments(req, res) {
       params.push(investorScope.allowedCustomerIds);
       sql += ` AND p.customer_id = ANY($${params.length}::uuid[])`;
     }
+    const canUseCustomerFallback = investorMayReadCustomer(investorScope, customerId);
 
     sql += ` ORDER BY p.created_at DESC LIMIT $` + (params.length + 1) + ` OFFSET $` + (params.length + 2);
     params.push(parseInt(limit), parseInt(offset));
@@ -205,7 +212,7 @@ async function listPayments(req, res) {
     let result = await query(sql, params);
     let usedLegacyFallback = false;
 
-    if (customerId && result.length === 0 && (!type || type === 'payments')) {
+    if (canUseCustomerFallback && customerId && result.length === 0 && (!type || type === 'payments')) {
       try {
         const legacyRows = await loadLegacyRows({ customerId, limit, offset });
         if (legacyRows.length > 0) {
@@ -236,7 +243,7 @@ async function listPayments(req, res) {
     );
     let totalItems = parseInt(countResult[0]?.count || 0);
 
-    if (customerId && totalItems === 0 && (!type || type === 'payments')) {
+    if (canUseCustomerFallback && customerId && totalItems === 0 && (!type || type === 'payments')) {
       try {
         const legacyCount = await query(
           `SELECT COUNT(*) FROM accountpayments ap WHERE ap.partnerid = $1`,

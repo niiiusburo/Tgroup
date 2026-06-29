@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.32.52",
+    "date": "2026-06-29",
+    "commit": "pending",
+    "highlights": "NK2 investor staff-shell reads stay limited to checked customers across calendar, payments, and cash-flow reports.",
+    "sections": [
+      {
+        "title": "Investor Access",
+        "items": [
+          "Calendar, payment history, and cash-flow report reads continue to use dbo.investor_clients as the customer allowlist.",
+          "Manual payment customer filters cannot fall back to legacy accountpayments rows unless that customer is checked for the investor.",
+          "Cash-flow branch filters now combine with the checked-customer allowlist instead of blocking investor branch views."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.51",
     "date": "2026-06-29",
     "commit": "pending",

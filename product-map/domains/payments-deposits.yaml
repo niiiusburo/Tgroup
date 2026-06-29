@@ -96,6 +96,7 @@ impact_tests:
   - website/src/components/payment/__tests__/PaymentForm.submit.test.tsx
   - website/src/lib/allocatePaymentSources.test.ts
   - api/tests/investorIdorScoping.test.js
+  - api/tests/paymentsLegacyFallback.test.js
   - api/tests/investorScopeRoutePermissions.test.js
 risk_level: high
 notes:

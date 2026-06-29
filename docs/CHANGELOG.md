@@ -14,6 +14,13 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.52] — 2026-06-29
+### Security
+- **Investor staff-shell data filters now cover payment legacy fallback and cash-flow branch filters:** `GET /api/Payments?customerId=...` skips the legacy `accountpayments` fallback unless the requested customer is in the investor's `dbo.investor_clients` allowlist, and `/api/Reports/cash-flow/summary` lets investors use branch filters while still applying the checked-customer allowlist. — @agent — preserves INV-021 / UC-022.
+
+### Tested
+- `cd api && JWT_SECRET=test-secret npx jest src/routes/appointments/__tests__/readHandlers.test.js tests/paymentsLegacyFallback.test.js src/routes/reports/__tests__/cashFlow.test.js --runInBand --no-coverage` passed 3 suites / 17 tests for the investor calendar all-location list, forbidden legacy-payment fallback, and investor cash-flow branch filtering; `cd api && JWT_SECRET=test-secret npx jest src/services/__tests__/permissionService.test.js tests/investorIdorScoping.test.js tests/investorScopeRoutePermissions.test.js tests/investorAdminMutationGuards.test.js tests/authInvestorLogin.test.js src/routes/partners/__tests__/investorVisibility.test.js --runInBand --no-coverage` passed 6 suites / 56 tests; production-file Semgrep over `api/src/routes/payments/readHandlers.js api/src/routes/reports/helpers.js` found 0 findings; `npm run verify:governance` and `npm --prefix website run build` passed. — @agent
+
 ## [0.32.51] — 2026-06-29
 ### Changed
 - **NK2 Face ID now exposes its recognizer version and uses a lighter privacy preview:** The header Face ID control shows `v0.32.51`, `POST /api/face/recognize` returns `recognitionVersion: "face-recognition-0.32.51"`, and public/staff camera previews use a light 3px overlay blur while face detection and JPEG capture still read the raw video element. Existing samples are unchanged. — @agent — preserves the Face ID diagnostics/privacy invariant while making the recognizer version visible.
