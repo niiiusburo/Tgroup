@@ -80,15 +80,53 @@ describe('comprefaceFaceProvider', () => {
 
     const result = await provider.recognizeFace(Buffer.from('face'), 'image/jpeg');
 
+    expect(result.status).toBe('ambiguous');
     expect(result.match).toBeNull();
-    expect(result.candidates).toHaveLength(2);
+    expect(result.candidates).toHaveLength(0);
+    expect(result.ambiguity).toMatchObject({
+      code: 'AMBIGUOUS_FACE_MATCH',
+      margin: 0.01,
+      requiredMargin: 0.06,
+    });
     expect(result.privateDiagnostics).toMatchObject({
-      reasonCode: 'AMBIGUOUS_MARGIN_TOO_SMALL',
+      reasonCode: 'AMBIGUOUS_CLOSE_IDENTITIES',
       scoreMargin: 0.010000000000000009,
       topCandidates: [
         expect.objectContaining({ rank: 1, partnerId: 'partner-1', score: 0.86 }),
         expect.objectContaining({ rank: 2, partnerId: 'partner-2', score: 0.85 }),
       ],
+    });
+  });
+
+  it('blocks ambiguous Compreface identities instead of returning selectable candidates', async () => {
+    comprefaceClient.recognize.mockResolvedValue([
+      { subject: 'partner-1', similarity: 0.9 },
+      { subject: 'partner-2', similarity: 0.86 },
+    ]);
+    query.mockResolvedValue([
+      { id: 'partner-1', name: 'Alice', phone: '0901', code: 'T001', face_subject_id: 'partner-1' },
+      { id: 'partner-2', name: 'Bob', phone: '0902', code: 'T002', face_subject_id: 'partner-2' },
+    ]);
+
+    const result = await provider.recognizeFace(Buffer.from('face'), 'image/jpeg');
+
+    expect(result.status).toBe('ambiguous');
+    expect(result.match).toBeNull();
+    expect(result.candidates).toEqual([]);
+    expect(result.ambiguity.candidates.map((c) => c.partnerId)).toEqual(['partner-1', 'partner-2']);
+    expect(result.recognitionVersion).toMatch(/^face-recognition-/);
+  });
+
+  it('maps Compreface multiple-face responses to MULTIPLE_FACES', async () => {
+    const err = new Error('More than one face detected');
+    err.code = 'MULTIPLE_FACES';
+    err.status = 422;
+    comprefaceClient.recognize.mockRejectedValue(err);
+
+    await expect(provider.recognizeFace(Buffer.from('face'), 'image/jpeg')).rejects.toMatchObject({
+      code: 'MULTIPLE_FACES',
+      status: 422,
+      message: 'More than one face detected',
     });
   });
 

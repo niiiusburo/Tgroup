@@ -9,17 +9,21 @@ const {
 } = require("./comprefaceClient");
 const { query } = require("../db");
 const { buildFaceReadiness } = require("./faceReadinessScore");
-
-const AUTO_MATCH_THRESHOLD = parseFloat(process.env.FACE_AUTO_MATCH_THRESHOLD || "0.92");
-const CANDIDATE_THRESHOLD = parseFloat(process.env.FACE_CANDIDATE_THRESHOLD || "0.84");
-const AUTO_MATCH_MARGIN = parseFloat(process.env.FACE_AUTO_MATCH_MARGIN || "0.05");
-const MAX_CANDIDATES = parseInt(process.env.FACE_MAX_CANDIDATES || "3", 10);
+const {
+  buildRecognitionResult,
+  AUTO_MATCH_THRESHOLD,
+  CANDIDATE_THRESHOLD,
+  AUTO_MATCH_MARGIN,
+  AMBIGUOUS_MATCH_MARGIN,
+  MAX_CANDIDATES,
+} = require("./faceMatchEngine");
 
 function policyDiagnostics() {
   return {
     autoMatchThreshold: AUTO_MATCH_THRESHOLD,
     candidateThreshold: CANDIDATE_THRESHOLD,
     autoMatchMargin: AUTO_MATCH_MARGIN,
+    ambiguousMatchMargin: AMBIGUOUS_MATCH_MARGIN,
     maxCandidates: MAX_CANDIDATES,
   };
 }
@@ -65,9 +69,19 @@ function isNoFaceError(err) {
   );
 }
 
+function isMultipleFacesError(err) {
+  const message = String(err?.message || "");
+  const code = String(err?.code || "");
+  return code === "MULTIPLE_FACES" || /more\s+than\s+one\s+face|multiple\s+faces/i.test(message);
+}
+
 function mapComprefaceFailure(err, fallbackCode, fallbackMessage) {
   if (isNoFaceError(err)) {
     return new ComprefaceFaceError("NO_FACE", "No face detected", 422);
+  }
+
+  if (isMultipleFacesError(err)) {
+    return new ComprefaceFaceError("MULTIPLE_FACES", "More than one face detected", 422);
   }
 
   return new ComprefaceFaceError(
@@ -129,7 +143,8 @@ async function recognizeFace(imageBuffer, mimetype) {
     }
   }
 
-  const sorted = Array.from(byPartner.values()).sort((a, b) => b.score - a.score);
+  const scored = Array.from(byPartner.values());
+  const sorted = [...scored].sort((a, b) => b.score - a.score);
   const top = sorted[0];
   const second = sorted[1];
   const scoreMargin = top && second ? top.score - second.score : null;
@@ -148,55 +163,9 @@ async function recognizeFace(imageBuffer, mimetype) {
     })),
   };
 
-  if (
-    top &&
-    top.score >= AUTO_MATCH_THRESHOLD &&
-    (!second || top.score - second.score >= AUTO_MATCH_MARGIN)
-  ) {
-    return {
-      match: {
-        partnerId: top.partnerId,
-        name: top.name,
-        code: top.code,
-        phone: top.phone,
-        confidence: parseFloat(top.score.toFixed(4)),
-      },
-      candidates: [],
-      privateDiagnostics: {
-        ...baseDiagnostics,
-        reasonCode: second ? "AUTO_MATCH_MARGIN_CONFIRMED" : "AUTO_MATCH_SINGLE_CANDIDATE",
-      },
-    };
-  }
-
-  if (top && top.score >= CANDIDATE_THRESHOLD) {
-    return {
-      match: null,
-      candidates: sorted
-        .filter((c) => c.score >= CANDIDATE_THRESHOLD)
-        .slice(0, MAX_CANDIDATES)
-        .map((c) => ({
-          partnerId: c.partnerId,
-          name: c.name,
-          code: c.code,
-          phone: c.phone,
-          confidence: parseFloat(c.score.toFixed(4)),
-        })),
-      privateDiagnostics: {
-        ...baseDiagnostics,
-        reasonCode: second ? "AMBIGUOUS_MARGIN_TOO_SMALL" : "CANDIDATE_BELOW_AUTO_THRESHOLD",
-      },
-    };
-  }
-
-  return {
-    match: null,
-    candidates: [],
-    privateDiagnostics: {
-      ...baseDiagnostics,
-      reasonCode: sorted.length > 0 ? "NO_SCORE_ABOVE_CANDIDATE_THRESHOLD" : "NO_MAPPED_PROVIDER_SUBJECTS",
-    },
-  };
+  return buildRecognitionResult(scored, baseDiagnostics, {
+    emptyReasonCode: "NO_MAPPED_PROVIDER_SUBJECTS",
+  });
 }
 
 async function ensureSubject(subjectId) {

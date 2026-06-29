@@ -23,6 +23,7 @@ jest.mock('../src/services/faceEngineClient', () => ({
   },
 }));
 jest.mock('../src/services/faceMatchEngine', () => ({
+  FACE_RECOGNITION_VERSION: 'face-recognition-0.32.59',
   findMatches: jest.fn(),
   registerSample: jest.fn(),
   replaceAllSamples: jest.fn(),
@@ -66,7 +67,7 @@ const { findMatches, registerSample, replaceAllSamples, getFaceStatus } = requir
 const comprefaceFaceProvider = require('../src/services/comprefaceFaceProvider');
 const { recordFaceDiagnostic } = require('../src/services/faceDiagnostics');
 const { query } = require('../src/db');
-const FACE_RECOGNITION_VERSION = 'face-recognition-0.32.55';
+const { FACE_RECOGNITION_VERSION } = require('../src/services/faceMatchEngine');
 
 afterEach(() => {
   delete process.env.FACE_RECOGNITION_PROVIDER;
@@ -115,6 +116,7 @@ describe('POST /api/face/recognize', () => {
       .set('Authorization', 'Bearer fake-token');
 
     expect(res.status).toBe(200);
+    expect(res.body.status).toBe('auto_matched');
     expect(res.body.match.partnerId).toBe('p-1');
     expect(res.body.match.name).toBe('Alice');
     expect(res.body.candidates).toEqual([]);
@@ -155,11 +157,49 @@ describe('POST /api/face/recognize', () => {
       .set('Authorization', 'Bearer fake-token');
 
     expect(res.status).toBe(200);
+    expect(res.body.status).toBe('candidates');
     expect(res.body.match).toBeNull();
     expect(res.body.candidates).toHaveLength(1);
     expect(res.body.candidates[0].partnerId).toBe('p-1');
     expect(res.body.recognitionVersion).toBe(FACE_RECOGNITION_VERSION);
     expect(res.body.privateDiagnostics).toBeUndefined();
+  });
+
+  it('returns ambiguous with recognition version and no selectable candidates', async () => {
+    getEmbedding.mockResolvedValue({
+      embedding: [0.1, 0.2, 0.3],
+      model: { recognizer: 'sface', version: 'v1' },
+      quality: { detectionScore: 0.95, faceCount: 1 },
+    });
+    findMatches.mockResolvedValue({
+      status: 'ambiguous',
+      match: null,
+      candidates: [],
+      recognitionVersion: 'face-recognition-test',
+      ambiguity: {
+        code: 'AMBIGUOUS_FACE_MATCH',
+        message: 'Face match is ambiguous; rescan with one centered face',
+        margin: 0.04,
+        requiredMargin: 0.06,
+        candidates: [
+          { partnerId: 'p-1', name: 'Alice', code: 'T001', phone: '0901', confidence: 0.9 },
+          { partnerId: 'p-2', name: 'Bob', code: 'T002', phone: '0902', confidence: 0.86 },
+        ],
+      },
+    });
+
+    const res = await request(app)
+      .post('/api/face/recognize')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('ambiguous');
+    expect(res.body.match).toBeNull();
+    expect(res.body.candidates).toEqual([]);
+    expect(res.body.recognitionVersion).toBe('face-recognition-test');
+    expect(res.body.ambiguity.code).toBe('AMBIGUOUS_FACE_MATCH');
+    expect(res.body.ambiguity.candidates).toHaveLength(2);
   });
 
   it('returns no-match when no candidate reaches threshold', async () => {
@@ -176,6 +216,7 @@ describe('POST /api/face/recognize', () => {
       .set('Authorization', 'Bearer fake-token');
 
     expect(res.status).toBe(200);
+    expect(res.body.status).toBe('no_match');
     expect(res.body.match).toBeNull();
     expect(res.body.candidates).toEqual([]);
     expect(res.body.recognitionVersion).toBe(FACE_RECOGNITION_VERSION);

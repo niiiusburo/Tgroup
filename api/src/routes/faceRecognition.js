@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
 const { getEmbedding, FaceEngineError } = require('../services/faceEngineClient');
-const { findMatches, registerSample, replaceAllSamples, getFaceStatus, FaceQualityError } = require('../services/faceMatchEngine');
+const { findMatches, registerSample, replaceAllSamples, getFaceStatus, FaceQualityError, FACE_RECOGNITION_VERSION } = require('../services/faceMatchEngine');
 const { getFaceRecognitionProvider } = require('../services/faceRecognitionRuntime');
 const comprefaceFaceProvider = require('../services/comprefaceFaceProvider');
 const { recordFaceDiagnostic } = require('../services/faceDiagnostics');
@@ -12,7 +12,6 @@ const { resolveInvestorScope } = require('../services/permissionService');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
-const FACE_RECOGNITION_VERSION = 'face-recognition-0.32.55';
 
 function sha256Hex(buffer) {
   return crypto.createHash('sha256').update(buffer).digest('hex');
@@ -49,11 +48,18 @@ function filterRecognitionForInvestor(recognition, investorScope) {
   const match = recognition.match && allowedIds.has(recognition.match.partnerId)
     ? recognition.match
     : null;
+  // An ambiguous result names the two closest customers for audit; investors
+  // must not see identities outside their allowed scope, so redact the pair
+  // while keeping the rescan instruction itself.
+  const ambiguity = recognition.ambiguity
+    ? { ...recognition.ambiguity, candidates: [] }
+    : recognition.ambiguity;
 
   return {
     ...recognition,
     match,
     candidates: match ? [] : candidates,
+    ambiguity,
     privateDiagnostics: {
       ...(recognition.privateDiagnostics || {}),
       investorScopeFiltered: true,
@@ -113,9 +119,16 @@ router.post('/recognize', requirePermission('customers.view'), upload.single('im
       durationMs: duration,
     });
 
-    console.log(`[FaceRecognize] version=${FACE_RECOGNITION_VERSION} result=${match ? 'match' : candidates.length ? 'candidates' : 'no_match'} duration=${duration}ms`);
+    const status = recognition.status || (match ? 'auto_matched' : candidates.length ? 'candidates' : 'no_match');
+    console.log(`[FaceRecognize] version=${recognition.recognitionVersion || FACE_RECOGNITION_VERSION} result=${status} duration=${duration}ms`);
 
-    return res.json({ match, candidates, recognitionVersion: FACE_RECOGNITION_VERSION });
+    return res.json({
+      status,
+      match: match || null,
+      candidates: candidates || [],
+      ambiguity: recognition.ambiguity || null,
+      recognitionVersion: recognition.recognitionVersion || FACE_RECOGNITION_VERSION,
+    });
   } catch (err) {
     const mapped = mapEngineError(err);
     await recordFaceDiagnostic({

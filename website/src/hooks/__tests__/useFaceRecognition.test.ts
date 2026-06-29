@@ -67,6 +67,37 @@ describe('useFaceRecognition', () => {
     expect(state.recognitionVersion).toBe('face-recognition-0.32.55');
   });
 
+  it('transitions to ambiguous when backend blocks close identity matches', async () => {
+    vi.mocked(api.recognizeFace).mockResolvedValue({
+      status: 'ambiguous',
+      match: null,
+      candidates: [],
+      recognitionVersion: 'face-recognition-test',
+      ambiguity: {
+        code: 'AMBIGUOUS_FACE_MATCH',
+        message: 'Face match is ambiguous',
+        margin: 0.04,
+        requiredMargin: 0.06,
+        candidates: [
+          { partnerId: 'p-1', name: 'Alice', code: 'T001', phone: '0901', confidence: 0.9 },
+          { partnerId: 'p-2', name: 'Bob', code: 'T002', phone: '0902', confidence: 0.86 },
+        ],
+      },
+    });
+
+    const { result } = renderHook(() => useFaceRecognition());
+    result.current.recognize(new Blob(['img']));
+
+    await waitFor(() => expect(result.current.recognizeState.status).toBe('ambiguous'));
+    const state = result.current.recognizeState as {
+      status: 'ambiguous';
+      candidates: Array<{ partnerId: string }>;
+      recognitionVersion?: string | null;
+    };
+    expect(state.candidates).toHaveLength(2);
+    expect(state.recognitionVersion).toBe('face-recognition-test');
+  });
+
   it('transitions to no_match when there is no match', async () => {
     vi.mocked(api.recognizeFace).mockResolvedValue({
       match: null,

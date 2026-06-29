@@ -152,6 +152,9 @@
     "noFaceFound": "Không phát hiện khuôn mặt",
     "multipleFaces": "Phát hiện nhiều khuôn mặt",
     "faceServiceUnavailable": "Dịch vụ nhận diện khuôn mặt không khả dụng",
+    "ambiguousTitle": "Cần quét khuôn mặt rõ hơn",
+    "ambiguousHint": "Hai hồ sơ khách hàng đang quá giống nhau để chọn an toàn. Quét lại với một khuôn mặt ở giữa khung hình.",
+    "rescan": "Quét lại",
     "registered": "Khuôn mặt",
     "registeredOn": "Đã đăng ký khuôn mặt: {{date}}",
     "readinessTitle": "Độ sẵn sàng Face ID: {{score}}% ({{count}}/{{target}} ảnh) - {{label}}",
@@ -307,7 +310,8 @@
   },
   "faceRecognition": {
     "registerFailed": "Đăng ký khuôn mặt thất bại",
-    "recognizeFailed": "Nhận diện khuôn mặt thất bại"
+    "recognizeFailed": "Nhận diện khuôn mặt thất bại",
+    "ambiguous": "Kết quả nhận diện chưa đủ chắc chắn. Vui lòng quét lại với một khuôn mặt ở giữa khung hình."
   },
   "states": {
     "loading": "Đang tải khách hàng..."

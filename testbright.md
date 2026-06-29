@@ -1463,7 +1463,11 @@ Edge cases:
 - Deleted/missing CompreFace subject during re-register is ignored before recreating it.
 - Unknown CompreFace subjects are ignored instead of linking to the wrong customer.
 - Low-confidence results return candidates or no-match, not an automatic customer jump.
+- **v0.39.5:** Close top-two identity matches return `status: "ambiguous"`, `match: null`, `candidates: []`, `ambiguity.candidates` for audit/debug, and `recognitionVersion: "face-recognition-0.39.5"` (or env override). Staff must rescan; they must not choose between the two close identities.
+- **v0.39.5:** CompreFace recognition calls request `limit=0`, `prediction_count=2`, and `det_prob_threshold`; responses with more than one detected face return HTTP 422 `MULTIPLE_FACES`.
+- **v0.39.5:** Native browser `FaceDetector` is configured with `maxDetectedFaces: 3`; two visible faces must block auto-ready capture.
 - Browser sessions without native `FaceDetector` support must not auto-capture a center face from frame quality alone.
+- **v0.39.5:** iPhone Safari uploads use intrinsic video dimensions, 60% center crop → 600×600 JPEG, `waitForVideoFrameReady`, and black-frame rejection before POST; NK2 check-in / `FaceCaptureModal` / customer register paths share `faceCaptureEngine.ts`.
 - CompreFace recognize/register requests must send a native multipart `file` part; provider responses like "Required part file is missing" indicate the upload client is broken.
 - `NO_FACE` from local or CompreFace providers must keep the camera modal open and show "Không phát hiện khuôn mặt" / "Face not detected".
 - CompreFace no-face responses must return HTTP 422 with `error: "NO_FACE"`, not a generic engine error.
@@ -1487,6 +1491,8 @@ Execution checklist for the no-face fix:
 - [ ] PENDING: Trigger CompreFace no-face on `POST /api/face/re-register` and verify HTTP 422 `NO_FACE`, not `ENGINE_ERROR`.
 - [ ] PENDING: Trigger Header Quick Face ID no-face and verify it keeps capture open without opening the no-match rescue popover.
 - [ ] PENDING: Trigger customer profile re-registration no-face and verify no success toast appears until a valid face is captured.
+- [ ] PENDING: Register two safe test customers with similar/close recognition scores; verify Header Quick Face ID and CustomerCameraWidget show the versioned ambiguous rescan state with no candidate buttons.
+- [ ] PENDING: Put two people/faces in the camera frame; verify capture blocks locally where native `FaceDetector` is available, and CompreFace returns `MULTIPLE_FACES` if a multi-face frame is submitted.
 
 ---
 

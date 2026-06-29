@@ -3,16 +3,23 @@
 const { query, pool } = require("../db");
 const { buildFaceReadiness } = require("./faceReadinessScore");
 
-// Thresholds (environment-configurable). Defaults tightened 2026-06-29:
+// Thresholds (environment-configurable). Defaults tightened 2026-06-29,
+// ambiguity gate re-landed 2026-07-02:
 //   - AUTO_MATCH_THRESHOLD 0.92: close scans below this become candidate/no-match
 //     instead of automatically opening a customer.
 //   - AUTO_MATCH_MARGIN 0.05: the best customer must clearly beat the runner-up.
 //   - CANDIDATE_THRESHOLD 0.84: weaker plausible hits are treated as rescan-only.
-//   - MIN_QUALITY added: low-quality samples poison the embedding pool and
+//   - AMBIGUOUS_MATCH_MARGIN 0.06: when the top two plausible customers are
+//     within this margin, do not auto-match and do not offer a candidate list —
+//     two different people this close in embedding space cannot be told apart
+//     reliably, so force a rescan instead.
+//   - MIN_QUALITY: low-quality samples poison the embedding pool and
 //     prevent future matches against that customer.
+const FACE_RECOGNITION_VERSION = process.env.FACE_RECOGNITION_VERSION || "face-recognition-0.32.59";
 const AUTO_MATCH_THRESHOLD = parseFloat(process.env.FACE_AUTO_MATCH_THRESHOLD || "0.92");
 const CANDIDATE_THRESHOLD = parseFloat(process.env.FACE_CANDIDATE_THRESHOLD || "0.84");
 const AUTO_MATCH_MARGIN = parseFloat(process.env.FACE_AUTO_MATCH_MARGIN || "0.05");
+const AMBIGUOUS_MATCH_MARGIN = parseFloat(process.env.FACE_AMBIGUOUS_MATCH_MARGIN || "0.06");
 const MAX_CANDIDATES = parseInt(process.env.FACE_MAX_CANDIDATES || "3", 10);
 const MIN_QUALITY = parseFloat(process.env.FACE_MIN_QUALITY || "0.55");
 
@@ -21,6 +28,7 @@ function policyDiagnostics() {
     autoMatchThreshold: AUTO_MATCH_THRESHOLD,
     candidateThreshold: CANDIDATE_THRESHOLD,
     autoMatchMargin: AUTO_MATCH_MARGIN,
+    ambiguousMatchMargin: AMBIGUOUS_MATCH_MARGIN,
     maxCandidates: MAX_CANDIDATES,
     minQuality: MIN_QUALITY,
   };
@@ -75,6 +83,124 @@ function computeCentroid(embeddings) {
   return l2Normalize(sum);
 }
 
+function roundScore(score) {
+  return parseFloat(score.toFixed(4));
+}
+
+function toCandidate(c) {
+  return {
+    partnerId: c.partnerId,
+    name: c.name,
+    code: c.code,
+    phone: c.phone,
+    confidence: roundScore(c.score),
+  };
+}
+
+function withRecognitionVersion(result) {
+  return {
+    ...result,
+    recognitionVersion: FACE_RECOGNITION_VERSION,
+  };
+}
+
+/**
+ * Shared decision ladder for both providers (local + Compreface).
+ * Order matters: the ambiguity gate must run BEFORE auto-match so two
+ * different customers scoring within AMBIGUOUS_MATCH_MARGIN can never
+ * auto-populate a name or appear as pickable candidates.
+ *
+ * baseDiagnostics: provider-specific context merged into privateDiagnostics.
+ * opts.emptyReasonCode: reasonCode when nothing scored (provider-specific).
+ */
+function buildRecognitionResult(scored, baseDiagnostics = {}, opts = {}) {
+  const sorted = scored
+    .filter((c) => Number.isFinite(c.score))
+    .sort((a, b) => b.score - a.score);
+
+  const top = sorted[0];
+  const second = sorted[1];
+
+  if (!top) {
+    return withRecognitionVersion({
+      status: "no_match",
+      match: null,
+      candidates: [],
+      privateDiagnostics: {
+        ...baseDiagnostics,
+        reasonCode: opts.emptyReasonCode || "NO_SCORE_ABOVE_CANDIDATE_THRESHOLD",
+      },
+    });
+  }
+
+  const secondIsPlausible = second && second.score >= CANDIDATE_THRESHOLD;
+  if (
+    top.score >= CANDIDATE_THRESHOLD &&
+    secondIsPlausible &&
+    top.score - second.score < AMBIGUOUS_MATCH_MARGIN
+  ) {
+    return withRecognitionVersion({
+      status: "ambiguous",
+      match: null,
+      candidates: [],
+      ambiguity: {
+        code: "AMBIGUOUS_FACE_MATCH",
+        message: "Face match is ambiguous; rescan with one centered face",
+        margin: roundScore(top.score - second.score),
+        requiredMargin: roundScore(AMBIGUOUS_MATCH_MARGIN),
+        candidates: [toCandidate(top), toCandidate(second)],
+      },
+      privateDiagnostics: {
+        ...baseDiagnostics,
+        reasonCode: "AMBIGUOUS_CLOSE_IDENTITIES",
+      },
+    });
+  }
+
+  // Auto-match: top score >= threshold AND beats second by margin
+  if (
+    top.score >= AUTO_MATCH_THRESHOLD &&
+    (!second || top.score - second.score >= AUTO_MATCH_MARGIN)
+  ) {
+    return withRecognitionVersion({
+      status: "auto_matched",
+      match: toCandidate(top),
+      candidates: [],
+      privateDiagnostics: {
+        ...baseDiagnostics,
+        reasonCode: second ? "AUTO_MATCH_MARGIN_CONFIRMED" : "AUTO_MATCH_SINGLE_CANDIDATE",
+      },
+    });
+  }
+
+  // Candidate review: top score >= candidate threshold, but not ambiguous.
+  if (top.score >= CANDIDATE_THRESHOLD) {
+    const candidates = sorted
+      .filter((c) => c.score >= CANDIDATE_THRESHOLD)
+      .slice(0, MAX_CANDIDATES)
+      .map(toCandidate);
+    return withRecognitionVersion({
+      status: "candidates",
+      match: null,
+      candidates,
+      privateDiagnostics: {
+        ...baseDiagnostics,
+        reasonCode: second ? "AMBIGUOUS_MARGIN_TOO_SMALL" : "CANDIDATE_BELOW_AUTO_THRESHOLD",
+      },
+    });
+  }
+
+  return withRecognitionVersion({
+    status: "no_match",
+    match: null,
+    candidates: [],
+    privateDiagnostics: {
+      ...baseDiagnostics,
+      reasonCode: "NO_SCORE_ABOVE_CANDIDATE_THRESHOLD",
+    },
+  });
+}
+
 /**
  * Compare one embedding against all active customer embeddings.
  * Scoring per customer uses MAX(best-sample, centroid) so that:
@@ -98,7 +224,8 @@ async function findMatches(embedding) {
   );
 
   if (!rows || rows.length === 0) {
-    return {
+    return withRecognitionVersion({
+      status: "no_match",
       match: null,
       candidates: [],
       privateDiagnostics: {
@@ -108,7 +235,7 @@ async function findMatches(embedding) {
         candidatesConsidered: 0,
         topCandidates: [],
       },
-    };
+    });
   }
 
   // Group all active embeddings per customer.
@@ -148,8 +275,8 @@ async function findMatches(embedding) {
     };
   });
 
-  // Sort descending by score
-  const sorted = scored.sort((a, b) => b.score - a.score);
+  // Sort descending by score (diagnostics only; buildRecognitionResult re-sorts)
+  const sorted = [...scored].sort((a, b) => b.score - a.score);
 
   const top = sorted[0];
   const second = sorted[1];
@@ -168,58 +295,7 @@ async function findMatches(embedding) {
     })),
   };
 
-  // Auto-match: top score >= threshold AND beats second by margin
-  if (
-    top &&
-    top.score >= AUTO_MATCH_THRESHOLD &&
-    (!second || top.score - second.score >= AUTO_MATCH_MARGIN)
-  ) {
-    return {
-      match: {
-        partnerId: top.partnerId,
-        name: top.name,
-        code: top.code,
-        phone: top.phone,
-        confidence: parseFloat(top.score.toFixed(4)),
-      },
-      candidates: [],
-      privateDiagnostics: {
-        ...baseDiagnostics,
-        reasonCode: second ? "AUTO_MATCH_MARGIN_CONFIRMED" : "AUTO_MATCH_SINGLE_CANDIDATE",
-      },
-    };
-  }
-
-  // Candidate review: top score >= candidate threshold
-  if (top && top.score >= CANDIDATE_THRESHOLD) {
-    const candidates = sorted
-      .filter((c) => c.score >= CANDIDATE_THRESHOLD)
-      .slice(0, MAX_CANDIDATES)
-      .map((c) => ({
-        partnerId: c.partnerId,
-        name: c.name,
-        code: c.code,
-        phone: c.phone,
-        confidence: parseFloat(c.score.toFixed(4)),
-      }));
-    return {
-      match: null,
-      candidates,
-      privateDiagnostics: {
-        ...baseDiagnostics,
-        reasonCode: second ? "AMBIGUOUS_MARGIN_TOO_SMALL" : "CANDIDATE_BELOW_AUTO_THRESHOLD",
-      },
-    };
-  }
-
-  return {
-    match: null,
-    candidates: [],
-    privateDiagnostics: {
-      ...baseDiagnostics,
-      reasonCode: "NO_SCORE_ABOVE_CANDIDATE_THRESHOLD",
-    },
-  };
+  return buildRecognitionResult(scored, baseDiagnostics);
 }
 
 /**
@@ -390,10 +466,13 @@ module.exports = {
   getFaceStatus,
   cosineSimilarity,
   computeCentroid,
+  buildRecognitionResult,
   FaceQualityError,
+  FACE_RECOGNITION_VERSION,
   AUTO_MATCH_THRESHOLD,
   CANDIDATE_THRESHOLD,
   AUTO_MATCH_MARGIN,
+  AMBIGUOUS_MATCH_MARGIN,
   MAX_CANDIDATES,
   MIN_QUALITY,
 };

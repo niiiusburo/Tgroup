@@ -26,8 +26,11 @@ reads:
   - process.env.FACE_DIAGNOSTICS_ENABLED
   - process.env.FACE_DIAGNOSTICS_DIR
   - process.env.FACE_DIAGNOSTICS_HASH_SALT
+  - process.env.FACE_RECOGNITION_VERSION
+  - process.env.FACE_AMBIGUOUS_MATCH_MARGIN
   - process.env.COMPREFACE_URL
   - process.env.COMPREFACE_API_KEY
+  - process.env.COMPREFACE_DET_PROB_THRESHOLD
   - process.env.HOSOONLINE_BASE_URL
   - process.env.HOSOONLINE_API_KEY
   - process.env.HOSOONLINE_USERNAME
@@ -65,6 +68,7 @@ jobs:
   - none (Compreface runs as standalone Docker containers)
 shared_types:
   - website/src/hooks/useFaceRecognition.ts
+  - website/src/lib/api/partners.ts
   - website/src/lib/api/externalCheckups.ts
 dependencies:
   - Customers & Partners
@@ -75,10 +79,14 @@ affected_by:
   - Network reachability between api container and compreface-api
 impact_tests:
   - website/src/hooks/__tests__/useFaceRecognition.test.ts
+  - website/src/lib/api/__tests__/faceRecognition.test.ts
   - api/tests/faceRecognition.test.js
   - api/src/services/__tests__/faceDiagnostics.test.js
   - api/src/services/__tests__/faceMatchEngine.test.js
+  - api/src/services/__tests__/comprefaceClient.test.js
   - api/src/services/__tests__/comprefaceFaceProvider.test.js
+  - website/src/components/shared/faceCaptureEngine.test.ts
+  - website/src/components/shared/GlobalFaceIdButton.test.tsx
   - api/src/routes/__tests__/externalCheckups.test.js
   - website/src/components/customer/AuthenticatedCheckupImage.test.tsx
 risk_level: medium
@@ -89,10 +97,12 @@ notes:
   - CompreFace registration/status must query `/faces?subject=<partners.id>`; `partners.face_subject_id` without at least one CompreFace example is not a registered face.
   - Public `/checkin` must keep a visible flip-camera control and light on-screen privacy preview while sending an unblurred, center-cropped capture frame to the Face ID provider.
   - Public and staff Face ID recognition write hidden diagnostics under `uploads/face-diagnostics/` with hashed subject/IP/user-agent identifiers, thresholds, top-score margin, reason codes, and latency; diagnostics must not store raw images, raw embeddings, names, phones, customer codes, or raw partner IDs.
-  - Staff header Face ID must show the active NK2 Face ID version badge (`v0.32.55`), the camera popup orange banner must show the same version, and `POST /api/face/recognize` must return `recognitionVersion` (for example `face-recognition-0.32.55`) without changing stored samples.
+  - Staff header Face ID must show the active NK2 Face ID version badge (current `v0.32.59`), the camera popup orange banner must show the same version, and `POST /api/face/recognize` must return `recognitionVersion` (for example `face-recognition-0.32.59`) without changing stored samples.
   - `GET /api/face/status/:partnerId` must return profile readiness metadata; CompreFace readiness is sample-count coverage, while local/SFace readiness can blend active embedding `detection_score`.
   - Strict Face ID matching defaults are `FACE_AUTO_MATCH_THRESHOLD=0.92`, `FACE_CANDIDATE_THRESHOLD=0.84`, and `FACE_AUTO_MATCH_MARGIN=0.05`; staff header candidate-only results are rescan-only and must not expose candidate identity buttons.
   - Staff header no-match rescue must open guided profile capture after customer selection and register the straight, left, and right samples instead of storing the failed single recognition frame.
+  - Face ID ambiguous-identity guard: if the best two plausible partner identities are closer than `FACE_AMBIGUOUS_MATCH_MARGIN` (default 0.06), `/api/face/recognize` returns `status: ambiguous`, `match: null`, `candidates: []`, and `ambiguity.candidates` only for audit/debug (redacted for investor-scoped callers). Header Quick Face ID and CustomerCameraWidget must show a rescan-only state, never staff-pick buttons, for this case.
+  - CompreFace recognize requests send `limit=0`, `prediction_count=2`, and `det_prob_threshold=COMPREFACE_DET_PROB_THRESHOLD` (default 0.75); enrollment `/faces` requests send the same `det_prob_threshold` so low-quality photos are rejected at registration. More than one detected face is normalized to `MULTIPLE_FACES` 422.
   - Compreface services are defined in docker-compose.yml but are not required for core app startup.
   - "Hosoonline is currently mixed-contract: login credentials take precedence for image reads (`Authorization: Bearer <token>` plus access_token cookie); `HOSOONLINE_API_KEY` / `X-API-Key` remains as fallback for older patient health-checkup endpoints."
   - The current observed Hosoonline website contract logs in through `/api/auth/login`, searches appointment media through `/api/appointments/search?q=<customerCode>&page=<page>`, and fetches bytes through `/api/appointments/image/:imageName`.

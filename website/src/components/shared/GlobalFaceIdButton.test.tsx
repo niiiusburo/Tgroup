@@ -6,14 +6,12 @@ import { fetchPartners, registerFace } from '@/lib/api';
 const navigateMock = vi.fn();
 const recognizeMock = vi.fn();
 const resetMock = vi.fn();
+type MockCandidate = { partnerId: string; name: string; code: string; phone: string; confidence: number };
 type MockRecognitionState =
   | { status: 'idle' }
   | { status: 'no_match'; recognitionVersion?: string | null }
-  | {
-      status: 'candidates';
-      candidates: Array<{ partnerId: string; name: string; code: string; phone: string; confidence: number }>;
-      recognitionVersion?: string | null;
-    };
+  | { status: 'candidates'; candidates: MockCandidate[]; recognitionVersion?: string | null }
+  | { status: 'ambiguous'; candidates: MockCandidate[]; recognitionVersion?: string | null };
 let recognizeState: MockRecognitionState = { status: 'idle' };
 
 vi.mock('react-router-dom', async () => {
@@ -191,5 +189,31 @@ describe('GlobalFaceIdButton', () => {
 
     expect(screen.getByText('Mock capture')).toBeInTheDocument();
     expect(screen.getByText('Quick Face ID')).toBeInTheDocument();
+  });
+
+  it('blocks ambiguous matches and prompts a rescan instead of selectable customers', async () => {
+    const candidates = [
+      { partnerId: 'p-1', name: 'Alice', code: 'T001', phone: '0901', confidence: 0.9 },
+      { partnerId: 'p-2', name: 'Bob', code: 'T002', phone: '0902', confidence: 0.86 },
+    ];
+    recognizeState = { status: 'ambiguous', candidates, recognitionVersion: 'face-recognition-test' };
+    recognizeMock.mockResolvedValue({
+      status: 'ambiguous',
+      match: null,
+      candidates: [],
+      recognitionVersion: 'face-recognition-test',
+      ambiguity: { code: 'AMBIGUOUS_FACE_MATCH', candidates },
+    });
+
+    render(<GlobalFaceIdButton />);
+    fireEvent.click(screen.getByRole('button', { name: /Quick Face ID/i }));
+    fireEvent.click(await screen.findByText('Mock capture'));
+
+    expect(await screen.findByText('Face ID needs a clearer scan')).toBeInTheDocument();
+    expect(screen.getByText('face-recognition-test')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Scan again/i })).toBeInTheDocument();
+    expect(screen.queryByText('Alice')).not.toBeInTheDocument();
+    expect(screen.queryByText('Bob')).not.toBeInTheDocument();
+    expect(navigateMock).not.toHaveBeenCalled();
   });
 });

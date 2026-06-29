@@ -152,6 +152,9 @@
     "noFaceFound": "No face detected",
     "multipleFaces": "More than one face detected",
     "faceServiceUnavailable": "Face service is unavailable",
+    "ambiguousTitle": "Face ID needs a clearer scan",
+    "ambiguousHint": "Two customer records are too close to choose safely. Rescan with one centered face.",
+    "rescan": "Scan again",
     "registered": "Face ID",
     "registeredOn": "Face registered: {{date}}",
     "readinessTitle": "Face ID readiness: {{score}}% ({{count}}/{{target}} samples) - {{label}}",
@@ -307,7 +310,8 @@
   },
   "faceRecognition": {
     "registerFailed": "Face registration failed",
-    "recognizeFailed": "Face recognition failed"
+    "recognizeFailed": "Face recognition failed",
+    "ambiguous": "Face match is ambiguous. Please scan again with one centered face."
   },
   "states": {
     "loading": "Loading patients..."

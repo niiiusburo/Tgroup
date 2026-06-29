@@ -23,6 +23,7 @@
 | v1.0.5 | 2026-06-01 | Partner DOB date parts normalize migrated blank/zero values to `null`; revenue by source report endpoint added. |
 | v1.0.4 | 2026-05-21 | Feedback creation now queues optional Lark custom bot alerts after manual or auto-detected feedback threads commit. |
 | v1.0.3 | 2026-05-19 | Feedback attachment persistence contract clarified: file-only messages are valid, DB/file writes are transactional, and destructive file cleanup happens only after DB commit. |
+| v1.0.6 | 2026-07-02 | Face ID recognize now carries `status`, `ambiguity`, and `recognitionVersion`; close two-identity matches (margin < `FACE_AMBIGUOUS_MATCH_MARGIN`, default 0.06) are rescan-only; CompreFace enrollment enforces `det_prob_threshold`. |
 
 ---
 
@@ -336,6 +337,7 @@ Optional DOB date parts (`birthday`, `birthmonth`, `birthyear`) normalize `""`, 
 **Response 200:**
 ```ts
 {
+  status: 'auto_matched' | 'candidates' | 'no_match' | 'ambiguous';
   match: null | {
     partnerId: string;
     name: string;
@@ -350,7 +352,20 @@ Optional DOB date parts (`birthday`, `birthmonth`, `birthyear`) normalize `""`, 
     phone: string | null;
     confidence: number;
   }>;
-  recognitionVersion: string; // e.g. "face-recognition-0.32.55"
+  ambiguity: null | {
+    code: 'AMBIGUOUS_FACE_MATCH';
+    message: string;
+    margin: number;
+    requiredMargin: number;
+    candidates: Array<{
+      partnerId: string;
+      name: string;
+      code: string;
+      phone: string | null;
+      confidence: number;
+    }>; // audit/debug only; redacted (empty) for investor-scoped callers
+  };
+  recognitionVersion: string; // e.g. "face-recognition-0.32.59"
 }
 ```
 
@@ -359,6 +374,8 @@ Provider behavior:
 - `FACE_RECOGNITION_PROVIDER=compreface` sends captures to CompreFace, uses `partners.id` as the CompreFace subject, and keeps `partners.face_subject_id` / `face_registered_at` as TGClinic status.
 - Staff recognition responses include `recognitionVersion` so NK2 operators can confirm the active Face ID recognizer from the header UI and camera banner without changing samples.
 - Default strict matching policy is `FACE_AUTO_MATCH_THRESHOLD=0.92`, `FACE_CANDIDATE_THRESHOLD=0.84`, and `FACE_AUTO_MATCH_MARGIN=0.05`; candidate-only staff header results are rescan-only and do not expose candidate identity buttons.
+- `status: "ambiguous"` is a precision guard, not a match: when the best two plausible customer identities are closer than `FACE_AMBIGUOUS_MATCH_MARGIN` (default 0.06), the response returns `match: null`, `candidates: []`, `ambiguity.candidates` for audit/debug, and a `recognitionVersion`. Frontends must show a rescan-only state and must not let staff choose between those identities.
+- CompreFace recognition calls use `limit=0`, `prediction_count=2`, and `det_prob_threshold=COMPREFACE_DET_PROB_THRESHOLD` (default 0.75) so TGClinic can see close identity ties and reject extra-face frames; enrollment `/faces` calls send the same `det_prob_threshold` so low-quality photos are rejected at registration.
 - Staff/public camera privacy blur is a visual overlay only; detection and capture must analyze/draw from the unblurred `video` element.
 
 Face error responses:
@@ -369,6 +386,7 @@ Face error responses:
 }
 ```
 - `NO_FACE` is HTTP 422 when the local provider or CompreFace cannot detect a face in the submitted image.
+- `MULTIPLE_FACES` is HTTP 422 when the local provider or CompreFace detects more than one face in the submitted image.
 - Frontend capture callers must keep the camera modal open on `NO_FACE`, show "Không phát hiện khuôn mặt" / "Face not detected", and dismiss capture only through an explicit close/cancel action.
 
 #### POST /api/public/face/checkin
@@ -712,6 +730,7 @@ async function query(text: string, params?: any[]): Promise<any[]>
 - `DELETE /api/v1/recognition/subjects/:subjectId` — reset subject during re-registration
 **Headers:** `x-api-key: COMPREFACE_API_KEY`
 **Version:** 1.2.0 (Docker image `exadel/compreface:1.2.0`)
+**Recognize query:** TGClinic sends `limit=0`, `prediction_count=2`, and `det_prob_threshold=COMPREFACE_DET_PROB_THRESHOLD` (default 0.75). More than one returned face is normalized to `MULTIPLE_FACES` 422; two close subject predictions are handled by the shared Face ID ambiguity gate.
 
 ### 4.2 Hosoonline
 
@@ -797,5 +816,6 @@ export const PaymentBaseSchema = z.object({
 
 | Date | Version | Change | Commit |
 |---|---|---|---|
+| 2026-07-02 | v1.0.6 | Face ID recognize now carries `status`, `ambiguity`, and `recognitionVersion`; close two-identity matches are rescan-only; CompreFace enrollment enforces `det_prob_threshold`. | pending |
 | 2026-05-17 | v1.0.1 | Aligned API contracts with live payment enum, reports endpoints, and export registry routes. | pending |
 | 2026-05-13 | v1.0.0 | Initial contract freeze | feat/complete-documentation-stack |

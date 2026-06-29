@@ -12,6 +12,7 @@ type RecognitionState =
   | { status: 'idle' }
   | { status: 'processing' }
   | { status: 'success'; match: FaceCandidate; recognitionVersion?: string | null }
+  | { status: 'ambiguous'; candidates: FaceCandidate[]; recognitionVersion?: string | null }
   | { status: 'candidates'; candidates: FaceCandidate[]; recognitionVersion?: string | null }
   | { status: 'no_match'; recognitionVersion?: string | null }
   | { status: 'error'; message: string };
@@ -38,7 +39,13 @@ export function useFaceRecognition() {
     setRecognizeState({ status: 'processing' });
     try {
       const result = await recognizeFace(image);
-      if (result.match) {
+      if (result.status === 'ambiguous' || result.ambiguity) {
+        setRecognizeState({
+          status: 'ambiguous',
+          candidates: result.ambiguity?.candidates ?? [],
+          recognitionVersion: result.recognitionVersion,
+        });
+      } else if (result.match) {
         setRecognizeState({
           status: 'success',
           match: result.match,

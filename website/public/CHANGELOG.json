@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.32.59",
+    "date": "2026-07-02",
+    "commit": "pending",
+    "highlights": "Face ID: close two-identity matches now force a rescan instead of populating a (possibly wrong) name",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Face ID no longer auto-matches or offers pickable candidates when the two closest customers score within 0.06 of each other — staff get a rescan prompt instead of a possibly wrong name",
+          "Face ID enrollment now rejects blurry/low-quality photos (CompreFace det_prob_threshold), keeping the recognition gallery clean",
+          "Investor accounts never see out-of-scope customer names in ambiguous Face ID responses"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "API + UI tests cover the new ambiguous rescan-only state in the header Quick Face ID and the customer camera widget"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.58",
     "date": "2026-07-02",
     "commit": "e6f65d5e0",

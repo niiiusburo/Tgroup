@@ -1,5 +1,15 @@
 const COMPREFACE_URL = (process.env.COMPREFACE_URL || 'http://compreface-api').replace(/\/$/, '');
 const COMPREFACE_API_KEY = process.env.COMPREFACE_API_KEY || '';
+const DET_PROB_THRESHOLD = process.env.COMPREFACE_DET_PROB_THRESHOLD || process.env.FACE_DET_PROB_THRESHOLD || '0.75';
+
+class ComprefaceClientError extends Error {
+  constructor(code, message, status = 502) {
+    super(message);
+    this.name = 'ComprefaceClientError';
+    this.code = code;
+    this.status = status;
+  }
+}
 
 async function comprefaceFetch(path, options = {}) {
   const url = `${COMPREFACE_URL}/api/v1/recognition${path}`;
@@ -49,13 +59,26 @@ function createImageForm(imageBuffer, mimetype, fields = {}) {
  */
 async function recognize(imageBuffer, mimetype = 'image/jpeg') {
   const form = createImageForm(imageBuffer, mimetype);
+  const params = new URLSearchParams({
+    limit: '0',
+    prediction_count: '2',
+    det_prob_threshold: DET_PROB_THRESHOLD,
+  });
 
-  const data = await comprefaceFetch('/recognize', {
+  const data = await comprefaceFetch(`/recognize?${params.toString()}`, {
     method: 'POST',
     body: form,
   });
 
   const results = data?.result || [];
+  if (results.length > 1) {
+    throw new ComprefaceClientError(
+      'MULTIPLE_FACES',
+      'More than one face detected',
+      422
+    );
+  }
+
   return results
     .flatMap((r) => r.subjects || [])
     .map((s) => ({ subject: s.subject, similarity: parseFloat(s.similarity) }))
@@ -82,8 +105,15 @@ async function createSubject(subjectId) {
  */
 async function addExample(subjectId, imageBuffer, mimetype = 'image/jpeg') {
   const form = createImageForm(imageBuffer, mimetype, { subject: subjectId });
+  // Enforce the same detection-probability floor at enrollment as at
+  // recognition: a blurry/low-light enrollment photo pollutes the subject's
+  // gallery and makes cross-person collisions more likely later.
+  const params = new URLSearchParams({
+    subject: subjectId,
+    det_prob_threshold: DET_PROB_THRESHOLD,
+  });
 
-  return comprefaceFetch('/faces', {
+  return comprefaceFetch(`/faces?${params.toString()}`, {
     method: 'POST',
     body: form,
   });
@@ -147,4 +177,5 @@ module.exports = {
   listFaces,
   deleteSubject,
   healthCheck,
+  ComprefaceClientError,
 };

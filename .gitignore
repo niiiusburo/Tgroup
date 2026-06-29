@@ -118,3 +118,6 @@ backups/*.sql.bak
 !contracts/dist/
 .venv/
 __pycache__/
+
+# EvoMap evolver session markers
+.evolver/

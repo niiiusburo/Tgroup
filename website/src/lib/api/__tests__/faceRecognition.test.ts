@@ -88,6 +88,35 @@ describe('Face Recognition API client', () => {
       expect(result.candidates).toEqual([]);
     });
 
+    it('returns ambiguous result with recognition version metadata', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          status: 'ambiguous',
+          match: null,
+          candidates: [],
+          recognitionVersion: 'face-recognition-test',
+          ambiguity: {
+            code: 'AMBIGUOUS_FACE_MATCH',
+            message: 'Face match is ambiguous',
+            margin: 0.04,
+            requiredMargin: 0.06,
+            candidates: [
+              { partnerId: 'p1', name: 'Alice', confidence: 0.9, code: 'T001', phone: '0901' },
+              { partnerId: 'p2', name: 'Bob', confidence: 0.86, code: 'T002', phone: '0902' },
+            ],
+          },
+        }),
+      });
+
+      const result = await recognizeFace(new Blob(['image']));
+      expect(result.status).toBe('ambiguous');
+      expect(result.recognitionVersion).toBe('face-recognition-test');
+      expect(result.ambiguity?.candidates).toHaveLength(2);
+      expect(result.candidates).toEqual([]);
+    });
+
     it('throws on HTTP error', async () => {
       mockFetch.mockResolvedValue({
         ok: false,
