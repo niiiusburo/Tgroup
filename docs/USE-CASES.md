@@ -155,6 +155,7 @@ When a use case is created or materially edited, add one compact `Traceability` 
   - **AF-2 No face match:** Show "Không nhận diện được" and offer manual customer search (UC-004).
   - **AF-3 No face registered:** Fallback to manual `CustomerSelector`.
   - **AF-4 No appointments today:** Show "Hôm nay không có lịch hẹn".
+  - **AF-5 Candidate-only / ambiguous:** Staff header Face ID shows "Face ID needs a clearer scan" with a rescan action and does not expose candidate identity buttons; public kiosk remains privacy-minimized.
 - **Postconditions:** Appointment state = `arrived`; check-in timestamp recorded.
 - **Invariants touched:** INV-005 (embedding dimension), INV-014 (Compreface optional startup).
 - **Traceability:** Related WF: WF-007, UC-003, UC-008. Contracts/routes: `POST /api/face/recognize`, `GET /api/Appointments?partnerId=...&date=...`, `PUT /api/Appointments/:id`. Data/tables: `dbo.customer_face_embeddings`, `dbo.partners`, `dbo.appointments`. Tests: `api/tests/faceRecognition.test.js`, `website/src/hooks/__tests__/useFaceRecognition.test.ts`, `website/src/components/shared/GlobalFaceIdButton.test.tsx`, `website/src/components/modules/PatientCheckIn.test.tsx`. Product-map domains: `customers-partners`, `appointments-calendar`, `integrations`.

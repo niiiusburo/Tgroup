@@ -15,6 +15,12 @@ Hard rules:
 - Preserve the full camera frame for provider upload. The preview may be softened for privacy, but the submitted JPEG must be unblurred and must not center-crop away portrait iPhone/iPad framing.
 - Treat `NO_FACE`, `MULTIPLE_FACES`, and `LOW_QUALITY` provider errors as transient scanner states in the public kiosk. Keep the camera scanning and only show terminal front-desk fallback for real no-match/multiple-match outcomes or repeated failures.
 
+## Staff Header Strictness
+
+- Staff header Face ID must show the active NK2 version in both the header control and the orange camera-popup banner.
+- Candidate-only recognition results are not operator choices in the staff header. Show "Face ID needs a clearer scan" with a rescan action and hide candidate names/buttons.
+- The default strict policy is auto-match `0.92`, candidate `0.84`, and top-vs-second margin `0.05`. Tightening these values changes recognition decisions only; it does not rewrite or replace stored face samples.
+
 ## Provider Status Rule
 
 In CompreFace mode, TGClinic treats a customer as Face ID registered only when both are true:

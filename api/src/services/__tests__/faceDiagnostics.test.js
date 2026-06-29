@@ -45,9 +45,9 @@ describe("faceDiagnostics", () => {
       },
       privateDiagnostics: {
         policy: {
-          autoMatchThreshold: 0.88,
-          candidateThreshold: 0.8,
-          autoMatchMargin: 0.03,
+          autoMatchThreshold: 0.92,
+          candidateThreshold: 0.84,
+          autoMatchMargin: 0.05,
           maxCandidates: 3,
         },
         reasonCode: "AMBIGUOUS_MARGIN_TOO_SMALL",

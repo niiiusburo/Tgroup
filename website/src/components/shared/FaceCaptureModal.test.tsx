@@ -99,6 +99,20 @@ describe('FaceCaptureModal', () => {
     expect(await screen.findByText('Custom Title')).toBeInTheDocument();
   });
 
+  it('renders the Face ID version in the orange camera header when provided', async () => {
+    render(
+      <FaceCaptureModal
+        isOpen
+        title="Quick Face ID"
+        versionLabel="v0.32.53"
+        onCapture={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    );
+    expect(await screen.findByText('Quick Face ID')).toBeInTheDocument();
+    expect(screen.getByText('v0.32.53')).toBeInTheDocument();
+  });
+
   it('does not render capture button when camera error occurs', async () => {
     mockGetUserMedia.mockRejectedValue(new Error('Camera denied'));
     render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
