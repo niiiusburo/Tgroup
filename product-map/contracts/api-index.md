@@ -392,7 +392,7 @@ Attachment persistence contract: feedback create/reply routes accept file-only m
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| POST | `/recognize` | Perm:`customers.view` | FormData (`image`) | `{ match: FaceCandidate \| null, candidates: FaceCandidate[] }`; provider selected by `FACE_RECOGNITION_PROVIDER=local|compreface` |
+| POST | `/recognize` | Perm:`customers.view` | FormData (`image`) | `{ status, match: FaceCandidate \| null, candidates: FaceCandidate[], ambiguity, recognitionVersion }`; provider selected by `FACE_RECOGNITION_PROVIDER=local|compreface`; `status:"ambiguous"` is rescan-only |
 | POST | `/register` | Perm:`customers.edit` | FormData (`partnerId`, `image`, optional `source`) | `{ success: true, partnerId, sampleId, sampleCount, faceRegisteredAt }` |
 | POST | `/re-register` | Perm:`customers.edit` | FormData (`partnerId`, repeated `images`, optional `source`) | `{ success: true, partnerId, sampleIds, sampleCount, faceRegisteredAt }` |
 | GET | `/status/:partnerId` | Perm:`customers.view` | — | `{ partnerId, registered, sampleCount, lastRegisteredAt }` |

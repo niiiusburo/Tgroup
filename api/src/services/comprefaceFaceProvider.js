@@ -12,11 +12,7 @@ const {
   deleteSubject,
 } = require("./comprefaceClient");
 const { query } = require("../db");
-
-const AUTO_MATCH_THRESHOLD = parseFloat(process.env.FACE_AUTO_MATCH_THRESHOLD || "0.88");
-const CANDIDATE_THRESHOLD = parseFloat(process.env.FACE_CANDIDATE_THRESHOLD || "0.80");
-const AUTO_MATCH_MARGIN = parseFloat(process.env.FACE_AUTO_MATCH_MARGIN || "0.03");
-const MAX_CANDIDATES = parseInt(process.env.FACE_MAX_CANDIDATES || "3", 10);
+const { buildRecognitionResult } = require("./faceMatchEngine");
 
 class ComprefaceFaceError extends Error {
   constructor(code, message, status = 500) {
@@ -53,9 +49,19 @@ function isNoFaceError(err) {
   );
 }
 
+function isMultipleFacesError(err) {
+  const message = String(err?.message || "");
+  const code = String(err?.code || "");
+  return code === "MULTIPLE_FACES" || /more\s+than\s+one\s+face|multiple\s+faces/i.test(message);
+}
+
 function mapComprefaceFailure(err, fallbackCode, fallbackMessage) {
   if (isNoFaceError(err)) {
     return new ComprefaceFaceError("NO_FACE", "No face detected", 422);
+  }
+
+  if (isMultipleFacesError(err)) {
+    return new ComprefaceFaceError("MULTIPLE_FACES", "More than one face detected", 422);
   }
 
   return new ComprefaceFaceError(
@@ -117,44 +123,7 @@ async function recognizeFace(imageBuffer, mimetype) {
     }
   }
 
-  const sorted = Array.from(byPartner.values()).sort((a, b) => b.score - a.score);
-  const top = sorted[0];
-  const second = sorted[1];
-
-  if (
-    top &&
-    top.score >= AUTO_MATCH_THRESHOLD &&
-    (!second || top.score - second.score >= AUTO_MATCH_MARGIN)
-  ) {
-    return {
-      match: {
-        partnerId: top.partnerId,
-        name: top.name,
-        code: top.code,
-        phone: top.phone,
-        confidence: parseFloat(top.score.toFixed(4)),
-      },
-      candidates: [],
-    };
-  }
-
-  if (top && top.score >= CANDIDATE_THRESHOLD) {
-    return {
-      match: null,
-      candidates: sorted
-        .filter((c) => c.score >= CANDIDATE_THRESHOLD)
-        .slice(0, MAX_CANDIDATES)
-        .map((c) => ({
-          partnerId: c.partnerId,
-          name: c.name,
-          code: c.code,
-          phone: c.phone,
-          confidence: parseFloat(c.score.toFixed(4)),
-        })),
-    };
-  }
-
-  return { match: null, candidates: [] };
+  return buildRecognitionResult(Array.from(byPartner.values()));
 }
 
 async function ensureSubject(subjectId) {

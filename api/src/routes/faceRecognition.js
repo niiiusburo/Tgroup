@@ -51,7 +51,7 @@ router.post('/recognize', requirePermission('customers.view'), upload.single('im
       return res.status(400).json({ error: 'MISSING_IMAGE', message: 'Missing image file' });
     }
 
-    const { match, candidates } = isComprefaceProvider()
+    const recognition = isComprefaceProvider()
       ? await comprefaceFaceProvider.recognizeFace(req.file.buffer, req.file.mimetype)
       : await (async () => {
           const { embedding } = await getEmbedding(req.file.buffer, req.file.mimetype);
@@ -59,9 +59,18 @@ router.post('/recognize', requirePermission('customers.view'), upload.single('im
         })();
 
     const duration = Date.now() - start;
-    console.log(`[FaceRecognize] result=${match ? 'match' : candidates.length ? 'candidates' : 'no_match'} duration=${duration}ms`);
+    const status = recognition.status || (recognition.match ? 'auto_matched' : recognition.candidates?.length ? 'candidates' : 'no_match');
+    console.log(
+      `[FaceRecognize] version=${recognition.recognitionVersion || 'unknown'} result=${status} duration=${duration}ms`
+    );
 
-    return res.json({ match, candidates });
+    return res.json({
+      status,
+      match: recognition.match || null,
+      candidates: recognition.candidates || [],
+      ambiguity: recognition.ambiguity || null,
+      recognitionVersion: recognition.recognitionVersion || null,
+    });
   } catch (err) {
     const mapped = mapEngineError(err);
     console.error('[FaceRecognize] error:', mapped.code, mapped.message);

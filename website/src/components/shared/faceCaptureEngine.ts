@@ -22,6 +22,19 @@ export const DETECTION_INTERVAL_MS = 260;
 export const PROFILE_POSE_SETTLE_MS = 650;
 export const PROFILE_POSE_HOLD_MS = 3000;
 
+/** Center crop fraction (intrinsic video coords) — face fills more of CompreFace input. */
+export const CENTER_CROP_FRACTION = 0.6;
+/** Square output sent to recognize/register (NK2 iPhone fix). */
+export const FACE_OUTPUT_SIZE = 600;
+const MIN_CAPTURE_MEAN_LUMINANCE = 12;
+
+export type CaptureVideoFrameOptions = {
+  /** Mirror horizontally for front (`user`) camera — matches preview expectation. */
+  mirrorUserFacing?: boolean;
+  /** Apply 60% center crop + scale to FACE_OUTPUT_SIZE (default true for recognition). */
+  faceCentricCrop?: boolean;
+};
+
 export function stopStream(stream: MediaStream | null) {
   stream?.getTracks().forEach((track) => track.stop());
 }
@@ -31,8 +44,16 @@ export async function getCameraStream(facingMode: CameraFacingMode) {
     {
       video: {
         facingMode: { exact: facingMode },
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+      },
+      audio: false,
+    },
+    {
+      video: {
+        facingMode: { ideal: facingMode },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
       },
       audio: false,
     },
@@ -66,7 +87,7 @@ export function getNativeFaceDetector(): FaceDetectorInstance | null {
   if (!Detector) return null;
 
   try {
-    return new Detector({ fastMode: true, maxDetectedFaces: 1 });
+    return new Detector({ fastMode: true, maxDetectedFaces: 3 });
   } catch {
     return null;
   }
@@ -127,8 +148,6 @@ export async function analyzeFrame(
     const face = faces.length === 1 ? faces[0] : null;
 
     if (!face?.boundingBox) {
-      // For non-frontal poses where face detection is unreliable (left/right),
-      // fall back to quality-only scoring instead of penalizing heavily.
       if (!requireFaceDetection) {
         return {
           score: frameQuality,
@@ -162,19 +181,137 @@ export async function analyzeFrame(
   }
 }
 
-export function captureVideoFrame(video: HTMLVideoElement | null) {
-  if (!video || video.videoWidth === 0 || video.videoHeight === 0) {
-    return Promise.resolve(null);
+/** iOS Safari: wait until intrinsic dimensions exist and a frame is painted. */
+export async function waitForVideoFrameReady(
+  video: HTMLVideoElement,
+  timeoutMs = 4000,
+): Promise<boolean> {
+  if (video.videoWidth > 0 && video.videoHeight > 0 && video.readyState >= 2) {
+    await new Promise<void>((r) => requestAnimationFrame(() => r()));
+    return true;
   }
 
-  const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return Promise.resolve(null);
-  ctx.drawImage(video, 0, 0);
-
-  return new Promise<Blob | null>((resolve) => {
-    canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.92);
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (ok: boolean) => {
+      if (settled) return;
+      settled = true;
+      video.removeEventListener('loadedmetadata', onMeta);
+      video.removeEventListener('playing', onPlaying);
+      clearTimeout(timer);
+      resolve(ok);
+    };
+    const onMeta = () => {
+      if (video.videoWidth > 0 && video.videoHeight > 0) {
+        void video.play().catch(() => undefined);
+      }
+    };
+    const onPlaying = () => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => finish(video.videoWidth > 0 && video.videoHeight > 0));
+      });
+    };
+    const timer = window.setTimeout(() => finish(false), timeoutMs);
+    video.addEventListener('loadedmetadata', onMeta);
+    video.addEventListener('playing', onPlaying);
+    onMeta();
+    if (video.readyState >= 2) onPlaying();
   });
+}
+
+export function centerCropSourceRect(videoWidth: number, videoHeight: number, fraction = CENTER_CROP_FRACTION) {
+  const side = Math.min(videoWidth, videoHeight) * fraction;
+  const sx = (videoWidth - side) / 2;
+  const sy = (videoHeight - side) / 2;
+  return { sx, sy, side };
+}
+
+function sampleFrameMeanLuminance(ctx: CanvasRenderingContext2D, w: number, h: number): number {
+  const sampleW = Math.min(32, w);
+  const sampleH = Math.min(32, h);
+  const { data } = ctx.getImageData(0, 0, sampleW, sampleH);
+  let total = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    total += data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+  }
+  return total / (data.length / 4);
+}
+
+function drawVideoToCanvas(
+  video: HTMLVideoElement,
+  ctx: CanvasRenderingContext2D,
+  destW: number,
+  destH: number,
+  opts: CaptureVideoFrameOptions,
+) {
+  const vw = video.videoWidth;
+  const vh = video.videoHeight;
+  const faceCentric = opts.faceCentricCrop !== false;
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, destW, destH);
+
+  if (faceCentric) {
+    const { sx, sy, side } = centerCropSourceRect(vw, vh);
+    if (opts.mirrorUserFacing) {
+      ctx.translate(destW, 0);
+      ctx.scale(-1, 1);
+    }
+    ctx.drawImage(video, sx, sy, side, side, 0, 0, destW, destH);
+    return;
+  }
+
+  if (opts.mirrorUserFacing) {
+    ctx.translate(destW, 0);
+    ctx.scale(-1, 1);
+  }
+  ctx.drawImage(video, 0, 0, vw, vh, 0, 0, destW, destH);
+}
+
+async function encodeCanvasJpeg(canvas: HTMLCanvasElement, quality = 0.92): Promise<Blob | null> {
+  return new Promise<Blob | null>((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
+  });
+}
+
+/**
+ * Capture a JPEG from the live video element using intrinsic dimensions (not CSS size).
+ * Rejects near-black frames (Safari video→canvas bug) with one delayed retry.
+ */
+export async function captureVideoFrame(
+  video: HTMLVideoElement | null,
+  options: CaptureVideoFrameOptions = {},
+): Promise<Blob | null> {
+  if (!video) return null;
+
+  const ready = await waitForVideoFrameReady(video);
+  if (!ready || video.videoWidth === 0 || video.videoHeight === 0) {
+    return null;
+  }
+
+  const faceCentric = options.faceCentricCrop !== false;
+  const outSize = faceCentric ? FACE_OUTPUT_SIZE : Math.min(video.videoWidth, 1920);
+  const outH = faceCentric ? FACE_OUTPUT_SIZE : Math.min(video.videoHeight, 1920);
+
+  const attempt = async (delayMs: number): Promise<Blob | null> => {
+    if (delayMs > 0) {
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = outSize;
+    canvas.height = outH;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return null;
+
+    drawVideoToCanvas(video, ctx, outSize, outH, options);
+    const mean = sampleFrameMeanLuminance(ctx, outSize, outH);
+    if (mean < MIN_CAPTURE_MEAN_LUMINANCE) {
+      return null;
+    }
+    return encodeCanvasJpeg(canvas);
+  };
+
+  const first = await attempt(0);
+  if (first) return first;
+  return attempt(120);
 }

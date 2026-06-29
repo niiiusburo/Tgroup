@@ -1,5 +1,11 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { analyzeFrame } from './faceCaptureEngine';
+import {
+  analyzeFrame,
+  centerCropSourceRect,
+  CENTER_CROP_FRACTION,
+  FACE_OUTPUT_SIZE,
+  getNativeFaceDetector,
+} from './faceCaptureEngine';
 
 describe('faceCaptureEngine', () => {
   const createReadyFrameData = () => {
@@ -28,6 +34,7 @@ describe('faceCaptureEngine', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    delete (globalThis as typeof globalThis & { FaceDetector?: unknown }).FaceDetector;
   });
 
   function createVideo() {
@@ -47,5 +54,42 @@ describe('faceCaptureEngine', () => {
     const result = await analyzeFrame(createVideo(), null, false);
 
     expect(result.ready).toBe(true);
+  });
+
+  it('configures native detection to expose multiple faces in the frame', () => {
+    const detect = vi.fn();
+    const FaceDetector = vi.fn(function () {
+      return { detect };
+    });
+    (globalThis as typeof globalThis & { FaceDetector?: unknown }).FaceDetector = FaceDetector;
+
+    expect(getNativeFaceDetector()).toEqual({ detect });
+    expect(FaceDetector).toHaveBeenCalledWith({ fastMode: true, maxDetectedFaces: 3 });
+  });
+
+  it('blocks auto-ready capture when native detection sees more than one face', async () => {
+    const detector = {
+      detect: vi.fn(async () => [
+        { boundingBox: { width: 160, height: 190 } },
+        { boundingBox: { width: 150, height: 180 } },
+      ]),
+    };
+
+    const result = await analyzeFrame(createVideo(), detector, true);
+
+    expect(result.ready).toBe(false);
+    expect(result.score).toBeLessThan(0.68);
+  });
+
+  it('centerCropSourceRect uses min side and center fraction for CompreFace-sized face region', () => {
+    const { sx, sy, side } = centerCropSourceRect(1920, 1080, CENTER_CROP_FRACTION);
+    expect(side).toBeCloseTo(648, 0);
+    expect(sx).toBeCloseTo((1920 - 648) / 2, 0);
+    expect(sy).toBeCloseTo((1080 - 648) / 2, 0);
+  });
+
+  it('exports NK2-friendly output size constant', () => {
+    expect(FACE_OUTPUT_SIZE).toBe(600);
+    expect(CENTER_CROP_FRACTION).toBe(0.6);
   });
 });

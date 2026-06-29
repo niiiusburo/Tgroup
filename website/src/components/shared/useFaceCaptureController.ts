@@ -75,10 +75,11 @@ export function useFaceCaptureController({
     const video = videoRef.current;
     if (!video) return null;
     const detector = getNativeFaceDetector();
+    const captureOpts = { mirrorUserFacing: facingMode === 'user', faceCentricCrop: true as const };
     const frames: Array<{ blob: Blob; score: number }> = [];
     for (let i = 0; i < BURST_FRAME_COUNT; i++) {
       if (i > 0) await new Promise((r) => setTimeout(r, BURST_FRAME_INTERVAL_MS));
-      const frameBlob = await captureVideoFrame(video);
+      const frameBlob = await captureVideoFrame(video, captureOpts);
       if (!frameBlob) continue;
       // requireFace=false: if detector is null we still want a numeric quality score
       // back, not a 0.45-penalty cap that would skew "best" selection.
@@ -87,7 +88,7 @@ export function useFaceCaptureController({
     }
     if (frames.length === 0) return null;
     return frames.reduce((a, b) => (b.score > a.score ? b : a)).blob;
-  }, []);
+  }, [facingMode]);
 
   const handleCapture = useCallback(async () => {
     setCaptureError(null);
@@ -102,7 +103,10 @@ export function useFaceCaptureController({
       }
 
       // Profile mode (3 poses): single-frame capture per pose, unchanged.
-      const blob = await captureVideoFrame(videoRef.current);
+      const blob = await captureVideoFrame(videoRef.current, {
+        mirrorUserFacing: facingMode === 'user',
+        faceCentricCrop: true,
+      });
       if (!blob) return;
 
       const nextImages = [...profileImagesRef.current, blob];
@@ -126,7 +130,7 @@ export function useFaceCaptureController({
       setDetectionScore(0);
       // Don't reset profile progress on capture error; let user retry the current pose
     }
-  }, [captureBestOfBurst, captureFailedMessage, isProfileCapture, onCapture]);
+  }, [captureBestOfBurst, captureFailedMessage, facingMode, isProfileCapture, onCapture]);
 
   useEffect(() => {
     const video = videoRef.current;

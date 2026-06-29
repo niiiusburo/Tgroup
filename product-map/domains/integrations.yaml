@@ -20,10 +20,13 @@ reads:
   - api/src/db.js
   - process.env.FACE_SERVICE_URL
   - process.env.FACE_RECOGNITION_PROVIDER
+  - process.env.FACE_RECOGNITION_VERSION
+  - process.env.FACE_AMBIGUOUS_MATCH_MARGIN
   - process.env.FACE_LIVENESS_ENABLED
   - process.env.FACE_LIVENESS_THRESHOLD
   - process.env.COMPREFACE_URL
   - process.env.COMPREFACE_API_KEY
+  - process.env.COMPREFACE_DET_PROB_THRESHOLD
   - process.env.HOSOONLINE_BASE_URL
   - process.env.HOSOONLINE_API_KEY
   - process.env.HOSOONLINE_USERNAME
@@ -54,6 +57,7 @@ jobs:
   - none (Compreface runs as standalone Docker containers)
 shared_types:
   - website/src/hooks/useFaceRecognition.ts
+  - website/src/lib/api/partners.ts
   - website/src/lib/api/externalCheckups.ts
 dependencies:
   - Customers & Partners
@@ -64,7 +68,12 @@ affected_by:
   - Network reachability between api container and compreface-api
 impact_tests:
   - website/src/hooks/__tests__/useFaceRecognition.test.ts
+  - website/src/lib/api/__tests__/faceRecognition.test.ts
   - api/tests/faceRecognition.test.js
+  - api/src/services/__tests__/faceMatchEngine.test.js
+  - api/src/services/__tests__/comprefaceClient.test.js
+  - api/src/services/__tests__/comprefaceFaceProvider.test.js
+  - website/src/components/shared/faceCaptureEngine.test.ts
   - face-service/tests/test_liveness.py
   - api/tests/crossLobProbe.test.js
   - website/src/components/shared/GlobalFaceIdButton.test.tsx
@@ -74,6 +83,9 @@ risk_level: medium
 notes:
   - `FACE_RECOGNITION_PROVIDER=local` uses the Python FastAPI face-service with OpenCV YuNet (detection) and SFace (128-dim embedding extraction).
   - `FACE_RECOGNITION_PROVIDER=compreface` uses CompreFace recognition subjects keyed by `partners.id`; TGClinic still updates `partners.face_subject_id` and `face_registered_at`.
+  - Face ID recognize responses include `recognitionVersion` (default `face-recognition-0.39.5`) so NK2/NK can prove which matching rules produced a result after deploy.
+  - Face ID ambiguous-identity guard: if the best two plausible partner identities are closer than `FACE_AMBIGUOUS_MATCH_MARGIN` (default 0.06), `/api/face/recognize` returns `status: ambiguous`, `match: null`, `candidates: []`, and `ambiguity.candidates` only for audit/debug. Header Quick Face ID and CustomerCameraWidget must show a rescan-only state, never staff-pick buttons, for this case.
+  - CompreFace recognize requests send `limit=0`, `prediction_count=2`, and `det_prob_threshold=COMPREFACE_DET_PROB_THRESHOLD` (default 0.75). More than one detected face is normalized to `MULTIPLE_FACES` 422.
   - Liveness / anti-spoofing (local provider only): `face-service/liveness.py` runs MiniFASNet (source-verified Silent-Face) via cv2.dnn on the detected face box. Gated by `FACE_LIVENESS_ENABLED` (default off) + `FACE_LIVENESS_THRESHOLD` (default 0.5, the averaged REAL-class probability bar). Fails open — a missing/unloadable model or inference error never blocks check-in. A spoof verdict returns `SPOOF_DETECTED` (HTTP 422) from `/api/face/recognize` and `/api/face/register` (embedding is not computed/stored). Models bake into the face-service image as a best-effort build-time download; enable only after calibrating the threshold with real clinic captures.
   - Cross-LOB chooser: after `/api/face/recognize` matches in the current LOB, if the caller has `lob.crossview` and the customer has a phone, `GlobalFaceIdButton` calls `GET /api/cross-lob-probe` (soft phone match of the other LOB pool). If the customer also exists in the other LOB, the quick-scan popover shows a chooser (open current LOB via in-app navigate, or the other LOB via a `?lob=` deep link in a new tab) instead of auto-navigating. Non-crossview employees and phone-less matches navigate straight to the current-LOB record. The probe was restored after being dropped in the cosmetic-LOB merge (also fixes the ProfileHeader badge).
   - Compreface services are defined in docker-compose.yml but are not required for core app startup.

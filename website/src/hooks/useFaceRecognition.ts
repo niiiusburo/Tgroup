@@ -18,6 +18,7 @@ import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 function resolveFaceError(err: unknown, t: (key: string) => string, fallbackKey: string): string {
   const code = (err as { code?: string } | null)?.code;
   if (code === 'SPOOF_DETECTED') return t('faceRecognition.spoofDetected');
+  if (code === 'AMBIGUOUS_FACE_MATCH') return t('faceRecognition.ambiguous');
   // Preserve existing fallback contract (raw key for non-Error); only spoof is localized here.
   return err instanceof Error ? err.message : fallbackKey;
 }
@@ -26,6 +27,7 @@ type RecognitionState =
   | { status: 'idle' }
   | { status: 'processing' }
   | { status: 'success'; match: FaceCandidate }
+  | { status: 'ambiguous'; candidates: FaceCandidate[]; recognitionVersion?: string | null }
   | { status: 'candidates'; candidates: FaceCandidate[] }
   | { status: 'no_match' }
   | { status: 'error'; message: string };
@@ -54,7 +56,13 @@ export function useFaceRecognition() {
     setRecognizeState({ status: 'processing' });
     try {
       const result = await recognizeFace(image, currentLOB);
-      if (result.match) {
+      if (result.status === 'ambiguous' || result.ambiguity) {
+        setRecognizeState({
+          status: 'ambiguous',
+          candidates: result.ambiguity?.candidates ?? [],
+          recognitionVersion: result.recognitionVersion,
+        });
+      } else if (result.match) {
         setRecognizeState({ status: 'success', match: result.match });
       } else if (result.candidates && result.candidates.length > 0) {
         setRecognizeState({ status: 'candidates', candidates: result.candidates });

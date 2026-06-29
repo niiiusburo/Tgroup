@@ -139,6 +139,56 @@ describe('useCustomerFormActions', () => {
       expect(registerFace).toHaveBeenCalledWith('new-customer', fakeBlob, 'profile_register');
     });
 
+    it('registers every guided profile image after creating a customer', async () => {
+      const { registerFace } = await import('@/lib/api');
+      vi.mocked(registerFace).mockResolvedValue({
+        success: true,
+        partnerId: 'new-customer',
+        sampleId: 's-1',
+        sampleCount: 3,
+        faceRegisteredAt: '2026-05-07T10:00:00',
+      });
+
+      const createCustomer = vi.fn().mockResolvedValue({
+        id: 'new-customer',
+        code: 'T9999',
+        name: 'New Customer',
+      });
+
+      const { result } = renderFormActions({
+        isEditMode: false,
+        selectedCustomerId: null,
+        createCustomer,
+      });
+
+      const images = [
+        new Blob(['face-center'], { type: 'image/jpeg' }),
+        new Blob(['face-left'], { type: 'image/jpeg' }),
+        new Blob(['face-right'], { type: 'image/jpeg' }),
+      ];
+      act(() => {
+        result.current.setPendingFaceImage(images);
+      });
+
+      await result.current.handleSubmit({
+        name: 'New Customer',
+        phone: '0909999999',
+      } as unknown as Parameters<typeof result.current.handleSubmit>[0]);
+
+      await waitFor(() => {
+        expect(createCustomer).toHaveBeenCalled();
+      });
+      expect(registerFace).toHaveBeenCalledTimes(3);
+      images.forEach((image, index) => {
+        expect(registerFace).toHaveBeenNthCalledWith(
+          index + 1,
+          'new-customer',
+          image,
+          'profile_register',
+        );
+      });
+    });
+
     it('does not call registerFace when no pendingFaceImage', async () => {
       const { registerFace } = await import('@/lib/api');
       const createCustomer = vi.fn().mockResolvedValue({

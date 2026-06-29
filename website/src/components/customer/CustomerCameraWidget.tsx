@@ -12,7 +12,7 @@ import { CustomerCameraNoMatchRescue } from './CustomerCameraNoMatchRescue';
 import type { CustomerCameraWidgetProps } from './CustomerCameraWidget.types';
 import { MOCK_QUICK_ADD_DATA } from './customerCameraMockData';
 
-type WidgetMode = 'idle' | 'face-id' | 'quick-add' | 'candidate-review' | 'no-match-rescue';
+type WidgetMode = 'idle' | 'face-id' | 'quick-add' | 'ambiguous' | 'candidate-review' | 'no-match-rescue';
 type CaptureState = 'preview' | 'processing' | 'success';
 
 export function CustomerCameraWidget({
@@ -84,7 +84,10 @@ export function CustomerCameraWidget({
         const result = await recognize(imageBlob);
         setShowCaptureModal(false);
 
-        if (result.match) {
+        if (result.status === 'ambiguous' || result.ambiguity) {
+          setCaptureState('preview');
+          setMode('ambiguous');
+        } else if (result.match) {
           const match = result.match;
           setCaptureState('success');
           setTimeout(() => {
@@ -176,11 +179,12 @@ export function CustomerCameraWidget({
   const isProcessing = captureState === 'processing' || recognizeState.status === 'processing';
   const isSuccess = captureState === 'success';
   const isCandidateReview = mode === 'candidate-review';
+  const isAmbiguous = mode === 'ambiguous';
   const isNoMatchRescue = mode === 'no-match-rescue';
 
   return (
     <div className="flex flex-col items-center">
-      {(isProcessing || isSuccess || isCandidateReview || isNoMatchRescue) && (
+      {(isProcessing || isSuccess || isAmbiguous || isCandidateReview || isNoMatchRescue) && (
         <div className="relative w-28 h-28 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden mb-3">
           {isProcessing ? (
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
@@ -189,6 +193,10 @@ export function CustomerCameraWidget({
           ) : isSuccess ? (
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
               <Check className="w-8 h-8 text-emerald-400" />
+            </div>
+          ) : isAmbiguous ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-2">
+              <span className="text-[10px] text-amber-700">{t('face.ambiguousTitle', 'Face ID needs a clearer scan')}</span>
             </div>
           ) : isCandidateReview ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-2">
@@ -231,6 +239,36 @@ export function CustomerCameraWidget({
             onSelect={handleSelectCandidate}
             onCancel={cancel}
           />
+        )}
+
+        {isAmbiguous && recognizeState.status === 'ambiguous' && (
+          <div className="w-full space-y-2">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-center">
+              <p className="text-xs font-semibold text-amber-800">
+                {t('face.ambiguousTitle', 'Face ID needs a clearer scan')}
+              </p>
+              <p className="mt-1 text-[10px] leading-snug text-amber-700">
+                {t('face.ambiguousHint', 'Two customer records are too close to choose safely. Rescan with one centered face.')}
+              </p>
+              {recognizeState.recognitionVersion && (
+                <p className="mt-1 font-mono text-[10px] text-amber-700">
+                  {recognizeState.recognitionVersion}
+                </p>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={startFaceId}
+              className="w-full px-3 py-2 text-[10px] font-semibold text-white bg-primary rounded-lg hover:bg-primary-dark transition-all">
+              {t('face.rescan', 'Scan again')}
+            </button>
+            <button
+              type="button"
+              onClick={cancel}
+              className="w-full px-3 py-2 text-[10px] font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all">
+              {t('cancel')}
+            </button>
+          </div>
         )}
 
         {isNoMatchRescue && (

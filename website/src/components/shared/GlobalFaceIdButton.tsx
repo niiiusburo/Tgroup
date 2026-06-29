@@ -115,6 +115,18 @@ export function GlobalFaceIdButton() {
     dismiss();
   };
 
+  const rescan = () => {
+    reset();
+    setShowPopover(false);
+    setCapturedImage(null);
+    setSearchQuery('');
+    setSearchResults([]);
+    setSelectedCustomer(null);
+    setRegisterError(null);
+    setCrossLobMatch(null);
+    setShowCapture(true);
+  };
+
   const handleSearchCustomers = useCallback((query: string) => {
     setSearchQuery(query);
     setSelectedCustomer(null);
@@ -237,6 +249,31 @@ export function GlobalFaceIdButton() {
                 <span className="text-[10px] font-semibold uppercase text-blue-600">
                   {crossLobMatch.otherLob ? t(`face.crossLob.lob.${crossLobMatch.otherLob}`, crossLobMatch.otherLob) : ''}
                 </span>
+              </button>
+            </div>
+          )}
+
+          {recognizeState.status === 'ambiguous' && (
+            <div className="space-y-2">
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+                <p className="text-xs font-semibold text-amber-800">
+                  {t('face.ambiguousTitle', 'Face ID needs a clearer scan')}
+                </p>
+                <p className="mt-1 text-[11px] leading-snug text-amber-700">
+                  {t('face.ambiguousHint', 'Two customer records are too close to choose safely. Rescan with one centered face.')}
+                </p>
+                {recognizeState.recognitionVersion && (
+                  <p className="mt-1 font-mono text-[10px] text-amber-700">
+                    {recognizeState.recognitionVersion}
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={rescan}
+                className="w-full px-3 py-2 text-xs font-semibold text-white bg-primary rounded-xl hover:bg-primary-dark transition-all"
+              >
+                {t('face.rescan', 'Scan again')}
               </button>
             </div>
           )}
