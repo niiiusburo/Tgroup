@@ -1,92 +1,202 @@
-"""Unit tests for face-service detection and embedding pipeline."""
+"""Unit tests for the face-service /embed endpoint.
 
-import base64
+These tests mock OpenCV (cv2) because the models (YuNet detector + SFace
+recognizer) are heavy and not always present in CI. We exercise the
+endpoint contract, error mapping, and request validation instead of the
+actual neural network inference.
+
+The original test file imported `detect_face`, `extract_embedding`, and
+`cosine_similarity` from `main`, but those names do not exist in main.py —
+main.py only exports the FastAPI `app`. The collection-time ImportError was
+silently breaking pytest for the entire face-service suite. This rewrite
+imports only what actually exists and uses FastAPI TestClient to exercise
+the HTTP layer.
+"""
+
 import io
 import sys
 from pathlib import Path
 
-import numpy as np
 import pytest
-from PIL import Image
 
 # Ensure the parent directory is on the path so we can import main
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from main import detect_face, extract_embedding, cosine_similarity, app
+
+@pytest.fixture
+def client(monkeypatch):
+    """Build a TestClient with the cv2 models stubbed out.
+
+    The real YuNet/SFace models are loaded lazily on first request. We
+    short-circuit _ensure_models so the TestClient doesn't try to open
+    .onnx files that aren't present in CI.
+    """
+
+    class _StubDetector:
+        def setInputSize(self, *_args, **_kwargs):
+            return None
+
+        def detect(self, _img):
+            # Return (count=0, faces=None) so /embed returns NO_FACE cleanly.
+            return 0, None
+
+    class _StubRecognizer:
+        def alignCrop(self, _img, _box):
+            return _img
+
+        def feature(self, _aligned):
+            import numpy as np  # local import keeps the fixture optional
+            return np.zeros((1, 128), dtype=np.float32)
+
+    import main as face_main
+
+    face_main._detector = _StubDetector()
+    face_main._recognizer = _StubRecognizer()
+
+    from fastapi.testclient import TestClient
+
+    return TestClient(face_main.app)
 
 
-def create_test_image(width: int = 640, height: int = 480, color: tuple = (128, 128, 128)):
-    """Create a simple test image in memory."""
-    img = Image.new("RGB", (width, height), color)
+def _png_bytes(width: int = 320, height: int = 240, color: tuple = (128, 128, 128)) -> bytes:
+    """Build a real PNG byte string via PIL — used as valid multipart upload body."""
+    from PIL import Image
+
     buf = io.BytesIO()
-    img.save(buf, format="JPEG")
-    buf.seek(0)
+    Image.new("RGB", (width, height), color).save(buf, format="PNG")
     return buf.getvalue()
 
 
-class TestDetectFace:
-    def test_detects_no_face_on_blank_image(self):
-        image_bytes = create_test_image()
-        face, score, box = detect_face(image_bytes)
-        assert face is None
-        assert score == 0.0
-        assert box is None
-
-    def test_detection_score_range(self):
-        # A blank image should yield score 0
-        image_bytes = create_test_image()
-        _, score, _ = detect_face(image_bytes)
-        assert 0.0 <= score <= 1.0
-
-
-class TestExtractEmbedding:
-    def test_returns_128_dimensions_for_valid_face(self):
-        # We can't easily synthesize a real face, but we can verify
-        # the function accepts a cropped face array and returns 128-dim vector.
-        fake_face = np.zeros((112, 112, 3), dtype=np.uint8)
-        emb = extract_embedding(fake_face)
-        assert emb is not None
-        assert len(emb) == 128
-
-
-class TestCosineSimilarity:
-    def test_identical_vectors_have_similarity_one(self):
-        v = np.ones(128, dtype=np.float32)
-        sim = cosine_similarity(v, v)
-        assert pytest.approx(sim, 0.001) == 1.0
-
-    def test_orthogonal_vectors_have_similarity_zero(self):
-        a = np.array([1.0] + [0.0] * 127, dtype=np.float32)
-        b = np.array([0.0, 1.0] + [0.0] * 126, dtype=np.float32)
-        sim = cosine_similarity(a, b)
-        assert pytest.approx(sim, 0.001) == 0.0
-
-    def test_opposite_vectors_have_similarity_minus_one(self):
-        a = np.ones(128, dtype=np.float32)
-        b = -np.ones(128, dtype=np.float32)
-        sim = cosine_similarity(a, b)
-        assert pytest.approx(sim, 0.001) == -1.0
-
-
-class TestApp:
-    def test_health_endpoint(self):
-        from fastapi.testclient import TestClient
-        client = TestClient(app)
+class TestHealthEndpoint:
+    def test_health_returns_ok_when_models_loaded(self, client):
         response = client.get("/health")
         assert response.status_code == 200
-        assert response.json()["status"] == "ok"
+        body = response.json()
+        assert body["status"] == "ok"
+        assert body["models"]["detector"] == "yunet"
+        assert body["models"]["recognizer"] == "sface"
 
-    def test_embed_invalid_image_returns_400(self):
+    def test_health_returns_503_when_models_missing(self, monkeypatch):
+        import main as face_main
+
+        def _raise():
+            raise RuntimeError("Detector model not found: /tmp/missing.onnx")
+
+        monkeypatch.setattr(face_main, "_ensure_models", _raise)
         from fastapi.testclient import TestClient
-        client = TestClient(app)
-        response = client.post("/embed", files={"image": ("test.jpg", b"not-an-image", "image/jpeg")})
+
+        client = TestClient(face_main.app)
+        response = client.get("/health")
+        assert response.status_code == 503
+        assert "Detector model not found" in response.json()["detail"]
+
+
+class TestEmbedEndpoint:
+    def test_embed_rejects_non_image_content_type(self, client):
+        response = client.post(
+            "/embed",
+            files={"image": ("blob.bin", b"\x00\x01\x02", "application/octet-stream")},
+        )
         assert response.status_code == 400
+        assert response.json()["error"] == "IMAGE_UNREADABLE"
 
-    def test_embed_valid_image_returns_128_embedding(self):
-        from fastapi.testclient import TestClient
-        client = TestClient(app)
-        image_bytes = create_test_image()
-        response = client.post("/embed", files={"image": ("test.jpg", image_bytes, "image/jpeg")})
-        # Blank image has no face — should return 422 or 200 with empty result
-        # depending on pipeline implementation; we just check it doesn't crash.
+    def test_embed_rejects_empty_body(self, client):
+        response = client.post(
+            "/embed",
+            files={"image": ("empty.png", b"", "image/png")},
+        )
+        # FastAPI/Starlette returns 400 on empty multipart file.
+        assert response.status_code in (400, 422)
+
+    def test_embed_returns_422_when_detector_finds_no_face(self, client):
+        # The stub detector returns (0, None) → NO_FACE
+        response = client.post(
+            "/embed",
+            files={"image": ("blank.png", _png_bytes(), "image/png")},
+        )
+        assert response.status_code == 422
+        body = response.json()
+        assert body["error"] == "NO_FACE"
+
+    def test_embed_endpoint_accepts_jpeg(self, client):
+        """Sanity: a JPEG upload reaches the detector (will then 422 NO_FACE
+        from the stub, but the request must not 400 IMAGE_UNREADABLE)."""
+        from PIL import Image
+
+        buf = io.BytesIO()
+        Image.new("RGB", (320, 240), (128, 128, 128)).save(buf, format="JPEG")
+        response = client.post(
+            "/embed",
+            files={"image": ("face.jpg", buf.getvalue(), "image/jpeg")},
+        )
         assert response.status_code in (200, 422)
+        assert response.status_code != 400
+
+
+class TestConfigurationEnvVars:
+    """The Dockerfile sets DETECTION_THRESHOLD and main.py must read it.
+
+    Regression: there was a period where main.py read DETECTOR_SCORE_THRESHOLD
+    for the detector and DETECTION_THRESHOLD for the quality gate, but the
+    Dockerfile only set DETECTION_THRESHOLD. This test pins both contracts.
+
+    These tests use regex checks against main.py source rather than importing
+    it, because importing main.py requires cv2 which is heavy and not always
+    available in CI. The contract we care about — env var names and defaults
+    appearing in the right places — is fully encoded in source.
+    """
+
+    def test_quality_threshold_reads_detection_threshold_env(self):
+        import re
+
+        from pathlib import Path
+
+        main_src = Path(__file__).parent.parent.joinpath("main.py").read_text()
+        # Must read DETECTION_THRESHOLD for QUALITY_THRESHOLD
+        assert re.search(
+            r"QUALITY_THRESHOLD\s*=\s*float\(os\.environ\.get\(\s*[\"']DETECTION_THRESHOLD[\"']",
+            main_src,
+        ), "main.py must read DETECTION_THRESHOLD into QUALITY_THRESHOLD"
+
+    def test_detector_score_threshold_has_own_env_var(self):
+        import re
+
+        from pathlib import Path
+
+        main_src = Path(__file__).parent.parent.joinpath("main.py").read_text()
+        # Must read DETECTOR_SCORE_THRESHOLD for the detector
+        assert re.search(
+            r"DETECTOR_SCORE_THRESHOLD\s*=\s*float\(os\.environ\.get\(\s*[\"']DETECTOR_SCORE_THRESHOLD[\"']",
+            main_src,
+        ), "main.py must read DETECTOR_SCORE_THRESHOLD"
+
+    def test_dockerfile_sets_both_env_vars(self):
+        import re
+
+        from pathlib import Path
+
+        dockerfile = (
+            Path(__file__).parent.parent.parent.joinpath("face-service/Dockerfile")
+            if (Path(__file__).parent.parent.parent.joinpath("face-service/Dockerfile").exists())
+            else Path(__file__).parent.parent.joinpath("Dockerfile")
+        )
+        # In a worktree, face-service/Dockerfile is alongside tests/.
+        candidates = [
+            Path(__file__).parent.parent.joinpath("Dockerfile"),
+        ]
+        repo_root_dockerfile = Path(__file__).parent.parent.parent.joinpath("Dockerfile")
+        if repo_root_dockerfile.exists():
+            candidates.append(repo_root_dockerfile)
+        chosen = next((c for c in candidates if c.exists()), None)
+        assert chosen is not None, "Could not locate face-service/Dockerfile"
+        df = chosen.read_text()
+        assert "ENV DETECTION_THRESHOLD" in df, "Dockerfile must set DETECTION_THRESHOLD"
+        assert "ENV DETECTOR_SCORE_THRESHOLD" in df, "Dockerfile must set DETECTOR_SCORE_THRESHOLD"
+
+    def test_defaults_when_no_env_set(self):
+        """Sanity check: source contains the documented defaults (0.85, 0.5)."""
+        from pathlib import Path
+
+        main_src = Path(__file__).parent.parent.joinpath("main.py").read_text()
+        assert '"0.85"' in main_src, "QUALITY_THRESHOLD default 0.85 must be present in source"
+        assert '"0.5"' in main_src, "DETECTOR_SCORE_THRESHOLD default 0.5 must be present in source"

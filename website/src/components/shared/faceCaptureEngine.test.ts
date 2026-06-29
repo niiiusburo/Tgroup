@@ -63,39 +63,48 @@ describe('faceCaptureEngine', () => {
     expect(result.ready).toBe(true);
   });
 
-  it('captures the full landscape frame for CompreFace instead of cropping the face area', async () => {
+  it('tight-crops the landscape frame to 60% of the smaller side so the face fills more of the image CompreFace/face-service receive', async () => {
+    // The full frame on a 1920x1080 front camera leaves the face at ~12% of
+    // the shipped image, below the ~20% NO_FACE threshold of both CompreFace
+    // and face-service. We crop to 60% of min(640, 480) = 288px centered.
+    // Then we downscale so the longest output side is 960px, keeping aspect.
     const video = createVideo();
 
     await captureVideoFrame(video);
 
+    // cropSide = round(480 * 0.6) = 288, sx = round((640 - 288)/2) = 176, sy = round((480 - 288)/2) = 96
+    // output side = 960 (scale = 960/288)
     expect(mockCanvasContext.drawImage).toHaveBeenLastCalledWith(
       video,
-      0,
-      0,
-      640,
-      480,
+      176,
+      96,
+      288,
+      288,
       0,
       0,
       960,
-      720,
+      960,
     );
     expect(HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(expect.any(Function), 'image/jpeg', 0.92);
   });
 
-  it('preserves the full portrait frame so iPhone framing is not center-cropped away', async () => {
+  it('tight-crops the portrait frame to 60% of the smaller side and downscales to a square', async () => {
+    // iPhone front camera is portrait. min(720, 1280) = 720, cropSide = 432,
+    // sx = round((720 - 432)/2) = 144, sy = round((1280 - 432)/2) = 424
+    // output side = 960 (scale = 960/432)
     const video = createPortraitVideo();
 
     await captureVideoFrame(video);
 
     expect(mockCanvasContext.drawImage).toHaveBeenLastCalledWith(
       video,
+      144,
+      424,
+      432,
+      432,
       0,
       0,
-      720,
-      1280,
-      0,
-      0,
-      540,
+      960,
       960,
     );
   });

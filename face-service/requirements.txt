@@ -4,3 +4,6 @@ python-multipart==0.0.17
 numpy==1.26.4
 opencv-contrib-python-headless==4.10.0.84
 Pillow==10.4.0
+# httpx is required by FastAPI's TestClient (used in tests/test_main.py).
+# FastAPI does not declare it as a runtime dep, so install it here.
+httpx==0.27.2

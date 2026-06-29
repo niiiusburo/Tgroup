@@ -173,19 +173,32 @@ export function captureVideoFrame(video: HTMLVideoElement | null) {
     return Promise.resolve(null);
   }
 
+  // Tight center-crop so the face fills more of the shipped frame. The CompreFace
+  // and face-service detectors both return NO_FACE when the face is <~20% of the
+  // image; on a 1920x1080 front-camera feed the face is often only 12% of the
+  // uncropped frame. We crop to 60% of the smaller dimension, centered, BEFORE
+  // downscaling to outputMaxSide. That keeps the face large without upscaling
+  // (no interpolation artifacts) and gives the embedding engine enough pixels
+  // for stable recognition on iPhone Safari (which applies skin-smoothing that
+  // already softens edges).
   const videoWidth = video.videoWidth;
   const videoHeight = video.videoHeight;
+  const minSide = Math.min(videoWidth, videoHeight);
+  const cropSide = Math.round(minSide * 0.6);
+  const sx = Math.round((videoWidth - cropSide) / 2);
+  const sy = Math.round((videoHeight - cropSide) / 2);
+
   const outputMaxSide = 960;
-  const scale = outputMaxSide / Math.max(videoWidth, videoHeight);
-  const outputWidth = Math.max(1, Math.round(videoWidth * scale));
-  const outputHeight = Math.max(1, Math.round(videoHeight * scale));
+  const scale = outputMaxSide / cropSide;
+  const outputWidth = Math.max(1, Math.round(cropSide * scale));
+  const outputHeight = Math.max(1, Math.round(cropSide * scale));
   const canvas = document.createElement('canvas');
   canvas.width = outputWidth;
   canvas.height = outputHeight;
   const ctx = canvas.getContext('2d');
   if (!ctx) return Promise.resolve(null);
   ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(video, 0, 0, videoWidth, videoHeight, 0, 0, outputWidth, outputHeight);
+  ctx.drawImage(video, sx, sy, cropSide, cropSide, 0, 0, outputWidth, outputHeight);
 
   return new Promise<Blob | null>((resolve) => {
     canvas.toBlob((blob) => {

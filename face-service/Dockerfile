@@ -19,7 +19,13 @@ RUN mkdir -p /app/models && \
         https://github.com/opencv/opencv_zoo/raw/main/models/face_recognition_sface/face_recognition_sface_2021dec.onnx
 
 ENV MODEL_DIR=/app/models
+# DETECTION_THRESHOLD is read by main.py as QUALITY_THRESHOLD (the bar above
+# which a detected face is accepted — i.e. LOW_QUALITY gate).
+# DETECTOR_SCORE_THRESHOLD is read separately as the YuNet raw score cutoff.
+# Setting both keeps the Dockerfile contract aligned with main.py; previously
+# only DETECTION_THRESHOLD was set, leaving the detector on the 0.5 default.
 ENV DETECTION_THRESHOLD=0.90
+ENV DETECTOR_SCORE_THRESHOLD=0.60
 ENV PYTHONUNBUFFERED=1
 
 EXPOSE 8000
