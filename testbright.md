@@ -32,8 +32,8 @@ Execution checklist:
 - [x] PASS: Backend permission regression covers investor auth locations staying empty - `cd api && JWT_SECRET=test-secret npx jest src/services/__tests__/permissionService.test.js tests/investorIdorScoping.test.js tests/investorScopeRoutePermissions.test.js --runInBand` passed 3 suites / 46 tests.
 - [x] PASS: Investor IDOR and route-permission tests still pass - `cd api && JWT_SECRET=test-secret npx jest tests/authInvestorLogin.test.js tests/readRoutePermissions.test.js tests/investorAdminMutationGuards.test.js src/routes/partners/__tests__/investorVisibility.test.js --runInBand` passed 4 suites / 33 tests.
 - [x] PASS: Build, Semgrep, and governance pass after docs/version updates - `npm --prefix website run build` passed for v0.32.49, Semgrep scanned `permissionService.js` and its test with 0 findings, and `npm run verify:governance` passed.
-- [ ] PENDING: Live NK2 `/api/Auth/me` returns investor staff-shell permissions, no wildcard, and `locations: []`.
-- [ ] PENDING: Live NK2 `/calendar` screenshot shows populated appointments for the investor.
+- [x] PASS: Live NK2 `/api/Auth/me` returns investor staff-shell permissions, no wildcard, and `locations: []` - deployed v0.32.49 / `a834e73`; authenticated investor probe returned group `investor`, 47 effective permissions, no `*`, `locations: []`, and 119 June 29 allowlisted appointments.
+- [x] PASS: Live NK2 `/calendar` screenshot shows populated appointments for the investor - Playwright loaded `https://nk2.2checkin.com/calendar`, the appointment request omitted `companyId`, returned 119 items, and the page showed `119 Lịch hẹn`; screenshot `output/playwright/nk2-investor-calendar-20260629/calendar-populated-v0.32.49.png`.
 
 ---
 
