@@ -7,6 +7,8 @@ import { useFaceRecognition } from '@/hooks/useFaceRecognition';
 import { fetchPartners, registerFace } from '@/lib/api';
 import type { ApiPartner } from '@/lib/api';
 
+const FACE_RECOGNITION_VERSION_LABEL = 'v0.32.51';
+
 /**
  * Global Face ID quick-search button.
  *
@@ -35,6 +37,14 @@ export function GlobalFaceIdButton() {
   const [registerError, setRegisterError] = useState<string | null>(null);
 
   const { recognizeState, recognize, reset } = useFaceRecognition();
+  const activeRecognitionVersion =
+    'recognitionVersion' in recognizeState && recognizeState.recognitionVersion
+      ? recognizeState.recognitionVersion.replace(/^face-recognition-/, 'v')
+      : FACE_RECOGNITION_VERSION_LABEL;
+  const quickScanLabel = t('face.quickScanWithVersion', {
+    version: FACE_RECOGNITION_VERSION_LABEL,
+    defaultValue: 'Quick Face ID {{version}}',
+  }) as string;
 
   const dismiss = useCallback(() => {
     setShowPopover(false);
@@ -119,30 +129,41 @@ export function GlobalFaceIdButton() {
 
   return (
     <div ref={containerRef} className="relative shrink-0">
-      <button
-        type="button"
-        title={t('face.quickScan', 'Quick Face ID') as string}
-        aria-label={t('face.quickScan', 'Quick Face ID') as string}
-        onClick={() => {
-          reset();
-          setShowPopover(false);
-          setCapturedImage(null);
-          setSearchQuery('');
-          setSearchResults([]);
-          setSelectedCustomer(null);
-          setRegisterError(null);
-          setShowCapture(true);
-        }}
-        className="relative w-10 h-10 flex items-center justify-center rounded-lg border border-orange-200 bg-orange-50 text-orange-600 shadow-sm hover:bg-orange-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-1 transition-colors duration-150"
-      >
-        <ScanFace className="w-5 h-5" />
-      </button>
+      <div className="flex items-center gap-1.5">
+        <button
+          type="button"
+          title={quickScanLabel}
+          aria-label={quickScanLabel}
+          onClick={() => {
+            reset();
+            setShowPopover(false);
+            setCapturedImage(null);
+            setSearchQuery('');
+            setSearchResults([]);
+            setSelectedCustomer(null);
+            setRegisterError(null);
+            setShowCapture(true);
+          }}
+          className="relative w-10 h-10 flex items-center justify-center rounded-lg border border-orange-200 bg-orange-50 text-orange-600 shadow-sm hover:bg-orange-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-1 transition-colors duration-150"
+        >
+          <ScanFace className="w-5 h-5" />
+        </button>
+        <span className="hidden xl:inline-flex flex-col leading-none text-[10px] font-semibold text-orange-600">
+          <span>{t('face.versionName', 'Face ID')}</span>
+          <span className="font-mono text-[10px] text-orange-500">
+            {FACE_RECOGNITION_VERSION_LABEL}
+          </span>
+        </span>
+      </div>
 
       {showPopover && (
         <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-gray-200 bg-white shadow-lg p-3 z-50">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-gray-700">
               {t('face.quickScan', 'Quick Face ID')}
+            </span>
+            <span className="ml-auto mr-2 rounded-full bg-orange-50 px-2 py-0.5 font-mono text-[10px] font-semibold text-orange-600">
+              {activeRecognitionVersion}
             </span>
             <button
               type="button"

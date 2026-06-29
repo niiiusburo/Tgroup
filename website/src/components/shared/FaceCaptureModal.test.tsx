@@ -299,10 +299,19 @@ describe('FaceCaptureModal', () => {
     });
   });
 
-  it('renders the camera preview with privacy blur', async () => {
+  it('keeps the camera preview privacy-blurred without blurring the captured video', async () => {
     render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
     await vi.waitFor(() => {
-      expect(document.querySelector('video')?.className).toContain('blur-[12px]');
+      // Blur must be on a SEPARATE backdrop-filter overlay, not on the <video>
+      // element itself. Putting `filter: blur()` on <video> can leak into the
+      // captured frame via canvas drawImage on some Chromium builds and was the
+      // proven root cause of NO_FACE rejections on iPhone Safari
+      // (fix/face-id-checkin-nk@1f2a06fe5).
+      const overlay = document.querySelector('[data-testid="face-modal-privacy-blur"]');
+      expect(overlay).toBeInTheDocument();
+      expect(overlay?.className ?? '').toContain('backdrop-blur-[3px]');
+      expect(overlay?.className ?? '').toContain('bg-gray-950/10');
+      expect(document.querySelector('video')?.className ?? '').not.toContain('blur-');
     });
   });
 

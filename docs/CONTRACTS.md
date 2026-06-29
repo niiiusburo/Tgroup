@@ -347,12 +347,15 @@ Optional DOB date parts (`birthday`, `birthmonth`, `birthyear`) normalize `""`, 
     phone: string | null;
     confidence: number;
   }>;
+  recognitionVersion: string; // e.g. "face-recognition-0.32.51"
 }
 ```
 
 Provider behavior:
 - `FACE_RECOGNITION_PROVIDER=local` sends captures to `FACE_SERVICE_URL` for SFace embeddings and stores vectors in `dbo.customer_face_embeddings`.
 - `FACE_RECOGNITION_PROVIDER=compreface` sends captures to CompreFace, uses `partners.id` as the CompreFace subject, and keeps `partners.face_subject_id` / `face_registered_at` as TGClinic status.
+- Staff recognition responses include `recognitionVersion` so NK2 operators can confirm the active Face ID recognizer from the header UI without changing samples or thresholds.
+- Staff/public camera privacy blur is a visual overlay only; detection and capture must analyze/draw from the unblurred `video` element.
 
 Face error responses:
 ```ts
@@ -379,6 +382,7 @@ Face error responses:
 Privacy/security contract:
 - Recognize-only; never registers or re-registers faces.
 - Returns only a minimal greeting on match and never returns `partnerId`, phone, customer code, confidence score, or candidate identities.
+- The public preview may be lightly privacy-blurred, but the uploaded image must come from the unblurred camera frame.
 - The server may write hidden diagnostic records for tuning/debugging, but those records are not part of the API response and must not include raw images, raw embeddings, names, phone numbers, customer codes, or raw partner IDs.
 - Rate-limited per source IP.
 - Reuses the configured Face ID provider. In CompreFace mode, subjects still map to `partners.id`.

@@ -66,6 +66,7 @@ const { findMatches, registerSample, replaceAllSamples, getFaceStatus } = requir
 const comprefaceFaceProvider = require('../src/services/comprefaceFaceProvider');
 const { recordFaceDiagnostic } = require('../src/services/faceDiagnostics');
 const { query } = require('../src/db');
+const FACE_RECOGNITION_VERSION = 'face-recognition-0.32.51';
 
 afterEach(() => {
   delete process.env.FACE_RECOGNITION_PROVIDER;
@@ -117,6 +118,7 @@ describe('POST /api/face/recognize', () => {
     expect(res.body.match.partnerId).toBe('p-1');
     expect(res.body.match.name).toBe('Alice');
     expect(res.body.candidates).toEqual([]);
+    expect(res.body.recognitionVersion).toBe(FACE_RECOGNITION_VERSION);
     expect(res.body.privateDiagnostics).toBeUndefined();
     expect(recordFaceDiagnostic).toHaveBeenCalledWith(expect.objectContaining({
       flow: 'staff_recognize',
@@ -156,6 +158,7 @@ describe('POST /api/face/recognize', () => {
     expect(res.body.match).toBeNull();
     expect(res.body.candidates).toHaveLength(1);
     expect(res.body.candidates[0].partnerId).toBe('p-1');
+    expect(res.body.recognitionVersion).toBe(FACE_RECOGNITION_VERSION);
     expect(res.body.privateDiagnostics).toBeUndefined();
   });
 
@@ -175,6 +178,7 @@ describe('POST /api/face/recognize', () => {
     expect(res.status).toBe(200);
     expect(res.body.match).toBeNull();
     expect(res.body.candidates).toEqual([]);
+    expect(res.body.recognitionVersion).toBe(FACE_RECOGNITION_VERSION);
   });
 
   it('returns 422 when face engine reports no face', async () => {
@@ -300,6 +304,7 @@ describe('POST /api/face/recognize', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.match.partnerId).toBe('p-2');
+    expect(res.body.recognitionVersion).toBe(FACE_RECOGNITION_VERSION);
     expect(res.body.privateDiagnostics).toBeUndefined();
     expect(comprefaceFaceProvider.recognizeFace).toHaveBeenCalledWith(
       expect.any(Buffer),
@@ -342,6 +347,7 @@ describe('POST /api/face/recognize', () => {
     expect(res.body.candidates).toEqual([
       expect.objectContaining({ partnerId: 'p-1', name: 'Alice' }),
     ]);
+    expect(res.body.recognitionVersion).toBe(FACE_RECOGNITION_VERSION);
     expect(recordFaceDiagnostic).toHaveBeenCalledWith(expect.objectContaining({
       privateDiagnostics: expect.objectContaining({
         investorScopeFiltered: true,

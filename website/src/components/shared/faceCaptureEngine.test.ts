@@ -63,6 +63,19 @@ describe('faceCaptureEngine', () => {
     expect(result.ready).toBe(true);
   });
 
+  it('analyzes the raw video element so overlay blur cannot affect face detection', async () => {
+    const video = createVideo();
+    const detector = {
+      detect: vi.fn().mockResolvedValue([{ boundingBox: { width: 220, height: 260 } }]),
+    };
+
+    const result = await analyzeFrame(video, detector as unknown as FaceDetector, true);
+
+    expect(detector.detect).toHaveBeenCalledWith(video);
+    expect(mockCanvasContext.drawImage).toHaveBeenLastCalledWith(video, 0, 0, 96, 128);
+    expect(result.ready).toBe(true);
+  });
+
   it('captures the full landscape frame for CompreFace instead of cropping the face area', async () => {
     const video = createVideo();
 

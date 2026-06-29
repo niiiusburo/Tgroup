@@ -1,5 +1,22 @@
 [
   {
+    "version": "0.32.51",
+    "date": "2026-06-29",
+    "commit": "pending",
+    "highlights": "NK2 Face ID shows recognizer version 0.32.51 and uses a lighter privacy preview without blurring detection/capture.",
+    "sections": [
+      {
+        "title": "Face ID",
+        "items": [
+          "Header Face ID shows v0.32.51 next to the scan control and in the result popover.",
+          "POST /api/face/recognize now returns recognitionVersion: face-recognition-0.32.51.",
+          "Staff and public camera previews use a light 3px overlay blur, and detection/capture still read the raw camera frame.",
+          "This is metadata-only and does not rewrite existing face samples or change registration paths."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.48",
     "date": "2026-06-27",
     "commit": "pending",
