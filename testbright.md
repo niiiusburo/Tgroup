@@ -10,6 +10,42 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK2 Face ID Popup Version And Strict Matching 2026-06-29
+
+Feature/edit name: NK2 Face ID camera-popup version badge plus stricter recognition policy (v0.32.53)
+
+Changed URLs / API routes / data flow:
+- URL: `https://nk2.2checkin.com/customers` and any staff-shell route with the shared header Face ID button.
+- API: `POST /api/face/recognize`
+- Config: `FACE_AUTO_MATCH_THRESHOLD`, `FACE_CANDIDATE_THRESHOLD`, `FACE_AUTO_MATCH_MARGIN`
+- Data flow: staff header Face ID button -> `FaceCaptureModal` orange camera banner -> `/api/face/recognize` -> result popover. Existing face samples are not rewritten.
+
+Affected roles and data flows:
+- Staff/admin users see `v0.32.53` inside the camera popup's orange banner, not only beside the header icon.
+- Staff/admin users no longer choose from ambiguous candidate buttons in the header popup; candidate-only results become a clearer-scan/rescan-only state.
+- Face ID recognition is stricter by default: auto-match `0.92`, candidate `0.84`, top-vs-second margin `0.05`.
+- NK2 live uses CompreFace, so the CompreFace provider and compose/env defaults must carry the strict policy.
+- NK/NK3 are out of scope and must remain unchanged.
+
+Expected behavior:
+
+| Visit / action | Expected result |
+|---|---|
+| Staff opens the header Face ID camera popup | Orange banner shows `v0.32.53`. |
+| `/api/face/recognize` returns candidate-only result | Header popover says "Face ID needs a clearer scan", hides candidate identity buttons, and offers Scan again. |
+| Close two-person match under the stricter margin | No automatic customer open unless top score is at least `0.92` and beats second by at least `0.05`. |
+| Existing registered faces | Stored samples/CompreFace examples remain unchanged; only recognition decisions change. |
+| NK live/NK3 checked after NK2 deploy | Their versions and containers remain unchanged. |
+
+Execution checklist:
+- [x] PASS: Focused frontend tests prove camera banner version and rescan-only ambiguous state - `cd website && npx vitest run src/components/shared/FaceCaptureModal.test.tsx src/components/shared/GlobalFaceIdButton.test.tsx src/hooks/__tests__/useFaceRecognition.test.ts src/lib/api/__tests__/faceRecognition.test.ts` passed 4 files / 62 tests, and local Playwright screenshots captured the orange-banner `v0.32.53` plus the rescan-only ambiguous state with no hidden-candidate name leak.
+- [x] PASS: Focused API/provider tests prove version metadata and strict threshold policy - `cd api && JWT_SECRET=test-secret npx jest tests/faceRecognition.test.js src/services/__tests__/faceMatchEngine.test.js src/services/__tests__/comprefaceFaceProvider.test.js src/services/__tests__/faceDiagnostics.test.js --runInBand` passed 4 suites / 91 tests; config validation passed 2 suites / 28 tests.
+- [x] PASS: Website build/lint, Semgrep, and governance pass - `npm --prefix website run build`, `npm --prefix website run lint`, scoped Semgrep over changed Face ID runtime surfaces, and `npm run verify:governance` passed.
+- [ ] PENDING: Live NK2 proof shows `0.32.53`, healthy CompreFace, orange banner version, and strict env values inside the API container.
+- [ ] PENDING: NK production/NK3 non-touch proof captured after deploy.
+
+---
+
 # TestSprite Plan: NK2 Investor Visible-Client Scope Hardening 2026-06-29
 
 Feature/edit name: NK2 investor staff-shell visible-client scope hardening (v0.32.52)

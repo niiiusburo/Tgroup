@@ -319,11 +319,15 @@ sequenceDiagram
     else No match
         API-->>FE: 200 { match: null, candidates: [] }
         FE-->>P: "Không nhận diện được" + manual search
+    else Candidate-only / ambiguous
+        API-->>FE: 200 { match: null, candidates: [...] }
+        FE-->>P: Public kiosk stays privacy-minimized; staff-header variant shows "Face ID needs a clearer scan" and hides candidate identities
     end
 ```
 
 **Data state transitions:** None (read-only recognition).
 **Invariants:** INV-005 (local 128-dim embedding), INV-014 (optional Face ID provider).
+**Strict policy:** Default auto-match threshold is `0.92`, candidate threshold is `0.84`, and top-vs-second margin is `0.05`; stricter recognition changes decisions only, not stored samples.
 **Failure modes:**
 - Provider cannot detect a face → API returns `NO_FACE`; frontend keeps camera open until manual close.
 - Configured Face ID provider down → fallback to manual check-in (UC-008).

@@ -76,7 +76,8 @@ ui_invariants:
   - CompreFace status must verify actual provider examples; stale `face_subject_id` without CompreFace examples is not a registered face.
   - Public `/checkin` must expose camera flip and a light privacy-softened preview control without returning or displaying customer identifiers beyond the allowed greeting; the blur must not touch detection/capture pixels.
   - Hidden Face ID diagnostics may record hashed candidate identifiers and score margins for tuning, but must not include names, phone numbers, customer codes, raw partner IDs, raw embeddings, raw images, or tokens.
-  - Staff header Face ID displays the active NK2 recognition version (`v0.32.51`) and `/api/face/recognize` includes `recognitionVersion` metadata without rewriting existing face samples.
+  - Staff header Face ID displays the active NK2 recognition version (`v0.32.53`), the camera popup orange banner shows the same version, and `/api/face/recognize` includes `recognitionVersion` metadata without rewriting existing face samples.
+  - Staff header Face ID candidate-only results are treated as rescan-only: show "Face ID needs a clearer scan", hide candidate identity buttons, and keep strict defaults at auto-match `0.92`, candidate `0.84`, margin `0.05`.
   - Customer profile assignment card and edit form must display the sales employee from `partners.salestaffid` / `salestaffname`, not the customer's `jobtitle` or other personal-detail fields.
   - Customer edit forms must resolve saved employee assignment IDs against all employees, including inactive migrated employees; active-only lists are for new selection defaults, not selected-value hydration.
   - Employee assignment suggestions in customer forms must hide inactive employees so TDental duplicate staff records do not appear as selectable options.

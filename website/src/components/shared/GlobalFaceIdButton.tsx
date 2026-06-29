@@ -7,7 +7,7 @@ import { useFaceRecognition } from '@/hooks/useFaceRecognition';
 import { fetchPartners, registerFace } from '@/lib/api';
 import type { ApiPartner } from '@/lib/api';
 
-const FACE_RECOGNITION_VERSION_LABEL = 'v0.32.51';
+const FACE_RECOGNITION_VERSION_LABEL = 'v0.32.53';
 
 /**
  * Global Face ID quick-search button.
@@ -15,7 +15,7 @@ const FACE_RECOGNITION_VERSION_LABEL = 'v0.32.51';
  * Lives in the top header on every page (next to the location filter).
  * Click → opens FaceCaptureModal → captures face → POST /api/face/recognize.
  * - Match: navigate to /customers/:id
- * - Candidates: list options in a popover, each navigates to that customer
+ * - Candidates: require a clearer scan instead of exposing identity choices
  * - No match: brief popover, then dismiss
  */
 export function GlobalFaceIdButton() {
@@ -46,16 +46,27 @@ export function GlobalFaceIdButton() {
     defaultValue: 'Quick Face ID {{version}}',
   }) as string;
 
-  const dismiss = useCallback(() => {
-    setShowPopover(false);
+  const clearCaptureState = useCallback(() => {
     setCapturedImage(null);
     setSearchQuery('');
     setSearchResults([]);
     setSelectedCustomer(null);
-    setRegistering(false);
     setRegisterError(null);
+  }, []);
+
+  const dismiss = useCallback(() => {
+    setShowPopover(false);
+    clearCaptureState();
+    setRegistering(false);
     reset();
-  }, [reset]);
+  }, [clearCaptureState, reset]);
+
+  const startCapture = useCallback(() => {
+    reset();
+    setShowPopover(false);
+    clearCaptureState();
+    setShowCapture(true);
+  }, [clearCaptureState, reset]);
 
   const handleCapture = useCallback(
     async (image: Blob) => {
@@ -83,11 +94,6 @@ export function GlobalFaceIdButton() {
     document.addEventListener('mousedown', onDocClick);
     return () => document.removeEventListener('mousedown', onDocClick);
   }, [showPopover, dismiss]);
-
-  const handlePickCandidate = (partnerId: string) => {
-    navigate(`/customers/${partnerId}`);
-    dismiss();
-  };
 
   const handleSearchCustomers = useCallback((query: string) => {
     setSearchQuery(query);
@@ -134,16 +140,7 @@ export function GlobalFaceIdButton() {
           type="button"
           title={quickScanLabel}
           aria-label={quickScanLabel}
-          onClick={() => {
-            reset();
-            setShowPopover(false);
-            setCapturedImage(null);
-            setSearchQuery('');
-            setSearchResults([]);
-            setSelectedCustomer(null);
-            setRegisterError(null);
-            setShowCapture(true);
-          }}
+          onClick={startCapture}
           className="relative w-10 h-10 flex items-center justify-center rounded-lg border border-orange-200 bg-orange-50 text-orange-600 shadow-sm hover:bg-orange-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-1 transition-colors duration-150"
         >
           <ScanFace className="w-5 h-5" />
@@ -196,31 +193,29 @@ export function GlobalFaceIdButton() {
           )}
 
           {recognizeState.status === 'candidates' && (
-            <div className="space-y-1.5">
-              <p className="text-[11px] text-gray-500">
-                {t('face.possibleMatches', 'Possible matches')}
-              </p>
-              <div className="max-h-56 overflow-y-auto space-y-1">
-                {recognizeState.candidates.map((c) => (
-                  <button
-                    key={c.partnerId}
-                    type="button"
-                    onClick={() => handlePickCandidate(c.partnerId)}
-                    className="w-full flex items-center justify-between gap-2 px-2.5 py-2 text-left text-sm rounded-lg border border-gray-200 hover:bg-gray-50"
-                  >
-                    <div className="flex flex-col min-w-0">
-                      <span className="font-medium text-gray-800 truncate">{c.name}</span>
-                      <span className="text-[11px] text-gray-500 truncate">
-                        {c.code}
-                        {c.phone ? ` · ${c.phone}` : ''}
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-semibold text-orange-500">
-                      {(c.confidence * 100).toFixed(0)}%
-                    </span>
-                  </button>
-                ))}
+            <div className="space-y-2">
+              <div className="rounded-xl border border-orange-100 bg-orange-50 px-3 py-2">
+                <div className="flex items-center gap-2 text-sm font-semibold text-orange-700">
+                  <ScanFace className="h-4 w-4" />
+                  <span>{t('face.clearerScan', 'Face ID needs a clearer scan')}</span>
+                </div>
+                <p className="mt-1 text-[11px] leading-snug text-orange-700/80">
+                  {t('face.clearerScanHint', 'The scan is close to more than one customer. Scan again instead of choosing a candidate.')}
+                </p>
               </div>
+              <p className="text-[11px] text-gray-500">
+                {t('face.possibleMatchesHidden', {
+                  count: recognizeState.candidates.length,
+                  defaultValue: '{{count}} possible matches hidden for safety',
+                })}
+              </p>
+              <button
+                type="button"
+                onClick={startCapture}
+                className="w-full rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-primary-dark"
+              >
+                {t('face.scanAgain', 'Scan again')}
+              </button>
             </div>
           )}
 
@@ -307,6 +302,7 @@ export function GlobalFaceIdButton() {
       <FaceCaptureModal
         isOpen={showCapture}
         title={t('face.quickScan', 'Quick Face ID') as string}
+        versionLabel={FACE_RECOGNITION_VERSION_LABEL}
         onCapture={handleCapture}
         onCancel={() => {
           setShowCapture(false);

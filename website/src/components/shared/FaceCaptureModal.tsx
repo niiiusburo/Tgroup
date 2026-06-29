@@ -6,6 +6,7 @@ import { useFaceCaptureController } from './useFaceCaptureController';
 interface FaceCaptureModalProps {
   readonly isOpen: boolean;
   readonly title?: string;
+  readonly versionLabel?: string;
   readonly captureMode?: FaceCaptureMode;
   readonly onCapture: (image: Blob, images?: readonly Blob[]) => void | Promise<void>;
   readonly onCancel: () => void;
@@ -14,6 +15,7 @@ interface FaceCaptureModalProps {
 export function FaceCaptureModal({
   isOpen,
   title,
+  versionLabel,
   captureMode = 'single',
   onCapture,
   onCancel
@@ -68,12 +70,19 @@ export function FaceCaptureModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
       <div className="absolute inset-0 bg-black/60" onClick={onCancel} />
       <div className="relative z-10 w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden max-h-[calc(100dvh-1.5rem)]">
-        <div className="px-4 py-2.5 bg-primary flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-white leading-snug">{resolvedTitle}</h3>
+        <div className="px-4 py-2.5 bg-primary flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="truncate text-sm font-semibold text-white leading-snug">{resolvedTitle}</h3>
+            {versionLabel && (
+              <span className="mt-1 inline-flex rounded-full bg-white/20 px-2 py-0.5 font-mono text-[10px] font-semibold leading-none text-white ring-1 ring-white/25">
+                {versionLabel}
+              </span>
+            )}
+          </div>
           <button
             type="button"
             onClick={onCancel}
-            className="w-10 h-10 flex items-center justify-center rounded-lg bg-white/20 hover:bg-white/30 text-white transition-colors"
+            className="w-10 h-10 shrink-0 flex items-center justify-center rounded-lg bg-white/20 hover:bg-white/30 text-white transition-colors"
             aria-label={t('close', 'Close')}>
             <X className="w-4 h-4" />
           </button>

@@ -2,17 +2,16 @@
 
 const { query, pool } = require("../db");
 
-// Thresholds (environment-configurable). Defaults retuned 2026-05-16:
-//   - AUTO_MATCH_THRESHOLD lowered 0.95 → 0.88: 0.95 rejected legitimate
-//     same-person re-captures (typically 0.88-0.94 under different lighting/pose),
-//     forcing operators to manually re-enroll and creating duplicate customers.
-//   - AUTO_MATCH_MARGIN lowered 0.05 → 0.03: with multi-pose enrollment,
-//     two real candidates rarely cluster within 0.03.
+// Thresholds (environment-configurable). Defaults tightened 2026-06-29:
+//   - AUTO_MATCH_THRESHOLD 0.92: close scans below this become candidate/no-match
+//     instead of automatically opening a customer.
+//   - AUTO_MATCH_MARGIN 0.05: the best customer must clearly beat the runner-up.
+//   - CANDIDATE_THRESHOLD 0.84: weaker plausible hits are treated as rescan-only.
 //   - MIN_QUALITY added: low-quality samples poison the embedding pool and
 //     prevent future matches against that customer.
-const AUTO_MATCH_THRESHOLD = parseFloat(process.env.FACE_AUTO_MATCH_THRESHOLD || "0.88");
-const CANDIDATE_THRESHOLD = parseFloat(process.env.FACE_CANDIDATE_THRESHOLD || "0.80");
-const AUTO_MATCH_MARGIN = parseFloat(process.env.FACE_AUTO_MATCH_MARGIN || "0.03");
+const AUTO_MATCH_THRESHOLD = parseFloat(process.env.FACE_AUTO_MATCH_THRESHOLD || "0.92");
+const CANDIDATE_THRESHOLD = parseFloat(process.env.FACE_CANDIDATE_THRESHOLD || "0.84");
+const AUTO_MATCH_MARGIN = parseFloat(process.env.FACE_AUTO_MATCH_MARGIN || "0.05");
 const MAX_CANDIDATES = parseInt(process.env.FACE_MAX_CANDIDATES || "3", 10);
 const MIN_QUALITY = parseFloat(process.env.FACE_MIN_QUALITY || "0.55");
 

@@ -14,6 +14,13 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.53] — 2026-06-29
+### Changed
+- **NK2 Face ID camera banner and stricter recognition policy:** The staff Face ID camera popup now shows `v0.32.53` in the orange header, `POST /api/face/recognize` returns `recognitionVersion: "face-recognition-0.32.53"`, staff header candidate-only results are rescan-only with no candidate identity buttons, and default recognition policy is stricter at auto-match `0.92`, candidate `0.84`, margin `0.05`. Existing face samples are unchanged. — @agent — UC-007 / WF-007 stricter Face ID decisioning.
+
+### Tested
+- Face ID local verification passed: `cd website && npx vitest run src/components/shared/FaceCaptureModal.test.tsx src/components/shared/GlobalFaceIdButton.test.tsx src/hooks/__tests__/useFaceRecognition.test.ts src/lib/api/__tests__/faceRecognition.test.ts` passed 4 files / 62 tests; `cd api && JWT_SECRET=test-secret npx jest tests/faceRecognition.test.js src/services/__tests__/faceMatchEngine.test.js src/services/__tests__/comprefaceFaceProvider.test.js src/services/__tests__/faceDiagnostics.test.js --runInBand` passed 4 suites / 91 tests; `cd api && JWT_SECRET=test-secret npx jest tests/envExampleValidation.test.js tests/dockerComposeValidation.test.js --runInBand` passed 2 suites / 28 tests; `npm --prefix website run build`, `npm --prefix website run lint`, scoped Semgrep, and `npm run verify:governance` passed; local Playwright proof captured the orange-banner `v0.32.53` and rescan-only ambiguous state with no hidden-candidate name leak. Live NK2 proof follows deploy. — @agent
+
 ## [0.32.52] — 2026-06-29
 ### Security
 - **Investor staff-shell data filters now cover payment legacy fallback and cash-flow branch filters:** `GET /api/Payments?customerId=...` skips the legacy `accountpayments` fallback unless the requested customer is in the investor's `dbo.investor_clients` allowlist, and `/api/Reports/cash-flow/summary` lets investors use branch filters while still applying the checked-customer allowlist. — @agent — preserves INV-021 / UC-022.

@@ -1,5 +1,22 @@
 [
   {
+    "version": "0.32.53",
+    "date": "2026-06-29",
+    "commit": "pending",
+    "highlights": "NK2 Face ID shows v0.32.53 inside the orange camera banner and uses stricter match thresholds.",
+    "sections": [
+      {
+        "title": "Face ID",
+        "items": [
+          "The staff Face ID camera popup now shows v0.32.53 in the orange header banner.",
+          "Staff header ambiguous/candidate results now show a clearer-scan state with no candidate identity buttons.",
+          "Default match policy is stricter: auto-match 0.92, candidate 0.84, and top-vs-second margin 0.05.",
+          "Existing face samples are unchanged; this only changes recognition decisions and visible version metadata."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.52",
     "date": "2026-06-29",
     "commit": "pending",
