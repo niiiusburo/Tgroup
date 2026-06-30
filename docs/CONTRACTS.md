@@ -466,7 +466,7 @@ For `investor` callers, report date and `companyId` filters compose with the `db
 ### 1.9 Exports
 
 Operational exports are registry-driven (`api/src/services/exports/exportRegistry.js`), require a valid JWT, and filter visible/exportable types by the current employee's effective permissions.
-Report exports used by `/reports/revenue` (`report-sales-employees`, `revenue-flat`, `deposit-flat`) enforce the same employee location-scope contract as `/api/Reports`: `companyId: "all"` or omitted resolves to allowed company IDs for scoped employees, and unauthorized explicit branch filters return 403 with `EXPORT_LOCATION_DENIED`.
+All operational Excel export builders enforce the same backend employee location-scope contract as `/api/Reports`: `companyId: "all"` or omitted resolves to allowed company IDs for scoped employees, and unauthorized explicit branch filters return 403 with `EXPORT_LOCATION_DENIED`. Customer-linked export builders also compose investor scope with `dbo.investor_clients` before preview counts or workbook rows are built.
 
 #### GET /api/Exports/types
 **Response 200:**
@@ -501,7 +501,7 @@ Array<{
 #### POST /api/Exports/:type/download
 **Body:** Same `{ filters }` wrapper as preview.
 **Response 200:** `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` stream with `Content-Disposition` filename.
-**Errors:** 400 unknown type or row-limit exceeded, 403 missing registry permission, 500 internal error.
+**Errors:** 400 unknown type or row-limit exceeded, 403 missing registry permission or out-of-scope branch filter, 500 internal error.
 **Timeout Requirement:** Nginx proxy read timeout >=300s (INV-019).
 
 Supported registry types:

@@ -134,16 +134,18 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 | `src/routes/reports/__tests__/cashFlow.test.js` | Reports/Payments | UC-013/WF-013: `CON-Reports-CashFlowSummary`; cash-flow aggregation rules for service collections, deposits, refunds, deposit usage, voided rows, timezone-safe date buckets, route mounting, and scoped location rejection |
 | `src/routes/reports/__tests__/revenueRecognition.test.js` | Reports/Payments | UC-013/WF-013: `CON-Reports-RevenueSummary` plus trend/doctor/category revenue; posted service payment allocations, deposit exclusion, allocation proration, and payment-date recognition |
 | `src/routes/reports/__tests__/servicesBreakdown.test.js` | Reports/Services | UC-013/WF-013: `CON-Reports-ServicesBreakdown`; category/source revenue from posted payment allocations instead of listed service prices or raw order totals |
+| `src/routes/reports/__tests__/locationScope.test.js` | Reports/Auth | UC-013/WF-013: all `/api/Reports/*` endpoints reject out-of-scope `companyId`, narrow all-location staff requests to allowed locations, filter investor customer-linked aggregates by `dbo.investor_clients`, and fail closed for employee-only reports without location scope |
 | `src/services/reports/__tests__/canonicalRevenue.test.js` | Reports/Exports | UC-013/WF-013: canonical revenue SQL mirrors the Excel `revenue-flat` export WHERE/JOIN topology, allocation capping expression, saleorder attribution, and payment-date bucketing |
 | `src/services/exports/__tests__/legacyFlatReportsExport.test.js` | Reports/Exports | UC-013/WF-005: `revenue-flat` and `deposit-flat` registry, workbook templates, SO-code column mapping, posted service-payment filters, allocation proration SQL, deposit top-up filtering, and row-limit error |
 | `src/services/exports/__tests__/reportSalesEmployeesExport.test.js` | Reports/Exports | UC-019/WF-005: `report-sales-employees` preview/download filters, location scope, employee-type SQL attribution, grouped workbook rows, and out-of-scope location rejection |
+| `src/services/exports/__tests__/exportScope.test.js` | Reports/Exports/Auth | UC-013/WF-005: customers, appointments, payments, services, service catalog, revenue-flat, deposit-flat, and report-sales-employees builders enforce backend location scope, reject out-of-scope `companyId`, and apply investor checked-customer filters |
 
 ## Coverage Gaps
 
 | Domain | Missing Test Coverage |
 |--------|----------------------|
 | **Payments (backend)** | No backend tests for payment allocation, void, refund, or deposit logic |
-| **Exports (backend)** | `legacyFlatReportsExport` and `reportSalesEmployeesExport` have focused builder coverage; route-level gaps remain for `POST /api/Exports/:type/preview`, `POST /api/Exports/:type/download`, permission filtering, row-limit HTTP responses, and `exports_audit` failure behavior |
+| **Exports (backend)** | Builder tests now cover shared backend location/investor scope across all operational export builders; route-level gaps remain for `POST /api/Exports/:type/preview`, `POST /api/Exports/:type/download`, permission filtering, row-limit HTTP responses, and `exports_audit` failure behavior |
 | **Auth (backend)** | No backend tests for `requirePermission` or `resolvePermissions` divergence |
 | **Appointments (backend)** | Calendar list optimization is covered; no backend tests for appointment create/update/delete validation |
 | **Reports** | Current revenue recognition, cash-flow classification, services breakdown, and canonical revenue SQL have targeted tests; missing full reconciliation against legacy Odoo/TDental audit exports |

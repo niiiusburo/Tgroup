@@ -5,11 +5,13 @@ jest.mock('../../../db', () => ({
 }));
 
 jest.mock('../../permissionService', () => ({
+  isInvestorGroup: jest.fn((name) => String(name || '').trim().toLowerCase() === 'investor'),
   resolveEffectivePermissions: jest.fn(),
+  resolveInvestorScope: jest.fn(),
 }));
 
 const { query } = require('../../../db');
-const { resolveEffectivePermissions } = require('../../permissionService');
+const { resolveEffectivePermissions, resolveInvestorScope } = require('../../permissionService');
 
 const reportSalesEmployeesExport = require('../builders/reportSalesEmployeesExport');
 
@@ -20,6 +22,7 @@ const ADMIN_USER = {
 const LOC_A = '11111111-1111-4111-8111-111111111111';
 const LOC_B = '22222222-2222-4222-8222-222222222222';
 const EMPLOYEE_ID = '33333333-3333-4333-8333-333333333333';
+const CLIENT_A = '44444444-4444-4444-8444-444444444444';
 
 const rows = [
   {
@@ -63,6 +66,7 @@ beforeEach(() => {
     effectivePermissions: ['reports.view', 'reports.export'],
     locations: [{ id: LOC_A, name: 'Tấm Dentist Thủ Đức' }],
   });
+  resolveInvestorScope.mockResolvedValue({ isInvestor: false, allowedCustomerIds: [] });
 });
 
 describe('reportSalesEmployeesExport', () => {
@@ -147,5 +151,28 @@ describe('reportSalesEmployeesExport', () => {
       code: 'EXPORT_LOCATION_DENIED',
     });
     expect(query).not.toHaveBeenCalled();
+  });
+
+  it('narrows investor employee-revenue export rows to checked clients', async () => {
+    resolveEffectivePermissions.mockResolvedValue({
+      groupName: 'investor',
+      effectivePermissions: ['reports.export'],
+      locations: [],
+    });
+    resolveInvestorScope.mockResolvedValue({
+      isInvestor: true,
+      allowedCustomerIds: [CLIENT_A],
+    });
+    query.mockResolvedValueOnce(rows);
+
+    await reportSalesEmployeesExport.preview({
+      employeeType: 'doctor',
+      dateFrom: '2026-05-01',
+      dateTo: '2026-05-31',
+    }, ADMIN_USER);
+
+    const [sql, params] = query.mock.calls[0];
+    expect(sql).toContain('COALESCE(p.customer_id, so.partnerid) = ANY($3::uuid[])');
+    expect(params).toEqual(['2026-05-01', '2026-05-31', [CLIENT_A], 'Bác sĩ']);
   });
 });

@@ -6,9 +6,15 @@ jest.mock('../../../middleware/auth', () => ({
   requirePermission: () => (_req, _res, next) => next(),
 }));
 
+jest.mock('../../../services/permissionService', () => ({
+  resolveEffectivePermissions: jest.fn(),
+  resolveInvestorScope: jest.fn(),
+}));
+
 const express = require('express');
 const request = require('supertest');
 const { query } = require('../../../db');
+const { resolveEffectivePermissions, resolveInvestorScope } = require('../../../services/permissionService');
 const servicesBreakdownRouter = require('../servicesBreakdown');
 
 function makeApp() {
@@ -21,6 +27,12 @@ function makeApp() {
 describe('reports services breakdown revenue recognition', () => {
   beforeEach(() => {
     query.mockReset();
+    resolveEffectivePermissions.mockResolvedValue({
+      groupName: 'Admin',
+      effectivePermissions: ['reports.view'],
+      locations: [],
+    });
+    resolveInvestorScope.mockResolvedValue({ isInvestor: false, allowedCustomerIds: [] });
   });
 
   it('uses posted payment allocations for category and source revenue', async () => {

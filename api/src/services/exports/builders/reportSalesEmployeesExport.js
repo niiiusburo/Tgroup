@@ -1,7 +1,7 @@
 'use strict';
 
 const { query } = require('../../../db');
-const { resolveCompanyScopeForUser } = require('../../reportLocationScope');
+const { resolveReportExportScope } = require('./reportExportScope');
 const { createWorkbook, populateSummarySheet, toVNDate } = require('../exportWorkbook');
 const { SERVICE_REVENUE_PAYMENT_CONDITION } = require('../../../routes/reports/revenueRecognition');
 
@@ -76,18 +76,6 @@ function resolveEmployeeType(type) {
   return EMPLOYEE_TYPES[type] || EMPLOYEE_TYPES.doctor;
 }
 
-async function resolveCompanyScope(user, companyId) {
-  const requestedCompanyId = normalizeId(companyId);
-  assertUuid(requestedCompanyId, 'Chi nhánh');
-  return resolveCompanyScopeForUser(user, requestedCompanyId, {
-    deniedMessage: 'Bạn không có quyền xuất dữ liệu cho chi nhánh này.',
-    deniedCode: 'EXPORT_LOCATION_DENIED',
-    scopeRequiredMessage: 'Tài khoản chưa có phạm vi chi nhánh để xuất báo cáo.',
-    scopeRequiredCode: 'EXPORT_LOCATION_SCOPE_REQUIRED',
-    requireAssignedLocation: true,
-  });
-}
-
 function buildWhere(filters, scope, employeeType) {
   const conditions = [
     SERVICE_REVENUE_PAYMENT_CONDITION,
@@ -115,6 +103,12 @@ function buildWhere(filters, scope, employeeType) {
     idx += 1;
   }
 
+  if (Array.isArray(scope.allowedCustomerIds)) {
+    conditions.push(`COALESCE(p.customer_id, so.partnerid) = ANY($${idx}::uuid[])`);
+    params.push(scope.allowedCustomerIds);
+    idx += 1;
+  }
+
   const employeeId = normalizeId(filters.employeeId);
   assertUuid(employeeId, 'Nhân viên');
   if (employeeId) {
@@ -126,9 +120,9 @@ function buildWhere(filters, scope, employeeType) {
   return { where: conditions.join(' AND '), params };
 }
 
-async function getRows(filters, user) {
+async function getRows(filters, user, resolvedScope = null) {
   const employeeType = resolveEmployeeType(filters.employeeType);
-  const scope = await resolveCompanyScope(user, filters.companyId);
+  const scope = resolvedScope || await resolveReportExportScope(user, filters.companyId);
   const { where, params } = buildWhere(filters, scope, employeeType);
 
   const sql = `
@@ -352,8 +346,8 @@ async function preview(filters, user) {
 
 async function build(filters, user) {
   const employeeType = resolveEmployeeType(filters.employeeType);
-  const scope = await resolveCompanyScope(user, filters.companyId);
-  const rows = await getRows(filters, user);
+  const scope = await resolveReportExportScope(user, filters.companyId);
+  const rows = await getRows(filters, user, scope);
 
   if (rows.length > MAX_ROWS) {
     throw makeError(

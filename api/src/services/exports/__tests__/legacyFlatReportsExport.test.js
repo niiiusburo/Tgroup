@@ -5,11 +5,13 @@ jest.mock('../../../db', () => ({
 }));
 
 jest.mock('../../../services/permissionService', () => ({
+  isInvestorGroup: jest.fn((name) => String(name || '').trim().toLowerCase() === 'investor'),
   resolveEffectivePermissions: jest.fn(),
+  resolveInvestorScope: jest.fn(),
 }));
 
 const { query } = require('../../../db');
-const { resolveEffectivePermissions } = require('../../../services/permissionService');
+const { resolveEffectivePermissions, resolveInvestorScope } = require('../../../services/permissionService');
 const legacyFlatReportsExport = require('../builders/legacyFlatReportsExport');
 const { getExportType } = require('../exportRegistry');
 
@@ -20,6 +22,7 @@ const USER = {
 
 const LOC_A = '11111111-1111-4111-8111-111111111111';
 const LOC_B = '33333333-3333-4333-8333-333333333333';
+const CLIENT_A = '44444444-4444-4444-8444-444444444444';
 const DOCTOR_ID = '22222222-2222-4222-8222-222222222222';
 const SCOPED_USER = {
   employeeId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
@@ -28,6 +31,7 @@ const SCOPED_USER = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  resolveInvestorScope.mockResolvedValue({ isInvestor: false, allowedCustomerIds: [] });
   resolveEffectivePermissions.mockResolvedValue({
     groupName: 'Admin',
     effectivePermissions: ['*'],
@@ -231,6 +235,26 @@ describe('legacyFlatReportsExport', () => {
     expect(query).not.toHaveBeenCalled();
   });
 
+  it('narrows investor flat revenue previews to checked clients', async () => {
+    resolveEffectivePermissions.mockResolvedValueOnce({
+      groupName: 'investor',
+      effectivePermissions: ['payments.export'],
+      locations: [],
+    });
+    resolveInvestorScope.mockResolvedValueOnce({ isInvestor: true, allowedCustomerIds: [CLIENT_A] });
+    query.mockResolvedValueOnce([{ total: '2', total_amount: '1500000' }]);
+
+    await legacyFlatReportsExport.revenue.preview({
+      companyId: 'all',
+      dateFrom: '2026-05-09',
+      dateTo: '2026-05-09',
+    }, SCOPED_USER);
+
+    const [sql, params] = query.mock.calls[0];
+    expect(sql).toContain('cust.id = ANY($3::uuid[])');
+    expect(params).toEqual(['2026-05-09', '2026-05-09', [CLIENT_A]]);
+  });
+
   it('builds the deposit workbook with the exact flat legacy template', async () => {
     query.mockResolvedValueOnce([
       {
@@ -332,6 +356,26 @@ describe('legacyFlatReportsExport', () => {
     const [sql, params] = query.mock.calls[0];
     expect(sql).toContain('pr.companyid = ANY($3::uuid[])');
     expect(params).toEqual(['2026-05-09', '2026-05-09', [LOC_A]]);
+  });
+
+  it('narrows investor flat deposit previews to checked clients', async () => {
+    resolveEffectivePermissions.mockResolvedValueOnce({
+      groupName: 'investor',
+      effectivePermissions: ['payments.export'],
+      locations: [],
+    });
+    resolveInvestorScope.mockResolvedValueOnce({ isInvestor: true, allowedCustomerIds: [CLIENT_A] });
+    query.mockResolvedValueOnce([{ total: '1', total_amount: '2000000' }]);
+
+    await legacyFlatReportsExport.deposit.preview({
+      companyId: 'all',
+      dateFrom: '2026-05-09',
+      dateTo: '2026-05-09',
+    }, SCOPED_USER);
+
+    const [sql, params] = query.mock.calls[0];
+    expect(sql).toContain('pr.id = ANY($3::uuid[])');
+    expect(params).toEqual(['2026-05-09', '2026-05-09', [CLIENT_A]]);
   });
 
   it('throws EXPORT_ROW_LIMIT_EXCEEDED when the flat export exceeds the row limit', async () => {

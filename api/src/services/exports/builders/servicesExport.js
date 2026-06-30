@@ -2,6 +2,7 @@
 
 const { query } = require('../../../db');
 const { createWorkbook, populateDataSheet, populateSummarySheet, toVNDate } = require('../exportWorkbook');
+const { resolveScopedExportFilters } = require('./reportExportScope');
 
 const MAX_ROWS = 100_000;
 
@@ -44,6 +45,12 @@ function buildWhere(filters) {
     idx++;
   }
 
+  if (Array.isArray(filters.companyIds)) {
+    conditions.push(`so.companyid = ANY($${idx}::uuid[])`);
+    params.push(filters.companyIds);
+    idx++;
+  }
+
   if (filters.dateFrom) {
     conditions.push(`so.datecreated >= $${idx}`);
     params.push(filters.dateFrom);
@@ -66,6 +73,12 @@ function buildWhere(filters) {
   if (filters.state) {
     conditions.push(`so.state = $${idx}`);
     params.push(filters.state);
+    idx++;
+  }
+
+  if (Array.isArray(filters.allowedCustomerIds)) {
+    conditions.push(`p.id = ANY($${idx}::uuid[])`);
+    params.push(filters.allowedCustomerIds);
     idx++;
   }
 
@@ -132,7 +145,8 @@ async function getSummary(filters) {
 }
 
 async function preview(filters, user) {
-  const summary = await getSummary(filters);
+  const { filters: scopedFilters } = await resolveScopedExportFilters(filters, user);
+  const summary = await getSummary(scopedFilters);
   const total = parseInt(summary.total, 10);
   return {
     rowCount: total,
@@ -150,9 +164,10 @@ async function preview(filters, user) {
 }
 
 async function build(filters, user) {
+  const { filters: scopedFilters, scope } = await resolveScopedExportFilters(filters, user);
   const [rows, summary] = await Promise.all([
-    getRows(filters),
-    getSummary(filters),
+    getRows(scopedFilters),
+    getSummary(scopedFilters),
   ]);
 
   if (rows.length > MAX_ROWS) {
@@ -165,7 +180,7 @@ async function build(filters, user) {
     exportedBy: user?.name || user?.email || '',
     filters: [
       { label: 'Tìm kiếm', value: filters.search || 'Tất cả' },
-      { label: 'Chi nhánh', value: filters.companyId === 'all' ? 'Tất cả' : filters.companyId },
+      { label: 'Chi nhánh', value: scope.label || (filters.companyId === 'all' ? 'Tất cả' : filters.companyId) },
       { label: 'Từ ngày', value: filters.dateFrom || 'Tất cả' },
       { label: 'Đến ngày', value: filters.dateTo || 'Tất cả' },
       { label: 'Trạng thái', value: filters.state ? STATE_LABELS[filters.state] || filters.state : 'Tất cả' },

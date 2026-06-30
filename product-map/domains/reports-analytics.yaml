@@ -98,6 +98,7 @@ impact_tests:
   - website/src/pages/reports/__tests__/ReportsSubpages.test.tsx
   - api/src/routes/reports/__tests__/locationScope.test.js
   - api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js
+  - api/src/services/exports/__tests__/exportScope.test.js
   - api/src/services/exports/__tests__/legacyFlatReportsExport.test.js
   - api/src/routes/reports/__tests__/cashFlow.test.js
   - api/src/routes/reports/__tests__/revenueRecognition.test.js
@@ -115,7 +116,7 @@ notes:
   - Revenue reporting must derive paid revenue from posted `payment_allocations` linked to saleorders, excluding deposits, refunds, deposit usage, and voided payments. Unpaid `saleorders.amounttotal` remains invoiced/outstanding context, not paid revenue.
   - Revenue by source uses sale-order source first, customer source fallback, and includes direct posted service payments without allocation rows.
   - All `/api/Reports` endpoints enforce employee location scope from primary branch plus `employee_location_scope`; empty `companyId` means all allowed employee branches, explicit unauthorized branch requests return 403, Admin/Super Admin/wildcard callers can intentionally run all-location reports, and investor callers still compose branch filters with `dbo.investor_clients`.
-  - Report exports on `/reports/revenue` (`report-sales-employees`, `revenue-flat`, `deposit-flat`) use the same employee location-scope resolver for preview and download.
+  - Operational Excel export builders for customers, appointments, payments, services, service catalog, employee-sales, revenue-flat, and deposit-flat use backend export scope before preview and download row queries; omitted/all branch filters narrow to allowed employee locations, explicit unauthorized branches return 403, and customer-linked builders compose with `dbo.investor_clients`.
   - >-
     Employee revenue Excel export uses `/api/Exports/report-sales-employees`
     with `reports.export`, date/location scope, employee type, and optional
@@ -132,4 +133,4 @@ notes:
     and branch filters; cash-flow cards remain raw cash-movement context and are
     not the paid-revenue source of truth.
   - Overview Zone 1 and Zone 3 searches must be accent-insensitive so unaccented input matches Vietnamese names and labels with diacritics.
-  - Investor employees must receive report/dashboard aggregates filtered to `dbo.investor_clients`. Normal staff/admin report formulas must remain unchanged, including canonical posted-revenue calculations.
+  - Investor employees must receive report/dashboard aggregates and customer-linked Excel rows filtered to `dbo.investor_clients`. Normal staff/admin report formulas must remain unchanged, including canonical posted-revenue calculations.

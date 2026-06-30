@@ -48,6 +48,7 @@ router.post('/locations/comparison', requirePermission('reports.view'), async (r
     }
     const soWhere = soConds.length ? 'AND ' + soConds.join(' AND ') : '';
     const locationFilter = companyScopeWhere(companyScope, 'c.id', queryParams);
+    const employeeWhere = investorScope.isInvestor ? 'false' : 'employee=true AND isdeleted=false';
 
     const locations = await query(
       `SELECT c.id, c.name, c.active,
@@ -58,7 +59,7 @@ router.post('/locations/comparison', requirePermission('reports.view'), async (r
        FROM dbo.companies c
        LEFT JOIN (SELECT companyid, COUNT(*) as cnt, SUM(CASE WHEN state IN ('done','completed') THEN 1 ELSE 0 END) as done FROM dbo.appointments WHERE 1=1 ${afWhere} GROUP BY companyid) appt ON appt.companyid=c.id
        LEFT JOIN (SELECT companyid, COUNT(*) as order_count FROM dbo.saleorders WHERE isdeleted=false ${soWhere} GROUP BY companyid) so ON so.companyid=c.id
-       LEFT JOIN (SELECT companyid, COUNT(*) as cnt FROM dbo.partners WHERE employee=true AND isdeleted=false GROUP BY companyid) emp ON emp.companyid=c.id
+       LEFT JOIN (SELECT companyid, COUNT(*) as cnt FROM dbo.partners WHERE ${employeeWhere} GROUP BY companyid) emp ON emp.companyid=c.id
        WHERE 1=1 ${locationFilter}`, queryParams);
 
     // Get canonical revenue by location and merge into locations.

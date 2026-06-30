@@ -2430,3 +2430,55 @@ TestSprite execution items:
 - [ ] PENDING: Capture screenshot of `https://nk2.2checkin.com/checkin`.
 - [ ] PENDING: Re-register the affected customer on desktop if status shows unregistered, then test phone `/checkin` with the same face.
 - [ ] PENDING: Verify NK live production version/container set remains unchanged after NK2 deploy.
+
+---
+
+# TestSprite Plan: NK2 Reports and Excel Scope Lock (2026-06-30, v0.32.56)
+
+Feature/edit name: NK2 investor and employee-location scope for Reports plus Excel extraction
+
+Changed URLs and resources:
+- Backend report endpoints: `POST /api/Reports/*`
+- Backend export endpoints: `POST /api/Exports/:type/preview`, `POST /api/Exports/:type/download`, `POST /api/Exports/report-sales-employees/*`, `POST /api/Exports/revenue-flat/*`, `POST /api/Exports/deposit-flat/*`
+- No frontend routes are added; `/reports/*` and existing export menus consume the tightened backend behavior.
+
+Data flow:
+- Non-admin employee scope comes from `resolveEffectivePermissions()` primary branch plus `employee_location_scope`.
+- Investor customer scope comes from `resolveInvestorScope()` and `dbo.investor_clients`.
+- Report routes apply location scope before SQL query construction.
+- Export builders resolve shared backend export scope before preview/download rows are queried or workbook rows are built.
+
+Roles affected:
+- Admin/all-location staff: normal report formulas and exports remain unchanged.
+- Staff with one permitted location: all report pages and Excel extracts are limited to that location, even when the UI omits `companyId`.
+- Investor employees: customer-linked report and export rows are limited to checked customers only.
+
+Expected behavior:
+
+| Visit / action | Expected result |
+|---|---|
+| Location-scoped employee opens any `/reports/*` page with All Locations selected | Backend queries include only the employee's allowed location IDs; no other branch rows or totals are returned. |
+| Location-scoped employee posts a direct out-of-scope `companyId` to `/api/Reports/*` | API returns HTTP 403 `Location not allowed` before querying. |
+| Location-scoped employee previews/downloads customers, appointments, payments, services, service catalog, revenue-flat, deposit-flat, or employee-sales Excel without `companyId` | Export SQL is narrowed to the employee's allowed location IDs. |
+| Location-scoped employee posts an out-of-scope `companyId` to an Excel preview/download | Export builder rejects the request before querying rows. |
+| Investor opens customer-linked Reports pages | Aggregates include only rows for customers checked in `dbo.investor_clients`; location employee counts are not exposed in locations comparison. |
+| Investor previews/downloads customer-linked Excel exports | Rows include only checked customer IDs. |
+| Investor opens employee-only report with no location scope | API fails closed instead of listing employees from every location. |
+| Admin opens the same reports and exports | Existing all-location formulas and workbook columns remain unchanged. |
+
+Regressions:
+- Canonical posted-revenue formulas must stay aligned with `revenue-flat`.
+- Cash-flow cards must keep service collections, deposits, refunds, deposit usage, and voided rows separated.
+- Workbook column order must stay locked to `product-map/features/exports/*.yaml`.
+- NK production must remain unchanged during NK2-only deploy.
+
+TestSprite execution items:
+- [x] DONE 2026-06-30: Focused TDD RED proved Reports routes leaked location/investor scope before the backend fix.
+- [x] DONE 2026-06-30: Focused TDD RED proved generic Excel builders leaked all-location rows before shared export scope.
+- [x] DONE 2026-06-30: Local backend scope suite passed `api/src/routes/reports/__tests__/locationScope.test.js` 48/48 after adding the investor locations-comparison employee-count regression.
+- [x] DONE 2026-06-30: Broader affected backend suite passed 11 suites / 185 tests for Reports, canonical revenue, report/generic exports, appointment exports, and export catalog locks.
+- [ ] PENDING: Deploy v0.32.56 to NK2 only and verify `/version.json` reports v0.32.56 plus the deployed commit.
+- [ ] PENDING: Log in as a one-location employee on NK2, open each Reports page, and verify only that location's data is visible.
+- [ ] PENDING: From the same one-location employee, preview/download Excel exports and verify workbook rows do not include other branches.
+- [ ] PENDING: Log in as the NK2 investor test user, open Reports and Excel previews, and verify only checked customers appear.
+- [ ] PENDING: Verify NK live production version/container set remains unchanged after NK2 deploy.
