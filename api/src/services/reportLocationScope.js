@@ -47,6 +47,14 @@ async function resolveCompanyScopeForUser(user, companyId, options = {}) {
   const unrestricted = hasAllLocationReportAccess(permissionState);
   const investor = usesCustomerBasedInvestorScope(permissionState);
 
+  if (investor && options.requireAssignedLocation) {
+    throw makeScopeError(
+      options.scopeRequiredMessage || 'Tài khoản chưa có phạm vi chi nhánh để xuất báo cáo.',
+      403,
+      options.scopeRequiredCode || 'REPORT_LOCATION_SCOPE_REQUIRED'
+    );
+  }
+
   if (unrestricted || investor) {
     return {
       companyIds: requestedCompanyId ? [requestedCompanyId] : null,

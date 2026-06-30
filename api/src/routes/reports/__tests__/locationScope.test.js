@@ -64,6 +64,7 @@ const CUSTOMER_LINKED_ENDPOINTS = [
 ];
 
 function makeApp() {
+  // nosemgrep: javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage -- isolated Jest route harness, not a production Express app.
   const app = express();
   app.use(express.json());
   app.use((req, _res, next) => {
@@ -148,6 +149,18 @@ describe('Reports route location and investor scope', () => {
 
   it('fails closed for employee-only report when no location scope exists', async () => {
     setScopedManager([]);
+
+    const res = await request(makeApp())
+      .post('/api/Reports/employees/overview')
+      .send(DATE_FILTERS);
+
+    expect(res.status).toBe(403);
+    expect(res.body).toEqual({ success: false, error: 'Location scope required' });
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('fails closed for investor employee-only report because customer scope is not location scope', async () => {
+    setInvestor();
 
     const res = await request(makeApp())
       .post('/api/Reports/employees/overview')

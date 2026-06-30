@@ -2476,6 +2476,7 @@ TestSprite execution items:
 - [x] DONE 2026-06-30: Focused TDD RED proved Reports routes leaked location/investor scope before the backend fix.
 - [x] DONE 2026-06-30: Focused TDD RED proved generic Excel builders leaked all-location rows before shared export scope.
 - [x] DONE 2026-06-30: Local backend scope suite passed `api/src/routes/reports/__tests__/locationScope.test.js` 48/48 after adding the investor locations-comparison employee-count regression.
+- [x] DONE 2026-06-30: Added regression coverage so investor accounts fail closed on the employee-only overview report because checked-customer scope is not location scope.
 - [x] DONE 2026-06-30: Broader affected backend suite passed 11 suites / 185 tests for Reports, canonical revenue, report/generic exports, appointment exports, and export catalog locks.
 - [ ] PENDING: Deploy v0.32.56 to NK2 only and verify `/version.json` reports v0.32.56 plus the deployed commit.
 - [ ] PENDING: Log in as a one-location employee on NK2, open each Reports page, and verify only that location's data is visible.
