@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CustomerAppointmentHistory } from '../CustomerAppointmentHistory';
 import { CustomerProfileIdentity } from './CustomerProfileIdentity';
@@ -49,8 +49,23 @@ export function CustomerProfile(props: OrchestratorProps) {
   const canVoidPayment = hasPermission('payment.void');
   const canReregisterFace = hasPermission('customers.edit');
 
-  const { reregister, reregisterState, reset: resetFaceState } = useFaceRecognition();
+  const {
+    reregister,
+    reregisterState,
+    loadFaceStatus,
+    reset: resetFaceState,
+  } = useFaceRecognition();
   const [showFaceRecaptureModal, setShowFaceRecaptureModal] = useState(false);
+  const [faceStatusOverride, setFaceStatusOverride] = useState(profile.faceStatus ?? null);
+  const activeFaceStatusOverride = faceStatusOverride?.partnerId === profile.id ? faceStatusOverride : null;
+  const profileWithFaceStatus = {
+    ...profile,
+    faceStatus: activeFaceStatusOverride ?? profile.faceStatus ?? null,
+  };
+
+  useEffect(() => {
+    setFaceStatusOverride(null);
+  }, [profile.id]);
 
   const handleOpenFaceRecapture = () => {
     resetFaceState();
@@ -61,6 +76,8 @@ export function CustomerProfile(props: OrchestratorProps) {
     const images = blobs && blobs.length > 0 ? blobs : [firstBlob];
     try {
       await reregister(profile.id, images, 'profile_reregister');
+      const updatedStatus = await loadFaceStatus(profile.id);
+      if (updatedStatus) setFaceStatusOverride(updatedStatus);
       setShowFaceRecaptureModal(false);
     } catch (err) {
       console.error('Face re-register failed:', err);
@@ -212,7 +229,7 @@ export function CustomerProfile(props: OrchestratorProps) {
         </div>
       )}
 
-      <CustomerProfileIdentity profile={profile} />
+      <CustomerProfileIdentity profile={profileWithFaceStatus} />
 
       <FaceCaptureModal
         isOpen={showFaceRecaptureModal}

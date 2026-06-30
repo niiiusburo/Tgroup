@@ -66,7 +66,7 @@ const { findMatches, registerSample, replaceAllSamples, getFaceStatus } = requir
 const comprefaceFaceProvider = require('../src/services/comprefaceFaceProvider');
 const { recordFaceDiagnostic } = require('../src/services/faceDiagnostics');
 const { query } = require('../src/db');
-const FACE_RECOGNITION_VERSION = 'face-recognition-0.32.54';
+const FACE_RECOGNITION_VERSION = 'face-recognition-0.32.55';
 
 afterEach(() => {
   delete process.env.FACE_RECOGNITION_PROVIDER;
@@ -699,6 +699,15 @@ describe('GET /api/face/status/:partnerId', () => {
       registered: true,
       sampleCount: 2,
       lastRegisteredAt: '2026-05-07T10:00:00',
+      readiness: {
+        score: 67,
+        label: 'needs_retake',
+        targetSampleCount: 3,
+        sampleCoverage: 0.6667,
+        storedQuality: null,
+        recommendedAction: 'capture_more_angles',
+        scoringVersion: 'face-readiness-0.32.55',
+      },
     });
 
     const res = await request(app)
@@ -708,6 +717,8 @@ describe('GET /api/face/status/:partnerId', () => {
     expect(res.status).toBe(200);
     expect(res.body.registered).toBe(true);
     expect(res.body.sampleCount).toBe(2);
+    expect(res.body.readiness.score).toBe(67);
+    expect(res.body.readiness.recommendedAction).toBe('capture_more_angles');
   });
 
   it('returns 404 when partner does not exist', async () => {

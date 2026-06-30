@@ -26,7 +26,7 @@ describe('useFaceRecognition', () => {
     vi.mocked(api.recognizeFace).mockResolvedValue({
       match: { partnerId: 'p-1', name: 'Alice', code: 'T001', phone: '0901', confidence: 0.95 },
       candidates: [],
-      recognitionVersion: 'face-recognition-0.32.54',
+      recognitionVersion: 'face-recognition-0.32.55',
     });
 
     const { result } = renderHook(() => useFaceRecognition());
@@ -40,7 +40,7 @@ describe('useFaceRecognition', () => {
     };
     expect(state.match.partnerId).toBe('p-1');
     expect(state.match.name).toBe('Alice');
-    expect(state.recognitionVersion).toBe('face-recognition-0.32.54');
+    expect(state.recognitionVersion).toBe('face-recognition-0.32.55');
   });
 
   it('transitions to candidates when plausible matches exist', async () => {
@@ -50,7 +50,7 @@ describe('useFaceRecognition', () => {
         { partnerId: 'p-1', name: 'Alice', code: 'T001', phone: '0901', confidence: 0.52 },
         { partnerId: 'p-2', name: 'Bob', code: 'T002', phone: '0902', confidence: 0.48 },
       ],
-      recognitionVersion: 'face-recognition-0.32.54',
+      recognitionVersion: 'face-recognition-0.32.55',
     });
 
     const { result } = renderHook(() => useFaceRecognition());
@@ -64,14 +64,14 @@ describe('useFaceRecognition', () => {
     };
     expect(state.candidates).toHaveLength(2);
     expect(state.candidates[0].partnerId).toBe('p-1');
-    expect(state.recognitionVersion).toBe('face-recognition-0.32.54');
+    expect(state.recognitionVersion).toBe('face-recognition-0.32.55');
   });
 
   it('transitions to no_match when there is no match', async () => {
     vi.mocked(api.recognizeFace).mockResolvedValue({
       match: null,
       candidates: [],
-      recognitionVersion: 'face-recognition-0.32.54',
+      recognitionVersion: 'face-recognition-0.32.55',
     });
 
     const { result } = renderHook(() => useFaceRecognition());
@@ -82,7 +82,7 @@ describe('useFaceRecognition', () => {
       status: 'no_match';
       recognitionVersion?: string | null;
     };
-    expect(state.recognitionVersion).toBe('face-recognition-0.32.54');
+    expect(state.recognitionVersion).toBe('face-recognition-0.32.55');
   });
 
   it('transitions to error when API throws', async () => {
@@ -160,6 +160,15 @@ describe('useFaceRecognition', () => {
       registered: true,
       sampleCount: 2,
       lastRegisteredAt: '2026-05-07T10:00:00',
+      readiness: {
+        score: 67,
+        label: 'needs_retake',
+        targetSampleCount: 3,
+        sampleCoverage: 0.6667,
+        storedQuality: null,
+        recommendedAction: 'capture_more_angles',
+        scoringVersion: 'face-readiness-0.32.55',
+      },
     });
 
     const { result } = renderHook(() => useFaceRecognition());
@@ -168,6 +177,7 @@ describe('useFaceRecognition', () => {
     await waitFor(() => expect(result.current.faceStatus?.partnerId).toBe('p-1'));
     expect(result.current.faceStatus?.registered).toBe(true);
     expect(result.current.faceStatus?.sampleCount).toBe(2);
+    expect(result.current.faceStatus?.readiness?.score).toBe(67);
   });
 
   it('sets faceStatus to null when loadFaceStatus fails', async () => {
@@ -213,7 +223,7 @@ describe('useFaceRecognition', () => {
     vi.mocked(api.recognizeFace).mockResolvedValue({
       match: { partnerId: 'p-1', name: 'Alice', code: 'T001', phone: '0901', confidence: 0.95 },
       candidates: [],
-      recognitionVersion: 'face-recognition-0.32.54',
+      recognitionVersion: 'face-recognition-0.32.55',
     });
 
     const { result } = renderHook(() => useFaceRecognition());

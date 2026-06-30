@@ -102,6 +102,23 @@ vi.mock('@/lib/api', () => ({
   fetchCustomerBalance: vi.fn(() =>
     Promise.resolve({ depositBalance: 0, outstandingBalance: 0 })
   ),
+  getFaceStatus: vi.fn(() =>
+    Promise.resolve({
+      partnerId: 'cust-1',
+      registered: true,
+      sampleCount: 3,
+      lastRegisteredAt: '2026-06-30T10:00:00',
+      readiness: {
+        score: 100,
+        label: 'excellent',
+        targetSampleCount: 3,
+        sampleCoverage: 1,
+        storedQuality: null,
+        recommendedAction: 'ready',
+        scoringVersion: 'face-readiness-0.32.55',
+      },
+    })
+  ),
 }));
 
 function Wrapper({ children }: { children: React.ReactNode }) {

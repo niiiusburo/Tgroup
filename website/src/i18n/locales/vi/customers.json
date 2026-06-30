@@ -153,7 +153,14 @@
     "multipleFaces": "Phát hiện nhiều khuôn mặt",
     "faceServiceUnavailable": "Dịch vụ nhận diện khuôn mặt không khả dụng",
     "registered": "Khuôn mặt",
-    "registeredOn": "Đã đăng ký khuôn mặt: {{date}}"
+    "registeredOn": "Đã đăng ký khuôn mặt: {{date}}",
+    "readinessTitle": "Độ sẵn sàng Face ID: {{score}}% ({{count}}/{{target}} ảnh) - {{label}}",
+    "readinessLabels": {
+      "excellent": "Rất tốt",
+      "good": "Tốt",
+      "needsRetake": "Cần chụp lại",
+      "notRegistered": "Chưa đăng ký"
+    }
   },
   "dialog": {
     "addReferrer": "Thêm ngưới giới thiệu mới",

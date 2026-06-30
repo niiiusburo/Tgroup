@@ -7,7 +7,7 @@ import { useFaceRecognition } from '@/hooks/useFaceRecognition';
 import { fetchPartners, registerFace } from '@/lib/api';
 import type { ApiPartner } from '@/lib/api';
 
-const FACE_RECOGNITION_VERSION_LABEL = 'v0.32.54';
+const FACE_RECOGNITION_VERSION_LABEL = 'v0.32.55';
 
 /**
  * Global Face ID quick-search button.

@@ -93,7 +93,7 @@ describe('GlobalFaceIdButton', () => {
   });
 
   it('requires guided left/right capture before registering a no-match face to a searched customer', async () => {
-    recognizeState = { status: 'no_match', recognitionVersion: 'face-recognition-0.32.54' };
+    recognizeState = { status: 'no_match', recognitionVersion: 'face-recognition-0.32.55' };
     vi.mocked(fetchPartners).mockResolvedValue({
       items: [
         {
@@ -117,7 +117,7 @@ describe('GlobalFaceIdButton', () => {
     fireEvent.click(await screen.findByText('Mock capture'));
 
     expect(await screen.findByText('No customer matched')).toBeInTheDocument();
-    expect(screen.getAllByText('v0.32.54')).toHaveLength(2);
+    expect(screen.getAllByText('v0.32.55')).toHaveLength(2);
     expect(screen.getByText(/capture straight, left, and right angles/i)).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText('Name, phone, or code...'), {
@@ -153,13 +153,13 @@ describe('GlobalFaceIdButton', () => {
     fireEvent.click(screen.getByRole('button', { name: /Quick Face ID/i }));
 
     expect(await screen.findByText('Quick Face ID')).toBeInTheDocument();
-    expect(screen.getAllByText('v0.32.54')).toHaveLength(2);
+    expect(screen.getAllByText('v0.32.55')).toHaveLength(2);
   });
 
   it('requires a clearer scan instead of exposing ambiguous candidate choices', async () => {
     recognizeState = {
       status: 'candidates',
-      recognitionVersion: 'face-recognition-0.32.54',
+      recognitionVersion: 'face-recognition-0.32.55',
       candidates: [
         { partnerId: 'p-1', name: 'Alice', code: 'T001', phone: '0901', confidence: 0.91 },
         { partnerId: 'p-2', name: 'Bob', code: 'T002', phone: '0902', confidence: 0.89 },

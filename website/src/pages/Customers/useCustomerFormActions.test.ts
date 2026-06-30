@@ -34,6 +34,8 @@ const baseProfile: CustomerProfileData = {
   referraluserid: null,
   sourceid: null,
   sourcename: null,
+  faceRegisteredAt: null,
+  faceStatus: null,
 };
 
 const renderFormActions = (overrides: Partial<Parameters<typeof useCustomerFormActions>[0]>) =>

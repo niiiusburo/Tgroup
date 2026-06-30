@@ -45,6 +45,27 @@ const mockProfile: CustomerProfileData = {
   code: 'KH001',
   depositBalance: 500000,
   outstandingBalance: 1000000,
+  salestaffid: null,
+  cskhid: null,
+  cskhname: null,
+  referraluserid: null,
+  faceRegisteredAt: '2026-06-28T14:09:17.740Z',
+  faceStatus: {
+    partnerId: '1',
+    registered: true,
+    sampleCount: 1,
+    lastRegisteredAt: '2026-06-28T14:09:17.740Z',
+    provider: 'compreface',
+    readiness: {
+      score: 33,
+      label: 'needs_retake',
+      targetSampleCount: 3,
+      sampleCoverage: 0.3333,
+      storedQuality: null,
+      recommendedAction: 'capture_more_angles',
+      scoringVersion: 'face-readiness-0.32.55',
+    },
+  },
 };
 
 const mockServices: CustomerService[] = [
@@ -86,6 +107,27 @@ const mockPayments: PaymentWithAllocations[] = [
 describe('CustomerProfile payment tab', () => {
   beforeEach(() => {
     authMock.hasPermission.mockImplementation((_permission: string) => true);
+  });
+
+  it('shows Face ID readiness percentage and sample coverage in the profile header', () => {
+    renderWithProviders(
+      <AuthProvider>
+        <CustomerProfile
+          profile={mockProfile}
+          appointments={[]}
+          services={[]}
+          payments={[]}
+          depositList={[]}
+          usageHistory={[]}
+          activeTab="profile"
+          onBack={vi.fn()}
+        />
+      </AuthProvider>
+    );
+
+    const readiness = screen.getByTestId('profile-face-readiness');
+    expect(readiness).toHaveTextContent('33%');
+    expect(readiness).toHaveTextContent('1/3');
   });
 
   it('renders 3-column bill summary', () => {

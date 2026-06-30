@@ -5,7 +5,15 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { fetchPartnerById, fetchAppointments, fetchCustomerBalance, type ApiAppointment, type ApiPartner } from '@/lib/api';
+import {
+  fetchPartnerById,
+  fetchAppointments,
+  fetchCustomerBalance,
+  getFaceStatus,
+  type ApiAppointment,
+  type ApiPartner,
+  type FaceStatusResult,
+} from '@/lib/api';
 import { useTimezone } from '@/contexts/TimezoneContext';
 
 export interface CustomerProfileData {
@@ -36,6 +44,7 @@ export interface CustomerProfileData {
   sourceid?: string | null;
   sourcename?: string | null;
   faceRegisteredAt: string | null;
+  faceStatus?: FaceStatusResult | null;
 }
 
 export interface CustomerProfileResult {
@@ -131,7 +140,18 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
         sourceid: partner.sourceid ?? null,
         sourcename: partner.sourcename ?? null,
         faceRegisteredAt: partner.face_registered_at ?? null,
+        faceStatus: null,
       };
+
+      try {
+        const faceStatus = await getFaceStatus(customerId);
+        if (!isCurrentRequest()) return;
+        profileData.faceStatus = faceStatus;
+        profileData.faceRegisteredAt = faceStatus.lastRegisteredAt ?? profileData.faceRegisteredAt;
+      } catch {
+        if (!isCurrentRequest()) return;
+        profileData.faceStatus = null;
+      }
 
       // Fetch appointment history for this customer
       // Backend API expects partner_id (snake_case), frontend camelCase is auto-converted in apiFetch

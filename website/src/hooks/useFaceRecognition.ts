@@ -102,6 +102,7 @@ export function useFaceRecognition() {
     setRecognizeState({ status: 'idle' });
     setRegisterState({ status: 'idle' });
     setReregisterState({ status: 'idle' });
+    setFaceStatus(null);
   }, []);
 
   return {

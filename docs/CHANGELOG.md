@@ -14,6 +14,13 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.55] — 2026-06-30
+### Changed
+- **NK2 customer profiles now show Face ID readiness:** `GET /api/face/status/:partnerId` returns a versioned readiness score, target sample count, stored-quality input when available, and recommended action. Customer profile headers display the percentage and sample coverage next to the Face ID badge, while CompreFace mode scores readiness from provider sample coverage instead of mixing in old local embeddings. The visible recognizer version is now `v0.32.55` / `face-recognition-0.32.55`; existing face samples are unchanged. — @agent — UC-003 / Face ID enrollment readiness.
+
+### Tested
+- `cd api && JWT_SECRET=test-secret npx jest tests/faceRecognition.test.js src/services/__tests__/faceReadinessScore.test.js src/services/__tests__/faceMatchEngine.test.js src/services/__tests__/comprefaceFaceProvider.test.js --runInBand` passed 4 suites / 93 tests; `cd website && npx vitest run src/lib/api/__tests__/faceRecognition.test.ts src/hooks/__tests__/useFaceRecognition.test.ts src/hooks/__tests__/useCustomerProfile.date-normalization.test.tsx src/components/customer/CustomerProfile.test.tsx src/components/shared/GlobalFaceIdButton.test.tsx src/components/shared/FaceCaptureModal.test.tsx` passed 6 files / 75 tests; `npm --prefix website run build` passed; `npm --prefix website run lint` passed with warnings only; scoped Semgrep over changed Face ID backend files found 0 findings; `npm run verify:governance` passed. — @agent
+
 ## [0.32.54] — 2026-06-30
 ### Changed
 - **NK2 Face ID no-match rescue now requires guided angles:** The staff header no-match popover no longer registers the failed one-shot scan directly. After staff selects a customer, Face ID opens the guided profile capture and requires straight, left, and right samples before saving examples with `source=no_match_rescue`; the visible recognizer version is now `v0.32.54` / `face-recognition-0.32.54`. Explicit profile re-register remains the only path that replaces active samples. — @agent — UC-003 / WF-007 multi-angle enrollment.

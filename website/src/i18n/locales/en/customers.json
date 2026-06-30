@@ -153,7 +153,14 @@
     "multipleFaces": "More than one face detected",
     "faceServiceUnavailable": "Face service is unavailable",
     "registered": "Face ID",
-    "registeredOn": "Face registered: {{date}}"
+    "registeredOn": "Face registered: {{date}}",
+    "readinessTitle": "Face ID readiness: {{score}}% ({{count}}/{{target}} samples) - {{label}}",
+    "readinessLabels": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "needsRetake": "Needs retake",
+      "notRegistered": "Not registered"
+    }
   },
   "dialog": {
     "addReferrer": "Add new referrer",

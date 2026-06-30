@@ -349,7 +349,7 @@ Optional DOB date parts (`birthday`, `birthmonth`, `birthyear`) normalize `""`, 
     phone: string | null;
     confidence: number;
   }>;
-  recognitionVersion: string; // e.g. "face-recognition-0.32.54"
+  recognitionVersion: string; // e.g. "face-recognition-0.32.55"
 }
 ```
 
@@ -391,9 +391,28 @@ Privacy/security contract:
 - Reuses the configured Face ID provider. In CompreFace mode, subjects still map to `partners.id`.
 
 #### GET /api/face/status/:partnerId
-**Response 200:** `{ partnerId: string; registered: boolean; sampleCount: number; lastRegisteredAt: string | null; provider?: 'local' | 'compreface' }`
+**Response 200:**
+```ts
+{
+  partnerId: string;
+  registered: boolean;
+  sampleCount: number;
+  lastRegisteredAt: string | null;
+  provider?: 'local' | 'compreface';
+  readiness: {
+    score: number; // 0-100 enrollment readiness, not a live-match guarantee
+    label: 'excellent' | 'good' | 'needs_retake' | 'not_registered';
+    targetSampleCount: number; // currently 3 for straight/left/right capture
+    sampleCoverage: number; // 0-1, capped at targetSampleCount
+    storedQuality: number | null; // local/SFace avg detection_score when available
+    recommendedAction: 'ready' | 'capture_more_angles' | 'retake' | 'register';
+    scoringVersion: string; // e.g. "face-readiness-0.32.55"
+  };
+}
+```
 
 CompreFace mode status is provider-backed: `registered` is true only when `partners.face_subject_id` exists and CompreFace currently returns at least one face example for that subject. A stale DB subject with zero CompreFace examples must report `registered: false`.
+CompreFace readiness uses provider sample coverage because CompreFace status does not expose stored image quality; local/SFace readiness also blends the active embeddings' average `detection_score` when available.
 
 ---
 

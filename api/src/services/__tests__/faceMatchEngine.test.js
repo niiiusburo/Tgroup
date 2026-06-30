@@ -507,6 +507,9 @@ describe('getFaceStatus', () => {
     expect(result.registered).toBe(true);
     expect(result.sampleCount).toBe(2);
     expect(result.lastRegisteredAt).toBe('2026-05-07T10:00:00');
+    expect(result.provider).toBe('local');
+    expect(result.readiness.score).toBe(67);
+    expect(result.readiness.recommendedAction).toBe('capture_more_angles');
   });
 
   it('returns registered=false when no samples exist', async () => {
@@ -519,6 +522,8 @@ describe('getFaceStatus', () => {
     expect(result.registered).toBe(false);
     expect(result.sampleCount).toBe(0);
     expect(result.lastRegisteredAt).toBeNull();
+    expect(result.readiness.score).toBe(0);
+    expect(result.readiness.label).toBe('not_registered');
   });
 
   it('falls back to partner face_registered_at when no embedding rows', async () => {
@@ -540,6 +545,18 @@ describe('getFaceStatus', () => {
     const result = await getFaceStatus('p1');
     expect(result.registered).toBe(true);
     expect(result.sampleCount).toBe(1);
+    expect(result.readiness.score).toBe(33);
+  });
+
+  it('includes stored detection quality in local readiness when available', async () => {
+    const { getFaceStatus, query } = loadEngine();
+    query
+      .mockResolvedValueOnce([{ cnt: 2, last_at: '2026-05-07T10:00:00', avg_detection_score: 0.95 }])
+      .mockResolvedValueOnce([{ face_registered_at: '2026-05-07T10:00:00' }]);
+
+    const result = await getFaceStatus('p1');
+    expect(result.readiness.score).toBe(77);
+    expect(result.readiness.storedQuality).toBe(0.95);
   });
 
   it('handles null last_at by using face_registered_at fallback', async () => {

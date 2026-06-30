@@ -174,6 +174,15 @@ describe('comprefaceFaceProvider', () => {
       sampleCount: 0,
       lastRegisteredAt: null,
       provider: 'compreface',
+      readiness: {
+        score: 0,
+        label: 'not_registered',
+        targetSampleCount: 3,
+        sampleCoverage: 0,
+        storedQuality: null,
+        recommendedAction: 'register',
+        scoringVersion: 'face-readiness-0.32.55',
+      },
     });
   });
 
@@ -186,5 +195,10 @@ describe('comprefaceFaceProvider', () => {
     expect(result.registered).toBe(true);
     expect(result.sampleCount).toBe(3);
     expect(result.lastRegisteredAt).toBe('2026-05-17T10:00:00');
+    expect(result.readiness).toMatchObject({
+      score: 100,
+      label: 'excellent',
+      recommendedAction: 'ready',
+    });
   });
 });

@@ -56,6 +56,7 @@ export function useCustomerProfileData(
         sourceid: hookProfile.sourceid,
         sourcename: hookProfile.sourcename,
         faceRegisteredAt: hookProfile.faceRegisteredAt,
+        faceStatus: hookProfile.faceStatus ?? null,
       };
     }
 
@@ -86,6 +87,7 @@ export function useCustomerProfileData(
         cskhname: null,
         referraluserid: null,
         faceRegisteredAt: null,
+        faceStatus: null,
       };
     }
 
@@ -115,6 +117,7 @@ export function useCustomerProfileData(
       cskhname: null,
       referraluserid: null,
       faceRegisteredAt: null,
+      faceStatus: null,
     };
   }, [hookProfile, listCustomer, selectedCustomerId, locationNameMap, customerCode]);
 }

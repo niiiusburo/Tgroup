@@ -211,11 +211,26 @@ export interface FaceReRegisterResult {
   faceRegisteredAt: string;
 }
 
+export type FaceReadinessLabel = 'excellent' | 'good' | 'needs_retake' | 'not_registered';
+export type FaceReadinessAction = 'ready' | 'capture_more_angles' | 'retake' | 'register';
+
+export interface FaceReadinessStatus {
+  score: number;
+  label: FaceReadinessLabel;
+  targetSampleCount: number;
+  sampleCoverage: number;
+  storedQuality: number | null;
+  recommendedAction: FaceReadinessAction;
+  scoringVersion: string;
+}
+
 export interface FaceStatusResult {
   partnerId: string;
   registered: boolean;
   sampleCount: number;
   lastRegisteredAt: string | null;
+  provider?: 'local' | 'compreface' | string;
+  readiness?: FaceReadinessStatus;
 }
 
 export type PublicFaceCheckInResult =

@@ -104,13 +104,13 @@ describe('FaceCaptureModal', () => {
       <FaceCaptureModal
         isOpen
         title="Quick Face ID"
-        versionLabel="v0.32.54"
+        versionLabel="v0.32.55"
         onCapture={vi.fn()}
         onCancel={vi.fn()}
       />,
     );
     expect(await screen.findByText('Quick Face ID')).toBeInTheDocument();
-    expect(screen.getByText('v0.32.54')).toBeInTheDocument();
+    expect(screen.getByText('v0.32.55')).toBeInTheDocument();
   });
 
   it('does not render capture button when camera error occurs', async () => {

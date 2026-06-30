@@ -12,7 +12,7 @@ const { resolveInvestorScope } = require('../services/permissionService');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
-const FACE_RECOGNITION_VERSION = 'face-recognition-0.32.54';
+const FACE_RECOGNITION_VERSION = 'face-recognition-0.32.55';
 
 function sha256Hex(buffer) {
   return crypto.createHash('sha256').update(buffer).digest('hex');
@@ -278,7 +278,7 @@ router.post(
 
 /**
  * GET /api/face/status/:partnerId
- * Returns face registration status for a customer.
+ * Returns face registration status and enrollment readiness for a customer.
  */
 router.get('/status/:partnerId', requirePermission('customers.view'), async (req, res) => {
   try {

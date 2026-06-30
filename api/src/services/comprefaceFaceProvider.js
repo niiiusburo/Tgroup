@@ -8,6 +8,7 @@ const {
   deleteSubject,
 } = require("./comprefaceClient");
 const { query } = require("../db");
+const { buildFaceReadiness } = require("./faceReadinessScore");
 
 const AUTO_MATCH_THRESHOLD = parseFloat(process.env.FACE_AUTO_MATCH_THRESHOLD || "0.92");
 const CANDIDATE_THRESHOLD = parseFloat(process.env.FACE_CANDIDATE_THRESHOLD || "0.84");
@@ -344,6 +345,7 @@ async function getFaceStatus(partnerId) {
       sampleCount: 0,
       lastRegisteredAt: null,
       provider: "compreface",
+      readiness: buildFaceReadiness({ registered: false, sampleCount: 0 }),
     };
   }
 
@@ -355,6 +357,7 @@ async function getFaceStatus(partnerId) {
     sampleCount,
     lastRegisteredAt: registered ? rows[0]?.face_registered_at || null : null,
     provider: "compreface",
+    readiness: buildFaceReadiness({ registered, sampleCount }),
   };
 }
 

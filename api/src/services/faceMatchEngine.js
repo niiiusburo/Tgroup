@@ -1,6 +1,7 @@
 "use strict";
 
 const { query, pool } = require("../db");
+const { buildFaceReadiness } = require("./faceReadinessScore");
 
 // Thresholds (environment-configurable). Defaults tightened 2026-06-29:
 //   - AUTO_MATCH_THRESHOLD 0.92: close scans below this become candidate/no-match
@@ -355,7 +356,8 @@ async function replaceAllSamples(partnerId, samples, createdBy) {
 async function getFaceStatus(partnerId) {
   const rows = await query(
     `SELECT COUNT(*)::int AS cnt,
-            MAX(created_at) AS last_at
+            MAX(created_at) AS last_at,
+            AVG(detection_score)::float AS avg_detection_score
      FROM dbo.customer_face_embeddings
      WHERE partner_id = $1 AND is_active = true`,
     [partnerId]
@@ -372,6 +374,12 @@ async function getFaceStatus(partnerId) {
     registered: sampleCount > 0,
     sampleCount,
     lastRegisteredAt: rows[0]?.last_at || partnerRows[0]?.face_registered_at || null,
+    provider: "local",
+    readiness: buildFaceReadiness({
+      registered: sampleCount > 0,
+      sampleCount,
+      avgDetectionScore: rows[0]?.avg_detection_score ?? null,
+    }),
   };
 }
 

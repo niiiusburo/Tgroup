@@ -76,7 +76,8 @@ ui_invariants:
   - CompreFace status must verify actual provider examples; stale `face_subject_id` without CompreFace examples is not a registered face.
   - Public `/checkin` must expose camera flip and a light privacy-softened preview control without returning or displaying customer identifiers beyond the allowed greeting; the blur must not touch detection/capture pixels.
   - Hidden Face ID diagnostics may record hashed candidate identifiers and score margins for tuning, but must not include names, phone numbers, customer codes, raw partner IDs, raw embeddings, raw images, or tokens.
-  - Staff header Face ID displays the active NK2 recognition version (`v0.32.54`), the camera popup orange banner shows the same version, and `/api/face/recognize` includes `recognitionVersion` metadata without rewriting existing face samples.
+  - Staff header Face ID displays the active NK2 recognition version (`v0.32.55`), the camera popup orange banner shows the same version, and `/api/face/recognize` includes `recognitionVersion` metadata without rewriting existing face samples.
+  - Customer profiles display Face ID readiness from `GET /api/face/status/:partnerId`; CompreFace readiness uses provider sample coverage against the straight/left/right target, while local/SFace readiness can also use stored `detection_score`.
   - Staff header Face ID candidate-only results are treated as rescan-only: show "Face ID needs a clearer scan", hide candidate identity buttons, and keep strict defaults at auto-match `0.92`, candidate `0.84`, margin `0.05`.
   - Staff header no-match rescue must not save the failed one-shot scan directly; after staff selects a customer, the client must complete guided straight, left, and right captures before Face ID samples are registered.
   - Customer profile assignment card and edit form must display the sales employee from `partners.salestaffid` / `salestaffname`, not the customer's `jobtitle` or other personal-detail fields.

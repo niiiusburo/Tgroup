@@ -30,6 +30,12 @@ In CompreFace mode, TGClinic treats a customer as Face ID registered only when b
 
 Registration must verify CompreFace persistence before updating `face_registered_at`. A stale DB subject with zero provider examples must display as unregistered so staff can re-register it.
 
+## Profile Readiness Score
+
+- Customer profiles show a Face ID readiness percentage from `GET /api/face/status/:partnerId`.
+- Readiness is an enrollment-quality signal, not a live-match guarantee. CompreFace status uses provider sample coverage against the straight/left/right target; local SFace status also blends the active embeddings' average `detection_score` when available.
+- Profiles below the three-sample target should be re-registered through the guided straight, left, and right capture flow.
+
 ## Operator Notes
 
 - If a customer has a DB subject but CompreFace has zero examples, treat them as not registered and re-register from the protected customer profile flow.

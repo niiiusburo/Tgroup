@@ -10,6 +10,44 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK2 Face ID Profile Readiness Score 2026-06-30
+
+Feature/edit name: NK2 Face ID profile readiness score and status contract (v0.32.55)
+
+Changed URLs / API routes / data flow:
+- URL: `https://nk2.2checkin.com/customers/T160437` after resolver redirects to the canonical customer UUID.
+- URL: `https://nk2.2checkin.com/customers/<partnerId>` profile header for any registered customer.
+- API: `GET /api/face/status/:partnerId`
+- API: `POST /api/face/recognize` version metadata remains visible as `face-recognition-0.32.55`.
+- Data flow: customer profile load -> `fetchPartnerById` -> `getFaceStatus` -> provider-backed `sampleCount` + `readiness` -> profile header badge.
+
+Affected roles and data flows:
+- Staff/admin users see a compact Face ID readiness percentage and sample coverage next to the profile Face ID badge.
+- CompreFace mode scores readiness from provider sample coverage against the straight/left/right target; it does not mix old local embeddings into current provider truth.
+- Local/SFace mode can blend active embedding `detection_score` into the readiness score.
+- Existing face samples are not bulk-rewritten. Low-readiness profiles should be re-registered through guided straight/left/right capture.
+- NK production and NK3 are out of scope and must remain unchanged.
+
+Expected behavior:
+
+| Visit / action | Expected result |
+|---|---|
+| Open T160437 profile on NK2 | Profile Face ID header shows readiness `33%` and `1/3` because live CompreFace status reports one provider sample. |
+| Call `GET /api/face/status/:partnerId` for T160437 | Response includes `registered: true`, `sampleCount: 1`, `provider: "compreface"`, and `readiness.score: 33`. |
+| Re-register a customer with guided profile capture | Profile readiness refreshes after save; three provider samples show `100%` / `3/3`. |
+| Customer has DB subject but CompreFace zero examples | Status reports unregistered and readiness `0%`; staff should re-register. |
+| Existing registered faces | Stored samples/CompreFace examples remain unchanged unless staff explicitly re-registers. |
+
+Execution checklist:
+- [x] PASS: Backend scorer/provider/status tests cover readiness score and CompreFace sample-count truth - `cd api && JWT_SECRET=test-secret npx jest tests/faceRecognition.test.js src/services/__tests__/faceReadinessScore.test.js src/services/__tests__/faceMatchEngine.test.js src/services/__tests__/comprefaceFaceProvider.test.js --runInBand` passed 4 suites / 93 tests.
+- [x] PASS: Frontend API/hook/profile tests render and carry readiness metadata - `cd website && npx vitest run src/lib/api/__tests__/faceRecognition.test.ts src/hooks/__tests__/useFaceRecognition.test.ts src/hooks/__tests__/useCustomerProfile.date-normalization.test.tsx src/components/customer/CustomerProfile.test.tsx src/components/shared/GlobalFaceIdButton.test.tsx src/components/shared/FaceCaptureModal.test.tsx` passed 6 files / 75 tests.
+- [x] PASS: Website build/typecheck, lint, and scoped Semgrep pass - `npm --prefix website run build` passed; `npm --prefix website run lint` passed with warnings only; `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off api/src/routes/faceRecognition.js api/src/services/faceReadinessScore.js api/src/services/faceMatchEngine.js api/src/services/comprefaceFaceProvider.js` scanned 4 files with 0 findings.
+- [x] PASS: Governance pass after this TestSprite plan is added - `npm run verify:governance` passed.
+- [ ] PENDING: Live NK2 proof after deploy shows `0.32.55`, healthy CompreFace, T160437 status readiness `33%`, and profile header badge `33% / 1/3`.
+- [ ] PENDING: NK production/NK3 non-touch proof captured after deploy.
+
+---
+
 # TestSprite Plan: NK2 Face ID Guided No-Match Rescue 2026-06-30
 
 Feature/edit name: NK2 Face ID guided no-match rescue registration (v0.32.54)

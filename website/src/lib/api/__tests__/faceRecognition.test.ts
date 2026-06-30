@@ -32,7 +32,7 @@ describe('Face Recognition API client', () => {
         json: async () => ({
           status: 'auto_matched',
           match: { partnerId: 'p1', name: 'Test', confidence: 0.95, code: 'T001', phone: '0901' },
-          recognitionVersion: 'face-recognition-0.32.54',
+          recognitionVersion: 'face-recognition-0.32.55',
         }),
       });
 
@@ -48,7 +48,7 @@ describe('Face Recognition API client', () => {
       );
       expect(result.status).toBe('auto_matched');
       expect(result.match).toBeDefined();
-      expect(result.recognitionVersion).toBe('face-recognition-0.32.54');
+      expect(result.recognitionVersion).toBe('face-recognition-0.32.55');
     });
 
     it('returns candidates when no auto-match', async () => {
@@ -180,7 +180,20 @@ describe('Face Recognition API client', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         status: 200,
-        json: async () => ({ registered: true, sampleCount: 2, lastRegisteredAt: '2026-05-01' }),
+        json: async () => ({
+          registered: true,
+          sampleCount: 2,
+          lastRegisteredAt: '2026-05-01',
+          readiness: {
+            score: 67,
+            label: 'needs_retake',
+            targetSampleCount: 3,
+            sampleCoverage: 0.6667,
+            storedQuality: null,
+            recommendedAction: 'capture_more_angles',
+            scoringVersion: 'face-readiness-0.32.55',
+          },
+        }),
       });
 
       const result = await getFaceStatus('p1');
@@ -191,6 +204,8 @@ describe('Face Recognition API client', () => {
       );
       expect(result.registered).toBe(true);
       expect(result.sampleCount).toBe(2);
+      expect(result.readiness?.score).toBe(67);
+      expect(result.readiness?.recommendedAction).toBe('capture_more_angles');
     });
 
     it('returns unregistered status', async () => {

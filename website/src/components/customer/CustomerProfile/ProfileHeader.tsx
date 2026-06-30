@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { User, Tag, Phone, Mail, MapPin, Calendar, Stethoscope, ScanFace } from 'lucide-react';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
+import { FaceReadinessBadge } from './FaceReadinessBadge';
 
 interface ProfileHeaderProps {
   profile: CustomerProfileData;
@@ -8,6 +9,9 @@ interface ProfileHeaderProps {
 
 export function ProfileHeader({ profile }: ProfileHeaderProps) {
   const { t } = useTranslation('customers');
+  const faceRegisteredAt = profile.faceStatus?.lastRegisteredAt ?? profile.faceRegisteredAt;
+  const hasFaceRegistration = Boolean(profile.faceStatus?.registered || faceRegisteredAt);
+
   return (
     <div className="bg-white rounded-xl shadow-card p-6">
       <div className="flex flex-col sm:flex-row gap-6">
@@ -19,7 +23,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
 
         <div className="flex-1 min-w-0">
           <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <h2 className="text-xl font-bold text-gray-900">{profile.name}</h2>
               <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
               profile.gender === 'female' ? 'bg-pink-50 text-pink-600' : 'bg-blue-50 text-blue-600'}`
@@ -27,16 +31,17 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
                 <User className="w-3 h-3" />
                 {profile.gender === 'male' ? 'Male' : 'Female'}
               </span>
-              {profile.faceRegisteredAt && (
+              {hasFaceRegistration && (
                 <span
                   data-testid="profile-face-registered"
-                  title={t('face.registeredOn', { date: profile.faceRegisteredAt.slice(0, 10), defaultValue: `Face registered: ${profile.faceRegisteredAt.slice(0, 10)}` }) as string}
+                  title={t('face.registeredOn', { date: faceRegisteredAt?.slice(0, 10) ?? '', defaultValue: `Face registered: ${faceRegisteredAt?.slice(0, 10) ?? ''}` }) as string}
                   className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 ring-1 ring-orange-200"
                 >
                   <ScanFace className="w-3 h-3" />
                   {t('face.registered', 'Face ID')}
                 </span>
               )}
+              <FaceReadinessBadge faceStatus={profile.faceStatus} />
             </div>
             {profile.code &&
             <span className="self-start inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">

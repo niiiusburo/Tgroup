@@ -456,7 +456,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | If you change this table... | You must also review... |
 |-----------------------------|--------------------------|
 | `dbo.partners` | Auth routes, Employee routes, Face Recognition, Payments, Appointments, Reports, E2E tests |
-| `dbo.customer_face_embeddings` | Face Recognition routes (register, recognize, status), customer profile Face ID tab |
+| `dbo.customer_face_embeddings` | Face Recognition routes (register, recognize, status), customer profile Face ID readiness badge |
 | `dbo.appointments` | Calendar components, AppointmentForm, constants (colors/status), Reports, E2E tests |
 | `dbo.products` | ServiceCatalog, ProductCategories, AppointmentForm, SaleOrders, Reports, delete guards |
 | `dbo.payments` | PaymentForm, DepositWallet, Reports, VietQR, CustomerProfile payment tab |

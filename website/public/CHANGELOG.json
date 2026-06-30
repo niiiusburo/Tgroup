@@ -1,5 +1,22 @@
 [
   {
+    "version": "0.32.55",
+    "date": "2026-06-30",
+    "commit": "pending",
+    "highlights": "Customer profiles now show a Face ID readiness percentage from provider sample coverage.",
+    "sections": [
+      {
+        "title": "Face ID",
+        "items": [
+          "The Face ID status API now returns readiness metadata with score, target sample count, and recommended action.",
+          "Customer profile headers show the readiness percentage and sample coverage next to the Face ID badge.",
+          "The active Face ID version now shows v0.32.55 in the header camera flow and API recognition metadata.",
+          "Existing face samples are unchanged; low-readiness profiles should be re-registered with straight, left, and right captures."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.54",
     "date": "2026-06-30",
     "commit": "pending",
