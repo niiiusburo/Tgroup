@@ -41,7 +41,7 @@ Execution checklist:
 - [x] PASS: API/tests still expose `face-recognition-0.32.54` metadata - `cd api && JWT_SECRET=test-secret npx jest tests/faceRecognition.test.js src/services/__tests__/faceMatchEngine.test.js src/services/__tests__/comprefaceFaceProvider.test.js src/services/__tests__/faceDiagnostics.test.js --runInBand` passed 4 suites / 91 tests.
 - [x] PASS: Website build/lint and scoped Semgrep pass - `npm --prefix website run build` passed; `npm --prefix website run lint` passed with warnings only; scoped Semgrep over changed Face ID runtime files found 0 findings.
 - [x] PASS: Governance pass - `npm run verify:governance` passed.
-- [ ] PENDING: Live NK2 proof shows `0.32.54`, healthy CompreFace, and guided no-match rescue behavior.
+- [x] PASS: Live NK2 proof shows `0.32.54`, healthy CompreFace, and guided no-match rescue behavior - `https://nk2.2checkin.com/version.json` returned version `0.32.54`, gitCommit `6c06dcb`, branch `codex/nk2-investor-scope`; `/api/health` returned healthy with `checks.faceService: true` and `faceProvider: compreface`; live Playwright proof captured `/tmp/nk2-faceid-proof-20260630-0.32.54/00-live-proof-board.png` with header version, orange camera banner version, no-match guided hint, and straight/left/right guided steps; the browser proof intercepted 3 `POST /api/face/register` calls so no fake samples were written to NK2.
 
 ---
 
