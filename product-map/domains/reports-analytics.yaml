@@ -93,8 +93,10 @@ affected_by:
   - Any change to appointment status values
   - Any change to payment method enum
 impact_tests:
+  - website/src/pages/reports/__tests__/ReportsLocationScope.test.tsx
   - website/src/pages/reports/__tests__/ReportsDashboard.test.tsx
   - website/src/pages/reports/__tests__/ReportsSubpages.test.tsx
+  - api/src/routes/reports/__tests__/locationScope.test.js
   - api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js
   - api/src/services/exports/__tests__/legacyFlatReportsExport.test.js
   - api/src/routes/reports/__tests__/cashFlow.test.js
@@ -112,7 +114,8 @@ notes:
   - Cash-flow reporting V1 separates service collections, customer deposits, refunds, deposit usage, and voided adjustments. Deposit usage is internal movement and must not be counted as new cash.
   - Revenue reporting must derive paid revenue from posted `payment_allocations` linked to saleorders, excluding deposits, refunds, deposit usage, and voided payments. Unpaid `saleorders.amounttotal` remains invoiced/outstanding context, not paid revenue.
   - Revenue by source uses sale-order source first, customer source fallback, and includes direct posted service payments without allocation rows.
-  - Revenue and cash-flow report endpoints enforce employee location scope from primary branch plus `employee_location_scope`; remaining non-revenue report routes should be reviewed before exposing them to scoped managers.
+  - All `/api/Reports` endpoints enforce employee location scope from primary branch plus `employee_location_scope`; empty `companyId` means all allowed employee branches, explicit unauthorized branch requests return 403, Admin/Super Admin/wildcard callers can intentionally run all-location reports, and investor callers still compose branch filters with `dbo.investor_clients`.
+  - Report exports on `/reports/revenue` (`report-sales-employees`, `revenue-flat`, `deposit-flat`) use the same employee location-scope resolver for preview and download.
   - >-
     Employee revenue Excel export uses `/api/Exports/report-sales-employees`
     with `reports.export`, date/location scope, employee type, and optional

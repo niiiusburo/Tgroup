@@ -12,6 +12,7 @@
 
 | Version | Date | Scope |
 |---|---|---|
+| v1.0.10 | 2026-06-30 | `/api/Reports` endpoints and report exports from `/reports/revenue` now enforce employee allowed company IDs server-side; empty/all `companyId` resolves to allowed branches for scoped employees and unauthorized explicit branch requests return 403. |
 | v1.0.9 | 2026-06-29 | Investor customer allowlist scope explicitly covers payment legacy fallback reads and report branch/date filters; branch filters compose with `dbo.investor_clients` instead of replacing it. |
 | v1.0.8 | 2026-06-27 | Investor group now resolves to explicit staff-shell permissions while customer-linked data remains scoped by `dbo.investor_clients`; investor role/employee self-escalation and allowlist curation stay server-blocked. |
 | v1.0.7 | 2026-06-27 | Admin-only investor allowlist curation added: `GET /api/Partners/investor-visibility` and `PATCH /api/Partners/:id/investor-visibility` read/write `dbo.investor_clients` only after `permissions.edit` and Admin-class handler validation. |
@@ -442,6 +443,7 @@ All current `/api/Reports` endpoints use `POST`, require `reports.view`, and ret
 }
 ```
 Date-scoped endpoints accept `{ dateFrom?: 'YYYY-MM-DD'; dateTo?: 'YYYY-MM-DD'; companyId?: string }` unless noted.
+For non-admin, non-investor employees, omitted/empty `companyId` is interpreted as all company IDs allowed by effective location scope. An explicit `companyId` outside that allowed set returns 403 before report queries run. Admin, Super Admin, and wildcard permission states may intentionally run all-location reports.
 For `investor` callers, report date and `companyId` filters compose with the `dbo.investor_clients` customer allowlist. Branch filters may narrow checked-customer data, but must not replace or bypass the customer allowlist.
 
 | Endpoint | Body | `data` shape |
@@ -458,12 +460,13 @@ For `investor` callers, report date and `companyId` filters compose with the `db
 | `/api/Reports/services/breakdown` | Date scope | `{ categories[], revenueByCategory[], revenueBySource[], popularProducts[] }` |
 | `/api/Reports/employees/overview` | `{ companyId?: string }` | `{ roles, byLocation[], employees[] }` |
 | `/api/Reports/customers/summary` | Date scope | `{ total, newInPeriod, gender[], cities[], topSpenders[], outstanding[], growth[] }` |
-| `/api/Reports/locations/comparison` | `{ dateFrom?: string; dateTo?: string }` | `{ locations[], trend[] }` |
+| `/api/Reports/locations/comparison` | Date scope | `{ locations[], trend[] }` |
 | `/api/Reports/doctors/performance` | Date scope | `{ id, name, totalAppointments, done, cancelled, revenue, unassigned? }[]` |
 
 ### 1.9 Exports
 
 Operational exports are registry-driven (`api/src/services/exports/exportRegistry.js`), require a valid JWT, and filter visible/exportable types by the current employee's effective permissions.
+Report exports used by `/reports/revenue` (`report-sales-employees`, `revenue-flat`, `deposit-flat`) enforce the same employee location-scope contract as `/api/Reports`: `companyId: "all"` or omitted resolves to allowed company IDs for scoped employees, and unauthorized explicit branch filters return 403 with `EXPORT_LOCATION_DENIED`.
 
 #### GET /api/Exports/types
 **Response 200:**

@@ -67,6 +67,7 @@ behavior:
   - `resolveInvestorScope()` reads `dbo.investor_clients` and returns a fail-closed customer allowlist for all customer-touching reads and writes.
   - The investor permission group resolves to an explicit staff-shell permission set without wildcard `*`, so the normal employee UI is visible while customer-linked data remains allowlist-scoped.
   - Investor auth responses return an empty `permissions.locations` array so the frontend does not auto-filter customer-linked pages to the investor employee's home clinic before the customer allowlist is applied.
+  - Non-investor report APIs and report export builders must enforce resolved employee location access server-side; frontend `LocationContext` limits the visible Reports location picker but is not the security boundary for `/api/Reports` or report exports.
   - Investor role/employee mutation endpoints must block self-escalation even when the staff-shell permission set includes `permissions.edit` and `employees.edit`.
   - Investor allowlist curation requires `permissions.edit` plus Admin-class permission state that explicitly excludes the `investor` group; do not expose the Customers Investor checkbox or allow `dbo.investor_clients` writes to non-admin employees.
 affected_by:

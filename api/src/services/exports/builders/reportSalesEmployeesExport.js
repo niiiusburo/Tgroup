@@ -1,7 +1,7 @@
 'use strict';
 
 const { query } = require('../../../db');
-const { resolveEffectivePermissions } = require('../../permissionService');
+const { resolveCompanyScopeForUser } = require('../../reportLocationScope');
 const { createWorkbook, populateSummarySheet, toVNDate } = require('../exportWorkbook');
 const { SERVICE_REVENUE_PAYMENT_CONDITION } = require('../../../routes/reports/revenueRecognition');
 
@@ -76,40 +76,16 @@ function resolveEmployeeType(type) {
   return EMPLOYEE_TYPES[type] || EMPLOYEE_TYPES.doctor;
 }
 
-function hasAllLocationAccess(permissionState) {
-  const perms = permissionState?.effectivePermissions || [];
-  const groupName = String(permissionState?.groupName || '');
-  return perms.includes('*') || /admin/i.test(groupName);
-}
-
 async function resolveCompanyScope(user, companyId) {
   const requestedCompanyId = normalizeId(companyId);
   assertUuid(requestedCompanyId, 'Chi nhánh');
-
-  const permissionState = await resolveEffectivePermissions(user?.employeeId);
-  if (hasAllLocationAccess(permissionState)) {
-    return {
-      companyIds: requestedCompanyId ? [requestedCompanyId] : null,
-      label: requestedCompanyId || 'Tất cả',
-    };
-  }
-
-  const allowedIds = (permissionState.locations || []).map((loc) => loc.id).filter(Boolean);
-  if (requestedCompanyId) {
-    if (!allowedIds.includes(requestedCompanyId)) {
-      throw makeError('Bạn không có quyền xuất dữ liệu cho chi nhánh này.', 403, 'EXPORT_LOCATION_DENIED');
-    }
-    return { companyIds: [requestedCompanyId], label: requestedCompanyId };
-  }
-
-  if (allowedIds.length === 0) {
-    throw makeError('Tài khoản chưa có phạm vi chi nhánh để xuất báo cáo.', 403, 'EXPORT_LOCATION_SCOPE_REQUIRED');
-  }
-
-  return {
-    companyIds: allowedIds,
-    label: permissionState.locations.map((loc) => loc.name || loc.id).join(', '),
-  };
+  return resolveCompanyScopeForUser(user, requestedCompanyId, {
+    deniedMessage: 'Bạn không có quyền xuất dữ liệu cho chi nhánh này.',
+    deniedCode: 'EXPORT_LOCATION_DENIED',
+    scopeRequiredMessage: 'Tài khoản chưa có phạm vi chi nhánh để xuất báo cáo.',
+    scopeRequiredCode: 'EXPORT_LOCATION_SCOPE_REQUIRED',
+    requireAssignedLocation: true,
+  });
 }
 
 function buildWhere(filters, scope, employeeType) {

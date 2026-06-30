@@ -1,7 +1,14 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID, dateCompanyFilter } = require('./helpers');
+const {
+  err,
+  validDate,
+  validUUID,
+  dateCompanyScopeFilter,
+  resolveReportCompanyScope,
+  appendCompanyScopeCondition,
+} = require('./helpers');
 const { resolveInvestorScope } = require('../../services/permissionService');
 const {
   SERVICE_REVENUE_PAYMENT_CONDITION,
@@ -25,11 +32,13 @@ router.post('/revenue/by-doctor', requirePermission('reports.view'), async (req,
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    const companyScope = await resolveReportCompanyScope(req, res, companyId);
+    if (!companyScope) return;
 
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
-      companyId,
+      companyIds: companyScope.companyIds,
       orderDateCol: 'so.datecreated',
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       orderCompanyCol: 'so.companyid',
@@ -83,8 +92,10 @@ router.post('/revenue/by-category', requirePermission('reports.view'), async (re
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    const companyScope = await resolveReportCompanyScope(req, res, companyId);
+    if (!companyScope) return;
 
-    const f = buildPaymentRevenueFilter({ dateFrom, dateTo, companyId });
+    const f = buildPaymentRevenueFilter({ dateFrom, dateTo, companyIds: companyScope.companyIds });
     let fWhere = f.where;
     let params = [...f.params];
     if (investorScope.isInvestor) {
@@ -152,10 +163,14 @@ router.post('/revenue/by-source', requirePermission('reports.view'), async (req,
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    const companyScope = await resolveReportCompanyScope(req, res, companyId);
+    if (!companyScope) return;
+
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
-      companyId,
+      companyIds: companyScope.companyIds,
       orderDateCol: 'so.datecreated',
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       orderCompanyCol: 'so.companyid',
@@ -164,10 +179,19 @@ router.post('/revenue/by-source', requirePermission('reports.view'), async (req,
     const directF = buildPaymentRevenueFilter({
       dateFrom,
       dateTo,
-      companyId,
+      companyIds: companyScope.companyIds,
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       companyCol: 'COALESCE(so.companyid, customer.companyid)',
     });
+    let allocatedWhere = f.paymentWhere;
+    let directWhere = directF.where;
+    const sourceParams = [...f.params];
+    if (investorScope.isInvestor) {
+      sourceParams.push(investorScope.allowedCustomerIds);
+      const paramIdx = sourceParams.length;
+      allocatedWhere += ` AND so.partnerid = ANY($${paramIdx}::uuid[])`;
+      directWhere += ` AND COALESCE(so.partnerid, customer.id) = ANY($${paramIdx}::uuid[])`;
+    }
     const rows = await query(
       `WITH ${ALLOCATION_TOTALS_CTE},
        allocated_service_payments AS (
@@ -179,7 +203,7 @@ router.post('/revenue/by-source', requirePermission('reports.view'), async (req,
          LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
          JOIN dbo.saleorders so ON so.id = pa.invoice_id AND so.isdeleted=false
          LEFT JOIN dbo.partners customer ON customer.id = COALESCE(p.customer_id, so.partnerid)
-         WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${f.paymentWhere}
+         WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${allocatedWhere}
        ),
        direct_service_payments AS (
          SELECT COALESCE(so.sourceid, customer.sourceid) AS sourceid,
@@ -188,7 +212,7 @@ router.post('/revenue/by-source', requirePermission('reports.view'), async (req,
          FROM dbo.payments p
          LEFT JOIN dbo.saleorders so ON so.id = p.service_id AND so.isdeleted=false
          LEFT JOIN dbo.partners customer ON customer.id = COALESCE(p.customer_id, so.partnerid)
-         WHERE ${UNALLOCATED_SERVICE_PAYMENT_CONDITION} ${directF.where}
+         WHERE ${UNALLOCATED_SERVICE_PAYMENT_CONDITION} ${directWhere}
        ),
        recognized_service_payments AS (
          SELECT sourceid, order_id, paid FROM allocated_service_payments
@@ -216,7 +240,7 @@ router.post('/revenue/by-source', requirePermission('reports.view'), async (req,
        LEFT JOIN paid_totals pt ON (
          pt.sourceid=sk.sourceid OR (pt.sourceid IS NULL AND sk.sourceid IS NULL)
        )
-       ORDER BY paid DESC, name ASC LIMIT 100`, f.params);
+       ORDER BY paid DESC, name ASC LIMIT 100`, sourceParams);
 
     return res.json({ success: true, data: rows.map(r => ({ ...r, orderCount: toInt(r.order_count), paid: toNumber(r.paid) })) });
   } catch (e) { console.error('reports/revenue/by-source:', e); return err(res, 500, 'Internal error'); }
@@ -231,8 +255,10 @@ router.post('/revenue/payment-plans', requirePermission('reports.view'), async (
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    const companyScope = await resolveReportCompanyScope(req, res, companyId);
+    if (!companyScope) return;
 
-    const f = dateCompanyFilter(dateFrom, dateTo, companyId, 'mp.created_at', 'mp.company_id');
+    const f = dateCompanyScopeFilter(dateFrom, dateTo, companyScope, 'mp.created_at', 'mp.company_id');
     let fWhere = f.where;
     let params = [...f.params];
     if (investorScope.isInvestor) {
@@ -247,14 +273,9 @@ router.post('/revenue/payment-plans', requirePermission('reports.view'), async (
 
     const instConds = ['pi.due_date::date >= $1', 'pi.due_date::date <= $2'];
     const instParams = [dateFrom, dateTo];
-    let instIdx = 3;
-    if (companyId) {
-      instConds.push(`mp.company_id = $${instIdx}`);
-      instParams.push(companyId);
-      instIdx++;
-    }
+    appendCompanyScopeCondition(instConds, instParams, companyScope, 'mp.company_id');
     if (investorScope.isInvestor) {
-      instConds.push(`mp.customer_id = ANY($${instIdx}::uuid[])`);
+      instConds.push(`mp.customer_id = ANY($${instParams.length + 1}::uuid[])`);
       instParams.push(investorScope.allowedCustomerIds);
     }
     const installments = await query(

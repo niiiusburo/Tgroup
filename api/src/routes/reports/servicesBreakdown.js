@@ -1,7 +1,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID } = require('./helpers');
+const { err, validDate, validUUID, resolveReportCompanyScope } = require('./helpers');
 const { resolveInvestorScope } = require('../../services/permissionService');
 const {
   SERVICE_REVENUE_PAYMENT_CONDITION,
@@ -14,6 +14,13 @@ const {
 
 const router = express.Router();
 
+function scopedCompanyClause(scope, params, column) {
+  if (!Array.isArray(scope.companyIds)) return '';
+  if (scope.companyIds.length === 0) return 'AND FALSE';
+  params.push(scope.companyIds);
+  return `AND ${column} = ANY($${params.length}::uuid[])`;
+}
+
 // ── Services Breakdown ───────────────────────────────────────────────
 
 router.post('/services/breakdown', requirePermission('reports.view'), async (req, res) => {
@@ -22,17 +29,21 @@ router.post('/services/breakdown', requirePermission('reports.view'), async (req
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    const companyScope = await resolveReportCompanyScope(req, res, companyId);
+    if (!companyScope) return;
 
     // Products by category
+    const productParams = [];
+    const productCompanyClause = scopedCompanyClause(companyScope, productParams, 'p.companyid');
     const cats = await query(
       `SELECT pc.name as category, COUNT(p.id) as product_count,
               COALESCE(AVG(p.listprice),0) as avg_price
        FROM dbo.productcategories pc
-       LEFT JOIN dbo.products p ON p.categid=pc.id AND p.active=true
+       LEFT JOIN dbo.products p ON p.categid=pc.id AND p.active=true ${productCompanyClause}
        WHERE pc.active=true
-       GROUP BY pc.name ORDER BY product_count DESC`);
+       GROUP BY pc.name ORDER BY product_count DESC`, productParams);
 
-    const f = buildPaymentRevenueFilter({ dateFrom, dateTo, companyId });
+    const f = buildPaymentRevenueFilter({ dateFrom, dateTo, companyIds: companyScope.companyIds });
     let fWhere = f.where;
     let params = [...f.params];
     if (investorScope.isInvestor) {
@@ -98,14 +109,18 @@ router.post('/services/breakdown', requirePermission('reports.view'), async (req
        GROUP BY cs.name ORDER BY revenue DESC`, params);
 
     // Popular products
+    const popularParams = [];
+    const popularCompanyClause = scopedCompanyClause(companyScope, popularParams, 'COALESCE(so_pop.companyid, p.companyid)');
     const popular = await query(
       `SELECT p.name, pc.name as category, p.listprice, COUNT(sol.id) as order_count
        FROM dbo.products p
        LEFT JOIN dbo.productcategories pc ON pc.id=p.categid
        LEFT JOIN dbo.saleorderlines sol ON sol.productid=p.id
+       LEFT JOIN dbo.saleorders so_pop ON so_pop.id=sol.orderid AND so_pop.isdeleted=false
        WHERE p.active=true
+       ${popularCompanyClause}
        GROUP BY p.name, pc.name, p.listprice
-       ORDER BY order_count DESC LIMIT 20`);
+       ORDER BY order_count DESC LIMIT 20`, popularParams);
 
     return res.json({ success: true, data: {
       categories: cats.map(c => ({ category: c.category, productCount: toInt(c.product_count), avgPrice: toNumber(c.avg_price) })),

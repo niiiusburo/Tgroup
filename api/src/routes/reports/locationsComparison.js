@@ -1,7 +1,15 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, dateCompanyFilter } = require('./helpers');
+const {
+  err,
+  validDate,
+  validUUID,
+  dateCompanyScopeFilter,
+  resolveReportCompanyScope,
+  appendCompanyScopeCondition,
+  companyScopeWhere,
+} = require('./helpers');
 const { resolveInvestorScope } = require('../../services/permissionService');
 const { getCanonicalRevenueByLocation } = require('../../services/reports/canonicalRevenue');
 
@@ -11,12 +19,14 @@ const router = express.Router();
 
 router.post('/locations/comparison', requirePermission('reports.view'), async (req, res) => {
   try {
-    const { dateFrom, dateTo } = req.body || {};
-    if (!validDate(dateFrom) || !validDate(dateTo)) return err(res, 400, 'Invalid params');
+    const { dateFrom, dateTo, companyId } = req.body || {};
+    if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    const companyScope = await resolveReportCompanyScope(req, res, companyId);
+    if (!companyScope) return;
 
-    const af = dateCompanyFilter(dateFrom, dateTo, null, 'date');
+    const af = dateCompanyScopeFilter(dateFrom, dateTo, companyScope, 'date');
     const queryParams = [...af.params];
     let afWhere = af.where;
     if (investorScope.isInvestor) {
@@ -29,12 +39,15 @@ router.post('/locations/comparison', requirePermission('reports.view'), async (r
     let soIdx = queryParams.length + 1;
     if (dateFrom) { soConds.push(`datecreated::date >= $${soIdx}`); queryParams.push(dateFrom); soIdx++; }
     if (dateTo) { soConds.push(`datecreated::date <= $${soIdx}`); queryParams.push(dateTo); soIdx++; }
+    appendCompanyScopeCondition(soConds, queryParams, companyScope, 'companyid');
+    soIdx = queryParams.length + 1;
     if (investorScope.isInvestor) {
       soConds.push(`partnerid = ANY($${soIdx}::uuid[])`);
       queryParams.push(investorScope.allowedCustomerIds);
       soIdx++;
     }
     const soWhere = soConds.length ? 'AND ' + soConds.join(' AND ') : '';
+    const locationFilter = companyScopeWhere(companyScope, 'c.id', queryParams);
 
     const locations = await query(
       `SELECT c.id, c.name, c.active,
@@ -45,12 +58,13 @@ router.post('/locations/comparison', requirePermission('reports.view'), async (r
        FROM dbo.companies c
        LEFT JOIN (SELECT companyid, COUNT(*) as cnt, SUM(CASE WHEN state IN ('done','completed') THEN 1 ELSE 0 END) as done FROM dbo.appointments WHERE 1=1 ${afWhere} GROUP BY companyid) appt ON appt.companyid=c.id
        LEFT JOIN (SELECT companyid, COUNT(*) as order_count FROM dbo.saleorders WHERE isdeleted=false ${soWhere} GROUP BY companyid) so ON so.companyid=c.id
-       LEFT JOIN (SELECT companyid, COUNT(*) as cnt FROM dbo.partners WHERE employee=true AND isdeleted=false GROUP BY companyid) emp ON emp.companyid=c.id`, queryParams);
+       LEFT JOIN (SELECT companyid, COUNT(*) as cnt FROM dbo.partners WHERE employee=true AND isdeleted=false GROUP BY companyid) emp ON emp.companyid=c.id
+       WHERE 1=1 ${locationFilter}`, queryParams);
 
     // Get canonical revenue by location and merge into locations.
     const revenueFilters = investorScope.isInvestor
-      ? { dateFrom, dateTo, allowedCustomerIds: investorScope.allowedCustomerIds }
-      : { dateFrom, dateTo };
+      ? { dateFrom, dateTo, companyIds: companyScope.companyIds, allowedCustomerIds: investorScope.allowedCustomerIds }
+      : { dateFrom, dateTo, companyIds: companyScope.companyIds };
     const revenueData = await getCanonicalRevenueByLocation(revenueFilters);
     const revenueMap = new Map(revenueData.map(r => [r.companyId, r.revenue]));
 
@@ -62,11 +76,13 @@ router.post('/locations/comparison', requirePermission('reports.view'), async (r
 
     // Location growth trend
     const trendParams = [dateFrom, dateTo];
-    let trendWhere = 'a.date::date >= $1 AND a.date::date <= $2';
+    const trendConds = ['a.date::date >= $1', 'a.date::date <= $2'];
+    appendCompanyScopeCondition(trendConds, trendParams, companyScope, 'a.companyid');
     if (investorScope.isInvestor) {
       trendParams.push(investorScope.allowedCustomerIds);
-      trendWhere += ` AND a.partnerid = ANY($${trendParams.length}::uuid[])`;
+      trendConds.push(`a.partnerid = ANY($${trendParams.length}::uuid[])`);
     }
+    const trendWhere = trendConds.join(' AND ');
     const trend = await query(
       `SELECT c.name, DATE_TRUNC('month', a.date) as month, COUNT(*) as cnt
        FROM dbo.companies c

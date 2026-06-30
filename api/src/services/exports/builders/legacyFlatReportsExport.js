@@ -5,6 +5,7 @@ const { createFlatWorkbook } = require('../flatWorkbook');
 const { REVENUE_COLUMNS, DEPOSIT_COLUMNS } = require('./legacyFlatReportColumns');
 const { getRevenueRows, previewRevenue } = require('./legacyFlatRevenueQuery');
 const { getDepositRows, previewDeposit } = require('./legacyFlatDepositQuery');
+const { resolveCompanyScopeForUser } = require('../../reportLocationScope');
 
 const MAX_ROWS = 100_000;
 
@@ -23,10 +24,29 @@ function dateValue(value) {
   return value ? toVNDate(value) : null;
 }
 
+async function scopedFilters(filters, user) {
+  const scope = await resolveCompanyScopeForUser(user, filters.companyId, {
+    deniedMessage: 'Bạn không có quyền xuất dữ liệu cho chi nhánh này.',
+    deniedCode: 'EXPORT_LOCATION_DENIED',
+    scopeRequiredMessage: 'Tài khoản chưa có phạm vi chi nhánh để xuất báo cáo.',
+    scopeRequiredCode: 'EXPORT_LOCATION_SCOPE_REQUIRED',
+    requireAssignedLocation: true,
+  });
+
+  if (scope.isUnrestricted && scope.requestedCompanyId) {
+    return filters;
+  }
+  if (scope.companyIds === null) {
+    return { ...filters, companyIds: undefined };
+  }
+  return { ...filters, companyId: 'all', companyIds: scope.companyIds };
+}
+
 function createBuilder({ columns, getRows, getPreview, toDataRow }) {
   return {
-    async preview(filters) {
-      const summary = await getPreview(filters);
+    async preview(filters, user) {
+      const effectiveFilters = await scopedFilters(filters, user);
+      const summary = await getPreview(effectiveFilters);
       const total = parseInt(summary.total || 0, 10);
       return {
         rowCount: total,
@@ -39,7 +59,8 @@ function createBuilder({ columns, getRows, getPreview, toDataRow }) {
     },
 
     async build(filters, user) {
-      const rows = await getRows(filters, MAX_ROWS);
+      const effectiveFilters = await scopedFilters(filters, user);
+      const rows = await getRows(effectiveFilters, MAX_ROWS);
       if (rows.length > MAX_ROWS) {
         throw makeRowLimitError();
       }

@@ -9,6 +9,7 @@ interface ReportsFiltersProps {
   onCompanyChange: (v: string) => void;
   locations: { id: string; name: string }[];
   locationsLoading?: boolean;
+  locationLocked?: boolean;
 }
 
 import { useTranslation } from 'react-i18next';
@@ -31,6 +32,7 @@ export function ReportsFilters({
   onDateFromChange, onDateToChange, onCompanyChange,
   locations,
   locationsLoading = false,
+  locationLocked = false,
 }: ReportsFiltersProps) {
   const { t, i18n } = useTranslation('reports');
   const { getToday } = useTimezone();
@@ -113,17 +115,24 @@ export function ReportsFilters({
       </div>
 
       {/* Location filter */}
-      <select
-        value={companyId}
-        onChange={(e) => onCompanyChange(e.target.value)}
-        disabled={locationsLoading}
-        className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-      >
-        <option value="">{locationsLoading ? t('loadingLocations', 'Loading locations...') : t('allLocations', 'Tất cả chi nhánh')}</option>
-        {locations.map((loc) => (
-          <option key={loc.id} value={loc.id}>{loc.name}</option>
-        ))}
-      </select>
+      <div className="flex flex-col gap-1">
+        <select
+          value={companyId}
+          onChange={(e) => onCompanyChange(e.target.value)}
+          disabled={locationsLoading || locationLocked}
+          className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary disabled:bg-gray-50 disabled:text-gray-600 disabled:cursor-not-allowed"
+        >
+          {!locationLocked && (
+            <option value="">{locationsLoading ? t('loadingLocations', 'Loading locations...') : t('allLocations', 'Tất cả chi nhánh')}</option>
+          )}
+          {locations.map((loc) => (
+            <option key={loc.id} value={loc.id}>{loc.name}</option>
+          ))}
+        </select>
+        {locationLocked && (
+          <span className="text-[11px] text-gray-500">{t('filters.locationLocked', 'Locked to your assigned location')}</span>
+        )}
+      </div>
       </div>
     </motion.div>
   );

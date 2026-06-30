@@ -60,7 +60,9 @@ Staff → /login form → POST /api/Auth/login
 2. **Employee overrides** (`permission_overrides` — grant or revoke specific strings)
 3. **Location scope** (`employee_location_scope` — restricts visible locations)
 
-Effective permissions = (Group ∪ Grants) − Revokes, then filtered by location scope at the UI level.
+Effective permissions = (Group ∪ Grants) − Revokes, then filtered by location scope at the UI level for general pages.
+
+Reports are the explicit higher-blast exception: `/api/Reports` endpoints and report exports from `/reports/revenue` also enforce employee location scope server-side. For non-admin employees, omitted/all `companyId` resolves to the allowed branch IDs; unauthorized explicit branch requests fail with 403 before report data is queried.
 
 Investor customer scope is an additional backend data filter. Only employee identities whose permission group name is exactly `investor` are scoped through `dbo.investor_clients`; everyone else keeps the existing behavior. The investor group resolves to an explicit staff-style permission set so the employee shell does not hide normal pages or controls, but it is never granted wildcard `*` access. Customer-linked reads/writes must apply the allowlist; legacy fallbacks such as `accountpayments` may only run for allowlisted customer IDs, and branch/date report filters must be combined with the customer allowlist rather than replacing it. Role/employee mutation endpoints block investor callers even when the UI exposes those controls. On NK2, investor passwords may be stored in `dbo.investor_accounts` instead of `partners.password_hash` so the shared `tdental_demo` database does not create a production-login-capable NK account before NK production has the same investor filters.
 

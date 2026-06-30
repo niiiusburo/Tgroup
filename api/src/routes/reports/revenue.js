@@ -1,7 +1,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID } = require('./helpers');
+const { err, validDate, validUUID, resolveReportCompanyScope, companyScopeWhere } = require('./helpers');
 const { resolveInvestorScope } = require('../../services/permissionService');
 const {
   SERVICE_REVENUE_PAYMENT_CONDITION,
@@ -42,11 +42,13 @@ router.post('/revenue/summary', requirePermission('reports.view'), async (req, r
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    const companyScope = await resolveReportCompanyScope(req, res, companyId);
+    if (!companyScope) return;
 
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
-      companyId,
+      companyIds: companyScope.companyIds,
       orderDateCol: 'datecreated',
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       orderCompanyCol: 'companyid',
@@ -100,11 +102,13 @@ router.post('/revenue/trend', requirePermission('reports.view'), async (req, res
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    const companyScope = await resolveReportCompanyScope(req, res, companyId);
+    if (!companyScope) return;
 
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
-      companyId,
+      companyIds: companyScope.companyIds,
       orderDateCol: 'datecreated',
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       orderCompanyCol: 'companyid',
@@ -169,11 +173,13 @@ router.post('/revenue/by-location', requirePermission('reports.view'), async (re
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    const companyScope = await resolveReportCompanyScope(req, res, companyId);
+    if (!companyScope) return;
 
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
-      companyId,
+      companyIds: companyScope.companyIds,
       orderDateCol: 'so.datecreated',
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       orderCompanyCol: 'so.companyid',
@@ -188,6 +194,7 @@ router.post('/revenue/by-location', requirePermission('reports.view'), async (re
       orderWhere += ` AND so.partnerid = ANY($${paramIdx}::uuid[])`;
       paymentWhere += ` AND so.partnerid = ANY($${paramIdx}::uuid[])`;
     }
+    const outerCompanyWhere = companyScopeWhere(companyScope, 'c.id', params);
     const rows = await query(
       `WITH order_totals AS (
          SELECT so.companyid, COUNT(so.id) as order_count,
@@ -214,6 +221,7 @@ router.post('/revenue/by-location', requirePermission('reports.view'), async (re
        FROM dbo.companies c
        LEFT JOIN order_totals ot ON ot.companyid=c.id
        LEFT JOIN paid_totals pt ON pt.companyid=c.id
+       WHERE 1=1 ${outerCompanyWhere}
        ORDER BY paid DESC`, params);
 
     return res.json({ success: true, data: rows.map(r => ({ ...r, orderCount: toInt(r.order_count), invoiced: toNumber(r.invoiced), paid: toNumber(r.paid), outstanding: toNumber(r.outstanding) })) });

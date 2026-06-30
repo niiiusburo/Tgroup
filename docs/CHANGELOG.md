@@ -14,6 +14,13 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.56] — 2026-06-30
+### Security
+- **NK2 reports now enforce employee location scope server-side:** `/api/Reports` endpoints and report exports from `/reports/revenue` resolve allowed company IDs from the employee primary branch plus `employee_location_scope`; empty/all `companyId` is limited to allowed branches for scoped employees, unauthorized explicit branch requests fail with 403, and the Reports location picker locks single-location employees to their assigned branch. — @agent — Preserves INV-023 / UC-013 / UC-019.
+
+### Tested
+- `cd api && npx jest --runTestsByPath src/routes/reports/__tests__/locationScope.test.js src/services/exports/__tests__/legacyFlatReportsExport.test.js --runInBand` passed 2 suites / 13 tests; `cd api && npx jest --runTestsByPath src/routes/reports/__tests__/locationScope.test.js src/routes/reports/__tests__/cashFlow.test.js src/routes/reports/__tests__/revenueRecognition.test.js src/routes/reports/__tests__/servicesBreakdown.test.js src/services/reports/__tests__/canonicalRevenue.test.js src/services/exports/__tests__/reportSalesEmployeesExport.test.js src/services/exports/__tests__/legacyFlatReportsExport.test.js --runInBand` passed 7 suites / 52 tests; `npm --prefix website test -- src/pages/reports/__tests__/ReportsLocationScope.test.tsx src/pages/reports/__tests__/ReportsDashboard.test.tsx src/pages/reports/__tests__/ReportsSubpages.test.tsx src/hooks/__tests__/useReportData.test.ts` passed 4 files / 37 tests; `npm --prefix website run build` passed and generated `version.json` for `0.32.56`; production-file Semgrep over changed report/export runtime files found 0 findings. — @agent
+
 ## [0.32.55] — 2026-06-30
 ### Changed
 - **NK2 customer profiles now show Face ID readiness:** `GET /api/face/status/:partnerId` returns a versioned readiness score, target sample count, stored-quality input when available, and recommended action. Customer profile headers display the percentage and sample coverage next to the Face ID badge, while CompreFace mode scores readiness from provider sample coverage instead of mixing in old local embeddings. The visible recognizer version is now `v0.32.55` / `face-recognition-0.32.55`; existing face samples are unchanged. — @agent — UC-003 / Face ID enrollment readiness.

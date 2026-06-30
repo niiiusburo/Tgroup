@@ -4,7 +4,12 @@ jest.mock('../../../db', () => ({
   query: jest.fn(),
 }));
 
+jest.mock('../../../services/permissionService', () => ({
+  resolveEffectivePermissions: jest.fn(),
+}));
+
 const { query } = require('../../../db');
+const { resolveEffectivePermissions } = require('../../../services/permissionService');
 const legacyFlatReportsExport = require('../builders/legacyFlatReportsExport');
 const { getExportType } = require('../exportRegistry');
 
@@ -14,10 +19,20 @@ const USER = {
 };
 
 const LOC_A = '11111111-1111-4111-8111-111111111111';
+const LOC_B = '33333333-3333-4333-8333-333333333333';
 const DOCTOR_ID = '22222222-2222-4222-8222-222222222222';
+const SCOPED_USER = {
+  employeeId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+  name: 'Scoped Employee',
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
+  resolveEffectivePermissions.mockResolvedValue({
+    groupName: 'Admin',
+    effectivePermissions: ['*'],
+    locations: [],
+  });
 });
 
 describe('legacyFlatReportsExport', () => {
@@ -180,6 +195,42 @@ describe('legacyFlatReportsExport', () => {
     expect(params).toEqual(['2026-05-09', '2026-05-09', '08:00', '17:30', LOC_A, DOCTOR_ID]);
   });
 
+  it('scopes flat revenue previews to allowed companies when companyId is all', async () => {
+    resolveEffectivePermissions.mockResolvedValueOnce({
+      groupName: 'Employee',
+      effectivePermissions: ['payments.export'],
+      locations: [{ id: LOC_A, name: 'Location A' }],
+    });
+    query.mockResolvedValueOnce([{ total: '2', total_amount: '1500000' }]);
+
+    await legacyFlatReportsExport.revenue.preview({
+      companyId: 'all',
+      dateFrom: '2026-05-09',
+      dateTo: '2026-05-09',
+    }, SCOPED_USER);
+
+    const [sql, params] = query.mock.calls[0];
+    expect(sql).toContain('so.companyid = ANY($3::uuid[])');
+    expect(params).toEqual(['2026-05-09', '2026-05-09', [LOC_A]]);
+  });
+
+  it('rejects flat revenue previews for an unauthorized explicit company', async () => {
+    resolveEffectivePermissions.mockResolvedValueOnce({
+      groupName: 'Employee',
+      effectivePermissions: ['payments.export'],
+      locations: [{ id: LOC_A, name: 'Location A' }],
+    });
+
+    await expect(
+      legacyFlatReportsExport.revenue.preview({
+        companyId: LOC_B,
+        dateFrom: '2026-05-09',
+        dateTo: '2026-05-09',
+      }, SCOPED_USER)
+    ).rejects.toMatchObject({ status: 403, code: 'EXPORT_LOCATION_DENIED' });
+    expect(query).not.toHaveBeenCalled();
+  });
+
   it('builds the deposit workbook with the exact flat legacy template', async () => {
     query.mockResolvedValueOnce([
       {
@@ -262,6 +313,25 @@ describe('legacyFlatReportsExport', () => {
     expect(sql).not.toContain('p.companyid');
     expect(sql).toContain('pr.companyid = $5');
     expect(params).toEqual(['2026-05-09', '2026-05-09', '08:00', '17:30', LOC_A]);
+  });
+
+  it('scopes flat deposit previews to allowed companies when companyId is all', async () => {
+    resolveEffectivePermissions.mockResolvedValueOnce({
+      groupName: 'Employee',
+      effectivePermissions: ['payments.export'],
+      locations: [{ id: LOC_A, name: 'Location A' }],
+    });
+    query.mockResolvedValueOnce([{ total: '1', total_amount: '2000000' }]);
+
+    await legacyFlatReportsExport.deposit.preview({
+      companyId: 'all',
+      dateFrom: '2026-05-09',
+      dateTo: '2026-05-09',
+    }, SCOPED_USER);
+
+    const [sql, params] = query.mock.calls[0];
+    expect(sql).toContain('pr.companyid = ANY($3::uuid[])');
+    expect(params).toEqual(['2026-05-09', '2026-05-09', [LOC_A]]);
   });
 
   it('throws EXPORT_ROW_LIMIT_EXCEEDED when the flat export exceeds the row limit', async () => {

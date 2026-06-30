@@ -10,6 +10,44 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK2 Reports Employee Location Scope 2026-06-30
+
+Feature/edit name: NK2 reports employee-location-scope enforcement (v0.32.56)
+
+Changed URLs / API routes / data flow:
+- URL: `/reports` and all report subpages under `/reports/*`.
+- APIs: all `POST /api/Reports/*` endpoints.
+- APIs: `POST /api/Exports/report-sales-employees/{preview,download}`, `POST /api/Exports/revenue-flat/{preview,download}`, `POST /api/Exports/deposit-flat/{preview,download}`.
+- Data flow: auth permissions/location scope -> `LocationContext` -> Reports global filter -> report APIs/export builders -> company-scoped SQL.
+
+Affected roles and data flows:
+- Single-location employees see the Reports location filter locked to their assigned branch.
+- Multi-location scoped employees can use all allowed branches or one allowed branch; `companyId` empty/all does not mean every branch.
+- Unauthorized explicit branch requests fail before report/export queries run.
+- Admin/Super Admin/wildcard users keep intentional all-location behavior.
+- Investor users keep customer allowlist scope and optional branch narrowing.
+
+Expected behavior:
+
+| Visit / action | Expected result |
+|---|---|
+| Single-location employee opens `/reports` | Location filter shows only the assigned branch, is disabled, and the period banner names that branch. |
+| Scoped employee posts a report request without `companyId` | Backend SQL uses `ANY([allowedCompanyIds])` and returns only allowed branch data. |
+| Scoped employee posts a report request with an unauthorized `companyId` | API returns 403 `Location not allowed`; no report query runs. |
+| Scoped employee previews/downloads `revenue-flat` or `deposit-flat` with `companyId=all` | Export SQL uses the employee allowed company IDs. |
+| Scoped employee requests an unauthorized report export branch | Export returns 403 `EXPORT_LOCATION_DENIED`; no export row query runs. |
+
+Execution checklist:
+- [x] PASS: New targeted report/export scope tests fail before implementation and pass after implementation - `cd api && npx jest --runTestsByPath src/routes/reports/__tests__/locationScope.test.js src/services/exports/__tests__/legacyFlatReportsExport.test.js --runInBand` passed 2 suites / 13 tests.
+- [x] PASS: Existing report/export regression tests still pass - `cd api && npx jest --runTestsByPath src/routes/reports/__tests__/locationScope.test.js src/routes/reports/__tests__/cashFlow.test.js src/routes/reports/__tests__/revenueRecognition.test.js src/routes/reports/__tests__/servicesBreakdown.test.js src/services/reports/__tests__/canonicalRevenue.test.js src/services/exports/__tests__/reportSalesEmployeesExport.test.js src/services/exports/__tests__/legacyFlatReportsExport.test.js --runInBand` passed 7 suites / 52 tests.
+- [x] PASS: Reports UI lock and existing report page tests pass - `npm --prefix website test -- src/pages/reports/__tests__/ReportsLocationScope.test.tsx src/pages/reports/__tests__/ReportsDashboard.test.tsx src/pages/reports/__tests__/ReportsSubpages.test.tsx src/hooks/__tests__/useReportData.test.ts` passed 4 files / 37 tests.
+- [x] PASS: Website build/typecheck and version metadata generated for v0.32.56 - `npm --prefix website run build` passed and generated `version.json` with version `0.32.56`.
+- [x] PASS: Scoped Semgrep over changed production auth/data-flow surfaces returns no findings - production-file scan over report/export runtime files found 0 findings; broad scan only flagged CSRF audit findings in temporary Express test apps.
+- [x] PASS: Governance and docs gate pass - `npm run verify:governance` passed.
+- [x] PASS: Browser-visible Reports proof captured with same-origin mocked auth - Chrome/Playwright rendered `/reports/dashboard`, locked the location select to `Location A`, hid `Location B`, and posted `companyId=11111111-1111-1111-1111-111111111111`; screenshot `output/playwright/nk2-reports-location-scope-20260630/local-reports-scope-lock.png`.
+
+---
+
 # TestSprite Plan: NK2 Face ID Profile Readiness Score 2026-06-30
 
 Feature/edit name: NK2 Face ID profile readiness score and status contract (v0.32.55)

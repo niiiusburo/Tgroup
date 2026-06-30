@@ -4,7 +4,7 @@ const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
 const { getVietnamToday } = require('../../lib/dateUtils');
-const { err, validDate, validUUID, dateCompanyFilter } = require('./helpers');
+const { err, validDate, validUUID, dateCompanyScopeFilter, resolveReportCompanyScope } = require('./helpers');
 const { resolveInvestorScope } = require('../../services/permissionService');
 const {
   getCanonicalRevenue,
@@ -35,11 +35,13 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    const companyScope = await resolveReportCompanyScope(req, res, companyId);
+    if (!companyScope) return;
 
     // Invoiced/outstanding still come from saleorders — they are different concepts
     // than "collected revenue" (which now matches the Excel canonical formula below).
     const so = applyInvestorPartnerScope(
-      dateCompanyFilter(dateFrom, dateTo, companyId, 'datecreated'),
+      dateCompanyScopeFilter(dateFrom, dateTo, companyScope, 'datecreated'),
       'partnerid',
       investorScope
     );
@@ -52,11 +54,11 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
        FROM dbo.saleorders WHERE isdeleted=false ${so.where}`, so.params);
 
     // Collected revenue — single source of truth shared with the Excel revenue-flat export.
-    const curPaid = await getCanonicalRevenue(investorRevenueFilters({ dateFrom, dateTo, companyId }, investorScope));
+    const curPaid = await getCanonicalRevenue(investorRevenueFilters({ dateFrom, dateTo, companyIds: companyScope.companyIds }, investorScope));
 
     // Appointments
     const af = applyInvestorPartnerScope(
-      dateCompanyFilter(dateFrom, dateTo, companyId, 'date'),
+      dateCompanyScopeFilter(dateFrom, dateTo, companyScope, 'date'),
       'partnerid',
       investorScope
     );
@@ -70,7 +72,7 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
 
     // New customers
     const cf = applyInvestorPartnerScope(
-      dateCompanyFilter(dateFrom, dateTo, companyId, 'datecreated'),
+      dateCompanyScopeFilter(dateFrom, dateTo, companyScope, 'datecreated'),
       'id',
       investorScope
     );
@@ -83,12 +85,12 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
     const prevFromDate = new Date(new Date(prevTo + 'T00:00:00Z') - days * 86400000);
     const prevFrom = prevFromDate.toISOString().split('T')[0];
 
-    const prevPaid = await getCanonicalRevenue(investorRevenueFilters({ dateFrom: prevFrom, dateTo: prevTo, companyId }, investorScope));
+    const prevPaid = await getCanonicalRevenue(investorRevenueFilters({ dateFrom: prevFrom, dateTo: prevTo, companyIds: companyScope.companyIds }, investorScope));
     const revChange = prevPaid > 0 ? ((curPaid - prevPaid) / prevPaid * 100).toFixed(1) : null;
 
     const curAppt = parseInt(appt[0]?.total || 0, 10);
     const paf = applyInvestorPartnerScope(
-      dateCompanyFilter(prevFrom, prevTo, companyId, 'date'),
+      dateCompanyScopeFilter(prevFrom, prevTo, companyScope, 'date'),
       'partnerid',
       investorScope
     );
@@ -103,9 +105,9 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
     const trendFrom = trendFromDate.toISOString().split('T')[0];
 
     const canonicalMonths = await getCanonicalRevenueByMonth(
-      investorRevenueFilters({ dateFrom: trendFrom, dateTo: today, companyId }, investorScope)
+      investorRevenueFilters({ dateFrom: trendFrom, dateTo: today, companyIds: companyScope.companyIds }, investorScope)
     );
-    const invoicedFilter = dateCompanyFilter(trendFrom, today, companyId, 'datecreated');
+    const invoicedFilter = dateCompanyScopeFilter(trendFrom, today, companyScope, 'datecreated');
     const invoicedParams = [...invoicedFilter.params];
     let invoicedWhere = invoicedFilter.where;
     if (investorScope.isInvestor) {

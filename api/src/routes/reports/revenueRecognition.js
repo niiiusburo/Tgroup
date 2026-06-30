@@ -44,6 +44,7 @@ function buildPairedRevenueFilters({
   dateFrom,
   dateTo,
   companyId,
+  companyIds,
   orderDateCol,
   paymentDateCol,
   orderCompanyCol,
@@ -70,7 +71,18 @@ function buildPairedRevenueFilters({
     idx++;
   }
 
-  if (companyId) {
+  if (Array.isArray(companyIds)) {
+    if (companyIds.length === 0) {
+      orderConds.push('FALSE');
+      paymentConds.push('FALSE');
+    } else {
+      const ref = `$${idx}`;
+      orderConds.push(`${orderCompanyCol} = ANY(${ref}::uuid[])`);
+      paymentConds.push(`${paymentCompanyCol} = ANY(${ref}::uuid[])`);
+      params.push(companyIds);
+      idx++;
+    }
+  } else if (companyId) {
     const ref = `$${idx}`;
     orderConds.push(`${orderCompanyCol} = ${ref}`);
     paymentConds.push(`${paymentCompanyCol} = ${ref}`);
@@ -90,6 +102,7 @@ function buildPaymentRevenueFilter({
   dateFrom,
   dateTo,
   companyId,
+  companyIds,
   paymentDateCol = 'COALESCE(p.payment_date, p.created_at)',
   companyCol = 'so.companyid',
 }) {
@@ -109,7 +122,15 @@ function buildPaymentRevenueFilter({
     idx++;
   }
 
-  if (companyId) {
+  if (Array.isArray(companyIds)) {
+    if (companyIds.length === 0) {
+      conds.push('FALSE');
+    } else {
+      conds.push(`${companyCol} = ANY($${idx}::uuid[])`);
+      params.push(companyIds);
+      idx++;
+    }
+  } else if (companyId) {
     conds.push(`${companyCol} = $${idx}`);
     params.push(companyId);
     idx++;

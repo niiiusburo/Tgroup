@@ -286,16 +286,18 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Preconditions:** Actor has the export permission for the selected export type; date range selected.
 - **Main flow:**
   1. Actor navigates to `/reports/revenue`.
-  2. Sets date range, location, doctor filters.
+  2. Sets date range, location, doctor filters; single-location employees see the location selector locked to their assigned branch.
   3. Clicks Export → frontend calls `POST /api/Exports/revenue-flat/download` with `{ filters }`.
-  4. Backend runs the legacy flat revenue export builder, using posted service payment allocations and allocation proration.
-  5. File downloads; an `exports_audit` row is attempted on a best-effort basis.
+  4. Backend resolves the employee's report location scope and treats `companyId=all` as all allowed branches for scoped employees.
+  5. Backend runs the legacy flat revenue export builder, using posted service payment allocations and allocation proration.
+  6. File downloads; an `exports_audit` row is attempted on a best-effort basis.
 - **Alternate flows:**
   - **AF-1 Large dataset >60s:** Nginx timeout must be ≥300s (INV-019).
   - **AF-2 No data:** Returns empty workbook with headers.
+  - **AF-3 Unauthorized branch:** Backend returns 403 `EXPORT_LOCATION_DENIED` before querying report rows.
 - **Postconditions:** Excel file downloaded; audit log attempted without blocking the workbook response.
-- **Invariants touched:** INV-019 (nginx timeout), INV-020 (version bump if export builder changed).
-- **Traceability:** Related WF: WF-005, WF-013, UC-019. Contracts/routes: `POST /api/Reports/revenue/summary`, `POST /api/Reports/revenue/trend`, `POST /api/Reports/revenue/by-location`, `POST /api/Reports/revenue/by-doctor`, `POST /api/Reports/revenue/by-category`, `POST /api/Reports/cash-flow/summary`, `POST /api/Exports/:type/preview`, `POST /api/Exports/:type/download` with type `revenue-flat`. Data/tables: `dbo.payment_allocations`, `dbo.payments`, `dbo.saleorders`, `dbo.saleorderlines`, `dbo.partners`, `dbo.products`, `dbo.companies`, `dbo.customersources`, `dbo.exports_audit`. Tests: `api/src/routes/reports/__tests__/revenueRecognition.test.js`, `api/src/routes/reports/__tests__/cashFlow.test.js`, `api/src/routes/reports/__tests__/servicesBreakdown.test.js`, `api/src/services/reports/__tests__/canonicalRevenue.test.js`, `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `website/src/hooks/__tests__/useReportData.test.ts`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`. Product-map domains: `reports-analytics`, `payments-deposits`, `services-catalog`, `customers-partners`, `employees-hr`.
+- **Invariants touched:** INV-019 (nginx timeout), INV-020 (version bump if export builder changed), INV-023 (reports employee location scope).
+- **Traceability:** Related WF: WF-005, WF-013, UC-019. Contracts/routes: `POST /api/Reports/revenue/summary`, `POST /api/Reports/revenue/trend`, `POST /api/Reports/revenue/by-location`, `POST /api/Reports/revenue/by-doctor`, `POST /api/Reports/revenue/by-category`, `POST /api/Reports/cash-flow/summary`, `POST /api/Exports/:type/preview`, `POST /api/Exports/:type/download` with type `revenue-flat`. Data/tables: `dbo.payment_allocations`, `dbo.payments`, `dbo.saleorders`, `dbo.saleorderlines`, `dbo.partners`, `dbo.products`, `dbo.companies`, `dbo.customersources`, `dbo.employee_location_scope`, `dbo.exports_audit`. Tests: `api/src/routes/reports/__tests__/locationScope.test.js`, `api/src/routes/reports/__tests__/revenueRecognition.test.js`, `api/src/routes/reports/__tests__/cashFlow.test.js`, `api/src/routes/reports/__tests__/servicesBreakdown.test.js`, `api/src/services/reports/__tests__/canonicalRevenue.test.js`, `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `website/src/pages/reports/__tests__/ReportsLocationScope.test.tsx`, `website/src/hooks/__tests__/useReportData.test.ts`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`. Product-map domains: `reports-analytics`, `payments-deposits`, `services-catalog`, `customers-partners`, `employees-hr`.
 
 ---
 
@@ -394,14 +396,15 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Trigger:** `/reports/revenue` → employee revenue Excel export controls
 - **Preconditions:** Actor has `reports.export`; date range selected; optional employee type and employee filters selected.
 - **Main flow:**
-  1. Actor sets date range, location filter, employee type filter.
+  1. Actor sets date range, location filter, employee type filter; a single-location actor is locked to the assigned branch.
   2. Clicks Export → `POST /api/Exports/report-sales-employees/download` with `{ filters }`.
-  3. Backend queries `payments`, `payment_allocations`, `saleorders`, `partners`, and `companies` using the requested employee role attribution.
-  4. Groups by employee; builds Excel with revenue per employee.
-  5. File downloads and an `exports_audit` row is attempted.
+  3. Backend resolves employee location scope; `all` means all allowed branches for scoped employees.
+  4. Backend queries `payments`, `payment_allocations`, `saleorders`, `partners`, and `companies` using the requested employee role attribution.
+  5. Groups by employee; builds Excel with revenue per employee.
+  6. File downloads and an `exports_audit` row is attempted.
 - **Postconditions:** Excel downloaded; audit log written.
-- **Invariants touched:** INV-019 (nginx timeout).
-- **Traceability:** Related WF: WF-005, WF-013, UC-013. Contracts/routes: `POST /api/Exports/report-sales-employees/preview`, `POST /api/Exports/report-sales-employees/download`. Data/tables: `dbo.payment_allocations`, `dbo.payments`, `dbo.saleorders`, `dbo.partners`, `dbo.companies`, `dbo.exports_audit`. Tests: `api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`, `website/e2e/export-downloads.spec.ts` for broader export downloads. Product-map domains: `reports-analytics`, `payments-deposits`, `employees-hr`.
+- **Invariants touched:** INV-019 (nginx timeout), INV-023 (reports employee location scope).
+- **Traceability:** Related WF: WF-005, WF-013, UC-013. Contracts/routes: `POST /api/Exports/report-sales-employees/preview`, `POST /api/Exports/report-sales-employees/download`. Data/tables: `dbo.payment_allocations`, `dbo.payments`, `dbo.saleorders`, `dbo.partners`, `dbo.companies`, `dbo.employee_location_scope`, `dbo.exports_audit`. Tests: `api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js`, `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `website/src/pages/reports/__tests__/ReportsLocationScope.test.tsx`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`, `website/e2e/export-downloads.spec.ts` for broader export downloads. Product-map domains: `reports-analytics`, `payments-deposits`, `employees-hr`.
 
 ---
 

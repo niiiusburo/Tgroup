@@ -65,11 +65,17 @@
 **Enforced by:** Code review + `ARCHITECTURE.md` §6.
 **Cite when:** Editing auth middleware, login, or permission resolution.
 
-### INV-009 — Location Scope Frontend-Only Filter
-**Rule:** Backend list routes generally do NOT enforce location scope. The frontend `LocationContext` is responsible for filtering by `companyid`.
-**Rationale:** Backend location scoping was historically inconsistent; frontend filtering is the current operational contract.
-**Enforced by:** Most `api/src/routes/*.js` list handlers lack location scoping SQL.
+### INV-009 — General Location Scope Frontend Filter
+**Rule:** Backend list routes generally do NOT enforce location scope unless a narrower invariant names the route family. The frontend `LocationContext` is responsible for filtering general list pages by `companyid`; `/api/Reports` and report exports are the explicit server-enforced exception under INV-023.
+**Rationale:** Backend location scoping was historically inconsistent; report aggregates and report exports have higher data-leak blast radius and now fail closed server-side.
+**Enforced by:** Most `api/src/routes/*.js` list handlers lack location scoping SQL; report routes/export builders are covered by INV-023.
 **Cite when:** Adding backend list routes, changing `LocationContext`, or implementing multi-location features.
+
+### INV-023 — Reports Employee Location Scope
+**Rule:** Every `/api/Reports` endpoint and report export builder surfaced from `/reports/revenue` MUST enforce the current employee's allowed company IDs from primary branch plus `employee_location_scope`. For non-admin employees, omitted/empty/all `companyId` means all allowed company IDs, not all companies. Explicit unauthorized branch requests MUST fail with 403 before data queries. Admin, Super Admin, wildcard, and investor behavior must preserve their existing all-location or customer-allowlist semantics.
+**Rationale:** Report aggregates and Excel exports can expose every branch at once; a frontend-only lock is not a sufficient security boundary for scoped employees.
+**Enforced by:** `api/src/services/reportLocationScope.js`, `api/src/routes/reports/helpers.js`, focused report location-scope tests, flat export scope tests, and Reports UI location lock tests.
+**Cite when:** Editing reports, revenue/cash-flow helpers, operational report exports, `LocationContext`, or employee location-scope permission resolution.
 
 ### INV-021 — Investor Employee Allowlist Scope
 **Rule:** An investor is a normal employee identity (`dbo.partners.employee = true`) assigned to the `investor` permission group. Investor-visible customer data MUST be restricted by `dbo.investor_clients` on every customer-touching read, write, recognition, legacy fallback, branch/date report filter, and aggregate. The investor group may resolve to an explicit staff-shell permission set so the regular employee UI is visible, but it MUST NOT receive wildcard `*`; auth permission responses MUST return `permissions.locations = []` for investors so customer allowlist scope is not over-filtered by the employee's home branch; and permission/employee mutation endpoints MUST block investor self-escalation. On shared NK/NK2 databases, NK2 investor passwords may live in `dbo.investor_accounts` so the same credential cannot authenticate on older NK production code through `partners.password_hash`.
@@ -190,3 +196,4 @@
 | 2026-05-13 | INV-001..INV-020 | Initial invariant set created | feat/complete-documentation-stack |
 | 2026-05-13 | INC-20260506-01, INC-20260506-02 | Incident-derived invariants added | feat/complete-documentation-stack |
 | 2026-06-27 | INV-021 | Added investor employee allowlist scope invariant | codex/nk2-investor-scope |
+| 2026-06-30 | INV-023, INV-009 | Added server-enforced report/export employee location scope exception | codex/nk2-face-guided-rescue |

@@ -36,7 +36,15 @@ function buildRevenueWhere(filters) {
     idx += 1;
   }
 
-  if (filters.companyId && filters.companyId !== 'all') {
+  if (Array.isArray(filters.companyIds)) {
+    if (filters.companyIds.length === 0) {
+      conditions.push('FALSE');
+    } else {
+      conditions.push(`so.companyid = ANY($${idx}::uuid[])`);
+      params.push(filters.companyIds);
+      idx += 1;
+    }
+  } else if (filters.companyId && filters.companyId !== 'all') {
     conditions.push(`so.companyid = $${idx}`);
     params.push(filters.companyId);
     idx += 1;

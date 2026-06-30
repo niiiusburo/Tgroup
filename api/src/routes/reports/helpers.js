@@ -1,6 +1,6 @@
 'use strict';
 
-const { resolveEffectivePermissions } = require('../../services/permissionService');
+const { resolveCompanyScopeForUser } = require('../../services/reportLocationScope');
 
 function err(res, status, msg) {
   return res.status(status).json({ success: false, error: msg });
@@ -35,33 +35,42 @@ function dateCompanyFilter(dateFrom, dateTo, companyId, dateCol = 'datecreated',
   return { where: conds.length ? 'AND ' + conds.join(' AND ') : '', params, idx };
 }
 
-function hasAllLocationReportAccess(permissionState = {}) {
-  const groupName = String(permissionState.groupName || '').trim().toLowerCase();
-  const permissions = new Set(permissionState.effectivePermissions || []);
-  return permissions.has('*') || groupName === 'admin' || groupName === 'super admin';
+function appendCompanyScopeCondition(conds, params, scope = {}, companyCol = 'companyid') {
+  if (!Array.isArray(scope.companyIds)) return;
+  if (scope.companyIds.length === 0) {
+    conds.push('FALSE');
+    return;
+  }
+  params.push(scope.companyIds);
+  conds.push(`${companyCol} = ANY($${params.length}::uuid[])`);
 }
 
-function usesCustomerBasedInvestorScope(permissionState = {}) {
-  return String(permissionState.groupName || '').trim().toLowerCase() === 'investor';
+function dateCompanyScopeFilter(dateFrom, dateTo, scope = {}, dateCol = 'datecreated', companyCol = 'companyid') {
+  const conds = [];
+  const params = [];
+  let idx = 1;
+  if (dateFrom) { conds.push(`${dateCol}::date >= $${idx}`); params.push(dateFrom); idx++; }
+  if (dateTo) { conds.push(`${dateCol}::date <= $${idx}`); params.push(dateTo); idx++; }
+  appendCompanyScopeCondition(conds, params, scope, companyCol);
+  return { where: conds.length ? 'AND ' + conds.join(' AND ') : '', params, idx: params.length + 1 };
+}
+
+function companyScopeWhere(scope = {}, companyCol = 'companyid', params = []) {
+  const conds = [];
+  appendCompanyScopeCondition(conds, params, scope, companyCol);
+  return conds.length ? `AND ${conds.join(' AND ')}` : '';
 }
 
 async function resolveReportCompanyScope(req, res, companyId) {
-  const permissionState = await resolveEffectivePermissions(req.user?.employeeId);
-
-  if (hasAllLocationReportAccess(permissionState) || usesCustomerBasedInvestorScope(permissionState)) {
-    return { companyIds: companyId ? [companyId] : null };
-  }
-
-  const allowedCompanyIds = (permissionState.locations || [])
-    .map(location => location.id)
-    .filter(Boolean);
-
-  if (companyId && !allowedCompanyIds.includes(companyId)) {
-    err(res, 403, 'Location not allowed');
+  try {
+    return await resolveCompanyScopeForUser(req.user, companyId, {
+      deniedMessage: 'Location not allowed',
+      deniedCode: 'REPORT_LOCATION_DENIED',
+    });
+  } catch (scopeErr) {
+    err(res, scopeErr.status || 403, scopeErr.message || 'Location not allowed');
     return null;
   }
-
-  return { companyIds: companyId ? [companyId] : allowedCompanyIds };
 }
 
 function datePaymentScopeFilter(dateFrom, dateTo, scope = {}, dateCol = 'p.payment_date', paymentAlias = 'p') {
@@ -80,7 +89,9 @@ function datePaymentScopeFilter(dateFrom, dateTo, scope = {}, dateCol = 'p.payme
     idx++;
   }
 
-  if (Array.isArray(scope.companyIds) && scope.companyIds.length > 0) {
+  if (Array.isArray(scope.companyIds) && scope.companyIds.length === 0) {
+    conds.push('FALSE');
+  } else if (Array.isArray(scope.companyIds) && scope.companyIds.length > 0) {
     const locationParam = idx;
     params.push(scope.companyIds);
     idx++;
@@ -110,6 +121,9 @@ module.exports = {
   validDate,
   validUUID,
   dateCompanyFilter,
+  dateCompanyScopeFilter,
+  companyScopeWhere,
+  appendCompanyScopeCondition,
   resolveReportCompanyScope,
   datePaymentScopeFilter,
 };

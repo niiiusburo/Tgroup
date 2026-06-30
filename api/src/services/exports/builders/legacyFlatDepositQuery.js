@@ -33,7 +33,15 @@ function buildDepositWhere(filters) {
     idx += 1;
   }
 
-  if (filters.companyId && filters.companyId !== 'all') {
+  if (Array.isArray(filters.companyIds)) {
+    if (filters.companyIds.length === 0) {
+      conditions.push('FALSE');
+    } else {
+      conditions.push(`pr.companyid = ANY($${idx}::uuid[])`);
+      params.push(filters.companyIds);
+      idx += 1;
+    }
+  } else if (filters.companyId && filters.companyId !== 'all') {
     conditions.push(`pr.companyid = $${idx}`);
     params.push(filters.companyId);
     idx += 1;

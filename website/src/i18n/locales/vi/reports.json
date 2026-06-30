@@ -32,7 +32,8 @@
     "30d": "1 tháng",
     "90d": "90 ngày",
     "allTime": "Tất cả",
-    "ytd": "Từ đầu năm"
+    "ytd": "Từ đầu năm",
+    "locationLocked": "Đã khóa theo chi nhánh được phân quyền"
   },
   "metrics": {
     "totalRevenue": "Tổng doanh thu",

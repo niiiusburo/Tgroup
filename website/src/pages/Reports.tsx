@@ -2,7 +2,7 @@
  * Reports Page — Shell with nested routing for 8 report sub-pages.
  * Provides shared filters (date range, location) and renders <Outlet /> for child routes.
  */
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import {
@@ -12,6 +12,7 @@ import {
 import { ROUTES } from '@/constants';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useLocations } from '@/hooks/useLocations';
+import { useLocationFilter } from '@/contexts/LocationContext';
 import { ReportsFilters } from '@/components/reports/ReportsFilters';
 import { useTranslation } from 'react-i18next';
 
@@ -31,6 +32,7 @@ export default function Reports() {
   const location = useLocation();
   const navigate = useNavigate();
   const { allLocations, isLoading: locationsLoading } = useLocations();
+  const { allowedLocations, isSingleLocation } = useLocationFilter();
 
   // Default: last 30 days → today (Vietnam timezone)
   const todayParts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
@@ -44,10 +46,31 @@ export default function Reports() {
 
   const [dateFrom, setDateFrom] = useState(defaultFrom);
   const [dateTo, setDateTo] = useState(defaultTo);
-  const [companyId, setCompanyId] = useState('');
+  const [companyId, setCompanyId] = useState(() => (
+    isSingleLocation && allowedLocations[0]?.id ? allowedLocations[0].id : ''
+  ));
 
   const activeTab = TABS.find(t => location.pathname === t.path) || TABS[0];
-  const locations = useMemo(() => allLocations.map((l: any) => ({ id: l.id, name: l.name })), [allLocations]);
+  const locations = useMemo(() => {
+    const sourceLocations = allowedLocations.length > 0 ? allowedLocations : allLocations;
+    return sourceLocations.map((l: any) => ({ id: l.id, name: l.name }));
+  }, [allowedLocations, allLocations]);
+
+  useEffect(() => {
+    if (isSingleLocation && allowedLocations[0]?.id) {
+      if (companyId !== allowedLocations[0].id) {
+        setCompanyId(allowedLocations[0].id);
+      }
+      return;
+    }
+
+    if (allowedLocations.length > 0 && companyId) {
+      const allowedIds = new Set(allowedLocations.map((loc) => loc.id));
+      if (!allowedIds.has(companyId)) {
+        setCompanyId('');
+      }
+    }
+  }, [allowedLocations, companyId, isSingleLocation]);
 
   const filters = useMemo(() => ({ dateFrom, dateTo, companyId }), [dateFrom, dateTo, companyId]);
 
@@ -96,6 +119,7 @@ export default function Reports() {
         onCompanyChange={setCompanyId}
         locations={locations}
         locationsLoading={locationsLoading}
+        locationLocked={isSingleLocation}
       />
 
       {/* Tab content */}

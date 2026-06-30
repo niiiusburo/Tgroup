@@ -32,7 +32,8 @@
     "30d": "1mo",
     "90d": "90d",
     "allTime": "All",
-    "ytd": "YTD"
+    "ytd": "YTD",
+    "locationLocked": "Locked to your assigned location"
   },
   "metrics": {
     "totalRevenue": "Total Revenue",

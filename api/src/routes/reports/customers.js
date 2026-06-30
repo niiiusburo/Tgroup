@@ -1,7 +1,14 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID, dateCompanyFilter } = require('./helpers');
+const {
+  err,
+  validDate,
+  validUUID,
+  dateCompanyScopeFilter,
+  resolveReportCompanyScope,
+  appendCompanyScopeCondition,
+} = require('./helpers');
 const { resolveInvestorScope } = require('../../services/permissionService');
 
 const router = express.Router();
@@ -14,18 +21,22 @@ router.post('/customers/summary', requirePermission('reports.view'), async (req,
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    const companyScope = await resolveReportCompanyScope(req, res, companyId);
+    if (!companyScope) return;
 
     // Total active customers
-    let totalWhere = 'customer=true AND isdeleted=false';
+    const totalConds = ['customer=true', 'isdeleted=false'];
     let totalParams = [];
+    appendCompanyScopeCondition(totalConds, totalParams, companyScope, 'companyid');
     if (investorScope.isInvestor) {
       totalParams.push(investorScope.allowedCustomerIds);
-      totalWhere += ` AND id = ANY($1::uuid[])`;
+      totalConds.push(`id = ANY($${totalParams.length}::uuid[])`);
     }
+    const totalWhere = totalConds.join(' AND ');
     const total = await query(`SELECT COUNT(*) as cnt FROM dbo.partners WHERE ${totalWhere}`, totalParams);
 
     // New customers in period
-    const cf = dateCompanyFilter(dateFrom, dateTo, companyId, 'datecreated');
+    const cf = dateCompanyScopeFilter(dateFrom, dateTo, companyScope, 'datecreated');
     let cfWhere = cf.where;
     let cfParams = [...cf.params];
     if (investorScope.isInvestor) {
@@ -39,32 +50,38 @@ router.post('/customers/summary', requirePermission('reports.view'), async (req,
     const sources = [];
 
     // By gender
-    let genderWhere = 'customer=true AND isdeleted=false AND gender IS NOT NULL';
+    const genderConds = ['customer=true', 'isdeleted=false', 'gender IS NOT NULL'];
     let genderParams = [];
+    appendCompanyScopeCondition(genderConds, genderParams, companyScope, 'companyid');
     if (investorScope.isInvestor) {
       genderParams.push(investorScope.allowedCustomerIds);
-      genderWhere += ` AND id = ANY($1::uuid[])`;
+      genderConds.push(`id = ANY($${genderParams.length}::uuid[])`);
     }
+    const genderWhere = genderConds.join(' AND ');
     const gender = await query(
       `SELECT gender, COUNT(*) as cnt FROM dbo.partners WHERE ${genderWhere} GROUP BY gender`, genderParams);
 
     // By city
-    let cityWhere = 'customer=true AND isdeleted=false AND cityname IS NOT NULL';
+    const cityConds = ['customer=true', 'isdeleted=false', 'cityname IS NOT NULL'];
     let cityParams = [];
+    appendCompanyScopeCondition(cityConds, cityParams, companyScope, 'companyid');
     if (investorScope.isInvestor) {
       cityParams.push(investorScope.allowedCustomerIds);
-      cityWhere += ` AND id = ANY($1::uuid[])`;
+      cityConds.push(`id = ANY($${cityParams.length}::uuid[])`);
     }
+    const cityWhere = cityConds.join(' AND ');
     const cities = await query(
       `SELECT cityname, COUNT(*) as cnt FROM dbo.partners WHERE ${cityWhere} GROUP BY cityname ORDER BY cnt DESC LIMIT 10`, cityParams);
 
     // Lifetime value (top spenders)
-    let ltvWhere = 'p.customer=true AND p.isdeleted=false';
+    const ltvConds = ['p.customer=true', 'p.isdeleted=false'];
     let ltvParams = [];
+    appendCompanyScopeCondition(ltvConds, ltvParams, companyScope, 'p.companyid');
     if (investorScope.isInvestor) {
       ltvParams.push(investorScope.allowedCustomerIds);
-      ltvWhere += ` AND p.id = ANY($1::uuid[])`;
+      ltvConds.push(`p.id = ANY($${ltvParams.length}::uuid[])`);
     }
+    const ltvWhere = ltvConds.join(' AND ');
     const ltv = await query(
       `SELECT p.id, p.name, COALESCE(SUM(so.totalpaid),0) as total_paid, COUNT(so.id) as order_count
        FROM dbo.partners p
@@ -73,12 +90,14 @@ router.post('/customers/summary', requirePermission('reports.view'), async (req,
        GROUP BY p.id, p.name ORDER BY total_paid DESC LIMIT 20`, ltvParams);
 
     // Outstanding balances
-    let outWhere = 'p.customer=true AND p.isdeleted=false AND so.residual > 0';
+    const outConds = ['p.customer=true', 'p.isdeleted=false', 'so.residual > 0'];
     let outParams = [];
+    appendCompanyScopeCondition(outConds, outParams, companyScope, 'p.companyid');
     if (investorScope.isInvestor) {
       outParams.push(investorScope.allowedCustomerIds);
-      outWhere += ` AND p.id = ANY($1::uuid[])`;
+      outConds.push(`p.id = ANY($${outParams.length}::uuid[])`);
     }
+    const outWhere = outConds.join(' AND ');
     const outstanding = await query(
       `SELECT p.id, p.name, COALESCE(SUM(so.residual),0) as outstanding
        FROM dbo.partners p
@@ -87,7 +106,7 @@ router.post('/customers/summary', requirePermission('reports.view'), async (req,
        GROUP BY p.id, p.name ORDER BY outstanding DESC LIMIT 20`, outParams);
 
     // Growth trend (new customers per month)
-    const growthF = dateCompanyFilter(dateFrom, dateTo, companyId, 'datecreated');
+    const growthF = dateCompanyScopeFilter(dateFrom, dateTo, companyScope, 'datecreated');
     let growthWhere = growthF.where;
     let growthParams = [...growthF.params];
     if (investorScope.isInvestor) {

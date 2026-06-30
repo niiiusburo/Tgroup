@@ -204,6 +204,7 @@ sequenceDiagram
     alt Preview
         FE->>API: POST /api/Exports/revenue-flat/preview { filters }
         API->>Builder: legacyFlatReportsExport.revenue.preview(filters, user)
+        Builder->>Builder: Resolve employee report location scope
         Builder->>DB: Count + total using posted payment allocations
         DB-->>Builder: rowCount, totalAmount
         Builder-->>API: { rowCount, summary, exceedsMax }
@@ -212,6 +213,7 @@ sequenceDiagram
     else Download
         FE->>API: POST /api/Exports/revenue-flat/download { filters }
         API->>Builder: legacyFlatReportsExport.revenue.build(filters, user)
+        Builder->>Builder: Resolve employee report location scope
         Builder->>DB: Revenue-flat rows from payments/payment_allocations/saleorders
         DB-->>Builder: Result rows
         Builder->>Builder: Build TDental-style flat workbook
@@ -228,7 +230,7 @@ sequenceDiagram
 - Optional `exports_audit` row with `export_type='revenue-flat'` and `action='preview'` or `action='download'`.
 - Report data is read-only; revenue is recognized from posted payment allocations, not raw order totals.
 
-**Traceability:** Related UCs: UC-013, UC-019. Contracts/routes: `POST /api/Reports/revenue/*`, `POST /api/Reports/cash-flow/summary`, `POST /api/Exports/:type/preview`, `POST /api/Exports/:type/download` with `revenue-flat` or `report-sales-employees`. Data/tables: `dbo.payment_allocations`, `dbo.payments`, `dbo.saleorders`, `dbo.saleorderlines`, `dbo.partners`, `dbo.companies`, `dbo.exports_audit`. Invariants: INV-019, INV-020. Tests: `api/src/routes/reports/__tests__/revenueRecognition.test.js`, `api/src/routes/reports/__tests__/cashFlow.test.js`, `api/src/routes/reports/__tests__/servicesBreakdown.test.js`, `api/src/services/reports/__tests__/canonicalRevenue.test.js`, `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js`, `website/src/hooks/__tests__/useReportData.test.ts`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`. Product-map domains: `reports-analytics`, `payments-deposits`, `employees-hr`.
+**Traceability:** Related UCs: UC-013, UC-019. Contracts/routes: `POST /api/Reports/revenue/*`, `POST /api/Reports/cash-flow/summary`, `POST /api/Exports/:type/preview`, `POST /api/Exports/:type/download` with `revenue-flat` or `report-sales-employees`. Data/tables: `dbo.payment_allocations`, `dbo.payments`, `dbo.saleorders`, `dbo.saleorderlines`, `dbo.partners`, `dbo.companies`, `dbo.employee_location_scope`, `dbo.exports_audit`. Invariants: INV-019, INV-020, INV-023. Tests: `api/src/routes/reports/__tests__/locationScope.test.js`, `api/src/routes/reports/__tests__/revenueRecognition.test.js`, `api/src/routes/reports/__tests__/cashFlow.test.js`, `api/src/routes/reports/__tests__/servicesBreakdown.test.js`, `api/src/services/reports/__tests__/canonicalRevenue.test.js`, `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js`, `website/src/pages/reports/__tests__/ReportsLocationScope.test.tsx`, `website/src/hooks/__tests__/useReportData.test.ts`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`. Product-map domains: `reports-analytics`, `payments-deposits`, `employees-hr`.
 
 **Failure modes:**
 - Dataset too large → nginx 504 if timeout <300s.
@@ -556,8 +558,10 @@ sequenceDiagram
     participant DB as Postgres (dbo)
 
     M->>FE: Open revenue report and set filters
+    FE->>FE: Lock single-location employee to LocationContext branch
     FE->>Hook: useReportData('/Reports/revenue/summary', filters)
     Hook->>API: POST /api/Reports/revenue/summary { dateFrom, dateTo, companyId? }
+    API->>API: Resolve employee report location scope
     API->>DB: Canonical revenue from payment_allocations/payments/saleorders
     DB-->>API: Result rows
     API-->>Hook: Revenue summary response
@@ -571,7 +575,7 @@ sequenceDiagram
 **Data state transitions:**
 - None. This screen reads canonical paid revenue and cash-flow context.
 
-**Traceability:** Related UCs: UC-013, UC-019. Contracts/routes: `POST /api/Reports/revenue/summary`, `POST /api/Reports/revenue/trend`, `POST /api/Reports/revenue/by-location`, `POST /api/Reports/revenue/by-doctor`, `POST /api/Reports/revenue/by-category`, `POST /api/Reports/revenue/rules`, `POST /api/Reports/cash-flow/summary`, `POST /api/Exports/report-sales-employees/preview`. Data/tables: `dbo.payment_allocations`, `dbo.payments`, `dbo.saleorders`, `dbo.saleorderlines`, `dbo.partners`, `dbo.companies`. Invariants: INV-003, INV-012, INV-019. Tests: `api/src/routes/reports/__tests__/revenueRecognition.test.js`, `api/src/routes/reports/__tests__/cashFlow.test.js`, `api/src/services/reports/__tests__/canonicalRevenue.test.js`, `website/src/hooks/__tests__/useReportData.test.ts`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`. Product-map domains: `reports-analytics`, `payments-deposits`.
+**Traceability:** Related UCs: UC-013, UC-019. Contracts/routes: `POST /api/Reports/revenue/summary`, `POST /api/Reports/revenue/trend`, `POST /api/Reports/revenue/by-location`, `POST /api/Reports/revenue/by-doctor`, `POST /api/Reports/revenue/by-category`, `POST /api/Reports/revenue/rules`, `POST /api/Reports/cash-flow/summary`, `POST /api/Exports/report-sales-employees/preview`. Data/tables: `dbo.payment_allocations`, `dbo.payments`, `dbo.saleorders`, `dbo.saleorderlines`, `dbo.partners`, `dbo.companies`, `dbo.employee_location_scope`. Invariants: INV-003, INV-012, INV-019, INV-023. Tests: `api/src/routes/reports/__tests__/locationScope.test.js`, `api/src/routes/reports/__tests__/revenueRecognition.test.js`, `api/src/routes/reports/__tests__/cashFlow.test.js`, `api/src/services/reports/__tests__/canonicalRevenue.test.js`, `website/src/pages/reports/__tests__/ReportsLocationScope.test.tsx`, `website/src/hooks/__tests__/useReportData.test.ts`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`. Product-map domains: `reports-analytics`, `payments-deposits`.
 
 **Failure modes:**
 - Cash-flow cards are cash movement context and must not be treated as the paid-revenue source of truth.

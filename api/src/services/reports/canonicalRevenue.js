@@ -13,7 +13,7 @@ const {
   CAPPED_ALLOCATED_AMOUNT_SQL,
 } = require('../../routes/reports/revenueRecognition');
 
-function buildWhere({ dateFrom, dateTo, companyId, allowedCustomerIds }) {
+function buildWhere({ dateFrom, dateTo, companyId, companyIds, allowedCustomerIds }) {
   const conditions = [SERVICE_REVENUE_PAYMENT_CONDITION, 'COALESCE(so.isdeleted, false) = false'];
   const params = [];
   let idx = 1;
@@ -28,7 +28,15 @@ function buildWhere({ dateFrom, dateTo, companyId, allowedCustomerIds }) {
     params.push(dateTo);
     idx += 1;
   }
-  if (companyId) {
+  if (Array.isArray(companyIds)) {
+    if (companyIds.length === 0) {
+      conditions.push('FALSE');
+    } else {
+      conditions.push(`so.companyid = ANY($${idx}::uuid[])`);
+      params.push(companyIds);
+      idx += 1;
+    }
+  } else if (companyId) {
     conditions.push(`so.companyid = $${idx}`);
     params.push(companyId);
     idx += 1;
