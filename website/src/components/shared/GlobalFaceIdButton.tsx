@@ -7,7 +7,7 @@ import { useFaceRecognition } from '@/hooks/useFaceRecognition';
 import { fetchPartners, registerFace } from '@/lib/api';
 import type { ApiPartner } from '@/lib/api';
 
-const FACE_RECOGNITION_VERSION_LABEL = 'v0.32.53';
+const FACE_RECOGNITION_VERSION_LABEL = 'v0.32.54';
 
 /**
  * Global Face ID quick-search button.
@@ -25,8 +25,9 @@ export function GlobalFaceIdButton() {
   const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [showCapture, setShowCapture] = useState(false);
+  const [showGuidedRegisterCapture, setShowGuidedRegisterCapture] = useState(false);
   const [showPopover, setShowPopover] = useState(false);
-  const [capturedImage, setCapturedImage] = useState<Blob | null>(null);
+  const [pendingRegisterCustomer, setPendingRegisterCustomer] = useState<ApiPartner | null>(null);
 
   // No-match rescue state
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,10 +48,10 @@ export function GlobalFaceIdButton() {
   }) as string;
 
   const clearCaptureState = useCallback(() => {
-    setCapturedImage(null);
     setSearchQuery('');
     setSearchResults([]);
     setSelectedCustomer(null);
+    setPendingRegisterCustomer(null);
     setRegisterError(null);
   }, []);
 
@@ -64,6 +65,7 @@ export function GlobalFaceIdButton() {
   const startCapture = useCallback(() => {
     reset();
     setShowPopover(false);
+    setShowGuidedRegisterCapture(false);
     clearCaptureState();
     setShowCapture(true);
   }, [clearCaptureState, reset]);
@@ -74,7 +76,6 @@ export function GlobalFaceIdButton() {
       const result = await recognize(image);
       setShowCapture(false);
       setShowPopover(true);
-      setCapturedImage(image);
       if (result.match) {
         navigate(`/customers/${result.match.partnerId}`);
         setTimeout(dismiss, 800);
@@ -117,21 +118,42 @@ export function GlobalFaceIdButton() {
     }, 300);
   }, []);
 
-  const handleRegisterToCustomer = useCallback(async () => {
-    if (!selectedCustomer || !capturedImage) return;
+  const handleStartGuidedRegister = useCallback(() => {
+    if (!selectedCustomer) return;
+    setPendingRegisterCustomer(selectedCustomer);
+    setShowPopover(false);
+    setShowGuidedRegisterCapture(true);
+  }, [selectedCustomer]);
+
+  const handleGuidedRegisterCapture = useCallback(async (image: Blob, images?: readonly Blob[]) => {
+    const customer = pendingRegisterCustomer ?? selectedCustomer;
+    const imagesToRegister = images?.length ? images : [image];
+    if (!customer || imagesToRegister.length === 0) return;
+
     setRegistering(true);
     setRegisterError(null);
     try {
-      await registerFace(selectedCustomer.id, capturedImage, 'no_match_rescue');
-      navigate(`/customers/${selectedCustomer.id}`);
+      for (const imageToRegister of imagesToRegister) {
+        await registerFace(customer.id, imageToRegister, 'no_match_rescue');
+      }
+      setShowGuidedRegisterCapture(false);
+      navigate(`/customers/${customer.id}`);
       dismiss();
     } catch (err) {
       const message = err instanceof Error ? err.message : t('faceRecognition.registerFailed');
       setRegisterError(message);
+      setShowGuidedRegisterCapture(false);
+      setShowPopover(true);
     } finally {
       setRegistering(false);
     }
-  }, [selectedCustomer, capturedImage, navigate, dismiss, t]);
+  }, [pendingRegisterCustomer, selectedCustomer, navigate, dismiss, t]);
+
+  const cancelGuidedRegister = useCallback(() => {
+    setShowGuidedRegisterCapture(false);
+    setPendingRegisterCustomer(null);
+    setShowPopover(true);
+  }, []);
 
   return (
     <div ref={containerRef} className="relative shrink-0">
@@ -231,6 +253,12 @@ export function GlobalFaceIdButton() {
                 <p className="text-[11px] text-gray-500">
                   {t('face.searchToRegister', 'Search customer to register this face')}
                 </p>
+                <p className="text-[11px] leading-snug text-orange-700">
+                  {t(
+                    'face.guidedRegisterHint',
+                    'After choosing a customer, capture straight, left, and right angles before saving Face ID.',
+                  )}
+                </p>
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                   <input
@@ -276,12 +304,12 @@ export function GlobalFaceIdButton() {
                 {selectedCustomer && (
                   <button
                     type="button"
-                    onClick={handleRegisterToCustomer}
+                    onClick={handleStartGuidedRegister}
                     disabled={registering}
                     className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-primary rounded-xl hover:bg-primary-dark disabled:opacity-50 transition-all"
                   >
                     {registering && <Loader2 className="w-3 h-3 animate-spin" />}
-                    {t('face.registerToCustomer', 'Register face to {name}', {
+                    {t('face.startGuidedRegisterToCustomer', 'Start 3-angle scan for {name}', {
                       name: selectedCustomer.name,
                     })}
                   </button>
@@ -306,8 +334,16 @@ export function GlobalFaceIdButton() {
         onCapture={handleCapture}
         onCancel={() => {
           setShowCapture(false);
-          setCapturedImage(null);
         }}
+      />
+
+      <FaceCaptureModal
+        isOpen={showGuidedRegisterCapture}
+        title={t('face.guidedRegisterTitle', '3-angle Face ID registration') as string}
+        versionLabel={FACE_RECOGNITION_VERSION_LABEL}
+        captureMode="profile"
+        onCapture={handleGuidedRegisterCapture}
+        onCancel={cancelGuidedRegister}
       />
     </div>
   );

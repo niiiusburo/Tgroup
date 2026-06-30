@@ -42,23 +42,35 @@ vi.mock('@/components/shared/FaceCaptureModal', () => ({
     isOpen,
     title,
     versionLabel,
+    captureMode,
     onCapture,
     onCancel,
   }: {
     isOpen: boolean;
     title?: string;
     versionLabel?: string;
-    onCapture: (image: Blob) => void;
+    captureMode?: 'single' | 'profile';
+    onCapture: (image: Blob, images?: readonly Blob[]) => void;
     onCancel: () => void;
   }) =>
     isOpen ? (
       <div>
         <span>{title}</span>
         <span>{versionLabel}</span>
+        <span data-testid="mock-capture-mode">{captureMode ?? 'single'}</span>
         <button
           type="button"
           onClick={() => {
-            void Promise.resolve(onCapture(new Blob(['face'], { type: 'image/jpeg' }))).catch(() => {});
+            const images =
+              captureMode === 'profile'
+                ? [
+                    new Blob(['face-center'], { type: 'image/jpeg' }),
+                    new Blob(['face-left'], { type: 'image/jpeg' }),
+                    new Blob(['face-right'], { type: 'image/jpeg' }),
+                  ]
+                : undefined;
+            const image = images?.[0] ?? new Blob(['face'], { type: 'image/jpeg' });
+            void Promise.resolve(onCapture(image, images)).catch(() => {});
           }}
         >
           Mock capture
@@ -80,8 +92,8 @@ describe('GlobalFaceIdButton', () => {
     resetMock.mockReset();
   });
 
-  it('registers a no-match auto-captured face to a searched customer', async () => {
-    recognizeState = { status: 'no_match', recognitionVersion: 'face-recognition-0.32.53' };
+  it('requires guided left/right capture before registering a no-match face to a searched customer', async () => {
+    recognizeState = { status: 'no_match', recognitionVersion: 'face-recognition-0.32.54' };
     vi.mocked(fetchPartners).mockResolvedValue({
       items: [
         {
@@ -101,10 +113,12 @@ describe('GlobalFaceIdButton', () => {
     render(<GlobalFaceIdButton />);
 
     fireEvent.click(screen.getByRole('button', { name: /Quick Face ID/i }));
+    expect(screen.getByTestId('mock-capture-mode')).toHaveTextContent('single');
     fireEvent.click(await screen.findByText('Mock capture'));
 
     expect(await screen.findByText('No customer matched')).toBeInTheDocument();
-    expect(screen.getAllByText('v0.32.53')).toHaveLength(2);
+    expect(screen.getAllByText('v0.32.54')).toHaveLength(2);
+    expect(screen.getByText(/capture straight, left, and right angles/i)).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText('Name, phone, or code...'), {
       target: { value: 'T146292' },
@@ -118,16 +132,19 @@ describe('GlobalFaceIdButton', () => {
       });
     });
     fireEvent.click(await screen.findByText('TRẦN THANH DUY- QL'));
-    fireEvent.click(screen.getByRole('button', { name: /Register face/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Start 3-angle scan/i }));
+
+    expect(await screen.findByText('3-angle Face ID registration')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-capture-mode')).toHaveTextContent('profile');
+    fireEvent.click(screen.getByText('Mock capture'));
 
     await waitFor(() => {
-      expect(registerFace).toHaveBeenCalledWith(
-        'p-1',
-        expect.any(Blob),
-        'no_match_rescue',
-      );
+      expect(registerFace).toHaveBeenCalledTimes(3);
       expect(navigateMock).toHaveBeenCalledWith('/customers/p-1');
     });
+    expect(registerFace).toHaveBeenNthCalledWith(1, 'p-1', expect.any(Blob), 'no_match_rescue');
+    expect(registerFace).toHaveBeenNthCalledWith(2, 'p-1', expect.any(Blob), 'no_match_rescue');
+    expect(registerFace).toHaveBeenNthCalledWith(3, 'p-1', expect.any(Blob), 'no_match_rescue');
   });
 
   it('passes the active NK2 Face ID version into the camera popup', async () => {
@@ -136,13 +153,13 @@ describe('GlobalFaceIdButton', () => {
     fireEvent.click(screen.getByRole('button', { name: /Quick Face ID/i }));
 
     expect(await screen.findByText('Quick Face ID')).toBeInTheDocument();
-    expect(screen.getAllByText('v0.32.53')).toHaveLength(2);
+    expect(screen.getAllByText('v0.32.54')).toHaveLength(2);
   });
 
   it('requires a clearer scan instead of exposing ambiguous candidate choices', async () => {
     recognizeState = {
       status: 'candidates',
-      recognitionVersion: 'face-recognition-0.32.53',
+      recognitionVersion: 'face-recognition-0.32.54',
       candidates: [
         { partnerId: 'p-1', name: 'Alice', code: 'T001', phone: '0901', confidence: 0.91 },
         { partnerId: 'p-2', name: 'Bob', code: 'T002', phone: '0902', confidence: 0.89 },

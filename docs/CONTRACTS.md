@@ -349,7 +349,7 @@ Optional DOB date parts (`birthday`, `birthmonth`, `birthyear`) normalize `""`, 
     phone: string | null;
     confidence: number;
   }>;
-  recognitionVersion: string; // e.g. "face-recognition-0.32.53"
+  recognitionVersion: string; // e.g. "face-recognition-0.32.54"
 }
 ```
 

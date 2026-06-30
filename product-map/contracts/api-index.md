@@ -344,7 +344,7 @@ Lark alert contract: when `LARK_FEEDBACK_WEBHOOK_URL` is configured, `POST /api/
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| POST | `/recognize` | Perm:`customers.view` | FormData (`image`) | `{ match: FaceCandidate \| null, candidates: FaceCandidate[], recognitionVersion: string }`; provider selected by `FACE_RECOGNITION_PROVIDER=local|compreface`; staff responses expose NK2 Face ID version metadata such as `face-recognition-0.32.53`; strict defaults are auto-match `0.92`, candidate `0.84`, margin `0.05`; writes hidden server-side Face ID diagnostics when enabled and never returns `privateDiagnostics` |
+| POST | `/recognize` | Perm:`customers.view` | FormData (`image`) | `{ match: FaceCandidate \| null, candidates: FaceCandidate[], recognitionVersion: string }`; provider selected by `FACE_RECOGNITION_PROVIDER=local|compreface`; staff responses expose NK2 Face ID version metadata such as `face-recognition-0.32.54`; strict defaults are auto-match `0.92`, candidate `0.84`, margin `0.05`; writes hidden server-side Face ID diagnostics when enabled and never returns `privateDiagnostics` |
 | POST | `/register` | Perm:`customers.edit` | FormData (`partnerId`, `image`, optional `source`) | `{ success: true, partnerId, sampleId, sampleCount, faceRegisteredAt }` |
 | POST | `/re-register` | Perm:`customers.edit` | FormData (`partnerId`, repeated `images`, optional `source`) | `{ success: true, partnerId, sampleIds, sampleCount, faceRegisteredAt }` |
 | GET | `/status/:partnerId` | Perm:`customers.view` | — | `{ partnerId, registered, sampleCount, lastRegisteredAt, provider? }`; CompreFace mode verifies actual `/faces?subject=` example count |

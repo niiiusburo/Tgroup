@@ -66,7 +66,7 @@ const { findMatches, registerSample, replaceAllSamples, getFaceStatus } = requir
 const comprefaceFaceProvider = require('../src/services/comprefaceFaceProvider');
 const { recordFaceDiagnostic } = require('../src/services/faceDiagnostics');
 const { query } = require('../src/db');
-const FACE_RECOGNITION_VERSION = 'face-recognition-0.32.53';
+const FACE_RECOGNITION_VERSION = 'face-recognition-0.32.54';
 
 afterEach(() => {
   delete process.env.FACE_RECOGNITION_PROVIDER;

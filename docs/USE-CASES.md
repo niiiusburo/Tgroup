@@ -62,9 +62,9 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Preconditions:** Customer exists; camera available.
 - **Main flow:**
   1. Actor clicks face capture button.
-  2. System detects/captures face via the live browser camera.
+  2. System detects/captures face via the live browser camera; enrollment and re-registration flows guide straight, left, and right captures.
   3. Waits for high-quality sample (size, lighting, angle).
-  4. Sends image to `POST /api/face/register` with `partnerId` and image buffer.
+  4. Sends each guided enrollment sample to `POST /api/face/register` with `partnerId` and image buffer, or sends the batch to `POST /api/face/re-register` when replacing active samples from the profile re-register flow.
   5. Backend uses the configured Face ID provider: local SFace stores 128-dim embeddings in `dbo.customer_face_embeddings`; CompreFace stores examples under subject `partners.id`.
   6. In CompreFace mode, verifies that CompreFace now returns at least one face example for the subject.
   7. Updates `partners.face_subject_id` and `face_registered_at`.
@@ -72,6 +72,7 @@ When a use case is created or materially edited, add one compact `Traceability` 
   - **AF-1 No face detected:** Camera stays open; shows "Không phát hiện khuôn mặt" / "Face not detected"; only explicit close/cancel dismisses capture.
   - **AF-2 Face too small:** Quality feedback "Xin vui lòng tiến lại gần".
   - **AF-3 Face already registered:** Overwrites with new embedding.
+  - **AF-4 Staff header no-match rescue:** Staff searches and selects the customer, then the client must complete straight, left, and right guided captures before the header flow registers Face ID samples.
 - **Postconditions:** Customer can now use face recognition check-in (UC-007).
 - **Invariants touched:** INV-005 (local 128-dim embedding lock), INV-014 (optional face integration startup).
 - **Traceability:** Related WF: WF-007. Contracts/routes: `POST /api/face/register`, `POST /api/face/re-register`, `GET /api/face/status/:partnerId`. Data/tables: `dbo.partners.face_subject_id`, `dbo.partners.face_registered_at`, `dbo.customer_face_embeddings` when local provider is active. Tests: `api/tests/faceRecognition.test.js`, `api/src/services/__tests__/comprefaceClient.test.js`, `api/src/services/__tests__/comprefaceFaceProvider.test.js`, `website/src/hooks/__tests__/useFaceRecognition.test.ts`, `website/src/components/shared/FaceCaptureModal.test.tsx`. Product-map domains: `customers-partners`, `integrations`.

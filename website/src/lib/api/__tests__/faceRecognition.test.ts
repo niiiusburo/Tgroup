@@ -32,7 +32,7 @@ describe('Face Recognition API client', () => {
         json: async () => ({
           status: 'auto_matched',
           match: { partnerId: 'p1', name: 'Test', confidence: 0.95, code: 'T001', phone: '0901' },
-          recognitionVersion: 'face-recognition-0.32.53',
+          recognitionVersion: 'face-recognition-0.32.54',
         }),
       });
 
@@ -48,7 +48,7 @@ describe('Face Recognition API client', () => {
       );
       expect(result.status).toBe('auto_matched');
       expect(result.match).toBeDefined();
-      expect(result.recognitionVersion).toBe('face-recognition-0.32.53');
+      expect(result.recognitionVersion).toBe('face-recognition-0.32.54');
     });
 
     it('returns candidates when no auto-match', async () => {

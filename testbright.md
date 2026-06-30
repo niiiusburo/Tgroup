@@ -10,6 +10,41 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK2 Face ID Guided No-Match Rescue 2026-06-30
+
+Feature/edit name: NK2 Face ID guided no-match rescue registration (v0.32.54)
+
+Changed URLs / API routes / data flow:
+- URL: `https://nk2.2checkin.com/customers` and any staff-shell route with the shared header Face ID button.
+- API: `POST /api/face/recognize`, then repeated `POST /api/face/register` with `source=no_match_rescue`.
+- Data flow: staff header Face ID button -> single recognition scan -> no-match popover -> staff searches/selects customer -> guided `FaceCaptureModal` profile capture -> straight/left/right samples registered.
+
+Affected roles and data flows:
+- Staff/admin users can no longer register the failed one-shot no-match frame directly from the header rescue panel.
+- Selected customers receive three guided samples: straight, head left, and head right.
+- Existing samples are not bulk-rewritten; explicit customer-profile re-register remains the replacement path.
+- NK/NK3 are out of scope and must remain unchanged.
+
+Expected behavior:
+
+| Visit / action | Expected result |
+|---|---|
+| Header Face ID returns no match | Popover explains the customer search/register rescue and says straight/left/right capture is required. |
+| Staff selects a customer and clicks the rescue button | A second orange Face ID camera modal opens with `v0.32.54` and `captureMode="profile"`. |
+| Client completes guided capture | The modal requires straight, left, and right steps before registration API calls are made. |
+| Guided rescue succeeds | Three samples are submitted to `POST /api/face/register` with `source=no_match_rescue`, then staff navigates to the selected customer profile. |
+| Camera privacy blur | The blur remains overlay-only; the raw video frame is still used for detection/capture. |
+
+Execution checklist:
+- [x] PASS: Focused frontend tests prove the header no-match rescue opens guided profile capture and registers three samples - `cd website && npx vitest run src/components/shared/GlobalFaceIdButton.test.tsx src/components/shared/FaceCaptureModal.test.tsx src/hooks/__tests__/useFaceRecognition.test.ts src/lib/api/__tests__/faceRecognition.test.ts` passed 4 files / 62 tests.
+- [x] PASS: FaceCaptureModal tests still prove straight/left/right profile capture and overlay-only blur - covered by the same focused Vitest run.
+- [x] PASS: API/tests still expose `face-recognition-0.32.54` metadata - `cd api && JWT_SECRET=test-secret npx jest tests/faceRecognition.test.js src/services/__tests__/faceMatchEngine.test.js src/services/__tests__/comprefaceFaceProvider.test.js src/services/__tests__/faceDiagnostics.test.js --runInBand` passed 4 suites / 91 tests.
+- [x] PASS: Website build/lint and scoped Semgrep pass - `npm --prefix website run build` passed; `npm --prefix website run lint` passed with warnings only; scoped Semgrep over changed Face ID runtime files found 0 findings.
+- [x] PASS: Governance pass - `npm run verify:governance` passed.
+- [ ] PENDING: Live NK2 proof shows `0.32.54`, healthy CompreFace, and guided no-match rescue behavior.
+
+---
+
 # TestSprite Plan: NK2 Face ID Popup Version And Strict Matching 2026-06-29
 
 Feature/edit name: NK2 Face ID camera-popup version badge plus stricter recognition policy (v0.32.53)

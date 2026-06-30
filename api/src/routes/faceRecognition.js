@@ -12,7 +12,7 @@ const { resolveInvestorScope } = require('../services/permissionService');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
-const FACE_RECOGNITION_VERSION = 'face-recognition-0.32.53';
+const FACE_RECOGNITION_VERSION = 'face-recognition-0.32.54';
 
 function sha256Hex(buffer) {
   return crypto.createHash('sha256').update(buffer).digest('hex');
