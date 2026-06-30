@@ -4,11 +4,24 @@ jest.mock('../../../db', () => ({
   query: jest.fn(),
 }));
 
+jest.mock('../../permissionService', () => ({
+  isInvestorGroup: jest.fn((name) => String(name || '').trim().toLowerCase() === 'investor'),
+  resolveEffectivePermissions: jest.fn(),
+  resolveInvestorScope: jest.fn(),
+}));
+
 const { query } = require('../../../db');
+const { resolveEffectivePermissions, resolveInvestorScope } = require('../../permissionService');
 const { buildAppointmentDate, build, preview } = require('../builders/appointmentsExport');
 
 beforeEach(() => {
   query.mockReset();
+  resolveEffectivePermissions.mockResolvedValue({
+    groupName: 'Admin',
+    effectivePermissions: ['*'],
+    locations: [],
+  });
+  resolveInvestorScope.mockResolvedValue({ isInvestor: false, allowedCustomerIds: [] });
 });
 
 describe('buildAppointmentDate', () => {

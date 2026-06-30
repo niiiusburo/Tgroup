@@ -61,11 +61,12 @@ function companyScopeWhere(scope = {}, companyCol = 'companyid', params = []) {
   return conds.length ? `AND ${conds.join(' AND ')}` : '';
 }
 
-async function resolveReportCompanyScope(req, res, companyId) {
+async function resolveReportCompanyScope(req, res, companyId, options = {}) {
   try {
     return await resolveCompanyScopeForUser(req.user, companyId, {
       deniedMessage: 'Location not allowed',
       deniedCode: 'REPORT_LOCATION_DENIED',
+      ...options,
     });
   } catch (scopeErr) {
     err(res, scopeErr.status || 403, scopeErr.message || 'Location not allowed');

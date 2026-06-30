@@ -47,6 +47,12 @@ function buildDepositWhere(filters) {
     idx += 1;
   }
 
+  if (Array.isArray(filters.allowedCustomerIds)) {
+    conditions.push(`pr.id = ANY($${idx}::uuid[])`);
+    params.push(filters.allowedCustomerIds);
+    idx += 1;
+  }
+
   if (filters.doctorId) {
     conditions.push(`EXISTS (
       SELECT 1

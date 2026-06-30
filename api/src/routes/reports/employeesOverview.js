@@ -12,7 +12,10 @@ router.post('/employees/overview', requirePermission('reports.view'), async (req
     const { companyId } = req.body || {};
     if (!validUUID(companyId)) return err(res, 400, 'Invalid params');
 
-    const companyScope = await resolveReportCompanyScope(req, res, companyId);
+    const companyScope = await resolveReportCompanyScope(req, res, companyId, {
+      requireAssignedLocation: true,
+      scopeRequiredMessage: 'Location scope required',
+    });
     if (!companyScope) return;
 
     const params = [];
