@@ -3,7 +3,7 @@ import { Mail, Phone, MapPin, Calendar, X, Users, Pencil, Loader2, Building2 } f
 import {
   ROLE_LABELS,
   ROLE_STYLES,
-  STATUS_BADGE_STYLES,
+  STATUS_STYLE_MAP,
   type Employee } from
 '@/data/mockEmployees';
 import { fetchCompanies, type ApiCompany } from '@/lib/api';
@@ -72,7 +72,7 @@ export function EmployeeProfile({
                 <span className="text-xs font-medium px-2 py-0.5 rounded bg-purple-100 text-purple-700">
                   {employee.tierName || 'No Tier'}
                 </span>
-                <span className={`text-xs px-1.5 py-0.5 rounded ${STATUS_BADGE_STYLES[employee.status]}`}>
+                <span className={`text-xs px-1.5 py-0.5 rounded ${STATUS_STYLE_MAP[employee.status]?.badgeClass ?? ''}`}>
                   {statusLabel}
                 </span>
               </div>

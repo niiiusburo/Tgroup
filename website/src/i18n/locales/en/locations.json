@@ -57,7 +57,6 @@
     "addLocation": "Add Location"
   },
   "states": {
-    "loading": "Loading locations...",
     "loadingDescription": "Fetching clinic branches and filters."
   }
 }

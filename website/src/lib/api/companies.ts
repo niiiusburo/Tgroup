@@ -4,7 +4,7 @@
  * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/companies.js, product-map/domains/settings-system.yaml]
  * Calls /api/Companies (list/create/update; LOB-aware).
  */
-import { apiFetch, type PaginatedResponse } from './core';
+import { apiFetch, DEFAULT_PAGE_SIZE, type PaginatedResponse } from './core';
 
 // ─── Companies (Locations) ────────────────────────────────────────
 
@@ -35,7 +35,7 @@ export interface CreateCompanyData {
 
 export function fetchCompanies(params?: { offset?: number; limit?: number; lob?: 'dental' | 'cosmetic' }) {
   return apiFetch<PaginatedResponse<ApiCompany>>('/Companies', {
-    params: { offset: params?.offset ?? 0, limit: params?.limit ?? 50 },
+    params: { offset: params?.offset ?? 0, limit: params?.limit ?? DEFAULT_PAGE_SIZE },
     lob: params?.lob,
   });
 }

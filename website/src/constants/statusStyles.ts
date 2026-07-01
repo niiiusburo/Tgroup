@@ -31,78 +31,52 @@ export const STATUS_LABELS: Record<string, string> = {
   refunded: 'Refunded',
 };
 
-export const STATUS_STYLES: Record<string, string> = {
-  active: 'bg-green-100 text-green-700',
-  inactive: 'bg-gray-100 text-gray-500',
-  pending: 'bg-yellow-100 text-yellow-700',
-  scheduled: 'bg-blue-100 text-blue-700',
-  confirmed: 'bg-indigo-100 text-indigo-700',
-  'in-progress': 'bg-orange-100 text-orange-700',
-  completed: 'bg-green-100 text-green-700',
-  cancelled: 'bg-red-100 text-red-700',
-  renovation: 'bg-yellow-100 text-yellow-700',
-  closed: 'bg-gray-100 text-gray-500',
-  planned: 'bg-blue-100 text-blue-700',
-  missed: 'bg-red-100 text-red-700',
-  paid: 'bg-green-100 text-green-700',
-  upcoming: 'bg-blue-100 text-blue-700',
-  overdue: 'bg-red-100 text-red-700',
-  defaulted: 'bg-red-100 text-red-700',
-  draft: 'bg-gray-100 text-gray-500',
-  'not-arrived': 'bg-gray-100 text-gray-500',
-  arrived: 'bg-blue-100 text-blue-700',
-  waiting: 'bg-yellow-100 text-yellow-700',
-  'in-treatment': 'bg-orange-100 text-orange-700',
-  done: 'bg-green-100 text-green-700',
-  published: 'bg-green-100 text-green-700',
-  archived: 'bg-gray-100 text-gray-500',
-  failed: 'bg-red-100 text-red-700',
-  refunded: 'bg-gray-100 text-gray-500',
-};
+/**
+ * Unified status style entry.
+ * - `color`: Tailwind bg/text classes for an inline status pill (formerly STATUS_STYLES).
+ * - `badgeClass`: Tailwind classes including a border, for badge-style status (formerly STATUS_BADGE_STYLES).
+ * - `dotClass`: Tailwind bg class for a status-dot indicator (formerly STATUS_DOT_COLORS).
+ *
+ * Empty string means that sub-style was not defined for this status in the
+ * legacy split maps — consumers fall back to `` via optional chaining.
+ */
+export interface StatusStyleEntry {
+  readonly color: string;
+  readonly badgeClass: string;
+  readonly dotClass: string;
+}
 
-export const STATUS_BADGE_STYLES: Record<string, string> = {
-  active: 'bg-green-100 text-green-700 border-green-200',
-  inactive: 'bg-gray-100 text-gray-500 border-gray-200',
-  pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  scheduled: 'bg-blue-100 text-blue-700 border-blue-200',
-  confirmed: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-  'in-progress': 'bg-orange-100 text-orange-700 border-orange-200',
-  completed: 'bg-green-100 text-green-700 border-green-200',
-  cancelled: 'bg-red-100 text-red-700 border-red-200',
-  renovation: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  closed: 'bg-gray-100 text-gray-500 border-gray-200',
-  planned: 'bg-blue-100 text-blue-700 border-blue-200',
-  missed: 'bg-red-100 text-red-700 border-red-200',
-  paid: 'bg-green-100 text-green-700 border-green-200',
-  upcoming: 'bg-blue-100 text-blue-700 border-blue-200',
-  overdue: 'bg-red-100 text-red-700 border-red-200',
-  defaulted: 'bg-red-100 text-red-700 border-red-200',
-  draft: 'bg-gray-100 text-gray-500 border-gray-200',
-  'not-arrived': 'bg-gray-100 text-gray-500 border-gray-200',
-  arrived: 'bg-blue-100 text-blue-700 border-blue-200',
-  waiting: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  'in-treatment': 'bg-orange-100 text-orange-700 border-orange-200',
-  done: 'bg-green-100 text-green-700 border-green-200',
-  failed: 'bg-red-100 text-red-700 border-red-200',
-  refunded: 'bg-gray-100 text-gray-500 border-gray-200',
-};
-
-export const STATUS_DOT_COLORS: Record<string, string> = {
-  scheduled: 'bg-blue-500',
-  confirmed: 'bg-indigo-500',
-  'in-progress': 'bg-orange-500',
-  completed: 'bg-green-500',
-  cancelled: 'bg-red-500',
-  active: 'bg-green-500',
-  inactive: 'bg-gray-400',
-  pending: 'bg-yellow-500',
-  renovation: 'bg-yellow-500',
-  closed: 'bg-gray-400',
-  'not-arrived': 'bg-gray-400',
-  arrived: 'bg-blue-500',
-  waiting: 'bg-yellow-500',
-  'in-treatment': 'bg-orange-500',
-  done: 'bg-green-500',
+/**
+ * Single source of truth for status-related Tailwind styling.
+ * Replaces the former STATUS_STYLES / STATUS_BADGE_STYLES / STATUS_DOT_COLORS maps.
+ */
+export const STATUS_STYLE_MAP: Record<string, StatusStyleEntry> = {
+  active:          { color: 'bg-green-100 text-green-700',   badgeClass: 'bg-green-100 text-green-700 border-green-200',   dotClass: 'bg-green-500' },
+  inactive:        { color: 'bg-gray-100 text-gray-500',     badgeClass: 'bg-gray-100 text-gray-500 border-gray-200',      dotClass: 'bg-gray-400' },
+  pending:         { color: 'bg-yellow-100 text-yellow-700', badgeClass: 'bg-yellow-100 text-yellow-700 border-yellow-200', dotClass: 'bg-yellow-500' },
+  scheduled:       { color: 'bg-blue-100 text-blue-700',     badgeClass: 'bg-blue-100 text-blue-700 border-blue-200',      dotClass: 'bg-blue-500' },
+  confirmed:       { color: 'bg-indigo-100 text-indigo-700', badgeClass: 'bg-indigo-100 text-indigo-700 border-indigo-200', dotClass: 'bg-indigo-500' },
+  'in-progress':   { color: 'bg-orange-100 text-orange-700', badgeClass: 'bg-orange-100 text-orange-700 border-orange-200', dotClass: 'bg-orange-500' },
+  completed:       { color: 'bg-green-100 text-green-700',   badgeClass: 'bg-green-100 text-green-700 border-green-200',   dotClass: 'bg-green-500' },
+  cancelled:       { color: 'bg-red-100 text-red-700',       badgeClass: 'bg-red-100 text-red-700 border-red-200',         dotClass: 'bg-red-500' },
+  renovation:      { color: 'bg-yellow-100 text-yellow-700', badgeClass: 'bg-yellow-100 text-yellow-700 border-yellow-200', dotClass: 'bg-yellow-500' },
+  closed:          { color: 'bg-gray-100 text-gray-500',     badgeClass: 'bg-gray-100 text-gray-500 border-gray-200',      dotClass: 'bg-gray-400' },
+  planned:         { color: 'bg-blue-100 text-blue-700',     badgeClass: 'bg-blue-100 text-blue-700 border-blue-200',      dotClass: '' },
+  missed:          { color: 'bg-red-100 text-red-700',       badgeClass: 'bg-red-100 text-red-700 border-red-200',         dotClass: '' },
+  paid:            { color: 'bg-green-100 text-green-700',   badgeClass: 'bg-green-100 text-green-700 border-green-200',   dotClass: '' },
+  upcoming:        { color: 'bg-blue-100 text-blue-700',     badgeClass: 'bg-blue-100 text-blue-700 border-blue-200',      dotClass: '' },
+  overdue:         { color: 'bg-red-100 text-red-700',       badgeClass: 'bg-red-100 text-red-700 border-red-200',         dotClass: '' },
+  defaulted:       { color: 'bg-red-100 text-red-700',       badgeClass: 'bg-red-100 text-red-700 border-red-200',         dotClass: '' },
+  draft:           { color: 'bg-gray-100 text-gray-500',     badgeClass: 'bg-gray-100 text-gray-500 border-gray-200',      dotClass: '' },
+  'not-arrived':   { color: 'bg-gray-100 text-gray-500',     badgeClass: 'bg-gray-100 text-gray-500 border-gray-200',      dotClass: 'bg-gray-400' },
+  arrived:         { color: 'bg-blue-100 text-blue-700',     badgeClass: 'bg-blue-100 text-blue-700 border-blue-200',      dotClass: 'bg-blue-500' },
+  waiting:         { color: 'bg-yellow-100 text-yellow-700', badgeClass: 'bg-yellow-100 text-yellow-700 border-yellow-200', dotClass: 'bg-yellow-500' },
+  'in-treatment':  { color: 'bg-orange-100 text-orange-700', badgeClass: 'bg-orange-100 text-orange-700 border-orange-200', dotClass: 'bg-orange-500' },
+  done:            { color: 'bg-green-100 text-green-700',   badgeClass: 'bg-green-100 text-green-700 border-green-200',   dotClass: 'bg-green-500' },
+  published:       { color: 'bg-green-100 text-green-700',   badgeClass: '',                                               dotClass: '' },
+  archived:        { color: 'bg-gray-100 text-gray-500',     badgeClass: '',                                               dotClass: '' },
+  failed:          { color: 'bg-red-100 text-red-700',       badgeClass: 'bg-red-100 text-red-700 border-red-200',         dotClass: '' },
+  refunded:        { color: 'bg-gray-100 text-gray-500',     badgeClass: 'bg-gray-100 text-gray-500 border-gray-200',      dotClass: '' },
 };
 
 export const TIER_LABELS: Record<string, string> = {

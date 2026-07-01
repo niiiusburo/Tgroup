@@ -194,13 +194,13 @@ describe('Report subpages — error handling', () => {
   });
 
   const subpages = [
-    { name: 'Revenue', Component: ReportsRevenue, label: 'Tổng đã xuất', responses: getRevenueResponses, loadingText: 'Đang tải…' },
-    { name: 'Appointments', Component: ReportsAppointments, label: 'Tổng lịch hẹn', responses: getApptResponses, loadingText: 'Đang tải…' },
-    { name: 'Doctors', Component: ReportsDoctors, label: 'Tổng bác sĩ', responses: () => [getDoctorsResponse()], loadingText: 'Đang tải…' },
-    { name: 'Customers', Component: ReportsCustomers, label: 'Tổng khách hàng', responses: () => [getCustomersResponse()], loadingText: 'Đang tải…' },
-    { name: 'Locations', Component: ReportsLocations, label: 'Tổng chi nhánh', responses: () => [getLocationsResponse()], loadingText: 'Đang tải…' },
-    { name: 'Services', Component: ReportsServices, label: 'Zirconia', responses: () => [getServicesResponse()], loadingText: 'Đang tải…' },
-    { name: 'Employees', Component: ReportsEmployees, label: 'Tổng nhân viên', responses: () => [getEmployeesResponse()], loadingText: 'Đang tải…' },
+    { name: 'Revenue', Component: ReportsRevenue, label: 'Tổng đã xuất', responses: getRevenueResponses, loadingText: 'Đang tải...' },
+    { name: 'Appointments', Component: ReportsAppointments, label: 'Tổng lịch hẹn', responses: getApptResponses, loadingText: 'Đang tải...' },
+    { name: 'Doctors', Component: ReportsDoctors, label: 'Tổng bác sĩ', responses: () => [getDoctorsResponse()], loadingText: 'Đang tải...' },
+    { name: 'Customers', Component: ReportsCustomers, label: 'Tổng khách hàng', responses: () => [getCustomersResponse()], loadingText: 'Đang tải...' },
+    { name: 'Locations', Component: ReportsLocations, label: 'Tổng chi nhánh', responses: () => [getLocationsResponse()], loadingText: 'Đang tải...' },
+    { name: 'Services', Component: ReportsServices, label: 'Zirconia', responses: () => [getServicesResponse()], loadingText: 'Đang tải...' },
+    { name: 'Employees', Component: ReportsEmployees, label: 'Tổng nhân viên', responses: () => [getEmployeesResponse()], loadingText: 'Đang tải...' },
   ];
 
   for (const { name, Component, label, responses, loadingText } of subpages) {

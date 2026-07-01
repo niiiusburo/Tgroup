@@ -1,4 +1,4 @@
-import { formatDate } from './CustomerProfile/formatDate';
+import { formatDate } from '@/lib/dateUtils';
 
 interface RecordDateBadgeProps {
   readonly value: string | null | undefined;

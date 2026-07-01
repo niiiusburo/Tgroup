@@ -4,7 +4,7 @@
  * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/partners.js, api/src/routes/faceRecognition.js, api/src/server.js (/api/cross-lob-probe inline), product-map/domains/customers-partners.yaml]
  * Calls /api/Partners CRUD/resolve, /api/face/* (recognize/register/status), /api/cross-lob-probe.
  */
-import { apiFetch, type PaginatedResponse } from './core';
+import { apiFetch, DEFAULT_PAGE_SIZE, type PaginatedResponse } from './core';
 
 // ─── Partners (Customers) ─────────────────────────────────────────
 
@@ -99,7 +99,7 @@ export function fetchPartners(params?: {
   return apiFetch<PartnersResponse>('/Partners', {
     params: {
       offset: params?.offset ?? 0,
-      limit: params?.limit ?? 50,
+      limit: params?.limit ?? DEFAULT_PAGE_SIZE,
       search: params?.search,
       companyId: params?.companyId,
       status: params?.status,

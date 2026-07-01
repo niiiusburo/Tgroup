@@ -7,19 +7,13 @@ jest.mock('../../services/referralClaim', () => ({
   getReferralClaimStatus: jest.fn(),
 }));
 
-jest.mock('../../db', () => {
-  const mockQueryRows = jest.fn();
-  const mockQuery = jest.fn((sql, params) => mockQueryRows(sql, params).then((rows) => ({ rows })));
-  return {
-    query: mockQuery,
-    getQuery: jest.fn(() => mockQueryRows),
-    getDb: jest.fn(() => ({ queryRows: mockQueryRows, query: mockQuery })),
-  };
-});
+jest.mock('../../db', () =>
+  require('../../__tests__/helpers/routeTestHelpers').createMockDb()
+);
 
-jest.mock('../../middleware/auth', () => ({
-  requireAuth: (req, res, next) => next(),
-}));
+jest.mock('../../middleware/auth', () =>
+  require('../../__tests__/helpers/routeTestHelpers').createMockAuth()
+);
 
 jest.mock('../../services/permissionService', () => ({
   resolveEffectivePermissions: jest.fn(() => Promise.resolve({ effectivePermissions: [] })),
@@ -28,36 +22,10 @@ jest.mock('../../services/permissionService', () => ({
 
 const { getReferralClaimStatus } = require('../../services/referralClaim');
 const { getDb } = require('../../db');
-
-// ctv routes are now split into sub-routers mounted on the main router (see
-// routes/ctv/index.js). Recurse into mounted sub-routers so route handlers can
-// still be located by path/method.
-function findRouteHandler(router, path, method) {
-  let handler;
-  router.stack.forEach((layer) => {
-    if (layer.route && layer.route.path === path && layer.route.methods[method]) {
-      layer.route.stack.forEach((l) => {
-        if (l.handle && typeof l.handle === 'function') handler = l.handle;
-      });
-    } else if (!layer.route && layer.handle && Array.isArray(layer.handle.stack)) {
-      const nested = findRouteHandler(layer.handle, path, method);
-      if (nested) handler = nested;
-    }
-  });
-  return handler;
-}
+const { findRouteHandler, makeRes } = require('../../__tests__/helpers/routeTestHelpers');
 
 function getRouteHandler(path, method) {
   return findRouteHandler(ctvRouter, path, method);
-}
-
-function makeRes() {
-  return {
-    statusCode: 200,
-    jsonBody: null,
-    status(code) { this.statusCode = code; return this; },
-    json(body) { this.jsonBody = body; return this; },
-  };
 }
 
 describe('POST /ctv/bookings', () => {
@@ -512,15 +480,6 @@ describe('POST /ctv/clients (cross-LOB claim gate)', () => {
     getReferralClaimStatus.mockReset();
   });
 
-  function makeRes() {
-    return {
-      statusCode: 200,
-      jsonBody: null,
-      status(code) { this.statusCode = code; return this; },
-      json(body) { this.jsonBody = body; return this; },
-    };
-  }
-
   test('allows register in dental when the same phone is actively claimed only in cosmetic (per-LOB locks)', async () => {
     const dentalDb = { queryRows: jest.fn(), query: jest.fn() };
     const cosmeticDb = { queryRows: jest.fn(), query: jest.fn() };
@@ -655,12 +614,7 @@ describe('GET /ctv/commission-summary', () => {
 
     const handler = findRouteHandler(ctvRouter, '/commission-summary', 'get');
     const req = { method: 'GET', url: '/ctv/commission-summary', user: { employeeId: 'ctv-1', is_ctv: true }, query: {} };
-    const res = {
-      statusCode: 200,
-      jsonBody: null,
-      status(code) { this.statusCode = code; return this; },
-      json(body) { this.jsonBody = body; return this; },
-    };
+    const res = makeRes();
 
     await handler(req, res);
 

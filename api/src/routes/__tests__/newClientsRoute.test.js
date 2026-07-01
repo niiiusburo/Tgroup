@@ -1,8 +1,8 @@
 'use strict';
 
-jest.mock('../../middleware/auth', () => ({
-  requireAuth: (_req, _res, next) => next(),
-}));
+jest.mock('../../middleware/auth', () =>
+  require('../../__tests__/helpers/routeTestHelpers').createMockAuth()
+);
 
 jest.mock('../../services/permissionService', () => ({
   resolveEffectivePermissions: jest.fn(() => Promise.resolve({ effectivePermissions: ['commissions.view.team'] })),
@@ -15,10 +15,10 @@ jest.mock('../../services/newClientsQuery', () => ({
 
 const newClientsRouter = require('../newClients');
 const { listNewClients } = require('../../services/newClientsQuery');
+const { findRouteHandler, makeRes } = require('../../__tests__/helpers/routeTestHelpers');
 
 function getGetHandler() {
-  const layer = newClientsRouter.stack.find((item) => item.route?.path === '/' && item.route?.methods?.get);
-  return layer.route.stack[layer.route.stack.length - 1].handle;
+  return findRouteHandler(newClientsRouter, '/', 'get');
 }
 
 function makeReq({ query, lob }) {
@@ -26,21 +26,6 @@ function makeReq({ query, lob }) {
     query,
     lob,
     user: { employeeId: 'admin-1', authLob: 'dental', lob_scope: ['dental', 'cosmetic'] },
-  };
-}
-
-function makeRes() {
-  return {
-    statusCode: 200,
-    jsonBody: null,
-    status(code) {
-      this.statusCode = code;
-      return this;
-    },
-    json(body) {
-      this.jsonBody = body;
-      return this;
-    },
   };
 }
 

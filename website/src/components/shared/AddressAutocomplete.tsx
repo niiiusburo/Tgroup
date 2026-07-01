@@ -426,7 +426,7 @@ export function AddressAutocomplete({
       <div ref={dropdownRef} className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 z-[100]">
           <div className="flex items-center gap-3 text-gray-500">
             <Search className="w-5 h-5" />
-            <p className="text-sm">{t('khngTmThyAChPhHp')}</p>
+            <p className="text-sm">{t('noMatchingAddress')}</p>
           </div>
         </div>
       }

@@ -16,6 +16,7 @@ import {
 import { CtvCreationForm, useCtvCreationForm } from '@/components/shared/CtvCreationForm';
 import { ApiError } from '@/lib/api/core';
 import { CtvHierarchyPanel } from '@/components/ctv/CtvHierarchyPanel';
+import { CTV_CREATE_AUTO_CLOSE_MS, COPY_FEEDBACK_RESET_MS } from '@/constants';
 import { normalizeText } from '@/lib/utils';
 
 /**
@@ -258,7 +259,7 @@ function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
       const id = setTimeout(() => {
         formApi.clearSuccess();
         onSuccess();
-      }, 800);
+      }, CTV_CREATE_AUTO_CLOSE_MS);
       return () => clearTimeout(id);
     }
   }, [formApi, formApi.success, createdCtv, onSuccess]);
@@ -272,7 +273,7 @@ function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
     try {
       await navigator.clipboard.writeText(text);
       setCopiedAll(true);
-      setTimeout(() => setCopiedAll(false), 2000);
+      setTimeout(() => setCopiedAll(false), COPY_FEEDBACK_RESET_MS);
     } catch {
       /* ignore clipboard errors */
     }
@@ -574,7 +575,7 @@ function ResetPasswordModal({ ctv, onClose, onSuccess }: ResetPasswordModalProps
     try {
       await navigator.clipboard.writeText(result);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), COPY_FEEDBACK_RESET_MS);
     } catch {
       /* ignore */
     }

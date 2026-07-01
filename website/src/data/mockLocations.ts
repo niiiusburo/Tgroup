@@ -4,10 +4,10 @@
  */
 
 import type { LocationBranch, LocationStatus, LocationMetrics } from '@/types/location';
-import { STATUS_LABELS, STATUS_STYLES } from '@/constants/statusStyles';
+import { STATUS_LABELS, STATUS_STYLE_MAP } from '@/constants/statusStyles';
 
 export type { LocationBranch, LocationStatus, LocationMetrics };
-export { STATUS_LABELS, STATUS_STYLES };
+export { STATUS_LABELS, STATUS_STYLE_MAP };
 
 export const MOCK_LOCATIONS: readonly LocationBranch[] = [];
 export const MOCK_LOCATION_BRANCHES: readonly LocationBranch[] = [];

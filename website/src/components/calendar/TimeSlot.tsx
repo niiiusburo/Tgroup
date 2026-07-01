@@ -1,5 +1,5 @@
 import { APPOINTMENT_TYPE_COLORS } from '@/constants';
-import { STATUS_DOT_COLORS, type CalendarAppointment } from '@/data/mockCalendar';
+import { STATUS_STYLE_MAP, type CalendarAppointment } from '@/data/mockCalendar';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import { formatAppointmentStartDuration } from '@/lib/appointmentDuration';
 
@@ -53,7 +53,7 @@ interface AppointmentBlockProps {
 }
 
 function AppointmentBlock({ appointment }: AppointmentBlockProps) {
-  const dotColor = STATUS_DOT_COLORS[appointment.status];
+  const dotColor = STATUS_STYLE_MAP[appointment.status]?.dotClass ?? '';
   const typeColors = APPOINTMENT_TYPE_COLORS[appointment.appointmentType];
   const timeLabel = formatAppointmentStartDuration(appointment.startTime, appointment.timeexpected);
 
@@ -76,7 +76,7 @@ function AppointmentBlock({ appointment }: AppointmentBlockProps) {
 }
 
 function CompactAppointment({ appointment }: AppointmentBlockProps) {
-  const dotColor = STATUS_DOT_COLORS[appointment.status];
+  const dotColor = STATUS_STYLE_MAP[appointment.status]?.dotClass ?? '';
   const typeColors = APPOINTMENT_TYPE_COLORS[appointment.appointmentType];
 
   return (

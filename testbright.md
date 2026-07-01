@@ -5111,3 +5111,28 @@ Edge cases / regressions:
 - [ ] PENDING: Verify debounce still works on customer/appointment/service search.
 
 Setup/login data: t@clinic.vn / 123123 on http://127.0.0.1:5175
+
+---
+
+# TestSprite Plan: Tier 3+4 consolidation 2026-07-01
+Feature/edit name: API client, i18n, constants, test helpers (v0.39.9).
+
+Changed URLs / API routes / data flow:
+- No URL changes. API client layer refactored internally (investorFetch → apiFetch).
+- i18n: 56 duplicate keys removed, 16 Vietnamese keys renamed in EN files.
+
+User roles: All.
+
+Happy paths:
+- [ ] PENDING: Login as t@clinic.vn/123123, verify dashboard loads.
+- [ ] PENDING: Investor portal login + portfolio view works.
+- [ ] PENDING: CTV discount landing page loads.
+- [ ] PENDING: Settings → Bank settings form renders with English labels.
+- [ ] PENDING: Export download works (blob response via apiFetch).
+
+Edge cases / regressions:
+- [ ] PENDING: Verify i18n fallbackNS works — loading/save/cancel text renders in both EN and VI.
+- [ ] PENDING: Verify no Vietnamese keys appear in English locale files.
+- [ ] PENDING: Verify status badges render with correct colors across all pages.
+
+Setup/login data: t@clinic.vn / 123123 on http://127.0.0.1:5175

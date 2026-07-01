@@ -1,0 +1,38 @@
+{
+  "title": "Investor Accounts",
+  "subtitle": "Provision and manage read-only investor portal access.",
+  "create": "Add Investor",
+  "createTitle": "New Investor Account",
+  "cancel": "Cancel",
+  "creating": "Creating…",
+  "loadError": "Could not load investors.",
+  "createError": "Could not create investor.",
+  "updateError": "Could not update investor.",
+  "duplicateEmail": "That email is already registered.",
+  "empty": "No investor accounts yet.",
+  "deactivate": "Deactivate",
+  "reactivate": "Reactivate",
+  "confirmDeactivate": "Deactivate {{email}}? They will lose portal access immediately.",
+  "initialPasswordTitle": "Initial password (shown once)",
+  "initialPasswordHint": "Copy this password now. It will not be shown again.",
+  "columns": {
+    "email": "Email",
+    "name": "Display name",
+    "lob": "LOB",
+    "status": "Status",
+    "clients": "Visible clients"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "lob": {
+    "dental": "Dental",
+    "cosmetic": "Cosmetic"
+  },
+  "form": {
+    "email": "Email",
+    "name": "Display name",
+    "lob": "Line of business"
+  }
+}

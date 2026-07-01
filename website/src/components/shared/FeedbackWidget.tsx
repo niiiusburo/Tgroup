@@ -11,6 +11,7 @@ import {
   fetchFeedbackUnreadCount,
 } from '@/lib/api';
 import type { FeedbackThread, FeedbackMessage, FeedbackStatus } from '@/types/feedback';
+import { FEEDBACK_INITIAL_FETCH_DEFER_MS } from '@/constants';
 import { AttachmentThumbnails } from './FeedbackWidgetAttachments';
 import { FeedbackLoginHint } from './FeedbackLoginHint';
 import { useBlockingDialogPresence, useObjectUrls } from './FeedbackWidgetHooks';
@@ -115,7 +116,7 @@ export function FeedbackWidget() {
     };
     // Defer the initial unread fetch off the critical path so this non-urgent
     // badge doesn't contend with page-critical XHRs during first load.
-    const initialTimer = window.setTimeout(refresh, 1500);
+    const initialTimer = window.setTimeout(refresh, FEEDBACK_INITIAL_FETCH_DEFER_MS);
     const id = window.setInterval(refresh, 45_000);
     return () => {
       cancelled = true;

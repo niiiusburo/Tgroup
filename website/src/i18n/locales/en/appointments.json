@@ -44,8 +44,6 @@
     "notes": "Notes",
     "status": "Status",
     "color": "Color",
-    "save": "Save",
-    "cancel": "Cancel",
     "selectCustomer": "Select customer",
     "selectDoctor": "Select doctor",
     "selectLocation": "Select location",

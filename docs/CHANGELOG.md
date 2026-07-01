@@ -2,6 +2,23 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.39.9] — 2026-07-01 — Tier 3+4: API client, i18n, constants, test helpers
+
+### Refactoring
+- Eliminated `investorFetch` duplicate — investor API now uses `apiFetch` with pluggable `authTokenSource`.
+- Replaced 6 raw `fetch` calls with `apiFetch` (discountCodes, exports blob, externalCheckups).
+- Centralized pagination defaults (`DEFAULT_PAGE_SIZE=50`, `DEFAULT_LARGE_PAGE_SIZE=100`, `DEFAULT_XL_PAGE_SIZE=200`).
+- Merged 3 duplicate status style maps into unified `STATUS_STYLE_MAP`; removed 3 dead hex color maps.
+- Extracted 11 named timeout constants replacing inline magic numbers across 9 files.
+- Removed 56 lines of duplicate `loading`/`save`/`cancel` i18n keys across 26 locale files (uses `fallbackNS`).
+- Renamed/deleted 16 Vietnamese-named keys in English locale files; updated 11 component call-sites.
+- Created shared `routeTestHelpers.js` — eliminated 250 lines of duplicated test boilerplate across 11 files.
+- Fixed i18n audit script + test mock to model `fallbackNS` (previously-failing i18n test now passes).
+
+### Testing
+- All 196 backend tests pass, **754/754 frontend tests pass** (pre-existing i18n failure now fixed).
+- 18 route test suites (104 tests) pass with shared helpers.
+
 ## [0.39.8] — 2026-07-01 — Tier 2 consolidation (JWT factory, CTV split, debounce dedup, context memoization)
 
 ### Refactoring

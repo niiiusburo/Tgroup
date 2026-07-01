@@ -15,19 +15,13 @@
  * product-map/domains/ctv.yaml writes: "writes partners in dental and optionally cosmetic".
  */
 
-jest.mock('../../db', () => {
-  const mockQueryRows = jest.fn();
-  const mockQuery = jest.fn((sql, params) => mockQueryRows(sql, params).then((rows) => ({ rows })));
-  return {
-    query: mockQuery,
-    getQuery: jest.fn(() => mockQueryRows),
-    getDb: jest.fn(() => ({ queryRows: mockQueryRows, query: mockQuery })),
-  };
-});
+jest.mock('../../db', () =>
+  require('../../__tests__/helpers/routeTestHelpers').createMockDb()
+);
 
-jest.mock('../../middleware/auth', () => ({
-  requireAuth: (req, res, next) => next(),
-}));
+jest.mock('../../middleware/auth', () =>
+  require('../../__tests__/helpers/routeTestHelpers').createMockAuth()
+);
 
 // Caller is treated as an admin so the create path is reached.
 jest.mock('../../services/permissionService', () => ({
@@ -45,33 +39,7 @@ jest.mock('bcryptjs', () => ({ hash: jest.fn(() => Promise.resolve('hashed-pw'))
 
 const ctvRouter = require('../ctv');
 const { getDb } = require('../../db');
-
-// ctv routes are now split into sub-routers mounted on the main router (see
-// routes/ctv/index.js). Recurse into mounted sub-routers so route handlers can
-// still be located by path/method.
-function findRouteHandler(router, path, method) {
-  let handler;
-  router.stack.forEach((layer) => {
-    if (layer.route && layer.route.path === path && layer.route.methods[method]) {
-      layer.route.stack.forEach((l) => {
-        if (l.handle && typeof l.handle === 'function') handler = l.handle;
-      });
-    } else if (!layer.route && layer.handle && Array.isArray(layer.handle.stack)) {
-      const nested = findRouteHandler(layer.handle, path, method);
-      if (nested) handler = nested;
-    }
-  });
-  return handler;
-}
-
-function makeRes() {
-  return {
-    statusCode: 200,
-    jsonBody: null,
-    status(code) { this.statusCode = code; return this; },
-    json(body) { this.jsonBody = body; return this; },
-  };
-}
+const { findRouteHandler, makeRes } = require('../../__tests__/helpers/routeTestHelpers');
 
 /**
  * Wire the two pools so we can assert exactly which DB received the INSERT.

@@ -203,7 +203,10 @@ function translateForTest(key: string, options?: Record<string, unknown> | strin
   const flatMap = lang === 'en' ? enFlat : viFlat;
 
   if (typeof options === 'string') {
-    return flatMap[requestedNs || 'common']?.[key] ?? options;
+    const ns = requestedNs || 'common';
+    return flatMap[ns]?.[key]
+      ?? (ns !== 'common' ? flatMap['common']?.[key] : undefined)
+      ?? options;
   }
 
   const defaultValue = typeof options?.defaultValue === 'string' ? options.defaultValue : undefined;
@@ -222,7 +225,13 @@ function translateForTest(key: string, options?: Record<string, unknown> | strin
     }
   }
 
-  const resolved = flatMap[resolvedNs]?.[resolvedKey] ?? defaultValue ?? key;
+  // Resolve via the requested namespace, then fall back to the 'common'
+  // namespace (mirroring fallbackNS: 'common' in src/i18n/index.ts), then
+  // defaultValue, then the raw key.
+  const resolved = flatMap[resolvedNs]?.[resolvedKey]
+    ?? (resolvedNs !== 'common' ? flatMap['common']?.[resolvedKey] : undefined)
+    ?? defaultValue
+    ?? key;
   return interpolate(resolved, options);
 }
 

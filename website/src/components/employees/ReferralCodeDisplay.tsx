@@ -1,5 +1,6 @@
 import { Copy, Check, Users, TrendingUp } from 'lucide-react';
 import { useState, useCallback } from 'react';
+import { COPY_FEEDBACK_RESET_MS } from '@/constants';
 
 /**
  * ReferralCodeDisplay — shows employee referral code and stats
@@ -45,7 +46,7 @@ export function ReferralCodeDisplay({
   const handleCopy = useCallback(() => {
     void navigator.clipboard.writeText(stats.code);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), COPY_FEEDBACK_RESET_MS);
   }, [stats.code]);
 
   return (

@@ -1,21 +1,10 @@
-jest.mock('../../../db', () => {
-  const mockQuery = jest.fn();
-  return {
-    query: mockQuery,
-    getQuery: jest.fn((reqOrLob) => mockQuery), // test shim: always delegate to the spied query fn (dental path in tests)
-    getDb: jest.fn(() => ({ queryRows: mockQuery })),
-  };
-});
+jest.mock('../../../db', () =>
+  require('../../../__tests__/helpers/routeTestHelpers').createMockQueryDb()
+);
 
 const { query } = require('../../../db');
 const { listAppointments } = require('../readHandlers');
-
-function mockResponse() {
-  return {
-    status: jest.fn().mockReturnThis(),
-    json: jest.fn().mockReturnThis(),
-  };
-}
+const { mockResponse } = require('../../../__tests__/helpers/routeTestHelpers');
 
 describe('appointment read handlers', () => {
   beforeEach(() => {

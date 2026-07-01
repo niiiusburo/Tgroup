@@ -4,7 +4,7 @@
  * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/employees.js, api/src/routes/employees/mutations.js, product-map/domains/employees-hr.yaml]
  * Calls /api/Employees CRUD (LOB-aware).
  */
-import { apiFetch, type PaginatedResponse } from './core';
+import { apiFetch, DEFAULT_PAGE_SIZE, type PaginatedResponse } from './core';
 
 // ─── Employees ────────────────────────────────────────────────────
 
@@ -78,7 +78,7 @@ export function fetchEmployees(params?: {
   return apiFetch<PaginatedResponse<ApiEmployee>>('/Employees', {
     params: {
       offset: params?.offset ?? 0,
-      limit: params?.limit ?? 50,
+      limit: params?.limit ?? DEFAULT_PAGE_SIZE,
       search: params?.search,
       companyId: params?.companyId,
       isDoctor: params?.isDoctor,

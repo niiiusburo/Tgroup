@@ -1,12 +1,12 @@
 /**
  * @crossref:domain[appointments-calendar]
  * @crossref:used-in[today's timeline — NO current importers (orphan candidate; useTodaySchedule hook is separate and live)]
- * @crossref:uses[website/src/data/mockCalendar.ts (CalendarAppointment, STATUS_BADGE_STYLES), website/src/components/shared/CustomerNameLink.tsx, website/src/lib/appointmentDuration.ts, product-map/domains/appointments-calendar.yaml]
+ * @crossref:uses[website/src/data/mockCalendar.ts (CalendarAppointment, STATUS_STYLE_MAP), website/src/components/shared/CustomerNameLink.tsx, website/src/lib/appointmentDuration.ts, product-map/domains/appointments-calendar.yaml]
  */
 import { Clock, User, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { CalendarAppointment } from '@/data/mockCalendar';
-import { STATUS_BADGE_STYLES } from '@/data/mockCalendar';
+import { STATUS_STYLE_MAP } from '@/data/mockCalendar';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import { formatAppointmentDuration } from '@/lib/appointmentDuration';
 
@@ -68,7 +68,7 @@ export function TodaySchedule({
                   </p>
                   <span
                     className={`shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full ${
-                      STATUS_BADGE_STYLES[apt.status]
+                      STATUS_STYLE_MAP[apt.status]?.badgeClass ?? ''
                     }`}
                   >
                     {apt.status}

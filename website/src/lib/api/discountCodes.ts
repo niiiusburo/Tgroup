@@ -4,7 +4,7 @@
  * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/discountCodes.js, product-map/domains/settings-system.yaml]
  * Calls /api/discount-codes/* (lookup/verify/generate/landing/mine/admin).
  */
-import { apiFetch, API_URL } from './core';
+import { apiFetch } from './core';
 
 export type DiscountCodeLob = 'dental' | 'cosmetic';
 
@@ -172,38 +172,20 @@ export async function generateCtvDiscountCode(input?: {
 }
 
 export async function fetchCtvDiscountLanding(shortCode: string): Promise<CtvDiscountLandingInfo> {
-  const res = await fetch(`${API_URL}/discount-codes/landing/${encodeURIComponent(shortCode)}`);
-  const contentType = res.headers.get('content-type') || '';
-  if (!res.ok || !contentType.includes('application/json')) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { error?: { message?: string } })?.error?.message || 'Landing not found'
-    );
-  }
-  return res.json() as Promise<CtvDiscountLandingInfo>;
+  return apiFetch<CtvDiscountLandingInfo>(`/discount-codes/landing/${encodeURIComponent(shortCode)}`);
 }
 
 export async function checkExistingFanCode(ctvId: string): Promise<DiscountCodeGenerate & { hasCode: boolean }> {
-  const qs = new URLSearchParams({ ctvId });
-  const res = await fetch(`${API_URL}/discount-codes/check-existing?${qs.toString()}`, {
-    credentials: 'include',
+  return apiFetch<DiscountCodeGenerate & { hasCode: boolean }>('/discount-codes/check-existing', {
+    params: { ctvId },
   });
-  if (!res.ok) throw new Error('Could not check existing code');
-  return res.json() as Promise<DiscountCodeGenerate & { hasCode: boolean }>;
 }
 
 export async function generateFanDiscountCode(ctvId: string): Promise<DiscountCodeGenerate> {
-  const res = await fetch(`${API_URL}/discount-codes/generate`, {
+  return apiFetch<DiscountCodeGenerate>('/discount-codes/generate', {
     method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ctvId }),
+    body: { ctvId },
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error?.message || 'Generate failed');
-  }
-  return res.json() as Promise<DiscountCodeGenerate>;
 }
 
 export async function fetchMyDiscountCodes(params?: {

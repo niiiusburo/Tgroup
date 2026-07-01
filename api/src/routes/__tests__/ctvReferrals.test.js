@@ -1,12 +1,12 @@
 'use strict';
 
-jest.mock('../../middleware/auth', () => ({
-  requireAuth: (req, res, next) => next(),
-}));
+jest.mock('../../middleware/auth', () =>
+  require('../../__tests__/helpers/routeTestHelpers').createMockAuth()
+);
 
-jest.mock('../../db', () => ({
-  getDb: jest.fn(),
-}));
+jest.mock('../../db', () =>
+  require('../../__tests__/helpers/routeTestHelpers').createMockDb()
+);
 
 jest.mock('../../services/ctvCardTrackingReferrals', () => ({
   buildCardTrackingReferrals: jest.fn(),
@@ -15,36 +15,10 @@ jest.mock('../../services/ctvCardTrackingReferrals', () => ({
 const ctvRouter = require('../ctv');
 const { getDb } = require('../../db');
 const { buildCardTrackingReferrals } = require('../../services/ctvCardTrackingReferrals');
-
-// ctv routes are now split into sub-routers mounted on the main router (see
-// routes/ctv/index.js). Recurse into mounted sub-routers so route handlers can
-// still be located by path/method.
-function findRouteHandler(router, path, method) {
-  let handler;
-  router.stack.forEach((layer) => {
-    if (layer.route && layer.route.path === path && layer.route.methods[method]) {
-      layer.route.stack.forEach((l) => {
-        if (l.handle && typeof l.handle === 'function') handler = l.handle;
-      });
-    } else if (!layer.route && layer.handle && Array.isArray(layer.handle.stack)) {
-      const nested = findRouteHandler(layer.handle, path, method);
-      if (nested) handler = nested;
-    }
-  });
-  return handler;
-}
+const { findRouteHandler, makeRes } = require('../../__tests__/helpers/routeTestHelpers');
 
 function getReferralsHandler() {
   return findRouteHandler(ctvRouter, '/referrals', 'get');
-}
-
-function makeRes() {
-  return {
-    statusCode: 200,
-    jsonBody: null,
-    status(code) { this.statusCode = code; return this; },
-    json(body) { this.jsonBody = body; return this; },
-  };
 }
 
 describe('GET /ctv/referrals', () => {

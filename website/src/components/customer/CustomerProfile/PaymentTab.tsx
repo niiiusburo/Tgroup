@@ -55,7 +55,7 @@ export function PaymentTab({
         </div>
 
         {loadingPayments ? (
-          <div className="p-6 text-center text-sm text-gray-500">{t('angTi', { ns: 'common' })}...</div>
+          <div className="p-6 text-center text-sm text-gray-500">{t('loading', { ns: 'common' })}...</div>
         ) : payments.length === 0 ? (
           <div className="p-6 text-center text-sm text-gray-400">{t('noPayments', { ns: 'services' })}</div>
         ) : (

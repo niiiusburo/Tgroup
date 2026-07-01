@@ -26,7 +26,7 @@ import type {
  * Exposes reset + success + isSubmitting for success UI (checkmark) + parent orchestration.
  *
  * @crossref:used-in[CtvManagementTab (admin AddCtvModal), CtvRecruitModal (portal-recruit), JoinCtv (public-join)]
- * @crossref:uses[@/lib/api/ctv (createCtv/joinCtv types + callers), react-i18next (ctv ns for errors), ./types, useFormValidation patterns (per-field + validators inspiration), @/lib/utils (cn/normalize in consumers)]
+ * @crossref:uses[@/lib/api/ctv (createCtv/joinCtv types + callers), react-i18next (ctv ns for errors), ./types, @/lib/utils (cn/normalize in consumers)]
  * @crossref:plan-refactor-target[minimal wiring in 3 consumers without behavior change until full cutover]
  */
 

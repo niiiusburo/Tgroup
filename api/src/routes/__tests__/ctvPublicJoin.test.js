@@ -6,44 +6,12 @@ jest.mock('../../services/referralClaim', () => ({
   getReferralClaimStatus: jest.fn(),
 }));
 
-jest.mock('../../db', () => {
-  const mockQueryRows = jest.fn();
-  const mockQuery = jest.fn((sql, params) => mockQueryRows(sql, params).then((rows) => ({ rows })));
-  return {
-    query: mockQuery,
-    getQuery: jest.fn(() => mockQueryRows),
-    getDb: jest.fn(() => ({ queryRows: mockQueryRows, query: mockQuery })),
-  };
-});
+jest.mock('../../db', () =>
+  require('../../__tests__/helpers/routeTestHelpers').createMockDb()
+);
 
 const { getDb } = require('../../db');
-
-function findRouteHandler(router, path, method) {
-  let handler;
-  router.stack.forEach((layer) => {
-    if (layer.route && layer.route.path === path && layer.route.methods[method]) {
-      layer.route.stack.forEach((l) => {
-        if (l.handle && typeof l.handle === 'function') handler = l.handle;
-      });
-    }
-  });
-  return handler;
-}
-
-function createRes() {
-  return {
-    statusCode: 200,
-    jsonBody: null,
-    status(code) {
-      this.statusCode = code;
-      return this;
-    },
-    json(body) {
-      this.jsonBody = body;
-      return this;
-    },
-  };
-}
+const { findRouteHandler, makeRes } = require('../../__tests__/helpers/routeTestHelpers');
 
 describe('POST /ctv-public/join', () => {
   beforeEach(() => {
@@ -80,7 +48,7 @@ describe('POST /ctv-public/join', () => {
         uplinePhone: '0909000000',
       },
     };
-    const res = createRes();
+    const res = makeRes();
 
     await handler(req, res);
 
@@ -127,7 +95,7 @@ describe('POST /ctv-public/join', () => {
         uplinePhone: '0909000000',
       },
     };
-    const res = createRes();
+    const res = makeRes();
 
     await handler(req, res);
 
@@ -151,7 +119,7 @@ describe('POST /ctv-public/join', () => {
         password: 'secret1',
       },
     };
-    const res = createRes();
+    const res = makeRes();
 
     await handler(req, res);
 
@@ -177,7 +145,7 @@ describe('POST /ctv-public/join', () => {
       url: '/ctv-public/join',
       body: { name: 'No Email CTV', phone: '0123456789', password: 'secret1', uplinePhone: '0909000000' },
     };
-    const res = createRes();
+    const res = makeRes();
 
     await handler(req, res);
 
@@ -211,7 +179,7 @@ describe('POST /ctv-public/join', () => {
       url: '/ctv-public/join',
       body: { name: 'Root CTV', phone: '0123456789', password: 'secret1' },
     };
-    const res = createRes();
+    const res = makeRes();
 
     await handler(req, res);
 
@@ -240,7 +208,7 @@ describe('POST /ctv-public/join', () => {
         uplinePhone: '0909000000',
       },
     };
-    const res = createRes();
+    const res = makeRes();
 
     await handler(req, res);
 
@@ -265,7 +233,7 @@ describe('GET /ctv-public/ctv-lookup', () => {
       url: '/ctv-public/ctv-lookup?phone=0909000000',
       query: { phone: '0909000000' },
     };
-    const res = createRes();
+    const res = makeRes();
 
     await handler(req, res);
 
@@ -284,7 +252,7 @@ describe('GET /ctv-public/ctv-lookup', () => {
       url: '/ctv-public/ctv-lookup?phone=0909000000',
       query: { phone: '0909000000' },
     };
-    const res = createRes();
+    const res = makeRes();
 
     await handler(req, res);
 

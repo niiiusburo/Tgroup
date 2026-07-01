@@ -263,7 +263,6 @@
     "paidToThem": "Đã trả cho họ",
     "noEarningSource": "Chưa có tuyến dưới nào phát sinh hoa hồng"
   },
-  "loading": "Đang tải khách trên thẻ...",
   "errorTitle": "Không tải được dữ liệu CTV",
   "errorBody": "Vui lòng thử lại sau ít phút.",
   "retry": "Tải lại",

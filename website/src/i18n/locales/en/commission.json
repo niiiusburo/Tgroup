@@ -194,9 +194,6 @@
     "returnHint": "You opened this from the commission workflow. Use the return action to go back to the exact commission step.",
     "backToCommission": "Back to commission"
   },
-  "cancel": "Cancel",
-  "loading": "Loading...",
-  "save": "Save",
   "error": "Error",
   "clear": "Clear",
   "common": {

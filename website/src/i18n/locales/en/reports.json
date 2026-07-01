@@ -8,7 +8,6 @@
   "locations": "Location Report",
   "services": "Service Report",
   "employees": "Employee Report",
-  "loading": "Loading…",
   "loadingLocations": "Loading locations...",
   "noData": "No data available",
   "viewingPeriod": {

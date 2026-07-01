@@ -47,7 +47,7 @@ export function RecordsTab({
 
       {loadingServices ? (
         <div className="bg-white rounded-xl shadow-card p-6 text-center text-sm text-gray-500">
-          {t('angTi', { ns: 'common' })}…
+          {t('loading', { ns: 'common' })}…
         </div>
       ) : (
         <ServiceHistory

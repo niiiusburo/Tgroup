@@ -1,0 +1,108 @@
+{
+  "login": {
+    "title": "Cổng Nhà Đầu Tư",
+    "subtitle": "Xem chỉ đọc các khách hàng được phòng khám chia sẻ với bạn.",
+    "email": "Email",
+    "emailPlaceholder": "ban@example.com",
+    "password": "Mật khẩu",
+    "rememberMe": "Ghi nhớ đăng nhập 7 ngày",
+    "signIn": "Đăng nhập",
+    "forgotPassword": "Quên mật khẩu?",
+    "errors": {
+      "invalidCredentials": "Email hoặc mật khẩu không đúng",
+      "rateLimited": "Đăng nhập quá nhiều lần. Vui lòng đợi vài phút rồi thử lại.",
+      "deactivated": "Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ phòng khám."
+    }
+  },
+  "dashboard": {
+    "title": "Khách hàng được chia sẻ",
+    "signOut": "Đăng xuất",
+    "clientCount": "{{count}} khách hàng được chia sẻ",
+    "exportCsv": "Xuất CSV",
+    "lob": {
+      "dental": "Nha khoa",
+      "cosmetic": "Thẩm mỹ"
+    },
+    "filters": {
+      "from": "Từ ngày",
+      "to": "Đến ngày"
+    },
+    "sections": {
+      "overview": "Tổng quan",
+      "dailyReport": "Báo cáo theo ngày",
+      "calendar": "Lịch của khách đã chọn",
+      "customerReport": "Báo cáo theo khách hàng",
+      "appointmentStatus": "Báo cáo trạng thái lịch hẹn",
+      "doctorReport": "Báo cáo theo bác sĩ",
+      "locationReport": "Báo cáo theo chi nhánh",
+      "serviceReport": "Báo cáo theo dịch vụ"
+    },
+    "overview": {
+      "clients": "Khách đã chọn",
+      "appointments": "Lịch hẹn",
+      "serviceTotal": "Tổng dịch vụ",
+      "outstanding": "Còn nợ"
+    },
+    "columns": {
+      "name": "Họ tên",
+      "gender": "Giới tính",
+      "appointments": "Lịch hẹn",
+      "orders": "Đơn hàng",
+      "deposit": "Tạm ứng",
+      "outstanding": "Còn nợ",
+      "status": "Trạng thái"
+    },
+    "reportColumns": {
+      "date": "Ngày",
+      "customer": "Khách hàng",
+      "appointments": "Lịch hẹn",
+      "orders": "Đơn hàng",
+      "serviceTotal": "Tổng dịch vụ",
+      "collected": "Đã thu",
+      "outstanding": "Còn nợ",
+      "status": "Trạng thái",
+      "doctor": "Bác sĩ",
+      "location": "Chi nhánh",
+      "service": "Dịch vụ"
+    },
+    "calendarColumns": {
+      "date": "Ngày",
+      "client": "Khách hàng",
+      "service": "Dịch vụ",
+      "doctor": "Bác sĩ",
+      "status": "Trạng thái"
+    },
+    "status": {
+      "active": "Hoạt động",
+      "inactive": "Ngưng"
+    },
+    "empty": {
+      "title": "Chưa có khách hàng nào được chia sẻ",
+      "message": "Khi nhân viên đánh dấu khách hàng hiển thị cho bạn, danh sách sẽ xuất hiện tại đây.",
+      "noCalendar": "Không có lịch hẹn trong khoảng ngày đã chọn.",
+      "noBreakdown": "Không có dòng báo cáo trong khoảng ngày đã chọn."
+    },
+    "errors": {
+      "fetchFailed": "Không tải được danh sách khách hàng.",
+      "invalidDateRange": "Chọn khoảng ngày theo thứ tự từ ngày đến ngày, tối đa 366 ngày.",
+      "retryHint": "Vui lòng tải lại trang hoặc đăng nhập lại."
+    }
+  },
+  "reset": {
+    "title": "Đặt lại mật khẩu",
+    "requestHint": "Nhập email tài khoản nhà đầu tư. Nếu tồn tại, bạn sẽ nhận hướng dẫn đặt lại.",
+    "confirmHint": "Nhập mã token và mật khẩu mới.",
+    "sendLink": "Gửi liên kết đặt lại",
+    "token": "Mã token",
+    "newPassword": "Mật khẩu mới",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "setPassword": "Đặt mật khẩu mới",
+    "backToLogin": "Quay lại đăng nhập",
+    "errors": {
+      "requestFailed": "Không xử lý được yêu cầu đặt lại.",
+      "confirmFailed": "Không đặt lại được mật khẩu.",
+      "weakPassword": "Mật khẩu phải có ít nhất 6 ký tự.",
+      "invalidToken": "Token không hợp lệ hoặc đã hết hạn."
+    }
+  }
+}

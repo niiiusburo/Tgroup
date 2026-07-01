@@ -4,7 +4,7 @@
  */
 
 import type { CalendarAppointment, AppointmentStatus } from '@/types/appointment';
-import { STATUS_BADGE_STYLES, STATUS_DOT_COLORS, STATUS_LABELS } from '@/constants/statusStyles';
+import { STATUS_STYLE_MAP, STATUS_LABELS } from '@/constants/statusStyles';
 
 export type { CalendarAppointment, AppointmentStatus };
-export { STATUS_BADGE_STYLES, STATUS_DOT_COLORS, STATUS_LABELS };
+export { STATUS_STYLE_MAP, STATUS_LABELS };

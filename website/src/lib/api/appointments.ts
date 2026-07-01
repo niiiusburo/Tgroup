@@ -4,7 +4,7 @@
  * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/appointments.js, api/src/routes/appointments/readHandlers.js, api/src/routes/appointments/mutationHandlers.js, product-map/domains/appointments-calendar.yaml]
  * Calls /api/Appointments (list/create/update; LOB-aware via core apiFetch).
  */
-import { apiFetch, type PaginatedResponse } from './core';
+import { apiFetch, DEFAULT_PAGE_SIZE, type PaginatedResponse } from './core';
 
 // ─── Appointments ─────────────────────────────────────────────────
 
@@ -66,7 +66,7 @@ export function fetchAppointments(params?: {
   return apiFetch<PaginatedResponse<ApiAppointment>>('/Appointments', {
     params: {
       offset: params?.offset ?? 0,
-      limit: params?.limit ?? 50,
+      limit: params?.limit ?? DEFAULT_PAGE_SIZE,
       search: params?.search,
       companyId: params?.companyId,
       dateFrom: params?.dateFrom,

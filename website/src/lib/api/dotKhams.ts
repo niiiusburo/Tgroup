@@ -4,7 +4,7 @@
  * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/dotKhams.js, product-map/domains/settings-system.yaml]
  * Calls /api/DotKhams (treatment-session read list).
  */
-import { apiFetch, type PaginatedResponse } from './core';
+import { apiFetch, DEFAULT_LARGE_PAGE_SIZE, type PaginatedResponse } from './core';
 
 // ─── DotKhams ─────────────────────────────────────────────────────
 
@@ -38,7 +38,7 @@ export function fetchDotKhams(params?: {
   return apiFetch<PaginatedResponse<ApiDotKham>>("/DotKhams", {
     params: {
       partner_id: params?.partnerId,
-      limit: params?.limit ?? 100,
+      limit: params?.limit ?? DEFAULT_LARGE_PAGE_SIZE,
       offset: params?.offset ?? 0,
     },
     lob: params?.lob,

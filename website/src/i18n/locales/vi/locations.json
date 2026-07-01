@@ -57,7 +57,6 @@
     "addLocation": "Thêm chi nhánh"
   },
   "states": {
-    "loading": "Đang tải chi nhánh...",
     "loadingDescription": "Đang tải danh sách chi nhánh và bộ lọc."
   }
 }

@@ -10,46 +10,46 @@
  */
 
 /**
- * Status colors for various entity states
- * Used throughout the application for consistent status indication
+ * Status styling lives in `./statusStyles` (single source of truth).
+ * Re-exported here so consumers can import from either `@/constants` or
+ * `@/constants/statusStyles`.
+ * @crossref:used-in[LocationCard, LocationDetail, TodaySchedule, TimeSlot, AppointmentCard, EmployeeProfile, EmployeeCard]
  */
-export const STATUS_COLORS = {
-  /** Active/Confirmed/Success states */
-  active: '#10B981',
-  /** Pending/Waiting/Processing states */
-  pending: '#F59E0B',
-  /** Cancelled/Failed/Error states */
-  cancelled: '#EF4444',
-  /** Completed/Done states */
-  completed: '#3B82F6',
-  /** Inactive/Archived states */
-  inactive: '#6B7280',
-  /** Draft/Temporary states */
-  draft: '#9CA3AF',
-} as const
+export {
+  STATUS_STYLE_MAP,
+  type StatusStyleEntry,
+  STATUS_LABELS,
+} from './statusStyles';
 
 /**
- * Appointment-specific status colors
+ * ═══════════════════════════════════════════════════════════════════════
+ * UI TIMEOUT CONSTANTS (ms)
+ * ═══════════════════════════════════════════════════════════════════════
+ * Named timeouts extracted from inline `setTimeout` magic numbers.
+ * Import these instead of passing a bare number to setTimeout.
+ * ═══════════════════════════════════════════════════════════════════════
  */
-export const APPOINTMENT_STATUS_COLORS = {
-  scheduled: '#3B82F6',
-  confirmed: '#10B981',
-  'in-progress': '#8B5CF6',
-  completed: '#0EA5E9',
-  cancelled: '#EF4444',
-  'no-show': '#F59E0B',
-} as const
 
-/**
- * Payment status colors
- */
-export const PAYMENT_STATUS_COLORS = {
-  paid: '#10B981',
-  pending: '#F59E0B',
-  overdue: '#EF4444',
-  refunded: '#6B7280',
-  partial: '#8B5CF6',
-} as const
+/** GlobalFaceIdButton: dismiss the match popover after navigating to the customer. */
+export const FACE_MATCH_DISMISS_MS = 800 as const;
+/** CtvManagementTab: auto-close the create-CTV success state when credentials are not revealed. */
+export const CTV_CREATE_AUTO_CLOSE_MS = 800 as const;
+/** FeedbackWidget: defer the initial unread-count fetch off the page critical path. */
+export const FEEDBACK_INITIAL_FETCH_DEFER_MS = 1500 as const;
+/** ChangePasswordModal: auto-close the modal after a successful password change. */
+export const PASSWORD_CHANGE_SUCCESS_AUTO_CLOSE_MS = 1500 as const;
+/** ReferralFlipCard: reset the "copied" indicator after copying the customer link. */
+export const REFERRAL_COPY_RESET_MS = 1600 as const;
+/** CtvMeTab: reset the "copied" indicator after copying the join link. */
+export const CTV_ME_COPY_RESET_MS = 1800 as const;
+/** Generic clipboard "copied" feedback reset (CtvManagementTab copy-all/copy-password, ReferralCodeDisplay). */
+export const COPY_FEEDBACK_RESET_MS = 2000 as const;
+/** useVersionCheck: localStorage refresh interval for the just-updated flag. */
+export const VERSION_CHECK_REFRESH_MS = 2000 as const;
+/** CtvQrDiscountPanel: reset the copy state after copying the discount landing URL. */
+export const QR_COPY_RESET_MS = 2200 as const;
+/** CtvQrDiscountPanel: revoke a created object URL after the download/share window has used it. */
+export const OBJECT_URL_REVOKE_MS = 15000 as const;
 
 /**
  * Dental clinic theme colors

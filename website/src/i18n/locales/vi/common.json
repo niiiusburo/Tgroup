@@ -161,7 +161,6 @@
   "edit": "Sửa",
   "search": "Tìm kiếm",
   "loading": "Đang tải...",
-  "angTi": "Đang tải...",
   "noData": "Không có dữ liệu",
   "confirm": "Xác nhận",
   "success": "Thành công",
@@ -179,10 +178,9 @@
   "ok": "OK",
   "commission": "Hoa hồng",
   "notifications": "Thông báo",
-  "khngCChiNhnhPh": "Không có chi nhánh phụ",
-  "khngTmThyAChPhHp": "Không tìm thấy địa chỉ phù hợp",
-  "khngTmThyKhchHng": "Không tìm thấy khách hàng",
-  "khngTmThyBcS": "Không tìm thấy bác sĩ",
+  "noMatchingAddress": "Không tìm thấy địa chỉ phù hợp",
+  "noCustomerFound": "Không tìm thấy khách hàng",
+  "noDoctorFound": "Không tìm thấy bác sĩ",
   "searchToView": "Tìm kiếm để xem",
   "subtitle": {
     "edit": "Cập nhật thông tin",
@@ -234,7 +232,6 @@
     "loadError": "Tải dữ liệu thất bại"
   },
   "apiKeyInstruction": "Tạo file .env với VITE_GOOGLE_PLACES_API_KEY=***",
-  "bnhNhnLinKt": "Bệnh nhân đã liên kết",
   "changePassword": {
     "fillAllFields": "Vui lòng điền đầy đủ các trường",
     "newPasswordMinLength": "Mật khẩu mới phải có ít nhất 6 ký tự",

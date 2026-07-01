@@ -50,7 +50,7 @@ describe('ReportsDashboard', () => {
   it('shows loading state while fetching', () => {
     mockFetch.mockReturnValue(new Promise(() => {}));
     renderWithProviders(<ReportsDashboard />);
-    expect(screen.getByText('Đang tải…')).toBeInTheDocument();
+    expect(screen.getByText('Đang tải...')).toBeInTheDocument();
   });
 
   it('renders KPI card labels when data loads', async () => {

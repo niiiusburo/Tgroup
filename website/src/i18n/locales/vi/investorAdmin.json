@@ -1,0 +1,38 @@
+{
+  "title": "Tài khoản Nhà đầu tư",
+  "subtitle": "Tạo và quản lý quyền truy cập cổng nhà đầu tư chỉ đọc.",
+  "create": "Thêm nhà đầu tư",
+  "createTitle": "Tài khoản nhà đầu tư mới",
+  "cancel": "Hủy",
+  "creating": "Đang tạo…",
+  "loadError": "Không tải được danh sách nhà đầu tư.",
+  "createError": "Không tạo được tài khoản.",
+  "updateError": "Không cập nhật được tài khoản.",
+  "duplicateEmail": "Email này đã được đăng ký.",
+  "empty": "Chưa có tài khoản nhà đầu tư.",
+  "deactivate": "Vô hiệu hóa",
+  "reactivate": "Kích hoạt lại",
+  "confirmDeactivate": "Vô hiệu hóa {{email}}? Họ sẽ mất quyền truy cập ngay lập tức.",
+  "initialPasswordTitle": "Mật khẩu ban đầu (chỉ hiện một lần)",
+  "initialPasswordHint": "Sao chép mật khẩu ngay. Sẽ không hiển thị lại.",
+  "columns": {
+    "email": "Email",
+    "name": "Tên hiển thị",
+    "lob": "LOB",
+    "status": "Trạng thái",
+    "clients": "KH hiển thị"
+  },
+  "status": {
+    "active": "Hoạt động",
+    "inactive": "Vô hiệu"
+  },
+  "lob": {
+    "dental": "Nha khoa",
+    "cosmetic": "Thẩm mỹ"
+  },
+  "form": {
+    "email": "Email",
+    "name": "Tên hiển thị",
+    "lob": "Ngành"
+  }
+}

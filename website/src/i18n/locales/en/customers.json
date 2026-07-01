@@ -83,7 +83,6 @@
   "appointments": "Appointments",
   "records": "Medical Record",
   "payment": "Payment",
-  "loading": "Loading...",
   "loadingProfile": "Loading profile...",
   "searchToView": "Search for a customer to view their profile",
   "deletePayment": "Delete payment",
@@ -212,11 +211,9 @@
   "notesPlaceholder": "Notes about customer...",
   "close": "Close",
   "saving": "Saving...",
-  "save": "Save",
   "memberSince": "Member since",
   "thmLchHn": "Add appointment",
   "update": "Update",
-  "cancel": "Cancel",
   "add": "Add",
   "chaGn": "— Not assigned",
   "phnCng": "ASSIGNMENT",
@@ -305,9 +302,6 @@
     "recognizeFailed": "Face recognition failed",
     "spoofDetected": "Liveness check failed — please present a live face to the camera",
     "ambiguous": "Face match is ambiguous. Please scan again with one centered face."
-  },
-  "states": {
-    "loading": "Loading patients..."
   },
   "investorVisibility": {
     "column": "Investor",

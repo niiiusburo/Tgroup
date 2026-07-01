@@ -1,13 +1,13 @@
 /**
  * @crossref:domain[integrations]
  * @crossref:used-in[hosoonline checkups API client; website/src/lib/api.ts (barrel), website/src/hooks/useExternalCheckups.ts, website/src/components/customer/HealthCheckupUploadForm.tsx, website/src/components/customer/HealthCheckupGallery.tsx, website/src/components/customer/AuthenticatedCheckupImage.tsx]
- * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/externalCheckups.js, product-map/domains/integrations.yaml]
- * Calls /api/ExternalCheckups/* (hosoonline.com proxy); raw fetch for image blobs + multipart upload.
+ * @crossref:uses[website/src/lib/api/core.ts, website/src/lib/authToken.ts, api/src/routes/externalCheckups.js, product-map/domains/integrations.yaml]
+ * Calls /api/ExternalCheckups/* (hosoonline.com proxy); image blobs use raw fetch (external URLs), upload uses apiFetch.
  */
+import { getAuthToken } from '@/lib/authToken';
 import { apiFetch, API_URL } from './core';
 
 // ─── External Checkups (hosoonline.com integration) ───────────────
-const TOKEN_KEY = 'tgclinic_token';
 
 export interface ExternalCheckupImage {
   url: string;
@@ -103,22 +103,10 @@ export function resolveExternalCheckupImageUrl(imagePath: string): string {
   return `${API_URL}/${imagePath}`;
 }
 
-function getExternalCheckupAuthToken(): string | null {
-  try {
-    return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function getExternalCheckupAuthHeaders(): Record<string, string> {
-  const token = getExternalCheckupAuthToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
 export async function fetchExternalCheckupImageBlob(imagePath: string, signal?: AbortSignal): Promise<Blob> {
+  const token = getAuthToken();
   const res = await fetch(resolveExternalCheckupImageUrl(imagePath), {
-    headers: getExternalCheckupAuthHeaders(),
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
     credentials: 'include',
     signal,
   });
@@ -156,17 +144,25 @@ export async function createExternalCheckup(
     }
   });
 
-  const lobPrefix = lob === 'cosmetic' ? '/cosmetic' : '';
-  const res = await fetch(`${API_URL}${lobPrefix}/ExternalCheckups/${encodeURIComponent(customerCode)}/health-checkups`, {
-    method: 'POST',
-    headers: getExternalCheckupAuthHeaders(),
-    body: form,
-    credentials: 'include',
-  });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => 'Upload failed');
-    throw new Error(extractExternalCheckupError(text, 'Upload failed'));
+  try {
+    return await apiFetch<{ checkup: ExternalCheckup }>(
+      `/ExternalCheckups/${encodeURIComponent(customerCode)}/health-checkups`,
+      { method: 'POST', body: form, lob },
+    );
+  } catch (err) {
+    // apiFetch throws ApiError for non-ok responses; re-extract nested
+    // hosoonline error messages for backward-compatible caller UX.
+    if (err instanceof Error && 'body' in err) {
+      const body = (err as { body?: unknown }).body;
+      if (typeof body === 'string') {
+        throw new Error(extractExternalCheckupError(body, err.message));
+      }
+      if (body && typeof body === 'object') {
+        throw new Error(
+          extractExternalCheckupError(JSON.stringify(body), err.message),
+        );
+      }
+    }
+    throw err;
   }
-  return res.json();
 }

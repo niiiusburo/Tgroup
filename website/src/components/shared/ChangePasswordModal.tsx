@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { X, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { changePassword } from '@/lib/api/auth';
 import { useTranslation } from 'react-i18next';
+import { PASSWORD_CHANGE_SUCCESS_AUTO_CLOSE_MS } from '@/constants';
 
 interface ChangePasswordModalProps {
   open: boolean;
@@ -69,7 +70,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
       setSuccess(true);
       setTimeout(() => {
         handleClose();
-      }, 1500);
+      }, PASSWORD_CHANGE_SUCCESS_AUTO_CLOSE_MS);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t('changePassword.changeFailed');
       setError(msg);

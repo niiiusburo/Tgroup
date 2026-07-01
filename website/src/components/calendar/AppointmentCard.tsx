@@ -1,7 +1,7 @@
 import { Clock, User, Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_CARD_COLORS } from '@/constants';
-import { STATUS_DOT_COLORS, type CalendarAppointment } from '@/data/mockCalendar';
+import { STATUS_STYLE_MAP, type CalendarAppointment } from '@/data/mockCalendar';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import { MedicalHistoryTooltip } from './MedicalHistoryTooltip';
 import { formatAppointmentStartDuration } from '@/lib/appointmentDuration';
@@ -35,7 +35,7 @@ export function AppointmentCard({
 }: AppointmentCardProps) {
   const { t } = useTranslation();
   const typeColors = APPOINTMENT_TYPE_COLORS[appointment.appointmentType];
-  const statusDot = STATUS_DOT_COLORS[appointment.status];
+  const statusDot = STATUS_STYLE_MAP[appointment.status]?.dotClass ?? '';
   const timeLabel = formatAppointmentStartDuration(
     appointment.startTime,
     appointment.timeexpected,

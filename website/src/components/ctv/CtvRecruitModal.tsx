@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';
 import { createCtv } from '@/lib/api/ctv';
+import { CTV_CREATE_AUTO_CLOSE_MS } from '@/constants';
 import { CtvModalSheet } from './CtvModalSheet';
 import { CtvCreationForm, useCtvCreationForm } from '@/components/shared/CtvCreationForm';
 
@@ -42,7 +43,7 @@ export function CtvRecruitModal({ open, onClose, onSuccess }: CtvRecruitModalPro
     if (formApi.success) {
       const id = setTimeout(() => {
         onSuccess();
-      }, 800);
+      }, CTV_CREATE_AUTO_CLOSE_MS);
       return () => clearTimeout(id);
     }
   }, [formApi.success, onSuccess]);

@@ -46,6 +46,11 @@ function findTsxFiles(dir, files = []) {
 const files = findTsxFiles(srcDir);
 const missing = [];
 
+// i18n config (src/i18n/index.ts) sets fallbackNS: 'common' — keys resolve via
+// the common namespace when not found in the declared namespace(s).
+const FALLBACK_NS = 'common';
+const allNs = Object.keys(namespaces.en);
+
 for (const file of files) {
   const content = fs.readFileSync(file, 'utf8');
   
@@ -61,7 +66,10 @@ for (const file of files) {
       for (const m of list.matchAll(/['"`]([^'"`]+)['"`]/g)) fileNamespaces.push(m[1]);
     }
   }
-  if (fileNamespaces.length === 0) fileNamespaces.push('common');
+  // When a file has no useTranslation declaration, `t` is typically passed in
+  // as a prop (namespace unknown) — check against every namespace rather than
+  // assuming 'common', which would produce false positives.
+  if (fileNamespaces.length === 0) fileNamespaces.push(...allNs);
 
   // Find t('...') calls, possibly with ns override
   const tCalls = [...content.matchAll(/(?<![\w$])t\s*\(\s*['"`]([^'"`]+)['"`]([^)]*)\)/g)];
@@ -80,8 +88,9 @@ for (const file of files) {
     }
 
     const candidates = overrideNs ? [overrideNs] : fileNamespaces;
-    const enFound = candidates.some((n) => getValue(namespaces.en[n], key) !== undefined);
-    const viFound = candidates.some((n) => getValue(namespaces.vi[n], key) !== undefined);
+    const withFallback = candidates.includes(FALLBACK_NS) ? candidates : [...candidates, FALLBACK_NS];
+    const enFound = withFallback.some((n) => getValue(namespaces.en[n], key) !== undefined);
+    const viFound = withFallback.some((n) => getValue(namespaces.vi[n], key) !== undefined);
 
     if (!enFound || !viFound) {
       missing.push({ file: path.relative(srcDir, file), ns: candidates.join('|'), key, en: enFound, vi: viFound });

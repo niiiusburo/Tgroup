@@ -9,6 +9,7 @@ import { CalendarDays, Check, ExternalLink, Link2, ReceiptText, RotateCcw, Spark
 import { cn } from '@/lib/utils';
 import { formatVND } from '@/lib/formatting';
 import { useCtvLocale } from '@/lib/i18n/ctv';
+import { REFERRAL_COPY_RESET_MS } from '@/constants';
 import type { CtvLob, CtvReferral, CtvReferralLobLink, CtvReferralService } from '@/lib/api/ctv';
 import { CtvLinkBar } from '@/components/shared';
 import {
@@ -150,7 +151,7 @@ export function ReferralFlipCard({
       const url = typeof window !== 'undefined' ? `${window.location.origin}${customerPath}` : customerPath;
       await navigator.clipboard.writeText(url);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
+      window.setTimeout(() => setCopied(false), REFERRAL_COPY_RESET_MS);
     } catch {
       // Clipboard unavailable (older browser / denied) — the Open link still works.
     }

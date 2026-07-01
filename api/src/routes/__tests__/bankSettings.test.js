@@ -8,13 +8,14 @@ const { requirePermission } = require('../../middleware/auth');
 const bankSettingsRoutes = require('../bankSettings');
 
 // Mock the query function
-jest.mock('../../db', () => ({
-  query: jest.fn(),
-}));
+jest.mock('../../db', () =>
+  require('../../__tests__/helpers/routeTestHelpers').createMockQueryDb()
+);
 
 const { query } = require('../../db');
 
-// Mock auth middleware to not validate
+// Mock auth middleware to not validate. NOTE: this route uses requirePermission
+// (not requireAuth), so it cannot use the shared createMockAuth() helper.
 jest.mock('../../middleware/auth', () => ({
   requirePermission: () => (req, res, next) => next(),
 }));

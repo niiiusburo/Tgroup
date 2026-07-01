@@ -83,7 +83,6 @@
   "appointments": "Lịch hẹn",
   "records": "Phiếu khám",
   "payment": "Thanh toán",
-  "loading": "Đang tải...",
   "loadingProfile": "Đang tải hồ sơ...",
   "searchToView": "Tìm khách hàng để xem hồ sơ",
   "deletePayment": "Xóa thanh toán",
@@ -212,11 +211,9 @@
   "notesPlaceholder": "Ghi chú về khách hàng...",
   "close": "Đóng",
   "saving": "Đang lưu...",
-  "save": "Lưu",
   "memberSince": "Ngày tham gia",
   "thmLchHn": "Thêm lịch hẹn",
   "update": "Cập nhật",
-  "cancel": "Hủy",
   "add": "Thêm",
   "chaGn": "— Chưa gán",
   "phnCng": "PHÂN CÔNG",
@@ -305,9 +302,6 @@
     "recognizeFailed": "Nhận diện khuôn mặt thất bại",
     "spoofDetected": "Phát hiện khuôn mặt giả — vui lòng đưa khuôn mặt thật vào khung hình",
     "ambiguous": "Kết quả nhận diện chưa đủ chắc chắn. Vui lòng quét lại với một khuôn mặt ở giữa khung hình."
-  },
-  "states": {
-    "loading": "Đang tải khách hàng..."
   },
   "investorVisibility": {
     "column": "NĐT",

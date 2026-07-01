@@ -263,7 +263,6 @@
     "paidToThem": "Paid to them",
     "noEarningSource": "No downline has generated commission yet"
   },
-  "loading": "Loading card-linked clients...",
   "errorTitle": "CTV data could not load",
   "errorBody": "Please try again in a few minutes.",
   "retry": "Retry",

@@ -4,7 +4,7 @@
  * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/saleOrders.js, api/src/routes/saleOrderLines.js, product-map/domains/services-catalog.yaml]
  * Calls /api/SaleOrders (CRUD/state/lines) and DELETE /api/SaleOrderLines/:id.
  */
-import { apiFetch, type PaginatedResponse } from './core';
+import { apiFetch, DEFAULT_PAGE_SIZE, DEFAULT_LARGE_PAGE_SIZE, type PaginatedResponse } from './core';
 
 // ─── Sale Orders ──────────────────────────────────────────────────
 
@@ -61,7 +61,7 @@ export function fetchSaleOrders(params?: {
   return apiFetch<PaginatedResponse<ApiSaleOrder>>('/SaleOrders', {
     params: {
       offset: params?.offset ?? 0,
-      limit: params?.limit ?? 50,
+      limit: params?.limit ?? DEFAULT_PAGE_SIZE,
       search: params?.search,
       partnerId: params?.partnerId,
       companyId: params?.companyId,
@@ -206,7 +206,7 @@ export function fetchSaleOrderLines(params?: {
     params: {
       partner_id: params?.partnerId,
       offset: params?.offset ?? 0,
-      limit: params?.limit ?? 100,
+      limit: params?.limit ?? DEFAULT_LARGE_PAGE_SIZE,
       sortField: params?.sortField ?? 'date',
       sortOrder: params?.sortOrder ?? 'desc',
     },

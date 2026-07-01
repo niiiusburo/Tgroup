@@ -2,17 +2,13 @@
 
 const discountCodesRouter = require('../discountCodes');
 
-jest.mock('../../db', () => {
-  const mockQueryRows = jest.fn();
-  const mockQuery = jest.fn((sql, params) => mockQueryRows(sql, params).then((rows) => ({ rows })));
-  return {
-    getDb: jest.fn(() => ({ queryRows: mockQueryRows, query: mockQuery })),
-  };
-});
+jest.mock('../../db', () =>
+  require('../../__tests__/helpers/routeTestHelpers').createMockDb()
+);
 
-jest.mock('../../middleware/auth', () => ({
-  requireAuth: (req, res, next) => next(),
-}));
+jest.mock('../../middleware/auth', () =>
+  require('../../__tests__/helpers/routeTestHelpers').createMockAuth()
+);
 
 jest.mock('../../services/referralClaim', () => ({
   getReferralClaimStatus: jest.fn().mockResolvedValue({ active: false, ownerCtvId: null }),
@@ -46,6 +42,7 @@ jest.mock('../../services/ctvDiscountCodes', () => ({
 }));
 
 const { getDb } = require('../../db');
+const { findRouteHandler, makeRes } = require('../../__tests__/helpers/routeTestHelpers');
 const {
   checkExistingCodeForVisitor,
   createCustomerForCtv,
@@ -60,37 +57,6 @@ const {
   reclaimClientForCtv,
   resolveCtvByShortCode,
 } = require('../../services/ctvDiscountCodes');
-
-function findRouteHandler(router, path, method) {
-  let handler;
-  router.stack.forEach((layer) => {
-    if (layer.route && layer.route.path === path && layer.route.methods[method]) {
-      const stack = layer.route.stack;
-      handler = stack[stack.length - 1].handle;
-    }
-  });
-  return handler;
-}
-
-function makeRes() {
-  const res = {
-    statusCode: 200,
-    jsonBody: null,
-    cookies: {},
-    status(code) {
-      this.statusCode = code;
-      return this;
-    },
-    json(body) {
-      this.jsonBody = body;
-      return this;
-    },
-    cookie(name, value) {
-      this.cookies[name] = value;
-    },
-  };
-  return res;
-}
 
 describe('discount-codes routes', () => {
   beforeEach(() => {

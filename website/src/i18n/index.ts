@@ -24,6 +24,8 @@ import enPermissions from './locales/en/permissions.json';
 import enExports from './locales/en/exports.json';
 import enCtv from './locales/en/ctv.json';
 import enVerifyDiscount from './locales/en/verifyDiscount.json';
+import enInvestor from './locales/en/investor.json';
+import enInvestorAdmin from './locales/en/investorAdmin.json';
 
 import viCommon from './locales/vi/common.json';
 import viNav from './locales/vi/nav.json';
@@ -48,6 +50,8 @@ import viPermissions from './locales/vi/permissions.json';
 import viExports from './locales/vi/exports.json';
 import viCtv from './locales/vi/ctv.json';
 import viVerifyDiscount from './locales/vi/verifyDiscount.json';
+import viInvestor from './locales/vi/investor.json';
+import viInvestorAdmin from './locales/vi/investorAdmin.json';
 
 const STORAGE_KEY = 'tg-lang';
 const DEFAULT_LANG = 'vi';
@@ -88,6 +92,8 @@ i18n.use(initReactI18next).init({
       exports: enExports,
       ctv: enCtv,
       verifyDiscount: enVerifyDiscount,
+      investor: enInvestor,
+      investorAdmin: enInvestorAdmin,
     },
     vi: {
       common: viCommon,
@@ -113,6 +119,8 @@ i18n.use(initReactI18next).init({
       exports: viExports,
       ctv: viCtv,
       verifyDiscount: viVerifyDiscount,
+      investor: viInvestor,
+      investorAdmin: viInvestorAdmin,
     },
   },
   lng: savedLang && SUPPORTED_LANGS.includes(savedLang) ? savedLang : DEFAULT_LANG,
@@ -122,7 +130,7 @@ i18n.use(initReactI18next).init({
     'common', 'nav', 'overview', 'calendar', 'customers',
     'appointments', 'services', 'payment', 'employees',
     'locations', 'reports', 'settings', 'auth', 'website', 'permissions',
-    'commission', 'feedback', 'notifications', 'relationships', 'serviceCatalog', 'exports', 'ctv', 'verifyDiscount',
+    'commission', 'feedback', 'notifications', 'relationships', 'serviceCatalog', 'exports', 'ctv', 'verifyDiscount', 'investor', 'investorAdmin',
   ],
   defaultNS: 'common',
   interpolation: { escapeValue: false },

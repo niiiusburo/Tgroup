@@ -1,7 +1,7 @@
 import { MapPin, Users, Phone, Clock } from 'lucide-react';
 import {
   STATUS_LABELS,
-  STATUS_STYLES,
+  STATUS_STYLE_MAP,
   type LocationBranch,
 } from '@/data/mockLocations';
 
@@ -52,7 +52,7 @@ export function LocationCard({ location, onSelect }: LocationCardProps) {
             </div>
           </div>
           <span
-            className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[location.status]}`}
+            className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLE_MAP[location.status]?.color ?? ''}`}
           >
             {STATUS_LABELS[location.status]}
           </span>

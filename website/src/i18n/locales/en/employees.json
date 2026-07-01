@@ -44,8 +44,6 @@
     "tierLabel": "Access Tier",
     "roleLabel": "Role / Position",
     "required": "Required",
-    "save": "Save",
-    "cancel": "Cancel",
     "errorNameRequired": "Name is required",
     "errorPasswordRequired": "Password is required"
   },
@@ -112,8 +110,6 @@
   "createNew": "Create new employee",
   "updateInfo": "Update employee information",
   "required": "Required",
-  "save": "Save",
-  "cancel": "Cancel",
   "saveFailed": "Save failed",
   "success": "Success",
   "error": "Error",

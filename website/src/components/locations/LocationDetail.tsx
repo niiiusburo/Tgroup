@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import {
   STATUS_LABELS,
-  STATUS_STYLES,
+  STATUS_STYLE_MAP,
   type LocationBranch,
   type LocationMetrics,
   type LocationStatus,
@@ -294,7 +294,7 @@ export function LocationDetail({ location, metrics, onBack, onUpdate, canEdit: c
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-bold text-gray-900">{location.name}</h1>
                 <span
-                  className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[location.status]}`}
+                  className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLE_MAP[location.status]?.color ?? ''}`}
                 >
                   {STATUS_LABELS[location.status]}
                 </span>

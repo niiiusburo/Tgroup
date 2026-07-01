@@ -277,3 +277,5 @@ docker compose config
 | `api/src/__tests__/db-factory.test.js`, `api/src/__tests__/enterprise-verification.test.js` | `npx jest --testPathPatterns="src/__tests__/db-factory|src/__tests__/enterprise-verification"` | 2026-07-01 v0.39.7 — db-factory test updated to remove db/index references; enterprise-verification test updated to assert full removal of /api/Account route (file deleted, not just commented out). All 196 backend tests pass. |
 
 | `api/src/middleware/__tests__/`, `api/src/routes/__tests__/ctv*` | `npx jest --testPathPatterns="middleware|ctv"` | 2026-07-01 v0.39.8 — JWT auth factory tests, CTV route split tests (106 CTV tests, 14 middleware tests all pass). |
+
+| `api/src/__tests__/helpers/routeTestHelpers.js`, `api/src/routes/__tests__/` | `npx jest --testPathPatterns="src/routes/__tests__"` | 2026-07-01 v0.39.9 — Shared test helpers eliminate 250 lines of duplicated mock boilerplate; 18 route test suites (104 tests) pass. |

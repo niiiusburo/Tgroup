@@ -128,7 +128,7 @@ export function CustomerSelector({
             {searching ?
           <div className="px-4 py-3 text-sm text-gray-400 text-center">{t('loading', 'Đang tải...')}</div> :
             filteredCustomers.length === 0 ?
-          <div className="px-4 py-3 text-sm text-gray-400 text-center">{t('khngTmThyKhchHng')}</div> :
+          <div className="px-4 py-3 text-sm text-gray-400 text-center">{t('noCustomerFound')}</div> :
 
           filteredCustomers.map((customer) =>
           <button

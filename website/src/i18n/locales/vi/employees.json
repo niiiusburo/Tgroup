@@ -44,8 +44,6 @@
     "tierLabel": "Cấp bậc quyền (Tier)",
     "roleLabel": "Vị trí / Vai trò",
     "required": "Bắt buộc",
-    "save": "Lưu",
-    "cancel": "Hủy bỏ",
     "errorNameRequired": "Vui lòng nhập tên nhân viên",
     "errorPasswordRequired": "Vui lòng nhập mật khẩu"
   },
@@ -112,8 +110,6 @@
   "createNew": "Tạo nhân viên mới",
   "updateInfo": "Cập nhật thông tin nhân viên",
   "required": "Bắt buộc",
-  "save": "Lưu",
-  "cancel": "Hủy bỏ",
   "saveFailed": "Lưu thất bại",
   "success": "Thành công",
   "error": "Lỗi",

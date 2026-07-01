@@ -8,9 +8,10 @@ import { Gift, MapPin } from 'lucide-react';
 import QRCode from 'qrcode';
 import { useTranslation } from 'react-i18next';
 
-import tamLogo from '@/pages/Landing/tam-logo-group.png';
 import { cn } from '@/lib/utils';
 import { formatDiscountValue } from './ctvDiscountVoucherCanvas';
+
+const tamLogo = '/favicon.svg';
 
 const VOUCHER_STYLES = `
   @keyframes ctv-voucher-heartbeat {

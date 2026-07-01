@@ -16,6 +16,22 @@ export { API_URL };
 
 export const AUTH_UNAUTHORIZED_EVENT = 'tgclinic:auth-unauthorized';
 
+/** Default page size for standard list endpoints (partners, appointments, etc.). */
+export const DEFAULT_PAGE_SIZE = 50;
+/** Larger page size for endpoints that benefit from fewer round-trips (dotKhams, sale-order lines). */
+export const DEFAULT_LARGE_PAGE_SIZE = 100;
+/** Extra-large page size for catalog endpoints that load all items for dropdowns/pickers (products). */
+export const DEFAULT_XL_PAGE_SIZE = 200;
+
+/**
+ * Pluggable auth token source — allows non-stauth callers (e.g. investor portal)
+ * to reuse apiFetch with their own token storage + unauthorized handling.
+ */
+export interface AuthTokenSource {
+  getToken: () => string | null;
+  onUnauthorized: () => void;
+}
+
 export class ApiError extends Error {
   status: number;
   code?: string;
@@ -52,6 +68,13 @@ interface FetchOptions {
   signal?: AbortSignal;
   /** LOB scoping for cosmetic mirror routes (future use by data hooks) */
   lob?: 'dental' | 'cosmetic';
+  /**
+   * Override the default staff auth token source. Pass an `AuthTokenSource`
+   * (e.g. investor token) to reuse apiFetch for non-staff sessions.
+   */
+  authTokenSource?: AuthTokenSource;
+  /** Response type — `'blob'` returns a Blob (for file/image downloads); default `'json'`. */
+  responseType?: 'json' | 'blob';
 }
 
 // Keys that bypass camelCase → snake_case conversion (backend expects them as-is)
@@ -64,7 +87,7 @@ function toSnakeCase(str: string): string {
 }
 
 export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
-  const { method = 'GET', body, params, lob } = options;
+  const { method = 'GET', body, params, lob, authTokenSource, responseType = 'json' } = options;
 
   // LOB-aware routing: cosmetic uses /api/cosmetic/* mirrors; dental uses legacy paths (no prefix)
   const lobPrefix = lob === 'cosmetic' ? '/cosmetic' : '';
@@ -87,7 +110,7 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
     headers['Content-Type'] = 'application/json';
   }
 
-  const token = getAuthToken();
+  const token = authTokenSource ? authTokenSource.getToken() : getAuthToken();
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
@@ -101,10 +124,14 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
 
   if (!res.ok) {
     if (res.status === 401) {
-      const activeToken = getAuthToken();
-      if (!activeToken || isAuthTokenExpired(activeToken)) {
-        clearAuthToken();
-        window.dispatchEvent(new CustomEvent(AUTH_UNAUTHORIZED_EVENT));
+      if (authTokenSource) {
+        authTokenSource.onUnauthorized();
+      } else {
+        const activeToken = getAuthToken();
+        if (!activeToken || isAuthTokenExpired(activeToken)) {
+          clearAuthToken();
+          window.dispatchEvent(new CustomEvent(AUTH_UNAUTHORIZED_EVENT));
+        }
       }
     }
 
@@ -210,6 +237,10 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
   }
   if (res.status === 204) {
     return undefined as T;
+  }
+  // Blob responses (file/image downloads) — skip JSON parsing + silent-failure interception.
+  if (responseType === 'blob') {
+    return (await res.blob()) as T;
   }
   const data = await res.json();
   // Intercept business-logic failures: HTTP 200 with { success: false }

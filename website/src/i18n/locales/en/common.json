@@ -161,7 +161,6 @@
   "edit": "Edit",
   "search": "Search",
   "loading": "Loading...",
-  "angTi": "Loading...",
   "noData": "No data",
   "confirm": "Confirm",
   "success": "Success",
@@ -179,10 +178,9 @@
   "ok": "OK",
   "commission": "Commission",
   "notifications": "Notifications",
-  "khngCChiNhnhPh": "No secondary branch",
-  "khngTmThyAChPhHp": "No matching address found",
-  "khngTmThyKhchHng": "No customer found",
-  "khngTmThyBcS": "No doctor found",
+  "noMatchingAddress": "No matching address found",
+  "noCustomerFound": "No customer found",
+  "noDoctorFound": "No doctor found",
   "searchToView": "Search to view",
   "subtitle": {
     "edit": "Update information",
@@ -234,7 +232,6 @@
     "loadError": "Failed to load data"
   },
   "apiKeyInstruction": "Set VITE_GOOGLE_PLACES_API_KEY in .env file",
-  "bnhNhnLinKt": "Linked Patient",
   "changePassword": {
     "fillAllFields": "Please fill in all fields",
     "newPasswordMinLength": "New password must be at least 6 characters",

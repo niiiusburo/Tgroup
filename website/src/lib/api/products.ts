@@ -4,7 +4,7 @@
  * @crossref:uses[website/src/lib/api/core.ts, api/src/routes/products.js, product-map/domains/services-catalog.yaml]
  * Calls /api/Products CRUD (LOB-aware).
  */
-import { apiFetch, type PaginatedResponse } from './core';
+import { apiFetch, DEFAULT_XL_PAGE_SIZE, type PaginatedResponse } from './core';
 
 // ─── Products (Services Catalog) ──────────────────────────────────
 
@@ -45,7 +45,7 @@ export function fetchProducts(params?: {
   return apiFetch<PaginatedResponse<ApiProduct>>('/Products', {
     params: {
       offset: params?.offset ?? 0,
-      limit: params?.limit ?? 200,
+      limit: params?.limit ?? DEFAULT_XL_PAGE_SIZE,
       search: params?.search,
       categId: params?.categId,
       companyId: params?.companyId,

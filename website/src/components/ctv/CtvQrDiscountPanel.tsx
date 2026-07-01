@@ -8,6 +8,7 @@ import { Copy, ExternalLink, Link2, Share2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { ApiError } from '@/lib/api/core';
+import { QR_COPY_RESET_MS, OBJECT_URL_REVOKE_MS } from '@/constants';
 import type { CtvProfile } from '@/lib/api/ctvSelf';
 import {
   buildStaffVerifyDiscountUrl,
@@ -76,7 +77,7 @@ export function CtvQrDiscountPanel({ profile, profileName }: CtvQrDiscountPanelP
       await navigator.clipboard.writeText(landingUrl);
       setCopyState('copied');
       if (copyTimerRef.current) window.clearTimeout(copyTimerRef.current);
-      copyTimerRef.current = window.setTimeout(() => setCopyState('idle'), 2200);
+      copyTimerRef.current = window.setTimeout(() => setCopyState('idle'), QR_COPY_RESET_MS);
     } catch {
       setCopyState('idle');
     }
@@ -156,7 +157,7 @@ export function CtvQrDiscountPanel({ profile, profileName }: CtvQrDiscountPanelP
         window.open(objectUrl, '_blank', 'noopener,noreferrer');
       }
 
-      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 15000);
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), OBJECT_URL_REVOKE_MS);
     } catch (error) {
       const message = error instanceof ApiError && error.message
         ? error.message

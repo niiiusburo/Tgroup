@@ -56,7 +56,7 @@ export function BankSettingsForm({ canEdit = false }: BankSettingsFormProps) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />
-        <span className="ml-2 text-sm text-gray-500">{t('angTi')}</span>
+        <span className="ml-2 text-sm text-gray-500">{t('loading')}</span>
       </div>);
 
   }
@@ -68,28 +68,28 @@ export function BankSettingsForm({ canEdit = false }: BankSettingsFormProps) {
           <Building2 className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h3 className="text-base font-semibold text-gray-900">{t('tiKhonNgnHng')}</h3>
-          <p className="text-sm text-gray-500">{t('cuHnhTiKhonNhnThanhTonQrChoPhngKhm')}</p>
+          <h3 className="text-base font-semibold text-gray-900">{t('bankAccount')}</h3>
+          <p className="text-sm text-gray-500">{t('qrPaymentConfigHint')}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label htmlFor="bankBin" className="block text-sm font-medium text-gray-700">
-            {t('mNgnHngBin')}
+            {t('bankCodeBin')}
           </label>
           <BankSelector
             value={formData.bankBin}
             onChange={(bin) => handleChange('bankBin', bin)}
             disabled={!canEdit}
             placeholder={t('bankSettingsContent.selectBank', { ns: 'settings' })} />
-          
-          <p className="text-xs text-gray-400">{t('vD970436Vietcombank')}</p>
+
+          <p className="text-xs text-gray-400">{t('bankCodeBinExample')}</p>
         </div>
 
         <div className="space-y-2">
           <label htmlFor="bankNumber" className="block text-sm font-medium text-gray-700">
-            {t('sTiKhon')}
+            {t('accountNumber')}
           </label>
           <input
             id="bankNumber"
@@ -105,7 +105,7 @@ export function BankSettingsForm({ canEdit = false }: BankSettingsFormProps) {
 
         <div className="md:col-span-2 space-y-2">
           <label htmlFor="bankAccountName" className="block text-sm font-medium text-gray-700">
-            {t('tnChTiKhon')}
+            {t('accountHolderName')}
           </label>
           <input
             id="bankAccountName"
@@ -129,12 +129,12 @@ export function BankSettingsForm({ canEdit = false }: BankSettingsFormProps) {
           {saving ?
           <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>{t('angLu')}</span>
+              <span>{t('saving')}</span>
             </> :
 
           <>
               <Save className="w-4 h-4" />
-              <span>{t('lu')}</span>
+              <span>{t('save')}</span>
             </>
           }
         </button>
@@ -142,7 +142,7 @@ export function BankSettingsForm({ canEdit = false }: BankSettingsFormProps) {
         {success &&
         <div className="flex items-center gap-2 text-green-600">
             <CheckCircle2 className="w-4 h-4" />
-            <span className="text-sm font-medium">{t('luCiTNgnHng')}</span>
+            <span className="text-sm font-medium">{t('bankSettingsSaved')}</span>
           </div>
         }
       </div>

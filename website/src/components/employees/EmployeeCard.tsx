@@ -4,7 +4,7 @@ import { ExpandableText } from '@/components/shared/ExpandableText';
 import {
   ROLE_LABELS,
   ROLE_STYLES,
-  STATUS_BADGE_STYLES,
+  STATUS_STYLE_MAP,
   type Employee,
 } from '@/data/mockEmployees';
 
@@ -49,7 +49,7 @@ export function EmployeeCard({ employee, isSelected, onSelect }: EmployeeCardPro
               employee.status === 'active' ? 'bg-green-500' :
               employee.status === 'on-leave' ? 'bg-yellow-500' : 'bg-gray-400'
             }`} />
-            <span className={`text-xs px-1.5 py-0.5 rounded ${STATUS_BADGE_STYLES[employee.status]}`}>
+            <span className={`text-xs px-1.5 py-0.5 rounded ${STATUS_STYLE_MAP[employee.status]?.badgeClass ?? ''}`}>
               {statusLabel}
             </span>
           </div>

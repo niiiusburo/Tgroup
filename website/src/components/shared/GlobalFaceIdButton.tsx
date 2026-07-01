@@ -9,6 +9,7 @@ import type { ApiPartner } from '@/lib/api';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { probeCrossLob, type CrossLobProbeResult } from '@/lib/api/partners';
+import { FACE_MATCH_DISMISS_MS } from '@/constants';
 
 /**
  * Global Face ID quick-search button.
@@ -79,7 +80,7 @@ export function GlobalFaceIdButton() {
           }
         }
         navigate(`/customers/${result.match.partnerId}`);
-        setTimeout(dismiss, 800);
+        setTimeout(dismiss, FACE_MATCH_DISMISS_MS);
       }
     },
     [recognize, navigate, dismiss, canCrossView, currentLOB]
