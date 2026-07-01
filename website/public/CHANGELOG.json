@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.32.57",
+    "date": "2026-07-01",
+    "commit": "pending",
+    "highlights": "Face capture: flashing directional arrows during profile poses + front-camera mirror.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "FaceCaptureModal now shows a large flashing arrow overlaid on the camera feed pointing left/right during the profile pose steps, so users know which way to turn without reading the hint text.",
+          "Front-facing (user) camera in FaceCaptureModal is now horizontally mirrored so moving your head left moves the preview left, matching a real mirror. Back camera stays unmirrored."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added tests verifying the pose-arrow overlay appears for left/right poses and is absent for the center pose and in single-shot mode.",
+          "Added test verifying the -scale-x-100 mirror class is applied only after switching to the front camera."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.55",
     "date": "2026-06-30",
     "commit": "pending",

@@ -27,6 +27,7 @@ export function FaceCaptureModal({
     error,
     captureError,
     isStarting,
+    facingMode,
     detectionState,
     detectionScore,
     poseIndex,
@@ -106,7 +107,7 @@ export function FaceCaptureModal({
                 autoPlay
                 playsInline
                 muted
-                className="absolute inset-0 w-full h-full scale-105 object-cover" />
+                className={`absolute inset-0 w-full h-full scale-105 object-cover ${facingMode === 'user' ? '-scale-x-100' : ''}`} />
                 <div
                 aria-hidden
                 data-testid="face-modal-privacy-blur"
@@ -141,6 +142,20 @@ export function FaceCaptureModal({
                         'border-white/70'
                   }`} />
                 </div>
+                {isProfileCapture && currentPose.id !== 'center' && (
+                  <div
+                    className={`absolute top-1/2 -translate-y-1/2 pointer-events-none ${currentPose.id === 'left' ? 'left-2 sm:left-3' : 'right-2 sm:right-3'}`}
+                    data-testid="pose-arrow-overlay"
+                    aria-hidden="true">
+                    <div className="flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-orange-500/85 shadow-[0_0_28px_rgba(249,115,22,0.65)] animate-face-arrow">
+                      {currentPose.id === 'left' ? (
+                        <ArrowLeft className="w-8 h-8 sm:w-9 sm:h-9 text-white" />
+                      ) : (
+                        <ArrowRight className="w-8 h-8 sm:w-9 sm:h-9 text-white" />
+                      )}
+                    </div>
+                  </div>
+                )}
                 <div className="absolute bottom-3 left-4 right-4 h-1.5 rounded-full bg-white/25 overflow-hidden pointer-events-none">
                   <div
                   className={`h-full rounded-full transition-all duration-200 ${

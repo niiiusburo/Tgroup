@@ -298,6 +298,58 @@ describe('FaceCaptureModal', () => {
     expect(onCapture.mock.calls[0][1]).toHaveLength(3);
   });
 
+  it('shows a flashing arrow overlay on the camera for left and right profile poses', async () => {
+    mockVideoWidth = 640;
+    mockVideoHeight = 480;
+
+    render(<FaceCaptureModal isOpen captureMode="profile" onCapture={vi.fn()} onCancel={vi.fn()} />);
+
+    await waitForCameraStart();
+    // Center pose: no directional arrow overlay.
+    expect(screen.getByText('Bước 1/3: Nhìn thẳng')).toBeInTheDocument();
+    expect(screen.queryByTestId('pose-arrow-overlay')).toBeNull();
+
+    // Left pose: arrow overlay present, pointing left.
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Chụp/i }));
+    });
+    expect(await screen.findByText('Bước 2/3: Quay đầu sang trái')).toBeInTheDocument();
+    const leftOverlay = screen.getByTestId('pose-arrow-overlay');
+    expect(leftOverlay).toBeInTheDocument();
+    expect(leftOverlay.querySelector('svg.lucide-arrow-left')).not.toBeNull();
+    expect(leftOverlay.className).toContain('left-');
+
+    // Right pose: arrow overlay present, pointing right.
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Chụp/i }));
+    });
+    expect(await screen.findByText('Bước 3/3: Quay đầu sang phải')).toBeInTheDocument();
+    const rightOverlay = screen.getByTestId('pose-arrow-overlay');
+    expect(rightOverlay).toBeInTheDocument();
+    expect(rightOverlay.querySelector('svg.lucide-arrow-right')).not.toBeNull();
+    expect(rightOverlay.className).toContain('right-');
+  });
+
+  it('does not show the pose arrow overlay in single-shot capture mode', async () => {
+    render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
+    await waitForCameraStart();
+    expect(screen.queryByTestId('pose-arrow-overlay')).toBeNull();
+  });
+
+  it('mirrors the video like a mirror on the front-facing camera only', async () => {
+    render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
+    await waitForCameraStart();
+    const video = document.querySelector('video') as HTMLVideoElement;
+    // Back camera (default): no horizontal mirror.
+    expect(video.className).not.toContain('-scale-x-100');
+
+    fireEvent.click(screen.getByLabelText('Đổi camera'));
+
+    await vi.waitFor(() => {
+      expect(video.className).toContain('-scale-x-100');
+    });
+  });
+
   it('displays camera error message when access is denied', async () => {
     mockGetUserMedia.mockRejectedValue(new Error('Camera denied'));
     render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);

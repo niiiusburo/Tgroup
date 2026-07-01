@@ -331,6 +331,7 @@ export function useFaceCaptureController({
     error,
     captureError,
     isStarting,
+    facingMode,
     detectionState,
     detectionScore,
     poseIndex,
