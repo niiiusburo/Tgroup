@@ -10,6 +10,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   type ReactNode,
 } from 'react';
 import { AUTH_UNAUTHORIZED_EVENT } from '@/lib/api/core';
@@ -19,6 +20,7 @@ import {
   getRememberMePreference,
   setAuthToken,
 } from '@/lib/authToken';
+import { clearInvestorSessionForStaffMode } from '@/lib/authSessionIsolation';
 import {
   login as apiLogin,
   fetchMe,
@@ -101,6 +103,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const login = useCallback(async (identifier: string, password: string, rememberMe = false) => {
     const res = await apiLogin(identifier, password, rememberMe);
+    clearInvestorSessionForStaffMode();
     setAuthToken(res.token, rememberMe);
     // Show the FeedbackWidget login hint once on each fresh login.
     sessionStorage.removeItem('tg_feedback_hint_dismissed');
@@ -147,10 +150,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [state.permissions]
   );
 
+  const value = useMemo(
+    () => ({ ...state, login, logout, hasPermission, hasLocationAccess }),
+    [state, login, logout, hasPermission, hasLocationAccess]
+  );
+
   return (
-    <AuthContext.Provider
-      value={{ ...state, login, logout, hasPermission, hasLocationAccess }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

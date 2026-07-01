@@ -12,6 +12,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import { useTimezone } from '@/contexts/TimezoneContext';
 import { cn } from '@/lib/utils';
+import { formatDateKey } from '@/lib/dateUtils';
 import { useTranslation } from 'react-i18next';
 
 const MONTH_KEYS = [
@@ -81,10 +82,6 @@ export function DateRangePicker({
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [isOpen]);
-
-  function formatDateKey(d: Date): string {
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  }
 
   const calendarDays = useMemo((): DayInfo[] => {
     const year = viewDate.getFullYear();

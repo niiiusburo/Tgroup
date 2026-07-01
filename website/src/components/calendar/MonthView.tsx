@@ -9,6 +9,7 @@ import { CheckCircle, Calendar, XCircle, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTimezone } from '@/contexts/TimezoneContext';
 import { cn } from '@/lib/utils';
+import { formatDateKey } from '@/lib/dateUtils';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 
 interface MonthViewProps {
@@ -19,11 +20,6 @@ interface MonthViewProps {
 }
 
 const WEEKDAY_HEADERS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-
-function formatDateKey(date: Date): string {
-  // date comes from YYYY-MM-DD parse; get local components to avoid UTC shift
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
 
 interface StatusCounts {
   confirmed: number;

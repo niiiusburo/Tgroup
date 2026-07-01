@@ -19,6 +19,7 @@ import {
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { mapSaleOrderToServiceRecord } from './useServices/mapSaleOrderToServiceRecord';
 import { nullableUuid } from '@/lib/uuid';
+import { useDebouncedValue } from './useDebouncedValue';
 
 export type ServiceFilter = 'all' | ServiceStatus;
 export type CategoryFilter = 'all' | AppointmentType;
@@ -66,7 +67,7 @@ export function useServices(selectedLocationId?: string, partnerId?: string, opt
   const [statusFilter, setStatusFilter] = useState<ServiceFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debouncedSearch = useDebouncedValue(searchTerm, 300);
   const didInitialFetchRef = useRef(false);
   const previousSearchTermRef = useRef('');
 
@@ -122,25 +123,14 @@ export function useServices(selectedLocationId?: string, partnerId?: string, opt
    */
   useEffect(() => {
     if (!enabled) return;
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
 
-    if (!searchTerm && didInitialFetchRef.current && !previousSearchTermRef.current) {
+    if (!debouncedSearch && didInitialFetchRef.current && !previousSearchTermRef.current) {
       return;
     }
 
-    previousSearchTermRef.current = searchTerm;
-    debounceTimerRef.current = setTimeout(() => {
-      fetchRecords(searchTerm || undefined);
-    }, 300);
-
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, [enabled, searchTerm, fetchRecords, partnerId]);
+    previousSearchTermRef.current = debouncedSearch;
+    fetchRecords(debouncedSearch || undefined);
+  }, [enabled, debouncedSearch, fetchRecords]);
 
   const filtered = useMemo(() => {
     let result: readonly ServiceRecord[] = records;

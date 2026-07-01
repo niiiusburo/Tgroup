@@ -8,6 +8,9 @@ import { StatusBadge, type StatusVariant } from '@/components/shared/StatusBadge
 import type { Column } from '@/components/shared/DataTable';
 import type { Customer } from '@/hooks/useCustomers';
 import type { CustomerStatus } from '@/data/mockCustomers';
+import { InvestorVisibilityCell } from '@/components/customer/InvestorVisibilityCell';
+import type { InvestorVisibilityState } from '@/lib/api/investorVisibility';
+import { formatDate } from '@/lib/dateUtils';
 
 const STATUS_TO_VARIANT: Record<CustomerStatus, StatusVariant> = {
   active: 'active',
@@ -15,13 +18,28 @@ const STATUS_TO_VARIANT: Record<CustomerStatus, StatusVariant> = {
   pending: 'pending',
 };
 
-function formatDate(dateStr: string): string {
-  if (!dateStr) return '-';
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+export interface InvestorColumnConfig {
+  canToggle: boolean;
+  hasInvestors: boolean;
+  investors: InvestorVisibilityState[];
+  batch: Record<string, InvestorVisibilityState[]>;
+  selectedInvestorId: string | null;
+  onSelectInvestor: (id: string) => void;
+  onToggle: (
+    partnerId: string,
+    investorId: string,
+    next: boolean,
+    investorName: string,
+  ) => Promise<{ ok: boolean }>;
 }
 
-export function buildCustomerColumns(locationNameMap: Map<string, string>, canSoftDelete: boolean, onSoftDelete: (id: string, name: string) => void, t: (key: string) => string): readonly Column<Customer>[] {
+export function buildCustomerColumns(
+  locationNameMap: Map<string, string>,
+  canSoftDelete: boolean,
+  onSoftDelete: (id: string, name: string) => void,
+  t: (key: string) => string,
+  investorConfig?: InvestorColumnConfig,
+): readonly Column<Customer>[] {
   return [
     {
       key: 'code',
@@ -88,9 +106,31 @@ export function buildCustomerColumns(locationNameMap: Map<string, string>, canSo
       key: 'status',
       header: 'Status',
       sortable: true,
-      width: '12%',
+      width: '10%',
       render: (row) => <StatusBadge status={STATUS_TO_VARIANT[row.status]} />,
     },
+    ...(investorConfig
+      ? [{
+          key: 'investor',
+          header: t('investorVisibility.column'),
+          sortable: false,
+          width: '12%',
+          render: (row: Customer) => (
+            <InvestorVisibilityCell
+              partnerId={row.id}
+              partnerName={row.name}
+              isDeleted={row.status === 'inactive'}
+              canToggle={investorConfig.canToggle}
+              hasInvestors={investorConfig.hasInvestors}
+              investors={investorConfig.investors}
+              rowStates={investorConfig.batch[row.id]}
+              selectedInvestorId={investorConfig.selectedInvestorId}
+              onSelectInvestor={investorConfig.onSelectInvestor}
+              onToggle={investorConfig.onToggle}
+            />
+          ),
+        } as Column<Customer>]
+      : []),
     {
       key: 'lastVisit',
       header: 'Last Visit',

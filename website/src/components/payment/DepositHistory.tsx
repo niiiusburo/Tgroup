@@ -1,20 +1,12 @@
 import { Clock, ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import type { DepositTransaction } from '@/hooks/useDeposits';
 import { formatVND } from '@/lib/formatting';
+import { formatDate } from '@/lib/dateUtils';
 import { useTranslation } from 'react-i18next';
 
 interface DepositHistoryProps {
   transactions: DepositTransaction[];
   loading?: boolean;
-}
-
-function formatDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('en-GB', { 
-    day: '2-digit', 
-    month: 'short', 
-    year: 'numeric' 
-  });
 }
 
 export function DepositHistory({ transactions, loading }: DepositHistoryProps) {

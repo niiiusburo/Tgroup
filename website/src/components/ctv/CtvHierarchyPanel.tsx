@@ -24,7 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { useCtvLocale } from '@/lib/i18n/ctv';
 import type { CtvHierarchyNode, CtvHierarchyResponse } from '@/lib/api/ctv';
 import { ctvDownlineDomId } from '@/pages/CTV/ctvCommissionNavigate';
-import { cn } from '@/lib/utils';
+import { cn, normalizeText } from '@/lib/utils';
 
 interface CtvHierarchyPanelProps {
   readonly hierarchy: CtvHierarchyResponse | null;
@@ -32,15 +32,6 @@ interface CtvHierarchyPanelProps {
   readonly error: string | null;
   readonly onRetry: () => void;
   readonly focusDownlineId?: string | null;
-}
-
-// Diacritic-insensitive normalize (đ→d) so "kien" matches "Kiên".
-function normalizeText(value: string): string {
-  return (value || '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/đ/g, 'd');
 }
 
 function NodeRow({

@@ -6,6 +6,7 @@ import {
   type EmployeeRole,
   type EmployeeStatus,
 } from '@/data/mockEmployees';
+import { useDebouncedValue } from './useDebouncedValue';
 
 /**
  * Map API employee status to Employee status
@@ -114,7 +115,7 @@ export function useEmployees(selectedLocationId?: string, options: UseEmployeesO
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const debouncedSearchQuery = useDebouncedValue(searchQuery, 300);
   const didInitialFetchRef = useRef(false);
   const previousSearchQueryRef = useRef('');
 
@@ -178,25 +179,14 @@ export function useEmployees(selectedLocationId?: string, options: UseEmployeesO
    */
   useEffect(() => {
     if (!enabled) return;
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
 
-    if (!searchQuery && didInitialFetchRef.current && !previousSearchQueryRef.current) {
+    if (!debouncedSearchQuery && didInitialFetchRef.current && !previousSearchQueryRef.current) {
       return;
     }
 
-    previousSearchQueryRef.current = searchQuery;
-    searchTimeoutRef.current = setTimeout(() => {
-      fetchAndSetEmployees(searchQuery || undefined);
-    }, 300);
-
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-    };
-  }, [enabled, searchQuery, fetchAndSetEmployees]);
+    previousSearchQueryRef.current = debouncedSearchQuery;
+    fetchAndSetEmployees(debouncedSearchQuery || undefined);
+  }, [enabled, debouncedSearchQuery, fetchAndSetEmployees]);
 
   /**
    * Filter counts derived from allEmployees (cross-filtered so counts reflect other active filters)

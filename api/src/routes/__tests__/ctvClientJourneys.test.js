@@ -16,16 +16,26 @@ const ctvRouter = require('../ctv');
 const { getDb } = require('../../db');
 const { buildCardTrackingReferrals } = require('../../services/ctvCardTrackingReferrals');
 
-function getClientJourneysHandler() {
+// ctv routes are now split into sub-routers mounted on the main router (see
+// routes/ctv/index.js). Recurse into mounted sub-routers so route handlers can
+// still be located by path/method.
+function findRouteHandler(router, path, method) {
   let handler;
-  ctvRouter.stack.forEach((layer) => {
-    if (layer.route && layer.route.path === '/client-journeys' && layer.route.methods.get) {
+  router.stack.forEach((layer) => {
+    if (layer.route && layer.route.path === path && layer.route.methods[method]) {
       layer.route.stack.forEach((l) => {
         if (l.handle && typeof l.handle === 'function') handler = l.handle;
       });
+    } else if (!layer.route && layer.handle && Array.isArray(layer.handle.stack)) {
+      const nested = findRouteHandler(layer.handle, path, method);
+      if (nested) handler = nested;
     }
   });
   return handler;
+}
+
+function getClientJourneysHandler() {
+  return findRouteHandler(ctvRouter, '/client-journeys', 'get');
 }
 
 function makeRes() {

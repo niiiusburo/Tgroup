@@ -5086,3 +5086,28 @@ Execution checks:
 - [x] PASS: Deploy v0.37.21 to `/opt/tgroup-nk3` only (tarball `a53266eb2`, backup `app.bak-pre-v03721-20260622T014811Z`); live `version.json` → v0.37.21 / `a53266e` / `nk3-deploy`; `serviceReversal.js` imports `reverseServiceCardEarnings`; NK (`nk.2checkin.com` v0.32.44) and NK2 staging containers untouched.
 - [ ] PENDING: NK3 live smoke — delete service line with pending service-card earning; expect `reversedServiceCardEarningsCount > 0` and earnings `status='reversed'`.
 - [ ] PENDING: Confirm NK (`nk.2checkin.com`) and NK2 version/containers unchanged after NK3-only deploy.
+
+---
+
+# TestSprite Plan: Tier 2 consolidation 2026-07-01
+Feature/edit name: JWT auth factory, CTV route split, debounce dedup, context memoization (v0.39.8).
+
+Changed URLs / API routes / data flow:
+- No URL changes. CTV routes internally split into sub-modules but same paths served.
+- JWT auth: investorAuth.js and patientAuth.js now use createJwtAuth factory (same exported names).
+
+User roles: All (admin, staff, CTV, patient, investor).
+
+Happy paths:
+- [ ] PENDING: Login as t@clinic.vn/123123, verify dashboard loads.
+- [ ] PENDING: CTV portal (/ctv) loads — commission, clients, bookings, network tabs all work.
+- [ ] PENDING: Investor portal login works.
+- [ ] PENDING: Patient portal login works.
+
+Edge cases / regressions:
+- [ ] PENDING: Verify CTV route split didn't break any CTV flow (refer client, book, view commission).
+- [ ] PENDING: Verify investor JWT validation still rejects invalid tokens.
+- [ ] PENDING: Verify patient JWT validation still rejects non-patient tokens.
+- [ ] PENDING: Verify debounce still works on customer/appointment/service search.
+
+Setup/login data: t@clinic.vn / 123123 on http://127.0.0.1:5175

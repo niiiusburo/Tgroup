@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchPartners, createPartner, updatePartner } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
@@ -10,6 +10,7 @@ import {
   type Customer,
   type CustomerStatusFilter,
 } from './useCustomers/customerMapper';
+import { useDebouncedValue } from './useDebouncedValue';
 
 export type { Customer, CustomerLocationFilter, CustomerStatus, CustomerStatusFilter } from './useCustomers/customerMapper';
 export { CUSTOMER_PAGE_SIZE } from './useCustomers/customerMapper';
@@ -40,18 +41,16 @@ export function useCustomers(locationId: string = 'all', options: UseCustomersOp
   const canViewAllCustomers = hasPermission(PERMISSION_VIEW_ALL_CUSTOMERS) || hasPermission('customers.view_all');
   const searchRequired = !canViewAllCustomers;
 
-  const searchTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const debouncedRawSearch = useDebouncedValue(searchTerm, 300);
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
+  // Apply the min-length guard to the debounced value (preserves original
+  // behavior: short search terms are ignored unless the user can view all).
   useEffect(() => {
-    if (searchTimeout.current) clearTimeout(searchTimeout.current);
-    searchTimeout.current = setTimeout(() => {
-      if (canViewAllCustomers || !searchTerm || searchTerm.length >= MIN_SEARCH_LENGTH) {
-        setDebouncedSearch(searchTerm);
-      }
-    }, 300);
-    return () => { if (searchTimeout.current) clearTimeout(searchTimeout.current); };
-  }, [searchTerm, canViewAllCustomers]);
+    if (canViewAllCustomers || !debouncedRawSearch || debouncedRawSearch.length >= MIN_SEARCH_LENGTH) {
+      setDebouncedSearch(debouncedRawSearch);
+    }
+  }, [debouncedRawSearch, canViewAllCustomers]);
 
   const setSearchTerm = useCallback((value: string) => {
     setPage(0);

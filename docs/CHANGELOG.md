@@ -2,6 +2,19 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.39.8] — 2026-07-01 — Tier 2 consolidation (JWT factory, CTV split, debounce dedup, context memoization)
+
+### Refactoring
+- Created `createJwtAuth` factory — shared Bearer-token extraction + `jwt.verify` boilerplate for investor and patient auth middleware.
+- Split `ctv.js` (755 lines) into `ctv/` directory (index, commission, clients, bookings, network, profile, _shared) — all under 500 lines.
+- Consolidated 4 duplicate debounce implementations into `useDebouncedValue` hook (useCustomers, useAppointments, useServices, usePayment, useEmployees).
+- Memoized context values in AuthContext, LocationContext, AppointmentHoverContext, InvestorAuthContext to prevent unnecessary re-renders.
+- Deduplicated `normalizeText` and `formatDate` utility functions across multiple components.
+
+### Testing
+- All 196 backend tests pass, 753/754 frontend tests pass (1 pre-existing i18n failure).
+- CTV test helpers updated to recurse nested sub-routers after route split.
+
 ## [0.39.7] — 2026-07-01 — Tier 1 dead code cleanup (-7164 LOC)
 
 ### Bug Fixes

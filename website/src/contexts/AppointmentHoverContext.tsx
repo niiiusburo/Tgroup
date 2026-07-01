@@ -10,6 +10,7 @@ import {
   useState,
   useRef,
   useCallback,
+  useMemo,
   type ReactNode,
   type MutableRefObject,
 } from 'react';
@@ -63,13 +64,16 @@ export function AppointmentHoverProvider({ children }: AppointmentHoverProviderP
     }
   }, []);
 
-  const value: AppointmentHoverContextValue = {
-    hoveredId,
-    setHoveredId,
-    appointmentRefs,
-    registerRef,
-    scrollToAppointment,
-  };
+  const value = useMemo<AppointmentHoverContextValue>(
+    () => ({
+      hoveredId,
+      setHoveredId,
+      appointmentRefs,
+      registerRef,
+      scrollToAppointment,
+    }),
+    [hoveredId, setHoveredId, appointmentRefs, registerRef, scrollToAppointment]
+  );
 
   return (
     <AppointmentHoverContext.Provider value={value}>

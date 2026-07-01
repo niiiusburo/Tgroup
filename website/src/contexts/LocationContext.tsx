@@ -5,7 +5,7 @@
  * @crossref:provides[selectedLocationId, setSelectedLocationId, availableLocations, isSingleLocation]
  */
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, type ReactNode } from 'react';
 
 interface LocationOption {
   id: string;
@@ -60,10 +60,13 @@ export function LocationProvider({ children }: LocationProviderProps) {
 
   const isSingleLocation = allowedLocations.length === 1;
 
+  const value = useMemo(
+    () => ({ selectedLocationId, setSelectedLocationId, allowedLocations, isSingleLocation }),
+    [selectedLocationId, setSelectedLocationId, allowedLocations, isSingleLocation]
+  );
+
   return (
-    <LocationContext.Provider
-      value={{ selectedLocationId, setSelectedLocationId, allowedLocations, isSingleLocation }}
-    >
+    <LocationContext.Provider value={value}>
       {children}
     </LocationContext.Provider>
   );

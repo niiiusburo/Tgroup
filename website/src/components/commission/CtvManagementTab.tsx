@@ -16,6 +16,7 @@ import {
 import { CtvCreationForm, useCtvCreationForm } from '@/components/shared/CtvCreationForm';
 import { ApiError } from '@/lib/api/core';
 import { CtvHierarchyPanel } from '@/components/ctv/CtvHierarchyPanel';
+import { normalizeText } from '@/lib/utils';
 
 /**
  * CtvManagementTab (and nested AddCtvModal / EditCtvModal) — admin CTV list + create/edit.
@@ -24,27 +25,14 @@ import { CtvHierarchyPanel } from '@/components/ctv/CtvHierarchyPanel';
  * LOB dental-forced, specific per-field errors, and payload shape.
  *
  * @crossref:used-in[admin /commission or CTV mgmt tab for "Add CTV"; website/src/pages/Commission.tsx]
- * @crossref:uses[shared/CtvCreationForm (SSOT), createCtv from @/lib/api/ctv, useBusinessUnit for LOB context, website/src/components/ctv/CtvHierarchyPanel.tsx, website/src/lib/api/core.ts, product-map/domains/ctv.yaml]
+ * @crossref:uses[shared/CtvCreationForm (SSOT), createCtv from @/lib/api/ctv, useBusinessUnit for LOB context, website/src/components/ctv/CtvHierarchyPanel.tsx, website/src/lib/api/core.ts, website/src/lib/utils.ts (normalizeText), product-map/domains/ctv.yaml]
  * @crossref:domain[ctv-creation — primary admin call site; see also CtvRecruitModal + JoinCtv]
  */
 
 const TABLE_COL_COUNT = 9;
 
-// Combining diacritical marks (U+0300–U+036F). Built from an ASCII string so the
-// source contains no invisible combining characters.
-const COMBINING_MARKS = new RegExp('[\\u0300-\\u036f]', 'g');
-
 function isLegacyCtv(ctv: CtvRecord) {
   return ctv.source === 'legacy_ctv' || ctv.created_via?.startsWith('legacy_ctv_import');
-}
-
-/** Lowercase + strip Vietnamese diacritics so "kien" matches "Kiên" and "dang" matches "Đặng". */
-function normalizeText(value: string | null | undefined): string {
-  return (value || '')
-    .normalize('NFD')
-    .replace(COMBINING_MARKS, '')
-    .replace(/[đĐ]/g, 'd')
-    .toLowerCase();
 }
 
 function SourceBadge({ ctv }: { ctv: CtvRecord }) {

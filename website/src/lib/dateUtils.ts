@@ -224,3 +224,37 @@ export function getFirstDayOfMonthInTimezone(dateStr: string, timezone: string):
   const d = parseDateInTimezone(`${year}-${String(month).padStart(2, '0')}-01`, timezone);
   return d.getDay();
 }
+
+/**
+ * Format a date string (YYYY-MM-DD or ISO timestamp) as a display string.
+ * Uses en-GB locale: "dd MMM yyyy" (e.g. "15 Mar 2024").
+ * Returns '-' for null/undefined/empty/invalid input.
+ *
+ * Parses YYYY-MM-DD as a local date to avoid timezone shifts; for ISO
+ * timestamps the date part is extracted first.
+ *
+ * SSOT for the "dd MMM yyyy" display format used across customer/deposit UIs.
+ */
+export function formatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return '-';
+  try {
+    const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
+    const [year, month, day] = datePart.split('-').map(Number);
+    if (!year || !month || !day) return '-';
+    const date = new Date(year, month - 1, day); // month is 0-indexed
+    if (isNaN(date.getTime())) return '-';
+    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  } catch {
+    return '-';
+  }
+}
+
+/**
+ * Build a YYYY-MM-DD key from a Date using its LOCAL components (no UTC shift).
+ *
+ * SSOT for calendar grid date-key generation (MonthView, WeekView, DateRangePicker).
+ * Use this when comparing a Date against timezone-provided YYYY-MM-DD "today" strings.
+ */
+export function formatDateKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}

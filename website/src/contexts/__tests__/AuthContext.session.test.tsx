@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AuthProvider, useAuth } from '../AuthContext';
 import { AUTH_UNAUTHORIZED_EVENT } from '@/lib/api/core';
@@ -22,6 +22,15 @@ function AuthProbe() {
       </span>
       <span data-testid="user-name">{auth.user?.name ?? 'none'}</span>
     </div>
+  );
+}
+
+function LoginProbe() {
+  const auth = useAuth();
+  return (
+    <button type="button" onClick={() => void auth.login('admin@example.com', 'secret', true)}>
+      Login staff
+    </button>
   );
 }
 
@@ -70,5 +79,33 @@ describe('AuthProvider session events', () => {
     });
     expect(screen.getByTestId('user-name')).toHaveTextContent('none');
     expect(localStorage.getItem('tgclinic_token')).toBeNull();
+  });
+
+  it('clears any investor portal session when staff login succeeds', async () => {
+    localStorage.setItem('tgclinic_investor_token', 'old-investor-local-token');
+    sessionStorage.setItem('tgclinic_investor_token', 'old-investor-session-token');
+    const investorUnauthorized = vi.fn();
+    window.addEventListener('tgclinic:investor-unauthorized', investorUnauthorized);
+
+    apiMocks.login.mockResolvedValue(meResponse);
+
+    render(
+      <AuthProvider>
+        <AuthProbe />
+        <LoginProbe />
+      </AuthProvider>
+    );
+
+    await screen.findByText('Login staff');
+    fireEvent.click(screen.getByText('Login staff'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('auth-status')).toHaveTextContent('authenticated');
+    });
+    expect(localStorage.getItem('tgclinic_investor_token')).toBeNull();
+    expect(sessionStorage.getItem('tgclinic_investor_token')).toBeNull();
+    expect(investorUnauthorized).toHaveBeenCalledTimes(1);
+
+    window.removeEventListener('tgclinic:investor-unauthorized', investorUnauthorized);
   });
 });

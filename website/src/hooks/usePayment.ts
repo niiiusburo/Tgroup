@@ -17,6 +17,7 @@ import {
 } from '@/data/mockPayment';
 import { normalizeText } from '@/lib/utils';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
+import { useDebouncedValue } from './useDebouncedValue';
 
 export type PaymentFilter = 'all' | PaymentStatus;
 
@@ -128,8 +129,10 @@ export function usePayment(selectedLocationId?: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Debounce timer ref
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Debounced search value (skip-first guard avoids a duplicate fetch on mount
+  // since the initial-fetch effect below already loads once).
+  const debouncedSearch = useDebouncedValue(searchTerm, 300);
+  const didInitialSearchRef = useRef(false);
 
   /**
    * Fetch sale orders from API
@@ -195,20 +198,12 @@ export function usePayment(selectedLocationId?: string) {
    * Debounced search
    */
   useEffect(() => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
+    if (!didInitialSearchRef.current) {
+      didInitialSearchRef.current = true;
+      return;
     }
-
-    debounceTimerRef.current = setTimeout(() => {
-      void refreshPayments();
-    }, 300);
-
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, [refreshPayments]);
+    void fetchPayments(debouncedSearch || undefined);
+  }, [debouncedSearch, fetchPayments]);
 
   const filteredPayments = useMemo(() => {
     let result: readonly PaymentRecord[] = payments;

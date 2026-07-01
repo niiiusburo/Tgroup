@@ -29,6 +29,9 @@ jest.mock('../../services/permissionService', () => ({
 const { getReferralClaimStatus } = require('../../services/referralClaim');
 const { getDb } = require('../../db');
 
+// ctv routes are now split into sub-routers mounted on the main router (see
+// routes/ctv/index.js). Recurse into mounted sub-routers so route handlers can
+// still be located by path/method.
 function findRouteHandler(router, path, method) {
   let handler;
   router.stack.forEach((layer) => {
@@ -36,19 +39,16 @@ function findRouteHandler(router, path, method) {
       layer.route.stack.forEach((l) => {
         if (l.handle && typeof l.handle === 'function') handler = l.handle;
       });
+    } else if (!layer.route && layer.handle && Array.isArray(layer.handle.stack)) {
+      const nested = findRouteHandler(layer.handle, path, method);
+      if (nested) handler = nested;
     }
   });
   return handler;
 }
 
 function getRouteHandler(path, method) {
-  let handler;
-  ctvRouter.stack.forEach((layer) => {
-    if (layer.route && layer.route.path === path && layer.route.methods[method]) {
-      layer.route.stack.forEach((l) => { if (l.handle && typeof l.handle === 'function') handler = l.handle; });
-    }
-  });
-  return handler;
+  return findRouteHandler(ctvRouter, path, method);
 }
 
 function makeRes() {
