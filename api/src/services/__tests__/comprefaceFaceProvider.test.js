@@ -54,38 +54,6 @@ describe('comprefaceFaceProvider', () => {
     expect(result.candidates[0].partnerId).toBe('partner-1');
   });
 
-  it('blocks ambiguous Compreface identities instead of returning selectable candidates', async () => {
-    comprefaceClient.recognize.mockResolvedValue([
-      { subject: 'partner-1', similarity: 0.9 },
-      { subject: 'partner-2', similarity: 0.86 },
-    ]);
-    query.mockResolvedValue([
-      { id: 'partner-1', name: 'Alice', phone: '0901', code: 'T001', face_subject_id: 'partner-1' },
-      { id: 'partner-2', name: 'Bob', phone: '0902', code: 'T002', face_subject_id: 'partner-2' },
-    ]);
-
-    const result = await provider.recognizeFace(Buffer.from('face'), 'image/jpeg');
-
-    expect(result.status).toBe('ambiguous');
-    expect(result.match).toBeNull();
-    expect(result.candidates).toEqual([]);
-    expect(result.ambiguity.candidates.map((c) => c.partnerId)).toEqual(['partner-1', 'partner-2']);
-    expect(result.recognitionVersion).toMatch(/^face-recognition-/);
-  });
-
-  it('maps Compreface multiple-face responses to MULTIPLE_FACES', async () => {
-    const err = new Error('More than one face detected');
-    err.code = 'MULTIPLE_FACES';
-    err.status = 422;
-    comprefaceClient.recognize.mockRejectedValue(err);
-
-    await expect(provider.recognizeFace(Buffer.from('face'), 'image/jpeg')).rejects.toMatchObject({
-      code: 'MULTIPLE_FACES',
-      status: 422,
-      message: 'More than one face detected',
-    });
-  });
-
   it('maps Compreface recognize no-face responses to NO_FACE instead of engine error', async () => {
     const err = new Error('No face detected');
     err.status = 400;

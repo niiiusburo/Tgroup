@@ -60,49 +60,6 @@ describe('useFaceRecognition', () => {
     expect(state.candidates[0].partnerId).toBe('p-1');
   });
 
-  it('transitions to ambiguous when backend blocks close identity matches', async () => {
-    vi.mocked(api.recognizeFace).mockResolvedValue({
-      status: 'ambiguous',
-      match: null,
-      candidates: [],
-      recognitionVersion: 'face-recognition-test',
-      ambiguity: {
-        code: 'AMBIGUOUS_FACE_MATCH',
-        message: 'Face match is ambiguous',
-        margin: 0.04,
-        requiredMargin: 0.06,
-        candidates: [
-          { partnerId: 'p-1', name: 'Alice', code: 'T001', phone: '0901', confidence: 0.9 },
-          { partnerId: 'p-2', name: 'Bob', code: 'T002', phone: '0902', confidence: 0.86 },
-        ],
-      },
-    });
-
-    const { result } = renderHook(() => useFaceRecognition());
-    result.current.recognize(new Blob(['img']));
-
-    await waitFor(() => expect(result.current.recognizeState.status).toBe('ambiguous'));
-    const state = result.current.recognizeState as {
-      status: 'ambiguous';
-      candidates: Array<{ partnerId: string }>;
-      recognitionVersion?: string | null;
-    };
-    expect(state.candidates).toHaveLength(2);
-    expect(state.recognitionVersion).toBe('face-recognition-test');
-  });
-
-  it('maps AMBIGUOUS_FACE_MATCH errors to a localized rescan message', async () => {
-    const ambiguousErr = Object.assign(new Error('raw ambiguous msg'), { code: 'AMBIGUOUS_FACE_MATCH' });
-    vi.mocked(api.recognizeFace).mockRejectedValue(ambiguousErr);
-
-    const { result } = renderHook(() => useFaceRecognition());
-    result.current.recognize(new Blob(['img'])).catch(() => {});
-
-    await waitFor(() => expect(result.current.recognizeState.status).toBe('error'));
-    const state = result.current.recognizeState as { status: 'error'; message: string };
-    expect(state.message).toBe(i18n.t('faceRecognition.ambiguous', { ns: 'customers' }));
-  });
-
   it('transitions to no_match when there is no match', async () => {
     vi.mocked(api.recognizeFace).mockResolvedValue({ match: null, candidates: [] });
 

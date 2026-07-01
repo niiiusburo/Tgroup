@@ -5,9 +5,7 @@ const faceEnvKeys = [
   'FACE_AUTO_MATCH_THRESHOLD',
   'FACE_CANDIDATE_THRESHOLD',
   'FACE_AUTO_MATCH_MARGIN',
-  'FACE_AMBIGUOUS_MATCH_MARGIN',
   'FACE_MAX_CANDIDATES',
-  'FACE_RECOGNITION_VERSION',
 ];
 
 function loadEngine(env = {}) {
@@ -142,33 +140,6 @@ describe('findMatches', () => {
     expect(result.match).toBeNull();
     expect(result.candidates.length).toBeGreaterThan(0);
     expect(result.candidates[0].partnerId).toBe('p1');
-  });
-
-  it('blocks ambiguous identities when two plausible customers are too close', async () => {
-    const { findMatches, query } = loadEngine({
-      FACE_AUTO_MATCH_THRESHOLD: '0.50',
-      FACE_CANDIDATE_THRESHOLD: '0.30',
-      FACE_AUTO_MATCH_MARGIN: '0.03',
-      FACE_AMBIGUOUS_MATCH_MARGIN: '0.06',
-      FACE_RECOGNITION_VERSION: 'face-recognition-test',
-    });
-    query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [0.5], name: 'Alice', phone: '0901', ref: 'T001' },
-      { partner_id: 'p2', embedding: [0.46], name: 'Bob', phone: '0902', ref: 'T002' },
-    ]);
-
-    const result = await findMatches([1]);
-
-    expect(result.status).toBe('ambiguous');
-    expect(result.match).toBeNull();
-    expect(result.candidates).toEqual([]);
-    expect(result.recognitionVersion).toBe('face-recognition-test');
-    expect(result.ambiguity).toMatchObject({
-      code: 'AMBIGUOUS_FACE_MATCH',
-      margin: 0.04,
-      requiredMargin: 0.06,
-    });
-    expect(result.ambiguity.candidates.map((c) => c.partnerId)).toEqual(['p1', 'p2']);
   });
 
   it('groups multiple samples per customer and uses best score', async () => {

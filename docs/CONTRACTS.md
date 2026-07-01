@@ -48,7 +48,6 @@
 | v1.0.34 | 2026-06-10 | Strict CTV commission attribution (DEC-20260610-01): `POST /api/SaleOrders` (+ `/api/cosmetic/SaleOrders`) no longer inherits the customer's `referred_by_ctv_id` when the payload omits `ctv_id` — the card stays CTV-less and creates zero earnings. Commission requires an explicit `ctv_id` in the payload. Field shapes unchanged. |
 | v1.0.33 | 2026-06-10 | CTV discount QR completion hardened (FM-20260610-02): on a `checked_in` code, the bound customer takes precedence over `createIfMissing`/submitted `customerLob` — completion never creates or rebinds a different client. Explicit `customerPartnerId` still honored. No field shapes changed. |
 | v1.0.35 | 2026-06-14 | Service-line reversal extended to service-card CTV earnings: `DELETE /api/SaleOrderLines/:id` (and the service-card delete path) now calls `reverseServiceCardEarnings` to clear pending service-card earnings (`payment_id IS NULL`) before soft-delete, and blocks the reversal with `B_COMMISSION_PAID_OUT` (HTTP 409) when paid-out service-card earnings exist. Response shape adds `reversedServiceCardEarningsCount: number`. Service-line delete no longer leaves orphan pending service-card earnings behind. NK3-only flag: `CTV_SERVICE_CARD_COMMISSION=true`. |
-| v1.0.41 | 2026-06-29 | Face ID recognize responses add `status`, `ambiguity`, and `recognitionVersion`; close top-two identity matches return `status: "ambiguous"` with no staff-selectable candidates, and CompreFace multi-face detections return `MULTIPLE_FACES` 422. |
 
 ---
 
@@ -676,7 +675,6 @@ Cosmetic mirror: `DELETE /api/cosmetic/SaleOrderLines/:id` uses the same contrac
 **Response 200:**
 ```ts
 {
-  status: 'auto_matched' | 'candidates' | 'no_match' | 'ambiguous';
   match: null | {
     partnerId: string;
     name: string;
@@ -691,28 +689,12 @@ Cosmetic mirror: `DELETE /api/cosmetic/SaleOrderLines/:id` uses the same contrac
     phone: string | null;
     confidence: number;
   }>;
-  ambiguity: null | {
-    code: 'AMBIGUOUS_FACE_MATCH';
-    message: string;
-    margin: number;
-    requiredMargin: number;
-    candidates: Array<{
-      partnerId: string;
-      name: string;
-      code: string;
-      phone: string | null;
-      confidence: number;
-    }>;
-  };
-  recognitionVersion: string | null; // e.g. face-recognition-0.39.5
 }
 ```
 
 Provider behavior:
 - `FACE_RECOGNITION_PROVIDER=local` sends captures to `FACE_SERVICE_URL` for SFace embeddings and stores vectors in `dbo.customer_face_embeddings`.
 - `FACE_RECOGNITION_PROVIDER=compreface` sends captures to CompreFace, uses `partners.id` as the CompreFace subject, and keeps `partners.face_subject_id` / `face_registered_at` as TGClinic status.
-- `status: "ambiguous"` is a precision guard, not a match: when the best two plausible customer identities are closer than `FACE_AMBIGUOUS_MATCH_MARGIN` (default 0.06), the response returns `match: null`, `candidates: []`, `ambiguity.candidates` for audit/debug, and a `recognitionVersion`. Frontends must show a rescan-only state and must not let staff choose between those identities.
-- CompreFace recognition calls use `limit=0`, `prediction_count=2`, and `det_prob_threshold=COMPREFACE_DET_PROB_THRESHOLD` (default 0.75) so TGClinic can see close identity ties and reject extra-face frames.
 - Passive liveness / anti-spoofing (MiniFASNet, source-verified Silent-Face) runs on the **local** provider only, gated by `FACE_LIVENESS_ENABLED` (default **off**) with `FACE_LIVENESS_THRESHOLD` (default 0.5). It **fails open**: when the liveness models are absent or inference errors, the capture is allowed through. The internal face-service `POST /embed` response additionally carries `liveness: { available: true; isLive: boolean; score: number; label: number; value: number; threshold: number } | { available: false; enabled: boolean }`.
 
 Face error responses:
@@ -723,7 +705,6 @@ Face error responses:
 }
 ```
 - `NO_FACE` is HTTP 422 when the local provider or CompreFace cannot detect a face in the submitted image.
-- `MULTIPLE_FACES` is HTTP 422 when the local provider or CompreFace detects more than one face in the submitted image.
 - Frontend capture callers must keep the camera modal open on `NO_FACE`, show "Không phát hiện khuôn mặt" / "Face not detected", and dismiss capture only through an explicit close/cancel action.
 - `SPOOF_DETECTED` is HTTP 422 from the local provider when liveness is enabled and the capture is judged a spoof (printed/screen photo). It gates both `/api/face/recognize` and `/api/face/register` (the embedding is never computed/stored for a spoof). Frontend surfaces the localized `customers:faceRecognition.spoofDetected` message.
 
@@ -976,7 +957,6 @@ async function query(text: string, params?: any[]): Promise<any[]>
 - `DELETE /api/v1/recognition/subjects/:subjectId` — reset subject during re-registration
 **Headers:** `x-api-key: COMPREFACE_API_KEY`
 **Version:** 1.2.0 (Docker image `exadel/compreface:1.2.0`)
-**Recognize query:** TGClinic sends `limit=0`, `prediction_count=2`, and `det_prob_threshold=COMPREFACE_DET_PROB_THRESHOLD` (default 0.75). More than one returned face is normalized to `MULTIPLE_FACES` 422; two close subject predictions are handled by the shared Face ID ambiguity gate.
 
 ### 4.2 Hosoonline
 
@@ -1062,7 +1042,6 @@ export const PaymentBaseSchema = z.object({
 
 | Date | Version | Change | Commit |
 |---|---|---|---|
-| 2026-06-29 | v1.0.41 | Face ID recognize now carries `status`, `ambiguity`, and `recognitionVersion`; close two-identity matches are rescan-only and CompreFace multi-face detections normalize to `MULTIPLE_FACES`. | pending |
 | 2026-06-06 | v1.0.28 | Added source-traceability breadcrumb contract markers for API/client/service surfaces; no payload shape changes. | pending |
 | 2026-06-14 | v1.0.30 | `/api/Services` contract removed: dead route file and mount references deleted from NK3; endpoint was already unmounted. | pending |
 | 2026-06-07 | v1.0.29 | Added Face ID liveness gate contract: `liveness` field on face-service `/embed`, new `SPOOF_DETECTED` 422 error code on recognize/register (local provider, default off, fail-open). | pending |

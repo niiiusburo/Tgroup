@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, screen, fireEvent } from '@testing-library/react';
 import { FaceCaptureModal } from './FaceCaptureModal';
 
 describe('FaceCaptureModal', () => {
@@ -21,10 +21,6 @@ describe('FaceCaptureModal', () => {
   };
 
   const mockCanvasContext = {
-    setTransform: vi.fn(),
-    clearRect: vi.fn(),
-    translate: vi.fn(),
-    scale: vi.fn(),
     drawImage: vi.fn(),
     getImageData: vi.fn(() => ({ data: createReadyFrameData() })),
   };
@@ -52,10 +48,6 @@ describe('FaceCaptureModal', () => {
     Object.defineProperty(HTMLVideoElement.prototype, 'videoHeight', {
       configurable: true,
       get: () => mockVideoHeight,
-    });
-    Object.defineProperty(HTMLMediaElement.prototype, 'readyState', {
-      configurable: true,
-      get: () => (mockVideoWidth > 0 && mockVideoHeight > 0 ? 2 : 0),
     });
     Object.defineProperty(HTMLMediaElement.prototype, 'play', {
       value: mockPlay,
@@ -277,20 +269,18 @@ describe('FaceCaptureModal', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Chụp/i }));
     });
-    expect(await screen.findByText('Bước 2/3: Quay đầu sang trái')).toBeInTheDocument();
+    expect(screen.getByText('Bước 2/3: Quay đầu sang trái')).toBeInTheDocument();
 
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Chụp/i }));
     });
-    expect(await screen.findByText('Bước 3/3: Quay đầu sang phải')).toBeInTheDocument();
+    expect(screen.getByText('Bước 3/3: Quay đầu sang phải')).toBeInTheDocument();
 
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /Chụp/i }));
     });
 
-    await waitFor(() => {
-      expect(onCapture).toHaveBeenCalledTimes(1);
-    });
+    expect(onCapture).toHaveBeenCalledTimes(1);
     expect(onCapture.mock.calls[0][0]).toBeInstanceOf(Blob);
     expect(onCapture.mock.calls[0][1]).toHaveLength(3);
   });

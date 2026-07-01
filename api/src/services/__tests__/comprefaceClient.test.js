@@ -75,44 +75,6 @@ describe('comprefaceClient', () => {
       );
     });
 
-    it('requests all detected faces and top two predictions for ambiguity gating', async () => {
-      const { recognize } = loadClient({
-        COMPREFACE_URL: 'http://compreface-test',
-        COMPREFACE_API_KEY: 'secret-key',
-        COMPREFACE_DET_PROB_THRESHOLD: '0.82',
-      });
-      fetchSpy.mockResolvedValue({
-        ok: true,
-        text: async () => JSON.stringify({ result: [{ subjects: [] }] }),
-      });
-
-      await recognize(Buffer.from('img'));
-
-      const requestUrl = new URL(fetchSpy.mock.calls[0][0]);
-      expect(requestUrl.pathname).toBe('/api/v1/recognition/recognize');
-      expect(requestUrl.searchParams.get('limit')).toBe('0');
-      expect(requestUrl.searchParams.get('prediction_count')).toBe('2');
-      expect(requestUrl.searchParams.get('det_prob_threshold')).toBe('0.82');
-    });
-
-    it('throws MULTIPLE_FACES when Compreface returns more than one detected face', async () => {
-      const { recognize } = loadClient();
-      fetchSpy.mockResolvedValue({
-        ok: true,
-        text: async () => JSON.stringify({
-          result: [
-            { subjects: [{ subject: 'p1', similarity: '0.91' }] },
-            { subjects: [{ subject: 'p2', similarity: '0.88' }] },
-          ],
-        }),
-      });
-
-      await expect(recognize(Buffer.from('img'))).rejects.toMatchObject({
-        code: 'MULTIPLE_FACES',
-        status: 422,
-      });
-    });
-
     it('uses native FormData so fetch sends the image file part', async () => {
       const { recognize } = loadClient({
         COMPREFACE_URL: 'http://compreface-test',

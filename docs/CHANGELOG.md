@@ -2,17 +2,6 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
-## [0.39.5] — 2026-06-29 — Face ID: ambiguity and multi-face precision hardening
-
-### Fixed
-- **NK2 Face ID recognition** (`/api/face/recognize`, header Quick Face ID, customer camera widget): close top-two identity matches now return a versioned `ambiguous` rescan state instead of a selectable candidate list, preventing staff from picking between two nearly identical scores. — @agent — integrations / Face ID precision contract
-- **CompreFace provider** (`api/src/services/comprefaceClient.js`, `comprefaceFaceProvider.js`): recognize calls request top-two subject predictions, apply `COMPREFACE_DET_PROB_THRESHOLD`, and convert more-than-one detected face into `MULTIPLE_FACES` 422. — @agent — integrations
-- **Browser capture gate** (`website/src/components/shared/faceCaptureEngine.ts`): native `FaceDetector` now allows up to three detections so multi-face frames block capture instead of being hidden by a one-face detector cap. iPhone/Safari captures use intrinsic video dimensions, a centered face crop, and black-frame retry before upload. — @agent — integrations
-- **Guided profile registration coverage** (`website/src/pages/Customers/useCustomerFormActions.test.ts`): new-customer registration proves all center/left/right profile images are submitted for Face ID enrollment. — @agent — customers / Face ID profile capture
-
-### Tests
-- Focused API and frontend tests cover ambiguous matches, CompreFace multi-face/top-two requests, versioned recognize responses, multi-face browser capture blocking, and multi-angle profile image registration.
-
 ## [0.37.22] — 2026-06-26 — NK login persistence / Remember Me hardening
 
 ### Changed

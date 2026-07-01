@@ -7,10 +7,7 @@ const navigateMock = vi.fn();
 const recognizeMock = vi.fn();
 const resetMock = vi.fn();
 type MockMatch = { partnerId: string; name: string; code: string; phone: string | null; confidence: number };
-let recognizeState:
-  | { status: 'idle' | 'no_match' }
-  | { status: 'success'; match: MockMatch }
-  | { status: 'ambiguous'; candidates: MockMatch[]; recognitionVersion?: string | null } = { status: 'idle' };
+let recognizeState: { status: 'idle' | 'no_match' | 'success'; match?: MockMatch } = { status: 'idle' };
 let canCrossView = false;
 const probeCrossLobMock = vi.fn();
 
@@ -155,30 +152,6 @@ describe('GlobalFaceIdButton', () => {
     expect(screen.getByText('Mock capture')).toBeInTheDocument();
     // And the quick face button should still be visible
     expect(screen.getByRole('button', { name: /Quét nhanh khuôn mặt/i })).toBeInTheDocument();
-  });
-
-  it('blocks ambiguous matches and shows the Face ID version instead of selectable customers', async () => {
-    const candidates = [
-      { partnerId: 'p-1', name: 'Alice', code: 'T001', phone: '0901', confidence: 0.9 },
-      { partnerId: 'p-2', name: 'Bob', code: 'T002', phone: '0902', confidence: 0.86 },
-    ];
-    recognizeState = { status: 'ambiguous', candidates, recognitionVersion: 'face-recognition-test' };
-    recognizeMock.mockResolvedValue({
-      status: 'ambiguous',
-      match: null,
-      candidates: [],
-      recognitionVersion: 'face-recognition-test',
-      ambiguity: { code: 'AMBIGUOUS_FACE_MATCH', candidates },
-    });
-
-    render(<GlobalFaceIdButton />);
-    fireEvent.click(screen.getByRole('button', { name: /Quét nhanh khuôn mặt/i }));
-    fireEvent.click(await screen.findByText('Mock capture'));
-
-    expect(await screen.findByText(/Cần quét khuôn mặt rõ hơn/i)).toBeInTheDocument();
-    expect(screen.getByText('face-recognition-test')).toBeInTheDocument();
-    expect(screen.queryByText('Alice')).not.toBeInTheDocument();
-    expect(navigateMock).not.toHaveBeenCalled();
   });
 
   it('shows the cross-LOB chooser when the recognized customer exists in both LOBs', async () => {

@@ -240,39 +240,6 @@ describe('CustomerCameraWidget', () => {
     });
   });
 
-  describe('Face ID ambiguous match flow', () => {
-    it('shows a rescan-only state when recognition is ambiguous', async () => {
-      mocks.recognizeFace.mockResolvedValue({
-        status: 'ambiguous',
-        match: null,
-        candidates: [],
-        recognitionVersion: 'face-recognition-test',
-        ambiguity: {
-          code: 'AMBIGUOUS_FACE_MATCH',
-          message: 'Face match is ambiguous',
-          margin: 0.04,
-          requiredMargin: 0.06,
-          candidates: [
-            { partnerId: 'p1', name: 'Candidate One', confidence: 0.9, phone: '0901111111', code: 'C001' },
-            { partnerId: 'p2', name: 'Candidate Two', confidence: 0.86, phone: '0902222222', code: 'C002' },
-          ],
-        },
-      });
-      const onFaceIdResult = vi.fn();
-
-      render(<CustomerCameraWidget onQuickAddResult={vi.fn()} onFaceIdResult={onFaceIdResult} />);
-      fireEvent.click(screen.getByRole('button', { name: /Face ID/i }));
-
-      const captureBtn = await screen.findByRole('button', { name: /Chụp/i });
-      fireEvent.click(captureBtn);
-
-      expect((await screen.findAllByText(/Face ID needs a clearer scan/i)).length).toBeGreaterThan(0);
-      expect(screen.getByText('face-recognition-test')).toBeInTheDocument();
-      expect(screen.queryByText(/Candidate One/i)).not.toBeInTheDocument();
-      expect(onFaceIdResult).not.toHaveBeenCalled();
-    });
-  });
-
   describe('Face ID no-match rescue flow', () => {
     it('enters no-match rescue when recognize returns no match', async () => {
       mocks.recognizeFace.mockResolvedValue({

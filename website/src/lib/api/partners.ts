@@ -184,20 +184,9 @@ export interface FaceCandidate {
   confidence: number;
 }
 
-export interface FaceAmbiguity {
-  code: 'AMBIGUOUS_FACE_MATCH';
-  message: string;
-  margin: number;
-  requiredMargin: number;
-  candidates: FaceCandidate[];
-}
-
 export interface FaceMatchResult {
-  status?: 'auto_matched' | 'candidates' | 'no_match' | 'ambiguous';
   match: FaceCandidate | null;
   candidates: FaceCandidate[];
-  ambiguity?: FaceAmbiguity | null;
-  recognitionVersion?: string | null;
 }
 
 export interface FaceRegisterResult {
