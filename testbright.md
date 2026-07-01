@@ -9,6 +9,27 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 Do not remove failed checks until the defect is fixed and rerun.
 
 ---
+# TestSprite Plan: Patient treatment detail service-line names 2026-07-01
+Feature/edit name: Mobile patient portal treatment detail shows human-readable service names (v0.39.10).
+
+Changed URLs / API routes / data flow:
+- API: `GET /api/patient/treatments/:id` (lines) and `GET /api/patient/treatments/:id` (visit steps).
+- Data flow: `saleorderlines` -> `products` (name) -> `saleorderlines.productname` -> `saleorderlines.name`; `dotkhamsteps` -> `products` (name) -> `dotkhamsteps.name`.
+
+User roles: Authenticated patient viewing their own treatment detail in the NK Patient mobile app.
+
+Happy paths:
+- [ ] PENDING: Open a treatment detail with linked services; each service line shows the product/service name (e.g., "Trám thẩm mỹ") instead of the service code/ID.
+- [ ] PENDING: Open a treatment detail with visit steps; each step shows the product/service name instead of the step ID.
+
+Edge cases / regressions:
+- [ ] PENDING: Service line with no matching product still shows `saleorderlines.productname` or `saleorderlines.name` fallback.
+- [ ] PENDING: Service line with all name fields empty shows fallback "Dịch vụ".
+- [ ] PENDING: Existing patient dashboard and treatment list still render correctly.
+
+Setup/login data: Authenticated patient account with at least one treatment plan containing service lines.
+
+---
 # TestSprite Plan: Tier 1 dead code cleanup 2026-07-01
 Feature/edit name: Dead code deletion + DB factory merge (v0.39.7).
 

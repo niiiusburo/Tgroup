@@ -66,9 +66,10 @@ router.get('/:id', requirePatientAuth, async (req, res) => {
       return res.status(404).json({ error: 'Treatment not found', code: 'NOT_FOUND' });
     }
 
-    // Service lines
+    // Service lines: prefer product.name, then saleorderline.productname, then line.name
     const lines = await db(
-      `SELECT sl.id, sl.name, pr.name as product_name,
+      `SELECT sl.id,
+              COALESCE(NULLIF(pr.name, ''), NULLIF(sl.productname, ''), NULLIF(sl.name, ''), 'Dịch vụ') as product_name,
               sl.priceunit AS price_unit, sl.productuomqty AS quantity, sl.pricetotal AS price_total
        FROM dbo.saleorderlines sl
        LEFT JOIN dbo.products pr ON pr.id = sl.productid
@@ -93,7 +94,8 @@ router.get('/:id', requirePatientAuth, async (req, res) => {
     if (visitIds.length > 0) {
       const placeholders = visitIds.map((_, i) => `$${i + 3}`).join(',');
       steps = await db(
-        `SELECT ds.id, ds.saleorderid as dotkham_id, ds.name, ds.isdone, ds.order, pr.name as product_name
+        `SELECT ds.id, ds.saleorderid as dotkham_id, ds.isdone, ds.order,
+                COALESCE(NULLIF(pr.name, ''), NULLIF(ds.name, ''), 'Bước') as product_name
          FROM dbo.dotkhamsteps ds
          LEFT JOIN dbo.products pr ON pr.id = ds.productid
          WHERE ds.saleorderid IN (${placeholders})`,

@@ -83,6 +83,7 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 | `debug-login-network.spec.ts` | Auth | Login network request inspection |
 | `deep-audit-verification.spec.ts` | Cross-domain | Deep audit of data consistency |
 | `employee-save.spec.ts` | Employees | Employee create/edit persistence |
+| `investor-phase2.spec.ts` | Investor Portal | Investor admin curation, settings, reset UI, and investor dashboard screenshots |
 | `export-downloads.spec.ts` | Reports/Exports | UC-013/WF-005: operational Excel downloads for customers, calendar, services, payments, and service catalog; validates workbook sheets, headers, dates, and numeric cells for `CON-Exports-Download` |
 | `filter-location-dropdown.spec.ts` | Locations | Location filter dropdown behavior |
 | `location-filter-appointments.spec.ts` | Appointments | Location filter applied to appointments |
@@ -131,18 +132,23 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 | `src/routes/partners/__tests__/mutationHandlers.test.js` | Customers | Customer edit allows phone values to overlap customer refs/phones while keeping UUID as identity |
 | `src/routes/partners/__tests__/readHandlers.test.js` | Customers | Customer uniqueness helper treats phone as non-blocking and keeps email duplicate checks active |
 | `src/routes/partners/__tests__/searchFilters.test.js` | Customers | Customer search matches related appointment and service order numbers |
+| `src/routes/investor/__tests__/portfolio.test.js` | Investor Portal | `GET /api/investor/portfolio` returns selected-client overview/calendar/daily/customer/status/doctor/location/service report/extraction rows with privacy-safe projection and date range validation |
 | `saleOrders.test.js` | Services/Payments | Sale order edits recalculate residual display from `payment_allocations` |
 | `tdentalImport.test.js` | Data/Money | TDental import mapping, payment status, local-only payment cleanup, CSV date parsing, and anomaly policy |
 | `tdentalDryRun.test.js` | Data/Migration | Full-export dry-run staff/product matching and compact import planning |
 | `telemetry.test.js` | Settings/Telemetry | Telemetry error ingestion, deduplication, management updates, fix attempts, and stats |
 | `telemetryAuth.test.js` | Settings/Telemetry | Public-only error ingestion and auth-required telemetry management routes |
 | `readRoutePermissions.test.js` | Auth/Permissions | Backend route permission declarations, including scoped feedback admin actions |
+| `src/middleware/__tests__/publicApiPaths.test.js` | Auth / Patient Portal | Public-path allowlist keeps patient login/register unauthenticated while `/api/patient/auth/me` and dashboard remain protected. |
+| `src/services/__tests__/aiConfigOptionalProviders.test.js` | Patient Portal / AI Support | AI provider config imports safely when optional OpenAI/Gemini packages are absent from an older production image. |
+| `src/routes/patient/treatments.js` | Patient Portal / Treatments | `GET /api/patient/treatments/:id` returns `lines[].product_name` and visit-step `product_name` resolved from `products.name` → `saleorderlines.productname` → `saleorderlines.name` so the mobile app shows the human-readable service name. |
 | `src/services/__tests__/nk3CtvIntegrityRepair.test.js` | CTV / Earnings / Data Repair | NK3-only repair planner for CTV Dental/Cosmetic identity mirrors, active Cosmetic-only CTV dental auth insertion, inactive scope normalization, service-card earning gap decisions, and migration-ledger targets. |
 | `src/routes/reports/__tests__/cashFlow.test.js` | Reports/Payments | UC-013/WF-013: `CON-Reports-CashFlowSummary`; cash-flow aggregation rules for service collections, deposits, refunds, deposit usage, voided rows, timezone-safe date buckets, route mounting, and scoped location rejection |
+| `src/routes/reports/__tests__/locationScope.test.js` | Reports/Exports | UC-013/WF-013: every `/api/Reports/*` report page must resolve backend employee location scope, constrain all-location requests to allowed branches, and reject out-of-scope requested locations |
 | `src/routes/reports/__tests__/revenueRecognition.test.js` | Reports/Payments | UC-013/WF-013: `CON-Reports-RevenueSummary` plus trend/doctor/category revenue; posted service payment allocations, deposit exclusion, allocation proration, and payment-date recognition |
 | `src/routes/reports/__tests__/servicesBreakdown.test.js` | Reports/Services | UC-013/WF-013: `CON-Reports-ServicesBreakdown`; category/source revenue from posted payment allocations instead of listed service prices or raw order totals |
 | `src/services/reports/__tests__/canonicalRevenue.test.js` | Reports/Exports | UC-013/WF-013: canonical revenue SQL mirrors the Excel `revenue-flat` export WHERE/JOIN topology, allocation capping expression, saleorder attribution, and payment-date bucketing |
-| `src/services/exports/__tests__/legacyFlatReportsExport.test.js` | Reports/Exports | UC-013/WF-005: `revenue-flat` and `deposit-flat` registry, workbook templates, SO-code column mapping, posted service-payment filters, allocation proration SQL, deposit top-up filtering, and row-limit error |
+| `src/services/exports/__tests__/legacyFlatReportsExport.test.js` | Reports/Exports | UC-013/WF-005: `revenue-flat` and `deposit-flat` registry, workbook templates, SO-code column mapping, posted service-payment filters, allocation proration SQL, deposit top-up filtering, row-limit error, and server-side employee location scope |
 | `src/services/exports/__tests__/reportSalesEmployeesExport.test.js` | Reports/Exports | UC-019/WF-005: `report-sales-employees` preview/download filters, location scope, employee-type SQL attribution, grouped workbook rows, and out-of-scope location rejection |
 
 ## Coverage Gaps

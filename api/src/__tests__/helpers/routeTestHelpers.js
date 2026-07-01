@@ -139,3 +139,16 @@ module.exports = {
   mockResponse,
   findRouteHandler,
 };
+
+// Jest treats files inside __tests__ as test suites; this smoke test satisfies
+// the suite requirement without altering the helper behavior.
+describe('routeTestHelpers', () => {
+  it('exports all helpers', () => {
+    expect(createMockDb).toBeInstanceOf(Function);
+    expect(createMockQueryDb).toBeInstanceOf(Function);
+    expect(createMockAuth).toBeInstanceOf(Function);
+    expect(makeRes).toBeInstanceOf(Function);
+    expect(mockResponse).toBeInstanceOf(Function);
+    expect(findRouteHandler).toBeInstanceOf(Function);
+  });
+});

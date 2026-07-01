@@ -566,7 +566,7 @@ Patient-facing iOS portal routes. All routes require a patient JWT (`Authorizati
 | GET | `/appointments` | Patient JWT | — | Patient appointments list |
 | GET | `/appointments/:id` | Patient JWT | — | Appointment detail |
 | GET | `/treatments` | Patient JWT | — | Treatment plans list |
-| GET | `/treatments/:id` | Patient JWT | — | Treatment detail |
+| GET | `/treatments/:id` | Patient JWT | — | Treatment detail; `lines[].product_name` and visit-step `product_name` resolve from `products.name` → `saleorderlines.productname` → `saleorderlines.name` |
 | GET | `/balance` | Patient JWT | — | Outstanding, total paid, deposit balance |
 | GET | `/balance/payments` | Patient JWT | — | Payment history |
 | GET | `/media` | Patient JWT | — | Patient media gallery from `dbo.patient_media` plus NK Photo `/api/clients/:id/media` when configured; signed URLs are server-generated |

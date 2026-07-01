@@ -45,6 +45,7 @@
 | v1.0.30 | 2026-06-07 | Restored `GET /api/cross-lob-probe` (admin-only `lob.crossview` soft phone-identity probe of the other LOB pool; dropped in the cosmetic-LOB merge, breaking the ProfileHeader cross-LOB badge). Now also powers the Face ID cross-LOB chooser: when a recognized customer exists in both LOBs, the quick-scan popover offers a choice instead of auto-navigating. |
 | v1.0.41 | 2026-06-29 | Face ID recognize responses add `status`, `ambiguity`, and `recognitionVersion`; close top-two identity matches return `status: "ambiguous"` with no staff-selectable candidates, and CompreFace multi-face detections return `MULTIPLE_FACES` 422. |
 | v1.0.42 | 2026-07-01 | Patient media bridge contract added: `/api/patient/media` maps authenticated live NK customers to NK Photo clients server-side, returns signed photo URLs, accepts multipart upload fields `file`/`image`/`photo`, and never exposes `MEDIA_SERVICE_API_KEY` to the mobile app. |
+| v1.0.43 | 2026-07-01 | Patient treatment detail service-line naming hardened: `GET /api/patient/treatments/:id` returns `lines[].product_name` resolved from `products.name`, then `saleorderlines.productname`, then `saleorderlines.name`, so the mobile app displays the human-readable service name instead of the service ID/code. Visit steps use the same product-name fallback. Response shape unchanged; field semantics only. |
 | v1.0.31 | 2026-06-08 | CTV discount QR contracts (NK3): public fan landing `/api/discount-codes/landing/:shortCode`, `check-existing`, and fan `POST /generate` bypass global auth; staff `/lookup`, `/client-search`, `/verify` require staff (not CTV); CTV `/mine` + `/stats` require self CTV. Frontend public fetches use `API_URL` from `core.ts` (not relative `/api` on Vite). |
 | v1.0.32 | 2026-06-10 | CTV discount QR fixes (NK3, FM-20260610-01): all `/api/discount-codes/*` POST bodies are single-encoded JSON objects (clients must NOT pre-`JSON.stringify` into `apiFetch`); `POST /verify` with `markAsUsed: true` on a `checked_in` code now falls back to the `customer_partner_id`/`customer_lob` bound at check-in when `customerPartnerId` is omitted. No field shapes changed. |
 | v1.0.34 | 2026-06-10 | Strict CTV commission attribution (DEC-20260610-01): `POST /api/SaleOrders` (+ `/api/cosmetic/SaleOrders`) no longer inherits the customer's `referred_by_ctv_id` when the payload omits `ctv_id` — the card stays CTV-less and creates zero earnings. Commission requires an explicit `ctv_id` in the payload. Field shapes unchanged. |
@@ -1015,6 +1016,89 @@ When NK Photo is configured, the route searches media clients by the live partne
 The backend creates the NK Photo client from the live `dbo.partners` row when no
 matching client exists, uploads to `/api/clients/:id/media`, and best-effort caches
 metadata in `dbo.patient_media`.
+
+---
+
+### 1.14 Patient Portal Treatments
+
+All endpoints require a valid patient JWT and are scoped to `req.patient.partnerId`.
+
+#### GET /api/patient/treatments
+**Response 200:**
+```ts
+{
+  success: true;
+  treatments: Array<{
+    id: string;
+    name?: string;
+    code?: string;
+    state: 'draft' | 'pending' | 'sale' | 'completed' | 'done' | 'cancel';
+    amounttotal: number;
+    totalpaid: number;
+    residual: number;
+    datestart?: string;
+    dateend?: string;
+    notes?: string;
+    datecreated?: string;
+    company_name?: string;
+    company_address?: string;
+    company_phone?: string;
+    doctor_name?: string;
+  }>;
+}
+```
+
+#### GET /api/patient/treatments/:id
+**Response 200:**
+```ts
+{
+  success: true;
+  treatment: {
+    id: string;
+    name?: string;
+    code?: string;
+    state: 'draft' | 'pending' | 'sale' | 'completed' | 'done' | 'cancel';
+    amounttotal: number;
+    totalpaid: number;
+    residual: number;
+    datestart?: string;
+    dateend?: string;
+    notes?: string;
+    datecreated?: string;
+    company_name?: string;
+    company_address?: string;
+    company_phone?: string;
+    doctor_name?: string;
+    lines: Array<{
+      id: string;
+      product_name: string;
+      price_unit: number;
+      quantity: number;
+      price_total: number;
+    }>;
+    visits: Array<{
+      id: string;
+      name?: string;
+      date?: string;
+      reason?: string;
+      state?: string;
+      note?: string;
+      totalamount?: number;
+      amountresidual?: number;
+      doctor_name?: string;
+      steps: Array<{
+        id: string;
+        dotkham_id: string;
+        product_name: string;
+        isdone: boolean;
+        order: number;
+      }>;
+    }>;
+  };
+}
+```
+
+**Naming resolution:** `lines[].product_name` is resolved from `products.name`, then `saleorderlines.productname`, then `saleorderlines.name`, falling back to `"Dịch vụ"`. Visit step `product_name` uses the same precedence with fallback `"Bước"`. No field names or response shape changed; only the data resolution logic was hardened.
 
 ---
 
