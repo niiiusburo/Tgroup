@@ -22,6 +22,13 @@ const ALLOCATION_TOTALS_CTE = `allocation_totals AS (
   GROUP BY payment_id
 )`;
 
+const LINE_TOTALS_CTE = `line_totals AS (
+  SELECT orderid, NULLIF(SUM(ABS(COALESCE(pricetotal, 0))), 0) AS line_total
+  FROM dbo.saleorderlines
+  WHERE COALESCE(isdeleted, false) = false
+  GROUP BY orderid
+)`;
+
 const CAPPED_ALLOCATED_AMOUNT_SQL = `CASE
   WHEN at.total_allocated_for_payment > p.amount AND at.total_allocated_for_payment > 0
   THEN pa.allocated_amount * p.amount / at.total_allocated_for_payment
@@ -49,6 +56,7 @@ function buildPairedRevenueFilters({
   dateFrom,
   dateTo,
   companyId,
+  companyIds,
   orderDateCol,
   paymentDateCol,
   orderCompanyCol,
@@ -75,8 +83,23 @@ function buildPairedRevenueFilters({
     idx++;
   }
 
-  if (companyId) {
+  let companyParamIndex = null;
+  let companyIdsParamIndex = null;
+  if (Array.isArray(companyIds)) {
+    if (companyIds.length === 0) {
+      orderConds.push('FALSE');
+      paymentConds.push('FALSE');
+    } else {
+      const ref = `$${idx}`;
+      companyIdsParamIndex = idx;
+      orderConds.push(`${orderCompanyCol} = ANY(${ref}::uuid[])`);
+      paymentConds.push(`${paymentCompanyCol} = ANY(${ref}::uuid[])`);
+      params.push(companyIds);
+      idx++;
+    }
+  } else if (companyId) {
     const ref = `$${idx}`;
+    companyParamIndex = idx;
     orderConds.push(`${orderCompanyCol} = ${ref}`);
     paymentConds.push(`${paymentCompanyCol} = ${ref}`);
     params.push(companyId);
@@ -88,6 +111,8 @@ function buildPairedRevenueFilters({
     paymentWhere: paymentConds.length ? `AND ${paymentConds.join(' AND ')}` : '',
     params,
     idx,
+    companyParamIndex,
+    companyIdsParamIndex,
   };
 }
 
@@ -95,6 +120,7 @@ function buildPaymentRevenueFilter({
   dateFrom,
   dateTo,
   companyId,
+  companyIds,
   paymentDateCol = 'COALESCE(p.payment_date, p.created_at)',
   companyCol = 'so.companyid',
 }) {
@@ -114,7 +140,19 @@ function buildPaymentRevenueFilter({
     idx++;
   }
 
-  if (companyId) {
+  let companyParamIndex = null;
+  let companyIdsParamIndex = null;
+  if (Array.isArray(companyIds)) {
+    if (companyIds.length === 0) {
+      conds.push('FALSE');
+    } else {
+      companyIdsParamIndex = idx;
+      conds.push(`${companyCol} = ANY($${idx}::uuid[])`);
+      params.push(companyIds);
+      idx++;
+    }
+  } else if (companyId) {
+    companyParamIndex = idx;
     conds.push(`${companyCol} = $${idx}`);
     params.push(companyId);
     idx++;
@@ -124,6 +162,8 @@ function buildPaymentRevenueFilter({
     where: conds.length ? `AND ${conds.join(' AND ')}` : '',
     params,
     idx,
+    companyParamIndex,
+    companyIdsParamIndex,
   };
 }
 
@@ -141,6 +181,7 @@ module.exports = {
   SERVICE_REVENUE_PAYMENT_CONDITION,
   UNALLOCATED_SERVICE_PAYMENT_CONDITION,
   ALLOCATION_TOTALS_CTE,
+  LINE_TOTALS_CTE,
   CAPPED_ALLOCATED_AMOUNT_SQL,
   DIRECT_SERVICE_PAYMENT_AMOUNT_SQL,
   buildPairedRevenueFilters,

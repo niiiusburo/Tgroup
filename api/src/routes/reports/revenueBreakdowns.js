@@ -6,11 +6,12 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID, dateCompanyFilter } = require('./helpers');
+const { err, validDate, validUUID, dateCompanyFilter, resolveReportCompanyScope } = require('./helpers');
 const {
   SERVICE_REVENUE_PAYMENT_CONDITION,
   UNALLOCATED_SERVICE_PAYMENT_CONDITION,
   ALLOCATION_TOTALS_CTE,
+  LINE_TOTALS_CTE,
   CAPPED_ALLOCATED_AMOUNT_SQL,
   DIRECT_SERVICE_PAYMENT_AMOUNT_SQL,
   buildPairedRevenueFilters,
@@ -27,11 +28,13 @@ router.post('/revenue/by-doctor', requirePermission('reports.view'), async (req,
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
 
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
-      companyId,
+      companyIds: scope.companyIds,
       orderDateCol: 'so.datecreated',
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       orderCompanyCol: 'so.companyid',
@@ -74,20 +77,13 @@ router.post('/revenue/by-category', requirePermission('reports.view'), async (re
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
 
-    const f = buildPaymentRevenueFilter({ dateFrom, dateTo, companyId });
+    const f = buildPaymentRevenueFilter({ dateFrom, dateTo, companyIds: scope.companyIds });
     const rows = await query(
-      `WITH line_totals AS (
-         SELECT orderid, NULLIF(SUM(ABS(COALESCE(pricetotal, 0))), 0) AS line_total
-         FROM dbo.saleorderlines
-         WHERE COALESCE(isdeleted, false) = false
-         GROUP BY orderid
-       ),
-       allocation_totals AS (
-         SELECT payment_id, SUM(allocated_amount) AS total_allocated_for_payment
-         FROM dbo.payment_allocations
-         GROUP BY payment_id
-       ),
+      `WITH ${LINE_TOTALS_CTE},
+       ${ALLOCATION_TOTALS_CTE},
        paid_lines AS (
          SELECT pc.id AS category_id,
                 sol.id AS line_id,
@@ -136,11 +132,13 @@ router.post('/revenue/by-source', requirePermission('reports.view'), async (req,
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
 
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
-      companyId,
+      companyIds: scope.companyIds,
       orderDateCol: 'so.datecreated',
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       orderCompanyCol: 'so.companyid',
@@ -149,7 +147,7 @@ router.post('/revenue/by-source', requirePermission('reports.view'), async (req,
     const directF = buildPaymentRevenueFilter({
       dateFrom,
       dateTo,
-      companyId,
+      companyIds: scope.companyIds,
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       companyCol: 'COALESCE(so.companyid, customer.companyid)',
     });
@@ -214,28 +212,25 @@ router.post('/revenue/payment-plans', requirePermission('reports.view'), async (
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
 
-    const f = dateCompanyFilter(dateFrom, dateTo, companyId, 'mp.created_at', 'mp.company_id');
+    const f = dateCompanyFilter(dateFrom, dateTo, scope.companyIds, 'mp.created_at', 'mp.company_id');
     const plans = await query(
       `SELECT mp.status, COUNT(*) as cnt, COALESCE(SUM(mp.total_amount),0) as total,
               COALESCE(SUM(mp.down_payment),0) as down_payment
        FROM dbo.monthlyplans mp WHERE 1=1 ${f.where}
        GROUP BY mp.status`, f.params);
 
-    const instConds = ['pi.due_date::date >= $1', 'pi.due_date::date <= $2'];
-    const instParams = [dateFrom, dateTo];
-    if (companyId) {
-      instConds.push('mp.company_id = $3');
-      instParams.push(companyId);
-    }
+    const instF = dateCompanyFilter(dateFrom, dateTo, scope.companyIds, 'pi.due_date', 'mp.company_id');
     const installments = await query(
       `SELECT pi.status, COUNT(*) as cnt, COALESCE(SUM(pi.amount),0) as total,
               COALESCE(SUM(pi.paid_amount),0) as paid
        FROM dbo.planinstallments pi
        JOIN dbo.monthlyplans mp ON mp.id=pi.plan_id
-       WHERE ${instConds.join(' AND ')}
+       WHERE 1=1 ${instF.where}
        GROUP BY pi.status`,
-      instParams);
+      instF.params);
 
     return res.json({ success: true, data: {
       plans: plans.map(p => ({ status: p.status, count: parseInt(p.cnt), total: parseFloat(p.total), downPayment: parseFloat(p.down_payment) })),

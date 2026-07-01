@@ -6,10 +6,11 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID } = require('./helpers');
+const { err, validDate, validUUID, dateCompanyFilter, resolveReportCompanyScope } = require('./helpers');
 const {
   SERVICE_REVENUE_PAYMENT_CONDITION,
   ALLOCATION_TOTALS_CTE,
+  LINE_TOTALS_CTE,
   CAPPED_ALLOCATED_AMOUNT_SQL,
   buildPaymentRevenueFilter,
   toNumber,
@@ -24,30 +25,25 @@ router.post('/services/breakdown', requirePermission('reports.view'), async (req
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
 
     // Products by category
+    const productFilter = dateCompanyFilter(undefined, undefined, scope.companyIds, 'created_at', 'p.companyid');
     const cats = await query(
       `SELECT pc.name as category, COUNT(p.id) as product_count,
               COALESCE(AVG(p.listprice),0) as avg_price
        FROM dbo.productcategories pc
-       LEFT JOIN dbo.products p ON p.categid=pc.id AND p.active=true
+       LEFT JOIN dbo.products p ON p.categid=pc.id AND p.active=true ${productFilter.where}
        WHERE pc.active=true
-       GROUP BY pc.name ORDER BY product_count DESC`);
+       GROUP BY pc.name ORDER BY product_count DESC`,
+      productFilter.params);
 
-    const f = buildPaymentRevenueFilter({ dateFrom, dateTo, companyId });
+    const f = buildPaymentRevenueFilter({ dateFrom, dateTo, companyIds: scope.companyIds });
     // Revenue by category via posted payment allocations.
     const revByCat = await query(
-      `WITH line_totals AS (
-         SELECT orderid, NULLIF(SUM(ABS(COALESCE(pricetotal, 0))), 0) AS line_total
-         FROM dbo.saleorderlines
-         WHERE COALESCE(isdeleted, false) = false
-         GROUP BY orderid
-       ),
-       allocation_totals AS (
-         SELECT payment_id, SUM(allocated_amount) AS total_allocated_for_payment
-         FROM dbo.payment_allocations
-         GROUP BY payment_id
-       )
+      `WITH ${LINE_TOTALS_CTE},
+       ${ALLOCATION_TOTALS_CTE}
        SELECT pc.name as category, COUNT(DISTINCT sol.id) as order_count,
               COALESCE(SUM(
                 CASE
@@ -99,9 +95,10 @@ router.post('/services/breakdown', requirePermission('reports.view'), async (req
        FROM dbo.products p
        LEFT JOIN dbo.productcategories pc ON pc.id=p.categid
        LEFT JOIN dbo.saleorderlines sol ON sol.productid=p.id
-       WHERE p.active=true
+       WHERE p.active=true ${productFilter.where}
        GROUP BY p.name, pc.name, p.listprice
-       ORDER BY order_count DESC LIMIT 20`);
+       ORDER BY order_count DESC LIMIT 20`,
+      productFilter.params);
 
     return res.json({ success: true, data: {
       categories: cats.map(c => ({ category: c.category, productCount: toInt(c.product_count), avgPrice: toNumber(c.avg_price) })),
