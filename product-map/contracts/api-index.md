@@ -158,6 +158,7 @@ PUT handler-level validation: `companyId` (when present) must be a UUID (`400 IN
 | GET | `/:id/GetKPIs` | Perm:`customers.view` | — | KPI stats |
 | POST | `/` | Perm:`customers.add` | Partner fields | Created partner |
 | PUT | `/:id` | Perm:`customers.edit` | Partner fields | Updated partner |
+| PATCH | `/:id/investor-visibility` | Perm:`customers.set_investor_visibility` + Admin group/wildcard | `{ investorId, isVisible }` | Upserts `dbo.investor_clients`; non-admin returns `403 S_ADMIN_ONLY` |
 | PATCH | `/:id/soft-delete` | Perm:`customers.delete` | — | Soft-deleted partner |
 | DELETE | `/:id/hard-delete` | Perm:`customers.hard_delete` | — | Hard-deleted partner |
 
@@ -323,7 +324,7 @@ Revenue paid totals count posted `payment_allocations` linked to saleorders plus
 | POST | `/:type/preview` | Auth + registry permission | `{ filters }`; `type` is `service-catalog`, `customers`, `appointments`, `services`, `payments`, `report-sales-employees`, `revenue-flat`, or `deposit-flat` | `{ type, label, rowCount, filename, filters, summary, exceedsMax }` + best-effort `exports_audit` row |
 | POST | `/:type/download` | Auth + registry permission | `{ filters }`; same type keys as preview | XLSX workbook stream + best-effort `exports_audit` row after response |
 
-Export permissions are defined by `api/src/services/exports/exportRegistry.js`: `customers.export`, `appointments.export`, `services.export`, `payments.export`, `products.export`, and `reports.export`. `appointments` accepts `search`, `companyId`, `dateFrom`, `dateTo`, `state`, and `doctorId`; its search includes customer phone and its workbook date must prefer `appointments.date`/`time` before falling back to legacy `datetimeappointment`. `report-sales-employees` accepts `companyId`, `employeeType` (`doctor`, `assistant`, `consultant`, `sales`), optional `employeeId`, `dateFrom`, and `dateTo`; `revenue-flat` and `deposit-flat` use `payments.export` with `search`, `companyId`, `dateFrom`, and `dateTo`. `revenue-flat` includes payment note and resolves customer source from sale order first, then customer fallback; `deposit-flat` includes deposit note and splits cash vs bank-transfer amounts from explicit split columns or payment method fallback.
+Export permissions are defined by `api/src/services/exports/exportRegistry.js`: `customers.export`, `appointments.export`, `services.export`, `payments.export`, `products.export`, and `reports.export`. `appointments` accepts `search`, `companyId`, `dateFrom`, `dateTo`, `state`, and `doctorId`; its search includes customer phone and its workbook date must prefer `appointments.date`/`time` before falling back to legacy `datetimeappointment`. `report-sales-employees` accepts `companyId`, `employeeType` (`doctor`, `assistant`, `consultant`, `sales`), optional `employeeId`, `dateFrom`, and `dateTo`; `revenue-flat` and `deposit-flat` use `payments.export` with `search`, `companyId`, `dateFrom`, and `dateTo`. For `report-sales-employees`, `revenue-flat`, and `deposit-flat`, non-admin employees with `companyId=all` are constrained to their resolved location scope, and a requested out-of-scope `companyId` returns 403 before export SQL runs. `revenue-flat` includes payment note and resolves customer source from sale order first, then customer fallback; `deposit-flat` includes deposit note and splits cash vs bank-transfer amounts from explicit split columns or payment method fallback.
 
 ## Dashboard Reports (`/api/DashboardReports`)
 
@@ -512,8 +513,14 @@ Hosoonline uses a mixed current contract: if `HOSOONLINE_USERNAME` and `HOSOONLI
 | Route | Status | Notes |
 |-------|--------|-------|
 | `GET/POST /api/Services` | **REMOVED** | `api/src/routes/services.js` deleted 2026-06-14; file and server.js references removed; frontend uses `/api/Products` + `/api/SaleOrders` |
-| `POST /api/Account/Login` | **UNMOUNTED LEGACY** | Frontend uses `/api/Auth/login`; server.js comments this route out |
-| `/Web/Session/*` | **UNMOUNTED LEGACY** | Kept in source pending external-client confirmation |
+| `POST /api/Account/Login` | **REMOVED** | Route file deleted 2026-07-01; was unmounted legacy duplicating `/api/Auth/login` |
+| `/Web/Session/*` | **REMOVED** | Route file deleted 2026-07-01; was unmounted legacy |
+| `/api/Receipts/*` | **REMOVED** | Route file deleted 2026-07-01; was dead (HTTP 500, non-existent table) |
+| `/api/AccountJournals/*` | **REMOVED** | Route file deleted 2026-07-01; was dead (HTTP 500, non-existent table) |
+| `/api/StockPickings/*` | **REMOVED** | Route file deleted 2026-07-01; was dead (HTTP 500, non-existent table) |
+| `/api/CrmTasks/*` | **REMOVED** | Route file deleted 2026-07-01; was dead (HTTP 500, non-existent table) |
+| `/api/Commissions/*` | **REMOVED** | Route file deleted 2026-07-01; was dead (HTTP 500, superseded by v3 earnings) |
+| `/api/HrPayslips/*` | **REMOVED** | Route file deleted 2026-07-01; was dead (HTTP 500, non-existent table) |
 
 ---
 
@@ -537,7 +544,92 @@ See cosmetic-clients.yaml, business-unit.yaml for details.
 - GET /api/me/lob-scope — returns current user's { lob_scope: string[], is_ctv: boolean, available_lobs: string[] }
 - Augmented on login/me responses
 
+## Patient Portal (`/api/patient`)
+
+Patient-facing iOS portal routes. All routes require a patient JWT (`Authorization: Bearer <patient-token>`) issued by `/api/patient/auth/login` and scoped to `req.patient.partnerId`.
+
+### Auth
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| POST | `/auth/login` | Public | `{ phone, password }` | `{ success, token, patient }` |
+| POST | `/auth/register` | Public | `{ phone, password, confirmPassword }` | `{ success }` |
+| POST | `/auth/refresh` | Public | `{ token? }` | `{ success, token, patient }` |
+| POST | `/auth/device` | Patient JWT | `{ deviceToken, platform }` | `{ success }` |
+| GET | `/auth/me` | Patient JWT | — | `{ success, patient }` |
+
+### Core
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/dashboard` | Patient JWT | — | Dashboard cards (appointments, treatments, balance) |
+| GET | `/appointments` | Patient JWT | — | Patient appointments list |
+| GET | `/appointments/:id` | Patient JWT | — | Appointment detail |
+| GET | `/treatments` | Patient JWT | — | Treatment plans list |
+| GET | `/treatments/:id` | Patient JWT | — | Treatment detail |
+| GET | `/balance` | Patient JWT | — | Outstanding, total paid, deposit balance |
+| GET | `/balance/payments` | Patient JWT | — | Payment history |
+| GET | `/media` | Patient JWT | — | Patient media gallery from `dbo.patient_media` plus NK Photo `/api/clients/:id/media` when configured; signed URLs are server-generated |
+| POST | `/media` | Patient JWT | FormData (`file` or `image` or `photo`, optional `type`/`category`, `label?`) | `{ success, client, media }`; backend creates/searches NK Photo client from live `dbo.partners` id/ref/phone and never exposes the media API key |
+| GET | `/notifications` | Patient JWT | — | Notification list |
+| PATCH | `/notifications/:id/read` | Patient JWT | — | Mark notification read |
+| PATCH | `/notifications/read-all` | Patient JWT | — | Mark all notifications read |
+| GET | `/referrals` | Patient JWT | — | Patient referral list |
+| POST | `/referrals` | Patient JWT | `{ referredName, referredPhone, referredEmail? }` | Created referral |
+| GET | `/reviews` | Patient JWT | — | Service reviews |
+| POST | `/reviews` | Patient JWT | `{ saleOrderId, rating, comment? }` | Created review |
+
+### Support & Chat
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/support` | Patient JWT | — | `{ success, tickets: SupportTicket[] }` |
+| POST | `/support` | Patient JWT | `{ type, subject, description }` | `{ success, ticketId }` |
+| GET | `/chat/sessions` | Patient JWT | — | `{ success, sessions: ChatSession[] }` |
+| POST | `/chat/sessions` | Patient JWT | — | `{ success, session: ChatSession }` |
+| GET | `/chat/sessions/:id/messages` | Patient JWT | — | `{ success, messages: ChatMessage[] }` |
+| POST | `/chat/sessions/:id/messages` | Patient JWT | `{ content }` | `{ success, reply, escalated, reason?, ticketId? }` |
+| POST | `/chat/sessions/:id/escalate` | Patient JWT | `{ reason? }` | `{ success, ticketId }` |
+| POST | `/chat/sessions/:id/learn` | Patient JWT | — | `{ success, chunksStored, chunkIds? }` |
+
+AI chat replies are generated server-side via OpenAI (`gpt-4o-mini` by default) with RAG context from `support_kb_chunks` when `pgvector` is available. Human escalation creates a `support_tickets` row. The `/learn` endpoint (MVP) chunks a resolved conversation and stores it in `support_kb_chunks` with `approved=false` pending staff review.
+
+### Profile
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/profile` | Patient JWT | — | Patient profile |
+| PUT | `/profile` | Patient JWT | `{ name?, email?, gender?, date_of_birth?, address? }` | Updated profile |
+| PUT | `/profile/consents` | Patient JWT | `{ marketing_push?, marketing_sms?, marketing_email?, photo_visible?, data_sharing? }` | Updated consents |
+| POST | `/profile/change-password` | Patient JWT | `{ currentPassword, newPassword, confirmPassword }` | Password changed |
+
 ## Common Response Patterns
+
+## Investor Portal (`/api/investor`)
+
+Read-only external portal. Investor JWT (`type:'investor'`) signed with `INVESTOR_JWT_SECRET`. LOB-pinned: all queries use `getQuery(investor.lob)`.
+
+### Auth
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| POST | `/auth/login` | Public | `{ email, password }` | `{ success, token, investor, permissions }` |
+| GET | `/auth/me` | Investor JWT | — | `{ success, investor, permissions }` |
+
+### Clients (safe projection only)
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/clients` | Investor JWT | `offset?, limit?` | `{ success, offset, limit, totalItems, items[] }` |
+| GET | `/clients/:partnerId` | Investor JWT | — | `{ success, client }` or 404 if not visible |
+| GET | `/portfolio` | Investor JWT | `dateFrom?, dateTo?` | `{ success, overview, clients, calendar, reports: { daily, byCustomer, appointmentStatus, byDoctor, byLocation, byService }, extraction }` scoped to allowlisted clients only |
+
+### Staff Admin Curation
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/api/investor-visibility` | Staff JWT + `customers.set_investor_visibility` + Admin group/wildcard | `partnerIds=...&lob=dental\|cosmetic` or `partnerId=&investorId?` | `{ success, batch }` or `{ success, items }`; non-admin returns `403 S_ADMIN_ONLY` |
+| PATCH | `/api/Partners/:id/investor-visibility` | Staff JWT + `customers.set_investor_visibility` + Admin group/wildcard | `{ investorId, isVisible }` | `{ success, investorId, partnerId, isVisible, investorName }`; writes `dbo.investor_clients` |
 
 ### Paginated List
 ```json

@@ -106,14 +106,20 @@ describe('P0.2 — Dead Route Removal', () => {
     }).toThrow();
   });
 
-  it('/api/Account legacy route is commented out', () => {
+  it('/api/Account legacy route is fully removed (file deleted + no mount references)', () => {
     const fs = require('fs');
     const path = require('path');
     const serverCode = fs.readFileSync(
       path.join(__dirname, '..', 'server.js'),
       'utf8'
     );
-    expect(serverCode).toContain('// app.use(\'/api/Account\', accountRoutes)');
+    // No active or commented-out Account mount remains
+    expect(serverCode).not.toContain('accountRoutes');
+    expect(serverCode).not.toContain("app.use('/api/Account'");
+    // File is gone
+    expect(() => {
+      fs.accessSync(path.join(__dirname, '..', 'routes', 'account.js'));
+    }).toThrow();
   });
 
 
@@ -254,8 +260,11 @@ describe('Integration — Server boots cleanly', () => {
     for (const mount of activeMounts) {
       const match = mount.match(/require\('(\.\/routes\/[^']+)'\)/);
       if (match) {
-        const routePath = path.join(__dirname, '..', match[1] + '.js');
-        expect(() => fs.accessSync(routePath)).not.toThrow();
+        const basePath = path.join(__dirname, '..', match[1]);
+        const filePath = basePath + '.js';
+        const indexPath = path.join(basePath, 'index.js');
+        const exists = fs.existsSync(filePath) || fs.existsSync(indexPath);
+        expect(exists).toBe(true);
       }
     }
   });

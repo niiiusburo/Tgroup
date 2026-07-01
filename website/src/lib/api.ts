@@ -14,7 +14,6 @@ export * from './api/auth';
 export * from './api/customerBalance';
 export * from './api/dotKhams';
 export * from './api/payments';
-export * from './api/services';
 export * from './api/monthlyPlans';
 export * from './api/customerSources';
 export * from './api/systemPreferences';

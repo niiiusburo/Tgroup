@@ -44,6 +44,9 @@ function createPool(connectionString) {
     const result = await this.query(text, params);
     return result.rows;
   };
+  pool.on('error', (err) => {
+    console.error('Unexpected idle pool error:', err.message);
+  });
   return pool;
 }
 

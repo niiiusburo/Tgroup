@@ -632,3 +632,9 @@ Postgres 127.0.0.1:5433
 **Auth note:** All identity, CTV flags, and LOB scoping use `partners` (no `users` table in the system). See DEC-20260519-COSMETIC-V2-01 and migration 047.
 
 New tables/columns are documented with full reversible SQL in `api/migrations/047_*.sql`.
+
+---
+
+## 2026-07-01: Dead Migration Cleanup
+
+Superseded migration files `008_data_migration_from_tdental.sql` (v1) and `008_data_migration_from_tdental_v2.sql` (v2) were deleted. The canonical version `008_data_migration_from_tdental_v3.sql` remains as the sole source. No schema changes — these were one-time data import scripts already applied to all environments. Migration number collisions (018 and 031 each have 2 files) are documented but left as-is since both are already applied.

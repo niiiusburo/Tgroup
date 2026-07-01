@@ -33,9 +33,9 @@ Current inventory from disk:
 | 006 | `006_dotkham_payment_allocations.sql` | Adds `dotkham_id` to `payment_allocations` | `ALTER TABLE payment_allocations ADD COLUMN dotkham_id ...` | `ALTER TABLE payment_allocations DROP COLUMN dotkham_id` | 2026-01 |
 | 006 | `006_fix_location_scope_column.sql` | Column rename/fix | `ALTER TABLE ... RENAME COLUMN ...` | Reverse rename | 2026-01 |
 | 007 | `007_add_external_checkups_permission.sql` | Adds permission strings for external checkups | `INSERT INTO group_permissions ...` | `DELETE FROM group_permissions WHERE permission_string IN (...)` | 2026-02 |
-| 008 | `008_data_migration_from_tdental.sql` | TDental import schema adjustments (v1); destructive legacy rebuild guarded by break-glass settings | Multiple ALTER TABLE + guarded destructive data rebuild | Restore from pre-run backup; do not run on protected DB names without explicit break-glass | 2026-02 / guard added 2026-06 |
-| 008 | `008_data_migration_from_tdental_v2.sql` | TDental import schema adjustments (v2); destructive legacy rebuild guarded by break-glass settings | Multiple ALTER TABLE + guarded destructive data rebuild | Restore from pre-run backup; do not run on protected DB names without explicit break-glass | 2026-02 / guard added 2026-06 |
-| 008 | `008_data_migration_from_tdental_v3.sql` | TDental import schema adjustments (v3); destructive legacy rebuild guarded by break-glass settings | Multiple ALTER TABLE + guarded destructive data rebuild | Restore from pre-run backup; do not run on protected DB names without explicit break-glass | 2026-02 / guard added 2026-06 |
+| 008 | `008_data_migration_from_tdental.sql` | **DELETED 2026-07-01** — superseded by v3. | — | — | 2026-02 / deleted 2026-07 |
+| 008 | `008_data_migration_from_tdental_v2.sql` | **DELETED 2026-07-01** — superseded by v3. | — | — | 2026-02 / deleted 2026-07 |
+| 008 | `008_data_migration_from_tdental_v3.sql` | TDental import schema adjustments (v3, canonical); destructive legacy rebuild guarded by break-glass settings | Multiple ALTER TABLE + guarded destructive data rebuild | Restore from pre-run backup; do not run on protected DB names without explicit break-glass | 2026-02 / guard added 2026-06 |
 | 011 | `011_fix_payment_proofs_type.sql` | Type correction on `payment_proofs` | `ALTER TABLE payment_proofs ALTER COLUMN ...` | Reverse type | 2026-02 |
 | 012 | `012_add_cskhid_salestaffid.sql` | Adds `cskhid` and `salestaffid` to `partners` | `ALTER TABLE partners ADD COLUMN ...` | `ALTER TABLE partners DROP COLUMN cskhid, salestaffid` | 2026-02 |
 | 013 | `013_add_employee_role_fields.sql` | Adds `isdoctor`, `isassistant`, `isreceptionist` | `ALTER TABLE partners ADD COLUMN ...` | `ALTER TABLE partners DROP COLUMN ...` | 2026-03 |
@@ -90,8 +90,19 @@ Current inventory from disk:
 | 056 | `056_braces_commission_config.sql` | Adds Dental braces/orthodontics CTV tier override config | Dental-only tier config fields/seeds | Remove braces override config after Dental engine rollback | 2026-06 |
 | 057 | `057_payout_group_id.sql` | Links combined Dental+Cosmetic payout rows | Adds `payout_group_id` and related index | Drop field/index after combined payout rollback | 2026-06 |
 | 058 | `058_audit_logs.sql` | Adds audit log support for CTV hierarchy moves | Creates `audit_logs` table/indexes | Drop `audit_logs` after move-feature rollback | 2026-06 |
+| 059 | `059_ctv_never_staff_tier.sql` | Ensures CTV identity rows cannot be assigned staff-tier permissions | Permission tier guard inserts | Remove tier guard rows only after confirming no CTV holds staff-tier assignments | 2026-06 |
+| 060 | `060_earnings_payout_id_fk.sql` | Adds `payout_id` foreign-key relationship to earnings rows | `ALTER TABLE earnings ADD payout_id` + index | Drop column/index after payout rollback | 2026-06 |
+| 061 | `061_backfill_null_level_earnings.sql` | Backfills null `level` values on existing earnings rows | Data update | Restore nulls from backup if rollback required | 2026-06 |
+| 062 | `062_ctv_discount_codes.sql` | Creates `dbo.ctv_discount_codes` for CTV voucher QR staff verify | `CREATE TABLE ctv_discount_codes (...)` | `DROP TABLE ctv_discount_codes` | NK3 2026-06-08 |
+| 063 | `063_ctv_discount_codes_kol_parity.sql` | Extends discount codes for KOL parity (visitor fields, claimed/generated statuses) | `ALTER TABLE ctv_discount_codes ADD COLUMN ...`; widen status check | Reverse column adds + restore old status check | NK3 2026-06-08 |
+| 064 | `064_ctv_qr_discount_settings.sql` | Adds CTV QR discount global settings table | `CREATE TABLE ctv_qr_discount_settings` | `DROP TABLE ctv_qr_discount_settings` | NK3 2026-06 |
+| 065 | `065_ctv_discount_codes_payment_id.sql` | Links completed discount codes to a payment record | `ALTER TABLE ctv_discount_codes ADD payment_id` | Drop column after code rollback | NK3 2026-06 |
+| 066 | `066_patient_portal_tables.sql` | Creates patient portal tables: devices, consents, notifications, referrals, reviews, media, support_tickets, aftercare_instructions | Multiple `CREATE TABLE` statements | Drop patient portal tables in reverse dependency order | 2026-06 |
+| 067 | `067_chat_support_ai.sql` | Adds AI chat support tables (`chat_sessions`, `chat_messages`, `support_kb_chunks`) and enables `pgvector` extension for RAG | `CREATE EXTENSION vector`; create chat + KB tables + HNSW index | Drop chat/KB tables and indexes; `DROP EXTENSION vector` only if no other table uses it | 2026-06 |
+| 068 | `068_investor_portal.sql` | Creates investor portal tables: `investor_accounts`, `investor_clients`, `investor_view_audit` | Three `CREATE TABLE` statements + partial index | `DROP TABLE investor_view_audit, investor_clients, investor_accounts CASCADE` | 2026-06 |
+| 069 | `069_investor_phase2.sql` | Phase 2: `investor_password_reset_tokens` + grants `customers.set_investor_visibility`, `investors.manage` to admin group | `CREATE TABLE` + `INSERT group_permissions` | `DROP TABLE investor_password_reset_tokens`; delete permission rows | 2026-06 |
 
-**Total repository migration SQL files:** 67 files in `api/migrations/`.
+**Total repository migration SQL files:** 68 files in `api/migrations/`.
 
 | 062 | `062_ctv_discount_codes.sql` | Creates `dbo.ctv_discount_codes` for CTV voucher QR staff verify | `CREATE TABLE ctv_discount_codes (...)` | `DROP TABLE ctv_discount_codes` | NK3 2026-06-08 |
 | 063 | `063_ctv_discount_codes_kol_parity.sql` | Extends discount codes for KOL parity (visitor fields, claimed/generated statuses) | `ALTER TABLE ctv_discount_codes ADD COLUMN ...`; widen status check | Reverse column adds + restore old status check | NK3 2026-06-08 |
@@ -161,3 +172,13 @@ diff local_schema.sql vps_schema.sql
 - **No down migrations in repo:** Every rollback is ad-hoc. Long-term: consider adding `down/` directory with reverse scripts.
 - **No migration runner:** Human must remember to run files. Risk of missing migrations on deploy.
 - **Sequence collisions:** `appointments.name` sequence is not transactional; concurrent inserts may rarely collide.
+
+---
+
+## 2026-07-01: Migration Number Collisions (documented, not renumbered)
+
+Two migration number collisions exist in the directory:
+- **018:** `018_error_events.sql` and `018_feedback_tables.sql` — both already applied on all environments.
+- **031:** `031_assign_default_tiers.sql` and `031_update_customer_sources.sql` — both already applied on all environments.
+
+Per user directive, these are **documented only** and not renumbered, since renumbering risks confusion on already-applied migrations. Future migrations should continue from 070+.

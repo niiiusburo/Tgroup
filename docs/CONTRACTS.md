@@ -43,12 +43,18 @@
 | v1.0.28 | 2026-06-06 | Site-wide crossref breadcrumb governance added for API route/client contract surfaces. No request or response payload shapes changed; touched API and client files now carry source-traceability breadcrumbs, and high-blast endpoints/functions carry explicit `@crossref:endpoint[...]` or `@crossref:function[...]` markers enforced by `npm run verify:crossrefs`. |
 | v1.0.29 | 2026-06-07 | Face ID liveness / anti-spoofing contract added (local provider): face-service `POST /embed` returns a `liveness` object; `/api/face/recognize` and `/api/face/register` can return `SPOOF_DETECTED` (HTTP 422) when `FACE_LIVENESS_ENABLED=true` and the capture is judged a spoof. Default off + fail-open, so existing payloads are unchanged when disabled/unavailable. |
 | v1.0.30 | 2026-06-07 | Restored `GET /api/cross-lob-probe` (admin-only `lob.crossview` soft phone-identity probe of the other LOB pool; dropped in the cosmetic-LOB merge, breaking the ProfileHeader cross-LOB badge). Now also powers the Face ID cross-LOB chooser: when a recognized customer exists in both LOBs, the quick-scan popover offers a choice instead of auto-navigating. |
+| v1.0.41 | 2026-06-29 | Face ID recognize responses add `status`, `ambiguity`, and `recognitionVersion`; close top-two identity matches return `status: "ambiguous"` with no staff-selectable candidates, and CompreFace multi-face detections return `MULTIPLE_FACES` 422. |
+| v1.0.42 | 2026-07-01 | Patient media bridge contract added: `/api/patient/media` maps authenticated live NK customers to NK Photo clients server-side, returns signed photo URLs, accepts multipart upload fields `file`/`image`/`photo`, and never exposes `MEDIA_SERVICE_API_KEY` to the mobile app. |
 | v1.0.31 | 2026-06-08 | CTV discount QR contracts (NK3): public fan landing `/api/discount-codes/landing/:shortCode`, `check-existing`, and fan `POST /generate` bypass global auth; staff `/lookup`, `/client-search`, `/verify` require staff (not CTV); CTV `/mine` + `/stats` require self CTV. Frontend public fetches use `API_URL` from `core.ts` (not relative `/api` on Vite). |
 | v1.0.32 | 2026-06-10 | CTV discount QR fixes (NK3, FM-20260610-01): all `/api/discount-codes/*` POST bodies are single-encoded JSON objects (clients must NOT pre-`JSON.stringify` into `apiFetch`); `POST /verify` with `markAsUsed: true` on a `checked_in` code now falls back to the `customer_partner_id`/`customer_lob` bound at check-in when `customerPartnerId` is omitted. No field shapes changed. |
 | v1.0.34 | 2026-06-10 | Strict CTV commission attribution (DEC-20260610-01): `POST /api/SaleOrders` (+ `/api/cosmetic/SaleOrders`) no longer inherits the customer's `referred_by_ctv_id` when the payload omits `ctv_id` — the card stays CTV-less and creates zero earnings. Commission requires an explicit `ctv_id` in the payload. Field shapes unchanged. |
 | v1.0.33 | 2026-06-10 | CTV discount QR completion hardened (FM-20260610-02): on a `checked_in` code, the bound customer takes precedence over `createIfMissing`/submitted `customerLob` — completion never creates or rebinds a different client. Explicit `customerPartnerId` still honored. No field shapes changed. |
 | v1.0.35 | 2026-06-14 | Service-line reversal extended to service-card CTV earnings: `DELETE /api/SaleOrderLines/:id` (and the service-card delete path) now calls `reverseServiceCardEarnings` to clear pending service-card earnings (`payment_id IS NULL`) before soft-delete, and blocks the reversal with `B_COMMISSION_PAID_OUT` (HTTP 409) when paid-out service-card earnings exist. Response shape adds `reversedServiceCardEarningsCount: number`. Service-line delete no longer leaves orphan pending service-card earnings behind. NK3-only flag: `CTV_SERVICE_CARD_COMMISSION=true`. |
-| v1.0.41 | 2026-06-29 | Face ID recognize responses add `status`, `ambiguity`, and `recognitionVersion`; close top-two identity matches return `status: "ambiguous"` with no staff-selectable candidates, and CompreFace multi-face detections return `MULTIPLE_FACES` 422. |
+| v1.0.36 | 2026-06-24 | Patient Portal AI chat support contract added: `/api/patient/chat/*` endpoints, `chat_sessions`, `chat_messages`, `support_kb_chunks` schemas, and mobile `ChatScreen`. AI replies are generated server-side via OpenAI `gpt-4o-mini`, Google Gemini, or DeepSeek with RAG context from `support_kb_chunks` (pgvector when available; keyword fallback otherwise). Human escalation creates a `support_tickets` row. Learning loop stores resolved-chat chunks with `approved=false` pending staff review. |
+| v1.0.40 | 2026-06-29 | Investor Portfolio contract added: `GET /api/investor/portfolio?dateFrom=YYYY-MM-DD&dateTo=YYYY-MM-DD` uses Investor JWT + `investor_clients` IDOR gate to return selected-client `overview`, `calendar`, `reports.daily`, `reports.byCustomer`, `reports.appointmentStatus`, `reports.byDoctor`, `reports.byLocation`, `reports.byService`, `clients`, and `extraction` metadata. Payloads exclude phone, email, treatment notes, and non-allowlisted customers; date ranges are bounded to 366 days. |
+| v1.0.39 | 2026-06-27 | Investor customer curation is Admin-only: `/customers` renders the Investor checkbox only for Admin-class/wildcard staff, and `GET /api/investor-visibility` plus `PATCH /api/Partners/:id/investor-visibility` return `403 S_ADMIN_ONLY` for non-admin callers even if `customers.set_investor_visibility` is present. |
+| v1.0.38 | 2026-06-26 | Investor Portal Phase 2 contracts: `InvestorVisibilityPatchSchema`, `InvestorAdminCreateSchema`, `InvestorAdminUpdateSchema`, `InvestorPasswordResetRequestSchema`, `InvestorPasswordResetConfirmSchema`. Staff routes: `GET /api/investor-visibility`, `PATCH /api/Partners/:id/investor-visibility`, `GET|POST|PATCH /api/admin/investors`. Public: `POST /api/investor/auth/password-reset-request`, `POST /api/investor/auth/password-reset`. Permissions: `customers.set_investor_visibility`, `investors.manage`. |
+| v1.0.37 | 2026-06-26 | Investor Portal contract added: `/api/investor/auth/login`, `/api/investor/auth/me`, `/api/investor/clients`, `/api/investor/clients/:partnerId`. JWT payload `{ sub, type:'investor', lob }` signed with mandatory `INVESTOR_JWT_SECRET` (never `JWT_SECRET`). `InvestorClientResponseSchema` allow-list: `id, name, gender, birth_year, appointment_count, order_count, deposit_balance, outstanding_balance, status` only. Unflagged clients return 404. |
 
 ---
 
@@ -452,6 +458,24 @@ Cosmetic mirror: `POST /api/cosmetic/Appointments` and `PUT /api/cosmetic/Appoin
 
 #### PATCH /api/Partners/:id/soft-delete
 **Effect:** Sets `isdeleted = true`. Requires `customers.delete`.
+
+#### PATCH /api/Partners/:id/investor-visibility
+**Auth:** Requires `customers.set_investor_visibility` and an Admin-class permission state (Admin group id, Admin/Super Admin/System Administrator name, or wildcard `*`). A non-admin employee with the permission string still receives `403 S_ADMIN_ONLY`.
+**Body:** `{ investorId: string; isVisible: boolean }`
+**Effect:** Upserts `dbo.investor_clients` for the active LOB and selected investor/customer pair. The target partner must be an active customer; the selected investor must be active and belong to the same LOB.
+**Response 200:** `{ success: true, investorId: string, partnerId: string, isVisible: boolean, investorName: string }`
+
+#### GET /api/investor-visibility
+**Auth:** Same Admin-only boundary as `PATCH /api/Partners/:id/investor-visibility`.
+**Query:** `partnerIds=uuid,uuid&lob=dental|cosmetic` for the customer list batch column, or `partnerId=&investorId?` for one row.
+**Response 200:** `{ success: true, batch: Record<string, InvestorVisibilityState[]> }` or `{ success: true, items: InvestorVisibilityState[] }`.
+
+#### GET /api/investor/portfolio
+**Auth:** Investor JWT only (`type:'investor'`, signed by `INVESTOR_JWT_SECRET`).
+**Query:** `dateFrom=YYYY-MM-DD&dateTo=YYYY-MM-DD`; omitted values default to today's Asia/Ho_Chi_Minh date, and ranges longer than 366 days or reversed ranges return `400 INVALID_DATE_RANGE`.
+**Effect:** Reads only customers in `dbo.investor_clients` for the authenticated investor and LOB, then aggregates appointments, service orders, payments, deposits, and outstanding balances for the selected range.
+**Response 200:** `{ success, dateFrom, dateTo, overview, clients, calendar, reports: { daily, byCustomer, appointmentStatus, byDoctor, byLocation, byService }, extraction }`.
+**Privacy boundary:** `clients` uses the `InvestorClientResponseSchema` safe projection; `calendar` and report rows include operational totals and labels only, never phone, email, treatment notes, or non-allowlisted customers.
 
 #### DELETE /api/Partners/:id/hard-delete
 **Effect:** Physical row removal. Requires `customers.hard_delete`.
@@ -891,6 +915,109 @@ Feedback attachment behavior:
 
 ---
 
+### 1.12 Patient Portal Chat Support (AI + Human Escalation)
+
+All endpoints require a valid patient JWT (`Authorization: Bearer <patient token>`) and are scoped to `req.patient.partnerId`. Inference and API keys remain server-side.
+
+#### GET /api/patient/chat/sessions
+**Response 200:**
+```ts
+{
+  success: true;
+  sessions: Array<{
+    id: string;
+    status: 'ai' | 'human' | 'closed';
+    ticket_id?: string | null;
+    created_at: string;
+    updated_at: string;
+  }>;
+}
+```
+
+#### POST /api/patient/chat/sessions
+**Response 201:** `{ success: true; session: ChatSession }`
+
+#### GET /api/patient/chat/sessions/:id/messages
+**Response 200:**
+```ts
+{
+  success: true;
+  messages: Array<{
+    id: string;
+    role: 'patient' | 'ai' | 'staff' | 'system';
+    content: string;
+    metadata?: Record<string, unknown>;
+    created_at: string;
+  }>;
+}
+```
+
+#### POST /api/patient/chat/sessions/:id/messages
+**Body:** `{ content: string }`
+**Response 200:**
+```ts
+{
+  success: true;
+  reply: string;
+  escalated: boolean;
+  reason?: string;
+  ticketId?: string | null;
+}
+```
+The route persists the patient message, retrieves top-5 KB chunks via pgvector, calls the LLM, persists the AI reply, and auto-escalates to a `support_tickets` row when escalation rules fire.
+
+#### POST /api/patient/chat/sessions/:id/escalate
+**Body:** `{ reason?: string }` (defaults to `'patient_requested'`)
+**Response 200:** `{ success: true; ticketId: string }`
+
+#### POST /api/patient/chat/sessions/:id/learn
+**MVP only — patient-facing trigger.** Chunks the resolved conversation, redacts phone numbers, embeds it, and inserts into `support_kb_chunks` with `approved=false` pending staff review. In production this should move to a staff-only admin route.
+**Response 200:** `{ success: true; chunksStored: number; chunkIds?: string[] }`
+
+---
+
+### 1.13 Patient Portal Media Bridge
+
+All endpoints require a valid patient JWT and are scoped to `req.patient.partnerId`.
+The mobile app calls only TGClinic `/api/patient/media`; NK Photo API keys remain
+server-side in `MEDIA_SERVICE_URL` and `MEDIA_SERVICE_API_KEY`.
+
+#### GET /api/patient/media
+**Response 200:**
+```ts
+{
+  success: true;
+  client?: { id: string };
+  media: Array<{
+    id: string | number;
+    media_service_id?: string;
+    media_url?: string;
+    signedUrl?: string;
+    signedUrlExpiresAt?: string;
+    category: string;
+    type: string;
+    label?: string;
+    created_at?: string;
+    mime_type?: string;
+    file_size?: number;
+    client_id?: string;
+  }>;
+}
+```
+When NK Photo is configured, the route searches media clients by the live partner
+`id`, `ref`, and `phone`, then lists `/api/clients/:id/media`. Local
+`dbo.patient_media` rows are still returned and signed when possible.
+
+#### POST /api/patient/media
+**Body:** multipart `file` or `image` or `photo`, optional `type`/`category`, `label`.
+**Response 201:** `{ success: true; client: { id: string }; media: MediaItem }`
+
+The backend creates the NK Photo client from the live `dbo.partners` row when no
+matching client exists, uploads to `/api/clients/:id/media`, and best-effort caches
+metadata in `dbo.patient_media`.
+
+---
+
 ## 2. Cross-Module Function Signatures
 
 ### 2.1 apiFetch (Frontend → Backend Bridge)
@@ -1069,3 +1196,4 @@ export const PaymentBaseSchema = z.object({
 | 2026-06-07 | v1.0.30 | Restored `GET /api/cross-lob-probe` contract + documented the Face ID cross-LOB chooser consumer. | pending |
 | 2026-05-17 | v1.0.1 | Aligned API contracts with live payment enum, reports endpoints, and export registry routes. | pending |
 | 2026-05-13 | v1.0.0 | Initial contract freeze | feat/complete-documentation-stack |
+| 2026-07-01 | v1.0.31 | Dead code cleanup: 8 dead route files deleted (account, session, receipts, journals, stockPickings, crmTasks, commissions, hrPayslips) + commented mount lines removed from server.js. Duplicate db/index.js deleted (db.js is SSOT with env-driven pool config + pool.on('error') handler). Dead API client services.ts removed. Superseded migrations 008 v1+v2 deleted (v3 canonical). No contract surface changes — all removed routes were already unmounted/non-functional. | pending |

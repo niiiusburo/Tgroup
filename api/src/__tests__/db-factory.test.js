@@ -7,7 +7,7 @@
  * No cross-DB leaks. Additive only.
  *
  * @crossref:implements[PLAN Phase 0 DB factory + TDD req]
- * @crossref:updates[api/src/db/index.js]
+ * @crossref:updates[api/src/db.js]
  */
 
 const path = require('path');
@@ -20,12 +20,10 @@ function withEnv(envOverrides, fn) {
   try {
     // Clear require cache so factory re-evaluates env
     delete require.cache[require.resolve('../db')];
-    delete require.cache[require.resolve('../db/index')];
     return fn();
   } finally {
     process.env = original;
     delete require.cache[require.resolve('../db')];
-    delete require.cache[require.resolve('../db/index')];
   }
 }
 

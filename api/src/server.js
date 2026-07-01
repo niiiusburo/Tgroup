@@ -38,8 +38,6 @@ if (!process.env.JWT_SECRET) {
   process.exit(1);
 }
 
-// const accountRoutes = require('./routes/account'); // LEGACY: duplicates /api/Auth
-// const sessionRoutes = require('./routes/session'); // LEGACY: deprecated
 const configRoutes = require('./routes/config');
 const companiesRoutes = require('./routes/companies');
 const partnersRoutes = require('./routes/partners');
@@ -49,13 +47,7 @@ const customerReceiptsRoutes = require('./routes/customerReceipts');
 const dotKhamsRoutes = require('./routes/dotKhams');
 const accountPaymentsRoutes = require('./routes/accountPayments');
 const cashbooksRoutes = require('./routes/cashbooks');
-// const receiptsRoutes = require('./routes/receipts');        // DEAD ROUTE (500) — disabled 2026-06-06
-// const journalsRoutes = require('./routes/journals');         // DEAD ROUTE (500) — disabled 2026-06-06
-// const stockPickingsRoutes = require('./routes/stockPickings'); // DEAD ROUTE (500) — disabled 2026-06-06
-// const crmTasksRoutes = require('./routes/crmTasks'); // DEAD ROUTE: crmTasks.js queries non-existent dbo.crmtasks (HTTP 500)
-// const commissionsRoutes = require('./routes/commissions');  // DEAD ROUTE (500) — disabled 2026-06-06
 const commissionConfigRoutes = require('./routes/commissionConfig');
-// const hrPayslipsRoutes = require('./routes/hrPayslips');     // DEAD ROUTE (500) — disabled 2026-06-06
 const employeesRoutes = require('./routes/employees');
 const productsRoutes = require('./routes/products');
 const productCategoriesRoutes = require('./routes/productCategories');
@@ -148,8 +140,9 @@ const loginAccountFailureLimiter = rateLimit({
 
 const loginLimiters = [loginIpFailureLimiter, loginAccountFailureLimiter];
 app.use('/api/Auth/login', loginLimiters);
-// app.use('/api/Account/Login', loginLimiters);  // LEGACY
-// app.use('/api/account/login', loginLimiters);  // LEGACY
+app.use('/api/investor/auth/login', loginLimiters);
+app.use('/api/investor/auth/password-reset-request', loginLimiters);
+app.use('/api/investor/auth/password-reset', loginLimiters);
 
 // Request logger
 app.use((req, _res, next) => {
@@ -163,6 +156,8 @@ app.use('/api', enforceIpAccess);
 // AutoDebugger: public error collection endpoint (before auth)
 // Frontend reports errors here; management endpoints stay behind auth
 app.use('/api/telemetry/errors', publicTelemetryErrorRoutes);
+app.use('/api/patient', require('./routes/patient'));
+app.use('/api/investor', require('./routes/investor'));
 
 // Public (unauthenticated) CTV self-signup via referral link — mounted BEFORE the /api auth gate.
 app.use('/api/ctv-public', require('./routes/ctvPublic'));
@@ -183,13 +178,11 @@ app.use('/api', (req, res, next) => {
 app.use('/api', dentalLobGate);
 
 // Routes
-// LEGACY: /api/Account duplicates /api/Auth — verify no external clients use this
-// app.use('/api/Account', accountRoutes);
-// LEGACY: Session route — verify no external clients before removing
-// app.use('/Web/Session', sessionRoutes);
 app.use('/api/IrConfigParameters', configRoutes);
 app.use('/api/Companies', companiesRoutes);
 app.use('/api/Partners', partnersRoutes);
+app.use('/api/investor-visibility', require('./routes/investor/staffVisibility'));
+app.use('/api/admin/investors', require('./routes/investor/adminStaff'));
 
 // ─── Cross-LOB identity probe (D6 / lob.crossview) ───────────────────────────
 // Admin-only soft phone match across the two physical DBs. Cross-cutting (not in
@@ -231,25 +224,11 @@ app.use('/api/CustomerReceipts', customerReceiptsRoutes);
 app.use('/api/DotKhams', dotKhamsRoutes);
 app.use('/api/AccountPayments', accountPaymentsRoutes);
 app.use('/api/CashBooks', cashbooksRoutes);
-// DEAD ROUTES (HTTP 500 for all users on NK3 — underlying tables/columns do not exist; 0 frontend references).
-// Disabled 2026-06-06 to stop 500s. Re-enable only after the backing schema is created.
-//   /api/Receipts        → "column cr.partnerid does not exist"
-//   /api/AccountJournals → "relation accountjournals does not exist"
-//   /api/StockPickings   → "relation stockpickings does not exist"
-// app.use('/api/Receipts', receiptsRoutes);
-// app.use('/api/AccountJournals', journalsRoutes);
-// app.use('/api/StockPickings', stockPickingsRoutes);
-// app.use('/api/CrmTasks', crmTasksRoutes); // DEAD ROUTE: crmTasks.js queries non-existent dbo.crmtasks (HTTP 500). Matches the dead Services route.
-// DEAD ROUTE (HTTP 500): legacy "commissions" table does not exist on NK3 (superseded by the
-// v3 per-service earnings model). 0 frontend references. Disabled 2026-06-06.
-// app.use('/api/Commissions', commissionsRoutes);
 app.use('/api/CommissionConfig', commissionConfigRoutes);
 app.use('/api/Ctvs', ctvsRoutes);
 app.use('/api/Earnings', earningsRoutes);
 app.use('/api/Payouts', payoutsRoutes);
 app.use('/api/NewClients', newClientsRoutes);
-// DEAD ROUTE (HTTP 500): "relation hrpayslips does not exist" on NK3. 0 frontend references. Disabled 2026-06-06.
-// app.use('/api/HrPayslips', hrPayslipsRoutes);
 app.use('/api/Employees', employeesRoutes);
 app.use('/api/Products', productsRoutes);
 app.use('/api/ProductCategories', productCategoriesRoutes);
@@ -275,7 +254,7 @@ app.use('/api/Exports', exportsRoutes);
 
 // === Cosmetic LOB v2: /api/cosmetic/* mirrors (Phase 1) ===
 // Reuses the *exact same* route handler modules as dental (DRY).
-// Dynamic DB resolution via ALS + runWithLob in db/index.js makes their internal `query()` calls
+// Dynamic DB resolution via ALS + runWithLob in db.js makes their internal `query()` calls
 // target tcosmetic_demo when the request context is set.
 // Gated by feature flag (503) + requireLobScope('cosmetic') hard gate (S_LOB_FORBIDDEN).
 // All core admin surfaces (customers, employees, products, services, appointments, payments, reports, etc.)
@@ -393,6 +372,68 @@ app.use('/uploads/payouts', express.static(path.join(__dirname, '..', 'uploads',
 app.get('/api/web/Image2', (req, res) => {
   res.status(204).end();
 });
+
+// ============================================================================
+// API docs (Swagger UI) — opt-in outside development.
+// Gated behind NODE_ENV!=production OR ENABLE_API_DOCS=1 so prod is opt-in:
+// the spec leaks internal route shapes, so we do not want it surfaced to the
+// public internet unless the operator explicitly enables it. In dev/staging,
+// the UI is always reachable. ENABLE_DOCS_PERSIST_AUTH=1 opts into Swagger UI's
+// `persistAuthorization: true` (writes the JWT to localStorage in the caller's
+// browser); default is off to avoid leaving JWTs on shared/personal machines.
+// ============================================================================
+if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_API_DOCS === '1') {
+  try {
+    const swaggerUi = require('swagger-ui-express');
+    const yaml = require('js-yaml');
+    const fsForDocs = require('fs');
+    const OPENAPI_PATH = path.join(__dirname, '..', 'openapi.yaml');
+    // Cache the spec once at boot. Avoids re-reading the file per request.
+    let openapiSpec = null;
+    let openapiRaw = null;
+    if (fsForDocs.existsSync(OPENAPI_PATH)) {
+      try {
+        openapiRaw = fsForDocs.readFileSync(OPENAPI_PATH, 'utf8');
+        openapiSpec = yaml.load(openapiRaw);
+      } catch (yamlErr) {
+        console.error('[docs] api/openapi.yaml failed to parse; Swagger UI disabled:', yamlErr.message);
+      }
+    } else {
+      console.warn('[docs] api/openapi.yaml not found; Swagger UI disabled');
+    }
+    if (openapiSpec) {
+      // Cached raw YAML/JSON so the spec is served exactly as on disk.
+      app.get('/api/docs/openapi.yaml', (req, res) => {
+        res.type('application/yaml').send(openapiRaw);
+      });
+      app.get('/api/docs/openapi.json', (req, res) => {
+        res.type('application/json').send(JSON.stringify(openapiSpec, null, 2));
+      });
+      // Anything we keep here is fully reachable to anyone who can fetch
+      // /api/docs (including unauthenticated visitors in dev), so be
+      // conservative about what ends up in the published description fields.
+      const persistAuth = process.env.ENABLE_DOCS_PERSIST_AUTH === '1';
+      app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openapiSpec, {
+        customSiteTitle: 'TGClinic NK3 API Docs',
+        swaggerOptions: {
+          persistAuthorization: persistAuth,
+          // The Try-it-Out box makes a real call as the visitor. Show it but warn.
+          docExpansion: 'list',
+          // Cap the bundled payload response by leaving display deep-linking on for permalinks.
+          displayOperationId: false,
+          displayRequestDuration: true,
+          filter: true,
+        },
+      }));
+      // Friendly redirect /api/docs → /api/docs/
+      app.get('/api/docs', (req, res) => res.redirect('/api/docs/'));
+      console.log(`[docs] Swagger UI enabled at /api/docs (NODE_ENV=${process.env.NODE_ENV || 'development'}, persistAuthorization=${persistAuth})`);
+    }
+  } catch (err) {
+    // Surface a real stack on first failure so misconfiguration is debuggable.
+    console.error('[docs] Swagger UI failed to load:', err && err.stack ? err.stack : err);
+  }
+}
 
 // 404 fallback
 app.use((req, res) => {

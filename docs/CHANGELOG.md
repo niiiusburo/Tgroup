@@ -2,16 +2,205 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.39.7] — 2026-07-01 — Tier 1 dead code cleanup (-7164 LOC)
+
+### Bug Fixes
+- Added `pool.on('error')` handler to DB factory to prevent process crashes from idle pool errors.
+- Deleted duplicate `db/index.js` (inferior copy lacking env-driven pool config); `db.js` is now the sole SSOT.
+
+### Removed
+- Deleted 8 dead route files (account, session, receipts, journals, stockPickings, crmTasks, commissions, hrPayslips) + commented mount lines from `server.js`.
+- Deleted dead API client `website/src/lib/api/services.ts` + barrel re-export.
+- Deleted superseded migrations 008 v1+v2 (v3 is canonical).
+- Deleted `api/scripts/archive/` (4 one-time fix scripts) and `api/scripts/tdental-import/` (16 legacy migration files).
+
+### Testing
+- Updated enterprise-verification test to assert full removal of `/api/Account` route.
+- Updated db-factory test to remove `db/index` references.
+- All 196 backend tests pass, 753/754 frontend tests pass (1 pre-existing i18n failure).
+
+## [Unreleased] — API: Swagger UI + OpenAPI 3.0.3 spec (security-hardened)
+
+### Security
+- **OpenAPI description leakage tightened.** The curated `api/openapi.yaml` no longer publishes per-operation annotations like `**Method**`, `**Path**`, `**LOB scope**`, `**Permission**`, and `**Handler chain**` to unauthenticated readers of `/api/docs`. The structured `tags`, `security`, and `parameters` fields keep all the information a consumer actually needs. `x-generated` extractor metadata is dropped from the curated spec.
+- **`persistAuthorization` is now opt-in.** Default is OFF: a JWT used in Swagger UI's Try-it-Out is **not** persisted to browser localStorage. Set `ENABLE_DOCS_PERSIST_AUTH=1` to restore the previous behavior (e.g. for an internal-only dev box). The boot log line now reports the effective setting.
+- **Start-time spec cache.** The OpenAPI YAML is parsed once at server boot and held in memory. `/api/docs/openapi.yaml` and `/api/docs/openapi.json` no longer re-read or re-parse the spec on every request.
+- **Better startup error reporting.** A malformed `api/openapi.yaml` now disables the docs mount and logs a real error stack via `console.error` instead of a one-line `console.warn`, so operators can see what is broken.
+- **Docs allowlist tested for traversal.** `publicApiPaths.test.js` pins the prefix as exact (`/api/docs` or starts with `/api/docs/`); live probes confirm `/api/docs/../server.js`, `/api/docs%2F..%2Fserver.js`, and `/api/docsevil` do not bypass the global JWT gate.
+
+### Added
+- **Swagger UI** at `/api/docs` (and `/api/docs/`) with custom title `TGClinic NK3 API Docs`. Also serves the raw OpenAPI document at `/api/docs/openapi.yaml` and `/api/docs/openapi.json`. Gated behind `NODE_ENV != 'production'` by default — set `ENABLE_API_DOCS=1` to expose in prod.
+- **Curated OpenAPI 3.0.3 spec** at `api/openapi.yaml` covering 151 paths / 195 operations across the dental surface. The companion `api/openapi.generated.yaml` is emitted fresh by `api/scripts/extract-openapi.js` from `api/src/server.js` + every `api/src/routes/**` file; the parsed output is then curated into `api/openapi.yaml` (idempotent re-run via the curation script).
+- **Two-DB topology** and **dead-route** notes baked into the spec `info.description` so mobile + 3rd-party consumers see the cosmetic LOB + disabled-endpoint caveats alongside the schema.
+- **Public path allowlist** (`api/src/middleware/publicApiPaths.js`): `/api/docs` and `/api/docs/*` now bypass the global `requireAuth` gate so the UI and raw spec are reachable without a token; access to the surrounding API still requires a JWT as before.
+- **`publicApiPaths` test coverage** (`api/src/middleware/__tests__/publicApiPaths.test.js`): new test pins the `/api/docs/*` public-bypass contract so future auth refactors cannot silently re-lock the UI.
+- **Mobile consumer guide** at `docs/API_MOBILE_GUIDE.md` — auth flow, ~20 mobile-relevant endpoints with copy-paste `fetch` snippets, error code catalogue, CORS + LOB notes, and a quick-start for the friend who is building the Android/iOS mobile app against the TGClinic API.
+- **Patient media bridge** (`/api/patient/media`): authenticated NK patients now map to NK Photo clients server-side by live `dbo.partners` id/ref/phone; GET returns signed media URLs, POST accepts multipart `file`/`image`/`photo`, `docker-compose.yml` now passes `MEDIA_SERVICE_URL`/`MEDIA_SERVICE_API_KEY` into the API container, and `MEDIA_SERVICE_API_KEY` stays out of the Expo app. — @agent — patient-portal media contract v1.0.42
+
+### Dependencies
+- `swagger-ui-express ^5.0.1` + `js-yaml ^5.2.0` added to `api/package.json`. `npm audit` reports no vulnerabilities directly attributable to either package; pre-existing HIGH advisories in `form-data`, `multer`, and `tmp` (unrelated to this change) remain and should be handled by the existing dependency-update lane.
+
+### Tests
+- `npx --prefix api jest src/middleware/__tests__/publicApiPaths.test.js` — 5/5 passed (1 new test for docs)
+- `npm --prefix api test -- --runTestsByPath src/routes/__tests__/patientMedia.test.js --runInBand` — 3/3 passed
+- `npx @apidevtools/swagger-cli validate api/openapi.yaml` — `api/openapi.yaml is valid` (no warnings)
+- **Ad-hoc security probe** (live server, `JWT_SECRET` synthetic, no DB) — confirmed:
+  - `/api/docs/`, `/api/docs/openapi.yaml`, `/api/docs/openapi.json`, Swagger UI assets → 200 (public-bypass scope correct).
+  - `/api/docs/../server.js`, `/api/docs%2F..%2Fserver.js`, `/api/docsevil`, `/api/docs../etc/passwd` → **401** (express path-normalization routes the first two to `/api/server.js`; the others don't match the `/api/docs/*` allowlist, so the JWT gate still applies).
+  - `/api/Partners`, `/api/Earnings`, `/api/ctv`, `/api/patient/auth/me` → 401 (JWT gate intact; docs allowlist did not leak).
+  - 0 per-operation `requirePermission` / `requireLobScope` / `**Method**` / `**Handler chain**` strings in the curated spec (audit was grep-scoped; the matches that appear in `info.description` are intentional documentation about the scrubbing itself).
+
+### Verified
+- `GET /api/docs/` (Swagger UI HTML) returns 200 with the custom title.
+- `GET /api/docs/openapi.yaml` returns 200, `application/yaml`, 245 KB.
+- `GET /api/docs/openapi.json` returns 200, `application/json`, ~530 KB.
+- `GET /api/Partners` still returns 401 — protected routes remain token-gated.
+- `GET /api/health` still returns 503 (degraded) — DB-backed health probe unchanged.
+
+## [0.39.6] — 2026-06-30 — Reports/export location scope and investor session isolation
+
+### Fixed
+- **Reports pages** (`/api/Reports/*`): dashboard, revenue, appointments, doctors, customers, employees, services, and location comparison now resolve employee location scope server-side; `companyId=all` is constrained to allowed branches and direct out-of-scope `companyId` filters return 403. — @agent — INV-009
+- **Report Excel exports** (`revenue-flat`, `deposit-flat`, `report-sales-employees`): preview/download builders now apply the same backend employee location scope before SQL runs, closing the one-location employee all-location export leak. — @agent — INV-009
+- **Investor/staff auth isolation** (`AuthContext`, `InvestorAuthContext`): staff login clears investor token state, and investor login clears stale staff token/remember state so investor portal sessions cannot inherit staff report access in the same browser. — @agent — INV-009A / INV-024
+
+### Tests
+- `npm --prefix api test -- --runTestsByPath src/routes/reports/__tests__/locationScope.test.js src/routes/reports/__tests__/cashFlow.test.js src/routes/reports/__tests__/revenueRecognition.test.js src/routes/reports/__tests__/servicesBreakdown.test.js src/routes/reports/__tests__/doctorsPerformance.test.js src/services/reports/__tests__/canonicalRevenue.test.js src/services/exports/__tests__/legacyFlatReportsExport.test.js src/services/exports/__tests__/reportSalesEmployeesExport.test.js --runInBand`
+- `npm --prefix website test -- src/contexts/__tests__/AuthContext.session.test.tsx src/contexts/__tests__/InvestorAuthContext.session.test.tsx`
+
 ## [0.39.5] — 2026-06-29 — Face ID: ambiguity and multi-face precision hardening
 
 ### Fixed
 - **NK2 Face ID recognition** (`/api/face/recognize`, header Quick Face ID, customer camera widget): close top-two identity matches now return a versioned `ambiguous` rescan state instead of a selectable candidate list, preventing staff from picking between two nearly identical scores. — @agent — integrations / Face ID precision contract
 - **CompreFace provider** (`api/src/services/comprefaceClient.js`, `comprefaceFaceProvider.js`): recognize calls request top-two subject predictions, apply `COMPREFACE_DET_PROB_THRESHOLD`, and convert more-than-one detected face into `MULTIPLE_FACES` 422. — @agent — integrations
-- **Browser capture gate** (`website/src/components/shared/faceCaptureEngine.ts`): native `FaceDetector` now allows up to three detections so multi-face frames block capture instead of being hidden by a one-face detector cap. iPhone/Safari captures use intrinsic video dimensions, a centered face crop, and black-frame retry before upload. — @agent — integrations
-- **Guided profile registration coverage** (`website/src/pages/Customers/useCustomerFormActions.test.ts`): new-customer registration proves all center/left/right profile images are submitted for Face ID enrollment. — @agent — customers / Face ID profile capture
+- **Browser capture gate** (`website/src/components/shared/faceCaptureEngine.ts`): native `FaceDetector` now allows up to three detections so multi-face frames block capture instead of being hidden by a one-face detector cap. — @agent — integrations
 
 ### Tests
-- Focused API and frontend tests cover ambiguous matches, CompreFace multi-face/top-two requests, versioned recognize responses, multi-face browser capture blocking, and multi-angle profile image registration.
+- Focused API and frontend tests cover ambiguous matches, CompreFace multi-face/top-two requests, versioned recognize responses, and multi-face browser capture blocking.
+
+## [0.39.4] — 2026-06-29 — Investor Portal: selected-client portfolio view
+
+### Added
+- **Investor Portal dashboard** (`/investor`): selected customers now show normal-mode style overview totals, date-filtered calendar rows, daily/customer reports, appointment-status/doctor/location/service breakdown reports, and CSV extraction from one investor-safe portfolio payload. — @agent — investor-portal domain
+- **Investor portfolio API** (`GET /api/investor/portfolio`): returns only `investor_clients` allowlisted customers plus aggregated appointments, service totals, collections, deposits, outstanding balances, and selected-customer report breakdowns for the selected date range. Phone, email, and clinical/private fields remain excluded. — @agent — INV-024 / investor redaction contract
+
+### Tests
+- `npm --prefix api test -- src/routes/investor/__tests__/portfolio.test.js --runInBand --no-coverage` — investor portfolio contract and invalid date range guard.
+
+## [0.39.3] — 2026-06-29 — Patient Portal: production API independence guard
+
+### Changed
+- **Patient Portal mobile API path** (`/api/patient/*`): added focused regression coverage so `POST /api/patient/auth/login` and `POST /api/patient/auth/register` stay public while protected patient routes remain token-gated. — @agent — patient-portal domain
+- **AI provider bootstrap** (`api/src/services/ai/aiConfig.js`): provider packages are optional at import time, so an older production image without `openai` or `@google/generative-ai` can still boot the patient API and fail chat provider setup at call time instead of taking down mobile login. — @agent — patient-portal domain
+
+### Tests
+- `npx jest --runInBand src/middleware/__tests__/publicApiPaths.test.js src/services/__tests__/aiConfigOptionalProviders.test.js` — 2 suites / 5 tests passed.
+- `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off --no-git-ignore api/src/routes/patient api/src/middleware/patientAuth.js api/src/services/ai api/src/db.js api/src/server.js` — 22 files scanned, 0 findings.
+
+## [Docs] — 2026-06-28 — NK mobile database PRD
+
+### Docs
+- **NK mobile database PRD** (`docs/specs/NK_MOBILE_DATABASE_PRD.md`): documented the API-only path for the NK patient mobile app to use NK database-backed data without direct DB access, with launch blockers for duplicate-phone identity, patient auth rate limiting, IDOR tests, chat learning exposure, and live migration proof. — @agent — patient-portal domain
+
+## [0.39.2] — 2026-06-27 — Investor visibility checkbox is admin-only
+
+### Fixed
+- **Customers Investor column** (`/customers`): the investor visibility checkbox now renders only for Admin-class staff and is hidden from non-admin employees, even if they carry the legacy `customers.set_investor_visibility` permission. Preserves INV-024 and the investor allowlist contract. — @agent — investor-portal/customers
+- **Investor visibility APIs** (`GET /api/investor-visibility`, `PATCH /api/Partners/:id/investor-visibility`): both endpoints now re-check Admin group/wildcard server-side before reading or writing `dbo.investor_clients`; direct non-admin calls return `403 S_ADMIN_ONLY`. — @agent
+
+### Tests
+- `api/src/routes/investor/__tests__/phase2.test.js` — admin-only read/write guard.
+- `website/src/hooks/__tests__/useInvestorVisibilityColumn.test.tsx` — non-admin column suppression.
+
+## [0.39.1] — 2026-06-27 — Face ID: iPhone Safari capture hardening (NK2 → NK)
+
+### Fixed
+- **Face capture pipeline** (`website/src/components/shared/faceCaptureEngine.ts`, `useFaceCaptureController.ts`): Safari-safe `waitForVideoFrameReady` before `drawImage`; **60% center crop → 600×600** JPEG (intrinsic `videoWidth`/`videoHeight`, not CSS); **1920×1080** camera constraints with fallbacks; reject near-black frames with 120ms retry (WebKit blank-canvas class); optional mirror for front camera. Targets CompreFace **422 NO_FACE** on iPhone while desktop worked. — @agent — integrations / FACE-ID-SCOPE
+
+### Ops (deploy NK2 then NK)
+- On VPS, consider raising CompreFace **`max_detect_size`** (default 640) if full-frame detection is still used anywhere; client crop is the primary fix.
+
+### Tests
+- `website/src/components/shared/faceCaptureEngine.test.ts` — center crop + constants.
+
+## [0.39.0] — 2026-06-26 — Investor Portal Phase 2: staff curation, admin provisioning, password reset
+
+- **Staff:** Customers "Investor" column toggles `investor_clients` visibility per LOB (`customers.set_investor_visibility`).
+- **Admin:** Settings → Investors tab — create/deactivate accounts (`investors.manage`, `/api/admin/investors`).
+- **Investor:** `/investor/reset-password` + public reset API (dev token in response).
+- **Schema:** migration `069_investor_phase2.sql` — `investor_password_reset_tokens` + permission grants (both DBs).
+- **Contracts:** extended `contracts/investor.ts` Phase 2 Zod schemas.
+- **Verify:** `api/scripts/verify-investor-phase2.mjs` full API loop.
+
+## [0.38.0] — 2026-06-26 — Investor Portal: login + read-only client roster (MVP)
+
+### Added
+- **Investor portal backend** (`api/src/routes/investor/`, `api/src/middleware/investorAuth.js`): `POST /api/investor/auth/login`, `GET /api/investor/auth/me`, `GET /api/investor/clients`, `GET /api/investor/clients/:partnerId` with distinct `INVESTOR_JWT_SECRET`, LOB-pinned queries, IDOR gate, and Zod safe projection. — @agent — investor-portal domain
+- **Migration 068** (`api/migrations/068_investor_portal.sql`): `investor_accounts`, `investor_clients`, `investor_view_audit` tables. — @agent
+- **Contracts** (`contracts/investor.ts`): `InvestorClientResponseSchema` allow-list is the redaction boundary. — @agent
+- **Investor portal UI** (`website/src/pages/Investor/`, `/investor/login`, `/investor`): separate auth context, EN+VI i18n, client roster table. — @agent
+- **Demo seed** (`api/scripts/seed-investor-demo.js`): `investor@clinic.vn` / `123123` with sample visible clients. — @agent
+
+### Governance
+- `product-map/domains/investor-portal.yaml`, `docs/CONTRACTS.md` v1.0.37, `docs/MIGRATIONS.md` §068, `DECISIONS.md` DEC-20260625-IP-01, `docs/TEST-MATRIX.md` investor rows. — @agent
+
+## [0.38.1] — 2026-06-24 — Patient Portal: multi-provider AI + KB seed + keyword RAG fallback
+
+### Added
+- **KB seed script** (`api/scripts/seed-support-kb.js`): seeds 15 Vietnamese clinic FAQs into `support_kb_chunks` with embeddings when available. — @agent
+- **KB ingestion utilities** (`api/src/services/ai/kbIngestion.js`): `ingestChunk`, `ingestChunks`, `listChunks`, `updateChunk`, `deleteChunk` for content curators. — @agent
+
+### Changed
+- **AI provider config** (`api/src/services/ai/aiConfig.js`): now supports Google Gemini, OpenAI, and DeepSeek (OpenAI-compatible). Priority: Gemini > OpenAI > DeepSeek. — @agent
+- **RAG retrieval** (`api/src/services/ai/ragService.js`): falls back to accent-insensitive keyword search when the active provider does not support embeddings (e.g., DeepSeek) or pgvector is unavailable. — @agent
+- **Escalation prompt** (`api/src/services/ai/escalationService.js`) and **support system prompt** (`api/src/services/ai/ragService.js`): fixed Vietnamese word spacing (`ngườithật`, `trả lờibằng`, etc.). — @agent
+- **API env example** (`api/.env.example`): adds `DEEPSEEK_API_KEY`, `DEEPSEEK_CHAT_MODEL`, `DEEPSEEK_BASE_URL`. — @agent
+
+### Security
+- **Removed leaked API keys from tracked files.** Replaced exposed `sk-kimi-...` (Kimi), TestSprite `sk-user-...`, and Telegram bot token in `hermes/hermes-map.yaml`, `testsprite_tests/TESTSPRITE_MCP_SETUP_GUIDE.md`, `website/testsprite_tests/tmp/config.json`, and matching `.worktrees/*` copies with placeholder values. Also cleaned the same leaks in `Tgrouptest-auth-phone`. — @agent
+- Note: these keys remain in git history (commits `5c2956f5f` and `424afe65e`). Rotate them at the provider console; ask if you want history rewritten.
+
+### Governance
+- Updated `docs/CONTRACTS.md` v1.0.36 to reflect multi-provider AI and keyword RAG fallback. — @agent
+- Bumped `api/package.json` to `1.2.3`. — @agent
+
+## [0.38.0] — 2026-06-24 — Patient Portal: AI + human chat support with learning loop
+
+### Added
+- **Two-tier chat support backend** (`api/src/routes/patient/chat.js`, `api/src/services/ai/`): patient chat sessions, messages, RAG retrieval from `support_kb_chunks`, OpenAI `gpt-4o-mini` replies, and human escalation to `support_tickets`. — @agent — patient-portal domain
+- **Learning loop** (`api/src/services/ai/learningService.js`): resolved/escalated chat transcripts are chunked, PII-redacted, embedded, and stored in `support_kb_chunks` (pending staff `approved` flag) so the AI can answer similar questions later. — @agent
+- **Patient chat migration** (`api/migrations/067_chat_support_ai.sql`): adds `chat_sessions`, `chat_messages`, `support_kb_chunks`, pgvector extension, and HNSW index. — @agent
+- **Mobile chat screen** (`nk-patient-app/src/screens/chat/ChatScreen.tsx`) + `useChat` hook (`nk-patient-app/src/hooks/useChat.ts`) + `chatApi` service (`nk-patient-app/src/services/chatApi.ts`): custom UI matching NK iOS design tokens, AI replies, and one-tap human escalation. — @agent
+- **Generative AI reference library** (`library/gen-ai-chat-support/`): downloaded reference repos (Vercel AI SDK, OpenAI Node SDK, Google Gen AI SDK, react-native-gifted-chat) plus project-specific backend/mobile code samples and migration DDL. — @agent
+
+### Changed
+- **Support screen** (`nk-patient-app/src/screens/support/SupportScreen.tsx`): the previously placeholder "Nhắn tin" card now navigates to the AI chat screen; subtitle updated to "Chat với trợ lý AI". — @agent
+- **Patient portal navigation** (`nk-patient-app/src/navigation/MainNavigator.tsx`): registers `Chat` in the `HomeStack`. — @agent
+- **API env example** (`api/.env.example`): adds `OPENAI_API_KEY`, `AI_CHAT_MODEL`, `AI_EMBEDDING_MODEL`, `AI_TEMPERATURE`, `AI_MAX_TOKENS`, `AI_RAG_TOP_K`. — @agent
+
+### Governance
+- Updated `product-map/domains/patient-portal.yaml` with new tables, endpoints, and `Chat` surface. — @agent
+- Updated `docs/CONTRACTS.md` and `docs/MIGRATIONS.md` for chat support v1.0.36. — @agent
+- Bumped `nk-patient-app/package.json` to `1.1.0`. — @agent
+
+## [0.37.22] — 2026-06-24 — Patient Portal: organize treatments, appointments, finance, profile
+
+### Added
+- **Treatment detail screen** (`nk-patient-app/src/screens/treatments/TreatmentDetailScreen.tsx`) + `TreatmentsStack` navigation: patients can now tap any treatment to see service lines (`product_name`, quantity, price), visits (`dotkhams`), and step-by-step progress. — @agent
+- **Shared money components** (`nk-patient-app/src/components/agent3/MoneyRow.tsx`, `MoneySummary.tsx`): consistent label/amount/progress display reused on treatments list, treatment detail, and home dashboard. — @agent
+- **VietQR payment block** (`nk-patient-app/src/screens/finance/FinanceScreen.tsx`): generates QR from `company_bank_settings` when there is an outstanding balance and a supported bank BIN. — @agent
+- **Payment method / category / status label helpers** (`nk-patient-app/src/utils/status.ts`): maps raw DB values (`posted`, `draft`, `voided`, `bank_transfer`, `deposit`, etc.) to patient-friendly Vietnamese labels. — @agent
+
+### Changed
+- **Appointments list + detail** now fetch real `/appointments` data, show `product_name` as the service, filter by upcoming/past/all, display doctor/clinic, and use the clinic’s actual phone for the call button. — @agent
+- **Home dashboard** treatment card uses real `totalpaid / amounttotal` progress, mapped Vietnamese status labels, clinic/doctor/date range, and taps through to detail. Hero card shows real appointment status and doctor. — @agent
+- **Finance screen** loads real `/balance` and `/balance/payments`, organizes outstanding/total-paid/deposit cards, and renders payment history with status badges and method labels. — @agent
+- **Profile screen** now builds full DOB from `birthyear/birthmonth/birthday`, builds full address from `street/ward/district/city`, and wires all consent toggles to `PUT /profile/consents`. — @agent
+- **Backend `/api/patient/dashboard`** returns richer treatment and next-appointment fields (`totalpaid`, `doctor_name`, `company_name`, `datestart`, `dateend`, `product_name`, `company_phone`, etc.) so the home cards match the detail API. — @agent
+
+### Fixed
+- **Treatment status mapping** now handles `done` and `cancel` sale-order states. — @agent
+- **Pre-existing TypeScript errors** in `AnimatedCounter`, `useAnimatedButton`, and `AftercareScreen` so the project passes `tsc --noEmit`. — @agent
 
 ## [0.37.22] — 2026-06-26 — NK login persistence / Remember Me hardening
 
@@ -1209,3 +1398,19 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 - TestSprite: Parallel test runner with 5 workers, ~38s full suite
 - TestSprite: MCP config fixed with correct API_KEY in ~/.claude.json
 - TestSprite: Added TESTSPRITE_STATUS.md and TESTSPRITE_MCP_SETUP_GUIDE.md
+
+## [1.33.0] - 2026-06-24
+### Added
+- Patient Portal iOS App (Expo React Native) — Phase 1
+- New API routes: `/api/patient/*` (auth, dashboard, appointments, treatments, balance, media, notifications, referrals, reviews, support, profile)
+- Patient auth middleware (`requirePatientAuth`) with separate JWT secret
+- New tables in tdental_demo: `patient_devices`, `patient_consents`, `patient_notifications`, `patient_referrals`, `service_reviews`, `patient_media`, `support_tickets`, `aftercare_instructions`
+- Migration 066: `api/migrations/066_patient_portal_tables.sql`
+- Patient registration = claim existing `partners` row by phone + set `password_hash`
+- VietQR payment display in patient app (reuses existing `company_bank_settings`)
+- Media plugin interface (MEDIA_SERVICE_URL + MEDIA_SERVICE_API_KEY) for external photo server
+- Product-map domain: `patient-portal.yaml`
+### Changed
+- `publicApiPaths.js`: added `/api/patient/auth/login` and `/api/patient/auth/register` to public paths
+- `server.js`: mounted `/api/patient` router
+- `.env.example`: added `PATIENT_JWT_SECRET`, `PATIENT_TOKEN_EXPIRY`, `MEDIA_SERVICE_URL`, `MEDIA_SERVICE_API_KEY`

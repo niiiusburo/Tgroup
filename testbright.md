@@ -9,6 +9,121 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 Do not remove failed checks until the defect is fixed and rerun.
 
 ---
+# TestSprite Plan: Tier 1 dead code cleanup 2026-07-01
+Feature/edit name: Dead code deletion + DB factory merge (v0.39.7).
+
+Changed URLs / API routes / data flow:
+- Removed: /api/Account, /Web/Session, /api/Receipts, /api/AccountJournals, /api/StockPickings, /api/CrmTasks, /api/Commissions, /api/HrPayslips (all were already unmounted/dead)
+- Removed: /api/Services frontend client (dead, unmounted route)
+- DB factory: db/index.js deleted, db.js is sole SSOT with pool.on('error') handler
+- Migrations: 008 v1+v2 deleted (v3 canonical)
+
+User roles: All (admin, staff, CTV, patient, investor) — no behavior change, only dead code removal.
+
+Happy paths:
+- [ ] PENDING: Login as t@clinic.vn/123123, verify dashboard loads normally.
+- [ ] PENDING: Navigate to Customers, verify list loads and search works.
+- [ ] PENDING: Navigate to Calendar, verify appointments render.
+- [ ] PENDING: Navigate to Payments, verify payment list loads.
+- [ ] PENDING: CTV portal (/ctv) loads and dashboard renders.
+
+Edge cases / regressions:
+- [ ] PENDING: Verify no 404 errors in console for removed routes (they were already dead).
+- [ ] PENDING: Verify DB pool error handler doesn't interfere with normal queries.
+- [ ] PENDING: Verify enterprise-verification test passes (asserts /api/Account fully removed).
+- [ ] PENDING: Verify db-factory test passes (9/9 tests).
+
+Setup/login data: t@clinic.vn / 123123 on http://127.0.0.1:5175
+
+---
+# TestSprite Plan: Reports/export location scope and investor session isolation 2026-06-30
+Feature/edit name: Reports and Excel exports enforce backend employee location scope; investor portal login clears stale staff auth (v0.39.6).
+
+Changed URLs / API routes / data flow:
+- URLs: `/reports`, `/reports/revenue`, `/reports/deposit`, `/reports/appointments`, `/reports/doctors`, `/reports/customers`, `/reports/employees`, `/reports/services`, `/reports/locations`, `/investor/login`, `/investor`.
+- API: every `/api/Reports/*` page route, `POST /api/Exports/revenue-flat/{preview,download}`, `POST /api/Exports/deposit-flat/{preview,download}`, and `POST /api/Exports/report-sales-employees/{preview,download}`.
+- Data flow: Staff JWT -> `resolveEffectivePermissions()` -> primary branch + `employee_location_scope` -> scoped report SQL / export SQL; Investor JWT -> `investor_clients` allowlist only, with staff token storage cleared on investor login.
+
+Expected behavior:
+- One-location employee with `reports.view` sees report pages only for their allowed location when the UI uses "all".
+- The same employee gets 403 before SQL/export if they request another location UUID directly.
+- `revenue-flat`, `deposit-flat`, and employee sales Excel exports contain only allowed-location rows for restricted staff.
+- Investor portal `/investor` stays selected-client-only and cannot use stale staff auth to enter `/reports/*` after investor login.
+
+Execution checklist:
+- [x] PASS: Backend RED/GREEN guard — focused Jest suite covers all report page endpoints for scoped all-location requests, out-of-scope direct UUID rejection, no-scope 403, and report export builder scope.
+- [x] PASS: Frontend auth guard — Vitest covers staff login clearing investor token state and investor login clearing staff token/remember state.
+- [ ] PENDING: Local browser smoke with one-location employee — verify `/reports/*` pages and Excel preview/download show only that branch.
+- [ ] PENDING: Local investor browser smoke — login at `/investor/login`, verify `/investor` report/extraction data is selected-client-only and `/reports/*` is not reachable via stale staff token.
+
+---
+# TestSprite Plan: Investor Portal selected-client portfolio parity 2026-06-29
+Feature/edit name: Investor Portal — selected customers show overview, calendar, reports, and CSV extraction (v0.39.4).
+
+Changed URLs / API routes / data flow:
+- URL: `http://127.0.0.1:5175/investor`
+- API: `GET /api/investor/portfolio?dateFrom=YYYY-MM-DD&dateTo=YYYY-MM-DD`
+- Data flow: Investor JWT → `investor_clients` allowlist → selected customer safe projection + aggregate appointments/orders/payments/service lines → investor dashboard cards/calendar/daily/customer/status/doctor/location/service tables/export; phone/email/private clinical fields stay excluded.
+
+Execution checklist:
+- [x] PASS: Baseline proof — before fix, investor login showed only the shared-customer roster and made no overview/calendar/report API calls; screenshot `output/playwright/investor-mode-current/baseline-dashboard.png`.
+- [x] PASS: API unit — `portfolio.test.js` covers selected-client payload shape, daily/customer/status/doctor/location/service report rows, redaction, and invalid date ranges.
+- [x] PASS: Local browser — Chrome login → `/investor`, set `2025-01-01` to `2025-12-31`; `GET /api/investor/portfolio` returned 200, overview/date filters/export/daily/calendar/client/customer/status/doctor/location/service-report sections rendered, no failed requests, only known React Router future-flag warnings. Screenshots: `output/playwright/investor-mode-current/final-expanded-dashboard.png`, `output/playwright/investor-mode-current/final-expanded-breakdowns.png`, `output/playwright/investor-mode-current/final-expanded-service-report.png`; CSV extraction: `output/playwright/investor-mode-current/final-expanded-export.csv`.
+- [x] PASS: Governance/security — `npm --prefix website run build`, `npm run verify:crossrefs`, `npm run verify:docs`, `npm run verify:governance`, and scoped semgrep all passed; semgrep scanned 11 changed files with 0 findings.
+
+---
+# TestSprite Plan: NK Patient mobile production API independence 2026-06-29
+Feature/edit name: Tấm Dentist iPhone/iPad uses VPS-hosted `https://nk.2checkin.com/api/patient/*` without a Mac local dev server (v0.39.3).
+
+Changed URLs / API routes / data flow:
+- API: `POST /api/patient/auth/login`, `POST /api/patient/auth/register`, and protected `/api/patient/*` routes on `https://nk.2checkin.com`.
+- Mobile build: `EXPO_PUBLIC_API_URL=https://nk.2checkin.com`; IPA must not contain `192.168.*:3002`, `localhost:3002`, or Metro/LAN API constants.
+- Data flow: iOS app → VPS nginx → `tgroup-api` → `tdental_demo.dbo.partners` / patient portal additive tables; no local Mac server.
+
+Execution checklist:
+- [x] PASS: Local guard tests — `npx jest --runInBand src/middleware/__tests__/publicApiPaths.test.js src/services/__tests__/aiConfigOptionalProviders.test.js` passed 2 suites / 5 tests.
+- [x] PASS: Semgrep — `--no-git-ignore` scan of patient routes, patient auth, AI services, db, and server returned 0 findings.
+- [x] PASS: VPS API — live `POST https://nk.2checkin.com/api/patient/auth/login` reaches patient credential logic instead of returning staff-auth `{"error":"No token"}`; provided patient account activation/login/auth-me/dashboard returned 200 after registering the supplied password.
+- [x] PASS: Mobile release — production IPA/OTA publish completed for `com.nkclinic.patient` version 1.3.1 build 5; build script proved bundle contains `https://nk.2checkin.com` and no LAN/localhost API URL.
+- [ ] BLOCKED: Device launch — iPhone install succeeded and app list shows Tấm Dentist 1.3.1 build 5, but remote launch was denied because the iPhone is locked; iPad install blocked because CoreDevice reports the iPad unavailable / connection timed out.
+
+---
+# TestSprite Plan: Investor visibility admin-only checkbox 2026-06-27
+Feature/edit name: Investor Portal — Admin-only customer allowlist checkbox (v0.39.2).
+
+Changed URLs / API routes / data flow:
+- URL: `/customers` customer search/list table.
+- API: `GET /api/investor-visibility`, `PATCH /api/Partners/:id/investor-visibility`.
+- Data flow: Admin checkbox → `investor_clients` allowlist → investor read-only portal; non-admin staff must never see or mutate this control.
+
+Execution checklist:
+- [ ] PENDING: API — non-admin caller with `customers.set_investor_visibility` gets `403 S_ADMIN_ONLY` on batch lookup and patch.
+- [ ] PENDING: UI — non-admin staff does not see the Investor column/checkbox on `/customers`.
+- [ ] PENDING: UI — Admin staff sees the Investor checkbox on `/customers` and can toggle a customer into/out of the investor page.
+- [ ] PENDING: Live — NK2 deployed and NK production version/health unchanged.
+
+---
+# TestSprite Plan: Investor Portal MVP login 2026-06-26
+Feature/edit name: Investor Portal — email login + read-only shared client roster (v0.38.0).
+
+Changed URLs / API routes / data flow:
+- URLs: `http://127.0.0.1:5175/investor/login`, `http://127.0.0.1:5175/investor`
+- API: `POST /api/investor/auth/login`, `GET /api/investor/auth/me`, `GET /api/investor/clients`
+- Local demo creds: `investor@clinic.vn` / `123123` (seed via `node api/scripts/seed-investor-demo.js`)
+- Data flow: `investor_accounts` → JWT (`INVESTOR_JWT_SECRET`, `type:investor`) → `investor_clients` IDOR gate → safe projection only
+
+Execution checklist:
+- [x] PASS: API login returns token + investor profile.
+- [x] PASS: `GET /api/investor/clients` returns 3 seeded clients with no phone/email/clinical fields.
+- [x] PASS: Playwright — login → dashboard shows 3 rows; screenshot `docs/live-artifacts/live-verify-screenshots/investor-portal-login-2026-06-26.png`.
+- [x] PASS: `npm --prefix api test -- src/routes/investor/__tests__` (auth + redaction).
+- [x] PASS: Admin toggle `PATCH /Partners/:id/investor-visibility` + Customers Investor column (v0.39.0 baseline; admin-only hardened in v0.39.2).
+- [x] PASS: Admin investor provisioning — Settings → Investors tab (`/api/admin/investors`).
+- [x] PASS: Investor password reset — `/investor/reset-password` + public reset API.
+- [x] PASS: `node api/scripts/verify-investor-phase2.mjs` — 14/14 API loop.
+- [x] PASS: `website/e2e/investor-phase2.spec.ts` — settings, customers column, reset UI, dashboard screenshots.
+
+---
 # TestSprite Plan: CTV gap-fix wave — tests + docs + governance 2026-06-15
 Feature/edit name: Close CTV tracking-vs-overview gap with integration tests, reclaim unit test, product-map/spec sync, CHANGELOG 0.37.19.
 
@@ -3584,7 +3699,7 @@ Edge cases:
 - **v0.39.5:** CompreFace recognition calls request `limit=0`, `prediction_count=2`, and `det_prob_threshold`; responses with more than one detected face return HTTP 422 `MULTIPLE_FACES`.
 - **v0.39.5:** Native browser `FaceDetector` is configured with `maxDetectedFaces: 3`; two visible faces must block auto-ready capture.
 - Browser sessions without native `FaceDetector` support must not auto-capture a center face from frame quality alone.
-- **v0.39.5:** iPhone Safari uploads use intrinsic video dimensions, 60% center crop → 600×600 JPEG, `waitForVideoFrameReady`, and black-frame rejection before POST; NK2 check-in / `FaceCaptureModal` / customer register paths share `faceCaptureEngine.ts`.
+- **v0.39.1:** iPhone Safari uploads use intrinsic video dimensions, 60% center crop → 600×600 JPEG, `waitForVideoFrameReady`, and black-frame rejection before POST; NK2 check-in / `FaceCaptureModal` / customer register paths share `faceCaptureEngine.ts`.
 - CompreFace recognize/register requests must send a native multipart `file` part; provider responses like "Required part file is missing" indicate the upload client is broken.
 - `NO_FACE` from local or CompreFace providers must keep the camera modal open and show "Không phát hiện khuôn mặt" / "Face not detected".
 - CompreFace no-face responses must return HTTP 422 with `error: "NO_FACE"`, not a generic engine error.
@@ -4968,6 +5083,6 @@ Setup data and login state:
 
 Execution checks:
 - [x] PASS: `npx jest src/services/__tests__/serviceReversal.test.js src/services/__tests__/customerReferrer.backfill.test.js --runInBand` — 13/13 (flag on/off + paid-out guard + no backfill when flag on).
-- [ ] PENDING: Deploy v0.37.21 to `/opt/tgroup-nk3` only; confirm `version.json` commit + `serviceReversal.js` imports `reverseServiceCardEarnings`.
+- [x] PASS: Deploy v0.37.21 to `/opt/tgroup-nk3` only (tarball `a53266eb2`, backup `app.bak-pre-v03721-20260622T014811Z`); live `version.json` → v0.37.21 / `a53266e` / `nk3-deploy`; `serviceReversal.js` imports `reverseServiceCardEarnings`; NK (`nk.2checkin.com` v0.32.44) and NK2 staging containers untouched.
 - [ ] PENDING: NK3 live smoke — delete service line with pending service-card earning; expect `reversedServiceCardEarningsCount > 0` and earnings `status='reversed'`.
 - [ ] PENDING: Confirm NK (`nk.2checkin.com`) and NK2 version/containers unchanged after NK3-only deploy.
