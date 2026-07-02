@@ -1,7 +1,14 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID, dateCompanyScopeFilter, resolveReportCompanyScope } = require('./helpers');
+const {
+  err,
+  validDate,
+  validUUID,
+  dateCompanyScopeFilter,
+  resolveReportCompanyScope,
+  appendCompanyScopeCondition,
+} = require('./helpers');
 const { resolveInvestorScope } = require('../../services/permissionService');
 const { getCanonicalRevenueByDoctor } = require('../../services/reports/canonicalRevenue');
 
@@ -18,20 +25,22 @@ router.post('/doctors/performance', requirePermission('reports.view'), async (re
     const companyScope = await resolveReportCompanyScope(req, res, companyId);
     if (!companyScope) return;
 
-    const f = dateCompanyScopeFilter(dateFrom, dateTo, companyScope, 'a.date');
+    const f = dateCompanyScopeFilter(dateFrom, dateTo, companyScope, 'a.date', 'a.companyid');
     const params = [...f.params];
     let fWhere = f.where;
     if (investorScope.isInvestor) {
       params.push(investorScope.allowedCustomerIds);
       fWhere += ` AND a.partnerid = ANY($${params.length}::uuid[])`;
     }
+    const doctorConds = ['p.isdoctor=true', 'p.isdeleted=false'];
+    appendCompanyScopeCondition(doctorConds, params, companyScope, 'p.companyid');
     const rows = await query(
       `SELECT p.id, p.name, COUNT(a.id) as total_appointments,
               SUM(CASE WHEN a.state IN ('done','completed') THEN 1 ELSE 0 END) as done,
               SUM(CASE WHEN a.state IN ('cancel','cancelled') THEN 1 ELSE 0 END) as cancelled
        FROM dbo.partners p
        LEFT JOIN dbo.appointments a ON a.doctorid=p.id ${fWhere}
-       WHERE p.isdoctor=true AND p.isdeleted=false
+       WHERE ${doctorConds.join(' AND ')}
        GROUP BY p.id, p.name ORDER BY done DESC LIMIT 100`, params);
 
     // Canonical revenue grouped by saleorder.doctorid (matches Excel attribution).

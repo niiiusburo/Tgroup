@@ -136,6 +136,18 @@ describe('Reports route location and investor scope', () => {
     expect(scopedSqlCalls(LOC_A).length).toBeGreaterThan(0);
   });
 
+  it('scopes doctors performance doctor rows and appointment joins to allowed locations', async () => {
+    const res = await request(makeApp())
+      .post('/api/Reports/doctors/performance')
+      .send(DATE_FILTERS);
+
+    expect(res.status).toBe(200);
+    const [sql, params = []] = query.mock.calls[0];
+    expect(String(sql)).toContain('a.companyid = ANY');
+    expect(String(sql)).toContain('p.companyid = ANY');
+    expect(hasArrayParam(params, LOC_A)).toBe(true);
+  });
+
   it.each(CUSTOMER_LINKED_ENDPOINTS)('narrows investor report %s to checked clients', async (endpoint) => {
     setInvestor();
 

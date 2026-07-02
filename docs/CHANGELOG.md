@@ -14,6 +14,13 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.58] — 2026-07-02
+### Security
+- **NK2 Doctors Performance report now honors employee location scope:** `/api/Reports/doctors/performance` qualifies appointment branch filtering as `a.companyid` and also scopes the doctor roster by `p.companyid` for non-admin employees, preventing single-location staff from seeing other branches' doctor rows and fixing the live ambiguous `companyid` 500. Investor report scoping remains customer-based, not location-based. — @agent — Preserves reports-analytics location-scope policy.
+
+### Tested
+- `cd api && npx jest src/routes/reports/__tests__/locationScope.test.js --runInBand --verbose` passed 1 suite / 51 tests; `cd api && npx jest src/services/exports/__tests__/exportScope.test.js --runInBand --verbose` passed 1 suite / 14 tests; `cd api && npx jest src/services/exports/__tests__/legacyFlatReportsExport.test.js --runInBand --verbose` passed 1 suite / 12 tests; `cd api && npx jest src/services/exports/__tests__/reportSalesEmployeesExport.test.js --runInBand --verbose` passed 1 suite / 4 tests; scoped Semgrep over `api/src/routes/reports/doctors.js` and `api/src/routes/reports/__tests__/locationScope.test.js` found 0 findings. — @agent
+
 ## [0.32.56] — 2026-06-30
 ### Security
 - **NK2 reports and Excel extraction now enforce backend scope for investors and location-scoped staff:** `/api/Reports` endpoints and operational Excel builders resolve allowed company IDs from the employee primary branch plus `employee_location_scope`; empty/all `companyId` is limited to allowed branches for scoped employees, unauthorized explicit branch requests fail with 403, and the Reports location picker locks single-location employees to their assigned branch. Investor report aggregates and customer-linked workbook rows compose branch/date filters with `dbo.investor_clients`, while employee-only reports fail closed for investors because checked-customer scope is not branch scope. Locations comparison no longer exposes employee counts to investors. — @agent — Preserves INV-021 / INV-023 / UC-013 / UC-019 / WF-005.

@@ -10,6 +10,40 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK2 Doctors Performance Location Scope 2026-07-02
+
+Feature/edit name: NK2 Doctors Performance employee-location-scope hardening (v0.32.58)
+
+Changed URLs / API routes / data flow:
+- URL: `/reports/doctors`.
+- API: `POST /api/Reports/doctors/performance`.
+- Data flow: auth permissions/location scope -> report company scope -> appointments joined by doctor -> doctor roster rows -> canonical doctor revenue.
+
+Affected roles and data flows:
+- Single-location employees see only doctors and appointment metrics for their assigned branch.
+- Multi-location scoped employees see only doctors and metrics for their allowed branches.
+- Unauthorized explicit branch requests fail before report SQL runs.
+- Admin/Super Admin/wildcard users keep intentional all-location behavior.
+- Investor scope stays customer-based; this change does not convert investor accounts to location scope.
+
+Expected behavior:
+
+| Visit / action | Expected result |
+|---|---|
+| Single-location employee opens `/reports/doctors` | Doctors Performance loads without a 500 and lists only doctors from the employee's assigned branch. |
+| Scoped employee posts `/api/Reports/doctors/performance` without `companyId` | SQL filters appointments by `a.companyid = ANY([allowedCompanyIds])` and doctor rows by `p.companyid = ANY([allowedCompanyIds])`. |
+| Scoped employee posts `/api/Reports/doctors/performance` with an unauthorized `companyId` | API returns 403 `Location not allowed`; no report query runs. |
+| Investor opens customer-linked reports | Investor remains scoped by `dbo.investor_clients`; investor is not treated as location-based. |
+
+Execution checklist:
+- [x] PASS: Local regression proves Doctors Performance scopes both appointment joins and doctor rows - `cd api && npx jest src/routes/reports/__tests__/locationScope.test.js --runInBand --verbose` passed 1 suite / 51 tests.
+- [x] PASS: Export scope regressions still pass - `cd api && npx jest src/services/exports/__tests__/exportScope.test.js src/services/exports/__tests__/legacyFlatReportsExport.test.js src/services/exports/__tests__/reportSalesEmployeesExport.test.js --runInBand --verbose` passed when split across the three suites: 14 + 12 + 4 tests.
+- [x] PASS: Scoped Semgrep returns no findings - `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off api/src/routes/reports/doctors.js api/src/routes/reports/__tests__/locationScope.test.js` found 0 findings.
+- [ ] PENDING: Live NK2 after deploy returns 200 for `/api/Reports/doctors/performance` using a one-location employee token and only names that employee's allowed branch/doctor rows.
+- [ ] PENDING: Live NK2 explicit out-of-scope branch request returns 403 `Location not allowed`.
+
+---
+
 # TestSprite Plan: NK2 Reports Employee Location Scope 2026-06-30
 
 Feature/edit name: NK2 reports employee-location-scope enforcement (v0.32.56)
