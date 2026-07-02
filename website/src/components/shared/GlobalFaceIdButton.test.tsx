@@ -115,7 +115,7 @@ describe('GlobalFaceIdButton', () => {
     fireEvent.click(await screen.findByText('Mock capture'));
 
     expect(await screen.findByText('No customer matched')).toBeInTheDocument();
-    expect(screen.getAllByText('v0.32.55')).toHaveLength(2);
+    expect(screen.getAllByText('v0.32.59')).toHaveLength(2);
     expect(screen.getByText(/capture straight, left, and right angles/i)).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText('Name, phone, or code...'), {
@@ -151,7 +151,7 @@ describe('GlobalFaceIdButton', () => {
     fireEvent.click(screen.getByRole('button', { name: /Quick Face ID/i }));
 
     expect(await screen.findByText('Quick Face ID')).toBeInTheDocument();
-    expect(screen.getAllByText('v0.32.55')).toHaveLength(2);
+    expect(screen.getAllByText('v0.32.59')).toHaveLength(2);
   });
 
   it('requires a clearer scan instead of exposing ambiguous candidate choices', async () => {
