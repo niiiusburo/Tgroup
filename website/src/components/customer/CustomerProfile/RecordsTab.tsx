@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Coins, Wallet, HandCoins, Receipt } from 'lucide-react';
 import { ServiceHistory } from '../ServiceHistory';
 import { formatVND } from '@/lib/formatting';
+import { usePermissions } from '@/hooks/usePermissions';
 import type { RecordsTabProps } from './types';
 
 export function RecordsTab({
@@ -18,6 +19,9 @@ export function RecordsTab({
   onUpdateServiceStatus,
 }: RecordsTabProps) {
   const { t } = useTranslation('customers');
+  const { hasPermission } = usePermissions();
+  const canViewMedia = hasPermission('patient_media.view');
+  const canUploadMedia = hasPermission('patient_media.upload');
 
   const totalServiceCost = services.reduce((sum, s) => sum + (s.cost || 0), 0);
   const totalRevenue = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
@@ -51,6 +55,9 @@ export function RecordsTab({
         </div>
       ) : (
         <ServiceHistory
+          customerId={profile.id}
+          canViewMedia={canViewMedia}
+          canUploadMedia={canUploadMedia}
           services={services}
           focusedServiceId={focusedServiceId}
           payments={payments}

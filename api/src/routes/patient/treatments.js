@@ -23,7 +23,11 @@ router.get('/', requirePatientAuth, async (req, res) => {
       `SELECT s.id, s.name, s.code, s.state, s.amounttotal, s.residual, s.totalpaid,
               s.datestart, s.dateend, s.notes, s.datecreated,
               c.name as company_name, c.taxunitaddress as company_address, c.phone as company_phone,
-              p.name as doctor_name
+              p.name as doctor_name,
+              (SELECT string_agg(DISTINCT COALESCE(NULLIF(pr.name, ''), NULLIF(sl.productname, ''), NULLIF(sl.name, '')), ', ')
+               FROM dbo.saleorderlines sl
+               LEFT JOIN dbo.products pr ON pr.id = sl.productid
+               WHERE sl.orderid = s.id) as service_names
        FROM dbo.saleorders s
        LEFT JOIN dbo.companies c ON c.id = s.companyid
        LEFT JOIN dbo.partners p ON p.id = s.doctorid

@@ -73,6 +73,7 @@ const publicBangGiaRoutes = require('./routes/publicBangGia');
 const { startPricingSyncWorker } = require('./services/pricingSyncWorker');
 const ipAccessRoutes = require('./routes/ipAccess');
 const exportsRoutes = require('./routes/exports');
+const mediaRoutes = require('./routes/media');
 const ctvRoutes = require('./routes/ctv');
 const ctvProfileRoutes = require('./routes/ctvProfile');
 const discountCodesRoutes = require('./routes/discountCodes');
@@ -251,6 +252,7 @@ app.use('/api/Reports', reportsRoutes);
 app.use('/api/telemetry', telemetryRoutes);
 app.use('/api/IpAccess', ipAccessRoutes);
 app.use('/api/Exports', exportsRoutes);
+app.use('/api/media', mediaRoutes);
 
 // === Cosmetic LOB v2: /api/cosmetic/* mirrors (Phase 1) ===
 // Reuses the *exact same* route handler modules as dental (DRY).
@@ -293,6 +295,7 @@ if (COSMETIC_FLAG) {
   cosmeticRouter.use('/Companies', companiesRoutes);
   cosmeticRouter.use('/Reports', reportsRoutes);
   cosmeticRouter.use('/DashboardReports', dashboardReportsRoutes);
+  cosmeticRouter.use('/media', mediaRoutes);
   cosmeticRouter.use('/CustomerBalance', customerBalanceRoutes);
   cosmeticRouter.use('/CustomerReceipts', customerReceiptsRoutes);
   cosmeticRouter.use('/CustomerSources', customerSourcesRoutes);

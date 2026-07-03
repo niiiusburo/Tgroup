@@ -8,13 +8,17 @@ import { getPaymentsForService, resolveServiceFinancials } from './ServiceHistor
 import { ServiceHistoryPayments } from './ServiceHistoryPayments';
 import { RecordDateBadge } from './RecordDateBadge';
 import { DoctorCtvTrail } from '@/components/shared';
+import { ServiceMediaGallery } from './ServiceMediaGallery';
 
 interface ServiceHistoryRowProps {
   readonly rowRef?: (node: HTMLTableRowElement | null) => void;
   readonly service: CustomerService;
+  readonly customerId?: string;
   readonly isExpanded: boolean;
   readonly isFocused?: boolean;
   readonly payments?: readonly PaymentWithAllocations[];
+  readonly canViewMedia?: boolean;
+  readonly canUploadMedia?: boolean;
   readonly onToggle: () => void;
   readonly onEditService?: (service: CustomerService) => void;
   readonly onDeleteService?: (service: CustomerService) => void;
@@ -30,9 +34,12 @@ const STATUS_DOT_CLASSES: Record<CustomerService['status'], string> = {
 export function ServiceHistoryRow({
   rowRef,
   service,
+  customerId,
   isExpanded,
   isFocused = false,
   payments,
+  canViewMedia = false,
+  canUploadMedia = false,
   onToggle,
   onEditService,
   onDeleteService,
@@ -156,6 +163,18 @@ export function ServiceHistoryRow({
           </div>
         </td>
       </tr>
+      {isExpanded && customerId && (canViewMedia || canUploadMedia) && (
+        <tr className="bg-gray-50/50">
+          <td colSpan={8} className="py-3 px-4">
+            <ServiceMediaGallery
+              customerId={customerId}
+              serviceId={service.id}
+              canUpload={canUploadMedia}
+              canDelete={canUploadMedia}
+            />
+          </td>
+        </tr>
+      )}
       {isExpanded && relatedPayments.length > 0 && <ServiceHistoryPayments payments={relatedPayments} />}
     </React.Fragment>
   );

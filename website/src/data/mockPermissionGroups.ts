@@ -76,6 +76,8 @@ export const PERMISSIONS: readonly Permission[] = [
   { id: 'external_checkups.view', module: 'Health Checkups', action: 'View', description: 'View external health checkup images' },
   { id: 'external_checkups.create', module: 'Health Checkups', action: 'Create', description: 'Create external patient records' },
   { id: 'external_checkups.upload', module: 'Health Checkups', action: 'Upload', description: 'Upload external health checkup images' },
+  { id: 'patient_media.view', module: 'Patient Media', action: 'View', description: 'View patient treatment photos' },
+  { id: 'patient_media.upload', module: 'Patient Media', action: 'Upload', description: 'Upload patient treatment photos' },
 ];
 
 export const ROLES: readonly Role[] = [

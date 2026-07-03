@@ -1,7 +1,7 @@
 /**
  * @crossref:domain[investor-portal]
  * @crossref:used-in[InvestorAuthContext, investor API client]
- * @crossref:uses[product-map/domains/investor-portal.yaml]
+ * @crossref:uses[website/src/contexts/InvestorAuthContext.tsx, website/src/lib/api/investor.ts]
  */
 
 export const INVESTOR_TOKEN_KEY = 'tgclinic_investor_token';

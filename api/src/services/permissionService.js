@@ -97,10 +97,17 @@ function _clearPermissionCache() {
   PERM_CACHE.clear();
 }
 
+function queryForAuthLob(authLob) {
+  if ((authLob === 'dental' || authLob === 'cosmetic') && typeof getQuery === 'function') {
+    return getQuery(authLob);
+  }
+  return query;
+}
+
 async function _resolveEffectivePermissionsUncached(employeeId, authLob) {
   // Resolve against the caller's home DB explicitly when known; otherwise keep the
   // legacy dynamic query() so existing callers/tests are unaffected.
-  const q = (authLob === 'dental' || authLob === 'cosmetic') ? getQuery(authLob) : query;
+  const q = queryForAuthLob(authLob);
 
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (!uuidRegex.test(employeeId)) {

@@ -312,5 +312,20 @@
     "selectInvestor": "Chọn nhà đầu tư",
     "toggleLabel": "Hiển thị với {{investor}}",
     "saveError": "Không cập nhật được trạng thái hiển thị. Vui lòng thử lại."
-  }
+  },
+  "mediaTitle": "Hình ảnh điều trị",
+  "mediaAdd": "Thêm ảnh",
+  "mediaLoading": "Đang tải hình ảnh...",
+  "mediaEmpty": "Dịch vụ này chưa có ảnh",
+  "mediaLoadFailed": "Không thể tải hình ảnh",
+  "mediaUploadFailed": "Không thể tải ảnh lên",
+  "mediaDeleteFailed": "Không thể xóa ảnh",
+  "mediaCategory": "Loại",
+  "mediaLabel": "Ghi chú (tùy chọn)",
+  "mediaLabelPlaceholder": "VD: Trước khi nhổ răng",
+  "mediaFile": "Hình ảnh",
+  "mediaChooseFile": "Chọn ảnh",
+  "mediaChangeFile": "Đổi ảnh khác",
+  "mediaUpload": "Tải lên",
+  "mediaDelete": "Xóa ảnh"
 }

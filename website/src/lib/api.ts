@@ -21,3 +21,4 @@ export * from './api/websitePages';
 export * from './api/externalCheckups';
 export * from './api/feedback';
 export * from './api/ipAccess';
+export * from './api/patientMedia';

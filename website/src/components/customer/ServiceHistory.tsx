@@ -13,6 +13,9 @@ import { resolveServiceFinancials } from './ServiceHistoryUtils';
  */
 
 interface ServiceHistoryProps {
+  readonly customerId?: string;
+  readonly canViewMedia?: boolean;
+  readonly canUploadMedia?: boolean;
   readonly services: readonly CustomerService[];
   readonly limit?: number;
   readonly focusedServiceId?: string | null;
@@ -25,6 +28,9 @@ interface ServiceHistoryProps {
 }
 
 export function ServiceHistory({
+  customerId,
+  canViewMedia,
+  canUploadMedia,
   services,
   limit,
   focusedServiceId,
@@ -114,6 +120,9 @@ export function ServiceHistory({
                   key={svc.id}
                   rowRef={(node) => { rowRefs.current[svc.id] = node; }}
                   service={svc}
+                  customerId={customerId}
+                  canViewMedia={canViewMedia}
+                  canUploadMedia={canUploadMedia}
                   isExpanded={isExpanded}
                   isFocused={focusedServiceId === svc.id}
                   payments={payments}

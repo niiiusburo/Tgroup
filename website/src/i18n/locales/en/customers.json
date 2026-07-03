@@ -312,5 +312,20 @@
     "selectInvestor": "Select investor",
     "toggleLabel": "Visible to {{investor}}",
     "saveError": "Could not update investor visibility. Please try again."
-  }
+  },
+  "mediaTitle": "Treatment photos",
+  "mediaAdd": "Add photo",
+  "mediaLoading": "Loading images...",
+  "mediaEmpty": "No photos for this service yet",
+  "mediaLoadFailed": "Could not load images",
+  "mediaUploadFailed": "Could not upload image",
+  "mediaDeleteFailed": "Could not delete image",
+  "mediaCategory": "Type",
+  "mediaLabel": "Note (optional)",
+  "mediaLabelPlaceholder": "e.g. Before extraction",
+  "mediaFile": "Image",
+  "mediaChooseFile": "Choose image",
+  "mediaChangeFile": "Change image",
+  "mediaUpload": "Upload",
+  "mediaDelete": "Delete image"
 }
