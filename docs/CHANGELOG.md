@@ -2,6 +2,17 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.40.3] — 2026-07-03 — NK appointment Trợ lý bác sĩ selector restore
+
+### Frontend
+- Restored the NK appointment edit module lineage that includes the `Trợ lý bác sĩ` staff selector and CTV field.
+- Fixed employee role inference so migrated NK employees with both `isdoctor=true` and `isassistant=true` plus a `Trợ lý bác sĩ`/`Tro ly bac si` title classify as `doctor-assistant` before the generic doctor role.
+- `useEmployees` now reuses the shared role classifier and falls back from `jobtitle` to `hrjobname`, so appointment, service, employee, and customer assignment selectors agree.
+
+### Testing
+- Added `website/src/types/employee.test.ts` for the NK migrated staff role case and unchanged doctor/assistant/receptionist behavior.
+- Reason: protects the appointment staff invariant that TLBS rows remain visible in `DoctorSelector` when filtered by `doctor-assistant`.
+
 ## [0.40.2] — 2026-07-02 — Patient media per-service tagging: sale_order_line_id filtering and validation
 
 ### Backend

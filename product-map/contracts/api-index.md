@@ -174,6 +174,8 @@ Partner create/update contract note: optional `birthday`, `birthmonth`, and `bir
 | PUT | `/:id` | Perm:`employees.edit` | Employee fields | Updated employee |
 | DELETE | `/:id` | Perm:`employees.edit` | — | Deleted employee |
 
+Employee role note: `GET /api/Employees` returns raw migrated flags (`isdoctor`, `isassistant`, `isreceptionist`) and title fields (`jobtitle`, `hrjobname`). Frontend role inference owns selector grouping; assistant rows whose normalized title is `Trợ lý bác sĩ` / `Tro ly bac si` classify as `doctor-assistant` before the generic doctor role so appointment TLBS selectors do not hide migrated NK staff.
+
 Cosmetic LOB mirror: Employee UI callers must pass active `lob` into `createEmployee` and `updateEmployee`; when `lob='cosmetic'`, these same contract shapes route through `POST /api/cosmetic/Employees` and `PUT /api/cosmetic/Employees/:id`.
 
 ## Products / Services Catalog (`/api/Products`)

@@ -42,6 +42,20 @@ export interface Employee {
   readonly hireDate: string;
 }
 
+function normalizeRoleText(value?: string | null): string {
+  return (value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .toLowerCase();
+}
+
+function isDoctorAssistantTitle(jobtitle?: string | null): boolean {
+  const normalized = normalizeRoleText(jobtitle);
+  return normalized.includes('tro ly') && (normalized.includes('bac si') || normalized.includes('doctor'));
+}
+
 // Employee role helper functions
 export function inferRoleFromFlags(
   isDoctor: boolean,
@@ -49,19 +63,18 @@ export function inferRoleFromFlags(
   isReceptionist: boolean,
   jobtitle?: string | null,
 ): EmployeeRole {
+  if (isAssistant && isDoctorAssistantTitle(jobtitle)) return 'doctor-assistant';
   if (isDoctor) return 'doctor';
   if (isReceptionist) return 'receptionist';
-  if (isAssistant) {
-    if (jobtitle && jobtitle.toLowerCase().includes('trợ lý')) return 'doctor-assistant';
-    return 'assistant';
-  }
+  if (isAssistant) return 'assistant';
   // No role flags — classify by jobtitle
   if (jobtitle) {
-    const lower = jobtitle.toLowerCase();
-    if (lower.includes('quản lý') || lower.includes('manager') || lower.includes('quản trị') || lower.includes('admin')) return 'general-manager';
+    const lower = normalizeRoleText(jobtitle);
+    if (isDoctorAssistantTitle(jobtitle)) return 'doctor-assistant';
+    if (lower.includes('quan ly') || lower.includes('manager') || lower.includes('quan tri') || lower.includes('admin')) return 'general-manager';
     if (lower.includes('marketing')) return 'marketing';
     if (lower.includes('sale')) return 'sales-staff';
-    if (lower.includes('cskh') || lower.includes('customer service') || lower.includes('hỗ trợ')) return 'customer-service';
+    if (lower.includes('cskh') || lower.includes('customer service') || lower.includes('ho tro')) return 'customer-service';
   }
   return 'assistant';
 }

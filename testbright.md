@@ -9,6 +9,30 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 Do not remove failed checks until the defect is fixed and rerun.
 
 ---
+# TestSprite Plan: NK appointment Trợ lý bác sĩ selector restore 2026-07-03
+
+Feature/edit name: NK appointment TLBS selector role inference restore (v0.40.3).
+
+Changed URLs / API routes / data flow:
+- URLs: `https://nk.2checkin.com/calendar` / appointment edit modal.
+- API: Existing `GET /api/Employees?active=all` payload shape unchanged.
+- Data flow: `dbo.partners` migrated staff flags/title -> `useEmployees` -> shared `inferRoleFromFlags` -> appointment `DoctorSelector` filtered by `doctor-assistant`.
+
+User roles: Authenticated NK admin or clinic staff with appointment edit access.
+
+Happy paths:
+- [ ] PENDING: Login to NK and open the appointment edit modal that shows `Sửa lịch hẹn`.
+- [ ] PENDING: Open `TRỢ LÝ BÁC SĨ`; active migrated TLBS staff rows appear instead of only `Không chọn (None)` / empty state.
+- [ ] PENDING: Search in the TLBS dropdown works with accented and unaccented text.
+
+Edge cases / regressions:
+- [ ] PENDING: Doctor selector still shows normal doctors.
+- [ ] PENDING: Phụ tá selector still shows assistant rows that are not TLBS.
+- [ ] PENDING: Saving an appointment without changing TLBS preserves the existing staff assignment.
+
+Setup/login data: NK production account with appointment edit access. Use screenshot evidence for the TLBS dropdown and keep any patient-identifying details cropped or redacted where possible.
+
+---
 # TestSprite Plan: Patient media upload hardening + mobile photo feature 2026-07-02
 Feature/edit name: Media upload constraints (10MB, image-only, 5/min rate limit, multi-field-name support) + NK patient app photo upload/download/share.
 

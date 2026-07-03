@@ -65,8 +65,10 @@ affected_by:
   - Changes to dbo.partners schema (jobtitle, isdoctor, isassistant, isreceptionist, wage, allowance)
   - Changes to dbo.hrjobs (dropdown data)
   - Employee and permission-board searches must remain accent-insensitive for Vietnamese staff, role, and location names.
+  - Frontend role inference must classify assistant rows with `Trợ lý bác sĩ` / `Tro ly bac si` titles as `doctor-assistant` before generic doctor, because migrated NK rows can carry both `isdoctor` and `isassistant`.
   - Cosmetic LOB employee add/edit/profile surfaces must pass the active LOB into Companies and Employees API calls so branch choices and saves stay in the cosmetic database.
 impact_tests:
+  - website/src/types/employee.test.ts
   - website/e2e/check_employees_page.spec.ts
   - website/e2e/employee-save.spec.ts
   - website/src/components/employees/__tests__/EmployeeForm.lob.test.tsx
