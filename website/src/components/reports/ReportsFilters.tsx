@@ -13,6 +13,7 @@ interface ReportsFiltersProps {
   onCompanyChange: (v: string) => void;
   locations: { id: string; name: string }[];
   locationsLoading?: boolean;
+  isLocationLocked?: boolean;
 }
 
 function formatPeriod(dateFrom: string, dateTo: string, locale: string): string {
@@ -32,6 +33,7 @@ export function ReportsFilters({
   onDateFromChange, onDateToChange, onCompanyChange,
   locations,
   locationsLoading = false,
+  isLocationLocked = false,
 }: ReportsFiltersProps) {
   const { t, i18n } = useTranslation('reports');
   const { getToday } = useTimezone();
@@ -50,6 +52,7 @@ export function ReportsFilters({
 
   const activeLocation = companyId ? locations.find((l) => l.id === companyId) : null;
   const locationLabel = activeLocation ? activeLocation.name : t('allLocations', 'Tất cả chi nhánh');
+  const isCompanySelectDisabled = locationsLoading || isLocationLocked;
   const localeForFormat = i18n.language?.startsWith('vi') ? 'vi-VN' : 'en-GB';
   const periodLabel = formatPeriod(dateFrom, dateTo, localeForFormat);
 
@@ -119,10 +122,12 @@ export function ReportsFilters({
       <select
         value={companyId}
         onChange={(e) => onCompanyChange(e.target.value)}
-        disabled={locationsLoading}
+        disabled={isCompanySelectDisabled}
         className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
       >
-        <option value="">{locationsLoading ? t('loadingLocations', 'Loading locations...') : t('allLocations', 'Tất cả chi nhánh')}</option>
+        {!isLocationLocked && (
+          <option value="">{locationsLoading ? t('loadingLocations', 'Loading locations...') : t('allLocations', 'Tất cả chi nhánh')}</option>
+        )}
         {locations.map((loc) => (
           <option key={loc.id} value={loc.id}>{loc.name}</option>
         ))}

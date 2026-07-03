@@ -1,5 +1,5 @@
 {
-  "version": "0.40.4",
+  "version": "0.40.5",
   "scripts": {
     "dev": "vite",
     "build": "npm run version && tsc && VITE_APP_VERSION=$(node -p \"require('./package.json').version\") vite build",

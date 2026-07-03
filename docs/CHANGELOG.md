@@ -2,6 +2,14 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.40.5] — 2026-07-03 — NK2 report location filter UI lock
+
+### Fixes
+- Locked the Reports location filter to the caller's assigned locations. Single-location employees now see a disabled one-branch selector instead of the all-location option and unrelated branch names.
+
+### Testing
+- Verified with live NK2 browser screenshot after deploy.
+
 ## [0.40.4] — 2026-07-03 — NK2 report location-scope hardening
 
 ### Fixes

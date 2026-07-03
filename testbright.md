@@ -25,7 +25,7 @@ Expected behavior:
 Execution checklist:
 - [x] PASS: Focused report scope regression - `cd api && ./node_modules/.bin/jest src/routes/reports/__tests__/cashFlow.test.js src/routes/reports/__tests__/doctorsPerformance.test.js --runInBand` passed 2 suites / 14 tests.
 - [ ] PENDING: Live NK2 proof after deploy - branch-scoped Admin token can fetch only its assigned location from `/api/Reports/locations/comparison`, and out-of-scope `companyId` returns 403.
-- [ ] PENDING: Live NK2 browser screenshot - `/reports/locations` shows one scoped location for the branch-scoped Admin.
+- [ ] PENDING: Live NK2 browser screenshot - `/reports/locations` shows one scoped location for the branch-scoped Admin and the filter dropdown is locked to that branch.
 
 ---
 # TestSprite Plan: NK2 TLBS, Investor+, branch-admin scope 2026-07-03
