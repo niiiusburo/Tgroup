@@ -2,6 +2,35 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.40.2] — 2026-07-02 — Patient media per-service tagging: sale_order_line_id filtering and validation
+
+### Backend
+- **Patient media per-service filtering** in `GET /api/patient/media`:
+  - New optional query parameter `?saleOrderLineId=<id>` filters media items to a specific service line
+  - Response items always include `saleOrderLineId` (camelCase, null when untagged)
+  - Automatic field normalization in `mediaService.normalizeMediaItem` (line 103: `sale_order_line_id → saleOrderLineId`)
+- **Patient media per-service tagging** in `POST /api/patient/media`:
+  - New optional multipart form field `saleOrderLineId` accepts a service line ID at upload time
+  - **Ownership validation** via INNER JOIN pattern (`saleorderlines → saleorders` with `partnerid` check)
+  - Invalid/foreign service line returns HTTP 400 with `{ error, code: 'SOL_NOT_OWNED' }`
+  - Untagged uploads (omitted `saleOrderLineId` field) persist NULL to database; existing behavior unchanged
+- **Schema** (migration `070_add_service_line_to_patient_media.sql`):
+  - `patient_media.sale_order_line_id` column already exists with FK to `saleorderlines(id)` on DELETE SET NULL
+  - Index `idx_patient_media_sale_order_line_id` already created
+
+### Testing
+- 5 new comprehensive tests in `patientMedia.test.js`:
+  - Filter test: GET results filtered by optional `saleOrderLineId` query param
+  - Field exposure test: GET response items include `saleOrderLineId` (camelCase)
+  - Happy path test: POST with owned service line validates and persists
+  - Negative case test: POST with foreign/unowned service line returns 400 SOL_NOT_OWNED
+  - Null persistence test: POST without `saleOrderLineId` persists NULL (existing behavior unchanged)
+- All 12 patient media tests pass, full API suite **1066 tests pass** with no regressions
+
+### Fixes
+- Fixed mediaService to include `saleOrderLineId` in normalized response objects (already implemented via `normalizeMediaItem`, no changes needed)
+- Validated ownership check exemplar from `api/src/routes/patient/treatments.js` (lines 22–29) uses identical INNER JOIN pattern for patient scope validation
+
 ## [0.40.1] — 2026-07-02 — Backend media API hardening: multer + rate limiting
 
 ### Backend

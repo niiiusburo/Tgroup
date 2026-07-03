@@ -1,5 +1,29 @@
 [
   {
+    "version": "0.40.0",
+    "date": "2026-07-02",
+    "commit": "e24899f87",
+    "highlights": "NK2 staff can attach patient treatment photos to individual service lines; photos flow to the patient mobile gallery.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Staff media API: GET /api/media, POST /api/media, DELETE /api/media/:id tied to a patient and sale order line.",
+          "ServiceMediaGallery component in customer service history row: view, upload (before/after/x-ray/other), and delete treatment photos.",
+          "patient_media table gains sale_order_line_id linking each photo to a specific service line.",
+          "New permissions patient_media.view and patient_media.upload; granted to Admin group by default.",
+          "MEDIA_SERVICE_URL and MEDIA_SERVICE_API_KEY now declared in docker-compose.yml and .env.example."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Backend media route tests updated; patient media route refactored to share NK Photo logic via mediaService.js."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.39.9",
     "date": "2026-07-01",
     "commit": "pending",

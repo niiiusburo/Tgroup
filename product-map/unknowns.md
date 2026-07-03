@@ -15,11 +15,10 @@
   - Evidence: `ROUTE_PERMISSIONS` in `App.tsx` maps routes to strings. Backend uses `requirePermission('...')` inline. No central enum or registry file exists.
 - **Risk:** Adding a new permission feature requires manually keeping frontend route guards, backend middleware, and DB seed data in sync.
 
-## 3. `services.js` Dead Code Intent
+## 3. `/api/Services` Removal Status
 
-- **Unknown:** Is `api/src/routes/services.js` intentionally kept for a future `public.services` table migration, or is it safe to delete?
-  - Evidence: File contains a large comment declaring it dead, but it is still mounted in `api/src/server.js` at `/api/Services`.
-- **Unknown:** Are there any external clients (mobile apps, third-party integrations) hitting `/api/Services`?
+- **Resolved:** `api/src/routes/services.js` is deleted and `/api/Services` is not mounted. Current service catalog and treatment workflows use `/api/Products`, `/api/SaleOrders`, and `/api/SaleOrderLines`.
+- **Guard:** `api/src/__tests__/enterprise-verification.test.js` asserts the legacy file and mount stay absent.
 
 ## 4. Account Routes Legacy Status
 

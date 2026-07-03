@@ -9,6 +9,41 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 Do not remove failed checks until the defect is fixed and rerun.
 
 ---
+# TestSprite Plan: Patient media upload hardening + mobile photo feature 2026-07-02
+Feature/edit name: Media upload constraints (10MB, image-only, 5/min rate limit, multi-field-name support) + NK patient app photo upload/download/share.
+
+Changed URLs / API routes / data flow:
+- API: `POST /api/patient/media` and `POST /api/media` now run `uploadMultipleFields` (accepts one of `file`/`image`/`photo`) → `normalizeFileField` → `handleMulterError`; shared config in `api/src/services/mediaUpload.js`.
+- Error contract: 413 `FILE_TOO_LARGE` (>10MB), 400 `INVALID_FILE_TYPE` (non-image MIME), 400 `MULTIPLE_FILES_NOT_ALLOWED`, 429 `RATE_LIMIT_EXCEEDED` (>5 uploads/min per patient/staff/IP).
+- Mobile (nk-patient-app): PhotoGalleryScreen gains upload (camera/library via expo-image-picker), download (expo-file-system + media-library), share (expo-sharing); Home quick-action navigates to PhotoGallery; consent `photo_visible === false` hides gallery with notice.
+
+User roles: Authenticated patient (mobile app); staff with `patient_media.upload`/`patient_media.view` (web).
+
+Happy paths:
+- [ ] PENDING: Patient uploads a JPEG <10MB from library via mobile app; it appears in the gallery after refresh.
+- [ ] PENDING: Staff uploads via web (field `file`) to `POST /api/media` with partnerId + saleOrderLineId; 200 with media item.
+- [ ] PENDING: Upload with field name `image` and `photo` both succeed (contract v1.0.42 parity).
+- [ ] PENDING: Patient downloads a photo to camera roll; share sheet opens on share tap.
+
+Edge cases / regressions:
+- [ ] PENDING: 11MB image upload returns 413 FILE_TOO_LARGE; mobile shows "Ảnh quá lớn (tối đa 10MB)".
+- [ ] PENDING: PDF upload returns 400 INVALID_FILE_TYPE; mobile shows unsupported-format message.
+- [ ] PENDING: 6th upload within a minute returns 429; mobile shows rate-limit message.
+- [ ] PENDING: Two files in one request (any field mix) returns 400 MULTIPLE_FILES_NOT_ALLOWED.
+- [ ] PENDING: Patient with `patient_consents.photo_visible = false` sees the privacy-hidden notice, not an empty gallery.
+- [ ] PENDING: Gallery still loads when `GET /api/patient/profile` fails (consent check is best-effort).
+- [ ] PENDING: Android upload flow uses Alert menu (no ActionSheetIOS crash).
+
+Setup/login data: Patient 0382210139 / 123123 in nk-patient-app against local API :3002; staff t@clinic.vn / 123123 on http://127.0.0.1:5175.
+
+Per-service photo tagging (v0.40.2 — patient media `saleOrderLineId` filter/validation):
+- [ ] PENDING: Patient media `GET /api/patient/media?saleOrderLineId=<id>` returns only items tagged with that service line ID (happy path filter).
+- [ ] PENDING: Patient media `GET /api/patient/media` response always includes `saleOrderLineId` field (camelCase, null when untagged).
+- [ ] PENDING: Staff `POST /api/media` with multipart field `saleOrderLineId=<owned-id>` validates ownership via INNER JOIN (sale orders join) and persists the tag; 201 response includes `saleOrderLineId`.
+- [ ] PENDING: Staff `POST /api/media` with `saleOrderLineId=<foreign-id>` (not owned by patient) returns 400 `{ code: 'SOL_NOT_OWNED' }`.
+- [ ] PENDING: Staff `POST /api/media` without `saleOrderLineId` field persists NULL; existing behavior unchanged (backward compatible).
+
+---
 # TestSprite Plan: Patient treatment detail service-line names 2026-07-01
 Feature/edit name: Mobile patient portal treatment detail shows human-readable service names (v0.39.10).
 

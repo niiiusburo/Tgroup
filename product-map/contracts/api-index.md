@@ -571,6 +571,9 @@ Patient-facing iOS portal routes. All routes require a patient JWT (`Authorizati
 | GET | `/balance/payments` | Patient JWT | — | Payment history |
 | GET | `/media` | Patient JWT | — | Patient media gallery from `dbo.patient_media` plus NK Photo `/api/clients/:id/media` when configured; signed URLs are server-generated |
 | POST | `/media` | Patient JWT | FormData (`file` or `image` or `photo`, optional `type`/`category`, `label?`) | `{ success, client, media }`; backend creates/searches NK Photo client from live `dbo.partners` id/ref/phone and never exposes the media API key |
+| GET | `/media` | Staff JWT | `?partnerId&saleOrderLineId?` | Staff media gallery for a patient; optional `saleOrderLineId` filters to a specific service line |
+| POST | `/media` | Staff JWT | FormData (`file`, `partnerId`, `saleOrderLineId?`, `type`/`category`, `label?`) | Upload treatment photo tied to a patient and optional service line |
+| DELETE | `/media/:id` | Staff JWT | — | Remove cached media row |
 | GET | `/notifications` | Patient JWT | — | Notification list |
 | PATCH | `/notifications/:id/read` | Patient JWT | — | Mark notification read |
 | PATCH | `/notifications/read-all` | Patient JWT | — | Mark all notifications read |

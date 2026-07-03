@@ -56,7 +56,7 @@
 
 | Sub-module | Path | Responsibility |
 |------------|------|----------------|
-| Routes | `api/src/routes/` | 40 Express route files; `services.js` exists but is intentionally unmounted |
+| Routes | `api/src/routes/` | Express route files; legacy `services.js` has been removed |
 | Middleware | `api/src/middleware/` | JWT validation (`auth.js`), permission checks |
 | Services | `api/src/services/` | Face ID providers, Hosoonline client helpers, permissions, exports, telemetry utilities |
 | DB | `api/src/db.js` | Single `pg` Pool instance exported to all routes |
@@ -122,10 +122,10 @@
 - `/services` page handles patient treatment records and is guarded by `customers.edit`.
 - **Risk:** `/services` frontend access can diverge from backend sale-order read routes (`services.view`); older docs and page-level comments may still call the service catalog `/website`; refactors must use the current route constants.
 
-### 5.4 Dead Backend Route
-- `api/src/routes/services.js` exists but is not mounted; `api/src/server.js` comments out `app.use('/api/Services', servicesRoutes)` because the route queries `public.services` (non-existent table).
+### 5.4 Removed Backend Route
+- `GET/POST /api/Services` is removed; the legacy file queried `public.services` (non-existent table).
 - Frontend uses `/api/Products` and `/api/SaleOrders` instead.
-- **Risk:** Accidental revival or copy-paste from this file will cause runtime SQL errors.
+- **Risk:** Accidental revival of `/api/Services` will reintroduce runtime SQL errors; the enterprise verification test asserts the file and mount stay absent.
 
 ### 5.5 E2E ↔ Local Port Coupling
 - E2E auth-setup spec uses `localhost:5175`.
@@ -135,7 +135,6 @@
 
 | File/Folder | Issue | Recommendation |
 |-------------|-------|----------------|
-| `api/src/routes/services.js` | Dead route; not mounted in `server.js` and queries non-existent `public.services` table. | Delete or repurpose with strong validation before mounting. |
 | `website/src/lib/api/services.ts` | Dead wrappers exported from `api.ts`; nothing imports them. | Delete. |
 | `web.jsx.backup` | 123KB legacy React backup. | Move to `backups/` or delete. |
 | `api/scripts/archive/` | One-off migration scripts (fix-two-plans, import-customers, migrate-payments). | Keep archived; do not run in production without review. |
