@@ -143,11 +143,11 @@
 **Enforced by:** `api/src/services/permissionService.js` (`is_ctv` short-circuit before the group branch), `api/src/services/__tests__/permissionService.test.js` ("CTV self-permissions"), and migration `api/migrations/059_ctv_never_staff_tier.sql`.
 **Cite when:** Editing permission resolution, CTV creation, bulk tier-assignment scripts/migrations, or partner imports.
 
-### INV-009 — Location Scope Frontend-Only Filter
-**Rule:** Backend list routes generally do NOT enforce location scope. The frontend `LocationContext` is responsible for filtering by `companyid`.
-**Rationale:** Backend location scoping was historically inconsistent; frontend filtering is the current operational contract.
-**Enforced by:** Most `api/src/routes/*.js` list handlers lack location scoping SQL.
-**Cite when:** Adding backend list routes, changing `LocationContext`, or implementing multi-location features.
+### INV-009 — Branch Admin Location Scope Is Backend-Enforced
+**Rule:** Staff assigned to a limited branch scope MUST receive only rows for their primary `partners.companyid` plus rows in `dbo.employee_location_scope` on backend read surfaces. Frontend `LocationContext` remains a convenience lock, but it is not the security boundary. Plain `Admin` respects branch scope; all-location access requires wildcard permission, `Super Admin`, or `System Administrator`.
+**Rationale:** Direct API calls can omit UI-selected `companyId`. Customer, appointment, payment, report, and Investor+ visibility reads must not leak other branches when a branch admin or scoped manager calls the endpoint directly.
+**Enforced by:** `api/src/services/locationScope.js`, scoped read handlers in Partners/Appointments/Payments/Reports/Investor+ visibility, and focused route tests in `api/src/routes/{partners,appointments,payments,reports}/__tests__`.
+**Cite when:** Adding backend list/detail routes, editing `resolveEffectivePermissions`, changing `LocationContext`, or implementing multi-location features.
 
 ---
 

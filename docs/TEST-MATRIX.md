@@ -212,6 +212,13 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | `nk-patient-app/src/navigation/MainNavigator.tsx`, `nk-patient-app/src/types/index.ts` | `cd nk-patient-app && npx tsc --noEmit`; navigation smoke across Home/Support/Chat modals | Route registration and param types must not break existing stack navigation. |
 | `product-map/domains/patient-portal.yaml`, `docs/CONTRACTS.md` §1.12, `product-map/contracts/api-index.md` | `npm run verify:governance` | Contract and domain changes must stay in sync with code. |
 
+### Staff Roles And Branch Scope
+
+| If you change... | Run these tests... | Why |
+|---|---|---|
+| `website/src/types/employee.ts`, `website/src/hooks/useEmployees.ts`, or staff role filters used by appointment/service TLBS selectors | `npm --prefix website test -- src/types/employee.test.ts`; `npm --prefix website run build`; browser smoke: appointment edit modal → Trợ lý bác sĩ dropdown | Migrated TLBS staff may be dual-flagged as doctor and assistant; the title must classify them as `doctor-assistant` before the doctor bucket hides them from TLBS dropdowns. |
+| `api/src/services/locationScope.js` or branch-scoped read handlers for Partners, Appointments, Payments, Reports, or Investor+ visibility | `cd api && ./node_modules/.bin/jest src/routes/reports/__tests__/cashFlow.test.js src/routes/partners/__tests__/readHandlers.test.js src/routes/appointments/__tests__/readHandlers.test.js src/routes/payments/__tests__/readHandlers.test.js --runInBand`; scoped Semgrep for changed auth/API files | Branch admins must not bypass UI location locks by omitting `companyId` or requesting another branch directly. Plain Admin is scoped; wildcard/Super Admin/System Administrator can see all branches. |
+
 ### Investor Portal
 
 | If you change... | Run these tests... | Why |

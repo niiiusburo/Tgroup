@@ -6,6 +6,11 @@
 const { getQuery } = require('../../db');
 const { applyPartnerListFilters } = require('./listFilters');
 const { applyPartnerSearchFilter } = require('./searchFilters');
+const {
+  appendCompanyScopeCondition,
+  resolveLocationScope,
+  sendLocationScopeError,
+} = require('../../services/locationScope');
 
 /**
  * GET /api/Partners
@@ -46,6 +51,18 @@ async function listPartners(req, res) {
 
     paramIdx = applyPartnerSearchFilter({ search, conditions, params, paramIdx });
     paramIdx = applyPartnerListFilters({ query: req.query, conditions, params, paramIdx });
+    const requestedCompanyId = req.query.companyId || req.query.company_id;
+    const locationScope = await resolveLocationScope(req, requestedCompanyId);
+    if (sendLocationScopeError(res, locationScope)) return;
+    if (!requestedCompanyId) {
+      paramIdx = appendCompanyScopeCondition({
+        conditions,
+        params,
+        paramIdx,
+        companySql: 'p.companyid',
+        companyIds: locationScope.companyIds,
+      });
+    }
 
     const whereClause = conditions.join(' AND ');
 

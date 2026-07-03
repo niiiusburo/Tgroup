@@ -10,6 +10,7 @@ import { Layout } from '@/components/Layout';
 import { LocationProvider } from '@/contexts/LocationContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { InvestorAuthProvider, useInvestorAuth } from '@/contexts/InvestorAuthContext';
 import { BusinessUnitProvider, useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { TimezoneProvider } from '@/contexts/TimezoneContext';
 import { Login } from '@/pages';
@@ -46,6 +47,9 @@ const Landing = lazy(() => import('@/pages/Landing').then(m => ({ default: m.Lan
 const JoinCtv = lazy(() => import('@/pages/CTV/JoinCtv').then(m => ({ default: m.JoinCtv })));
 const VerifyDiscount = lazy(() => import('@/pages/VerifyDiscount'));
 const CtvDiscountLanding = lazy(() => import('@/pages/CtvDiscountLanding'));
+const InvestorLogin = lazy(() => import('@/pages/Investor/InvestorLogin').then(m => ({ default: m.InvestorLogin })));
+const InvestorDashboard = lazy(() => import('@/pages/Investor/InvestorDashboard').then(m => ({ default: m.InvestorDashboard })));
+const InvestorResetPassword = lazy(() => import('@/pages/Investor/InvestorResetPassword').then(m => ({ default: m.InvestorResetPassword })));
 
 /**
  * Access Denied page — shown when authenticated but lacking permission
@@ -168,6 +172,13 @@ function LoginRoute() {
   return <Login />;
 }
 
+function InvestorLoginRoute() {
+  const { isAuthenticated, isLoading } = useInvestorAuth();
+  if (isLoading) return <AuthLoading />;
+  if (isAuthenticated) return <Navigate to="/investor" replace />;
+  return <InvestorLogin />;
+}
+
 function AppRoutes({ children }: { readonly children: React.ReactNode }) {
   const { currentLOB } = useBusinessUnit();
   return <Routes key={currentLOB}>{children}</Routes>;
@@ -179,6 +190,8 @@ function AdminCatchAllRedirect() {
   if (
     pathname.startsWith('/ctv/') ||
     pathname === '/verify-discount' ||
+    pathname === '/investor' ||
+    pathname.startsWith('/investor/') ||
     pathname === '/welcome' ||
     pathname === '/login'
   ) {
@@ -209,36 +222,43 @@ function AdminCatchAllRedirect() {
 function App() {
   return (
     <AuthProvider>
-      <TimezoneProvider>
-        <LocationProvider>
-          <BusinessUnitProvider>
-            <Suspense fallback={<div className="flex items-center justify-center h-screen text-gray-500">Loading...</div>}>
-              <AppRoutes>
-                {/* Public routes */}
-                {/* @crossref:route[path="/login", component=LoginRoute] */}
-                <Route path="/login" element={<LoginRoute />} />
-                {/* @crossref:route[path="/welcome", component=Landing] — public Tâm Group landing (ported from CTV app) */}
-                <Route path="/welcome" element={<Landing />} />
-                {/* @crossref:route[path="/verify-discount"] — staff scans CTV voucher QR */}
-                <Route path="/verify-discount" element={<VerifyDiscount />} />
-                {/* @crossref:route[path="/ctv/*"] — CTV portal + public join + fan discount landing */}
-                <Route path="/ctv" element={<Outlet />}>
-                  {/* @crossref:route[path="/ctv/join", component=JoinCtv] */}
-                  <Route path="join" element={<JoinCtv />} />
-                  <Route path="discount/:shortCode" element={<CtvDiscountLanding />} />
-                  {/* @crossref:route[path="/ctv", component=CtvDashboard] — portal home (CTVRouteGuard) */}
-                  <Route
-                    index
-                    element={
-                      <CTVRouteGuard>
-                        <CtvDashboard />
-                      </CTVRouteGuard>
-                    }
-                  />
-                </Route>
-                {import.meta.env.DEV && (
-                  <Route path="/test/address" element={<AddressAutocompleteTest />} />
-                )}
+      <InvestorAuthProvider>
+        <TimezoneProvider>
+          <LocationProvider>
+            <BusinessUnitProvider>
+              <Suspense fallback={<div className="flex items-center justify-center h-screen text-gray-500">Loading...</div>}>
+                <AppRoutes>
+                  {/* Public routes */}
+                  {/* @crossref:route[path="/login", component=LoginRoute] */}
+                  <Route path="/login" element={<LoginRoute />} />
+                  {/* @crossref:route[path="/welcome", component=Landing] — public Tâm Group landing (ported from CTV app) */}
+                  <Route path="/welcome" element={<Landing />} />
+                  {/* @crossref:route[path="/verify-discount"] — staff scans CTV voucher QR */}
+                  <Route path="/verify-discount" element={<VerifyDiscount />} />
+                  {/* @crossref:route[path="/investor/*"] — investor account login, reset, and selected-client dashboard */}
+                  <Route path="/investor" element={<Outlet />}>
+                    <Route path="login" element={<InvestorLoginRoute />} />
+                    <Route path="reset-password" element={<InvestorResetPassword />} />
+                    <Route index element={<InvestorDashboard />} />
+                  </Route>
+                  {/* @crossref:route[path="/ctv/*"] — CTV portal + public join + fan discount landing */}
+                  <Route path="/ctv" element={<Outlet />}>
+                    {/* @crossref:route[path="/ctv/join", component=JoinCtv] */}
+                    <Route path="join" element={<JoinCtv />} />
+                    <Route path="discount/:shortCode" element={<CtvDiscountLanding />} />
+                    {/* @crossref:route[path="/ctv", component=CtvDashboard] — portal home (CTVRouteGuard) */}
+                    <Route
+                      index
+                      element={
+                        <CTVRouteGuard>
+                          <CtvDashboard />
+                        </CTVRouteGuard>
+                      }
+                    />
+                  </Route>
+                  {import.meta.env.DEV && (
+                    <Route path="/test/address" element={<AddressAutocompleteTest />} />
+                  )}
 
           {/* Protected routes wrapped in Layout */}
           <Route
@@ -437,11 +457,12 @@ function App() {
             {/* @crossref:catch-all-route[redirects to Overview; skips public CTV + verify paths] */}
             <Route path="*" element={<AdminCatchAllRedirect />} />
           </Route>
-              </AppRoutes>
-            </Suspense>
-          </BusinessUnitProvider>
-        </LocationProvider>
-      </TimezoneProvider>
+                </AppRoutes>
+              </Suspense>
+            </BusinessUnitProvider>
+          </LocationProvider>
+        </TimezoneProvider>
+      </InvestorAuthProvider>
     </AuthProvider>
   );
 }

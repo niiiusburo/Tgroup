@@ -5,6 +5,12 @@
  */
 const { query: legacyQuery, getQuery } = require("../../db");
 const { mapAllocations } = require("./helpers");
+const {
+  appendCompanyScopeCondition,
+  appendCompanyScopeToSql,
+  resolveLocationScope,
+  sendLocationScopeError,
+} = require("../../services/locationScope");
 
 function getRequestQuery(req) {
   // In tests, ../db.getQuery may be mocked with a no-op executor while
@@ -127,7 +133,7 @@ function addPaymentSearchCondition({ conditions, params, search, paramIdx }) {
   return nextParamIdx;
 }
 
-function paymentCountWhere({ customerId, serviceId, type, search }) {
+function paymentCountWhere({ customerId, serviceId, type, search, companyIds }) {
   const conditions = ['1=1'];
   const params = [];
   let paramIdx = 1;
@@ -146,12 +152,25 @@ function paymentCountWhere({ customerId, serviceId, type, search }) {
   } else if (type === 'deposits') {
     conditions.push(`p.payment_category = 'deposit'`);
   }
-  addPaymentSearchCondition({ conditions, params, search, paramIdx });
+  paramIdx = addPaymentSearchCondition({ conditions, params, search, paramIdx });
+  appendCompanyScopeCondition({
+    conditions,
+    params,
+    paramIdx,
+    companySql: 'partner.companyid',
+    companyIds,
+  });
   return { where: conditions.join(' AND '), params };
 }
 
-async function loadLegacyRows({ customerId, limit, offset }, reqOrLobOrQ) {
+async function loadLegacyRows({ customerId, limit, offset, companyIds }, reqOrLobOrQ) {
   const q = typeof reqOrLobOrQ === 'function' ? reqOrLobOrQ : getQuery(reqOrLobOrQ);
+  if (Array.isArray(companyIds) && companyIds.length === 0) return [];
+  const params = [customerId, parseInt(limit), parseInt(offset)];
+  const scopeSql = companyIds === null
+    ? ''
+    : ` AND partner.companyid = ANY($4::uuid[])`;
+  if (companyIds !== null) params.push(companyIds);
   return q(
     `SELECT
        ap.id,
@@ -176,10 +195,10 @@ async function loadLegacyRows({ customerId, limit, offset }, reqOrLobOrQ) {
      FROM accountpayments ap
      LEFT JOIN partners partner ON partner.id = ap.partnerid
      LEFT JOIN companies company ON company.id = partner.companyid
-     WHERE ap.partnerid = $1
+     WHERE ap.partnerid = $1${scopeSql}
      ORDER BY ap.paymentdate DESC
      LIMIT $2 OFFSET $3`,
-    [customerId, parseInt(limit), parseInt(offset)]
+    params
   );
 }
 
@@ -187,6 +206,8 @@ async function listPayments(req, res) {
   try {
     const q = getRequestQuery(req);
     const { customerId, serviceId, limit = 100, offset = 0, type, search } = req.query;
+    const locationScope = await resolveLocationScope(req, req.query.companyId || req.query.company_id);
+    if (sendLocationScopeError(res, locationScope)) return;
     const params = [];
     let sql = `
       SELECT
@@ -205,6 +226,12 @@ async function listPayments(req, res) {
     `;
 
     sql = appendPaymentFilters({ sql, params, customerId, serviceId, type, search });
+    sql = appendCompanyScopeToSql({
+      sql,
+      params,
+      companySql: 'partner.companyid',
+      companyIds: locationScope.companyIds,
+    });
     sql += ` ORDER BY p.created_at DESC LIMIT $` + (params.length + 1) + ` OFFSET $` + (params.length + 2);
     params.push(parseInt(limit), parseInt(offset));
 
@@ -213,7 +240,7 @@ async function listPayments(req, res) {
 
     if (customerId && result.length === 0 && (!type || type === 'payments')) {
       try {
-        const legacyRows = await loadLegacyRows({ customerId, limit, offset }, q);
+        const legacyRows = await loadLegacyRows({ customerId, limit, offset, companyIds: locationScope.companyIds }, q);
         if (legacyRows.length > 0) {
           result = legacyRows;
           usedLegacyFallback = true;
@@ -223,7 +250,7 @@ async function listPayments(req, res) {
       }
     }
 
-    const count = paymentCountWhere({ customerId, serviceId, type, search });
+    const count = paymentCountWhere({ customerId, serviceId, type, search, companyIds: locationScope.companyIds });
     let countResult = await q(
       `SELECT COUNT(*)
        FROM payments p
@@ -235,9 +262,17 @@ async function listPayments(req, res) {
 
     if (customerId && totalItems === 0 && (!type || type === 'payments')) {
       try {
+        const legacyParams = [customerId];
+        const legacyScopeSql = locationScope.companyIds === null
+          ? ''
+          : ` AND partner.companyid = ANY($2::uuid[])`;
+        if (locationScope.companyIds !== null) legacyParams.push(locationScope.companyIds);
         const legacyCount = await q(
-          `SELECT COUNT(*) FROM accountpayments ap WHERE ap.partnerid = $1`,
-          [customerId]
+          `SELECT COUNT(*)
+           FROM accountpayments ap
+           LEFT JOIN partners partner ON partner.id = ap.partnerid
+           WHERE ap.partnerid = $1${legacyScopeSql}`,
+          legacyParams
         );
         totalItems = parseInt(legacyCount[0]?.count || 0);
       } catch {
@@ -305,6 +340,8 @@ async function listDeposits(req, res) {
       limit = 100,
       offset = 0,
     } = req.query;
+    const locationScope = await resolveLocationScope(req, req.query.companyId || req.query.company_id);
+    if (sendLocationScopeError(res, locationScope)) return;
     const params = [];
     let sql = `
       SELECT
@@ -323,6 +360,12 @@ async function listDeposits(req, res) {
     `;
 
     sql = appendDepositFilters({ sql, params, customerId, dateFrom, dateTo, receiptNumber, type });
+    sql = appendCompanyScopeToSql({
+      sql,
+      params,
+      companySql: 'partner.companyid',
+      companyIds: locationScope.companyIds,
+    });
     const countSql = `SELECT COUNT(*) FROM payments p ${sql.slice(sql.indexOf("FROM payments p") + "FROM payments p".length)}`;
     const countResult = await q(countSql, [...params]);
     const totalItems = parseInt(countResult[0]?.count || 0);
@@ -342,6 +385,8 @@ async function listDepositUsage(req, res) {
   try {
     const q = getRequestQuery(req);
     const { customerId, dateFrom, dateTo, limit = 100, offset = 0 } = req.query;
+    const locationScope = await resolveLocationScope(req, req.query.companyId || req.query.company_id);
+    if (sendLocationScopeError(res, locationScope)) return;
     const params = [];
     let sql = `
       SELECT
@@ -371,6 +416,12 @@ async function listDepositUsage(req, res) {
       params.push(dateTo);
       sql += ` AND p.payment_date <= $` + params.length;
     }
+    sql = appendCompanyScopeToSql({
+      sql,
+      params,
+      companySql: 'partner.companyid',
+      companyIds: locationScope.companyIds,
+    });
 
     const countSql = `SELECT COUNT(*) FROM payments p ${sql.slice(sql.indexOf("FROM payments p") + "FROM payments p".length)}`;
     const countResult = await q(countSql, [...params]);
@@ -391,6 +442,17 @@ async function getPaymentById(req, res) {
   try {
     const q = getRequestQuery(req);
     const { id } = req.params;
+    const locationScope = await resolveLocationScope(req, req.query.companyId || req.query.company_id);
+    if (sendLocationScopeError(res, locationScope)) return;
+    const params = [id];
+    const scopeSql = locationScope.companyIds === null
+      ? ''
+      : Array.isArray(locationScope.companyIds) && locationScope.companyIds.length > 0
+      ? ` AND partner.companyid = ANY($2::uuid[])`
+      : ' AND false';
+    if (locationScope.companyIds !== null && locationScope.companyIds.length > 0) {
+      params.push(locationScope.companyIds);
+    }
     const rows = await q(
       `SELECT p.id, p.customer_id, p.service_id,
               partner.name AS customer_name,
@@ -402,8 +464,8 @@ async function getPaymentById(req, res) {
        FROM payments p
        LEFT JOIN partners partner ON partner.id = p.customer_id
        LEFT JOIN companies company ON company.id = partner.companyid
-       WHERE p.id = $1`,
-      [id]
+       WHERE p.id = $1${scopeSql}`,
+      params
     );
     if (rows.length === 0) return res.status(404).json({ error: "Payment not found" });
 

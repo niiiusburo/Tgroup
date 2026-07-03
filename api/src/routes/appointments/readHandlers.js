@@ -6,6 +6,11 @@
 const { getQuery } = require('../../db');
 const { errorResponse, isValidISODate, isValidUUID, VALID_STATES } = require('./helpers');
 const { addAccentInsensitiveSearchCondition } = require('../../utils/search');
+const {
+  appendCompanyScopeCondition,
+  resolveLocationScope,
+  sendLocationScopeError,
+} = require('../../services/locationScope');
 
 /**
  * GET /api/Appointments
@@ -116,6 +121,18 @@ async function listAppointments(req, res) {
       conditions.push(`a.companyid = $${paramIdx}`);
       params.push(effectiveCompanyId);
       paramIdx++;
+    }
+
+    const locationScope = await resolveLocationScope(req, effectiveCompanyId);
+    if (sendLocationScopeError(res, locationScope)) return;
+    if (!effectiveCompanyId) {
+      paramIdx = appendCompanyScopeCondition({
+        conditions,
+        params,
+        paramIdx,
+        companySql: 'a.companyid',
+        companyIds: locationScope.companyIds,
+      });
     }
 
     if (effectiveDoctorId) {

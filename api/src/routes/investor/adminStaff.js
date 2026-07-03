@@ -13,6 +13,11 @@ const {
 const { requirePermission } = require('../../middleware/auth');
 const { getQuery } = require('../../db');
 const { generateInitialPassword } = require('./services/passwordReset');
+const {
+  appendCompanyScopeToSql,
+  resolveLocationScope,
+  sendLocationScopeError,
+} = require('../../services/locationScope');
 
 const router = express.Router();
 
@@ -28,17 +33,25 @@ router.get('/', requirePermission('investors.manage'), async (req, res) => {
   try {
     const lob = resolveLob(req, req.query.lob);
     const db = getQuery(lob);
+    const locationScope = await resolveLocationScope(req);
+    if (sendLocationScopeError(res, locationScope)) return;
+
+    const countScopeSql = locationScope.companyIds === null
+      ? ''
+      : ' AND client_partner.companyid = ANY($2::uuid[])';
+    const params = locationScope.companyIds === null ? [lob] : [lob, locationScope.companyIds];
 
     const rows = await db(
       `SELECT ia.id, ia.email, ia.investor_name, ia.lob, ia.is_active,
               ia.last_login, ia.created_at,
-              COUNT(ic.id) FILTER (WHERE ic.is_visible = true) AS client_count
+              COUNT(ic.id) FILTER (WHERE ic.is_visible = true${countScopeSql}) AS client_count
        FROM dbo.investor_accounts ia
        LEFT JOIN dbo.investor_clients ic ON ic.investor_id = ia.id AND ic.lob = ia.lob
+       LEFT JOIN dbo.partners client_partner ON client_partner.id = ic.partner_id
        WHERE ia.lob = $1
        GROUP BY ia.id
        ORDER BY ia.created_at DESC`,
-      [lob]
+      params
     );
 
     const items = (rows || []).map((r) => ({
@@ -175,15 +188,24 @@ router.get('/:id/clients', requirePermission('investors.manage'), async (req, re
   try {
     const lob = resolveLob(req, req.query.lob);
     const db = getQuery(lob);
+    const locationScope = await resolveLocationScope(req);
+    if (sendLocationScopeError(res, locationScope)) return;
+    const params = [req.params.id, lob];
 
-    const rows = await db(
-      `SELECT ic.partner_id, ic.is_visible, ic.marked_at, p.name AS partner_name
+    let sql = `SELECT ic.partner_id, ic.is_visible, ic.marked_at, p.name AS partner_name
        FROM dbo.investor_clients ic
        JOIN dbo.partners p ON p.id = ic.partner_id
        WHERE ic.investor_id = $1 AND ic.lob = $2
-       ORDER BY ic.marked_at DESC`,
-      [req.params.id, lob]
-    );
+       `;
+    sql = appendCompanyScopeToSql({
+      sql,
+      params,
+      companySql: 'p.companyid',
+      companyIds: locationScope.companyIds,
+    });
+    sql += ' ORDER BY ic.marked_at DESC';
+
+    const rows = await db(sql, params);
 
     return res.json({
       success: true,

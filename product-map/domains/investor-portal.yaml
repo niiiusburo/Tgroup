@@ -52,8 +52,12 @@ ui_surfaces:
   - /investor (client roster)
   - /customers (investor visibility column)
   - /settings (investors tab)
+invariants:
+  - Investor portal routes must be mounted at `/investor/login`, `/investor/reset-password`, and `/investor`; investor auth remains separate from staff auth and clears stale staff session state on investor login.
+  - Staff Investor+ visibility and admin client-count surfaces must enforce the caller's backend employee location scope through the shared customer `partners.companyid`; branch admins cannot view or toggle investor access for other-branch customers by direct API call.
 impact_tests:
   - api/src/routes/investor/__tests__/auth.test.js
   - api/src/routes/investor/__tests__/clientRedaction.test.js
   - api/src/routes/investor/__tests__/phase2.test.js
   - api/scripts/verify-investor-phase2.mjs
+  - npm --prefix website run build

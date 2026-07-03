@@ -183,7 +183,7 @@ describe('reports cash-flow aggregation', () => {
     });
   });
 
-  it('allows the Admin group to run all-location cash-flow reports without wildcard or location rows', async () => {
+  it('does not let the Admin group run all-location cash-flow reports without scoped locations', async () => {
     resolveEffectivePermissions.mockResolvedValue({
       groupName: 'Admin',
       effectivePermissions: ['reports.view', 'permissions.view'],
@@ -197,6 +197,7 @@ describe('reports cash-flow aggregation', () => {
 
     expect(res.status).toBe(200);
     const [sql, params] = query.mock.calls[0];
+    expect(sql).toContain('AND false');
     expect(sql).not.toContain('ANY(');
     expect(sql).not.toContain('p.companyid');
     expect(params).toEqual(['2026-05-01', '2026-05-31']);

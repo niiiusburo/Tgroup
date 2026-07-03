@@ -5,6 +5,7 @@ import {
   type Employee,
   type EmployeeRole,
   type EmployeeStatus,
+  inferRoleFromFlags,
 } from '@/data/mockEmployees';
 import { useDebouncedValue } from './useDebouncedValue';
 
@@ -17,36 +18,13 @@ function mapApiStatus(active: boolean): EmployeeStatus {
 
 
 
-/**
- * Derive roles from API employee flags and hrjobname
- */
 function deriveRoles(
   isdoctor: boolean,
   isassistant: boolean,
   isreceptionist: boolean,
   jobtitle: string | null
 ): readonly EmployeeRole[] {
-  // Single-role: return exactly one role based on DB flags + jobtitle
-  if (isdoctor) return ['doctor'];
-  if (isreceptionist) return ['receptionist'];
-  if (isassistant) {
-    if (jobtitle && jobtitle.toLowerCase().includes('trợ lý')) {
-      return ['doctor-assistant'];
-    }
-    return ['assistant'];
-  }
-
-  // No role flags set — classify by jobtitle
-  if (jobtitle) {
-    const lower = jobtitle.toLowerCase();
-    if (lower.includes('quản lý') || lower.includes('manager')) return ['general-manager'];
-    if (lower.includes('marketing')) return ['marketing'];
-    if (lower.includes('sale')) return ['sales-staff'];
-    if (lower.includes('cskh') || lower.includes('customer service') || lower.includes('hỗ trợ')) return ['customer-service'];
-    if (lower.includes('quản trị') || lower.includes('admin')) return ['general-manager'];
-  }
-
-  return ['assistant'];
+  return [inferRoleFromFlags(isdoctor, isassistant, isreceptionist, jobtitle)];
 }
 
 /**
@@ -63,7 +41,7 @@ function mapApiEmployeeToEmployee(apiEmployee: ApiEmployee): Employee {
       apiEmployee.isdoctor,
       apiEmployee.isassistant,
       apiEmployee.isreceptionist,
-      apiEmployee.jobtitle ?? null
+      apiEmployee.jobtitle ?? apiEmployee.hrjobname ?? null
     ),
     status: mapApiStatus(apiEmployee.active),
     locationId: apiEmployee.companyid || '',

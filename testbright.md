@@ -9,6 +9,29 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 Do not remove failed checks until the defect is fixed and rerun.
 
 ---
+# TestSprite Plan: NK2 TLBS, Investor+, branch-admin scope 2026-07-03
+Feature/edit name: NK2 appointment TLBS restore, Investor+ route restore, confirm route check, and backend branch-admin location scope (v0.40.3).
+
+Changed URLs / API routes / data flow:
+- URLs: `/calendar` appointment edit modal, `/verify-discount`, `/investor/login`, `/investor/reset-password`, `/investor`.
+- API: `GET /api/Employees`, `GET /api/Appointments`, `GET /api/Partners`, `GET /api/Payments*`, `POST /api/Reports/cash-flow/summary`, `GET /api/investor-visibility`, `PATCH /api/Partners/:id/investor-visibility`, `GET /api/admin/investors*`.
+- Data flow: staff JWT -> `resolveEffectivePermissions()` -> `locationScope` helper -> branch-scoped SQL; migrated TLBS `dbo.employees` flags/title -> `inferRoleFromFlags()` -> appointment/service `DoctorSelector` filterRoles `doctor-assistant`; Investor JWT -> `/investor` selected-client dashboard.
+
+Expected behavior:
+- Active `Trợ lý bác sĩ` employees in NK2 appear in the appointment edit modal's TLBS dropdown even when the migrated row is dual-flagged as doctor + assistant.
+- `/verify-discount` remains mounted for the CTV confirm/complete flow.
+- Investor+ pages are mounted at `/investor/login`, `/investor/reset-password`, and `/investor`.
+- Branch admins only see customers, appointments, payments, reports, and Investor+ customer visibility for their assigned cơ sở; direct out-of-scope requests return 403.
+
+Execution checklist:
+- [x] PASS: Live root-cause probe before fix - NK2 had 40 TLBS-title employees (23 active), but all active TLBS rows were dual-flagged and the bundle classified doctor before doctor-assistant; screenshot `output/playwright/nk2-tlbs-check/03-tlbs-dropdown.png` showed "Không tìm thấy bác sĩ".
+- [x] PASS: TLBS unit regression - `cd website && ./node_modules/.bin/vitest run src/types/employee.test.ts` passed 1 file / 3 tests.
+- [x] PASS: Backend branch-scope focused tests - `cd api && ./node_modules/.bin/jest src/routes/reports/__tests__/cashFlow.test.js src/routes/partners/__tests__/readHandlers.test.js src/routes/appointments/__tests__/readHandlers.test.js src/routes/payments/__tests__/readHandlers.test.js --runInBand` passed 4 suites / 21 tests.
+- [x] PASS: Investor+ frontend compile - `npm --prefix website run build` passed and emitted InvestorLogin, InvestorResetPassword, and InvestorDashboard chunks.
+- [x] PASS: Security scan - `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off ...` scanned 17 changed files with 0 findings.
+- [ ] PENDING: Live NK2 browser proof after deploy - `/calendar` edit modal TLBS dropdown shows TLBS staff; `/investor/login` renders; `/verify-discount` still renders.
+
+---
 # TestSprite Plan: Patient media upload hardening + mobile photo feature 2026-07-02
 Feature/edit name: Media upload constraints (10MB, image-only, 5/min rate limit, multi-field-name support) + NK patient app photo upload/download/share.
 

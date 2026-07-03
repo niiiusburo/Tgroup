@@ -2,6 +2,17 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.40.3] — 2026-07-03 — NK2 TLBS restore, Investor+ route restore, and branch-admin backend scope
+
+### Fixes
+- Fixed TLBS staff classification for dual doctor/assistant rows titled `Trợ lý bác sĩ`; appointment and service TLBS dropdowns now receive `doctor-assistant` roles again instead of hiding those employees.
+- Restored the Investor+ frontend route surface: `/investor/login`, `/investor/reset-password`, and `/investor` dashboard pages are mounted again.
+- Moved branch-admin location scope from frontend-only filtering to backend-enforced reads for customers, appointments, payments/deposits, reports cash-flow, and Investor+ visibility/client-count surfaces. Plain `Admin` now respects assigned `employee_location_scope`; all-location access requires wildcard, Super Admin, or System Administrator.
+
+### Testing
+- Added TLBS role regression coverage and backend list-scope route tests.
+- Verified with focused API tests, TLBS Vitest, `npm --prefix website run build`, and scoped Semgrep (0 findings).
+
 ## [0.40.2] — 2026-07-02 — Patient media per-service tagging: sale_order_line_id filtering and validation
 
 ### Backend

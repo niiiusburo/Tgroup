@@ -7,6 +7,7 @@
 const express = require('express');
 const { requirePermission } = require('../../middleware/auth');
 const { getQuery } = require('../../db');
+const { resolveLocationScope, sendLocationScopeError } = require('../../services/locationScope');
 
 const router = express.Router();
 const MAX_BATCH = 50;
@@ -36,6 +37,23 @@ router.get('/', requirePermission('customers.set_investor_visibility'), async (r
         return res.status(400).json({ error: 'partnerIds required', code: 'VALIDATION' });
       }
 
+      const locationScope = await resolveLocationScope(req);
+      if (sendLocationScopeError(res, locationScope)) return;
+
+      let scopedPartnerIds = ids;
+      if (locationScope.companyIds !== null) {
+        const scopedPartners = await db(
+          `SELECT id
+           FROM dbo.partners
+           WHERE id = ANY($1::uuid[])
+             AND customer = true
+             AND isdeleted = false
+             AND companyid = ANY($2::uuid[])`,
+          [ids, locationScope.companyIds]
+        );
+        scopedPartnerIds = (scopedPartners || []).map((row) => row.id);
+      }
+
       const investors = await db(
         `SELECT id, investor_name, email, is_active
          FROM dbo.investor_accounts
@@ -44,7 +62,7 @@ router.get('/', requirePermission('customers.set_investor_visibility'), async (r
         [lob]
       );
 
-      if (!investors || investors.length === 0) {
+      if (!investors || investors.length === 0 || scopedPartnerIds.length === 0) {
         return res.json({ success: true, batch: {} });
       }
 
@@ -52,7 +70,7 @@ router.get('/', requirePermission('customers.set_investor_visibility'), async (r
         `SELECT partner_id, investor_id, is_visible
          FROM dbo.investor_clients
          WHERE lob = $1 AND partner_id = ANY($2::uuid[])`,
-        [lob, ids]
+        [lob, scopedPartnerIds]
       );
 
       const visMap = new Map();
@@ -62,7 +80,7 @@ router.get('/', requirePermission('customers.set_investor_visibility'), async (r
       }
 
       const batch = {};
-      for (const pid of ids) {
+      for (const pid of scopedPartnerIds) {
         batch[pid] = investors.map((inv) => ({
           investorId: inv.id,
           investorName: inv.investor_name || inv.email,
@@ -77,6 +95,19 @@ router.get('/', requirePermission('customers.set_investor_visibility'), async (r
     if (!partnerId) {
       return res.status(400).json({ error: 'partnerId or partnerIds required', code: 'VALIDATION' });
     }
+
+    const partnerRows = await db(
+      `SELECT companyid
+       FROM dbo.partners
+       WHERE id = $1 AND customer = true AND isdeleted = false
+       LIMIT 1`,
+      [partnerId]
+    );
+    if (!partnerRows || partnerRows.length === 0) {
+      return res.status(404).json({ error: 'Client not found', code: 'U_PARTNER_NOT_FOUND' });
+    }
+    const locationScope = await resolveLocationScope(req, partnerRows[0].companyid);
+    if (sendLocationScopeError(res, locationScope)) return;
 
     let investorFilter = '';
     const params = [lob, partnerId];

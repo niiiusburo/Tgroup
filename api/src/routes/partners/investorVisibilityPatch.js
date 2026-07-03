@@ -6,6 +6,7 @@
  */
 const { InvestorVisibilityPatchSchema } = require('@tgroup/contracts');
 const { getQuery } = require('../../db');
+const { resolveLocationScope, sendLocationScopeError } = require('../../services/locationScope');
 
 async function patchInvestorVisibility(req, res) {
   try {
@@ -25,7 +26,7 @@ async function patchInvestorVisibility(req, res) {
     }
 
     const partners = await db(
-      `SELECT id FROM dbo.partners
+      `SELECT id, companyid FROM dbo.partners
        WHERE id = $1 AND customer = true AND isdeleted = false
        LIMIT 1`,
       [partnerId]
@@ -33,6 +34,8 @@ async function patchInvestorVisibility(req, res) {
     if (!partners || partners.length === 0) {
       return res.status(404).json({ error: 'Client not found', code: 'U_PARTNER_NOT_FOUND' });
     }
+    const locationScope = await resolveLocationScope(req, partners[0].companyid);
+    if (sendLocationScopeError(res, locationScope)) return;
 
     const investors = await db(
       `SELECT id, lob, is_active, COALESCE(investor_name, email) AS name

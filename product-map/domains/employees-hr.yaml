@@ -66,7 +66,10 @@ affected_by:
   - Changes to dbo.hrjobs (dropdown data)
   - Employee and permission-board searches must remain accent-insensitive for Vietnamese staff, role, and location names.
   - Cosmetic LOB employee add/edit/profile surfaces must pass the active LOB into Companies and Employees API calls so branch choices and saves stay in the cosmetic database.
+invariants:
+  - Dual-flagged doctor/assistant employees with a `Trợ lý bác sĩ` title must map to `doctor-assistant` before the generic doctor role so appointment/service TLBS selectors can show them.
 impact_tests:
+  - website/src/types/employee.test.ts
   - website/e2e/check_employees_page.spec.ts
   - website/e2e/employee-save.spec.ts
   - website/src/components/employees/__tests__/EmployeeForm.lob.test.tsx

@@ -75,6 +75,7 @@ ui_invariants:
   - Cosmetic customer create/update and customer balance reads must use the cosmetic mirror (`/api/cosmetic/Partners`, `/api/cosmetic/CustomerBalance`) so company FKs and deposit summaries resolve against `tcosmetic_demo`, not the dental database.
   - Customer outstanding balance must ignore soft-deleted saleorders so deleting the last service line clears the removed card's residual from the customer profile financial summary.
   - Customer health-check upload dates must use the shared in-flow DatePicker and keep the required-date guard in frontend validation instead of relying on native browser date validation.
+  - GET /api/Partners must enforce backend employee location scope when `companyId` is omitted or requested directly; branch admins cannot read other-branch customers by bypassing the UI.
 jobs:
   - none (archive scripts in api/scripts/archive/ are stale)
 shared_types:
@@ -95,6 +96,7 @@ impact_tests:
   - website/e2e/face-recognition related flows
   - api/src/routes/partners/__tests__/searchFilters.test.js
   - api/src/routes/partners/__tests__/partnerValidation.test.js
+  - api/src/routes/partners/__tests__/readHandlers.test.js
   - website/src/__tests__/customer-deep-link.test.tsx
   - api/src/routes/__tests__/customerBalance.lob.test.js
   - website/src/hooks/__tests__/useCustomers.lob.test.ts

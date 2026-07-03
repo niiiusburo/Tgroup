@@ -5,7 +5,10 @@
  * @crossref:used-in[shared report validators/filters: all api/src/routes/reports/*.js sub-routers (dashboard, revenue, revenueBreakdowns, cashFlow, appointments, doctors, customers, employeesOverview, servicesBreakdown, locationsComparison)]
  * @crossref:uses[api/src/services/permissionService.js (resolveEffectivePermissions), product-map/domains/reports-analytics.yaml]
  */
-const { resolveEffectivePermissions } = require('../../services/permissionService');
+const {
+  hasAllLocationAccess,
+  resolveLocationScope,
+} = require('../../services/locationScope');
 
 function err(res, status, msg) {
   return res.status(status).json({ success: false, error: msg });
@@ -41,30 +44,16 @@ function dateCompanyFilter(dateFrom, dateTo, companyId, dateCol = 'datecreated',
 }
 
 function hasAllLocationReportAccess(permissionState = {}) {
-  const groupName = String(permissionState.groupName || '').trim().toLowerCase();
-  const permissions = new Set(permissionState.effectivePermissions || []);
-  return permissions.has('*') || groupName === 'admin' || groupName === 'super admin';
+  return hasAllLocationAccess(permissionState);
 }
 
 async function resolveReportCompanyScope(req, res, companyId) {
-  // Resolve from the caller's home DB (authLob) so an admin keeps all-location report
-  // access on /api/cosmetic/* (the cosmetic mirror DB is not seeded with the admin group).
-  const permissionState = await resolveEffectivePermissions(req.user?.employeeId, req.user?.authLob || 'dental');
-
-  if (hasAllLocationReportAccess(permissionState)) {
-    return { companyIds: companyId ? [companyId] : null };
-  }
-
-  const allowedCompanyIds = (permissionState.locations || [])
-    .map(location => location.id)
-    .filter(Boolean);
-
-  if (companyId && !allowedCompanyIds.includes(companyId)) {
+  const scope = await resolveLocationScope(req, companyId);
+  if (scope.error) {
     err(res, 403, 'Location not allowed');
     return null;
   }
-
-  return { companyIds: companyId ? [companyId] : allowedCompanyIds };
+  return { companyIds: scope.companyIds };
 }
 
 function datePaymentScopeFilter(dateFrom, dateTo, scope = {}, dateCol = 'p.payment_date', paymentAlias = 'p') {
@@ -83,7 +72,11 @@ function datePaymentScopeFilter(dateFrom, dateTo, scope = {}, dateCol = 'p.payme
     idx++;
   }
 
-  if (Array.isArray(scope.companyIds) && scope.companyIds.length > 0) {
+  if (Array.isArray(scope.companyIds)) {
+    if (scope.companyIds.length === 0) {
+      conds.push('false');
+      return { where: conds.length ? 'AND ' + conds.join(' AND ') : '', params, idx };
+    }
     const locationParam = idx;
     params.push(scope.companyIds);
     idx++;

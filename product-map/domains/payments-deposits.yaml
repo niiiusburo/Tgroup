@@ -90,6 +90,7 @@ affected_by:
   - Changes to VietQR library or bank BIN list
 impact_tests:
   - api/tests/readRoutePermissions.test.js
+  - api/src/routes/payments/__tests__/readHandlers.test.js
   - website/e2e/team-charlie-payments.spec.ts
   - website/e2e/vietqr-payment.spec.ts
   - website/e2e/vps-payment-history.spec.ts
@@ -110,3 +111,4 @@ notes:
   - Customer balance advance totals are based on `payments.payment_category = 'deposit'`; unallocated service/payment receipts must not be counted as advances even when `service_id` is blank.
   - CustomerBalance outstanding totals are based on non-deleted receivables only; soft-deleted `saleorders` residuals must not appear as customer debt after a service card is removed.
   - Payment and deposit transaction date fields must use the shared in-flow DatePicker while preserving the same posted date strings and payment payload shape.
+  - GET /api/Payments, /api/Payments/deposits, /api/Payments/deposit-usage, and /api/Payments/:id must enforce backend employee location scope through the linked customer `partners.companyid`.

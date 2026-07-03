@@ -151,14 +151,14 @@ PUT handler-level validation: `companyId` (when present) must be a UUID (`400 IN
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/` | Auth | `?offset, limit, search, companyId` | `PaginatedResponse<Partner>` |
+| GET | `/` | Auth + backend location scope | `?offset, limit, search, companyId` | `PaginatedResponse<Partner>`; branch-scoped callers omit/limit to allowed `companyid`, out-of-scope `companyId` returns `403 LOCATION_NOT_ALLOWED` |
 | GET | `/check-unique` | Auth | `?field, value` (e.g. phone, email) | `{ available: boolean }` |
 | GET | `/resolve` | Perm:`customers.view` | `?key` (UUID, customer ref, or normalized phone) | `{ matchedBy, partner }`, 404 `CUSTOMER_NOT_FOUND`, or 409 `CUSTOMER_LOOKUP_AMBIGUOUS` with candidates |
 | GET | `/:id` | Perm:`customers.view` | — | Partner detail |
 | GET | `/:id/GetKPIs` | Perm:`customers.view` | — | KPI stats |
 | POST | `/` | Perm:`customers.add` | Partner fields | Created partner |
 | PUT | `/:id` | Perm:`customers.edit` | Partner fields | Updated partner |
-| PATCH | `/:id/investor-visibility` | Perm:`customers.set_investor_visibility` + Admin group/wildcard | `{ investorId, isVisible }` | Upserts `dbo.investor_clients`; non-admin returns `403 S_ADMIN_ONLY` |
+| PATCH | `/:id/investor-visibility` | Perm:`customers.set_investor_visibility` + Admin group/wildcard + backend location scope | `{ investorId, isVisible }` | Upserts `dbo.investor_clients`; non-admin returns `403 S_ADMIN_ONLY`, out-of-scope branch returns `403 LOCATION_NOT_ALLOWED` |
 | PATCH | `/:id/soft-delete` | Perm:`customers.delete` | — | Soft-deleted partner |
 | DELETE | `/:id/hard-delete` | Perm:`customers.hard_delete` | — | Hard-deleted partner |
 
@@ -631,8 +631,8 @@ Read-only external portal. Investor JWT (`type:'investor'`) signed with `INVESTO
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/api/investor-visibility` | Staff JWT + `customers.set_investor_visibility` + Admin group/wildcard | `partnerIds=...&lob=dental\|cosmetic` or `partnerId=&investorId?` | `{ success, batch }` or `{ success, items }`; non-admin returns `403 S_ADMIN_ONLY` |
-| PATCH | `/api/Partners/:id/investor-visibility` | Staff JWT + `customers.set_investor_visibility` + Admin group/wildcard | `{ investorId, isVisible }` | `{ success, investorId, partnerId, isVisible, investorName }`; writes `dbo.investor_clients` |
+| GET | `/api/investor-visibility` | Staff JWT + `customers.set_investor_visibility` + Admin group/wildcard + backend location scope | `partnerIds=...&lob=dental\|cosmetic` or `partnerId=&investorId?` | `{ success, batch }` or `{ success, items }`; non-admin returns `403 S_ADMIN_ONLY`, out-of-scope branch returns `403 LOCATION_NOT_ALLOWED` |
+| PATCH | `/api/Partners/:id/investor-visibility` | Staff JWT + `customers.set_investor_visibility` + Admin group/wildcard + backend location scope | `{ investorId, isVisible }` | `{ success, investorId, partnerId, isVisible, investorName }`; writes `dbo.investor_clients` |
 
 ### Paginated List
 ```json
