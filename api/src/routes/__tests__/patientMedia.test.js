@@ -171,7 +171,7 @@ describe('patient media route', () => {
 
     const res = await request(app)
       .post('/media')
-      .attach('file', Buffer.from('png'), { filename: 'photo.png', contentType: 'image/png' })
+      .attach('image', Buffer.from('png'), { filename: 'photo.png', contentType: 'image/png' })
       .expect(503);
 
     expect(res.body.code).toBe('NOT_CONFIGURED');

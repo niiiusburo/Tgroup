@@ -1,0 +1,143 @@
+name: Patient Portal
+summary: |
+  Patient-facing iOS portal for NK Clinic. Patients login with phone + password,
+  view appointments, treatment plans, financial balance, pay via VietQR, and manage
+  referrals, reviews, and support. Uses existing partners/customer data; new tables
+  are additive only.
+owns:
+  - api/src/middleware/patientAuth.js
+  - api/src/routes/patient/
+  - api/src/routes/media.js
+  - api/src/services/mediaService.js
+  - nk-patient-app/ (Expo iOS app)
+  - website/src/components/customer/ServiceMediaGallery.tsx
+reads:
+  - api/src/db.js (getQuery)
+  - api/src/routes/auth.js (password verification pattern)
+writes:
+  - dbo.patient_devices
+  - dbo.patient_consents
+  - dbo.patient_notifications
+  - dbo.patient_referrals
+  - dbo.service_reviews
+  - dbo.patient_media
+  - dbo.support_tickets
+  - dbo.chat_sessions
+  - dbo.chat_messages
+  - dbo.support_kb_chunks
+  - dbo.aftercare_instructions
+  - dbo.partners (password_hash on register/claim)
+tables:
+  - dbo.patient_devices
+  - dbo.patient_consents
+  - dbo.patient_notifications
+  - dbo.patient_referrals
+  - dbo.service_reviews
+  - dbo.patient_media
+  - dbo.support_tickets
+  - dbo.chat_sessions
+  - dbo.chat_messages
+  - dbo.support_kb_chunks
+  - dbo.aftercare_instructions
+  - dbo.partners (read-only identity)
+  - dbo.appointments (read-only)
+  - dbo.saleorders (read-only)
+  - dbo.payments (read-only)
+  - dbo.dotkhams (read-only)
+  - dbo.company_bank_settings (read-only)
+endpoints:
+  - POST /api/patient/auth/login
+  - POST /api/patient/auth/register
+  - POST /api/patient/auth/refresh
+  - POST /api/patient/auth/device
+  - GET  /api/patient/auth/me
+  - GET  /api/patient/dashboard
+  - GET  /api/patient/appointments
+  - GET  /api/patient/appointments/:id
+  - GET  /api/patient/treatments
+  - GET  /api/patient/treatments/:id
+  - GET  /api/patient/balance
+  - GET  /api/patient/balance/payments
+  - GET  /api/patient/media
+  - POST /api/patient/media
+  - GET  /api/media
+  - POST /api/media
+  - DELETE /api/media/:id
+  - GET  /api/patient/notifications
+  - PATCH /api/patient/notifications/:id/read
+  - PATCH /api/patient/notifications/read-all
+  - GET  /api/patient/referrals
+  - POST /api/patient/referrals
+  - GET  /api/patient/reviews
+  - POST /api/patient/reviews
+  - GET  /api/patient/support
+  - POST /api/patient/support
+  - GET  /api/patient/chat/sessions
+  - POST /api/patient/chat/sessions
+  - GET  /api/patient/chat/sessions/:id/messages
+  - POST /api/patient/chat/sessions/:id/messages
+  - POST /api/patient/chat/sessions/:id/escalate
+  - POST /api/patient/chat/sessions/:id/learn
+  - GET  /api/patient/profile
+  - PUT  /api/patient/profile
+  - PUT  /api/patient/profile/consents
+  - POST /api/patient/profile/change-password
+ui_surfaces:
+  - iOS Patient App (Expo)
+  - Login, Home, Appointments, Treatments, Finance, Profile, Media, Notifications, Referrals, Support, Chat
+jobs:
+  - none (push notifications deferred)
+shared_types:
+  - nk-patient-app/src/types/auth.ts
+  - nk-patient-app/src/services/api.ts
+  - nk-patient-app/src/context/AuthContext.tsx
+dependencies:
+  - api/src/db.js (getQuery)
+  - api/src/services/authSession.js (lob scope resolution pattern)
+  - api/src/routes/payments.js (VietQR logic)
+  - company_bank_settings (VietQR bank details)
+  - hosoonline.com (external media service — plugin)
+affected_by:
+  - Changes to dbo.partners schema (password_hash, customer flag)
+  - Changes to dbo.appointments schema
+  - Changes to dbo.saleorders schema
+  - Changes to company_bank_settings schema
+  - Changes to VietQR library or bank BIN list
+impact_tests:
+  - api/src/routes/patient/__tests__/auth.test.js (to create)
+  - nk-patient-app/__tests__/LoginScreen.test.tsx (to create)
+  - nk-patient-app/__tests__/HomeScreen.test.tsx (to create)
+risk_level: high
+media_constraints:
+  file_size_limit: 10 MB
+  allowed_mime_types:
+    - image/jpeg
+    - image/jpg
+    - image/png
+    - image/webp
+    - image/heic
+    - image/heif
+  single_file_per_request: true
+  field_name: image
+  rate_limiting:
+    limit_per_minute: 5
+    key_priority:
+      - patient.partnerId (patient routes)
+      - user.id (staff routes)
+      - ipKeyGenerator (unauthenticated fallback with IPv6 safety)
+  error_codes:
+    - FILE_TOO_LARGE (HTTP 413)
+    - MULTIPLE_FILES_NOT_ALLOWED (HTTP 400)
+    - INVALID_FILE_TYPE (HTTP 400)
+    - RATE_LIMIT_EXCEEDED (HTTP 429)
+    - NOT_CONFIGURED (HTTP 503 when MEDIA_SERVICE_URL/API_KEY missing)
+notes:
+  - Patient auth uses separate JWT secret (PATIENT_JWT_SECRET) from staff auth.
+  - Patient data segmentation enforced by requirePatientAuth middleware (partner_id filter).
+  - Media is a plugin interface: MEDIA_SERVICE_URL + MEDIA_SERVICE_API_KEY env vars.
+  - File uploads are hardened with multer (10 MB limit, MIME type validation, single file) and express-rate-limit (5 per minute per user).
+  - Staff media endpoints (/api/media) link each photo to a sale_order_line_id so doctors can attach images to a specific treatment line.
+  - Payment uses existing VietQR flow; no new payment gateway integration.
+  - Push notifications deferred to Phase 4.
+  - All new tables are additive; no existing schema changes.
+  - Patient registration = claim existing partners row by phone + set password_hash.

@@ -2,6 +2,56 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.40.1] — 2026-07-02 — Backend media API hardening: multer + rate limiting
+
+### Backend
+- **Media upload constraints** enforced via `api/src/services/mediaUpload.js`:
+  - File size limit: **10 MB** (multer `fileSize` limit)
+  - Allowed MIME types: `image/jpeg`, `image/jpg`, `image/png`, `image/webp`, `image/heic`, `image/heif`
+  - Single file per request (multer `files: 1`)
+  - Custom file type validation with typed error response (`code: 'INVALID_FILE_TYPE'`)
+- **Rate limiting** per authenticated user:
+  - Limit: **5 uploads per minute** per patient or staff member
+  - Key generation: prioritizes `req.patient.partnerId` (patients), falls back to `req.user.id` (staff), then IPv6-safe IP via `ipKeyGenerator`
+  - Uses express-rate-limit v8+ with IPv6 validation
+  - Returns 429 with `code: 'RATE_LIMIT_EXCEEDED'` when exceeded
+- **Error handling middleware** (`handleMulterError`):
+  - Maps multer errors to standard error envelope with typed error codes
+  - Handles `LIMIT_FILE_SIZE`, `LIMIT_FILE_COUNT`, and custom file type validation errors
+  - Returns structured JSON responses (status + code + message)
+
+### Testing
+- 27 comprehensive tests in `mediaUpload.test.js` covering:
+  - Constants validation (file size, MIME types, rate limit)
+  - Multer configuration (single file, file type filtering, size limits)
+  - Rate limiting (per-user isolation, IPv6 safety, HTTP method skipping)
+  - Error handler middleware (all error types)
+- 4 tests in `patientMedia.test.js` covering:
+  - Media listing with/without external service
+  - Media upload with automatic client creation
+  - Service configuration validation (503 NOT_CONFIGURED)
+- All 1058 tests pass (0 failures)
+
+### Fixes
+- Fixed IPv6 validation error in rate limiter by properly using `ipKeyGenerator` from express-rate-limit v8+
+- Fixed test field name mismatch (`.attach('file', ...)` → `.attach('image', ...)` to match multer configuration)
+
+## [0.40.0] — 2026-07-02 — NK2 staff can attach treatment photos to service lines
+
+### New Features
+- **Staff media API** (`/api/media`): `GET`, `POST`, and `DELETE` for patient treatment photos tied to a specific `sale_order_line_id`. Reuses the NK Photo media bridge with the API key kept server-side.
+- **ServiceMediaGallery** component in the customer service history row: doctors can view, upload (before/after/x-ray/other), and delete treatment photos for an individual service line.
+- **`patient_media` schema** gains `sale_order_line_id` so photos are associated with a specific treatment/service line, not just the patient.
+- **New permissions** `patient_media.view` and `patient_media.upload`; granted to the Admin group by default and assignable through the permission board.
+- **Deployment wiring** for `MEDIA_SERVICE_URL` and `MEDIA_SERVICE_API_KEY` added to `docker-compose.yml`, `.env.example`, and `api/.env.example`.
+
+### Backend
+- Extracted shared NK Photo integration into `api/src/services/mediaService.js`; refactored `api/src/routes/patient/media.js` to use it.
+- Added `api/src/routes/media.js` mounted at `/api/media` (and `/api/cosmetic/media` when cosmetic LOB is enabled).
+
+### Testing
+- Updated `patientMedia.test.js` for the shared service refactor; added migration `070_add_service_line_to_patient_media.sql`.
+
 ## [0.39.9] — 2026-07-01 — Tier 3+4: API client, i18n, constants, test helpers
 
 ### Refactoring
