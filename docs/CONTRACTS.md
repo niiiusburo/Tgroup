@@ -20,6 +20,7 @@
 | v1.0.4 | 2026-05-21 | Feedback creation now queues optional Lark custom bot alerts after manual or auto-detected feedback threads commit. |
 | v1.0.3 | 2026-05-19 | Feedback attachment persistence contract clarified: file-only messages are valid, DB/file writes are transactional, and destructive file cleanup happens only after DB commit. |
 | v1.0.6 | 2026-05-23 | NK3 cosmetic customer intake clarified: cosmetic creates use `TM######` refs; Google Places stays server-proxied through `/api/Places/*` and bypasses LOB path rewriting. |
+| v1.0.7 | 2026-07-03 | Employee client role mapping clarified: `Trợ lý bác sĩ` assistant rows map to `doctor-assistant` before generic doctor, even when migrated data also has `isdoctor=true`. |
 
 ---
 
@@ -185,6 +186,9 @@ PaginatedResponse<{
 
 #### DELETE /api/Partners/:id/hard-delete
 **Effect:** Physical row removal. Requires `customers.hard_delete`.
+
+#### Frontend Employee role mapping
+The API response keeps legacy employee flags (`isdoctor`, `isassistant`, `isreceptionist`) plus `jobtitle`/`hrjobname`. Frontend `Employee.roles` is a single derived role. Rows with `isassistant=true` and a title that normalizes to `tro ly`/`doctor assistant` MUST map to `doctor-assistant` before the generic `doctor` role, so migrated `Trợ lý bác sĩ` rows with both `isdoctor=true` and `isassistant=true` remain selectable in dental-aide staff fields.
 
 ---
 

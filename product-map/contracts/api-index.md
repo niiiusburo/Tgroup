@@ -116,6 +116,8 @@ PUT handler-level validation: `companyId` (when present) must be a UUID (`400 IN
 | PUT | `/:id` | Perm:`employees.edit` | Employee fields | Updated employee |
 | DELETE | `/:id` | Perm:`employees.edit` | — | Deleted employee |
 
+Client role mapping: `/api/Employees` still returns legacy boolean flags and title fields. `website/src/types/employee.ts` derives a single `Employee.roles[]` value; assistant rows whose `jobtitle`/`hrjobname` normalizes to `tro ly` or `doctor assistant` map to `doctor-assistant` before generic `doctor`, including migrated rows where both `isdoctor` and `isassistant` are true.
+
 ## Products / Services Catalog (`/api/Products`)
 
 | Method | Path | Auth | Body / Query | Response |

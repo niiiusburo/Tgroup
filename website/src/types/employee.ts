@@ -42,6 +42,20 @@ export interface Employee {
   readonly hireDate: string;
 }
 
+function normalizeRoleTitle(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd');
+}
+
+function isDoctorAssistantTitle(jobtitle?: string | null): boolean {
+  if (!jobtitle) return false;
+  const normalized = normalizeRoleTitle(jobtitle);
+  return normalized.includes('tro ly') || normalized.includes('doctor assistant');
+}
+
 // Employee role helper functions
 export function inferRoleFromFlags(
   isDoctor: boolean,
@@ -49,12 +63,10 @@ export function inferRoleFromFlags(
   isReceptionist: boolean,
   jobtitle?: string | null,
 ): EmployeeRole {
+  if (isAssistant && isDoctorAssistantTitle(jobtitle)) return 'doctor-assistant';
   if (isDoctor) return 'doctor';
   if (isReceptionist) return 'receptionist';
-  if (isAssistant) {
-    if (jobtitle && jobtitle.toLowerCase().includes('trợ lý')) return 'doctor-assistant';
-    return 'assistant';
-  }
+  if (isAssistant) return 'assistant';
   // No role flags — classify by jobtitle
   if (jobtitle) {
     const lower = jobtitle.toLowerCase();

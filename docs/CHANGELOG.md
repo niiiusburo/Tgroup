@@ -14,6 +14,11 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.45] — 2026-07-03
+
+### Fixed
+- NK2 staff role inference now classifies migrated `Trợ lý bác sĩ` employees as `doctor-assistant` before the generic doctor role, so service and appointment `Trợ lý Bác sĩ` selectors can list rows that have both `isdoctor=true` and `isassistant=true`; restored the required `testbright.md` ledger for this verification path. — @codex — preserves Employees & HR role assignment behavior and Appointments/Services staff selector workflows.
+
 ## [0.32.44] — 2026-05-23
 
 ### Added
