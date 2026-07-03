@@ -40,6 +40,11 @@ router.post('/revenue/by-doctor', requirePermission('reports.view'), async (req,
       orderCompanyCol: 'so.companyid',
       paymentCompanyCol: 'so.companyid',
     });
+    const doctorScopeWhere = scope.companyIds === null
+      ? ''
+      : Array.isArray(scope.companyIds) && scope.companyIds.length > 0
+        ? `AND p.companyid = ANY($${f.companyIdsParamIndex}::uuid[])`
+        : 'AND FALSE';
     const rows = await query(
       `WITH order_totals AS (
          SELECT so.doctorid, COUNT(DISTINCT so.id) as order_count,
@@ -64,7 +69,7 @@ router.post('/revenue/by-doctor', requirePermission('reports.view'), async (req,
        FROM dbo.partners p
        LEFT JOIN order_totals ot ON ot.doctorid=p.id
        LEFT JOIN paid_totals pt ON pt.doctorid=p.id
-       WHERE p.isdoctor=true AND p.isdeleted=false
+       WHERE p.isdoctor=true AND p.isdeleted=false ${doctorScopeWhere}
        ORDER BY paid DESC LIMIT 100`, f.params);
 
     return res.json({ success: true, data: rows.map(r => ({ ...r, orderCount: toInt(r.order_count), invoiced: toNumber(r.invoiced), paid: toNumber(r.paid) })) });

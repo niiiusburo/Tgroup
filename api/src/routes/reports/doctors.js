@@ -6,7 +6,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID, dateCompanyFilter } = require('./helpers');
+const { err, validDate, validUUID, resolveReportCompanyScope } = require('./helpers');
 const { getCanonicalRevenueByDoctor } = require('../../services/reports/canonicalRevenue');
 
 const router = express.Router();
@@ -17,19 +17,39 @@ router.post('/doctors/performance', requirePermission('reports.view'), async (re
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
 
-    const f = dateCompanyFilter(dateFrom, dateTo, companyId, 'a.date', 'a.companyid');
+    const joinConds = [];
+    const doctorConds = [];
+    const params = [];
+    let idx = 1;
+    if (dateFrom) { joinConds.push(`a.date::date >= $${idx}`); params.push(dateFrom); idx++; }
+    if (dateTo) { joinConds.push(`a.date::date <= $${idx}`); params.push(dateTo); idx++; }
+    if (Array.isArray(scope.companyIds)) {
+      if (scope.companyIds.length === 0) {
+        joinConds.push('FALSE');
+        doctorConds.push('FALSE');
+      } else {
+        const ref = `$${idx}::uuid[]`;
+        joinConds.push(`a.companyid = ANY(${ref})`);
+        doctorConds.push(`p.companyid = ANY(${ref})`);
+        params.push(scope.companyIds);
+      }
+    }
+    const appointmentWhere = joinConds.length ? 'AND ' + joinConds.join(' AND ') : '';
+    const doctorWhere = doctorConds.length ? 'AND ' + doctorConds.join(' AND ') : '';
     const rows = await query(
       `SELECT p.id, p.name, COUNT(a.id) as total_appointments,
               SUM(CASE WHEN a.state IN ('done','completed') THEN 1 ELSE 0 END) as done,
               SUM(CASE WHEN a.state IN ('cancel','cancelled') THEN 1 ELSE 0 END) as cancelled
        FROM dbo.partners p
-       LEFT JOIN dbo.appointments a ON a.doctorid=p.id ${f.where}
-       WHERE p.isdoctor=true AND p.isdeleted=false
-       GROUP BY p.id, p.name ORDER BY done DESC LIMIT 100`, f.params);
+       LEFT JOIN dbo.appointments a ON a.doctorid=p.id ${appointmentWhere}
+       WHERE p.isdoctor=true AND p.isdeleted=false ${doctorWhere}
+       GROUP BY p.id, p.name ORDER BY done DESC LIMIT 100`, params);
 
     // Canonical revenue grouped by saleorder.doctorid (matches Excel attribution).
-    const revenueByDoctor = await getCanonicalRevenueByDoctor({ dateFrom, dateTo, companyId });
+    const revenueByDoctor = await getCanonicalRevenueByDoctor({ dateFrom, dateTo, companyIds: scope.companyIds });
     const revenueMap = new Map(revenueByDoctor.map(r => [r.doctorId, r.revenue]));
 
     const doctorRows = rows.map(r => ({

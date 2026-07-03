@@ -296,6 +296,8 @@ Cosmetic LOB mirror: LOB-aware employee and location UI surfaces must call `GET 
 
 Revenue paid totals count posted `payment_allocations` linked to saleorders plus direct posted `payment_category = 'payment'` service receipts with no allocation rows yet. Deposits, refunds, deposit usage, and voided rows are excluded. Source attribution uses sale-order source first, then customer source fallback.
 
+Branch-sensitive report endpoints apply backend location scope from `employee_location_scope` before SQL. Plain `Admin` users receive only assigned-location report rows; wildcard, `Super Admin`, and `System Administrator` can read all locations. Explicit out-of-scope `companyId` requests return `403 { success:false, error:'Location not allowed' }`.
+
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
 | POST | `/dashboard` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | Dashboard KPIs |
@@ -314,7 +316,7 @@ Revenue paid totals count posted `payment_allocations` linked to saleorders plus
 | POST | `/customers/summary` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { total, newInPeriod, gender[], cities[], topSpenders[], outstanding[], growth[] } }` |
 | POST | `/employees/overview` | Perm:`reports.view` | `{ companyId? }` | `{ success, data: { roles, byLocation[], employees[] } }` |
 | POST | `/services/breakdown` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { categories[], revenueByCategory[], revenueBySource[], popularProducts[] } }` |
-| POST | `/locations/comparison` | Perm:`reports.view` | `{ dateFrom?, dateTo? }` | `{ success, data: { locations[], trend[] } }` |
+| POST | `/locations/comparison` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { locations[], trend[] } }` |
 
 ## Operational Exports (`/api/Exports`)
 

@@ -33,13 +33,21 @@ function validUUID(s) {
 // and shift every value +7h, pushing all evening appointments to the next day.
 // Verified 2026-05-17: hour-of-day histograms peak at 9–18 (clinic working hours)
 // across appointments/saleorders/payments — confirms VN-local-naive storage.
-function dateCompanyFilter(dateFrom, dateTo, companyId, dateCol = 'datecreated', companyCol = 'companyid') {
+function dateCompanyFilter(dateFrom, dateTo, companyId, dateCol = 'datecreated', companyCol = 'companyid', startIdx = 1) {
   const conds = [];
   const params = [];
-  let idx = 1;
+  let idx = startIdx;
   if (dateFrom) { conds.push(`${dateCol}::date >= $${idx}`); params.push(dateFrom); idx++; }
   if (dateTo) { conds.push(`${dateCol}::date <= $${idx}`); params.push(dateTo); idx++; }
-  if (companyId) { conds.push(`${companyCol} = $${idx}`); params.push(companyId); idx++; }
+  if (Array.isArray(companyId)) {
+    if (companyId.length === 0) {
+      conds.push('false');
+    } else {
+      conds.push(`${companyCol} = ANY($${idx}::uuid[])`);
+      params.push(companyId);
+      idx++;
+    }
+  } else if (companyId) { conds.push(`${companyCol} = $${idx}`); params.push(companyId); idx++; }
   return { where: conds.length ? 'AND ' + conds.join(' AND ') : '', params, idx };
 }
 

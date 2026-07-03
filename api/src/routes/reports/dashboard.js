@@ -9,7 +9,7 @@ const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
 const { getVietnamToday } = require('../../lib/dateUtils');
-const { err, validDate, validUUID, dateCompanyFilter } = require('./helpers');
+const { err, validDate, validUUID, dateCompanyFilter, resolveReportCompanyScope } = require('./helpers');
 const {
   getCanonicalRevenue,
   getCanonicalRevenueByMonth,
@@ -21,10 +21,12 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
 
     // Invoiced/outstanding still come from saleorders — they are different concepts
     // than "collected revenue" (which now matches the Excel canonical formula below).
-    const so = dateCompanyFilter(dateFrom, dateTo, companyId, 'datecreated');
+    const so = dateCompanyFilter(dateFrom, dateTo, scope.companyIds, 'datecreated');
     // No state filter — matches Revenue page behavior. Filtering to state='sale' alone
     // excludes 99%+ of orders (most live in 'pending'/'completed') and shrinks the
     // invoiced/outstanding KPIs by ~3 orders of magnitude.
@@ -34,10 +36,10 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
        FROM dbo.saleorders WHERE isdeleted=false ${so.where}`, so.params);
 
     // Collected revenue — single source of truth shared with the Excel revenue-flat export.
-    const curPaid = await getCanonicalRevenue({ dateFrom, dateTo, companyId });
+    const curPaid = await getCanonicalRevenue({ dateFrom, dateTo, companyIds: scope.companyIds });
 
     // Appointments
-    const af = dateCompanyFilter(dateFrom, dateTo, companyId, 'date');
+    const af = dateCompanyFilter(dateFrom, dateTo, scope.companyIds, 'date');
     const appt = await query(
       // 'completed' is the canonical finished state in this DB (~84% of appointments);
       // 'done' is a legacy spelling kept for backward compat with older imports.
@@ -47,7 +49,7 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
        FROM dbo.appointments WHERE 1=1 ${af.where}`, af.params);
 
     // New customers
-    const cf = dateCompanyFilter(dateFrom, dateTo, companyId, 'datecreated');
+    const cf = dateCompanyFilter(dateFrom, dateTo, scope.companyIds, 'datecreated');
     const cust = await query(
       `SELECT COUNT(*) as new_customers FROM dbo.partners WHERE customer=true AND isdeleted=false ${cf.where}`, cf.params);
 
@@ -57,11 +59,11 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
     const prevFromDate = new Date(new Date(prevTo + 'T00:00:00Z') - days * 86400000);
     const prevFrom = prevFromDate.toISOString().split('T')[0];
 
-    const prevPaid = await getCanonicalRevenue({ dateFrom: prevFrom, dateTo: prevTo, companyId });
+    const prevPaid = await getCanonicalRevenue({ dateFrom: prevFrom, dateTo: prevTo, companyIds: scope.companyIds });
     const revChange = prevPaid > 0 ? ((curPaid - prevPaid) / prevPaid * 100).toFixed(1) : null;
 
     const curAppt = parseInt(appt[0]?.total || 0);
-    const paf = dateCompanyFilter(prevFrom, prevTo, companyId, 'date');
+    const paf = dateCompanyFilter(prevFrom, prevTo, scope.companyIds, 'date');
     const prevAppt = await query(`SELECT COUNT(*) as total FROM dbo.appointments WHERE 1=1 ${paf.where}`, paf.params);
     const prevApptCount = parseInt(prevAppt[0]?.total || 0);
     const apptChange = prevApptCount > 0 ? ((curAppt - prevApptCount) / prevApptCount * 100).toFixed(1) : null;
@@ -72,16 +74,15 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
     const trendFromDate = new Date(new Date(today + 'T00:00:00Z') - 365 * 86400000);
     const trendFrom = trendFromDate.toISOString().split('T')[0];
 
-    const canonicalMonths = await getCanonicalRevenueByMonth({ dateFrom: trendFrom, dateTo: today, companyId });
+    const canonicalMonths = await getCanonicalRevenueByMonth({ dateFrom: trendFrom, dateTo: today, companyIds: scope.companyIds });
+    const invoicedFilter = dateCompanyFilter(trendFrom, today, scope.companyIds, 'datecreated');
     const invoicedByMonth = await query(
       `SELECT DATE_TRUNC('month', datecreated) as month,
               COALESCE(SUM(amounttotal),0) as invoiced
        FROM dbo.saleorders
-       WHERE isdeleted=false
-         AND datecreated::date >= $1 AND datecreated::date <= $2
-         ${companyId ? 'AND companyid = $3' : ''}
+       WHERE isdeleted=false ${invoicedFilter.where}
        GROUP BY month`,
-      companyId ? [trendFrom, today, companyId] : [trendFrom, today]);
+      invoicedFilter.params);
 
     const invoicedMap = new Map();
     for (const row of invoicedByMonth) {

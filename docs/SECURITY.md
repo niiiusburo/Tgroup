@@ -69,7 +69,7 @@ Staff → /login form → POST /api/Auth/login
 2. **Employee overrides** (`permission_overrides` — grant or revoke specific strings)
 3. **Location scope** (`employee_location_scope` — restricts visible locations)
 
-Effective permissions = (Group ∪ Grants) − Revokes, then constrained by location scope. The UI locks one-branch users to their assigned branch, and backend read handlers must also enforce `partners.companyid` / `appointments.companyid` / customer-branch joins through `api/src/services/locationScope.js`. Plain `Admin` is branch-scoped unless the user has wildcard permission, `Super Admin`, or `System Administrator`.
+Effective permissions = (Group ∪ Grants) − Revokes, then constrained by location scope. The UI locks one-branch users to their assigned branch, and backend read handlers must also enforce `partners.companyid` / `appointments.companyid` / report company filters / customer-branch joins through `api/src/services/locationScope.js`. Plain `Admin` is branch-scoped unless the user has wildcard permission, `Super Admin`, or `System Administrator`.
 
 ### Dangerous Permissions (Require Explicit Assignment)
 

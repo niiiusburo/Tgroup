@@ -98,6 +98,7 @@ impact_tests:
   - api/src/routes/reports/__tests__/cashFlow.test.js
   - api/src/routes/reports/__tests__/revenueRecognition.test.js
   - api/src/routes/reports/__tests__/servicesBreakdown.test.js
+  - api/src/routes/reports/__tests__/doctorsPerformance.test.js
   - website/e2e/export-downloads.spec.ts
   - website/src/__tests__/useVersionCheck.test.ts (indirect)
 risk_level: medium
@@ -106,7 +107,7 @@ notes:
   - Export download audit logging is fire-and-forget after the XLSX response; preview audit logging is awaited but catch-and-log. Verification that an audit row exists requires a direct DB/API check.
   - Cash-flow reporting V1 separates service collections, customer deposits, refunds, deposit usage, and voided adjustments. Deposit usage is internal movement and must not be counted as new cash.
   - Revenue reporting must derive paid revenue from posted `payment_allocations` linked to saleorders plus direct posted `payment_category = 'payment'` receipts with no allocation rows yet, including imported cosmetic receipts whose `service_id` is still blank. By-location reporting must surface unassigned paid receipts instead of dropping them. By-source reporting uses `COALESCE(saleorders.sourceid, partners.sourceid)` and includes unassigned paid receipts. Deposits, refunds, deposit usage, and voided payments stay excluded. Unpaid `saleorders.amounttotal` remains invoiced/outstanding context, not paid revenue.
-  - Report endpoints that expose branch-sensitive rows must use `api/src/services/locationScope.js` or an equivalent `resolveEffectivePermissions()` location-scope check. Plain Admin is branch-scoped; wildcard, Super Admin, or System Administrator can run all-location reports.
+  - Report endpoints that expose branch-sensitive rows must use `api/src/services/locationScope.js` or an equivalent `resolveEffectivePermissions()` location-scope check. Plain Admin is branch-scoped; wildcard, Super Admin, or System Administrator can run all-location reports. `api/src/routes/reports/__tests__/cashFlow.test.js` includes parent-router coverage for `/api/Reports/locations/comparison` so locations comparison cannot regress to all-branch output.
   - >-
     Employee revenue Excel export uses `/api/Exports/report-sales-employees`
     with `reports.export`, date/location scope, employee type, and optional

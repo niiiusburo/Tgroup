@@ -6,7 +6,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID } = require('./helpers');
+const { err, validDate, validUUID, resolveReportCompanyScope } = require('./helpers');
 const {
   SERVICE_REVENUE_PAYMENT_CONDITION,
   UNALLOCATED_SERVICE_PAYMENT_CONDITION,
@@ -47,11 +47,13 @@ router.post('/revenue/summary', requirePermission('reports.view'), async (req, r
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
 
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
-      companyId,
+      companyIds: scope.companyIds,
       orderDateCol: 'datecreated',
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       orderCompanyCol: 'companyid',
@@ -60,7 +62,7 @@ router.post('/revenue/summary', requirePermission('reports.view'), async (req, r
     const directF = buildPaymentRevenueFilter({
       dateFrom,
       dateTo,
-      companyId,
+      companyIds: scope.companyIds,
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       companyCol: 'COALESCE(so.companyid, customer.companyid)',
     });
@@ -133,11 +135,13 @@ router.post('/revenue/trend', requirePermission('reports.view'), async (req, res
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
 
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
-      companyId,
+      companyIds: scope.companyIds,
       orderDateCol: 'datecreated',
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       orderCompanyCol: 'companyid',
@@ -146,7 +150,7 @@ router.post('/revenue/trend', requirePermission('reports.view'), async (req, res
     const directF = buildPaymentRevenueFilter({
       dateFrom,
       dateTo,
-      companyId,
+      companyIds: scope.companyIds,
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       companyCol: 'COALESCE(so.companyid, customer.companyid)',
     });
@@ -215,11 +219,13 @@ router.post('/revenue/by-location', requirePermission('reports.view'), async (re
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
 
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
-      companyId,
+      companyIds: scope.companyIds,
       orderDateCol: 'so.datecreated',
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       orderCompanyCol: 'so.companyid',
@@ -228,10 +234,16 @@ router.post('/revenue/by-location', requirePermission('reports.view'), async (re
     const directF = buildPaymentRevenueFilter({
       dateFrom,
       dateTo,
-      companyId,
+      companyIds: scope.companyIds,
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       companyCol: 'COALESCE(so.companyid, customer.companyid)',
     });
+    const scopedLocationKeys = scope.companyIds === null
+      ? 'SELECT id AS companyid FROM dbo.companies'
+      : Array.isArray(scope.companyIds) && scope.companyIds.length > 0
+        ? `SELECT id AS companyid FROM dbo.companies WHERE id = ANY($${f.companyIdsParamIndex}::uuid[])`
+        : 'SELECT NULL::uuid AS companyid WHERE FALSE';
+
     const rows = await query(
       `WITH order_totals AS (
          SELECT so.companyid, COUNT(so.id) as order_count,
@@ -268,7 +280,7 @@ router.post('/revenue/by-location', requirePermission('reports.view'), async (re
          GROUP BY companyid
        ),
        location_keys AS (
-         SELECT id AS companyid FROM dbo.companies
+         ${scopedLocationKeys}
          UNION
          SELECT companyid FROM order_totals
          UNION

@@ -2,6 +2,16 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.40.4] — 2026-07-03 — NK2 report location-scope hardening
+
+### Fixes
+- Enforced backend location scope across NK2 report dashboard, appointments, customers, doctors, employees, revenue, services, and locations comparison endpoints. Branch-scoped employees now resolve allowed `employee_location_scope` ids before report SQL runs; direct out-of-scope report requests return 403.
+- Extended shared report company filters and canonical revenue helpers to support allowed-location arrays instead of only a single `companyId`.
+
+### Testing
+- Added regression coverage for branch-scoped Admin access to `/api/Reports/locations/comparison` and out-of-scope report rejection.
+- Verified with focused report Jest suites and scoped Semgrep.
+
 ## [0.40.3] — 2026-07-03 — NK2 TLBS restore, Investor+ route restore, and branch-admin backend scope
 
 ### Fixes

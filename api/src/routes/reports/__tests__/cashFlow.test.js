@@ -235,4 +235,76 @@ describe('reports cash-flow aggregation', () => {
     expect(res.body).toEqual({ success: false, error: 'Location not allowed' });
     expect(query).not.toHaveBeenCalled();
   });
+
+  it('scopes locations comparison through the parent reports router', async () => {
+    resolveEffectivePermissions.mockResolvedValue({
+      groupName: 'Admin',
+      effectivePermissions: ['reports.view'],
+      locations: [{ id: LOC_A, name: 'Location A' }],
+    });
+    query
+      .mockResolvedValueOnce([
+        {
+          id: LOC_A,
+          name: 'Location A',
+          active: true,
+          appointment_count: '2',
+          done_count: '1',
+          order_count: '1',
+          employee_count: '3',
+        },
+      ])
+      .mockResolvedValueOnce([{ company_id: LOC_A, revenue: '500000' }])
+      .mockResolvedValueOnce([{ name: 'Location A', month: '2026-05-01', cnt: '2' }]);
+
+    const res = await request(makeParentReportsApp())
+      .post('/api/Reports/locations/comparison')
+      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.locations).toEqual([
+      expect.objectContaining({ id: LOC_A, name: 'Location A', revenue: 500000 }),
+    ]);
+    expect(query).toHaveBeenCalledTimes(3);
+
+    const [locationsSql, locationsParams] = query.mock.calls[0];
+    expect(locationsSql).toContain('companyid = ANY($3::uuid[])');
+    expect(locationsSql).toContain('companyid = ANY($6::uuid[])');
+    expect(locationsSql).toContain('companyid = ANY($7::uuid[])');
+    expect(locationsSql).toContain('c.id = ANY($8::uuid[])');
+    expect(locationsParams).toEqual([
+      '2026-05-01',
+      '2026-05-31',
+      [LOC_A],
+      '2026-05-01',
+      '2026-05-31',
+      [LOC_A],
+      [LOC_A],
+      [LOC_A],
+    ]);
+
+    const [revenueSql, revenueParams] = query.mock.calls[1];
+    expect(revenueSql).toContain('so.companyid = ANY($3::uuid[])');
+    expect(revenueParams).toEqual(['2026-05-01', '2026-05-31', [LOC_A]]);
+
+    const [trendSql, trendParams] = query.mock.calls[2];
+    expect(trendSql).toContain('a.companyid = ANY($3::uuid[])');
+    expect(trendParams).toEqual(['2026-05-01', '2026-05-31', [LOC_A]]);
+  });
+
+  it('rejects locations comparison for a requested location outside employee scope', async () => {
+    resolveEffectivePermissions.mockResolvedValue({
+      groupName: 'Admin',
+      effectivePermissions: ['reports.view'],
+      locations: [{ id: LOC_A, name: 'Location A' }],
+    });
+
+    const res = await request(makeParentReportsApp())
+      .post('/api/Reports/locations/comparison')
+      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_B });
+
+    expect(res.status).toBe(403);
+    expect(res.body).toEqual({ success: false, error: 'Location not allowed' });
+    expect(query).not.toHaveBeenCalled();
+  });
 });

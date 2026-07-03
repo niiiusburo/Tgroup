@@ -6,7 +6,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, dateCompanyFilter } = require('./helpers');
+const { err, validDate, validUUID, dateCompanyFilter, resolveReportCompanyScope } = require('./helpers');
 const { getCanonicalRevenueByLocation } = require('../../services/reports/canonicalRevenue');
 
 const router = express.Router();
@@ -15,17 +15,24 @@ const router = express.Router();
 
 router.post('/locations/comparison', requirePermission('reports.view'), async (req, res) => {
   try {
-    const { dateFrom, dateTo } = req.body || {};
-    if (!validDate(dateFrom) || !validDate(dateTo)) return err(res, 400, 'Invalid params');
+    const { dateFrom, dateTo, companyId } = req.body || {};
+    if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
 
-    const af = dateCompanyFilter(dateFrom, dateTo, null, 'date');
-    // Offset so params by af.idx so $N is correct in combined query
-    const soConds = [];
-    const soParams = [...af.params];
-    let soIdx = af.idx;
-    if (dateFrom) { soConds.push(`datecreated::date >= $${soIdx}`); soParams.push(dateFrom); soIdx++; }
-    if (dateTo) { soConds.push(`datecreated::date <= $${soIdx}`); soParams.push(dateTo); soIdx++; }
-    const soWhere = soConds.length ? 'AND ' + soConds.join(' AND ') : '';
+    const params = [];
+    let idx = 1;
+    const af = dateCompanyFilter(dateFrom, dateTo, scope.companyIds, 'date', 'companyid', idx);
+    params.push(...af.params);
+    idx = af.idx;
+    const soF = dateCompanyFilter(dateFrom, dateTo, scope.companyIds, 'datecreated', 'companyid', idx);
+    params.push(...soF.params);
+    idx = soF.idx;
+    const empF = dateCompanyFilter(undefined, undefined, scope.companyIds, 'datecreated', 'companyid', idx);
+    params.push(...empF.params);
+    idx = empF.idx;
+    const locF = dateCompanyFilter(undefined, undefined, scope.companyIds, 'c.datecreated', 'c.id', idx);
+    params.push(...locF.params);
 
     const locations = await query(
       `SELECT c.id, c.name, c.active,
@@ -35,11 +42,12 @@ router.post('/locations/comparison', requirePermission('reports.view'), async (r
               COALESCE(emp.cnt, 0) as employee_count
        FROM dbo.companies c
        LEFT JOIN (SELECT companyid, COUNT(*) as cnt, SUM(CASE WHEN state IN ('done','completed') THEN 1 ELSE 0 END) as done FROM dbo.appointments WHERE 1=1 ${af.where} GROUP BY companyid) appt ON appt.companyid=c.id
-       LEFT JOIN (SELECT companyid, COUNT(*) as order_count FROM dbo.saleorders WHERE isdeleted=false ${soWhere} GROUP BY companyid) so ON so.companyid=c.id
-       LEFT JOIN (SELECT companyid, COUNT(*) as cnt FROM dbo.partners WHERE employee=true AND isdeleted=false GROUP BY companyid) emp ON emp.companyid=c.id`, soParams);
+       LEFT JOIN (SELECT companyid, COUNT(*) as order_count FROM dbo.saleorders WHERE isdeleted=false ${soF.where} GROUP BY companyid) so ON so.companyid=c.id
+       LEFT JOIN (SELECT companyid, COUNT(*) as cnt FROM dbo.partners WHERE employee=true AND isdeleted=false ${empF.where} GROUP BY companyid) emp ON emp.companyid=c.id
+       WHERE 1=1 ${locF.where}`, params);
 
     // Get canonical revenue by location and merge into locations
-    const revenueData = await getCanonicalRevenueByLocation({ dateFrom, dateTo });
+    const revenueData = await getCanonicalRevenueByLocation({ dateFrom, dateTo, companyIds: scope.companyIds });
     const revenueMap = new Map(revenueData.map(r => [r.companyId, r.revenue]));
 
     // Inject revenue into each location and sort by revenue DESC
@@ -49,11 +57,13 @@ router.post('/locations/comparison', requirePermission('reports.view'), async (r
     locations.sort((a, b) => b.revenue - a.revenue);
 
     // Location growth trend
+    const trendF = dateCompanyFilter(dateFrom, dateTo, scope.companyIds, 'a.date', 'a.companyid');
     const trend = await query(
       `SELECT c.name, DATE_TRUNC('month', a.date) as month, COUNT(*) as cnt
        FROM dbo.companies c
-       JOIN dbo.appointments a ON a.companyid=c.id AND a.date::date >= $1 AND a.date::date <= $2
-       GROUP BY c.name, month ORDER BY c.name, month`, [dateFrom, dateTo]);
+       JOIN dbo.appointments a ON a.companyid=c.id
+       WHERE 1=1 ${trendF.where}
+       GROUP BY c.name, month ORDER BY c.name, month`, trendF.params);
 
     return res.json({ success: true, data: {
       locations: locations.map(l => ({ ...l, appointmentCount: parseInt(l.appointment_count), doneCount: parseInt(l.done_count), revenue: parseFloat(l.revenue), orderCount: parseInt(l.order_count), employeeCount: parseInt(l.employee_count) })),

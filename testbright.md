@@ -9,6 +9,25 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 Do not remove failed checks until the defect is fixed and rerun.
 
 ---
+# TestSprite Plan: NK2 report branch scope proof 2026-07-03
+Feature/edit name: NK2 report location-scope backend enforcement and live proof (v0.40.4).
+
+Changed URLs / API routes / data flow:
+- URLs: `/reports`, `/reports/dashboard`, `/reports/revenue`, `/reports/appointments`, `/reports/doctors`, `/reports/customers`, `/reports/locations`, `/reports/services`, `/reports/employees`.
+- API: `POST /api/Reports/dashboard`, `/api/Reports/revenue/*`, `/api/Reports/appointments/*`, `/api/Reports/doctors/performance`, `/api/Reports/customers/summary`, `/api/Reports/employees/overview`, `/api/Reports/services/breakdown`, `/api/Reports/locations/comparison`.
+- Data flow: staff JWT -> `resolveEffectivePermissions()` -> `employee_location_scope` -> `resolveReportCompanyScope()` -> report SQL company filters.
+
+Expected behavior:
+- An employee with `reports.view` and only one assigned cơ sở sees report aggregate rows only for that cơ sở.
+- A direct report request with an out-of-scope `companyId` returns 403 before running report SQL.
+- Super Admin / wildcard / System Administrator can still run all-location reports.
+
+Execution checklist:
+- [x] PASS: Focused report scope regression - `cd api && ./node_modules/.bin/jest src/routes/reports/__tests__/cashFlow.test.js src/routes/reports/__tests__/doctorsPerformance.test.js --runInBand` passed 2 suites / 14 tests.
+- [ ] PENDING: Live NK2 proof after deploy - branch-scoped Admin token can fetch only its assigned location from `/api/Reports/locations/comparison`, and out-of-scope `companyId` returns 403.
+- [ ] PENDING: Live NK2 browser screenshot - `/reports/locations` shows one scoped location for the branch-scoped Admin.
+
+---
 # TestSprite Plan: NK2 TLBS, Investor+, branch-admin scope 2026-07-03
 Feature/edit name: NK2 appointment TLBS restore, Investor+ route restore, confirm route check, and backend branch-admin location scope (v0.40.3).
 

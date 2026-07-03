@@ -6,7 +6,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID, dateCompanyFilter } = require('./helpers');
+const { err, validDate, validUUID, dateCompanyFilter, resolveReportCompanyScope } = require('./helpers');
 
 const router = express.Router();
 
@@ -16,41 +16,49 @@ router.post('/customers/summary', requirePermission('reports.view'), async (req,
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
+    const customerScope = dateCompanyFilter(undefined, undefined, scope.companyIds, 'datecreated', 'companyid');
+    const partnerScope = dateCompanyFilter(undefined, undefined, scope.companyIds, 'p.datecreated', 'p.companyid');
 
     // Total active customers
-    const total = await query(`SELECT COUNT(*) as cnt FROM dbo.partners WHERE customer=true AND isdeleted=false`);
+    const total = await query(`SELECT COUNT(*) as cnt FROM dbo.partners WHERE customer=true AND isdeleted=false ${customerScope.where}`, customerScope.params);
 
     // New customers in period
-    const cf = dateCompanyFilter(dateFrom, dateTo, companyId, 'datecreated');
+    const cf = dateCompanyFilter(dateFrom, dateTo, scope.companyIds, 'datecreated');
     const newCust = await query(
       `SELECT COUNT(*) as cnt FROM dbo.partners WHERE customer=true AND isdeleted=false ${cf.where}`, cf.params);
 
     // By gender
     const gender = await query(
-      `SELECT gender, COUNT(*) as cnt FROM dbo.partners WHERE customer=true AND isdeleted=false AND gender IS NOT NULL GROUP BY gender`);
+      `SELECT gender, COUNT(*) as cnt FROM dbo.partners WHERE customer=true AND isdeleted=false AND gender IS NOT NULL ${customerScope.where} GROUP BY gender`,
+      customerScope.params);
 
     // By city
     const cities = await query(
-      `SELECT cityname, COUNT(*) as cnt FROM dbo.partners WHERE customer=true AND isdeleted=false AND cityname IS NOT NULL GROUP BY cityname ORDER BY cnt DESC LIMIT 10`);
+      `SELECT cityname, COUNT(*) as cnt FROM dbo.partners WHERE customer=true AND isdeleted=false AND cityname IS NOT NULL ${customerScope.where} GROUP BY cityname ORDER BY cnt DESC LIMIT 10`,
+      customerScope.params);
 
     // Lifetime value (top spenders)
     const ltv = await query(
       `SELECT p.id, p.name, COALESCE(SUM(so.totalpaid),0) as total_paid, COUNT(so.id) as order_count
        FROM dbo.partners p
        LEFT JOIN dbo.saleorders so ON so.partnerid=p.id AND so.isdeleted=false AND so.state='sale'
-       WHERE p.customer=true AND p.isdeleted=false
-       GROUP BY p.id, p.name ORDER BY total_paid DESC LIMIT 20`);
+       WHERE p.customer=true AND p.isdeleted=false ${partnerScope.where}
+       GROUP BY p.id, p.name ORDER BY total_paid DESC LIMIT 20`,
+      partnerScope.params);
 
     // Outstanding balances
     const outstanding = await query(
       `SELECT p.id, p.name, COALESCE(SUM(so.residual),0) as outstanding
        FROM dbo.partners p
        JOIN dbo.saleorders so ON so.partnerid=p.id AND so.isdeleted=false AND so.state='sale' AND so.residual > 0
-       WHERE p.customer=true AND p.isdeleted=false
-       GROUP BY p.id, p.name ORDER BY outstanding DESC LIMIT 20`);
+       WHERE p.customer=true AND p.isdeleted=false ${partnerScope.where}
+       GROUP BY p.id, p.name ORDER BY outstanding DESC LIMIT 20`,
+      partnerScope.params);
 
     // Growth trend (new customers per month)
-    const growthF = dateCompanyFilter(dateFrom, dateTo, companyId, 'datecreated');
+    const growthF = dateCompanyFilter(dateFrom, dateTo, scope.companyIds, 'datecreated');
     const growth = await query(
       `SELECT DATE_TRUNC('month', datecreated) as month, COUNT(*) as cnt
        FROM dbo.partners WHERE customer=true AND isdeleted=false ${growthF.where}

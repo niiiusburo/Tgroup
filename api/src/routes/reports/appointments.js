@@ -6,7 +6,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID, dateCompanyFilter } = require('./helpers');
+const { err, validDate, validUUID, dateCompanyFilter, resolveReportCompanyScope } = require('./helpers');
 
 const router = express.Router();
 
@@ -16,8 +16,10 @@ router.post('/appointments/summary', requirePermission('reports.view'), async (r
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
 
-    const f = dateCompanyFilter(dateFrom, dateTo, companyId, 'date');
+    const f = dateCompanyFilter(dateFrom, dateTo, scope.companyIds, 'date');
     const states = await query(
       `SELECT state, COUNT(*) as cnt FROM dbo.appointments WHERE 1=1 ${f.where} GROUP BY state`, f.params);
 
@@ -58,8 +60,10 @@ router.post('/appointments/trend', requirePermission('reports.view'), async (req
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
 
-    const f = dateCompanyFilter(dateFrom, dateTo, companyId, 'date');
+    const f = dateCompanyFilter(dateFrom, dateTo, scope.companyIds, 'date');
     const trend = await query(
       `SELECT DATE_TRUNC('week', date) as week, COUNT(*) as total,
               SUM(CASE WHEN state='done' THEN 1 ELSE 0 END) as done,
