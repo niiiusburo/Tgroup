@@ -150,4 +150,63 @@ describe('reportSalesEmployeesExport', () => {
     });
     expect(query).not.toHaveBeenCalled();
   });
+
+  it('constrains admin-named employee exports to resolved locations when companyId is all', async () => {
+    resolveEffectivePermissions.mockResolvedValueOnce({
+      groupName: 'Super Admin',
+      effectivePermissions: ['reports.view', 'reports.export'],
+      locations: [{ id: LOC_A, name: 'Tấm Dentist Thủ Đức' }],
+    });
+    query.mockResolvedValueOnce(rows);
+
+    await reportSalesEmployeesExport.preview({
+      companyId: 'all',
+      employeeType: 'doctor',
+      dateFrom: '2026-05-01',
+      dateTo: '2026-05-31',
+    }, ADMIN_USER);
+
+    const [sql, params] = query.mock.calls[0];
+    expect(sql).toContain('so.companyid = ANY');
+    expect(params).toContainEqual([LOC_A]);
+  });
+
+  it('rejects out-of-scope locations for admin-named employees without global permission', async () => {
+    resolveEffectivePermissions.mockResolvedValueOnce({
+      groupName: 'Super Admin',
+      effectivePermissions: ['reports.view', 'reports.export'],
+      locations: [{ id: LOC_A, name: 'Tấm Dentist Thủ Đức' }],
+    });
+
+    await expect(reportSalesEmployeesExport.preview({
+      companyId: LOC_B,
+      employeeType: 'doctor',
+      dateFrom: '2026-05-01',
+      dateTo: '2026-05-31',
+    }, ADMIN_USER)).rejects.toMatchObject({
+      status: 403,
+      code: 'EXPORT_LOCATION_DENIED',
+    });
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('keeps explicit wildcard permission as the all-location export override', async () => {
+    resolveEffectivePermissions.mockResolvedValueOnce({
+      groupName: 'Super Admin',
+      effectivePermissions: ['*'],
+      locations: [{ id: LOC_A, name: 'Tấm Dentist Thủ Đức' }],
+    });
+    query.mockResolvedValueOnce(rows);
+
+    await reportSalesEmployeesExport.preview({
+      companyId: 'all',
+      employeeType: 'doctor',
+      dateFrom: '2026-05-01',
+      dateTo: '2026-05-31',
+    }, ADMIN_USER);
+
+    const [sql, params] = query.mock.calls[0];
+    expect(sql).not.toContain('so.companyid = ANY');
+    expect(params).not.toContainEqual([LOC_A]);
+  });
 });

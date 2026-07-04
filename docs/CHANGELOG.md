@@ -14,6 +14,14 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.48] — 2026-07-04
+
+### Fixed
+- NK2 employee revenue Excel exports now treat explicit wildcard `*` permission as the only all-location override; Admin/Super Admin group names without `*` remain constrained to resolved employee locations, and out-of-scope branch requests return `403 EXPORT_LOCATION_DENIED` before export SQL. Merged from PR #57 (`fix/nk2-employee-export-scope-20260704`, originally labeled 0.32.45), which the same-day 0.32.47 full redeploy did not include. — @codex — preserves INV-009, INV-020, UC-019, and WF-005.
+
+### Testing
+- Added `reportSalesEmployeesExport` regression coverage for Super Admin-named scoped employees, out-of-scope branch rejection, and the wildcard all-location override. — @codex — NK2 live proof captured in `output/proof/location-report-scope-20260704/` outside the commit.
+
 ## [0.32.47] — 2026-07-04
 
 ### Fixed
