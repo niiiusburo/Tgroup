@@ -78,8 +78,7 @@ function resolveEmployeeType(type) {
 
 function hasAllLocationAccess(permissionState) {
   const perms = permissionState?.effectivePermissions || [];
-  const groupName = String(permissionState?.groupName || '');
-  return perms.includes('*') || /admin/i.test(groupName);
+  return perms.includes('*');
 }
 
 async function resolveCompanyScope(user, companyId) {
