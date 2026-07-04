@@ -2,8 +2,9 @@
 
 const { query } = require('../../../db');
 const { addCommonDateFilters } = require('./legacyFlatReportFilters');
+const { appendInvestorCustomerCondition, resolveExportInvestorScope } = require('../investorExportScope');
 
-function buildDepositWhere(filters) {
+function buildDepositWhere(filters, investorScope) {
   const conditions = [
     "p.status = 'posted'",
     "p.payment_category = 'deposit'",
@@ -48,7 +49,16 @@ function buildDepositWhere(filters) {
         AND doctor_so.doctorid = $${idx}
     )`);
     params.push(filters.doctorId);
+    idx += 1;
   }
+
+  idx = appendInvestorCustomerCondition({
+    conditions,
+    params,
+    idx,
+    column: 'p.customer_id',
+    investorScope,
+  });
 
   return { where: conditions.join(' AND '), params };
 }
@@ -93,8 +103,9 @@ function depositSelect(where) {
   `;
 }
 
-async function getDepositRows(filters, maxRows) {
-  const { where, params } = buildDepositWhere(filters);
+async function getDepositRows(filters, maxRows, user) {
+  const investorScope = await resolveExportInvestorScope(user);
+  const { where, params } = buildDepositWhere(filters, investorScope);
   const sql = `
     ${depositSelect(where)}
     ORDER BY paymentdate DESC NULLS LAST, created_at DESC NULLS LAST
@@ -103,8 +114,9 @@ async function getDepositRows(filters, maxRows) {
   return query(sql, params);
 }
 
-async function previewDeposit(filters) {
-  const { where, params } = buildDepositWhere(filters);
+async function previewDeposit(filters, user) {
+  const investorScope = await resolveExportInvestorScope(user);
+  const { where, params } = buildDepositWhere(filters, investorScope);
   const sql = `
     SELECT COUNT(*) AS total, COALESCE(SUM(amount), 0) AS total_amount
     FROM (${depositSelect(where)}) deposit_rows

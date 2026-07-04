@@ -2,6 +2,7 @@
 
 const { query } = require('../../../db');
 const { createWorkbook, populateDataSheet, populateSummarySheet, toVNDate } = require('../exportWorkbook');
+const { appendInvestorCustomerCondition, resolveExportInvestorScope } = require('../investorExportScope');
 
 const MAX_ROWS = 100_000;
 
@@ -21,7 +22,7 @@ const COLUMNS = [
   { key: 'status', header: 'Trạng thái', width: 12 },
 ];
 
-function buildWhere(filters) {
+function buildWhere(filters, investorScope) {
   const conditions = ['p.customer = true', 'p.isdeleted = false'];
   const params = [];
   let idx = 1;
@@ -46,6 +47,14 @@ function buildWhere(filters) {
     idx++;
   }
 
+  idx = appendInvestorCustomerCondition({
+    conditions,
+    params,
+    idx,
+    column: 'p.id',
+    investorScope,
+  });
+
   return { where: conditions.join(' AND '), params, nextIdx: idx };
 }
 
@@ -66,8 +75,8 @@ function buildBirthday(row) {
   return new Date(year, month - 1, day);
 }
 
-async function getRows(filters) {
-  const { where, params } = buildWhere(filters);
+async function getRows(filters, investorScope) {
+  const { where, params } = buildWhere(filters, investorScope);
   const sql = `
     SELECT
       p.id,
@@ -104,8 +113,8 @@ async function getRows(filters) {
   return query(sql, params);
 }
 
-async function getSummary(filters) {
-  const { where, params } = buildWhere(filters);
+async function getSummary(filters, investorScope) {
+  const { where, params } = buildWhere(filters, investorScope);
   const sql = `
     SELECT
       COUNT(*) AS total,
@@ -121,7 +130,8 @@ async function getSummary(filters) {
 }
 
 async function preview(filters, user) {
-  const summary = await getSummary(filters);
+  const investorScope = await resolveExportInvestorScope(user);
+  const summary = await getSummary(filters, investorScope);
   const total = parseInt(summary.total, 10);
   return {
     rowCount: total,
@@ -137,9 +147,10 @@ async function preview(filters, user) {
 }
 
 async function build(filters, user) {
+  const investorScope = await resolveExportInvestorScope(user);
   const [rows, summary] = await Promise.all([
-    getRows(filters),
-    getSummary(filters),
+    getRows(filters, investorScope),
+    getSummary(filters, investorScope),
   ]);
 
   if (rows.length > MAX_ROWS) {

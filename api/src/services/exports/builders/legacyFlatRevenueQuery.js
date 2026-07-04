@@ -2,8 +2,9 @@
 
 const { query } = require('../../../db');
 const { addCommonDateFilters } = require('./legacyFlatReportFilters');
+const { appendInvestorCustomerCondition, resolveExportInvestorScope } = require('../investorExportScope');
 
-function buildRevenueWhere(filters) {
+function buildRevenueWhere(filters, investorScope) {
   const conditions = [
     "p.status = 'posted'",
     'pa.invoice_id IS NOT NULL',
@@ -45,7 +46,16 @@ function buildRevenueWhere(filters) {
   if (filters.doctorId) {
     conditions.push(`so.doctorid = $${idx}`);
     params.push(filters.doctorId);
+    idx += 1;
   }
+
+  idx = appendInvestorCustomerCondition({
+    conditions,
+    params,
+    idx,
+    column: 'COALESCE(p.customer_id, so.partnerid)',
+    investorScope,
+  });
 
   return { where: conditions.join(' AND '), params };
 }
@@ -127,8 +137,9 @@ function revenueCte(where) {
   `;
 }
 
-async function getRevenueRows(filters, maxRows) {
-  const { where, params } = buildRevenueWhere(filters);
+async function getRevenueRows(filters, maxRows, user) {
+  const investorScope = await resolveExportInvestorScope(user);
+  const { where, params } = buildRevenueWhere(filters, investorScope);
   const sql = `
     ${revenueCte(where)}
     SELECT
@@ -162,8 +173,9 @@ async function getRevenueRows(filters, maxRows) {
   return query(sql, params);
 }
 
-async function previewRevenue(filters) {
-  const { where, params } = buildRevenueWhere(filters);
+async function previewRevenue(filters, user) {
+  const investorScope = await resolveExportInvestorScope(user);
+  const { where, params } = buildRevenueWhere(filters, investorScope);
   const sql = `
     ${revenueCte(where)}
     SELECT COUNT(*) AS total, COALESCE(SUM(row_amount), 0) AS total_amount

@@ -54,3 +54,28 @@ Edge cases / regressions:
 - [ ] PENDING: Stale deploy preflight rejects old investor branches that do not contain the live NK/NK2 commit.
 
 Setup/login data: Use the live admin account to assign visibility, then the live investor account to verify portal/data scope. Do not print credentials in this ledger.
+
+---
+
+# TestSprite Plan: NK/NK2 investor export allowlist hotfix 2026-07-04
+
+Feature/edit name: Investor Excel/export builders apply the same admin-allowlisted customer scope as the normal portal.
+
+Changed URLs / API routes / data flow:
+- API: `POST /api/Exports/:type/preview`, `POST /api/Exports/:type/download`.
+- Export types: `customers`, `services`, `appointments`, `payments`, `revenue-flat`, `deposit-flat`, `report-sales-employees`.
+- Data flow: normal staff JWT → `resolveInvestorScope()` → `dbo.investor_clients` allowlist → export builder SQL predicate.
+
+User roles: Investor downloading/previewing export data; admin assigning investor-visible customers.
+
+Happy paths:
+- [ ] PENDING: Investor export preview for an allowed customer search returns rows for the allowlisted customer.
+- [ ] PENDING: Investor export download for customer-derived exports excludes non-allowlisted customers.
+- [ ] PENDING: Employee revenue report export still honors branch/location scope while also applying investor customer allowlist.
+
+Edge cases / regressions:
+- [ ] PENDING: Empty investor allowlist returns zero export rows instead of falling back to all customers.
+- [ ] PENDING: Non-investor staff/admin exports remain unchanged.
+- [ ] PENDING: Legacy NK/NK2 account-keyed `dbo.investor_clients` rows still scope exports through the linked partner account.
+
+Setup/login data: Use the live investor account and known allowed/forbidden customer refs from the NK/NK2 investor same-portal proof. Do not print credentials in this ledger.

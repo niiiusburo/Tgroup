@@ -2,6 +2,7 @@
 
 const { query } = require('../../../db');
 const { createWorkbook, populateDataSheet, populateSummarySheet, toVNDate } = require('../exportWorkbook');
+const { appendInvestorCustomerCondition, resolveExportInvestorScope } = require('../investorExportScope');
 
 const MAX_ROWS = 100_000;
 
@@ -33,7 +34,7 @@ const STATUS_LABELS = {
   cancelled: 'Đã hủy',
 };
 
-function buildWhere(filters) {
+function buildWhere(filters, investorScope) {
   const conditions = [];
   const params = [];
   let idx = 1;
@@ -76,12 +77,20 @@ function buildWhere(filters) {
     idx++;
   }
 
+  idx = appendInvestorCustomerCondition({
+    conditions,
+    params,
+    idx,
+    column: 'a.partnerid',
+    investorScope,
+  });
+
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
   return { where, params, nextIdx: idx };
 }
 
-async function getRows(filters) {
-  const { where, params } = buildWhere(filters);
+async function getRows(filters, investorScope) {
+  const { where, params } = buildWhere(filters, investorScope);
   const sql = `
     SELECT
       a.id,
@@ -118,8 +127,8 @@ async function getRows(filters) {
   return query(sql, params);
 }
 
-async function getSummary(filters) {
-  const { where, params } = buildWhere(filters);
+async function getSummary(filters, investorScope) {
+  const { where, params } = buildWhere(filters, investorScope);
   const sql = `
     SELECT
       COUNT(*) AS total,
@@ -171,7 +180,8 @@ function buildAppointmentDate(row) {
 }
 
 async function preview(filters, user) {
-  const summary = await getSummary(filters);
+  const investorScope = await resolveExportInvestorScope(user);
+  const summary = await getSummary(filters, investorScope);
   const total = parseInt(summary.total, 10);
   return {
     rowCount: total,
@@ -188,9 +198,10 @@ async function preview(filters, user) {
 }
 
 async function build(filters, user) {
+  const investorScope = await resolveExportInvestorScope(user);
   const [rows, summary] = await Promise.all([
-    getRows(filters),
-    getSummary(filters),
+    getRows(filters, investorScope),
+    getSummary(filters, investorScope),
   ]);
 
   if (rows.length > MAX_ROWS) {

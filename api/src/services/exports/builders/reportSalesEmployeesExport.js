@@ -4,6 +4,7 @@ const { query } = require('../../../db');
 const { resolveEffectivePermissions } = require('../../permissionService');
 const { createWorkbook, populateSummarySheet, toVNDate } = require('../exportWorkbook');
 const { SERVICE_REVENUE_PAYMENT_CONDITION } = require('../../../routes/reports/revenueRecognition');
+const { appendInvestorCustomerCondition, resolveExportInvestorScope } = require('../investorExportScope');
 
 const MAX_ROWS = 100_000;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -147,12 +148,24 @@ function buildWhere(filters, scope, employeeType) {
     idx += 1;
   }
 
+  idx = appendInvestorCustomerCondition({
+    conditions,
+    params,
+    idx,
+    column: 'COALESCE(p.customer_id, so.partnerid)',
+    investorScope: scope.investorScope,
+  });
+
   return { where: conditions.join(' AND '), params };
 }
 
 async function getRows(filters, user) {
   const employeeType = resolveEmployeeType(filters.employeeType);
-  const scope = await resolveCompanyScope(user, filters.companyId);
+  const [companyScope, investorScope] = await Promise.all([
+    resolveCompanyScope(user, filters.companyId),
+    resolveExportInvestorScope(user),
+  ]);
+  const scope = { ...companyScope, investorScope };
   const { where, params } = buildWhere(filters, scope, employeeType);
 
   const sql = `

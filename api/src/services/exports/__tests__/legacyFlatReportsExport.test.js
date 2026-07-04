@@ -4,7 +4,12 @@ jest.mock('../../../db', () => ({
   query: jest.fn(),
 }));
 
+jest.mock('../../permissionService', () => ({
+  resolveInvestorScope: jest.fn(),
+}));
+
 const { query } = require('../../../db');
+const { resolveInvestorScope } = require('../../permissionService');
 const legacyFlatReportsExport = require('../builders/legacyFlatReportsExport');
 const { getExportType } = require('../exportRegistry');
 
@@ -18,6 +23,7 @@ const DOCTOR_ID = '22222222-2222-4222-8222-222222222222';
 
 beforeEach(() => {
   jest.clearAllMocks();
+  resolveInvestorScope.mockResolvedValue({ isInvestor: false, allowedCustomerIds: [] });
 });
 
 describe('legacyFlatReportsExport', () => {

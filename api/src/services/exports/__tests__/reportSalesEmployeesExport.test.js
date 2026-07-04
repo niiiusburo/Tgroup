@@ -6,10 +6,11 @@ jest.mock('../../../db', () => ({
 
 jest.mock('../../permissionService', () => ({
   resolveEffectivePermissions: jest.fn(),
+  resolveInvestorScope: jest.fn(),
 }));
 
 const { query } = require('../../../db');
-const { resolveEffectivePermissions } = require('../../permissionService');
+const { resolveEffectivePermissions, resolveInvestorScope } = require('../../permissionService');
 
 const reportSalesEmployeesExport = require('../builders/reportSalesEmployeesExport');
 
@@ -63,6 +64,7 @@ beforeEach(() => {
     effectivePermissions: ['reports.view', 'reports.export'],
     locations: [{ id: LOC_A, name: 'Tấm Dentist Thủ Đức' }],
   });
+  resolveInvestorScope.mockResolvedValue({ isInvestor: false, allowedCustomerIds: [] });
 });
 
 describe('reportSalesEmployeesExport', () => {

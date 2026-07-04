@@ -25,8 +25,8 @@ function dateValue(value) {
 
 function createBuilder({ columns, getRows, getPreview, toDataRow }) {
   return {
-    async preview(filters) {
-      const summary = await getPreview(filters);
+    async preview(filters, user) {
+      const summary = await getPreview(filters, user);
       const total = parseInt(summary.total || 0, 10);
       return {
         rowCount: total,
@@ -39,7 +39,7 @@ function createBuilder({ columns, getRows, getPreview, toDataRow }) {
     },
 
     async build(filters, user) {
-      const rows = await getRows(filters, MAX_ROWS);
+      const rows = await getRows(filters, MAX_ROWS, user);
       if (rows.length > MAX_ROWS) {
         throw makeRowLimitError();
       }

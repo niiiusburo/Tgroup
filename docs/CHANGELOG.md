@@ -14,6 +14,11 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.47] — 2026-07-04
+
+### Fixed
+- NK/NK2 investor Excel exports now apply the same admin-allowlisted customer scope as the normal portal for customer, service, appointment, payment, revenue, deposit, and employee-revenue exports. — @codex — preserves INV-021 same-portal investor scoping and closes the export leak found during live verification.
+
 ## [0.32.46] — 2026-07-04
 
 ### Added

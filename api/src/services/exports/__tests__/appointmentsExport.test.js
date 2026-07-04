@@ -4,11 +4,17 @@ jest.mock('../../../db', () => ({
   query: jest.fn(),
 }));
 
+jest.mock('../../permissionService', () => ({
+  resolveInvestorScope: jest.fn(),
+}));
+
 const { query } = require('../../../db');
+const { resolveInvestorScope } = require('../../permissionService');
 const { buildAppointmentDate, build, preview } = require('../builders/appointmentsExport');
 
 beforeEach(() => {
   query.mockReset();
+  resolveInvestorScope.mockResolvedValue({ isInvestor: false, allowedCustomerIds: [] });
 });
 
 describe('buildAppointmentDate', () => {
