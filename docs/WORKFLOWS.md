@@ -103,6 +103,45 @@ sequenceDiagram
 
 ---
 
+## WF-015 — Investor Same-Portal Scoped Read
+
+**Trigger:** Investor submits `/login` and opens customer-derived portal surfaces.
+**Why it matters:** Investors must use the same portal as staff while only seeing admin-allowlisted customers.
+
+```mermaid
+sequenceDiagram
+    actor I as Investor
+    participant FE as React Portal
+    participant API as Express API
+    participant DB as Postgres (dbo)
+
+    I->>FE: Login on /login
+    FE->>API: POST /api/Auth/login { email, password }
+    API->>DB: Check partners employee credentials
+    alt No matching staff password
+        API->>DB: Check active investor_accounts linked to investor group partner
+    end
+    API->>DB: Resolve effective permissions with investor group
+    API-->>FE: Normal staff token + user + permissions
+    FE->>API: Read customers/reports/export/service data
+    API->>DB: resolveInvestorScope(user.employeeId)
+    DB-->>API: allowed customer ids from investor_clients
+    API->>DB: Query requested data with allowed customer filter
+    API-->>FE: Scoped rows only
+```
+
+**Data state transitions:**
+- `partners.last_login` updates on successful investor login.
+- `investor_accounts.last_login` updates when the helper credential row was used.
+- `investor_clients` is written only by admin visibility toggles.
+
+**Invariants:** INV-008, INV-021.
+**Failure modes:**
+- Missing investor allowlist returns empty scoped data.
+- Stale branch deploy without live commit can remove the same-portal implementation (FM-20260704-01).
+
+---
+
 ## WF-002 — Create Appointment
 
 **Trigger:** Reception staff clicks "Hẹn mới" on Overview or Calendar.

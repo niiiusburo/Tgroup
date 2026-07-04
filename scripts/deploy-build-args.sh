@@ -4,7 +4,8 @@
 # Single entry point that prepares safe docker-build arguments for any
 # TGroup deploy (NK / NK2 / NK3). Combines:
 #   - require-clean-tree.sh  (Layer 1: refuse dirty deploys)
-#   - GIT_SHA + GIT_BRANCH    (Layer 2: stamp real commit into version.json)
+#   - deploy-preflight.js    (Layer 2: refuse stale worktree deploys)
+#   - GIT_SHA + GIT_BRANCH   (Layer 3: stamp real commit into version.json)
 #
 # Usage from a shell:
 #   source scripts/deploy-build-args.sh
@@ -23,7 +24,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Layer 1 — refuse a dirty tree
 bash "$SCRIPT_DIR/require-clean-tree.sh"
 
-# Layer 2 — export build args for the Docker build
+# Layer 2 — refuse deploys that would erase the live target's current commit
+node "$SCRIPT_DIR/deploy-preflight.js"
+
+# Layer 3 — export build args for the Docker build
 export GIT_SHA="$(git rev-parse HEAD)"
 export GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 

@@ -124,7 +124,7 @@ export const ROUTE_PERMISSIONS: Record<string, string> = {
   [ROUTES.CUSTOMERS]: 'customers.view',
   [ROUTES.EMPLOYEES]: 'employees.view',
   [ROUTES.LOCATIONS]: 'locations.view',
-  [ROUTES.SERVICES]: 'customers.edit',
+  [ROUTES.SERVICES]: 'services.view',
   [ROUTES.SERVICE_CATALOG]: 'services.view',
   [ROUTES.WEBSITE]: 'website.view',
   [ROUTES.REPORTS]: 'reports.view',

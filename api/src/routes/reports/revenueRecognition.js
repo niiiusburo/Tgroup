@@ -23,6 +23,23 @@ const CAPPED_ALLOCATED_AMOUNT_SQL = `CASE
   ELSE pa.allocated_amount
 END`;
 
+const UNALLOCATED_SERVICE_PAYMENT_CONDITION = [
+  "p.status = 'posted'",
+  "COALESCE(p.payment_category, 'payment') = 'payment'",
+  "COALESCE(p.deposit_type, '') NOT IN ('deposit', 'refund', 'usage')",
+  `NOT EXISTS (
+    SELECT 1
+    FROM dbo.payment_allocations existing_pa
+    WHERE existing_pa.payment_id = p.id
+  )`,
+].join('\nAND ');
+
+const DIRECT_SERVICE_PAYMENT_AMOUNT_SQL = `CASE
+  WHEN COALESCE(p.cash_amount, 0) + COALESCE(p.bank_amount, 0) > 0
+  THEN COALESCE(p.cash_amount, 0) + COALESCE(p.bank_amount, 0)
+  ELSE GREATEST(0, ABS(COALESCE(p.amount, 0)) - COALESCE(p.deposit_used, 0))
+END`;
+
 function buildPairedRevenueFilters({
   dateFrom,
   dateTo,
@@ -117,8 +134,10 @@ function toInt(value) {
 
 module.exports = {
   SERVICE_REVENUE_PAYMENT_CONDITION,
+  UNALLOCATED_SERVICE_PAYMENT_CONDITION,
   ALLOCATION_TOTALS_CTE,
   CAPPED_ALLOCATED_AMOUNT_SQL,
+  DIRECT_SERVICE_PAYMENT_AMOUNT_SQL,
   buildPairedRevenueFilters,
   buildPaymentRevenueFilter,
   toNumber,

@@ -132,6 +132,30 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | **UI** | Customers page, Employees page, Login, Appointment forms, Payment forms, Service records, Reports, Face capture |
 | **Risk** | **Critical** — recent breakage occurred when `password_hash` was missing and NOT NULL constraints were added without updating all INSERT paths. Customer phone is not unique identity and may overlap migrated refs/phones; UUID remains the durable key. |
 
+### dbo.investor_clients
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Key** | `id` (uuid) |
+| **Key Relationships** | `partner_id` → partners(id) for the visible customer. `investor_id` may be the investor partner id on fresh installs or `investor_accounts.id` on the already-deployed NK/NK2 successor schema; `resolveInvestorScope()` must check both and filter `lob='dental'`. |
+| **W** | `api/src/routes/partners/investorVisibility.js` admin toggle |
+| **R** | `api/src/services/permissionService.js`, partner/customer read handlers, appointments, payments, services, reports, exports |
+| **E** | `GET /api/Partners/investor-visibility`, `PATCH /api/Partners/:id/investor-visibility` |
+| **UI** | Admin-only Customer list visibility checkbox; investor Customer/Profile/Reports reads |
+| **Risk** | **Critical** — missing filters can disclose customer data; filters must fail closed, preserve existing allowlist rows, and never create a separate investor portal. |
+
+### dbo.investor_accounts
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Key** | `id` (uuid) |
+| **Key Relationships** | `partner_id` → partners(id), where the partner row is the canonical investor identity. Investor permission-group matching is case-insensitive to preserve live `Investor`; migration 049 normalizes legacy `is_active`/`created_at`/`updated_at` into `active`/`datecreated`/`lastupdated`. |
+| **W** | Migration/admin data setup only; login updates `last_login` |
+| **R** | `api/src/routes/auth.js` login fallback |
+| **E** | Existing `POST /api/Auth/login`; no `/api/investor/*` endpoint |
+| **UI** | Existing `/login` page and app shell |
+| **Risk** | **High** — credential helper must not become a second identity system or second app shell. |
+
 ### dbo.customer_face_embeddings
 
 | Attribute | Value |
@@ -437,6 +461,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | `dbo.payment_allocations` | Payments, SaleOrders residuals, CustomerBalance, TDental import scripts, service history paid/residual display |
 | `dbo.saleorders` | Service records UI, Payments (allocations), Reports, CustomerProfile |
 | `dbo.exports_audit` | Export route audit behavior, operational compliance checks |
+| `dbo.investor_clients` / `dbo.investor_accounts` | Same-portal investor login, admin customer visibility assignment, investor customer/report/export scoping |
 | `dbo.error_events` / `dbo.error_fix_attempts` | Telemetry ingestion, Feedback auto-thread creation, AutoDebugger scripts |
 | `dbo.permission_groups` / `group_permissions` | Auth middleware, PermissionBoard, Settings RoleConfig |
 | `dbo.company_bank_settings` | BankSettingsForm, VietQrModal, `lib/vietqr.ts` |

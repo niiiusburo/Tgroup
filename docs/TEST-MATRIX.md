@@ -32,8 +32,8 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | If you change... | Run these tests... | Why |
 |---|---|---|
 | `api/src/middleware/auth.js` | `api/tests/loginRateLimiter.test.js`, `api/tests/readRoutePermissions.test.js`, all E2E auth specs | Single point of failure for all protected routes. |
-| `api/src/routes/auth.js` | Same as above + `website/e2e/auth-setup.spec.ts` | Login payload shape changes break frontend AuthContext. |
-| `api/src/services/permissionService.js` | `api/tests/readRoutePermissions.test.js`, `website/e2e/permissions-*.spec.ts` | Effective permission divergence causes 403s. |
+| `api/src/routes/auth.js` | Same as above + `website/e2e/auth-setup.spec.ts`, `api/tests/authInvestorLogin.test.js` | Login payload shape changes break frontend AuthContext; investor login must stay on the same staff portal/session. |
+| `api/src/services/permissionService.js` | `api/src/services/__tests__/permissionService.test.js`, `api/tests/readRoutePermissions.test.js`, `api/tests/investorIdorScoping.test.js`, `api/tests/investorScopeRoutePermissions.test.js`, `api/tests/investorVisibilityCompatibility.test.js`, `website/e2e/permissions-*.spec.ts` | Effective permission divergence causes 403s; investor scope must fail closed to allowlisted customers, preserve legacy account-keyed allowlist rows, and match live `Investor` group casing. |
 | `website/src/contexts/AuthContext.tsx` | `website/e2e/auth-setup.spec.ts`, `website/e2e/permissions-check.spec.ts` | Auth state hydration affects every protected page. |
 | `website/src/constants/index.ts` (ROUTE_PERMISSIONS) | All E2E specs that navigate protected routes | Route guard changes may hide/show pages incorrectly. |
 
@@ -67,6 +67,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | If you change... | Run these tests... | Why |
 |---|---|---|
 | `api/src/routes/partners.js` | `api/src/routes/partners/__tests__/*.test.js` | Customer CRUD, search, uniqueness logic. |
+| `api/src/routes/partners/investorVisibility.js` and customer read handlers | `api/tests/investorVisibilityCompatibility.test.js`, `api/tests/investorIdorScoping.test.js`, `api/tests/investorScopeRoutePermissions.test.js` | Admin visibility toggles write `dbo.investor_clients`; investor customer/profile reads must show only allowlisted clients and keep existing NK/NK2 account-keyed visibility rows working. |
 | `api/src/routes/partners/mutationHandlers.js` customer-code generation | `api/src/routes/partners/__tests__/mutationHandlers.test.js` | New dental customers must keep `T######`; new cosmetic customers created through `/api/cosmetic/Partners` must use collision-checked `TM######` refs in the cosmetic DB. |
 | `website/src/components/forms/AddCustomerForm/` | `AddCustomerForm.test.tsx`, `website/e2e/customer-create-save.spec.ts` | New-customer intake is high-frequency workflow. |
 | `website/src/components/customer/CustomerProfile/` | `CustomerProfile.test.tsx`, `website/e2e/customer-profile-crud.spec.ts` | Profile tabs (appointments, services, payments, photos). |
@@ -95,6 +96,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | If you change... | Run these tests... | Why |
 |---|---|---|
 | `api/src/routes/exports.js` | `website/e2e/export-downloads.spec.ts`, `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js` | UC-013/UC-019, WF-005. Locks `CON-Exports-Preview` and `CON-Exports-Download` as current `POST /api/Exports/:type/...` contracts plus workbook generation. |
+| Investor report/export scoping (`api/src/routes/reports/*`, `api/src/routes/exports.js`, export builders) | `api/tests/investorIdorScoping.test.js`, `api/src/routes/reports/__tests__/cashFlow.test.js`, live investor report/export smoke | Investor downloads must include only admin-allowlisted customers and must not require a separate portal. |
 | `api/src/services/exports/builders/*.js` COLUMNS arrays | `api/src/services/exports/__tests__/featureCatalog.crosscheck.test.js` (40 assertions) | **Feature Catalog Lock**: If you modify any export builder's COLUMNS, DATA_COLUMNS, REVENUE_COLUMNS, or DEPOSIT_COLUMNS arrays, the Jest cross-check test validates that `product-map/features/exports/*.yaml` specifications match code exactly (keys and headers, order-sensitive). Update the YAML file in lockstep with builder code changes. All 8 exports (appointments, customers, payments, services, service-catalog, report-sales-employees, revenue-flat, deposit-flat) use this pattern. Land 2026-05-21 on `fix/feedback-reports` — additive test only, does not touch builder code. |
 | `api/src/services/exports/builders/legacyFlatReportsExport*.js` | `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `website/e2e/export-downloads.spec.ts` | UC-013, WF-005. Locks `revenue-flat` and `deposit-flat` workbook templates, SO-code column mapping, payment/deposit note columns, revenue source precedence, deposit cash/bank split fallback, posted service-payment filters, allocation proration SQL, row-limit errors, and deposit top-up filtering. |
 | `api/src/services/exports/builders/reportSalesEmployeesExport.js` | `api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx` | UC-019, WF-005. Locks `report-sales-employees` preview/download filters, location scope, employee-type attribution, grouped workbook rows, and `/reports/revenue` export controls. |
@@ -104,6 +106,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | `website/src/hooks/useReportData.ts` | `website/src/hooks/__tests__/useReportData.test.ts` | UC-013, WF-013. Locks report API calls as POST payloads and strips the all-location sentinel from request bodies. |
 | `website/src/pages/reports/ReportsRevenue.tsx` and other `website/src/pages/reports/*` subpages | `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`, `website/e2e/export-downloads.spec.ts` | UC-013/UC-019, WF-013. Locks visible revenue recognition basis, cash-flow cards, employee export controls, loading/error states, and report subpage routing. |
 | `nginx.conf` or `nginx.docker.conf` | `website/e2e/export-downloads.spec.ts` (large dataset) | Timeout behavior for long-running exports. |
+| `scripts/deploy-build-args.sh`, `scripts/deploy-preflight.js`, `scripts/deploy-worktree-audit.js` | `DEPLOY_SITE=nk,nk2 DEPLOY_FEATURES=$'candidate' node scripts/deploy-preflight.js --candidate HEAD`, stale-candidate negative preflight check, `DEPLOY_SITE=nk,nk2 node scripts/deploy-worktree-audit.js` | Deploy candidates must contain live commit and list every deployed feature before build. |
 
 ### Settings & System
 

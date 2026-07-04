@@ -14,6 +14,14 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.46] — 2026-07-04
+
+### Added
+- NK/NK2 investor access now uses the normal staff portal with admin-assigned visible customers, server-side `dbo.investor_clients` scoping across customer reads, appointments, payments, services, reports, and exports, plus admin customer-list visibility toggles. — @codex — preserves INV-008 and new INV-021 same-portal investor scoping.
+- Investor migrations normalize the already-deployed NK/NK2 same-portal successor schema (`is_active`, `lob`, account-keyed visibility rows) instead of replacing it, so previous investor allowlists survive the hotfix. — @codex — preserves INV-021 and fixes the 2026-07-04 deploy conflict discovered on VPS.
+- Investor group checks are case-insensitive, matching the live `Investor` permission group and preventing allowlist filters from silently skipping. — @codex — preserves INV-021 fail-closed investor scoping.
+- Deployment continuity preflight now requires every NK/NK2/NK3 deploy candidate to contain the live target commit and list the product-facing feature manifest before build, with a worktree audit helper for stale/dirty sibling branches. — @codex — prevents FM-20260704-01 live feature erasure.
+
 ## [0.32.45] — 2026-07-03
 
 ### Fixed

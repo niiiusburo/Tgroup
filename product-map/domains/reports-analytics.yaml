@@ -34,6 +34,7 @@ tables:
   - dbo.monthlyplans
   - dbo.planinstallments
   - dbo.exports_audit
+  - dbo.investor_clients (investor report/export customer scope)
 endpoints:
   - POST /api/Reports/dashboard
   - POST /api/Reports/revenue/summary
@@ -88,6 +89,7 @@ dependencies:
 affected_by:
   - Any schema change to aggregated tables
   - Any change to appointment status values
+  - Investor access must scope report and export rows to admin-allowlisted customers only.
   - Any change to payment method enum
 impact_tests:
   - website/src/pages/reports/__tests__/ReportsDashboard.test.tsx

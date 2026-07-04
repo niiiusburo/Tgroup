@@ -109,4 +109,58 @@ async function hasPermission(employeeId, permission) {
   return effectivePermissions.includes(permission);
 }
 
-module.exports = { resolveEffectivePermissions, hasPermission };
+/**
+ * Resolve an investor's customer scope.
+ *
+ * An "investor" is a restricted employee (permission group 'investor') whose
+ * visibility is limited to an explicit per-customer allowlist in
+ * dbo.investor_clients — mirroring employee_location_scope, but keyed by
+ * customer instead of location. Callers MUST apply the returned allowlist to
+ * every customer-touching query (reads) and validate it on writes.
+ *
+ * @param {string} employeeId - UUID of the logged-in employee (req.user.employeeId)
+ * @returns {Promise<{ isInvestor: boolean, allowedCustomerIds: string[] }>}
+ *   isInvestor=false → normal staff/admin; apply NO extra scope.
+ *   isInvestor=true  → restrict to allowedCustomerIds (fail-closed; may be []).
+ */
+async function resolveInvestorScope(employeeId) {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!employeeId || !uuidRegex.test(employeeId)) {
+    return { isInvestor: false, allowedCustomerIds: [] };
+  }
+
+  const groupRows = await query(
+    `SELECT pg.name AS group_name
+     FROM dbo.partners p
+     JOIN dbo.permission_groups pg ON pg.id = p.tier_id
+     WHERE p.id = $1 AND p.employee = true AND p.isdeleted = false`,
+    [employeeId]
+  );
+
+  const groupName = String(groupRows[0]?.group_name || '').trim().toLowerCase();
+  const isInvestor = groupRows.length > 0 && groupName === 'investor';
+  if (!isInvestor) {
+    return { isInvestor: false, allowedCustomerIds: [] };
+  }
+
+  const rows = await query(
+    `WITH investor_account_ids AS (
+       SELECT id
+       FROM dbo.investor_accounts
+       WHERE partner_id = $1 AND active = true
+     )
+     SELECT DISTINCT partner_id
+     FROM dbo.investor_clients
+     WHERE is_visible = true
+       AND lob = 'dental'
+       AND (
+         investor_id = $1
+         OR investor_id IN (SELECT id FROM investor_account_ids)
+       )`,
+    [employeeId]
+  );
+
+  return { isInvestor: true, allowedCustomerIds: rows.map(r => r.partner_id) };
+}
+
+module.exports = { resolveEffectivePermissions, hasPermission, resolveInvestorScope };

@@ -86,6 +86,10 @@
   "loading": "Loading...",
   "loadingProfile": "Loading profile...",
   "searchToView": "Search for a customer to view their profile",
+  "investorVisibility": {
+    "column": "Investor",
+    "toggleLabel": "Allow investor to view {{name}}"
+  },
   "deletePayment": "Delete payment",
   "districtHint": "District",
   "wardHint": "Ward",

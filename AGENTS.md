@@ -104,6 +104,14 @@ Allowed exceptions:
 - Auto-generated files where splitting harms maintainability.
 - Translation JSON files and static data files.
 
+## 5.1 Investor Same-Portal Rule
+
+Investors use the same NK portal, `/login` page, app shell, staff-compatible JWT session, and permission system as employees and admins. Do not build, revive, route to, deploy, or document a separate Investor portal, `/investor/*` frontend, `/api/investor/*` auth/client API, separate investor token storage, or separate `InvestorAuthContext`.
+
+Investor access is a restricted normal-portal role. Investors may only see customers and customer-derived records explicitly allowlisted by an admin through investor visibility controls backed by `dbo.investor_clients` or the current same-portal successor table. Customer-touching reads, reports, exports, appointments, payments, treatment history, CRM, and direct customer-detail URLs must apply that allowlist server-side and fail closed when no allowlist exists. Investor writes are forbidden unless a future authority decision names the exact write permission and scope.
+
+Admin controls for creating/managing investor identities and assigning visible customers stay inside the normal portal, such as Settings, Permissions, and Customers, and must use normal staff/admin auth.
+
 ## 6. Frontend Rules
 
 For frontend work:
@@ -185,6 +193,18 @@ Do not delete or prune worktrees unless:
 - `git worktree list --porcelain` proves the worktree is stale or merged.
 - The branch has no unmerged work.
 - Any dirty detached worktree has been classified and preserved.
+
+### 12.1 Deployment Continuity Guard
+
+Before any NK, NK2, or NK3 deployment, run the deployment preflight from the exact worktree/branch being deployed:
+
+```bash
+DEPLOY_SITE=nk DEPLOY_FEATURES=$'Feature one\nFeature two' source scripts/deploy-build-args.sh
+```
+
+Use `DEPLOY_SITE=nk,nk2` for a two-site deploy, or the matching single target for a one-site deploy. The feature manifest must list every product-facing feature/fix included in the deployment. A deployment report that omits this deployed-feature list is incomplete.
+
+The preflight is a blocking guard: it fetches the live target's `/version.json`, reads the live `gitCommit`, and refuses to deploy when the candidate worktree does not contain that live commit. This protects already-deployed features from being erased by a sibling or stale worktree. Do not bypass it unless this is a named emergency rollback/hotfix; if bypassed, the recap must state `ALLOW_DEPLOY_PREFLIGHT_BYPASS=1` or `ALLOW_UNKNOWN_LIVE_COMMIT=1`, the reason, and the rollback path.
 
 ## 13. Reporting Protocol
 

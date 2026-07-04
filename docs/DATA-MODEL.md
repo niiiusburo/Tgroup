@@ -151,6 +151,31 @@ erDiagram
 - `ON DELETE RESTRICT` implied by application logic (soft delete preferred).
 - Hard delete cascades to `appointments`, `saleorders`, `payments`, `dotkhams`, `feedback_threads`, `hr_payslips` only if explicitly implemented in route handler.
 
+Investor identities remain `dbo.partners` employee rows assigned to the `investor` permission group; group-name matching is case-insensitive to preserve the live `Investor` group. Optional alternate investor login credentials live in `dbo.investor_accounts` but resolve back to the same `partners.id` and normal staff JWT/session.
+
+#### `dbo.investor_clients`
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | uuid | PK, default `gen_random_uuid()` |
+| `investor_id` | uuid | Investor visibility owner. Fresh installs may store the investor `partners.id`; NK/NK2 live compatibility may store `investor_accounts.id`, which resolves back to `investor_accounts.partner_id`. |
+| `partner_id` | uuid | FK → `partners(id)`; customer made visible |
+| `lob` | text | DEFAULT `dental`; NK/NK2 scope reads `lob='dental'` |
+| `is_visible` | boolean | DEFAULT true |
+| `marked_by_partner_id` / `marked_at` | uuid / timestamptz | Admin/audit fields from the existing live successor table |
+| `datecreated` / `lastupdated` | timestamp | Compatibility timestamps normalized by migration 048 |
+
+**Unique:** `(investor_id, partner_id, lob)` for the live-compatible shape. Routes must treat missing rows or `is_visible=false` as no access.
+
+#### `dbo.investor_accounts`
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | uuid | PK, default `gen_random_uuid()` |
+| `partner_id` | uuid | FK → `partners(id)`; linked investor employee |
+| `email` | text | Unique active login email |
+| `password_hash` | text | bcrypt hash |
+| `active` | boolean | DEFAULT true; migration 049 normalizes older `is_active` rows into this column |
+| `datecreated` / `lastupdated` / `last_login` | timestamp | Operational timestamps; migration 049 normalizes older `created_at` / `updated_at` rows |
+
 ---
 
 #### `dbo.appointments`

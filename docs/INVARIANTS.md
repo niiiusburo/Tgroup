@@ -65,6 +65,12 @@
 **Enforced by:** Code review + `ARCHITECTURE.md` §6.
 **Cite when:** Editing auth middleware, login, or permission resolution.
 
+### INV-021 — Investor Same-Portal Customer Scope
+**Rule:** Investor users are normal portal staff sessions with the `investor` permission group. They must never use a separate investor app shell, token, auth context, or `/api/investor/*` API. Every customer-derived backend read, report, and export reachable by an investor must restrict rows to `dbo.investor_clients.is_visible = true` for that investor and fail closed when no allowlist exists. The scope resolver must preserve both same-portal key shapes: `investor_clients.investor_id = partners.id` and the already-deployed NK/NK2 successor shape where `investor_clients.investor_id = investor_accounts.id`.
+**Rationale:** Investors should see only admin-approved clients while preserving one portal and one permission system.
+**Enforced by:** `resolveInvestorScope()` in `api/src/services/permissionService.js`, route-level customer scope filters, `api/src/services/__tests__/permissionService.test.js`, `api/tests/authInvestorLogin.test.js`, `api/tests/investorIdorScoping.test.js`, `api/tests/investorScopeRoutePermissions.test.js`, and `api/tests/investorVisibilityCompatibility.test.js`.
+**Cite when:** Editing investor auth, customer reads, reports, exports, appointments, payments, service cards, or permission seeds.
+
 ### INV-009 — Location Scope Frontend-Only Filter
 **Rule:** Backend list routes generally do NOT enforce location scope. The frontend `LocationContext` is responsible for filtering by `companyid`.
 **Rationale:** Backend location scoping was historically inconsistent; frontend filtering is the current operational contract.
@@ -153,6 +159,12 @@
 **Enforced by:** `AGENTS.md` §8 and `DECISIONS.md` DEC-20260502-05.
 **Cite when:** Shipping frontend, API, or behavior changes.
 
+### INV-022 — Deployment Candidate Contains Live Commit
+**Rule:** Any NK, NK2, or NK3 deploy candidate must contain the target site's current `/version.json.gitCommit` and must list the full product-facing feature manifest before build.
+**Rationale:** Deploying from a stale sibling worktree can erase features that were already live.
+**Enforced by:** `scripts/deploy-build-args.sh` calling `scripts/deploy-preflight.js`; release planning may also run `scripts/deploy-worktree-audit.js`.
+**Cite when:** Deploying, preparing a hotfix, or changing release scripts.
+
 ---
 
 ## Incident-Derived Invariants
@@ -177,3 +189,4 @@
 |---|---|---|---|
 | 2026-05-13 | INV-001..INV-020 | Initial invariant set created | feat/complete-documentation-stack |
 | 2026-05-13 | INC-20260506-01, INC-20260506-02 | Incident-derived invariants added | feat/complete-documentation-stack |
+| 2026-07-04 | INV-021..INV-022 | Added investor same-portal customer scope and live-commit deploy continuity invariants | codex/nk2-investor-same-portal-ship |
