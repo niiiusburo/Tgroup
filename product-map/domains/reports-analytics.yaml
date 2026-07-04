@@ -111,7 +111,9 @@ notes:
     with `reports.export`, date/location scope, employee type, and optional
     employee filters; workbook rows are grouped by employee and derive revenue
     from posted `payment_allocations`, excluding deposits, refunds, deposit
-    usage, and voided payments like the revenue-flat export.
+    usage, and voided payments like the revenue-flat export. Explicit wildcard
+    `*` permission is the only all-location export override; Admin/Super Admin
+    group names alone remain constrained to resolved locations.
   - >-
     Legacy flat report exports use `/api/Exports/revenue-flat` and
     `/api/Exports/deposit-flat` with `payments.export`; preview/download
