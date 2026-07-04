@@ -1,6 +1,7 @@
 const { query } = require('../../db');
 const { applyPartnerListFilters } = require('./listFilters');
 const { applyPartnerSearchFilter } = require('./searchFilters');
+const { resolveInvestorScope } = require('../../services/permissionService');
 
 /**
  * GET /api/Partners
@@ -40,6 +41,15 @@ async function listPartners(req, res) {
 
     paramIdx = applyPartnerSearchFilter({ search, conditions, params, paramIdx });
     paramIdx = applyPartnerListFilters({ query: req.query, conditions, params, paramIdx });
+
+    // Investor scope: restrict to the customers explicitly assigned to this
+    // investor (fail-closed — empty allowlist yields zero rows).
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      params.push(investorScope.allowedCustomerIds);
+      conditions.push(`p.id = ANY($${paramIdx}::uuid[])`);
+      paramIdx++;
+    }
 
     const whereClause = conditions.join(' AND ');
 
@@ -191,6 +201,11 @@ async function checkPartnerUnique(req, res) {
 async function getPartnerKpis(req, res) {
   try {
     const { id } = req.params;
+
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(id)) {
+      return res.status(404).json({ error: 'Partner not found' });
+    }
 
     const kpiResult = await query(
       `SELECT

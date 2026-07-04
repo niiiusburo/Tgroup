@@ -6,6 +6,9 @@
     "prepare": "husky",
     "verify:prompt": "bash scripts/prompt-authority-check.sh",
     "verify:docs": "bash scripts/verify-docs.sh",
+    "verify:deploy-preflight": "DEPLOY_SITE=${DEPLOY_SITE:-nk} DEPLOY_FEATURES=${DEPLOY_FEATURES:-deploy-preflight-check} node scripts/deploy-preflight.js",
+    "verify:deploy-worktree-audit": "DEPLOY_SITE=${DEPLOY_SITE:-nk} node scripts/deploy-worktree-audit.js --fail-on-risk",
+    "audit:deploy-worktrees": "DEPLOY_SITE=${DEPLOY_SITE:-nk,nk2} node scripts/deploy-worktree-audit.js",
     "verify:governance": "bash scripts/prompt-authority-check.sh && bash scripts/verify-docs.sh && git diff --check HEAD"
   },
   "devDependencies": {

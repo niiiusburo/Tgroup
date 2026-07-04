@@ -52,6 +52,7 @@ Staff → /login form → POST /api/Auth/login
 | Doctor | `appointments.view`, `appointments.edit`, `services.edit` | Clinical workflows only |
 | Receptionist | `appointments.add`, `appointments.edit`, `customers.view`, `customers.add`, `payment.add` | Front-desk operations |
 | Cashier | `payment.add`, `payment.view`, `customers.view` | Money collection |
+| Investor | `customers.view`, read/report/export permissions only | Same portal as staff; rows must be allowlisted in `dbo.investor_clients`; no write permissions |
 
 ### Permission Resolution Order
 
@@ -60,6 +61,8 @@ Staff → /login form → POST /api/Auth/login
 3. **Location scope** (`employee_location_scope` — restricts visible locations)
 
 Effective permissions = (Group ∪ Grants) − Revokes, then filtered by location scope at the UI level.
+
+Investor customer scope is an additional server-side filter. If an authenticated user resolves to the `investor` group, customer-derived routes must apply `dbo.investor_clients` and return empty lists or 404s for non-allowlisted customers without disclosing existence.
 
 ### Dangerous Permissions (Require Explicit Assignment)
 
@@ -82,6 +85,7 @@ Effective permissions = (Group ∪ Grants) − Revokes, then filtered by locatio
 | Refund payment | `payment.refund` | Confirmation + amount validation |
 | Delete payment | `payment.delete` | Confirmation + audit log |
 | Change permission group | `permissions.edit` | Admin-only UI; group list protected |
+| Assign investor-visible customers | `permissions.edit` | Admin-only Customer list toggle; writes `dbo.investor_clients` |
 | Edit system preferences | `settings.system` | Admin-only |
 | Deploy to production | Human approval | Not automated; `AGENTS.md` worktree discipline |
 

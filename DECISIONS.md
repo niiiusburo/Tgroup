@@ -92,3 +92,29 @@ Sticky dashboard search/toolbars follow `website/design.md`: standard white card
 
 Consequences:
 Future sticky search bars should feel like compact toolbars, not form rows with reserved label columns. The content below must remain in normal flow so the sticky bar does not overlap panels.
+
+## DEC-20260704-01: Investors Use Same Portal With Customer Allowlist
+
+Status: Accepted
+
+Context:
+An earlier investor implementation risked becoming a separate portal. Product policy now requires investors to use the same NK/NK2 login, app shell, JWT session, and permission system as employees/admins, while seeing only customers explicitly allowed by an admin.
+
+Decision:
+Investor access is a restricted normal-portal permission group. Customer-derived reads, reports, exports, appointments, payments, service cards, and direct profile URLs must enforce `dbo.investor_clients` server-side. Do not introduce `/investor/*`, `/api/investor/*`, investor-specific token storage, or a separate `InvestorAuthContext`.
+
+Consequences:
+Admin visibility controls stay inside the normal portal. Investor writes remain forbidden unless a future decision names the exact write permission and scope. NK/NK2 had an earlier same-portal successor table where `investor_clients.investor_id` points to `investor_accounts.id`; runtime scope resolution and admin visibility writes must preserve that existing allowlist data while still exposing the normal `partners.id` session identity. Same-portal behavior is guarded by INV-021 and the investor API tests.
+
+## DEC-20260704-02: Deploy Candidates Must Contain Live Commit
+
+Status: Accepted
+
+Context:
+NK/NK2 lost already-live work when a later hotfix deployed from a sibling worktree whose branch did not contain the current live `version.json.gitCommit`.
+
+Decision:
+Every NK, NK2, or NK3 deploy must run `scripts/deploy-preflight.js` through `scripts/deploy-build-args.sh` from the exact deploy worktree. The preflight requires a `DEPLOY_FEATURES` manifest and refuses candidates that do not contain the target site's live commit.
+
+Consequences:
+Old work that already exists must be re-ported or rebased onto the live baseline before deployment. Emergency bypasses must be named in the report with the bypass env var, reason, and rollback path. Worktree audits can identify stale/dirty sibling branches before release planning.

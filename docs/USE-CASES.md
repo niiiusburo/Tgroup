@@ -438,3 +438,24 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Postconditions:** Staff can inspect long migrated clinical notes without breaking dense profile layout.
 - **Invariants touched:** INV-015 (expandable overflow), INV-016 (i18n), INV-017 (dense list scroll).
 - **Traceability:** Related WF: WF-014. Contracts/routes: `GET /api/Partners/:id`, `GET /api/DotKhams`. Data/tables: `dbo.partners.medicalhistory`, `dbo.dotkhams`, `dbo.dotkhamsteps`. Tests: `website/src/components/customer/CustomerProfile.test.tsx`, `website/src/hooks/__tests__/useCustomerProfile.date-normalization.test.tsx`, no dedicated DotKham tooltip regression yet. Product-map domains: `customers-partners`, `services-catalog`, `payments-deposits` when DotKham allocations are shown.
+
+---
+
+## UC-022 — Investor Views Admin-Allowlisted Customers
+
+- **Actor:** Investor
+- **Trigger:** Submit `/login` form and open customer, report, export, service, or appointment views.
+- **Preconditions:** Investor identity is an active `dbo.partners` employee assigned to the `investor` permission group; optional `dbo.investor_accounts` login row is active; admin has allowlisted customers through `dbo.investor_clients`.
+- **Main flow:**
+  1. Investor logs in through the normal `/login` page.
+  2. Backend authenticates through staff credentials or `dbo.investor_accounts`, then returns the same staff-compatible token, user, and permissions shape.
+  3. Investor opens `/customers`, `/customers/:id`, `/services`, `/calendar`, `/payment`, or `/reports`.
+  4. Backend applies `resolveInvestorScope()` and filters every customer-derived read/report/export to `dbo.investor_clients.is_visible=true`.
+  5. Frontend renders the normal portal shell with only permitted rows and read/export actions.
+- **Alternate flows:**
+  - **AF-1 No allowlist:** Lists/reports/export downloads return empty scoped results.
+  - **AF-2 Direct URL for hidden customer:** Backend returns 404 or empty results without disclosing existence.
+  - **AF-3 Write attempt:** Existing permission gates return 403 because investors do not receive write permissions.
+- **Postconditions:** Investor sees only admin-approved customers and customer-derived records; no separate investor portal/session exists.
+- **Invariants touched:** INV-008, INV-021, INV-020.
+- **Traceability:** Related WF: WF-015. Contracts/routes: `POST /api/Auth/login`, `GET/PATCH /api/Partners/*investor-visibility`, customer/appointment/payment/service/report/export read routes. Data/tables: `dbo.partners`, `dbo.permission_groups`, `dbo.group_permissions`, `dbo.investor_accounts`, `dbo.investor_clients`. Tests: `api/tests/authInvestorLogin.test.js`, `api/tests/investorIdorScoping.test.js`, `api/tests/investorScopeRoutePermissions.test.js`, live NK/NK2 browser proof after deploy. Product-map domains: `auth`, `customers-partners`, `reports-analytics`, `payments-deposits`, `services-catalog`.

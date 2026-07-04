@@ -14,6 +14,16 @@ Each entry:
 
 ---
 
+## FM-20260704-01: Stale Worktree Deploy Erases Live Features
+
+- **Symptom:** A feature that was already pushed and verified disappears from NK/NK2 after a later hotfix deploy from another worktree.
+- **Root Cause:** The deploy source did not contain the live target's current `version.json.gitCommit`, so the rebuild replaced production with a sibling branch missing already-deployed commits.
+- **Fix:** Deploy only from a candidate that contains the live commit, and re-port intended changes onto that live baseline when old work exists on a stale branch.
+- **Prevention:** `scripts/deploy-build-args.sh` runs `scripts/deploy-preflight.js`, which fetches each target's `/version.json`, requires `DEPLOY_FEATURES`, and blocks candidates that do not contain the live commit. `scripts/deploy-worktree-audit.js` lists stale/dirty sibling worktrees before release planning.
+- **Related:** INV-018, INV-020, INV-022, AGENTS.md §12.1.
+
+---
+
 ## FM-20260519-01: Feedback Attachment Row Points at Missing Uploaded File
 
 - **Symptom:** A resolved `/feedback` thread shows an uploaded image attachment card, but the proof image does not load and the `/uploads/feedback/<file>` URL returns 404.

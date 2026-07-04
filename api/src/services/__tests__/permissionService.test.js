@@ -6,7 +6,7 @@ jest.mock('../../db', () => ({
 }));
 
 const { query } = require('../../db');
-const { resolveEffectivePermissions, hasPermission } = require('../permissionService');
+const { resolveEffectivePermissions, hasPermission, resolveInvestorScope } = require('../permissionService');
 
 beforeEach(() => {
   query.mockReset();
@@ -156,6 +156,35 @@ describe('permissionService', () => {
 
       const result = await hasPermission('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', 'any.permission');
       expect(result).toBe(true);
+    });
+  });
+
+  describe('resolveInvestorScope', () => {
+    const investorId = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
+
+    it('returns normal staff scope when the permission group is not investor', async () => {
+      query.mockResolvedValueOnce([{ group_name: 'admin' }]);
+
+      const result = await resolveInvestorScope(investorId);
+
+      expect(result).toEqual({ isInvestor: false, allowedCustomerIds: [] });
+      expect(query).toHaveBeenCalledTimes(1);
+    });
+
+    it('reads allowlisted customers by partner id or legacy investor account id', async () => {
+      query.mockResolvedValueOnce([{ group_name: 'investor' }]);
+      query.mockResolvedValueOnce([{ partner_id: 'customer-a' }, { partner_id: 'customer-b' }]);
+
+      const result = await resolveInvestorScope(investorId);
+
+      expect(result).toEqual({
+        isInvestor: true,
+        allowedCustomerIds: ['customer-a', 'customer-b'],
+      });
+      expect(query.mock.calls[1][0]).toContain('WITH investor_account_ids AS');
+      expect(query.mock.calls[1][0]).toContain('investor_id = $1');
+      expect(query.mock.calls[1][0]).toContain('investor_id IN (SELECT id FROM investor_account_ids)');
+      expect(query.mock.calls[1][0]).toContain("lob = 'dental'");
     });
   });
 });

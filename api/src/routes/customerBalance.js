@@ -1,19 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const { query } = require('../db');
+const { requireAuth, requirePermission } = require('../middleware/auth');
+const { resolveInvestorScope } = require('../services/permissionService');
 
 /**
  * GET /api/CustomerBalance/:id
  * Returns deposit and outstanding balance for a customer (dbo.partners)
  * Calculates from payments table if records exist, otherwise returns 0
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', requireAuth, requirePermission('customers.view'), async (req, res) => {
   try {
     const { id } = req.params;
 
     // Verify customer exists in dbo.partners
     const partner = await query('SELECT id, name FROM dbo.partners WHERE id = $1', [id]);
     if (!partner || partner.length === 0) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    // Investor scope: membership check
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(id)) {
       return res.status(404).json({ error: 'Customer not found' });
     }
 

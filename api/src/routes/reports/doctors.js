@@ -2,6 +2,7 @@ const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
 const { err, validDate, validUUID, dateCompanyFilter } = require('./helpers');
+const { resolveInvestorScope } = require('../../services/permissionService');
 const { getCanonicalRevenueByDoctor } = require('../../services/reports/canonicalRevenue');
 
 const router = express.Router();
@@ -13,23 +14,37 @@ router.post('/doctors/performance', requirePermission('reports.view'), async (re
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+
     const f = dateCompanyFilter(dateFrom, dateTo, companyId, 'a.date');
+    const params = [...f.params];
+    let fWhere = f.where;
+    if (investorScope.isInvestor) {
+      params.push(investorScope.allowedCustomerIds);
+      fWhere += ` AND a.partnerid = ANY($${params.length}::uuid[])`;
+    }
     const rows = await query(
       `SELECT p.id, p.name, COUNT(a.id) as total_appointments,
               SUM(CASE WHEN a.state IN ('done','completed') THEN 1 ELSE 0 END) as done,
               SUM(CASE WHEN a.state IN ('cancel','cancelled') THEN 1 ELSE 0 END) as cancelled
        FROM dbo.partners p
-       LEFT JOIN dbo.appointments a ON a.doctorid=p.id ${f.where}
+       LEFT JOIN dbo.appointments a ON a.doctorid=p.id ${fWhere}
        WHERE p.isdoctor=true AND p.isdeleted=false
-       GROUP BY p.id, p.name ORDER BY done DESC LIMIT 100`, f.params);
+       GROUP BY p.id, p.name ORDER BY done DESC LIMIT 100`, params);
 
     // Canonical revenue grouped by saleorder.doctorid (matches Excel attribution).
-    const revenueByDoctor = await getCanonicalRevenueByDoctor({ dateFrom, dateTo, companyId });
+    const revenueFilters = investorScope.isInvestor
+      ? { dateFrom, dateTo, companyId, allowedCustomerIds: investorScope.allowedCustomerIds }
+      : { dateFrom, dateTo, companyId };
+    const revenueByDoctor = await getCanonicalRevenueByDoctor(revenueFilters);
     const revenueMap = new Map(revenueByDoctor.map(r => [r.doctorId, r.revenue]));
 
     const doctorRows = rows.map(r => ({
-      ...r, totalAppointments: parseInt(r.total_appointments), done: parseInt(r.done),
-      cancelled: parseInt(r.cancelled), revenue: revenueMap.get(r.id) || 0,
+      ...r,
+      totalAppointments: parseInt(r.total_appointments || 0, 10),
+      done: parseInt(r.done || 0, 10),
+      cancelled: parseInt(r.cancelled || 0, 10),
+      revenue: revenueMap.get(r.id) || 0,
     }));
 
     // Capture revenue that isn't attributable to a known doctor (NULL doctorid on the

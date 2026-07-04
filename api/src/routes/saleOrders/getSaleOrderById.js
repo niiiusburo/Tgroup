@@ -1,4 +1,5 @@
 const { query } = require('../../db');
+const { resolveInvestorScope } = require('../../services/permissionService');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
 
 async function getSaleOrderById(req, res) {
@@ -7,6 +8,12 @@ async function getSaleOrderById(req, res) {
     const rows = await fetchSaleOrderById(id);
 
     if (!rows || rows.length === 0) {
+      return res.status(404).json({ error: 'Sale order not found' });
+    }
+
+    // Investor scope: check if the order's partner is allowed
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(rows[0].partnerid)) {
       return res.status(404).json({ error: 'Sale order not found' });
     }
 

@@ -1,6 +1,8 @@
 const express = require('express');
 const { query } = require('../db');
 const { addAccentInsensitiveSearchCondition } = require('../utils/search');
+const { requirePermission } = require('../middleware/auth');
+const { resolveInvestorScope } = require('../services/permissionService');
 
 const router = express.Router();
 
@@ -11,7 +13,7 @@ const router = express.Router();
  *
  * CB-01: Sổ quỹ tiền (Fund book) - Main cash book listing
  */
-router.get('/GetDetails', async (req, res) => {
+router.get('/GetDetails', requirePermission('payment.view'), async (req, res) => {
   try {
     const {
       offset = '0',
@@ -71,6 +73,15 @@ router.get('/GetDetails', async (req, res) => {
         search,
         paramIdx,
       });
+    }
+
+    // Investor scope: restrict cash flow to the investor's assigned customers.
+    // Internal transfers/expenses (partnerid NULL) correctly fall outside scope.
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      conditions.push(`ap.partnerid = ANY($${paramIdx}::uuid[])`);
+      params.push(investorScope.allowedCustomerIds);
+      paramIdx++;
     }
 
     const whereClause = conditions.join(' AND ');
@@ -164,7 +175,7 @@ router.get('/GetDetails', async (req, res) => {
  * Query params: journalId, dateFrom, dateTo
  * Returns: Summary aggregates for cash book dashboard
  */
-router.get('/GetSumary', async (req, res) => {
+router.get('/GetSumary', requirePermission('payment.view'), async (req, res) => {
   try {
     const { journalId = '', dateFrom = '', dateTo = '' } = req.query;
 
@@ -185,6 +196,14 @@ router.get('/GetSumary', async (req, res) => {
     if (dateTo) {
       conditions.push(`ap.paymentdate <= $${paramIdx}`);
       params.push(dateTo);
+      paramIdx++;
+    }
+
+    // Investor scope: summary aggregates only the investor's assigned customers.
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      conditions.push(`ap.partnerid = ANY($${paramIdx}::uuid[])`);
+      params.push(investorScope.allowedCustomerIds);
       paramIdx++;
     }
 
@@ -240,7 +259,7 @@ router.get('/GetSumary', async (req, res) => {
  * GET /api/CashBooks/:id
  * Returns: Single payment/receipt/transfer details
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', requirePermission('payment.view'), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -300,6 +319,13 @@ router.get('/:id', async (req, res) => {
     );
 
     if (!rows || rows.length === 0) {
+      return res.status(404).json({ error: 'Payment not found' });
+    }
+
+    // Investor scope: a payment for a non-assigned customer (or an internal
+    // transfer with no customer) is indistinguishable from missing (404).
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(rows[0].partnerid)) {
       return res.status(404).json({ error: 'Payment not found' });
     }
 

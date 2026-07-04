@@ -17,7 +17,7 @@
 
 Current inventory from disk:
 
-- **Canonical directory:** `api/migrations/` — 53 SQL files. This directory contains the `schema_migrations` installer and the full numbered application history used by the root runbook loop.
+- **Canonical directory:** `api/migrations/` — 55 SQL files. This directory contains the `schema_migrations` installer and the full numbered application history used by the root runbook loop.
 - **Supplemental directory:** `api/src/db/migrations/` — 2 SQL files. These are straggler migrations (`payment_category`, customer face embeddings) that should be consolidated into the canonical migration path or explicitly promoted by a future runbook decision.
 - **Runbook status:** `docs/RUNBOOK.md` and `docs/runbooks/DEPLOYMENT.md` both use `api/migrations/*.sql` as the canonical deploy loop. Supplemental files under `api/src/db/migrations/` are not covered by that loop unless explicitly run or consolidated.
 
@@ -76,8 +76,10 @@ Current inventory from disk:
 | 045 | `045_add_feedback_permissions.sql` | Seeds feedback permissions | Permission seed inserts | Delete seeded feedback permissions | 2026-04 |
 | 045 | `045_grant_external_checkups_create_to_clinic_roles.sql` | Grants external checkup create permission to clinic roles | Permission seed insert | Delete granted permission rows | 2026-04 |
 | 046 | `046_split_payment_and_hoso_permissions.sql` | Splits payment and treatment-record permission strings | Permission seed inserts | Delete seeded split permissions after replacement mapping | 2026-05 |
+| 048 | `048_investor_customer_scope.sql` | Creates/normalizes investor customer allowlist and seeds read/export-only investor permission group | `CREATE TABLE dbo.investor_clients`; add live-compatible `lob`, `marked_by_partner_id`, `marked_at`, `datecreated`, `lastupdated`; seed `investor` group permissions | Drop `dbo.investor_clients` only after removing investor access; delete seeded permissions if replacing group | 2026-07 |
+| 049 | `049_investor_accounts_nk2_credentials.sql` | Adds/normalizes same-portal investor credential records linked to `dbo.partners` | `CREATE TABLE dbo.investor_accounts`; normalize older `is_active`, `created_at`, `updated_at` into `active`, `datecreated`, `lastupdated` | Drop `dbo.investor_accounts` after disabling investor login fallback | 2026-07 |
 
-**Total canonical migrations:** 53 files in `api/migrations/`.
+**Total canonical migrations:** 55 files in `api/migrations/`.
 
 ## Supplemental Migration Files
 

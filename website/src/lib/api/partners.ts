@@ -73,6 +73,17 @@ export type PartnersResponse = PaginatedResponse<ApiPartner> & {
   readonly aggregates?: PartnerAggregates | null;
 };
 
+export interface InvestorVisibilityResponse {
+  readonly investorId: string;
+  readonly customerIds: string[];
+}
+
+export interface InvestorVisibilityUpdateResponse {
+  readonly investorId: string;
+  readonly customerId: string;
+  readonly visible: boolean;
+}
+
 export function fetchPartners(params?: {
   offset?: number;
   limit?: number;
@@ -93,6 +104,17 @@ export function fetchPartners(params?: {
 
 export function fetchPartnerById(id: string) {
   return apiFetch<ApiPartner>(`/Partners/${id}`);
+}
+
+export function fetchInvestorVisibility() {
+  return apiFetch<InvestorVisibilityResponse>('/Partners/investor-visibility');
+}
+
+export function setInvestorCustomerVisibility(customerId: string, visible: boolean) {
+  return apiFetch<InvestorVisibilityUpdateResponse>(
+    `/Partners/${encodeURIComponent(customerId)}/investor-visibility`,
+    { method: 'PATCH', body: { visible } },
+  );
 }
 
 export interface ResolvedPartner {

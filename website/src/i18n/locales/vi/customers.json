@@ -86,6 +86,10 @@
   "loading": "Đang tải...",
   "loadingProfile": "Đang tải hồ sơ...",
   "searchToView": "Tìm khách hàng để xem hồ sơ",
+  "investorVisibility": {
+    "column": "Nhà đầu tư",
+    "toggleLabel": "Cho phép nhà đầu tư xem {{name}}"
+  },
   "deletePayment": "Xóa thanh toán",
   "districtHint": "Quận/Huyện",
   "wardHint": "Phường/Xã",

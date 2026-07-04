@@ -21,6 +21,7 @@
 | v1.0.3 | 2026-05-19 | Feedback attachment persistence contract clarified: file-only messages are valid, DB/file writes are transactional, and destructive file cleanup happens only after DB commit. |
 | v1.0.6 | 2026-05-23 | NK3 cosmetic customer intake clarified: cosmetic creates use `TM######` refs; Google Places stays server-proxied through `/api/Places/*` and bypasses LOB path rewriting. |
 | v1.0.7 | 2026-07-03 | Employee client role mapping clarified: `Trợ lý bác sĩ` assistant rows map to `doctor-assistant` before generic doctor, even when migrated data also has `isdoctor=true`. |
+| v1.0.8 | 2026-07-04 | Investor users are restricted normal-portal staff sessions: `/api/Auth/login` may authenticate `dbo.investor_accounts`, but all data access stays on existing portal routes and is scoped by `dbo.investor_clients`. |
 
 ---
 
@@ -32,7 +33,7 @@
 **Request:**
 ```ts
 {
-  email: string;           // employee email
+  email: string;           // employee email or active investor account email
   password: string;        // plaintext, bcrypt compared server-side
   rememberMe?: boolean;    // default false → token expires 24h; true → 60d
 }
@@ -57,6 +58,8 @@
 }
 ```
 **Errors:** 400 (missing fields), 401 (invalid credentials), 429 (rate limited).
+
+Investor login is not a separate portal contract. When `email` matches an active `dbo.investor_accounts` row whose linked `partners` row is an active employee assigned to the `investor` permission group, the response shape is identical to staff login and the same JWT/session/app shell is used.
 
 #### GET /api/Auth/me
 **Headers:** `Authorization: Bearer <token>`
@@ -177,6 +180,15 @@ PaginatedResponse<{
 }
 ```
 **Response 201:** Created partner row. The backend owns `ref` generation; dental creates use `T######`, while cosmetic creates through `/api/cosmetic/Partners` use `TM######` and check for collisions in the request-scoped database before insert.
+
+#### GET /api/Partners/investor-visibility
+**Auth:** `permissions.edit`.
+**Response 200:** `{ investorId: string, customerIds: string[] }` for the configured investor identity.
+
+#### PATCH /api/Partners/:id/investor-visibility
+**Auth:** `permissions.edit`.
+**Body:** `{ visible: boolean }`
+**Response 200:** `{ investorId: string, customerId: string, visible: boolean }` after upserting `dbo.investor_clients`. `investorId` is always the same-portal `partners.id`; on NK/NK2 live successor data the stored `dbo.investor_clients.investor_id` may be `dbo.investor_accounts.id` and is resolved server-side.
 
 #### PUT /api/Partners/:id
 **Body:** Partial partner fields. `ref` cannot be changed after creation (enforced by backend).

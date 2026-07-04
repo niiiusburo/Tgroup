@@ -1,6 +1,7 @@
 'use strict';
 
 const { query } = require('../../db');
+const { resolveInvestorScope } = require('../../services/permissionService');
 
 const PARTNER_BY_ID_SQL = `SELECT
   p.id,
@@ -103,6 +104,14 @@ async function fetchPartnerProfileById(id, runQuery = query) {
 async function getPartnerById(req, res) {
   try {
     const { id } = req.params;
+
+    // Investor scope: a non-assigned customer is indistinguishable from a
+    // missing one (404 — fail-closed, no existence disclosure).
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(id)) {
+      return res.status(404).json({ error: 'Partner not found' });
+    }
+
     const rows = await fetchPartnerProfileById(id);
 
     if (!rows || rows.length === 0) {

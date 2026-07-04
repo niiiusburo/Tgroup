@@ -25,3 +25,31 @@ Edge cases / regressions:
 - [ ] PENDING: Employee list role counts include doctor-assistant rows without breaking the employees page.
 
 Setup/login data: Staff login on NK2 with a branch containing active Trợ lý bác sĩ employees.
+
+---
+
+# TestSprite Plan: NK/NK2 investor same-portal scope 2026-07-04
+
+Feature/edit name: Investor users log in through the normal portal and see only admin-allowlisted customers, reports, exports, services, and appointments.
+
+Changed URLs / API routes / data flow:
+- Frontend: `/login`, `/customers`, `/customers/:id`, `/services`, `/reports/*`, customer list admin visibility checkbox.
+- API: `POST /api/Auth/login`, `GET/PATCH /api/Partners/*investor-visibility`, customer/appointment/payment/service/report/export read routes.
+- Data flow: `dbo.investor_accounts` → `dbo.partners.tier_id=investor` → `resolveInvestorScope()` → `dbo.investor_clients` allowlist filters.
+
+User roles: Admin assigning investor-visible customers; investor viewing approved customer data.
+
+Happy paths:
+- [ ] PENDING: Investor logs in on NK and lands in the normal app shell, not a separate investor portal.
+- [ ] PENDING: Investor logs in on NK2 and lands in the normal app shell, not a separate investor portal.
+- [ ] PENDING: Admin-visible customer list checkbox allows one test customer and the investor sees that customer in `/customers`.
+- [ ] PENDING: Investor opens the allowed customer profile and a service or appointment card; TLBS data populates.
+- [ ] PENDING: Investor report and Excel/export output includes only allowlisted customer rows.
+
+Edge cases / regressions:
+- [ ] PENDING: Existing NK/NK2 `dbo.investor_clients` rows keyed by `dbo.investor_accounts.id` still scope the investor linked through `investor_accounts.partner_id`.
+- [ ] PENDING: Investor cannot open a direct URL for a non-allowlisted customer; API returns 404/empty result.
+- [ ] PENDING: Investor lacks write actions for customers, payments, appointments, and services.
+- [ ] PENDING: Stale deploy preflight rejects old investor branches that do not contain the live NK/NK2 commit.
+
+Setup/login data: Use the live admin account to assign visibility, then the live investor account to verify portal/data scope. Do not print credentials in this ledger.

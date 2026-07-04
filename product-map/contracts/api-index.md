@@ -13,7 +13,7 @@
 
 | Method | Path | Auth | Body | Response |
 |--------|------|------|------|----------|
-| POST | `/login` | Public | `{ email, password }` | `{ token, user (with is_ctv?, lob_scope?), permissions }` |
+| POST | `/login` | Public | `{ email, password }`; investor emails may resolve through `dbo.investor_accounts` | `{ token, user (with is_ctv?, lob_scope?), permissions }` |
 | GET | `/me` | Auth | — | `{ user (with is_ctv?, lob_scope?), permissions }` |
 | POST | `/change-password` | Auth | `{ oldPassword, newPassword }` | `{ success, message }` |
 
@@ -101,6 +101,8 @@ PUT handler-level validation: `companyId` (when present) must be a UUID (`400 IN
 | GET | `/resolve` | Perm:`customers.view` | `?key` (UUID, customer ref, or normalized phone) | `{ matchedBy, partner }`, 404 `CUSTOMER_NOT_FOUND`, or 409 `CUSTOMER_LOOKUP_AMBIGUOUS` with candidates |
 | GET | `/:id` | Perm:`customers.view` | — | Partner detail |
 | GET | `/:id/GetKPIs` | Perm:`customers.view` | — | KPI stats |
+| GET | `/investor-visibility` | Perm:`permissions.edit` | — | `{ investorId, customerIds }`; `investorId` is the same-portal partner id even when stored visibility rows use legacy `investor_accounts.id` |
+| PATCH | `/:id/investor-visibility` | Perm:`permissions.edit` | `{ visible: boolean }` | `{ investorId, customerId, visible }`; server resolves legacy account-keyed allowlists |
 | POST | `/` | Perm:`customers.add` | Partner fields | Created partner with backend-generated `ref`; dental uses `T######`, cosmetic mirror uses collision-checked `TM######` |
 | PUT | `/:id` | Perm:`customers.edit` | Partner fields | Updated partner |
 | PATCH | `/:id/soft-delete` | Perm:`customers.delete` | — | Soft-deleted partner |
