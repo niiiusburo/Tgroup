@@ -282,5 +282,14 @@
     "loadingWallets": "Loading wallets...",
     "loadingPlans": "Loading payment plans...",
     "loadingDetails": "Loading plan details..."
-  }
+  },
+  "colProof": "Proof",
+  "viewReceiptProof": "Receipt proof",
+  "receiptProofTitle": "Receipt proof",
+  "loadingReceiptProof": "Loading receipt proof...",
+  "noReceiptProof": "No receipt proof uploaded for this payment.",
+  "receiptConfirmed": "Confirmed",
+  "receiptUnconfirmed": "Unconfirmed",
+  "confirmReceipt": "Confirm receipt",
+  "receiptAlreadyConfirmed": "Already confirmed"
 }

@@ -282,5 +282,14 @@
     "loadingWallets": "Đang tải ví...",
     "loadingPlans": "Đang tải kế hoạch thanh toán...",
     "loadingDetails": "Đang tải chi tiết..."
-  }
+  },
+  "colProof": "Chứng từ",
+  "viewReceiptProof": "Chứng từ",
+  "receiptProofTitle": "Chứng từ thanh toán",
+  "loadingReceiptProof": "Đang tải chứng từ...",
+  "noReceiptProof": "Chưa có chứng từ thanh toán cho giao dịch này.",
+  "receiptConfirmed": "Đã xác nhận",
+  "receiptUnconfirmed": "Chưa xác nhận",
+  "confirmReceipt": "Xác nhận chứng từ",
+  "receiptAlreadyConfirmed": "Đã xác nhận"
 }

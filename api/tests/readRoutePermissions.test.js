@@ -139,12 +139,16 @@ describe('payments mutation route permissions', () => {
     expectRoutePermission(paymentRouter, 'post', '/refund', 'payment.refund');
   });
 
-  it('PATCH /:id uses payment.add (record/manage payments)', () => {
-    expectRoutePermission(paymentRouter, 'patch', '/:id', 'payment.add');
+  it('PATCH /:id uses payment.edit (edit existing payment record, split from payment.add per 0.32.0)', () => {
+    expectRoutePermission(paymentRouter, 'patch', '/:id', 'payment.edit');
   });
 
   it('POST /:id/proof uses payment.add (proof upload is part of payment workflow)', () => {
     expectRoutePermission(paymentRouter, 'post', '/:id/proof', 'payment.add');
+  });
+
+  it('POST /:id/proof/confirm requires payment.confirm', () => {
+    expectRoutePermission(paymentRouter, 'post', '/:id/proof/confirm', 'payment.confirm');
   });
 
   it('DELETE /:id requires payment.void for destructive reversal', () => {
