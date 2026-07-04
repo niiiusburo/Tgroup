@@ -1,5 +1,33 @@
 [
   {
+    "version": "0.32.49",
+    "date": "2026-07-04",
+    "commit": "4372048da",
+    "highlights": "Payment receipt proofs can now be viewed and confirmed, and the revenue report splits money-in into confirmed vs pending.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Payment history has a new proof column: 'Xem chứng từ' opens a modal showing the transfer proof image, QR description, and confirmation status.",
+          "Users with the payment.confirm permission can confirm a receipt proof from the modal; confirmation is idempotent and stamps the confirming user and Vietnam-time timestamp.",
+          "Revenue report money-in KPI now shows a Confirmed (Đã xác nhận) vs Pending (Chờ xác nhận) breakdown based on the latest proof confirmation per payment."
+        ]
+      },
+      {
+        "title": "Changed",
+        "items": [
+          "Editing an existing payment (PATCH /Payments/:id) now requires payment.edit instead of payment.add, completing the permission split introduced in 0.32.0. Groups holding only payment.add can no longer edit posted payments."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added confirm-proof endpoint coverage (auth, 404, 409, idempotency), route permission assertions for payment.edit/payment.confirm, PaymentProofModal permission gating tests, and payment-proof migration idempotency tests."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.48",
     "date": "2026-07-04",
     "commit": "23c712d2b",

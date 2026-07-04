@@ -14,6 +14,19 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.49] — 2026-07-04
+
+### Added
+- Payment receipt-proof viewing and confirmation for NK/NK2: payment history proof column opens `PaymentProofModal` (proof image, QR description, confirmation status); `POST /Payments/:id/proof/confirm` gated by `payment.confirm`, idempotent, stamps confirming user + Asia/Ho_Chi_Minh timestamp; `GET /Payments/:id` returns the latest proof object. — @claude — surgical port of the payment chain from `feature/permission-domain-repair` (30ef2478b) onto main (4372048da), preserving shipped v0.32.48 investor scoping, timezone-safe date keys, and hardened export builders.
+- Revenue report money-in KPI shows Confirmed (Đã xác nhận) vs Pending (Chờ xác nhận) breakdown driven by latest proof confirmation per payment (cash-flow LATERAL join + `KPICard` breakdown prop). — @claude
+- Migrations `047_payment_proof_confirmation.sql`, `048_grant_payment_confirm_permission.sql`, `051_payment_proofs_payment_id_uuid.sql` committed for repo/DB parity; 047/051 already applied to prod `tdental_demo` in May, 048 (grants `payment.confirm` to Dentist + Super Admin) NOT yet run — migrations remain manual. — @claude
+
+### Changed
+- `PATCH /Payments/:id` now requires `payment.edit` instead of `payment.add`, completing the 0.32.0 permission split. Live grant check 2026-07-04: Assistant group holds `payment.add` but not `payment.edit`, so Assistant loses payment editing unless granted `payment.edit` (data-side, manual). `payment.confirm` currently granted to Editor only in prod. — @claude
+
+### Testing
+- Confirm-proof endpoint suite (auth 401, 404 payment/proof, 409 non-posted, idempotent re-confirm), route permission assertions (`payment.edit`, `payment.confirm`), `PaymentProofModal` permission gating tests, proof-migration idempotency tests. Full API sweep 567/569 (2 failures pre-existing on main in `saleOrderLines.test.js`), vitest 24/24, `tsc --noEmit` clean. — @claude
+
 ## [0.32.48] — 2026-07-04
 
 ### Fixed
