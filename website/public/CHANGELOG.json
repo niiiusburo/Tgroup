@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.32.48",
+    "date": "2026-07-04",
+    "commit": "23c712d2b",
+    "highlights": "Employee revenue Excel exports now strictly follow branch permissions: only a true wildcard (*) permission can export all locations.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "NK2 employee revenue Excel exports treat explicit wildcard * permission as the only all-location override; Admin/Super Admin group names without * stay constrained to their resolved employee locations.",
+          "Out-of-scope branch export requests return 403 EXPORT_LOCATION_DENIED before any export SQL runs."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added reportSalesEmployeesExport regression coverage: Super Admin-named scoped employees, out-of-scope branch rejection, and the wildcard all-location override."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.37",
     "date": "2026-05-21",
     "commit": "pending",
