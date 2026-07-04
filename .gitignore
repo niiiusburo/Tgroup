@@ -136,3 +136,9 @@ backups/*.sql.bak
 !contracts/dist/
 .venv/
 __pycache__/
+
+# Local operational data (DB backup cron target, evidence, tool caches)
+/backups/
+/screenshots/
+/.repomix-packs/
+website/testsprite_tests/tmp/
