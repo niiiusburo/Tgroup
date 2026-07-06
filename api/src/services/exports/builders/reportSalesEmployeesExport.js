@@ -86,30 +86,27 @@ async function resolveCompanyScope(user, companyId) {
   const requestedCompanyId = normalizeId(companyId);
   assertUuid(requestedCompanyId, 'Chi nhánh');
 
+  if (!requestedCompanyId) {
+    return {
+      companyIds: null,
+      label: 'Tất cả',
+    };
+  }
+
   const permissionState = await resolveEffectivePermissions(user?.employeeId);
   if (hasAllLocationAccess(permissionState)) {
     return {
-      companyIds: requestedCompanyId ? [requestedCompanyId] : null,
-      label: requestedCompanyId || 'Tất cả',
+      companyIds: [requestedCompanyId],
+      label: requestedCompanyId,
     };
   }
 
   const allowedIds = (permissionState.locations || []).map((loc) => loc.id).filter(Boolean);
-  if (requestedCompanyId) {
-    if (!allowedIds.includes(requestedCompanyId)) {
-      throw makeError('Bạn không có quyền xuất dữ liệu cho chi nhánh này.', 403, 'EXPORT_LOCATION_DENIED');
-    }
-    return { companyIds: [requestedCompanyId], label: requestedCompanyId };
+  if (!allowedIds.includes(requestedCompanyId)) {
+    throw makeError('Bạn không có quyền xuất dữ liệu cho chi nhánh này.', 403, 'EXPORT_LOCATION_DENIED');
   }
 
-  if (allowedIds.length === 0) {
-    throw makeError('Tài khoản chưa có phạm vi chi nhánh để xuất báo cáo.', 403, 'EXPORT_LOCATION_SCOPE_REQUIRED');
-  }
-
-  return {
-    companyIds: allowedIds,
-    label: permissionState.locations.map((loc) => loc.name || loc.id).join(', '),
-  };
+  return { companyIds: [requestedCompanyId], label: requestedCompanyId };
 }
 
 function buildWhere(filters, scope, employeeType) {
