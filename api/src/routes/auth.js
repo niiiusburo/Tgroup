@@ -13,21 +13,25 @@ function normalizeLoginEmail(email) {
   return String(email || '').trim().toLowerCase();
 }
 
-async function findStaffLoginCandidate(email) {
+// Returns EVERY active staff row for this email (not just the first). Multiple
+// rows can share an email in legacy data; the password is what disambiguates.
+async function findStaffLoginCandidates(email) {
   const rows = await query(
     `SELECT p.id, p.name, p.email, p.password_hash, p.companyid AS "companyId", c.name AS "companyName"
      FROM partners p
      LEFT JOIN companies c ON c.id = p.companyid
-     WHERE p.email = $1 AND p.employee = true AND p.isdeleted = false AND p.active = true`,
+     WHERE p.email = $1 AND p.employee = true AND p.isdeleted = false AND p.active = true
+     ORDER BY p.datecreated ASC, p.id ASC
+     LIMIT 100`,
     [email]
   );
 
-  return rows?.[0] ? { ...rows[0], loginSource: 'partners' } : null;
+  return (rows || []).map((row) => ({ ...row, loginSource: 'partners' }));
 }
 
-async function findInvestorLoginCandidate(email) {
+async function findInvestorLoginCandidates(email) {
   const rows = await query(
-    `SELECT p.id, p.name, ia.email, ia.password_hash, p.companyid AS "companyId", c.name AS "companyName",
+    `SELECT p.id, p.name, lower(ia.email) AS email, ia.password_hash, p.companyid AS "companyId", c.name AS "companyName",
             ia.id AS "investorAccountId"
      FROM dbo.investor_accounts ia
      JOIN dbo.partners p ON p.id = ia.partner_id
@@ -37,30 +41,67 @@ async function findInvestorLoginCandidate(email) {
        AND ia.active = true
        AND p.employee = true
        AND p.isdeleted = false
-       AND lower(pg.name) = 'investor'`,
+       AND lower(pg.name) = 'investor'
+     ORDER BY p.datecreated ASC, p.id ASC
+     LIMIT 100`,
     [email]
   );
 
-  return rows?.[0] ? { ...rows[0], loginSource: 'investor_accounts' } : null;
+  return (rows || []).map((row) => ({ ...row, loginSource: 'investor_accounts' }));
 }
 
-async function verifyCandidate(candidate, password) {
-  if (!candidate?.password_hash) {
-    return null;
+// Verify the password against EVERY candidate and return all that match. We do
+// not short-circuit on the first match: checking all candidates is what lets us
+// (a) land in the correct account when several share an email with distinct
+// passwords, and (b) detect the ambiguous case where 2+ accounts share both
+// the email and the password.
+async function matchingCandidates(candidates, password) {
+  const matches = [];
+  for (const candidate of candidates) {
+    if (!candidate?.password_hash) {
+      continue;
+    }
+    // eslint-disable-next-line no-await-in-loop
+    const ok = await bcrypt.compare(password, candidate.password_hash);
+    if (ok) {
+      matches.push(candidate);
+    }
   }
+  return matches;
+}
 
-  const passwordMatch = await bcrypt.compare(password, candidate.password_hash);
-  return passwordMatch ? candidate : null;
+// Sentinel returned when the credentials match more than one account. The caller
+// fails the login closed (401) rather than guessing which account to grant.
+const AMBIGUOUS = Symbol('ambiguous-login');
+
+function resolveFromMatches(matches, email, kind) {
+  if (matches.length === 1) {
+    return matches[0];
+  }
+  if (matches.length > 1) {
+    console.error(
+      `Ambiguous ${kind} login: ${matches.length} active accounts for "${email}" share the same password; refusing to guess. Assign unique credentials to resolve.`
+    );
+    return AMBIGUOUS;
+  }
+  return null;
 }
 
 async function resolveLoginCandidate(email, password) {
-  const staffCandidate = await findStaffLoginCandidate(email);
-  const verifiedStaff = await verifyCandidate(staffCandidate, password);
-  if (verifiedStaff) {
-    return verifiedStaff;
+  const staff = resolveFromMatches(
+    await matchingCandidates(await findStaffLoginCandidates(email), password),
+    email,
+    'staff'
+  );
+  if (staff) {
+    return staff;
   }
 
-  return verifyCandidate(await findInvestorLoginCandidate(email), password);
+  return resolveFromMatches(
+    await matchingCandidates(await findInvestorLoginCandidates(email), password),
+    email,
+    'investor'
+  );
 }
 
 async function markLogin(candidate) {
@@ -95,7 +136,7 @@ router.post('/login', async (req, res) => {
     }
 
     const employee = await resolveLoginCandidate(email, password);
-    if (!employee) {
+    if (!employee || employee === AMBIGUOUS) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 

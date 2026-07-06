@@ -1,5 +1,32 @@
 [
   {
+    "version": "0.32.51",
+    "date": "2026-07-06",
+    "commit": "pending",
+    "highlights": "Staff login now resolves the correct account when several employees share an email address.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Login now checks the typed password against every active account sharing an email, so each employee reaches their own account — previously only the first matching record could log in and others were locked out.",
+          "Removed the non-deterministic account selection where a shared-email login could silently resolve to a different colleague after routine database maintenance."
+        ]
+      },
+      {
+        "title": "Security",
+        "items": [
+          "If two active accounts share both the same email and the same password, login now fails closed (401) instead of guessing which account to grant."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added shared-email login coverage: correct-account resolution in both directions, ambiguous same-password rejection, last_login attributed to the matched account, single-account and wrong-password paths, and investor-fallback short-circuit."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.50",
     "date": "2026-07-06",
     "commit": "pending",

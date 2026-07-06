@@ -14,6 +14,17 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.51] — 2026-07-06
+
+### Fixed
+- Staff login (`POST /api/Auth/login`) now verifies the typed password against **every** active account sharing an email and logs into the one that matches, instead of only checking the first row returned by an unordered query. Fixes the case where employees sharing an email were locked out (only `rows[0]` could authenticate) and the non-deterministic behavior where the resolved account could silently change after DB maintenance. — @claude — `api/src/routes/auth.js` `findStaffLoginCandidates`/`matchingCandidates`/`resolveLoginCandidate`.
+
+### Security
+- Login fails closed (401) when two or more active accounts share both the same email and the same password (ambiguous), rather than guessing which account to grant. — @claude
+
+### Testing
+- `authSharedEmailLogin.test.js`: correct-account resolution in both directions, ambiguous same-password rejection, `last_login` attributed to the matched account, single-account and wrong-password paths, and staff-before-investor short-circuit. Full API suite 763/765 (2 pre-existing `saleOrderLines` failures unrelated). — @claude
+
 ## [0.32.50] — 2026-07-06
 
 ### Changed
