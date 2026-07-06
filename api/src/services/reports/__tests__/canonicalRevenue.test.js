@@ -112,6 +112,49 @@ describe('canonicalRevenue — mirrors Excel revenue-flat export', () => {
     expect(lastSql()).not.toContain('so.companyid');
   });
 
+  test('applies investor customer allowlist via so.partnerid when allowedCustomerIds is provided', async () => {
+    const allowed = ['aaaaaaaa-1111-4111-8111-000000000001', 'bbbbbbbb-2222-4222-8222-000000000002'];
+    await getCanonicalRevenue({ dateFrom: '2026-04-01', dateTo: '2026-04-30', allowedCustomerIds: allowed });
+    expect(lastSql()).toContain('so.partnerid = ANY(');
+    expect(lastParams()).toEqual(['2026-04-01', '2026-04-30', allowed]);
+  });
+
+  test('applies investor customer allowlist to getCanonicalRevenueByDoctor', async () => {
+    const allowed = ['aaaaaaaa-1111-4111-8111-000000000001'];
+    await getCanonicalRevenueByDoctor({ dateFrom: '2026-04-01', dateTo: '2026-04-30', allowedCustomerIds: allowed });
+    expect(lastSql()).toContain('so.partnerid = ANY(');
+    expect(lastParams()).toContainEqual(allowed);
+  });
+
+  test('applies investor customer allowlist to getCanonicalRevenueByLocation', async () => {
+    const allowed = ['aaaaaaaa-1111-4111-8111-000000000001'];
+    await getCanonicalRevenueByLocation({ dateFrom: '2026-04-01', dateTo: '2026-04-30', allowedCustomerIds: allowed });
+    expect(lastSql()).toContain('so.partnerid = ANY(');
+    expect(lastParams()).toContainEqual(allowed);
+  });
+
+  test('applies investor customer allowlist to getCanonicalRevenueByMonth', async () => {
+    const allowed = ['aaaaaaaa-1111-4111-8111-000000000001'];
+    await getCanonicalRevenueByMonth({ dateFrom: '2026-04-01', dateTo: '2026-04-30', allowedCustomerIds: allowed });
+    expect(lastSql()).toContain('so.partnerid = ANY(');
+    expect(lastParams()).toContainEqual(allowed);
+  });
+
+  test('omits the customer allowlist condition when allowedCustomerIds is empty or absent', async () => {
+    await getCanonicalRevenue({ dateFrom: '2026-04-01', dateTo: '2026-04-30', allowedCustomerIds: [] });
+    expect(lastSql()).not.toContain('so.partnerid');
+    expect(lastParams()).toEqual(['2026-04-01', '2026-04-30']);
+  });
+
+  test('combines companyId array scope and investor allowlist correctly (multi-param ordering)', async () => {
+    const locs = ['loc-1111-4111-8111-000000000001'];
+    const allowed = ['cust-1111-4111-8111-000000000002'];
+    await getCanonicalRevenue({ dateFrom: '2026-04-01', dateTo: '2026-04-30', companyId: locs, allowedCustomerIds: allowed });
+    expect(lastSql()).toContain('so.companyid = ANY(');
+    expect(lastSql()).toContain('so.partnerid = ANY(');
+    expect(lastParams()).toEqual(['2026-04-01', '2026-04-30', locs, allowed]);
+  });
+
   test('omits date filters when not provided', async () => {
     await getCanonicalRevenue({});
     expect(lastParams()).toEqual([]);

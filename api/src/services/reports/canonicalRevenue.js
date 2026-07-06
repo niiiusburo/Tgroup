@@ -13,7 +13,7 @@ const {
   CAPPED_ALLOCATED_AMOUNT_SQL,
 } = require('../../routes/reports/revenueRecognition');
 
-function buildWhere({ dateFrom, dateTo, companyId }) {
+function buildWhere({ dateFrom, dateTo, companyId, allowedCustomerIds }) {
   const conditions = [SERVICE_REVENUE_PAYMENT_CONDITION, 'COALESCE(so.isdeleted, false) = false'];
   const params = [];
   let idx = 1;
@@ -37,6 +37,14 @@ function buildWhere({ dateFrom, dateTo, companyId }) {
   } else if (companyId) {
     conditions.push(`so.companyid = $${idx}`);
     params.push(companyId);
+    idx += 1;
+  }
+  if (Array.isArray(allowedCustomerIds) && allowedCustomerIds.length) {
+    // Investor customer allowlist (see permissionService.resolveInvestorScope) — restricts
+    // canonical revenue to only the investor's assigned customers/patients. Without this,
+    // getCanonicalRevenue* silently returned the FULL company-wide total to every investor.
+    conditions.push(`so.partnerid = ANY($${idx}::uuid[])`);
+    params.push(allowedCustomerIds);
     idx += 1;
   }
 
