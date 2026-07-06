@@ -72,8 +72,8 @@
 **Cite when:** Editing investor auth, customer reads, reports, exports, appointments, payments, service cards, or permission seeds.
 
 ### INV-009 — Location Scope Frontend-Only Filter
-**Rule:** Backend list routes generally do NOT enforce location scope. The frontend `LocationContext` is responsible for filtering by `companyid`. Reporting and export routes that explicitly document server-side location scope must enforce it before SQL runs; `companyId=all` is constrained to the employee's resolved locations unless effective permissions include `*`.
-**Rationale:** Backend location scoping was historically inconsistent; frontend filtering is the current operational contract for ordinary lists, while financial/report exports require a backend guard because downloaded workbooks can bypass UI filters.
+**Rule:** Backend list routes generally do NOT enforce location scope. The frontend `LocationContext` is responsible for filtering by `companyid`. Reporting and export routes that explicitly document server-side location scope must enforce it before SQL runs for explicit branch IDs. The employee revenue export (`report-sales-employees`) intentionally treats `companyId=all` as full extraction for accounts with `reports.export`; investor customer allowlists still apply after that branch choice.
+**Rationale:** Backend location scoping was historically inconsistent; frontend filtering is the current operational contract for ordinary lists, while financial/report exports require documented branch behavior because downloaded workbooks can bypass UI filters.
 **Enforced by:** Most `api/src/routes/*.js` list handlers lack location scoping SQL; report/export enforcement is covered by `api/src/routes/reports/__tests__/locationScope.test.js`, `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, and `api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js`.
 **Cite when:** Adding backend list routes, changing `LocationContext`, implementing multi-location features, or changing report/export location scope.
 

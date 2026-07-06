@@ -394,12 +394,12 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Trigger:** `/reports/revenue` → employee revenue Excel export controls
 - **Preconditions:** Actor has `reports.export`; date range selected; optional employee type and employee filters selected.
 - **Main flow:**
-  1. Actor sets date range, location filter, employee type filter.
+  1. Actor sets date range, location filter, employee type filter. If the location filter is `all`, the employee revenue export covers all branches.
   2. Clicks Export → `POST /api/Exports/report-sales-employees/download` with `{ filters }`.
   3. Backend queries `payments`, `payment_allocations`, `saleorders`, `partners`, and `companies` using the requested employee role attribution.
   4. Groups by employee; builds Excel with revenue per employee.
   5. File downloads and an `exports_audit` row is attempted.
-- **Postconditions:** Excel downloaded; audit log written.
+- **Postconditions:** Excel downloaded; audit log written. Investor sessions still see only allowlisted customer-derived rows.
 - **Invariants touched:** INV-019 (nginx timeout).
 - **Traceability:** Related WF: WF-005, WF-013, UC-013. Contracts/routes: `POST /api/Exports/report-sales-employees/preview`, `POST /api/Exports/report-sales-employees/download`. Data/tables: `dbo.payment_allocations`, `dbo.payments`, `dbo.saleorders`, `dbo.partners`, `dbo.companies`, `dbo.exports_audit`. Tests: `api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`, `website/e2e/export-downloads.spec.ts` for broader export downloads. Product-map domains: `reports-analytics`, `payments-deposits`, `employees-hr`.
 

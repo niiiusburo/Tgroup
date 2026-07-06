@@ -14,6 +14,14 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.50] — 2026-07-06
+
+### Changed
+- Employee revenue Excel export (`report-sales-employees`) now treats `companyId=all` as full extraction across branches for any account with `reports.export`; explicit branch IDs still return `403 EXPORT_LOCATION_DENIED` when outside the caller's resolved location scope, and investor customer allowlists still apply. — @codex — product correction for UC-019 / INV-009 after NK/NK2 live report extraction review.
+
+### Testing
+- Added focused `reportSalesEmployeesExport` regression coverage for no-location `companyId=all` extraction and retained explicit out-of-scope branch rejection. — @codex
+
 ## [0.32.49] — 2026-07-04
 
 ### Added

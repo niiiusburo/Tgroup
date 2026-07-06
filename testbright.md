@@ -4,6 +4,32 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 ---
 
+# TestSprite Plan: NK/NK2 employee revenue all-location extraction 2026-07-06
+
+Feature/edit name: Employee revenue export treats `companyId=all` as full extraction.
+
+Changed URLs / API routes / data flow:
+- API: `POST /api/Exports/report-sales-employees/preview`
+- API: `POST /api/Exports/report-sales-employees/download`
+- Data flow: JWT employee -> `reports.export` registry permission -> `reportSalesEmployeesExport.resolveCompanyScope()` -> unfiltered branch SQL when `companyId=all`; explicit branch IDs still validate against resolved employee locations unless `*` is present.
+
+Expected behavior:
+- A report-capable employee who submits `companyId=all` can extract all branches, even if the account has no resolved branch scope.
+- An explicit out-of-scope `companyId` still returns `403 EXPORT_LOCATION_DENIED` before SQL runs.
+- Investor sessions still apply `dbo.investor_clients` allowlist filters after the all-branch choice.
+
+User roles:
+- Report-capable employee with `reports.export`.
+- Investor account with `reports.export` and allowlisted customers.
+
+Execution items:
+- [x] PASS: Focused Jest proves `companyId=all` omits the `so.companyid` SQL predicate and no-scope accounts can preview.
+- [x] PASS: Focused Jest proves explicit out-of-scope branch requests still return `EXPORT_LOCATION_DENIED`.
+- [x] PASS: Investor export-scope Jest still proves allowlisted customer filtering for `report-sales-employees`.
+- [ ] PENDING: After deploy, live NK and NK2 preview for `t@clinic.vn` and June 2026 returns 200 for `report-sales-employees` with `companyId=all`.
+
+---
+
 # TestSprite Plan: NK2 Trợ lý bác sĩ selector restore 2026-07-03
 
 Feature/edit name: Employee role inference classifies Trợ lý bác sĩ rows as `doctor-assistant` even when migrated data also has `isdoctor=true`.
@@ -82,9 +108,9 @@ Setup/login data: Use the live investor account and known allowed/forbidden cust
 
 ---
 
-# TestSprite Plan: NK2 employee revenue export branch-scope hardening 2026-07-04
+# TestSprite Plan: NK2 employee revenue export branch-scope hardening 2026-07-04 — SUPERSEDED
 
-Feature/edit name: NK2-only employee revenue export branch-scope hardening.
+Feature/edit name: NK2-only employee revenue export branch-scope hardening. Superseded by "NK/NK2 employee revenue all-location extraction 2026-07-06" above.
 
 Changed URLs / API routes / data flow:
 - NK2 live route: `https://nk2.2checkin.com/reports/revenue`
@@ -93,10 +119,8 @@ Changed URLs / API routes / data flow:
 - Data flow: JWT employee -> `resolveEffectivePermissions()` -> resolved employee locations -> `reportSalesEmployeesExport.resolveCompanyScope()` -> scoped SQL/workbook rows.
 
 Expected behavior:
-- A report-capable employee assigned to one branch who submits `companyId=all` downloads only their resolved branch rows.
-- An out-of-scope explicit `companyId` returns `403 EXPORT_LOCATION_DENIED` before SQL runs.
-- Admin/Super Admin group names do not bypass branch scope unless effective permissions include wildcard `*`.
-- A true wildcard `*` permission remains the only all-location export override.
+- SUPERSEDED: The July 6 product rule now says `companyId=all` downloads all branch rows for `report-sales-employees`.
+- Still current: an out-of-scope explicit `companyId` returns `403 EXPORT_LOCATION_DENIED` before SQL runs.
 
 User roles:
 - One-location NK2 employee with `reports.export`.

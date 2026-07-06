@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.32.50",
+    "date": "2026-07-06",
+    "commit": "pending",
+    "highlights": "Employee revenue Excel exports now treat all locations as full extraction when companyId=all.",
+    "sections": [
+      {
+        "title": "Changed",
+        "items": [
+          "The report-sales-employees export now lets accounts with reports.export preview or download all branches when the location filter is all.",
+          "Explicit branch selections still validate against the user's resolved branch permissions unless the account has wildcard *.",
+          "Investor sessions continue to apply the admin allowlist after the all-branch choice."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added reportSalesEmployeesExport regression coverage for companyId=all full extraction and retained explicit out-of-scope branch rejection."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.49",
     "date": "2026-07-04",
     "commit": "4372048da",

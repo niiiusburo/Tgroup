@@ -472,7 +472,7 @@ Supported registry types:
 | `revenue-flat` | `payments.export` | `search`, `companyId`, `dateFrom`, `dateTo` |
 | `deposit-flat` | `payments.export` | `search`, `companyId`, `dateFrom`, `dateTo` |
 
-For report export types that enforce employee location scope, `companyId=all` resolves to the caller's effective location list unless their effective permissions include `*`; admin-like group names do not bypass branch scope. A requested out-of-scope `companyId` returns 403 before export SQL runs.
+For `report-sales-employees`, `companyId=all` means full employee revenue extraction across branches for any caller that passes `reports.export`. A requested explicit branch `companyId` still validates against the caller's effective location list unless their effective permissions include `*`; out-of-scope explicit branch requests return 403 before export SQL runs.
 
 ---
 

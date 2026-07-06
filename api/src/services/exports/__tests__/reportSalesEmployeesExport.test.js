@@ -58,7 +58,9 @@ const rows = [
 ];
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  query.mockReset();
+  resolveEffectivePermissions.mockReset();
+  resolveInvestorScope.mockReset();
   resolveEffectivePermissions.mockResolvedValue({
     groupName: 'Manager',
     effectivePermissions: ['reports.view', 'reports.export'],
@@ -151,12 +153,7 @@ describe('reportSalesEmployeesExport', () => {
     expect(query).not.toHaveBeenCalled();
   });
 
-  it('constrains admin-named employee exports to resolved locations when companyId is all', async () => {
-    resolveEffectivePermissions.mockResolvedValueOnce({
-      groupName: 'Super Admin',
-      effectivePermissions: ['reports.view', 'reports.export'],
-      locations: [{ id: LOC_A, name: 'Tấm Dentist Thủ Đức' }],
-    });
+  it('allows companyId all to export every branch without a resolved location scope', async () => {
     query.mockResolvedValueOnce(rows);
 
     await reportSalesEmployeesExport.preview({
@@ -167,8 +164,8 @@ describe('reportSalesEmployeesExport', () => {
     }, ADMIN_USER);
 
     const [sql, params] = query.mock.calls[0];
-    expect(sql).toContain('so.companyid = ANY');
-    expect(params).toContainEqual([LOC_A]);
+    expect(sql).not.toContain('so.companyid = ANY');
+    expect(params).not.toContainEqual([LOC_A]);
   });
 
   it('rejects out-of-scope locations for admin-named employees without global permission', async () => {
@@ -190,7 +187,7 @@ describe('reportSalesEmployeesExport', () => {
     expect(query).not.toHaveBeenCalled();
   });
 
-  it('keeps explicit wildcard permission as the all-location export override', async () => {
+  it('keeps explicit wildcard permission able to request any explicit location', async () => {
     resolveEffectivePermissions.mockResolvedValueOnce({
       groupName: 'Super Admin',
       effectivePermissions: ['*'],
@@ -199,14 +196,14 @@ describe('reportSalesEmployeesExport', () => {
     query.mockResolvedValueOnce(rows);
 
     await reportSalesEmployeesExport.preview({
-      companyId: 'all',
+      companyId: LOC_B,
       employeeType: 'doctor',
       dateFrom: '2026-05-01',
       dateTo: '2026-05-31',
     }, ADMIN_USER);
 
     const [sql, params] = query.mock.calls[0];
-    expect(sql).not.toContain('so.companyid = ANY');
-    expect(params).not.toContainEqual([LOC_A]);
+    expect(sql).toContain('so.companyid = ANY');
+    expect(params).toContainEqual([LOC_B]);
   });
 });
