@@ -99,6 +99,19 @@ describe('canonicalRevenue — mirrors Excel revenue-flat export', () => {
     expect(lastSql()).toContain('so.companyid =');
   });
 
+  test('filters by ANY(uuid[]) when companyId is an array (multi-location scope)', async () => {
+    const ids = ['765f6593-2b19-4d06-cc8c-08dc4d479451', '9a2c1f10-1111-4111-8111-08dc4d479452'];
+    await getCanonicalRevenue({ dateFrom: '2026-04-01', dateTo: '2026-04-30', companyId: ids });
+    expect(lastParams()).toEqual(['2026-04-01', '2026-04-30', ids]);
+    expect(lastSql()).toContain('so.companyid = ANY(');
+  });
+
+  test('omits the company condition for an empty array companyId', async () => {
+    await getCanonicalRevenue({ dateFrom: '2026-04-01', dateTo: '2026-04-30', companyId: [] });
+    expect(lastParams()).toEqual(['2026-04-01', '2026-04-30']);
+    expect(lastSql()).not.toContain('so.companyid');
+  });
+
   test('omits date filters when not provided', async () => {
     await getCanonicalRevenue({});
     expect(lastParams()).toEqual([]);

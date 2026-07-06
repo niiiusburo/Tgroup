@@ -70,7 +70,15 @@ function buildPairedRevenueFilters({
     idx++;
   }
 
-  if (companyId) {
+  if (Array.isArray(companyId)) {
+    if (companyId.length) {
+      const ref = `$${idx}::uuid[]`;
+      orderConds.push(`${orderCompanyCol} = ANY(${ref})`);
+      paymentConds.push(`${paymentCompanyCol} = ANY(${ref})`);
+      params.push(companyId);
+      idx++;
+    }
+  } else if (companyId) {
     const ref = `$${idx}`;
     orderConds.push(`${orderCompanyCol} = ${ref}`);
     paymentConds.push(`${paymentCompanyCol} = ${ref}`);
@@ -109,7 +117,13 @@ function buildPaymentRevenueFilter({
     idx++;
   }
 
-  if (companyId) {
+  if (Array.isArray(companyId)) {
+    if (companyId.length) {
+      conds.push(`${companyCol} = ANY($${idx}::uuid[])`);
+      params.push(companyId);
+      idx++;
+    }
+  } else if (companyId) {
     conds.push(`${companyCol} = $${idx}`);
     params.push(companyId);
     idx++;

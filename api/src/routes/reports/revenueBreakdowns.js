@@ -1,7 +1,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID, dateCompanyFilter } = require('./helpers');
+const { err, validDate, validUUID, dateCompanyFilter, resolveReportCompanyScope } = require('./helpers');
 const { resolveInvestorScope } = require('../../services/permissionService');
 const {
   SERVICE_REVENUE_PAYMENT_CONDITION,
@@ -24,12 +24,15 @@ router.post('/revenue/by-doctor', requirePermission('reports.view'), async (req,
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
+
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
 
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
-      companyId,
+      companyId: scope.companyIds,
       orderDateCol: 'so.datecreated',
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       orderCompanyCol: 'so.companyid',
@@ -82,9 +85,12 @@ router.post('/revenue/by-category', requirePermission('reports.view'), async (re
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
+
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
 
-    const f = buildPaymentRevenueFilter({ dateFrom, dateTo, companyId });
+    const f = buildPaymentRevenueFilter({ dateFrom, dateTo, companyId: scope.companyIds });
     let fWhere = f.where;
     let params = [...f.params];
     if (investorScope.isInvestor) {
@@ -152,10 +158,13 @@ router.post('/revenue/by-source', requirePermission('reports.view'), async (req,
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
+
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
-      companyId,
+      companyId: scope.companyIds,
       orderDateCol: 'so.datecreated',
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       orderCompanyCol: 'so.companyid',
@@ -164,7 +173,7 @@ router.post('/revenue/by-source', requirePermission('reports.view'), async (req,
     const directF = buildPaymentRevenueFilter({
       dateFrom,
       dateTo,
-      companyId,
+      companyId: scope.companyIds,
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       companyCol: 'COALESCE(so.companyid, customer.companyid)',
     });
@@ -230,9 +239,12 @@ router.post('/revenue/payment-plans', requirePermission('reports.view'), async (
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
+
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
 
-    const f = dateCompanyFilter(dateFrom, dateTo, companyId, 'mp.created_at', 'mp.company_id');
+    const f = dateCompanyFilter(dateFrom, dateTo, scope.companyIds, 'mp.created_at', 'mp.company_id');
     let fWhere = f.where;
     let params = [...f.params];
     if (investorScope.isInvestor) {
@@ -248,9 +260,9 @@ router.post('/revenue/payment-plans', requirePermission('reports.view'), async (
     const instConds = ['pi.due_date::date >= $1', 'pi.due_date::date <= $2'];
     const instParams = [dateFrom, dateTo];
     let instIdx = 3;
-    if (companyId) {
-      instConds.push(`mp.company_id = $${instIdx}`);
-      instParams.push(companyId);
+    if (scope.companyIds && scope.companyIds.length) {
+      instConds.push(`mp.company_id = ANY($${instIdx}::uuid[])`);
+      instParams.push(scope.companyIds);
       instIdx++;
     }
     if (investorScope.isInvestor) {

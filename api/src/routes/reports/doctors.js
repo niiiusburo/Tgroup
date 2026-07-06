@@ -1,7 +1,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID, dateCompanyFilter } = require('./helpers');
+const { err, validDate, validUUID, dateCompanyFilter, resolveReportCompanyScope } = require('./helpers');
 const { resolveInvestorScope } = require('../../services/permissionService');
 const { getCanonicalRevenueByDoctor } = require('../../services/reports/canonicalRevenue');
 
@@ -14,9 +14,12 @@ router.post('/doctors/performance', requirePermission('reports.view'), async (re
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
+
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
 
-    const f = dateCompanyFilter(dateFrom, dateTo, companyId, 'a.date');
+    const f = dateCompanyFilter(dateFrom, dateTo, scope.companyIds, 'a.date');
     const params = [...f.params];
     let fWhere = f.where;
     if (investorScope.isInvestor) {
@@ -34,8 +37,8 @@ router.post('/doctors/performance', requirePermission('reports.view'), async (re
 
     // Canonical revenue grouped by saleorder.doctorid (matches Excel attribution).
     const revenueFilters = investorScope.isInvestor
-      ? { dateFrom, dateTo, companyId, allowedCustomerIds: investorScope.allowedCustomerIds }
-      : { dateFrom, dateTo, companyId };
+      ? { dateFrom, dateTo, companyId: scope.companyIds, allowedCustomerIds: investorScope.allowedCustomerIds }
+      : { dateFrom, dateTo, companyId: scope.companyIds };
     const revenueByDoctor = await getCanonicalRevenueByDoctor(revenueFilters);
     const revenueMap = new Map(revenueByDoctor.map(r => [r.doctorId, r.revenue]));
 

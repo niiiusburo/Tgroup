@@ -31,7 +31,13 @@ function dateCompanyFilter(dateFrom, dateTo, companyId, dateCol = 'datecreated',
   let idx = 1;
   if (dateFrom) { conds.push(`${dateCol}::date >= $${idx}`); params.push(dateFrom); idx++; }
   if (dateTo) { conds.push(`${dateCol}::date <= $${idx}`); params.push(dateTo); idx++; }
-  if (companyId) { conds.push(`${companyCol} = $${idx}`); params.push(companyId); idx++; }
+  if (Array.isArray(companyId)) {
+    // Scope-resolved multi-location filter (see resolveReportCompanyScope): null means
+    // unrestricted (admin/investor), an array means restrict to exactly these companies.
+    if (companyId.length) { conds.push(`${companyCol} = ANY($${idx}::uuid[])`); params.push(companyId); idx++; }
+  } else if (companyId) {
+    conds.push(`${companyCol} = $${idx}`); params.push(companyId); idx++;
+  }
   return { where: conds.length ? 'AND ' + conds.join(' AND ') : '', params, idx };
 }
 

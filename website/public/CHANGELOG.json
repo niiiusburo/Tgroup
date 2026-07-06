@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.32.52",
+    "date": "2026-07-06",
+    "commit": "pending",
+    "highlights": "Report pages now enforce each employee's branch scope instead of trusting the requested location.",
+    "sections": [
+      {
+        "title": "Security",
+        "items": [
+          "Dashboard, Revenue, Revenue Breakdowns, Appointments, Doctors, Customers, Employees Overview, Locations Comparison, and Cash Summary reports now validate the requested branch against the employee's actual location scope — previously any authenticated staff member with report access could request another branch's revenue, customer, or employee data by passing its ID directly, regardless of their own assigned locations.",
+          "Customers report now applies branch scoping to sub-metrics that previously had none at all (total customer count, gender/city breakdowns, top spenders, outstanding balances) — a location-scoped employee could see company-wide customer names and financial totals across every branch.",
+          "Locations Comparison and Employees Overview breakdowns now only show branches within the caller's own scope instead of every branch in the clinic chain.",
+          "Super Admin, Admin, and investor accounts are unaffected — they continue to see unrestricted, cross-branch data exactly as before."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added scope-enforcement coverage across all 9 affected route files: location-scoped 403 rejection, correct multi-location filtering, and unrestricted-admin no-op behavior, plus unit coverage for the shared filter-builder helpers."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.51",
     "date": "2026-07-06",
     "commit": "pending",

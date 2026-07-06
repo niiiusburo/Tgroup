@@ -1,7 +1,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID } = require('./helpers');
+const { err, validDate, validUUID, resolveReportCompanyScope } = require('./helpers');
 const { resolveInvestorScope } = require('../../services/permissionService');
 const {
   SERVICE_REVENUE_PAYMENT_CONDITION,
@@ -41,12 +41,15 @@ router.post('/revenue/summary', requirePermission('reports.view'), async (req, r
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
+
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
 
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
-      companyId,
+      companyId: scope.companyIds,
       orderDateCol: 'datecreated',
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       orderCompanyCol: 'companyid',
@@ -99,12 +102,15 @@ router.post('/revenue/trend', requirePermission('reports.view'), async (req, res
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
+
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
 
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
-      companyId,
+      companyId: scope.companyIds,
       orderDateCol: 'datecreated',
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       orderCompanyCol: 'companyid',
@@ -168,12 +174,15 @@ router.post('/revenue/by-location', requirePermission('reports.view'), async (re
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
+
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
 
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
-      companyId,
+      companyId: scope.companyIds,
       orderDateCol: 'so.datecreated',
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       orderCompanyCol: 'so.companyid',

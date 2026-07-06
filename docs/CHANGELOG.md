@@ -14,6 +14,19 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.52] — 2026-07-06
+
+### Security
+- Report routes (`dashboard`, `revenue`, `revenueBreakdowns`, `appointments`, `doctors`, `customers`, `employeesOverview`, `locationsComparison` under `api/src/routes/reports/`, plus `dashboardReports.js`) now call `resolveReportCompanyScope()` before running any query, rejecting requests for a `companyId` outside the caller's own location scope with `403 Location not allowed`. Previously these routes accepted a client-supplied `companyId` unchecked (only `cashFlow.js` validated it), so any authenticated employee with `reports.view` could request another branch's revenue, customer, or employee data regardless of their own assigned locations.
+- `customers.js`'s total-customer-count, gender/city breakdowns, top-spenders, and outstanding-balance sub-queries previously had **no** location filtering at all (even ignoring a requested `companyId`) — now scoped to the caller's allowed branches via `dbo.partners.companyid`.
+- `locationsComparison.js` and `employeesOverview.js`'s per-branch breakdowns now restrict the driving `dbo.companies` set to the caller's allowed branches instead of always comparing every branch in the clinic chain.
+- Super Admin, Admin, and investor accounts are unaffected — `resolveReportCompanyScope()` returns unrestricted scope for them, preserving byte-identical query behavior to before this fix.
+- Root cause note: discovered while auditing a report-export complaint from a Super Admin account (whose own access was already correct); the scoping gap affects non-admin staff on both NK and NK2, which share `tdental_demo`.
+- `api/src/routes/reports/helpers.js`'s `dateCompanyFilter`, `revenueRecognition.js`'s `buildPairedRevenueFilters`/`buildPaymentRevenueFilter`, and `api/src/services/reports/canonicalRevenue.js`'s shared `buildWhere` now accept `companyId` as either a single UUID (unchanged `= $n` behavior) or an array (`= ANY($n::uuid[])`), backing the scope-aware filtering above.
+
+### Testing
+- Added `api/src/routes/reports/__tests__/helpers.test.js` (new) plus scope-enforcement test coverage across all 9 fixed route files and their existing/new test files: 403-on-out-of-scope, correct `ANY()` multi-location filtering, and unrestricted-admin no-op assertions. Extended `canonicalRevenue.test.js` for the array-form filter. Net +142 tests in the reports test surface, all passing; full API suite (872 tests) shows no regressions from this change (2 pre-existing, unrelated failures: a flaky external network test and a pre-existing `saleOrderLines` failure present on `main` before this branch).
+
 ## [0.32.51] — 2026-07-06
 
 ### Fixed

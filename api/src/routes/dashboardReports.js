@@ -1,6 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
+const { resolveReportCompanyScope } = require('./reports/helpers');
 
 const router = express.Router();
 
@@ -69,6 +70,10 @@ router.post('/GetSumary', requirePermission('reports.view'), async (req, res) =>
       }
     }
 
+    // Resolve report scope (location-based authorization)
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
+
     // Validate date formats
     if (dateFrom && !isValidDate(dateFrom)) {
       return errorResponse(res, 400, 'INVALID_DATE_FROM', 'dateFrom must be in YYYY-MM-DD format');
@@ -100,9 +105,9 @@ router.post('/GetSumary', requirePermission('reports.view'), async (req, res) =>
     const paymentParams = [];
     let paymentIdx = 1;
 
-    if (companyId) {
-      paymentConditions.push(`ap.companyid = $${paymentIdx}`);
-      paymentParams.push(companyId);
+    if (scope.companyIds !== null && scope.companyIds.length > 0) {
+      paymentConditions.push(`ap.companyid = ANY($${paymentIdx}::uuid[])`);
+      paymentParams.push(scope.companyIds);
       paymentIdx++;
     }
 
@@ -148,9 +153,9 @@ router.post('/GetSumary', requirePermission('reports.view'), async (req, res) =>
       const yesterdayConditions = ['ap.state = \'posted\''];
       let yesterdayIdx = 1;
 
-      if (companyId) {
-        yesterdayConditions.push(`ap.companyid = $${yesterdayIdx}`);
-        yesterdayParams.push(companyId);
+      if (scope.companyIds !== null && scope.companyIds.length > 0) {
+        yesterdayConditions.push(`ap.companyid = ANY($${yesterdayIdx}::uuid[])`);
+        yesterdayParams.push(scope.companyIds);
         yesterdayIdx++;
       }
 
