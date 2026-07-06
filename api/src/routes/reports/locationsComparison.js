@@ -1,7 +1,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, dateCompanyFilter } = require('./helpers');
+const { err, validDate, dateCompanyFilter, resolveReportCompanyScope } = require('./helpers');
 const { resolveInvestorScope } = require('../../services/permissionService');
 const { getCanonicalRevenueByLocation } = require('../../services/reports/canonicalRevenue');
 
@@ -13,6 +13,9 @@ router.post('/locations/comparison', requirePermission('reports.view'), async (r
   try {
     const { dateFrom, dateTo } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo)) return err(res, 400, 'Invalid params');
+
+    const scope = await resolveReportCompanyScope(req, res, undefined);
+    if (!scope) return;
 
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
 
@@ -36,6 +39,13 @@ router.post('/locations/comparison', requirePermission('reports.view'), async (r
     }
     const soWhere = soConds.length ? 'AND ' + soConds.join(' AND ') : '';
 
+    // Build location scope condition: restrict to caller's allowed locations when not null (unrestricted)
+    let locWhere = '';
+    if (scope.companyIds !== null && scope.companyIds.length > 0) {
+      locWhere = `WHERE c.id = ANY($${queryParams.length + 1}::uuid[])`;
+      queryParams.push(scope.companyIds);
+    }
+
     const locations = await query(
       `SELECT c.id, c.name, c.active,
               COALESCE(appt.cnt, 0) as appointment_count,
@@ -43,6 +53,7 @@ router.post('/locations/comparison', requirePermission('reports.view'), async (r
               COALESCE(so.order_count, 0) as order_count,
               COALESCE(emp.cnt, 0) as employee_count
        FROM dbo.companies c
+       ${locWhere}
        LEFT JOIN (SELECT companyid, COUNT(*) as cnt, SUM(CASE WHEN state IN ('done','completed') THEN 1 ELSE 0 END) as done FROM dbo.appointments WHERE 1=1 ${afWhere} GROUP BY companyid) appt ON appt.companyid=c.id
        LEFT JOIN (SELECT companyid, COUNT(*) as order_count FROM dbo.saleorders WHERE isdeleted=false ${soWhere} GROUP BY companyid) so ON so.companyid=c.id
        LEFT JOIN (SELECT companyid, COUNT(*) as cnt FROM dbo.partners WHERE employee=true AND isdeleted=false GROUP BY companyid) emp ON emp.companyid=c.id`, queryParams);
@@ -67,10 +78,15 @@ router.post('/locations/comparison', requirePermission('reports.view'), async (r
       trendParams.push(investorScope.allowedCustomerIds);
       trendWhere += ` AND a.partnerid = ANY($${trendParams.length}::uuid[])`;
     }
+    let trendCompanyFilter = '';
+    if (scope.companyIds !== null && scope.companyIds.length > 0) {
+      trendParams.push(scope.companyIds);
+      trendCompanyFilter = ` AND c.id = ANY($${trendParams.length}::uuid[])`;
+    }
     const trend = await query(
       `SELECT c.name, DATE_TRUNC('month', a.date) as month, COUNT(*) as cnt
        FROM dbo.companies c
-       JOIN dbo.appointments a ON a.companyid=c.id AND ${trendWhere}
+       JOIN dbo.appointments a ON a.companyid=c.id AND ${trendWhere}${trendCompanyFilter}
        GROUP BY c.name, month ORDER BY c.name, month`, trendParams);
 
     return res.json({ success: true, data: {

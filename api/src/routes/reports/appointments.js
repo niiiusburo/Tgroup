@@ -1,7 +1,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID, dateCompanyFilter } = require('./helpers');
+const { err, validDate, validUUID, dateCompanyFilter, resolveReportCompanyScope } = require('./helpers');
 const { resolveInvestorScope } = require('../../services/permissionService');
 
 const router = express.Router();
@@ -13,9 +13,12 @@ router.post('/appointments/summary', requirePermission('reports.view'), async (r
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
+
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
 
-    const f = dateCompanyFilter(dateFrom, dateTo, companyId, 'date');
+    const f = dateCompanyFilter(dateFrom, dateTo, scope.companyIds, 'date');
     let fWhere = f.where;
     let fParams = [...f.params];
     if (investorScope.isInvestor) {
@@ -63,9 +66,12 @@ router.post('/appointments/trend', requirePermission('reports.view'), async (req
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
+
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
 
-    const f = dateCompanyFilter(dateFrom, dateTo, companyId, 'date');
+    const f = dateCompanyFilter(dateFrom, dateTo, scope.companyIds, 'date');
     let fWhere = f.where;
     let fParams = [...f.params];
     if (investorScope.isInvestor) {

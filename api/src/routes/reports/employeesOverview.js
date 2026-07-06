@@ -1,7 +1,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID, dateCompanyFilter } = require('./helpers');
+const { err, validDate, validUUID, resolveReportCompanyScope } = require('./helpers');
 
 const router = express.Router();
 
@@ -12,8 +12,14 @@ router.post('/employees/overview', requirePermission('reports.view'), async (req
     const { companyId } = req.body || {};
     if (!validUUID(companyId)) return err(res, 400, 'Invalid params');
 
-    const companyFilter = companyId ? 'AND companyid = $1' : '';
-    const params = companyId ? [companyId] : [];
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
+
+    // Build company filter using scope.companyIds
+    const companyFilter = Array.isArray(scope.companyIds) && scope.companyIds.length
+      ? 'AND companyid = ANY($1::uuid[])'
+      : '';
+    const params = Array.isArray(scope.companyIds) && scope.companyIds.length ? [scope.companyIds] : [];
 
     const roles = await query(
       `SELECT
@@ -23,13 +29,22 @@ router.post('/employees/overview', requirePermission('reports.view'), async (req
          COUNT(*) as total
        FROM dbo.partners WHERE employee=true AND isdeleted=false ${companyFilter}`, params);
 
+    // byLocation: filter companies when location-scoped, show all when unrestricted (admins/investors)
+    const byLocationParams = [];
+    let byLocationWhere = '';
+    if (Array.isArray(scope.companyIds) && scope.companyIds.length) {
+      byLocationWhere = 'WHERE c.id = ANY($1::uuid[])';
+      byLocationParams.push(scope.companyIds);
+    }
+
     const byLocation = await query(
       `SELECT c.name as location, COUNT(e.id) as cnt,
             SUM(CASE WHEN e.isdoctor THEN 1 ELSE 0 END) as doctors,
             SUM(CASE WHEN e.isassistant THEN 1 ELSE 0 END) as assistants
        FROM dbo.companies c
        LEFT JOIN dbo.partners e ON e.companyid=c.id AND e.employee=true AND e.isdeleted=false
-       GROUP BY c.name ORDER BY cnt DESC`);
+       ${byLocationWhere}
+       GROUP BY c.name ORDER BY cnt DESC`, byLocationParams);
 
     const list = await query(
       `SELECT p.id, p.name, p.isdoctor, p.isassistant, p.isreceptionist,

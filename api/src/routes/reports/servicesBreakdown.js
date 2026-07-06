@@ -1,7 +1,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID } = require('./helpers');
+const { err, validDate, validUUID, resolveReportCompanyScope } = require('./helpers');
 const { resolveInvestorScope } = require('../../services/permissionService');
 const {
   SERVICE_REVENUE_PAYMENT_CONDITION,
@@ -21,6 +21,9 @@ router.post('/services/breakdown', requirePermission('reports.view'), async (req
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
+    const scope = await resolveReportCompanyScope(req, res, companyId);
+    if (!scope) return;
+
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
 
     // Products by category
@@ -32,7 +35,7 @@ router.post('/services/breakdown', requirePermission('reports.view'), async (req
        WHERE pc.active=true
        GROUP BY pc.name ORDER BY product_count DESC`);
 
-    const f = buildPaymentRevenueFilter({ dateFrom, dateTo, companyId });
+    const f = buildPaymentRevenueFilter({ dateFrom, dateTo, companyId: scope.companyIds });
     let fWhere = f.where;
     let params = [...f.params];
     if (investorScope.isInvestor) {

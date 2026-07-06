@@ -28,7 +28,13 @@ function buildWhere({ dateFrom, dateTo, companyId }) {
     params.push(dateTo);
     idx += 1;
   }
-  if (companyId) {
+  if (Array.isArray(companyId)) {
+    if (companyId.length) {
+      conditions.push(`so.companyid = ANY($${idx}::uuid[])`);
+      params.push(companyId);
+      idx += 1;
+    }
+  } else if (companyId) {
     conditions.push(`so.companyid = $${idx}`);
     params.push(companyId);
     idx += 1;
