@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.32.53",
+    "date": "2026-07-06",
+    "commit": "pending",
+    "highlights": "Investor accounts now see their own scoped revenue instead of the clinic's company-wide totals.",
+    "sections": [
+      {
+        "title": "Security",
+        "items": [
+          "Fixed a data-scoping gap where an investor's Dashboard 'revenue collected', 12-month revenue trend, Doctors report per-doctor revenue, and Locations Comparison per-branch revenue all silently showed the FULL company-wide total instead of being restricted to that investor's assigned customers — the shared canonical-revenue calculation accepted the investor's customer allowlist but never applied it as a SQL filter.",
+          "All other investor-facing figures (appointment counts, new-customer counts, invoiced totals, and the previously-shipped location-scope fix in v0.32.52) were already correctly scoped and are unaffected by this change."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added unit coverage locking the investor customer-allowlist filter (`so.partnerid = ANY(...)`) across all 4 canonical-revenue functions, including combined location+investor scoping."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.52",
     "date": "2026-07-06",
     "commit": "pending",

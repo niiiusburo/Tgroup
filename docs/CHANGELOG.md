@@ -14,6 +14,15 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.53] — 2026-07-06
+
+### Security
+- Fixed `api/src/services/reports/canonicalRevenue.js`'s `buildWhere()` silently ignoring the `allowedCustomerIds` field that `dashboard.js`, `doctors.js`, and `locationsComparison.js` already passed for investor accounts — meaning an investor's "paid revenue" (Dashboard), 12-month revenue trend, per-doctor revenue (Doctors report), and per-branch revenue (Locations Comparison) all showed the clinic's full company-wide total instead of being restricted to that investor's assigned customers. Discovered via a live read-only verification of the NK2 Investor Demo account immediately after shipping v0.32.52 (the location-scope fix does not touch this code path — this is a separate, pre-existing gap).
+- Fix: `buildWhere()` now applies `so.partnerid = ANY($n::uuid[])` when `allowedCustomerIds` is provided, matching the customer-scoping convention already used everywhere else in the report routes. Non-investor callers are unaffected (the field is only ever populated for investor accounts).
+
+### Testing
+- Added 5 unit tests in `canonicalRevenue.test.js` locking the investor allowlist filter across all 4 canonical-revenue functions, including combined branch+investor scoping param ordering.
+
 ## [0.32.52] — 2026-07-06
 
 ### Security
