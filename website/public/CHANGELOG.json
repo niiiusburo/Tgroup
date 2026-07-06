@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.32.54",
+    "date": "2026-07-06",
+    "commit": "pending",
+    "highlights": "Closed two more investor data-scoping gaps found while auditing every report route for the same class of bug fixed in v0.32.53.",
+    "sections": [
+      {
+        "title": "Security",
+        "items": [
+          "Fixed 'Revenue by Source' (Revenue Breakdowns report): this route never called the investor scoping check at all, so any investor saw the clinic's full company-wide by-source revenue breakdown instead of only their assigned customers' revenue.",
+          "Fixed the legacy Dashboard KPI summary endpoint (`/api/DashboardReports/GetSumary`, powers the totalBank/totalCash/totalOther/totalAmount cards): it validated branch scope but never applied the investor customer allowlist, so investors saw the clinic's full unscoped cash totals.",
+          "All other report routes (Dashboard, Revenue, Doctors, Locations Comparison, Cash Flow Summary, Payment Plans) were already correctly scoped for investors and are unaffected."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added investor-allowlist unit coverage across all 7 revenue/revenue-breakdown routes (previously zero investor test cases existed for these routes) plus the legacy dashboard summary endpoint, including a regression test asserting non-investor staff never get the allowlist applied."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.53",
     "date": "2026-07-06",
     "commit": "pending",

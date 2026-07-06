@@ -14,6 +14,18 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.54] — 2026-07-06
+
+### Security
+- Discovered while auditing every report route for the same class of bug fixed in v0.32.53 (counted `resolveInvestorScope()` calls vs. route handlers per file). Found two routes that never applied the investor customer allowlist at all:
+  - `api/src/routes/reports/revenueBreakdowns.js`'s `/revenue/by-source` handler never called `resolveInvestorScope()` — unlike its three sibling handlers (`by-doctor`, `by-category`, `payment-plans`) in the same file, which already scoped correctly. An investor hitting this route saw the clinic's full company-wide revenue-by-source breakdown.
+  - `api/src/routes/dashboardReports.js`'s legacy `/GetSumary` endpoint (powers the Dashboard's totalBank/totalCash/totalOther/totalAmount KPI cards) validated branch scope via `resolveReportCompanyScope()` but never checked `resolveInvestorScope()` at all — investors saw the clinic's full unscoped cash totals on both the "today" and "yesterday" queries.
+- Fix: both routes now call `resolveInvestorScope()` and, when `isInvestor` is true, add a `partnerid = ANY($n::uuid[])` condition (via `COALESCE(p.customer_id, so.partnerid)` for `by-source`'s two CTEs, `ap.partnerid` for the legacy dashboard summary), matching the convention used everywhere else. Non-investor callers are unaffected.
+- Audited (not changed): `employeesOverview.js` and `cashFlow.js`'s static `/revenue/rules` route have no `resolveInvestorScope()` call — verified this is correct as-is: `employeesOverview.js` reports on staff/employee roster data (location-scoped, no customer identity involved), and `/revenue/rules` returns a static config array with no query at all.
+
+### Testing
+- Added investor-allowlist unit coverage for all 7 revenue/revenue-breakdown routes in `revenueRecognition.test.js` (previously zero investor test cases existed there) plus new coverage in `dashboardReports.test.js` for the legacy summary endpoint — including a regression test per file asserting non-investor staff never get the allowlist condition applied. 41 tests in the two touched suites, 158 across the full reports test surface, all passing.
+
 ## [0.32.53] — 2026-07-06
 
 ### Security

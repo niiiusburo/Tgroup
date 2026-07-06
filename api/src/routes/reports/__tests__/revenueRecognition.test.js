@@ -390,4 +390,142 @@ describe('reports revenue recognition', () => {
     expect(installmentsSql).not.toContain('mp.company_id');
     expect(installmentsParams).toEqual(['2026-05-01', '2026-05-31']);
   });
+
+  describe('investor customer allowlist', () => {
+    const ALLOWED = ['aaaaaaaa-1111-4111-8111-000000000001', 'bbbbbbbb-2222-4222-8222-000000000002'];
+
+    beforeEach(() => {
+      resolveEffectivePermissions.mockResolvedValue({
+        groupName: 'Investor',
+        effectivePermissions: ['reports.view'],
+        locations: [],
+      });
+      resolveInvestorScope.mockResolvedValue({ isInvestor: true, allowedCustomerIds: ALLOWED });
+    });
+
+    it('applies allowlist to revenue/summary (orders + payments queries)', async () => {
+      query
+        .mockResolvedValueOnce([{ state: 'sale', cnt: '1', total: '500', outstanding: '0' }])
+        .mockResolvedValueOnce([{ state: 'sale', paid: '500' }])
+        .mockResolvedValueOnce([{ method: 'cash', status: 'posted', cnt: '1', total: '500' }]);
+
+      const res = await request(makeApp())
+        .post('/api/Reports/revenue/summary')
+        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+
+      expect(res.status).toBe(200);
+      const orderSql = query.mock.calls[0][0];
+      const paymentSql = query.mock.calls[1][0];
+      expect(orderSql).toContain('partnerid = ANY(');
+      expect(paymentSql).toContain('so.partnerid = ANY(');
+      expect(query.mock.calls[0][1]).toContainEqual(ALLOWED);
+    });
+
+    it('applies allowlist to revenue/trend', async () => {
+      query
+        .mockResolvedValueOnce([{ month: '2026-05-01', order_count: '1', invoiced: '500', outstanding: '0' }])
+        .mockResolvedValueOnce([{ month: '2026-05-01', paid: '500' }]);
+
+      const res = await request(makeApp())
+        .post('/api/Reports/revenue/trend')
+        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+
+      expect(res.status).toBe(200);
+      expect(query.mock.calls[0][0]).toContain('partnerid = ANY(');
+      expect(query.mock.calls[0][1]).toContainEqual(ALLOWED);
+    });
+
+    it('applies allowlist to revenue/by-location (orders + payments queries)', async () => {
+      query.mockResolvedValueOnce([{ id: 'loc-1', name: 'Location A', order_count: '1', invoiced: '500', paid: '500', outstanding: '0' }]);
+
+      const res = await request(makeApp())
+        .post('/api/Reports/revenue/by-location')
+        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+
+      expect(res.status).toBe(200);
+      expect(query.mock.calls[0][0]).toContain('so.partnerid = ANY(');
+      expect(query.mock.calls[0][1]).toContainEqual(ALLOWED);
+    });
+
+    it('applies allowlist to revenue/by-doctor', async () => {
+      query.mockResolvedValueOnce([{ id: 'doc-1', name: 'Dr X', order_count: '1', invoiced: '500', paid: '500' }]);
+
+      const res = await request(makeApp())
+        .post('/api/Reports/revenue/by-doctor')
+        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+
+      expect(res.status).toBe(200);
+      expect(query.mock.calls[0][0]).toContain('so.partnerid = ANY(');
+      expect(query.mock.calls[0][1]).toContainEqual(ALLOWED);
+    });
+
+    it('applies allowlist to revenue/by-category', async () => {
+      query.mockResolvedValueOnce([{ id: 'cat-1', category: 'Implant', line_count: '1', revenue: '500' }]);
+
+      const res = await request(makeApp())
+        .post('/api/Reports/revenue/by-category')
+        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+
+      expect(res.status).toBe(200);
+      expect(query.mock.calls[0][0]).toContain('so.partnerid = ANY(');
+      expect(query.mock.calls[0][1]).toContainEqual(ALLOWED);
+    });
+
+    it('applies allowlist to revenue/by-source (both allocated and direct CTEs, shared params)', async () => {
+      query.mockResolvedValueOnce([{ id: 'src-1', name: 'Facebook', order_count: '1', paid: '500' }]);
+
+      const res = await request(makeApp())
+        .post('/api/Reports/revenue/by-source')
+        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+
+      expect(res.status).toBe(200);
+      const sql = query.mock.calls[0][0];
+      const params = query.mock.calls[0][1];
+      // Both CTEs must be scoped — a leak in either one exposes company-wide revenue.
+      const allocatedIdx = sql.indexOf('allocated_service_payments');
+      const directIdx = sql.indexOf('direct_service_payments');
+      const allocatedClause = sql.slice(allocatedIdx, directIdx);
+      const directClause = sql.slice(directIdx);
+      expect(allocatedClause).toContain('COALESCE(p.customer_id, so.partnerid) = ANY(');
+      expect(directClause).toContain('COALESCE(p.customer_id, so.partnerid) = ANY(');
+      expect(params).toContainEqual(ALLOWED);
+    });
+
+    it('applies allowlist to revenue/payment-plans (both plans and installments queries)', async () => {
+      query
+        .mockResolvedValueOnce([{ status: 'active', cnt: '1', total: '1000', down_payment: '200' }])
+        .mockResolvedValueOnce([{ status: 'paid', cnt: '1', total: '500', paid: '500' }]);
+
+      const res = await request(makeApp())
+        .post('/api/Reports/revenue/payment-plans')
+        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+
+      expect(res.status).toBe(200);
+      const plansSql = query.mock.calls[0][0];
+      const plansParams = query.mock.calls[0][1];
+      const installmentsSql = query.mock.calls[1][0];
+      const installmentsParams = query.mock.calls[1][1];
+      expect(plansSql).toContain('mp.customer_id = ANY(');
+      expect(plansParams).toContainEqual(ALLOWED);
+      expect(installmentsSql).toContain('mp.customer_id = ANY(');
+      expect(installmentsParams).toContainEqual(ALLOWED);
+    });
+
+    it('non-investor staff never get the allowlist applied, even when resolveInvestorScope resolves allowedCustomerIds', async () => {
+      resolveEffectivePermissions.mockResolvedValue({
+        groupName: 'Super Admin',
+        effectivePermissions: ['reports.view'],
+        locations: [],
+      });
+      resolveInvestorScope.mockResolvedValue({ isInvestor: false, allowedCustomerIds: [] });
+      query.mockResolvedValueOnce([{ id: 'src-1', name: 'Facebook', order_count: '1', paid: '500' }]);
+
+      const res = await request(makeApp())
+        .post('/api/Reports/revenue/by-source')
+        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+
+      expect(res.status).toBe(200);
+      expect(query.mock.calls[0][0]).not.toContain('partnerid = ANY(');
+    });
+  });
 });

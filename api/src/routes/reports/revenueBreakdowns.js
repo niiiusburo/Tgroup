@@ -161,6 +161,8 @@ router.post('/revenue/by-source', requirePermission('reports.view'), async (req,
     const scope = await resolveReportCompanyScope(req, res, companyId);
     if (!scope) return;
 
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
@@ -177,6 +179,18 @@ router.post('/revenue/by-source', requirePermission('reports.view'), async (req,
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       companyCol: 'COALESCE(so.companyid, customer.companyid)',
     });
+    let paymentWhere = f.paymentWhere;
+    let directWhere = directF.where;
+    let params = [...f.params];
+    if (investorScope.isInvestor) {
+      // f and directF are built from identical {dateFrom, dateTo, companyId} so their
+      // param arrays/indices stay aligned — only f.params is passed to query() below.
+      // Append the same param + index to both WHERE strings to preserve that invariant.
+      params.push(investorScope.allowedCustomerIds);
+      const paramIdx = f.params.length + 1;
+      paymentWhere += ` AND COALESCE(p.customer_id, so.partnerid) = ANY($${paramIdx}::uuid[])`;
+      directWhere += ` AND COALESCE(p.customer_id, so.partnerid) = ANY($${paramIdx}::uuid[])`;
+    }
     const rows = await query(
       `WITH ${ALLOCATION_TOTALS_CTE},
        allocated_service_payments AS (
@@ -188,7 +202,7 @@ router.post('/revenue/by-source', requirePermission('reports.view'), async (req,
          LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
          JOIN dbo.saleorders so ON so.id = pa.invoice_id AND so.isdeleted=false
          LEFT JOIN dbo.partners customer ON customer.id = COALESCE(p.customer_id, so.partnerid)
-         WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${f.paymentWhere}
+         WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${paymentWhere}
        ),
        direct_service_payments AS (
          SELECT COALESCE(so.sourceid, customer.sourceid) AS sourceid,
@@ -197,7 +211,7 @@ router.post('/revenue/by-source', requirePermission('reports.view'), async (req,
          FROM dbo.payments p
          LEFT JOIN dbo.saleorders so ON so.id = p.service_id AND so.isdeleted=false
          LEFT JOIN dbo.partners customer ON customer.id = COALESCE(p.customer_id, so.partnerid)
-         WHERE ${UNALLOCATED_SERVICE_PAYMENT_CONDITION} ${directF.where}
+         WHERE ${UNALLOCATED_SERVICE_PAYMENT_CONDITION} ${directWhere}
        ),
        recognized_service_payments AS (
          SELECT sourceid, order_id, paid FROM allocated_service_payments
@@ -225,7 +239,7 @@ router.post('/revenue/by-source', requirePermission('reports.view'), async (req,
        LEFT JOIN paid_totals pt ON (
          pt.sourceid=sk.sourceid OR (pt.sourceid IS NULL AND sk.sourceid IS NULL)
        )
-       ORDER BY paid DESC, name ASC LIMIT 100`, f.params);
+       ORDER BY paid DESC, name ASC LIMIT 100`, params);
 
     return res.json({ success: true, data: rows.map(r => ({ ...r, orderCount: toInt(r.order_count), paid: toNumber(r.paid) })) });
   } catch (e) { console.error('reports/revenue/by-source:', e); return err(res, 500, 'Internal error'); }

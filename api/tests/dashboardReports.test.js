@@ -14,7 +14,7 @@ jest.mock('../src/services/permissionService', () => ({
 const express = require('express');
 const request = require('supertest');
 const { query } = require('../src/db');
-const { resolveEffectivePermissions } = require('../src/services/permissionService');
+const { resolveEffectivePermissions, resolveInvestorScope } = require('../src/services/permissionService');
 const dashboardReportsRouter = require('../src/routes/dashboardReports');
 
 const LOC_A = '11111111-1111-4111-8111-111111111111';
@@ -386,5 +386,57 @@ describe('dashboard reports authorization', () => {
     expect(res.status).toBe(200);
     expect(res.body.totalAmountYesterday).toBe(0);
     expect(query).toHaveBeenCalledTimes(1); // Only today query, no yesterday
+  });
+
+  describe('investor customer allowlist', () => {
+    const ALLOWED = ['aaaaaaaa-1111-4111-8111-000000000001', 'bbbbbbbb-2222-4222-8222-000000000002'];
+
+    beforeEach(() => {
+      resolveEffectivePermissions.mockResolvedValue({
+        groupName: 'Investor',
+        effectivePermissions: ['reports.view'],
+        locations: [],
+      });
+      resolveInvestorScope.mockResolvedValue({ isInvestor: true, allowedCustomerIds: ALLOWED });
+    });
+
+    it('applies the investor allowlist to both the today and yesterday payment queries', async () => {
+      query
+        .mockResolvedValueOnce([{ totalinbound: 500000, totaloutbound: 100000, totalcash: 300000, totalbank: 200000, totalother: 0 }]) // today
+        .mockResolvedValueOnce([{ totalamount: 150000 }]); // yesterday
+
+      const res = await request(makeApp())
+        .post('/api/DashboardReports/GetSumary')
+        .send({ dateFrom: '2026-01-01', dateTo: '2026-01-31' });
+
+      expect(res.status).toBe(200);
+
+      const [todaySql, todayParams] = query.mock.calls[0];
+      expect(todaySql).toContain('ap.partnerid = ANY($');
+      expect(todayParams).toContainEqual(ALLOWED);
+
+      const [yesterdaySql, yesterdayParams] = query.mock.calls[1];
+      expect(yesterdaySql).toContain('ap.partnerid = ANY($');
+      expect(yesterdayParams).toContainEqual(ALLOWED);
+    });
+
+    it('non-investor staff never get the allowlist applied', async () => {
+      resolveEffectivePermissions.mockResolvedValue({
+        groupName: 'Super Admin',
+        effectivePermissions: ['reports.view'],
+        locations: [],
+      });
+      resolveInvestorScope.mockResolvedValue({ isInvestor: false, allowedCustomerIds: [] });
+      query
+        .mockResolvedValueOnce([{ totalinbound: 2000000, totaloutbound: 1000000, totalcash: 1000000, totalbank: 800000, totalother: 200000 }])
+        .mockResolvedValueOnce([{ totalamount: 600000 }]);
+
+      const res = await request(makeApp())
+        .post('/api/DashboardReports/GetSumary')
+        .send({ dateFrom: '2026-01-01', dateTo: '2026-01-31' });
+
+      expect(res.status).toBe(200);
+      expect(query.mock.calls[0][0]).not.toContain('ap.partnerid');
+    });
   });
 });
