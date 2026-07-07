@@ -24,8 +24,8 @@ User roles:
 Execution items:
 - [x] PASS: `useEmployees.permissions.test.ts` — 4/4 (fetch with permission, skip without, no debounced search fetch without, enabled=false honored).
 - [x] PASS: `useVersionCheck.test.ts` — 3 new unknown-commit `hasUpdate` cases green; full suite at pre-existing-failure baseline (11), zero new failures.
-- [ ] PENDING: After deploy, fresh Playwright load on nk as investor shows no update toast and no 403 console error.
-- [ ] PENDING: After deploy, live `/version.json` gitCommit matches the baked bundle commit (grep bundle for gitCommit value).
+- [x] PASS: 2026-07-07 ~8:00 AM — investor@2checkin.com session on nk prod: 0 console errors (was 2), no update toast, v0.32.55 badge, Overview renders; same result on nk2.
+- [x] PASS: nk + nk2 both serve version.json gitCommit `59a038c` AND bundle `assets/index-C1uhLzSi.js` bakes `gitCommit:"59a038c"` — first deploy where they match (previously bundle said "unknown").
 
 ---
 
