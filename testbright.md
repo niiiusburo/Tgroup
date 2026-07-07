@@ -4,6 +4,31 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 ---
 
+# TestSprite Plan: phantom update toast + investor employees.view 403 2026-07-07
+
+Feature/edit name: v0.32.55 — update-check unknown-commit guard, GIT_SHA baking in vite.config, useEmployees permission gate.
+
+Changed URLs / API routes / data flow:
+- Frontend only: `website/src/hooks/useEmployees.ts` (gates `GET /api/Employees` on `employees.view`), `website/src/hooks/useVersionCheck/versionUtils.ts` (`hasUpdate` ignores `unknown` commits), `website/vite.config.ts` (bakes `GIT_SHA`/`GIT_BRANCH` env vars into `__APP_GIT_COMMIT__`/`__APP_GIT_BRANCH__`).
+- No API or contract changes.
+
+Expected behavior:
+- Fresh browser load on nk/nk2 while fully up to date shows NO "Có bản cập nhật / New version is ready" toast.
+- Investor session (investor@2checkin.com) Overview load produces zero `employees.view` 403 console errors; dashboard still renders appointments.
+- Admin session still loads employees everywhere (Employees page, appointment/service forms).
+- A real deploy of a newer version still shows the update toast (semver bump path unaffected).
+
+User roles:
+- Investor account (no employees.view), admin t@clinic.vn (full permissions).
+
+Execution items:
+- [x] PASS: `useEmployees.permissions.test.ts` — 4/4 (fetch with permission, skip without, no debounced search fetch without, enabled=false honored).
+- [x] PASS: `useVersionCheck.test.ts` — 3 new unknown-commit `hasUpdate` cases green; full suite at pre-existing-failure baseline (11), zero new failures.
+- [ ] PENDING: After deploy, fresh Playwright load on nk as investor shows no update toast and no 403 console error.
+- [ ] PENDING: After deploy, live `/version.json` gitCommit matches the baked bundle commit (grep bundle for gitCommit value).
+
+---
+
 # TestSprite Plan: NK/NK2 employee revenue all-location extraction 2026-07-06
 
 Feature/edit name: Employee revenue export treats `companyId=all` as full extraction.

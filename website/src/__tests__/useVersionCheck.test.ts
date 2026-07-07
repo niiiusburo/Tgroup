@@ -74,6 +74,18 @@ describe('useVersionCheck utilities', () => {
     it('returns true when semver is older but commit differs (rollback detected)', () => {
       expect(hasUpdate(mockV3NewerSemver, mockV1)).toBe(true);
     });
+
+    it('returns false when semver matches and the baked commit is "unknown" (no phantom update)', () => {
+      expect(hasUpdate({ ...mockV1, gitCommit: 'unknown' }, mockV1)).toBe(false);
+    });
+
+    it('returns false when semver matches and the server commit is "unknown"', () => {
+      expect(hasUpdate(mockV1, { ...mockV1, gitCommit: 'unknown' })).toBe(false);
+    });
+
+    it('still returns true on newer semver even when a commit is "unknown"', () => {
+      expect(hasUpdate({ ...mockV1, gitCommit: 'unknown' }, mockV3NewerSemver)).toBe(true);
+    });
   });
 
   describe('consumeReturnPath', () => {

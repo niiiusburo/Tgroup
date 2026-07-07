@@ -35,6 +35,9 @@ function isSemverNewer(current: VersionInfo, latest: VersionInfo): boolean {
 
 export function hasUpdate(current: VersionInfo, latest: VersionInfo): boolean {
   if (isSemverNewer(current, latest)) return true;
+  // "unknown" means the build didn't get a git SHA baked in; comparing it
+  // against a real SHA would report a phantom update on every load.
+  if (current.gitCommit === 'unknown' || latest.gitCommit === 'unknown') return false;
   return current.gitCommit !== latest.gitCommit;
 }
 

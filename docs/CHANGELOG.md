@@ -14,6 +14,15 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.55] — 2026-07-07
+
+### Fixed
+- Phantom "New version is ready" toast on every fresh page load — @agent-claude — `website/vite.config.ts`'s `getVersionInfo()` only ran `git rev-parse` (absent inside the Docker build context), so the bundle baked `__APP_GIT_COMMIT__ = "unknown"` while `scripts/generate-version.js` (which does read the `GIT_SHA` build arg) wrote the real SHA into `/version.json`; `hasUpdate()` compares commits, so every client permanently saw an update prompt. `vite.config.ts` now uses the same `GIT_SHA`/`GIT_COMMIT`/`GIT_BRANCH` env-var-first precedence as `generate-version.js`, and `hasUpdate()` in `useVersionCheck/versionUtils.ts` no longer treats an `unknown` commit on either side as an update (newer semver still wins).
+- Guaranteed 403 `Permission denied: employees.view` console error for investor sessions — @agent-claude — `useEmployees` fired `GET /api/Employees` on every mount regardless of permission (Overview dashboard, appointment/service forms, customer assignments); the hook now checks `hasPermission('employees.view')` (exported as `PERMISSION_VIEW_EMPLOYEES`) and skips the fetch entirely when missing, composing with the existing `enabled` option. Observed live on nk prod as the only console error in an investor session (v0.32.54 verification, 2026-07-06).
+
+### Testing
+- New `useEmployees.permissions.test.ts` (4 tests: fetch with permission, skip without, no search fetch without, explicit `enabled=false` still honored) modeled on `useCustomers.permissions.test.ts`; 3 new `hasUpdate` unknown-commit cases in `useVersionCheck.test.ts`; `Overview.test.tsx` now mocks `AuthContext` like sibling page tests. Full website suite: 548 passed, 11 pre-existing failures unchanged from the v0.32.54 baseline (faceRecognition ×4, AuthenticatedCheckupImage ×2, customer-deep-link ×2, useCustomerFormActions ×1, AppointmentFormCore.customer-search ×1, Calendar.click ×1 — verified identical at HEAD before this change).
+
 ## [0.32.54] — 2026-07-06
 
 ### Security

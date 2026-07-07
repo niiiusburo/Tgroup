@@ -16,12 +16,22 @@ function getVersionInfo() {
     
     let gitCommit = 'unknown'
     let gitBranch = 'unknown'
-    
-    try {
-      gitCommit = execSync('git rev-parse --short HEAD', { cwd: __dirname }).toString().trim()
-      gitBranch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: __dirname }).toString().trim()
-    } catch {
-      // Git not available, use defaults
+
+    // Same precedence as scripts/generate-version.js: GIT_SHA/GIT_BRANCH env
+    // vars first (Docker builds have no .git, the SHA arrives as a build arg),
+    // then `git`. If these diverge, the baked __APP_GIT_COMMIT__ never matches
+    // /version.json and every client sees a phantom "update available".
+    const envCommit = process.env.GIT_SHA || process.env.GIT_COMMIT
+    if (envCommit) {
+      gitCommit = envCommit.slice(0, 7)
+      gitBranch = process.env.GIT_BRANCH || 'unknown'
+    } else {
+      try {
+        gitCommit = execSync('git rev-parse --short HEAD', { cwd: __dirname }).toString().trim()
+        gitBranch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: __dirname }).toString().trim()
+      } catch {
+        // Git not available, use defaults
+      }
     }
     
     return {

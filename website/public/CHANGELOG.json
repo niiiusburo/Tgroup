@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.32.55",
+    "date": "2026-07-07",
+    "commit": "pending",
+    "highlights": "Stopped the permanent phantom 'update available' toast and removed the guaranteed 403 console error investors hit on every page load.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Fixed the 'New version is ready' toast appearing on every fresh page load even when the app was fully up to date: Docker builds baked gitCommit 'unknown' into the bundle (vite.config.ts ignored the GIT_SHA build arg that generate-version.js used), so the bundle's commit never matched /version.json and the update check always fired. The build now reads GIT_SHA/GIT_BRANCH env vars with the same precedence in both places, and the update check no longer treats an 'unknown' commit as an update.",
+          "Users without the employees.view permission (e.g. investor accounts) no longer trigger a guaranteed 403 'Permission denied: employees.view' request on the Overview dashboard and other pages — useEmployees now skips the fetch entirely when the permission is missing."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added permission-gating unit coverage for useEmployees (fetches with employees.view, skips without it, still honors explicit enabled=false) and unknown-commit cases for the update check (no phantom update on 'unknown' commits, newer semver still wins)."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.54",
     "date": "2026-07-06",
     "commit": "pending",

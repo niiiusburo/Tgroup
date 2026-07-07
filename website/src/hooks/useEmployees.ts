@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { fetchEmployees, type ApiEmployee } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   inferRoleFromFlags,
   type Employee,
@@ -82,8 +83,13 @@ interface UseEmployeesOptions {
   readonly enabled?: boolean;
 }
 
+export const PERMISSION_VIEW_EMPLOYEES = 'employees.view';
+
 export function useEmployees(selectedLocationId?: string, options: UseEmployeesOptions = {}) {
-  const enabled = options.enabled ?? true;
+  const { hasPermission } = useAuth();
+  // GET /api/Employees requires employees.view; users without it (e.g. investor
+  // role) would only ever get a 403, so skip fetching entirely.
+  const enabled = (options.enabled ?? true) && hasPermission(PERMISSION_VIEW_EMPLOYEES);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [tierFilter, setTierFilter] = useState<string>('all');

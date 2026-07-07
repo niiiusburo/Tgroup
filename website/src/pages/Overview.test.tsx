@@ -2,6 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 
 // Mock all child components and hooks so we only test Overview wiring
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => ({
+    hasPermission: () => true,
+  }),
+}));
 vi.mock('@/components/modules/PatientCheckIn', () => ({
   PatientCheckIn: (props: any) => (
     <div data-testid="patient-checkin">
