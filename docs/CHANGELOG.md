@@ -14,6 +14,17 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.56] — 2026-07-08
+
+### Fixed
+- Admin could not add clients to the investor model — @agent-claude — `api/src/routes/partners/investorVisibility.js`'s `UUID_RE` was malformed (`8-4-4-12`, missing the 4th group), so `setInvestorVisibility` rejected EVERY real customer UUID with 400 `VALIDATION`; every checkbox tick on the Customers investor column silently failed. Regex corrected to the canonical `8-4-4-4-12` (matches `permissionService`). Introduced in `2bd2ac4bd` when the same-portal investor scope was restored.
+- Investor visibility management was gated on `permissions.edit` — @agent-claude — the Customers page shows the investor checkbox to any admin group (`canManageInvestorVisibility`), but the routes required `permissions.edit`, which the Admin group does not hold, so admins got 403 from the API. Routes now rely on the handler's `assertAdmin` (admin / super-admin / system-admin / `*`) plus global `requireAuth`; the route-level `requirePermission('permissions.edit')` was removed so any admin can tick.
+- `getConfiguredInvestor` threw 409 `MULTIPLE_INVESTOR_ACCOUNTS` when more than one active investor account existed (E2E/duplicate rows) — @agent-claude — the single-global-investor model now resolves deterministically to the in-use investor (most visible clients, then oldest) and never 409s, so a stray account cannot block the admin flow.
+- Admin management and investor read used different `investor_clients` keys — @agent-claude — `resolveInvestorScope` (investor read) matches the union of the investor's partner id OR any active `investor_accounts.id`, but the admin list/untick matched only one key. A client added under a legacy key was invisible to the admin list and an untick silently missed it, leaving a "removed" client permanently visible to the investor. Admin list + untick now match the SAME union (`investor_id = ANY(scopeMatchIds)`); ticks write under the canonical key.
+
+### Testing
+- `api/tests/investorVisibilityCompatibility.test.js` extended (write-key selection for both keyings, `scopeMatchIds` union, deterministic multi-account resolution with no 409, 404 when unconfigured) and new `api/tests/investorVisibilityHandlers.test.js` (rejects malformed UUID with 400, ACCEPTS a real 8-4-4-4-12 UUID, untick clears via `ANY($1::uuid[])` union) — 8 tests. Verified end-to-end against the local demo DB (login → `GET` 200 → `PATCH` on/off 200 → DB row flips) and in a real headless-Chromium browser at `127.0.0.1:5175` (t@clinic.vn): 20 investor checkboxes rendered, tick ON → PATCH 200 + checkbox checked, tick OFF → PATCH 200 + unchecked, zero console errors.
+
 ## [0.32.55] — 2026-07-07
 
 ### Fixed

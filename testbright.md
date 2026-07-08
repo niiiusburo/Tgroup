@@ -4,6 +4,37 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 ---
 
+# TestSprite Plan: investor client selection fix (admin cannot add clients) 2026-07-08
+
+Feature/edit name: v0.32.56 — investor visibility admin toggle (UUID regex, admin gate, deterministic resolver, scope-union list/untick).
+
+Changed URLs / API routes / data flow:
+- Frontend surface (unchanged code): `/customers` — investor checkbox column (`input[type=checkbox][aria-label]`), admin only.
+- API: `GET /api/Partners/investor-visibility`, `PATCH /api/Partners/:id/investor-visibility` (`api/src/routes/partners/investorVisibility.js`, route gating in `api/src/routes/partners.js`).
+- Data flow: admin JWT → `assertAdmin` (NOT `permissions.edit`) → `getConfiguredInvestor` (deterministic single investor, `scopeMatchIds` union of partner id + active `dbo.investor_accounts.id`) → upsert/clear `dbo.investor_clients`; investor read (`resolveInvestorScope`) matches the SAME union.
+
+Expected behavior:
+- Admin ticks a customer's investor checkbox → `PATCH` 200, row `is_visible=true`, checkbox checked.
+- Admin unticks → `PATCH` 200, cleared under every union key, checkbox unchecked; investor no longer sees the client.
+- Malformed customer id → 400 `VALIDATION`; a canonical 8-4-4-4-12 UUID is accepted (the regression).
+- More than one active investor account never 409s; the admin list equals the investor's visible set.
+- Non-admin (staff/investor) hitting these routes → 403 `ADMIN_REQUIRED` (investors cannot self-grant clients).
+
+User roles:
+- Admin `t@clinic.vn` (tick/untick). Investor `investor@2checkin.com` (read scope). Non-admin (negative path).
+
+Execution items:
+- [x] PASS: `investorVisibilityCompatibility.test.js` + `investorVisibilityHandlers.test.js` — 8/8; full investor+permission suite 46/46 (2026-07-08, local).
+- [x] PASS: Local demo DB end-to-end — login `t@clinic.vn` → `GET` 200 → `PATCH` on 200 (`is_visible=t`) → `PATCH` off 200 (`is_visible=f`); malformed id → 400.
+- [x] PASS: Real headless-Chromium at `127.0.0.1:5175` — 20 investor checkboxes rendered, tick ON → PATCH 200 + checked, tick OFF → PATCH 200 + unchecked, zero console errors.
+- [ ] PENDING: nk2 (staging) live deploy verification — admin `t@clinic.vn` at `https://nk2.2checkin.com/customers` ticks/unticks a client, PATCH 200, checkbox reflects; then investor login sees exactly the admin-selected set.
+- [ ] PENDING: nk2 negative path — a non-admin session gets 403 on `PATCH /api/Partners/:id/investor-visibility`.
+- [ ] PENDING: nk (prod) verification — deferred until after nk2 sign-off.
+
+Setup/login data: Admin `t@clinic.vn` and investor `investor@2checkin.com` on nk2; do not print credentials in this ledger.
+
+---
+
 # TestSprite Plan: phantom update toast + investor employees.view 403 2026-07-07
 
 Feature/edit name: v0.32.55 — update-check unknown-commit guard, GIT_SHA baking in vite.config, useEmployees permission gate.

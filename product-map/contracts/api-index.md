@@ -101,8 +101,8 @@ PUT handler-level validation: `companyId` (when present) must be a UUID (`400 IN
 | GET | `/resolve` | Perm:`customers.view` | `?key` (UUID, customer ref, or normalized phone) | `{ matchedBy, partner }`, 404 `CUSTOMER_NOT_FOUND`, or 409 `CUSTOMER_LOOKUP_AMBIGUOUS` with candidates |
 | GET | `/:id` | Perm:`customers.view` | — | Partner detail |
 | GET | `/:id/GetKPIs` | Perm:`customers.view` | — | KPI stats |
-| GET | `/investor-visibility` | Perm:`permissions.edit` | — | `{ investorId, customerIds }`; `investorId` is the same-portal partner id even when stored visibility rows use legacy `investor_accounts.id` |
-| PATCH | `/:id/investor-visibility` | Perm:`permissions.edit` | `{ visible: boolean }` | `{ investorId, customerId, visible }`; server resolves legacy account-keyed allowlists |
+| GET | `/investor-visibility` | Admin (`assertAdmin`) | — | `{ investorId, customerIds }`; admin-only (admin/super-admin/system-admin/`*`), NOT `permissions.edit`. `customerIds` is the union of rows keyed by the investor's partner id OR any active `investor_accounts.id` — exactly what the investor sees via `resolveInvestorScope`. `investorId` is the same-portal partner id even when stored rows use legacy `investor_accounts.id` |
+| PATCH | `/:id/investor-visibility` | Admin (`assertAdmin`) | `{ visible: boolean }` | `{ investorId, customerId, visible }`; admin-only. Tick writes under the canonical key; untick clears the customer under EVERY key in the scope union (partner id OR any active account id) so a removed client cannot stay visible. Rejects a non-UUID `:id` with 400 `VALIDATION` |
 | POST | `/` | Perm:`customers.add` | Partner fields | Created partner with backend-generated `ref`; dental uses `T######`, cosmetic mirror uses collision-checked `TM######` |
 | PUT | `/:id` | Perm:`customers.edit` | Partner fields | Updated partner |
 | PATCH | `/:id/soft-delete` | Perm:`customers.delete` | — | Soft-deleted partner |

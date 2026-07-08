@@ -22,6 +22,7 @@
 | v1.0.6 | 2026-05-23 | NK3 cosmetic customer intake clarified: cosmetic creates use `TM######` refs; Google Places stays server-proxied through `/api/Places/*` and bypasses LOB path rewriting. |
 | v1.0.7 | 2026-07-03 | Employee client role mapping clarified: `Trợ lý bác sĩ` assistant rows map to `doctor-assistant` before generic doctor, even when migrated data also has `isdoctor=true`. |
 | v1.0.8 | 2026-07-04 | Investor users are restricted normal-portal staff sessions: `/api/Auth/login` may authenticate `dbo.investor_accounts`, but all data access stays on existing portal routes and is scoped by `dbo.investor_clients`. |
+| v1.0.9 | 2026-07-08 | Investor visibility admin controls (`GET`/`PATCH /api/Partners/investor-visibility`) are gated by admin group (`assertAdmin`) instead of `permissions.edit`, and admin list/toggle match `dbo.investor_clients` by the SAME scope union (`investor_id` = the investor's `partners.id` OR any active `dbo.investor_accounts.id`) that scopes the investor read. Customer id is validated with the canonical 8-4-4-4-12 UUID pattern. |
 
 ---
 
@@ -182,13 +183,14 @@ PaginatedResponse<{
 **Response 201:** Created partner row. The backend owns `ref` generation; dental creates use `T######`, while cosmetic creates through `/api/cosmetic/Partners` use `TM######` and check for collisions in the request-scoped database before insert.
 
 #### GET /api/Partners/investor-visibility
-**Auth:** `permissions.edit`.
-**Response 200:** `{ investorId: string, customerIds: string[] }` for the configured investor identity.
+**Auth:** Admin group only — `assertAdmin` (admin / super admin / system administrator / `*`), NOT `permissions.edit` (the Admin group does not hold it, which previously 403'd admins who could see the checkbox). Global `requireAuth` still applies.
+**Response 200:** `{ investorId: string, customerIds: string[] }` for the configured single global investor. `customerIds` is the union of `dbo.investor_clients` rows keyed by the investor's `partners.id` OR any of its active `dbo.investor_accounts.id` — identical to what the investor sees via `resolveInvestorScope`, so the admin list is the single source of truth. The investor is resolved deterministically (most visible clients, then oldest); more than one active investor account never errors.
 
 #### PATCH /api/Partners/:id/investor-visibility
-**Auth:** `permissions.edit`.
+**Auth:** Admin group only — `assertAdmin` (same as GET). Global `requireAuth` still applies.
 **Body:** `{ visible: boolean }`
-**Response 200:** `{ investorId: string, customerId: string, visible: boolean }` after upserting `dbo.investor_clients`. `investorId` is always the same-portal `partners.id`; on NK/NK2 live successor data the stored `dbo.investor_clients.investor_id` may be `dbo.investor_accounts.id` and is resolved server-side.
+**Validation:** `:id` must match the canonical 8-4-4-4-12 UUID; otherwise 400 `VALIDATION`.
+**Response 200:** `{ investorId: string, customerId: string, visible: boolean }`. `visible:true` upserts one row under the canonical key (the active `dbo.investor_accounts.id` when the FK is present, else `partners.id`). `visible:false` clears the customer under EVERY key in the scope union (`investor_id = ANY[partner_id, ...active account ids]`) so a removed client cannot remain visible to the investor. `investorId` is always the same-portal `partners.id`; on NK/NK2 live successor data the stored `dbo.investor_clients.investor_id` may be `dbo.investor_accounts.id` and is resolved server-side.
 
 #### PUT /api/Partners/:id
 **Body:** Partial partner fields. `ref` cannot be changed after creation (enforced by backend).

@@ -138,6 +138,8 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 | `src/services/reports/__tests__/canonicalRevenue.test.js` | Reports/Exports | UC-013/WF-013: canonical revenue SQL mirrors the Excel `revenue-flat` export WHERE/JOIN topology, allocation capping expression, saleorder attribution, and payment-date bucketing |
 | `src/services/exports/__tests__/legacyFlatReportsExport.test.js` | Reports/Exports | UC-013/WF-005: `revenue-flat` and `deposit-flat` registry, workbook templates, SO-code column mapping, posted service-payment filters, allocation proration SQL, deposit top-up filtering, and row-limit error |
 | `src/services/exports/__tests__/reportSalesEmployeesExport.test.js` | Reports/Exports | UC-019/WF-005: `report-sales-employees` preview/download filters, `companyId=all` full extraction, explicit branch rejection when out of scope, employee-type SQL attribution, and grouped workbook rows |
+| `investorVisibilityCompatibility.test.js` | Customers/Investor | `getConfiguredInvestor` write-key selection under both keyings (account-FK present vs same-portal partner id), `scopeMatchIds` union of partner id + every active account id, deterministic resolution across multiple active investor accounts with no 409, and 404 when unconfigured |
+| `investorVisibilityHandlers.test.js` | Customers/Investor | `PATCH /api/Partners/:id/investor-visibility` rejects a malformed customer id with 400 `VALIDATION` before any DB work, ACCEPTS a canonical 8-4-4-4-12 UUID (the regression that blocked every admin tick), and untick clears the client under the scope union via `investor_id = ANY($1::uuid[])` |
 
 ## Coverage Gaps
 
