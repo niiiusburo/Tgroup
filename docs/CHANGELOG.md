@@ -26,7 +26,7 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 - Added API and frontend regression tests for transaction commit/rollback, inactive-source selection, fail-closed lookup errors, unchanged inherited-source omission, explicit source changes, same-order historical preservation, sale-order-aware deletion, foreign-key retention, numeric usage-count mapping, and exact immutable hashes/distributions for the executed 43-order repair artifacts — @codex — `dbTransaction.test.js`, `customerSourceIntegrity.test.js`, `customerSourceReferenceMigration.test.js`, `q10CustomerSourceRepairGuard.test.js`, `useSettings.customer-sources.test.tsx`, `useServices.payment-state.test.tsx`.
 
 ### Docs
-- Updated customer-source contracts, data model, invariants, failure mode, use case/workflow traceability, product maps, repair runbook, test matrix, and coordination status — @codex — INV-023 / INV-024 / FM-20260723-01.
+- Updated customer-source contracts, data model, invariants, failure mode, use case/workflow traceability, product maps, dependency map, repair runbook, test matrix, and coordination status — @codex — INV-023 / INV-024 / FM-20260723-01.
 
 ## [0.32.57] — 2026-07-23
 
