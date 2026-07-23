@@ -99,6 +99,18 @@
 **Enforced by:** `validateAllocationResidual()` in `api/src/routes/payments/helpers.js`.
 **Cite when:** Changing allocation math, tolerance values, or payment create validation.
 
+### INV-023 — Historical Customer-Source Attribution Stability
+**Rule:** Customer-source taxonomy changes MUST NOT bulk rewrite `partners.sourceid` or `saleorders.sourceid` for already-recorded activity. A historical correction must be record-scoped from a verified earlier source and include an exact manifest, backup, transaction rollback, and explicit production-data confirmation.
+**Rationale:** Revenue exports prefer the sale-order source and can fall back to the customer source. Rewriting either reference makes a closed reporting period change even when staff did not edit its visits.
+**Guarded by:** `api/tests/customerSourceMigrationArchiveGuard.test.js` prevents the five known destructive scripts from re-entering runnable SQL discovery. The broader rule is documented and depends on the production mutation confirmation gate for future repair scripts.
+**Cite when:** Editing customer-source migrations, `partners.sourceid`, `saleorders.sourceid`, source imports, or source-based reports/exports.
+
+### INV-024 — Historical Customer-Source Lookup Retention
+**Rule:** An inactive customer source MUST NOT be offered or accepted for new order attribution. An existing order MAY retain its exact inactive source during unrelated edits, and a customer-source lookup MUST NOT be deleted while any `partners` or `saleorders` row references it.
+**Rationale:** Historical lookup rows are needed to render closed-period attribution. Reusing them creates new ambiguous data; deleting them breaks existing report labels.
+**Enforced by:** `ServiceForm`, transaction-scoped lookup locks in `getCustomerSourceSelectionError()` and CustomerSources update/delete, validated `ON DELETE RESTRICT` foreign keys from `partners.sourceid` and `saleorders.sourceid`, and the reference-aware `DELETE /api/CustomerSources/:id` guard. Covered by `dbTransaction.test.js`, `customerSourceIntegrity.test.js`, `customerSourceReferenceMigration.test.js`, and `useSettings.customer-sources.test.tsx`.
+**Cite when:** Changing customer-source selectors, source CRUD, sale-order create/update, or historical attribution handling.
+
 ---
 
 ## Integration Invariants
@@ -190,3 +202,5 @@
 | 2026-05-13 | INV-001..INV-020 | Initial invariant set created | feat/complete-documentation-stack |
 | 2026-05-13 | INC-20260506-01, INC-20260506-02 | Incident-derived invariants added | feat/complete-documentation-stack |
 | 2026-07-04 | INV-021..INV-022 | Added investor same-portal customer scope and live-commit deploy continuity invariants | codex/nk2-investor-same-portal-ship |
+| 2026-07-23 | INV-023 | Added historical customer-source attribution stability after the Q10 June report incident | codex/customer-source-incident-guard |
+| 2026-07-23 | INV-024 | Added inactive-source selection and reference-retention safeguards | codex/customer-source-incident-guard |

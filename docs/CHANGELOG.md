@@ -14,6 +14,29 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.58] — 2026-07-23
+
+### Fixed
+- Reject inactive or missing `CustomerSources` on new `SaleOrders`; make active-only selectors fail closed; omit unchanged inherited source values from unrelated service edits; and preserve only an explicitly assigned inactive source on the same historical order — @codex — INV-023 / INV-024 / FM-20260723-01.
+- Count both `partners` and `saleorders` references in CustomerSources management, lock lookup rows through sale-order/source-management transactions, and block deletion while either table still uses the lookup — @codex — INV-024; prevents deleting or racing historical report attribution that has zero customer-level references.
+- Add validated `ON DELETE RESTRICT` foreign keys from both `partners.sourceid` and `saleorders.sourceid` to `customersources.id`; live read-only preflight found zero existing orphans and the migration was proved twice on a disposable restore — @codex — INV-024 / migration 050.
+- Applied the separately confirmed Q10 43-order production transaction and proved transaction `276262` wrote exactly 43 `saleorders`, one `customersources` row, 43 repair audit rows, and one metadata row; it wrote zero `partners` and zero `payments` — @codex — INV-023 / Q10 June source repair. A newly detected 44th workbook mismatch remains unmodified pending a fresh explicit confirmation.
+
+### Testing
+- Added API and frontend regression tests for transaction commit/rollback, inactive-source selection, fail-closed lookup errors, unchanged inherited-source omission, explicit source changes, same-order historical preservation, sale-order-aware deletion, foreign-key retention, numeric usage-count mapping, and exact immutable hashes/distributions for the executed 43-order repair artifacts — @codex — `dbTransaction.test.js`, `customerSourceIntegrity.test.js`, `customerSourceReferenceMigration.test.js`, `q10CustomerSourceRepairGuard.test.js`, `useSettings.customer-sources.test.tsx`, `useServices.payment-state.test.tsx`.
+
+### Docs
+- Updated customer-source contracts, data model, invariants, failure mode, use case/workflow traceability, product maps, repair runbook, test matrix, and coordination status — @codex — INV-023 / INV-024 / FM-20260723-01.
+
+## [0.32.57] — 2026-07-23
+
+### Fixed
+- Quarantined five historical customer-source rewrite migrations behind non-executable `.sql.retired` extensions and added a CI-required recursive migration-selection regression guard — @codex — INV-023 / FM-20260723-01; prevents another batch migration run from rewriting `partners.sourceid` and `saleorders.sourceid` and changing past revenue exports to `Sale Online`.
+- Added confirmation-locked, transaction-scoped Q10 apply and rollback scripts with 43-order live-state assertions, persistent before/after audit rows, backup/workbook hashes, and zero customer/payment writes — @codex — INV-023 / Q10 June source repair.
+
+### Docs
+- Recorded the customer-source attribution incident, runnable migration count, rollback boundary, focused regression command, and exact confirmation-gated 43-order Q10 repair runbook — @codex — Snake group Q10 June report comparison and production read-only audit.
+
 ## [0.32.56] — 2026-07-08
 
 ### Fixed

@@ -80,6 +80,7 @@ export function createSaleOrder(data: {
   notes?: string;
   tooth_numbers?: string | null;
   tooth_comment?: string | null;
+  sourceid?: string | null;
 }) {
   return apiFetch<ApiSaleOrder>('/SaleOrders', { method: 'POST', body: data });
 }
@@ -104,6 +105,7 @@ export function updateSaleOrder(id: string, data: {
   notes?: string | null;
   tooth_numbers?: string | null;
   tooth_comment?: string | null;
+  sourceid?: string | null;
 }) {
   return apiFetch<ApiSaleOrder>(`/SaleOrders/${id}`, { method: 'PATCH', body: data });
 }

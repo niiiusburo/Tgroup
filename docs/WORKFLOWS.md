@@ -299,6 +299,7 @@ sequenceDiagram
         FE->>API: POST /api/Exports/revenue-flat/download { filters }
         API->>Builder: legacyFlatReportsExport.revenue.build(filters, user)
         Builder->>DB: Revenue-flat rows from payments/payment_allocations/saleorders
+        Builder->>DB: Resolve Nguồn khách from saleorders.sourceid, then partners.sourceid fallback
         DB-->>Builder: Result rows
         Builder->>Builder: Build TDental-style flat workbook
         Builder-->>API: workbook, filename, rowCount
@@ -314,12 +315,13 @@ sequenceDiagram
 - Optional `exports_audit` row with `export_type='revenue-flat'` and `action='preview'` or `action='download'`.
 - Report data is read-only; revenue is recognized from posted payment allocations, not raw order totals.
 
-**Traceability:** Related UCs: UC-013, UC-019. Contracts/routes: `POST /api/Reports/revenue/*`, `POST /api/Reports/cash-flow/summary`, `POST /api/Exports/:type/preview`, `POST /api/Exports/:type/download` with `revenue-flat` or `report-sales-employees`. Data/tables: `dbo.payment_allocations`, `dbo.payments`, `dbo.saleorders`, `dbo.saleorderlines`, `dbo.partners`, `dbo.companies`, `dbo.exports_audit`. Invariants: INV-019, INV-020. Tests: `api/src/routes/reports/__tests__/revenueRecognition.test.js`, `api/src/routes/reports/__tests__/cashFlow.test.js`, `api/src/routes/reports/__tests__/servicesBreakdown.test.js`, `api/src/services/reports/__tests__/canonicalRevenue.test.js`, `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js`, `website/src/hooks/__tests__/useReportData.test.ts`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`. Product-map domains: `reports-analytics`, `payments-deposits`, `employees-hr`.
+**Traceability:** Related UCs: UC-013, UC-019. Contracts/routes: `POST /api/Reports/revenue/*`, `POST /api/Reports/cash-flow/summary`, `POST /api/Exports/:type/preview`, `POST /api/Exports/:type/download` with `revenue-flat` or `report-sales-employees`. Data/tables: `dbo.payment_allocations`, `dbo.payments`, `dbo.saleorders`, `dbo.saleorderlines`, `dbo.partners`, `dbo.customersources`, `dbo.companies`, `dbo.exports_audit`. Invariants: INV-019, INV-020, INV-023, INV-024. Tests: `api/src/routes/reports/__tests__/revenueRecognition.test.js`, `api/src/routes/reports/__tests__/cashFlow.test.js`, `api/src/routes/reports/__tests__/servicesBreakdown.test.js`, `api/src/services/reports/__tests__/canonicalRevenue.test.js`, `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js`, `api/tests/customerSourceIntegrity.test.js`, `website/src/hooks/__tests__/useReportData.test.ts`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`. Product-map domains: `reports-analytics`, `payments-deposits`, `employees-hr`, `customers-partners`, `services-catalog`.
 
 **Failure modes:**
 - Dataset too large → nginx 504 if timeout <300s.
 - `EXPORT_ROW_LIMIT_EXCEEDED` → preview/download must surface row-limit guidance.
 - Export audit insert failure is best effort and must not corrupt the workbook response.
+- Bulk source-taxonomy rewrites can change closed-period output even when the report builder is correct; INV-023 forbids that mutation pattern.
 
 ---
 

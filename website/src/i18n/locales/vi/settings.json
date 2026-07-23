@@ -75,7 +75,8 @@
     "title": "Nguồn khách hàng",
     "addSource": "Thêm nguồn",
     "sourceName": "Tên nguồn",
-    "description": "Mô tả"
+    "description": "Mô tả",
+    "customersOrders": "khách hàng / phiếu khám"
   },
   "timezoneSelector": {
     "label": "Chọn múi giờ",

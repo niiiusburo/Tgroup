@@ -210,14 +210,16 @@ When a use case is created or materially edited, add one compact `Traceability` 
   1. Actor clicks appointment in arrived state.
   2. Clicks "Chuyển đổi thành Dịch vụ".
   3. Frontend opens `ConvertToServiceForm` with appointment data.
-  4. Selects service(s) from catalog; sets quantity per tooth if applicable.
+  4. Selects service(s) from catalog, sets quantity per tooth if applicable, and may select an active customer source. When editing an existing historical order, its displayed historical source may remain visible, but the client omits `sourceid` unless the user explicitly changes that field; no other inactive source is selectable.
   5. Clicks Save → `POST /api/SaleOrders` with customer, location, line items.
   6. Backend creates `saleorder` + `saleorderlines`; appointment moves to `done`.
 - **Alternate flows:**
   - **AF-1 Service not in catalog:** Must create service first (UC-041 analog).
   - **AF-2 Tooth picker missing data:** Validation fails for multi-tooth services.
+  - **AF-3 Inactive or missing source submitted:** Backend returns `400 CUSTOMER_SOURCE_NOT_SELECTABLE`; no sale-order data is written.
 - **Postconditions:** SaleOrder created; appointment linked; revenue recognized.
-- **Invariants touched:** INV-003 (residual non-negative on any immediate payment), INV-017 (dense list).
+- **Invariants touched:** INV-003 (residual non-negative on any immediate payment), INV-017 (dense list), INV-023 and INV-024 (historical source stability and retention).
+- **Traceability:** Contracts/routes: `POST /api/SaleOrders`, `PATCH /api/SaleOrders/:id`, `GET /api/CustomerSources?is_active=true`. Data/tables: `dbo.saleorders`, `dbo.saleorderlines`, `dbo.customersources`. Tests: `api/tests/customerSourceIntegrity.test.js`, `website/src/hooks/useSettings.customer-sources.test.tsx`, `website/src/hooks/useServices.payment-state.test.tsx`. Product-map domains: `services-catalog`, `customers-partners`.
 
 ---
 

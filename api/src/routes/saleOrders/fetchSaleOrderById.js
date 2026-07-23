@@ -1,7 +1,7 @@
 const { query } = require('../../db');
 
-function fetchSaleOrderById(id) {
-  return query(
+function fetchSaleOrderById(id, queryFn = query) {
+  return queryFn(
     `SELECT
       so.id,
       so.name,

@@ -12,6 +12,7 @@ Add one row per request. Keep the request concrete and update the status instead
 | 2026-05-02 | Architecture | All agents | Use this file for cross-domain blockers instead of leaving them only in chat. | OPEN |
 | 2026-05-06 | Integrations | QA + Release | Verify the new Hosoonline patient creation proxy against live v2 `/api/patients/_create` and `_search` with a disposable patient before deploy. | IN PROGRESS |
 | 2026-05-20 | QA/Verification | Reports + Payments + Appointments + Customers + Feedback | Fix and verify 2026-05-19 live NK feedback bugs: revenue/deposit exports, calendar export date shift, and appointment clinic/location persistence. Keep production read-only until staging proof exists. | OPEN |
+| 2026-07-23 | QA/Data | Reports + Customers + Release | The confirmed Q10 June 43-order repair is applied and transaction-verified. Release the local migration/selection/deletion guards through PR/CI; separately review `SO-2026-5176`, which strict row-key comparison found outside the confirmed batch and which remains unmodified pending fresh confirmation. | IN PROGRESS |
 
 ## Status Values
 

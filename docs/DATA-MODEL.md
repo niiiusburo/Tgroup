@@ -122,6 +122,7 @@ erDiagram
 | `active` | boolean | DEFAULT true |
 | `isdeleted` | boolean | DEFAULT false |
 | `tier_id` | uuid | FK → permission_groups |
+| `sourceid` | uuid | FK → customersources; current customer-level source |
 | `salestaffid` | uuid | FK → partners (self-ref, employee) |
 | `face_subject_id` | text | face engine ID |
 | `face_registered_at` | timestamp | |
@@ -152,6 +153,17 @@ erDiagram
 - Hard delete cascades to `appointments`, `saleorders`, `payments`, `dotkhams`, `feedback_threads`, `hr_payslips` only if explicitly implemented in route handler.
 
 Investor identities remain `dbo.partners` employee rows assigned to the `investor` permission group; group-name matching is case-insensitive to preserve the live `Investor` group. Optional alternate investor login credentials live in `dbo.investor_accounts` but resolve back to the same `partners.id` and normal staff JWT/session.
+
+#### `dbo.customersources` (Customer-Source Lookup)
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | uuid | PK, default `gen_random_uuid()` |
+| `name` | varchar | NOT NULL |
+| `type` | varchar | nullable, default `offline` |
+| `description` | text | nullable |
+| `is_active` | boolean | nullable, default true |
+
+`partners.sourceid` stores the current customer-level source. `saleorders.sourceid` stores the service/order attribution used first by historical revenue exports. Both columns have validated foreign keys to `customersources.id` with `ON DELETE RESTRICT` (migration 050). Lookup taxonomy maintenance must not bulk rewrite those references; a record-level correction requires a verified earlier source, an explicit manifest, backup, transaction rollback, and production confirmation. Inactive lookups are historical-only: they cannot be selected for a new order, but an existing order may retain its already-assigned inactive value. Application deletion is blocked while either `partners` or `saleorders` has a reference.
 
 #### `dbo.investor_clients`
 | Column | Type | Constraints |
@@ -238,6 +250,7 @@ Investor identities remain `dbo.partners` employee rows assigned to the `investo
 | `partner_id` | uuid | FK → partners (patient) |
 | `doctor_id` | uuid | FK → partners (doctor) |
 | `company_id` | uuid | FK → companies |
+| `sourceid` | uuid | FK → customersources; order-level attribution snapshot |
 | `amounttotal` | numeric | |
 | `totalpaid` | numeric | |
 | `residual` | numeric | DEFAULT 0 |
@@ -574,13 +587,16 @@ If `dbo.customer_face_embeddings` exists and the local provider is active, the e
 ### INV-SCHEMA-007 — Receipt Number Year Partition
 `payments.receipt_number` uses a per-year counter. The sequence MUST reset on January 1st of each calendar year. The generation function uses `EXTRACT(YEAR FROM NOW())` as the partition key.
 
+### INV-SCHEMA-008 — Historical Customer-Source Attribution Stability
+Customer-source taxonomy maintenance must not bulk rewrite `partners.sourceid` or `saleorders.sourceid` for already-recorded activity. Known destructive rewrite files remain forensic artifacts with `.sql.retired` extensions; any repair must be record-scoped and reversible.
+
 ---
 
 ## Migration Inventory
 
 - Canonical root index: `docs/MIGRATIONS.md`.
-- Canonical migration directory: `api/migrations/` (53 SQL files, through `046_split_payment_and_hoso_permissions.sql`).
-- Supplemental migration directory: `api/src/db/migrations/` (2 SQL files: `003_add_payment_category.sql`, `046_customer_face_embeddings.sql`).
+- Canonical migration directory: `api/migrations/` (50 runnable root `.sql` files). Five historical customer-source rewrite artifacts are quarantined under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` with `.sql.retired` extensions.
+- Supplemental migration directory: `api/src/db/migrations/` (5 SQL files: `003_add_payment_category.sql`, `046_customer_face_embeddings.sql`, `047_payment_proof_confirmation.sql`, `048_grant_payment_confirm_permission.sql`, `051_payment_proofs_payment_id_uuid.sql`).
 - Runbook status: `docs/RUNBOOK.md` and `docs/runbooks/DEPLOYMENT.md` both use `api/migrations/*.sql` as the canonical deploy loop. Supplemental files under `api/src/db/migrations/` require explicit review, consolidation, or manual execution when a change depends on them.
 
 ---

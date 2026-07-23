@@ -101,7 +101,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
   const [showToothPicker, setShowToothPicker] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
-  const { allSources } = useCustomerSources();
+  const { allSources } = useCustomerSources({ activeOnly: true, preserveId: initialData?.sourceId });
 
   useEffect(() => {
     if (initialData) {
@@ -256,7 +256,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
         notes: notes.trim(), quantity: quantity || 1, unit: unit.trim(),
         toothNumbers,
         toothComment: toothComment.trim(),
-        sourceId
+        sourceId, sourceChanged: Boolean(initialData?.id && sourceId !== (initialData.sourceId ?? null))
       });
     } catch (error) {
       setErrors((prev) => ({ ...prev, submit: error instanceof Error ? error.message : t('formErrors.saveFailed', 'Lưu thất bại') }));

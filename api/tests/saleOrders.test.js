@@ -9,6 +9,10 @@ jest.mock('uuid', () => ({
 
 jest.mock('../src/db', () => ({
   query: jest.fn(),
+  withTransaction: jest.fn(async (work) => {
+    const { query } = require('../src/db');
+    return work(query);
+  }),
 }));
 
 const request = require('supertest');

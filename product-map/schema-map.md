@@ -2,7 +2,7 @@
 
 > Database entity map: relationships, writers, readers, endpoints, and frontend surfaces.
 
-> Migration inventory: 53 SQL files under `api/migrations/` as of 2026-05-17 local file inventory. Duplicate numeric prefixes exist, so treat filename order as inventory, not a strict linear version sequence.
+> Migration inventory: 51 runnable root SQL files under `api/migrations/` as of 2026-07-23, plus 5 non-executable customer-source incident artifacts under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/`. Duplicate numeric prefixes exist, so treat filename order as inventory, not a strict linear version sequence.
 
 ## Legend
 
@@ -124,13 +124,25 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | Attribute | Value |
 |-----------|-------|
 | **Primary Key** | `id` (uuid) |
-| **Key Relationships** | FK `companyid` → companies; conceptually parent of `appointments.partnerid`, `appointments.doctorid`, `payments.partnerid`, `saleorders.partner_id`, `dotkhams.partnerid`, `dotkhams.doctorid`, `monthlyplans.partnerid`, `employee_permissions.employee_id`, `permission_overrides.employee_id`, `employee_location_scope.employee_id` |
+| **Key Relationships** | FK `companyid` → companies; FK `sourceid` → customersources; conceptually parent of `appointments.partnerid`, `appointments.doctorid`, `payments.partnerid`, `saleorders.partner_id`, `dotkhams.partnerid`, `dotkhams.doctorid`, `monthlyplans.partnerid`, `employee_permissions.employee_id`, `permission_overrides.employee_id`, `employee_location_scope.employee_id` |
 | **Discriminator Columns** | `customer` (bool), `employee` (bool), `isdoctor` (bool), `isassistant` (bool), `isreceptionist` (bool) |
 | **W** | `api/src/routes/partners.js`, `api/src/routes/employees.js`, `api/src/routes/auth.js` (password_hash, last_login), `api/src/routes/faceRecognition.js` (face_subject_id), `api/src/routes/permissions.js` (tier_id) |
 | **R** | `partners.js`, `appointments.js`, `payments.js`, `reports.js`, `employees.js`, `auth.js`, `faceRecognition.js`, `dashboardReports.js`, `commissions.js`, employee revenue export builder |
 | **E** | `GET/POST/PUT/PATCH/DELETE /api/Partners/*`, `GET/POST/PUT/DELETE /api/Employees/*`, `POST /api/Auth/login`, `GET /api/Auth/me`, `POST /api/Auth/change-password`, `POST /api/face/*` |
 | **UI** | Customers page, Employees page, Login, Appointment forms, Payment forms, Service records, Reports, Face capture |
 | **Risk** | **Critical** — recent breakage occurred when `password_hash` was missing and NOT NULL constraints were added without updating all INSERT paths. Customer phone is not unique identity and may overlap migrated refs/phones; UUID remains the durable key. |
+
+### dbo.customersources
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Key** | `id` (uuid) |
+| **Key Relationships** | Referenced by validated `ON DELETE RESTRICT` foreign keys from `partners.sourceid` for current customer attribution and `saleorders.sourceid` for service/order attribution used first by historical revenue exports |
+| **W** | `api/src/routes/customerSources.js`; explicitly reviewed record-level repair transactions only |
+| **R** | Customer settings, ServiceForm, customer/deposit exports, revenue/service exports and source breakdowns |
+| **E** | `GET/POST/PUT/DELETE /api/CustomerSources` |
+| **UI** | Settings customer sources; service/order source selector; report/export `Nguồn khách` |
+| **Risk** | **Critical** — bulk renames, merges, or deletes can rewrite both current and historical attribution. Five incident migrations are quarantined with `.sql.retired`; inactive lookups are excluded from new selection, transaction locks serialize source management with sale-order writes, and validated foreign keys block deletion while either partners or saleorders references remain (INV-024); future repairs require a verified manifest, backup, rollback, and explicit production confirmation (INV-023). |
 
 ### dbo.investor_clients
 
@@ -210,12 +222,12 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | Attribute | Value |
 |-----------|-------|
 | **Primary Key** | `id` (uuid) |
-| **Foreign Keys** | `partner_id` → partners, `company_id` → companies |
+| **Foreign Keys** | `partner_id` → partners, `company_id` → companies, `sourceid` → customersources |
 | **W** | `api/src/routes/saleOrders.js` |
 | **R** | `saleOrders.js`, `saleOrderLines.js`, `payments.js` (allocations), `reports.js`, `partners.js` (KPIs), `appointments.js`, employee revenue export builder |
 | **E** | `GET/POST/PATCH /api/SaleOrders` |
 | **UI** | Services patient records, Payment allocations, CustomerProfile service history, Reports |
-| **Risk** | **High** — state transitions (`draft` → `confirmed` → `done` → `cancelled`) are logged in `saleorder_state_logs` and drive payment residual calculations. |
+| **Risk** | **High** — state transitions (`draft` → `confirmed` → `done` → `cancelled`) are logged in `saleorder_state_logs` and drive payment residual calculations. `sourceid` is the order-level report attribution; bulk taxonomy rewrites change closed-period revenue output (INV-023). |
 
 ### dbo.saleorderlines
 

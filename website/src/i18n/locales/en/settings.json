@@ -75,7 +75,8 @@
     "title": "Customer Sources",
     "addSource": "Add Source",
     "sourceName": "Source Name",
-    "description": "Description"
+    "description": "Description",
+    "customersOrders": "customers / orders"
   },
   "timezoneSelector": {
     "label": "Select Timezone",

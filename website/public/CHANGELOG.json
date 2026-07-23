@@ -1,5 +1,43 @@
 [
   {
+    "version": "0.32.58",
+    "date": "2026-07-23",
+    "commit": "pending",
+    "highlights": "Protected historical customer-source attribution from inactive-source reuse and unsafe deletion.",
+    "sections": [
+      {
+        "title": "Data Integrity",
+        "items": [
+          "New service orders can select active customer sources only; selectors fail closed if the lookup is unavailable, and unrelated edits do not re-submit an inherited historical source.",
+          "Customer-source settings now count both customer and sale-order references, and deletion is blocked while either kind of record still uses the source.",
+          "The confirmed Q10 repair changed exactly 43 order-level source references without changing customers, payments, amounts, dates, or other orders; one separately discovered workbook mismatch remains outside that confirmation."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added backend and frontend regression coverage for fail-closed active selection, inherited-source omission, explicit source changes, historical preservation, reference-aware deletion, numeric usage counts, and the immutable 43-order repair manifest."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.57",
+    "date": "2026-07-23",
+    "commit": "pending",
+    "highlights": "Prevented retired customer-source migrations from rewriting historical report attribution again.",
+    "sections": [
+      {
+        "title": "Data Integrity",
+        "items": [
+          "Quarantined five historical customer-source rewrite migrations with non-executable .sql.retired extensions, so normal and recursive SQL migration scans cannot rerun them.",
+          "Added an automated guard covering the known destructive filenames and recursive migration discovery.",
+          "Prepared an exact, confirmation-gated Q10 June repair plan; no production data is changed by this release item."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.55",
     "date": "2026-07-07",
     "commit": "pending",

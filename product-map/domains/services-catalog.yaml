@@ -82,6 +82,10 @@ impact_tests:
   - website/src/components/services/serviceFormToothQuantity.test.ts
   - website/e2e/export-downloads.spec.ts (services/service-catalog export menus)
   - website/e2e/team-bravo-records.spec.ts
+  - api/tests/customerSourceIntegrity.test.js
+  - api/tests/customerSourceReferenceMigration.test.js
+  - api/tests/dbTransaction.test.js
+  - website/src/hooks/useSettings.customer-sources.test.tsx
 risk_level: high
 notes:
   - STALE/DEAD: api/src/routes/services.js is not mounted in server.js and queries public.services which does not exist.
@@ -91,4 +95,6 @@ notes:
   - /api/ProductCategories groups duplicate migrated category UUIDs by display name for the catalog sidebar; /api/Products category filtering expands the selected display group to all matching category UUIDs.
   - Service catalog and patient treatment searches must remain accent-insensitive for Vietnamese service, category, doctor, and customer names.
   - Customer profile service edits patch the parent sale order but must also persist rendered line fields such as `saleorderlines.productuomqty`, `tooth_numbers`, and `tooth_comment` because the `Phiếu khám` table is sourced from `/api/SaleOrders/lines`.
+  - New service/order source choices must be active CustomerSources. An edit may preserve the exact inactive source already assigned to that order, but the API rejects assigning an inactive or missing source to new or different data with `CUSTOMER_SOURCE_NOT_SELECTABLE`.
+  - Sale-order create/update holds a transaction-scoped share lock on a selected source and commits order/line writes together; source update/delete uses the conflicting row lock and database foreign keys restrict lookup deletion.
   - Tooth picker saves should sync quantity to selected tooth count only while quantity is still following the picker/default count; manual quantity overrides must be preserved.
