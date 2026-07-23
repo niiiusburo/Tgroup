@@ -207,7 +207,7 @@ describe('useCustomers - CSKH Role Assignment', () => {
       );
     });
 
-    it('should create customer with sourceid', async () => {
+    it('should omit sourceid from the customer create payload', async () => {
       mockCreatePartner.mockResolvedValue({
         id: '3',
         name: 'Test Customer',
@@ -230,14 +230,11 @@ describe('useCustomers - CSKH Role Assignment', () => {
         sourceid: 'source-online',
       } as CustomerFormData);
 
-      expect(mockCreatePartner).toHaveBeenCalledWith(
-        expect.objectContaining({
-          sourceid: 'source-online',
-        })
-      );
+      expect(mockCreatePartner).toHaveBeenCalledTimes(1);
+      expect(mockCreatePartner.mock.calls[0][0]).not.toHaveProperty('sourceid');
     });
 
-    it('should update customer with sourceid', async () => {
+    it('should omit sourceid from the customer update payload', async () => {
       mockUpdatePartner.mockResolvedValue({
         id: '1',
         name: 'Updated Name',
@@ -256,12 +253,9 @@ describe('useCustomers - CSKH Role Assignment', () => {
         sourceid: 'source-hotline',
       } as CustomerFormData);
 
-      expect(mockUpdatePartner).toHaveBeenCalledWith(
-        '1',
-        expect.objectContaining({
-          sourceid: 'source-hotline',
-        })
-      );
+      expect(mockUpdatePartner).toHaveBeenCalledTimes(1);
+      expect(mockUpdatePartner.mock.calls[0][0]).toBe('1');
+      expect(mockUpdatePartner.mock.calls[0][1]).not.toHaveProperty('sourceid');
     });
 
     it('should not clear omitted nullable assignment and note fields on partial updates', async () => {

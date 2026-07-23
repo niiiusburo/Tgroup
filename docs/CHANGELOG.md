@@ -14,6 +14,17 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.59] — 2026-07-23
+
+### Fixed
+- Preserve omitted writable UUID fields during partial customer updates so unrelated edits cannot clear assignments; make `partners.sourceid` read-only on normal Partner POST/PUT with stable `PARTNER_SOURCE_READ_ONLY` rejection for source assignment/change/clear, and remove source from frontend customer write payloads — @codex — INV-023 / INV-025 / FM-20260723-02.
+
+### Testing
+- Added partner mutation regressions for omission preservation, writable UUID clearing, validated-route source create/change/clear rejection, case-insensitive repeated-source compatibility, full no-op response shape, and frontend source omission — @codex — `mutationHandlers.test.js` / `useCustomers.cskh.test.ts`.
+
+### Docs
+- Documented the partial-update contract, invariant, failure mode, and test mapping — @codex — `PUT /api/Partners/:id` / INV-025.
+
 ## [0.32.58] — 2026-07-23
 
 ### Fixed

@@ -103,8 +103,8 @@ PUT handler-level validation: `companyId` (when present) must be a UUID (`400 IN
 | GET | `/:id/GetKPIs` | Perm:`customers.view` | — | KPI stats |
 | GET | `/investor-visibility` | Admin (`assertAdmin`) | — | `{ investorId, customerIds }`; admin-only (admin/super-admin/system-admin/`*`), NOT `permissions.edit`. `customerIds` is the union of rows keyed by the investor's partner id OR any active `investor_accounts.id` — exactly what the investor sees via `resolveInvestorScope`. `investorId` is the same-portal partner id even when stored rows use legacy `investor_accounts.id` |
 | PATCH | `/:id/investor-visibility` | Admin (`assertAdmin`) | `{ visible: boolean }` | `{ investorId, customerId, visible }`; admin-only. Tick writes under the canonical key; untick clears the customer under EVERY key in the scope union (partner id OR any active account id) so a removed client cannot stay visible. Rejects a non-UUID `:id` with 400 `VALIDATION` |
-| POST | `/` | Perm:`customers.add` | Partner fields | Created partner with backend-generated `ref`; dental uses `T######`, cosmetic mirror uses collision-checked `TM######` |
-| PUT | `/:id` | Perm:`customers.edit` | Partner fields | Updated partner |
+| POST | `/` | Perm:`customers.add` | Partner fields; normal customer creation must omit `sourceid` | Created partner with backend-generated `ref`; dental uses `T######`, cosmetic mirror uses collision-checked `TM######`; non-null `sourceid` returns `400 PARTNER_SOURCE_READ_ONLY` |
+| PUT | `/:id` | Perm:`customers.edit` | Partial partner fields; omitted fields remain unchanged and normal clients must omit `sourceid` | Updated partner; a changed or cleared `sourceid` returns `400 PARTNER_SOURCE_READ_ONLY`, while an explicitly repeated current value is ignored for compatibility |
 | PATCH | `/:id/soft-delete` | Perm:`customers.delete` | — | Soft-deleted partner |
 | DELETE | `/:id/hard-delete` | Perm:`customers.hard_delete` | — | Hard-deleted partner |
 

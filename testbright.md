@@ -4,6 +4,33 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 ---
 
+# TestSprite Plan: partner source read-only boundary 2026-07-23
+
+Feature/edit name: v0.32.59 — omission-safe partial customer updates and read-only `partners.sourceid` on normal customer writes.
+
+Changed URLs / API routes / data flow:
+- Frontend: `/customers` add/edit flow through `website/src/hooks/useCustomers.ts`.
+- API: `POST /api/Partners`, `PUT /api/Partners/:id`.
+- Data flow: customer form → source-free Partner payload → mutation handler; omitted writable UUID fields remain unchanged, explicit empty writable UUIDs normalize to `null`, and Partner source assignment/change/clear fails with `400 PARTNER_SOURCE_READ_ONLY`.
+
+Expected behavior:
+- Creating or editing a customer never sends `sourceid` from the normal frontend flow.
+- POST rejects a non-null source; PUT rejects changed, empty, or null source values with `PARTNER_SOURCE_READ_ONLY`.
+- A legacy PUT repeating the current source, including uppercase UUID spelling, succeeds without writing that column and returns the full customer row.
+- Unrelated partial edits preserve every omitted UUID; explicitly clearing a writable non-source UUID still writes `null`.
+
+User roles: Staff with `customers.add` or `customers.edit`; admin inherits the same source boundary.
+
+Execution items:
+- [x] PASS: API mutation and validated-route tests — 14/14, including source create/change/clear rejection, case-insensitive same-source compatibility, full no-op response, omitted UUID preservation, and writable UUID clear.
+- [x] PASS: `useCustomers.cskh.test.ts` — 8/8; create/update payloads omit source.
+- [ ] PENDING: NK2 authenticated customer add/edit smoke test confirms unrelated fields save and existing customer source/report attribution remains unchanged.
+- [ ] PENDING: NK2 direct negative API check confirms changed/cleared source returns `400 PARTNER_SOURCE_READ_ONLY` without a DB change.
+
+Setup/login data: NK2 staff/admin account with customer add/edit permissions; use an existing test customer for read-only-source verification and do not alter production source attribution.
+
+---
+
 # TestSprite Plan: investor client selection fix (admin cannot add clients) 2026-07-08
 
 Feature/edit name: v0.32.56 — investor visibility admin toggle (UUID regex, admin gate, deterministic resolver, scope-union list/untick).

@@ -63,7 +63,7 @@ ui_surfaces:
   - CustomerProfile tabs (appointments, services, photos, payments)
   - AddCustomerForm modal
 ui_invariants:
-  - Customer source (`sourceid` / `sourcename`, label `Nguồn khách hàng`) is stored for migration/reporting compatibility but must not appear in the customer profile assignment card or the customer profile add/edit form.
+  - Customer source (`sourceid` / `sourcename`, label `Nguồn khách hàng`) is stored for migration/reporting compatibility but must not appear in the customer profile assignment card or the customer profile add/edit form. Normal Partner POST/PUT clients must omit `sourceid`; POST rejects a non-null value and PUT rejects changed or cleared values with `PARTNER_SOURCE_READ_ONLY` (an explicitly repeated current value may no-op for legacy compatibility).
   - CustomerSources list responses expose numeric `customer_count` and `order_count`; settings retain inactive rows for audit and must not offer deletion while either count is nonzero.
   - "`DELETE /api/CustomerSources/:id` counts references in both `dbo.partners.sourceid` and `dbo.saleorders.sourceid` and returns `CUSTOMER_SOURCE_IN_USE` instead of deleting referenced history."
   - Customer-source update/delete and sale-order source selection lock the lookup row inside one transaction; validated `ON DELETE RESTRICT` foreign keys retain lookup rows referenced by customers or orders.
