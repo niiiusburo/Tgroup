@@ -14,8 +14,24 @@ const UUID_FIELDS = [
   'cskhid','salestaffid','sourceid','hrjobid','tier_id',
 ];
 
-function sanitizeUuids(o) {
-  for (const f of UUID_FIELDS) if (o[f] === '' || o[f] === undefined) o[f] = null;
+function sanitizeUuids(o, { preserveUndefined = false } = {}) {
+  for (const f of UUID_FIELDS) {
+    if (o[f] === '' || (!preserveUndefined && o[f] === undefined)) o[f] = null;
+  }
+}
+
+function rejectPartnerSourceMutation(res) {
+  return res.status(400).json({
+    error: {
+      code: 'PARTNER_SOURCE_READ_ONLY',
+      message: 'Nguồn khách hàng không thể thay đổi từ hồ sơ khách hàng',
+    },
+  });
+}
+
+function sameNullableUuid(left, right) {
+  if (left == null || right == null) return left == null && right == null;
+  return String(left).toLowerCase() === String(right).toLowerCase();
 }
 
 function isCosmeticRequest(req) {
@@ -59,6 +75,9 @@ async function generateCustomerCode(q, prefix) {
 async function createPartner(req, res) {
   try {
     const q = getRequestQuery(req);
+    if (req.body.sourceid !== undefined && req.body.sourceid !== null && req.body.sourceid !== '') {
+      return rejectPartnerSourceMutation(res);
+    }
     sanitizeUuids(req.body);
     const {
       name,
@@ -207,11 +226,12 @@ async function updatePartner(req, res) {
   try {
     const q = getRequestQuery(req);
     const { id } = req.params;
-    sanitizeUuids(req.body);
+    const sourceWasSubmitted = Object.prototype.hasOwnProperty.call(req.body, 'sourceid')
+      && req.body.sourceid !== undefined;
+    sanitizeUuids(req.body, { preserveUndefined: true });
     const {
       name, phone, email, companyid, gender, birthday, birthmonth, birthyear,
       street, cityname, districtname, wardname, medicalhistory, note, comment,
-      sourceid,
       referraluserid, weight, identitynumber, healthinsurancecardnumber,
       emergencyphone, jobtitle, taxcode, unitname, unitaddress, isbusinessinvoice,
       personalname, personalidentitycard, personaltaxcode, personaladdress, ref,
@@ -220,12 +240,16 @@ async function updatePartner(req, res) {
 
     // Check if partner exists
     const existing = await q(
-      'SELECT id FROM partners WHERE id = $1 AND isdeleted = false',
+      'SELECT * FROM partners WHERE id = $1 AND isdeleted = false',
       [id]
     );
 
     if (!existing || existing.length === 0) {
       return res.status(404).json({ error: 'Partner not found' });
+    }
+
+    if (sourceWasSubmitted && !sameNullableUuid(req.body.sourceid, existing[0].sourceid ?? null)) {
+      return rejectPartnerSourceMutation(res);
     }
 
     // Check email uniqueness (case-insensitive) excluding this partner
@@ -252,7 +276,7 @@ async function updatePartner(req, res) {
 
     const fields = {
       name, phone, email, companyid, gender, birthday, birthmonth, birthyear,
-      street, medicalhistory, note, comment, sourceid, referraluserid,
+      street, medicalhistory, note, comment, referraluserid,
       cityname, districtname, wardname, weight, identitynumber,
       healthinsurancecardnumber, emergencyphone, jobtitle, taxcode,
       unitname, unitaddress, isbusinessinvoice, personalname,
@@ -268,6 +292,7 @@ async function updatePartner(req, res) {
     }
 
     if (updates.length === 0) {
+      if (sourceWasSubmitted) return res.json(existing[0]);
       return res.status(400).json({ error: 'No fields to update' });
     }
 

@@ -194,7 +194,7 @@ PaginatedResponse<{
 **Response 200:** `{ investorId: string, customerId: string, visible: boolean }`. `visible:true` upserts one row under the canonical key (the active `dbo.investor_accounts.id` when the FK is present, else `partners.id`). `visible:false` clears the customer under EVERY key in the scope union (`investor_id = ANY[partner_id, ...active account ids]`) so a removed client cannot remain visible to the investor. `investorId` is always the same-portal `partners.id`; on NK/NK2 live successor data the stored `dbo.investor_clients.investor_id` may be `dbo.investor_accounts.id` and is resolved server-side.
 
 #### PUT /api/Partners/:id
-**Body:** Partial partner fields. `ref` cannot be changed after creation (enforced by backend).
+**Body:** Partial partner fields. Omitted fields remain unchanged. For writable UUID fields, an explicitly submitted empty string is normalized to `null`, while an omitted field is not added to the update. `sourceid` is read-only on normal Partner mutations: clients must omit it; the backend ignores an explicitly repeated current UUID for compatibility (UUID letter case is not significant) and returns `400` with `PARTNER_SOURCE_READ_ONLY` for a changed or cleared value. `ref` cannot be changed after creation (enforced by backend).
 
 #### PATCH /api/Partners/:id/soft-delete
 **Effect:** Sets `isdeleted = true`. Requires `customers.delete`.
@@ -206,6 +206,8 @@ PaginatedResponse<{
 The API response keeps legacy employee flags (`isdoctor`, `isassistant`, `isreceptionist`) plus `jobtitle`/`hrjobname`. Frontend `Employee.roles` is a single derived role. Rows with `isassistant=true` and a title that normalizes to `tro ly`/`doctor assistant` MUST map to `doctor-assistant` before the generic `doctor` role, so migrated `Trợ lý bác sĩ` rows with both `isdoctor=true` and `isassistant=true` remain selectable in dental-aide staff fields.
 
 #### CustomerSources and SaleOrder source attribution
+
+Normal `POST /api/Partners` and `PUT /api/Partners/:id` do not assign or change `partners.sourceid`. Customer create rejects a non-null source with `400 PARTNER_SOURCE_READ_ONLY`; customer update rejects a changed or cleared source with the same code. Source attribution is owned by the order/service flow and controlled repair/import paths.
 
 `GET /api/CustomerSources` returns each lookup with numeric `customer_count` and `order_count`. `POST` and `PUT` return the same numeric count fields for their affected lookup. The optional `is_active=true` query limits selection lists to active sources. Settings may request all rows so inactive historical lookups remain visible for management and audit. Active-only selection surfaces must show no fallback IDs when the lookup request is empty or fails.
 

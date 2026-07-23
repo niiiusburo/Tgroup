@@ -138,3 +138,11 @@ Each entry:
 - **Fix:** Quarantine all five artifacts with non-executable `.sql.retired` extensions. Repair affected production records only from a verified earlier export or backup using an explicit order-level manifest and transaction; recreating lookup names alone cannot restore lost assignments. The explicitly confirmed first batch repaired exactly 43 orders; `SO-2026-5176` remains unchanged until separately confirmed.
 - **Prevention:** `customerSourceMigrationArchiveGuard.test.js` proves the retired files cannot be selected by top-level or recursive `*.sql` migration scans. Workbook comparisons must use an immutable row key such as order code plus customer reference, not only phone-level source sets. Production source repairs require a fresh backup, exact old-to-new manifest, rollback, and explicit confirmation. Inactive historical lookup selection/deletion is guarded by INV-024.
 - **Related:** INV-023, INV-024, UC-009, UC-013, WF-005, `product-map/domains/customers-partners.yaml`, `product-map/domains/reports-analytics.yaml`.
+
+## FM-20260723-02: Partial Customer Edit Clears Omitted UUID Fields
+
+- **Symptom:** Saving an unrelated customer edit can silently clear UUID-backed assignments, including `partners.sourceid`, even though the client omitted those fields. Reports that fall back to the customer source may then show a changed or blank attribution.
+- **Root Cause:** The shared UUID sanitizer converted both empty strings and `undefined` values to `null` before `updatePartner()` built its partial SQL. That added omitted UUID keys to the request body, so the dynamic update treated them as explicit clears.
+- **Fix:** Preserve `undefined` writable UUID fields on partner updates, keep explicit empty-string-to-`null` clearing for those writable fields, and make `partners.sourceid` read-only on normal Partner POST/PUT. The frontend no longer includes source in customer create/update payloads.
+- **Prevention:** `api/src/routes/partners/__tests__/mutationHandlers.test.js` proves source create/change/clear rejection, repeated-source compatibility, omitted-field preservation, and explicit clearing of a writable non-source UUID. `useCustomers.cskh.test.ts` proves frontend Partner payloads omit source.
+- **Related:** INV-023, INV-025, `PUT /api/Partners/:id`.

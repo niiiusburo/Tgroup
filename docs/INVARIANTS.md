@@ -111,6 +111,12 @@
 **Enforced by:** `ServiceForm`, transaction-scoped lookup locks in `getCustomerSourceSelectionError()` and CustomerSources update/delete, validated `ON DELETE RESTRICT` foreign keys from `partners.sourceid` and `saleorders.sourceid`, and the reference-aware `DELETE /api/CustomerSources/:id` guard. Covered by `dbTransaction.test.js`, `customerSourceIntegrity.test.js`, `customerSourceReferenceMigration.test.js`, and `useSettings.customer-sources.test.tsx`.
 **Cite when:** Changing customer-source selectors, source CRUD, sale-order create/update, or historical attribution handling.
 
+### INV-025 — Partial Partner Update Omission Safety
+**Rule:** `PUT /api/Partners/:id` MUST leave every omitted field unchanged. An explicitly submitted empty writable UUID string MAY clear that field by normalizing to `null`, but the handler MUST NOT materialize an omitted UUID field as `null`. `partners.sourceid` is read-only on normal Partner POST/PUT: create rejects non-null source input, update rejects changed or cleared source input, and an explicitly repeated current value is ignored for compatibility.
+**Rationale:** Customer forms submit partial edits. Treating absence as a clear operation can silently remove assignments such as `partners.sourceid`, changing customer attribution and report fallback values during an unrelated edit.
+**Enforced by:** `createPartner()` and `updatePartner()` return `PARTNER_SOURCE_READ_ONLY` at the normal mutation boundary; `updatePartner()` preserves undefined writable UUID fields before building its dynamic `UPDATE`. API tests cover source create/change/clear rejection, repeated-source compatibility, omitted-source preservation, and explicit empty-string clearing for a writable non-source UUID. `useCustomers` omits source from frontend create/update payloads.
+**Cite when:** Changing partner/customer update payloads, UUID normalization, or dynamic partner SQL updates.
+
 ---
 
 ## Integration Invariants
@@ -204,3 +210,4 @@
 | 2026-07-04 | INV-021..INV-022 | Added investor same-portal customer scope and live-commit deploy continuity invariants | codex/nk2-investor-same-portal-ship |
 | 2026-07-23 | INV-023 | Added historical customer-source attribution stability after the Q10 June report incident | codex/customer-source-incident-guard |
 | 2026-07-23 | INV-024 | Added inactive-source selection and reference-retention safeguards | codex/customer-source-incident-guard |
+| 2026-07-23 | INV-025 | Added omission-safe semantics for partial partner UUID updates | codex/partner-partial-update-fix |
