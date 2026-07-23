@@ -1,7 +1,8 @@
 const crypto = require('crypto');
-const { query } = require('../../db');
+const { withTransaction } = require('../../db');
 const { getVietnamToday, getVietnamYear } = require('../../lib/dateUtils');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
+const { getCustomerSourceSelectionError } = require('./customerSourceSelection');
 
 async function createSaleOrder(req, res) {
   try {
@@ -34,14 +35,24 @@ async function createSaleOrder(req, res) {
       return res.status(400).json({ error: 'quantity must be >= 0' });
     }
 
-    const id = crypto.randomUUID();
-    const name = productname || `Service ${getVietnamToday()}`;
-    const year = getVietnamYear();
-    const seqResult = await query(`SELECT nextval('dbo.saleorder_code_seq') AS seq`);
-    const seqNum = parseInt(seqResult[0]?.seq || '1', 10);
-    const code = `SO-${year}-${String(seqNum).padStart(4, '0')}`;
+    const outcome = await withTransaction(async (transactionQuery) => {
+      const sourceError = await getCustomerSourceSelectionError(
+        sourceid,
+        null,
+        transactionQuery,
+      );
+      if (sourceError) {
+        return { status: 400, body: sourceError };
+      }
 
-    await query(
+      const id = crypto.randomUUID();
+      const name = productname || `Service ${getVietnamToday()}`;
+      const year = getVietnamYear();
+      const seqResult = await transactionQuery(`SELECT nextval('dbo.saleorder_code_seq') AS seq`);
+      const seqNum = parseInt(seqResult[0]?.seq || '1', 10);
+      const code = `SO-${year}-${String(seqNum).padStart(4, '0')}`;
+
+      await transactionQuery(
       `INSERT INTO saleorders (
         id, name, code, partnerid, companyid, doctorid, assistantid, dentalaideid,
         quantity, unit, amounttotal, residual, totalpaid, state,
@@ -72,8 +83,8 @@ async function createSaleOrder(req, res) {
       ],
     );
 
-    if (productid) {
-      await query(
+      if (productid) {
+        await transactionQuery(
         `INSERT INTO saleorderlines (
           id, orderid, productid, productname, employeeid, assistantid,
           productuomqty, pricetotal, tooth_numbers, tooth_comment, isdeleted
@@ -91,11 +102,13 @@ async function createSaleOrder(req, res) {
           tooth_comment || null,
           false,
         ],
-      );
-    }
+        );
+      }
 
-    const rows = await fetchSaleOrderById(id);
-    return res.status(201).json(rows[0]);
+      const rows = await fetchSaleOrderById(id, transactionQuery);
+      return { status: 201, body: rows[0] };
+    });
+    return res.status(outcome.status).json(outcome.body);
   } catch (err) {
     console.error('Error creating sale order:', err);
     return res.status(500).json({

@@ -187,14 +187,14 @@ export function useRoleConfig() {
 
 // Default customer sources (fallback when API fails)
 const DEFAULT_CUSTOMER_SOURCES: readonly CustomerSource[] = [
-  { id: 'src-1', name: 'Sale Online', type: 'online', description: 'Khách đến từ kênh sale online', isActive: true, customerCount: 0 },
-  { id: 'src-2', name: 'Khách vãng lai', type: 'offline', description: 'Khách vãng lai', isActive: true, customerCount: 0 },
-  { id: 'src-3', name: 'Hotline', type: 'online', description: 'Khách từ hotline', isActive: true, customerCount: 0 },
-  { id: 'src-4', name: 'Khách cũ', type: 'referral', description: 'Khách cũ quay lại', isActive: true, customerCount: 0 },
-  { id: 'src-5', name: 'Khách hàng giới thiệu', type: 'referral', description: 'Khách do khách hàng giới thiệu', isActive: true, customerCount: 0 },
-  { id: 'src-6', name: 'Nội bộ giới thiệu', type: 'referral', description: 'Khách do nội bộ giới thiệu', isActive: true, customerCount: 0 },
-  { id: 'src-7', name: 'MKT1', type: 'online', description: 'Kênh marketing 1', isActive: true, customerCount: 0 },
-  { id: 'src-8', name: 'ĐNCB', type: 'offline', description: 'Đối tượng ngoài cơ sở bệnh', isActive: true, customerCount: 0 },
+  { id: 'src-1', name: 'Sale Online', type: 'online', description: 'Khách đến từ kênh sale online', isActive: true, customerCount: 0, orderCount: 0 },
+  { id: 'src-2', name: 'Khách vãng lai', type: 'offline', description: 'Khách vãng lai', isActive: true, customerCount: 0, orderCount: 0 },
+  { id: 'src-3', name: 'Hotline', type: 'online', description: 'Khách từ hotline', isActive: true, customerCount: 0, orderCount: 0 },
+  { id: 'src-4', name: 'Khách cũ', type: 'referral', description: 'Khách cũ quay lại', isActive: true, customerCount: 0, orderCount: 0 },
+  { id: 'src-5', name: 'Khách hàng giới thiệu', type: 'referral', description: 'Khách do khách hàng giới thiệu', isActive: true, customerCount: 0, orderCount: 0 },
+  { id: 'src-6', name: 'Nội bộ giới thiệu', type: 'referral', description: 'Khách do nội bộ giới thiệu', isActive: true, customerCount: 0, orderCount: 0 },
+  { id: 'src-7', name: 'MKT1', type: 'online', description: 'Kênh marketing 1', isActive: true, customerCount: 0, orderCount: 0 },
+  { id: 'src-8', name: 'ĐNCB', type: 'offline', description: 'Đối tượng ngoài cơ sở bệnh', isActive: true, customerCount: 0, orderCount: 0 },
 ];
 
 function mapApiSource(api: ApiCustomerSource): CustomerSource {
@@ -204,12 +204,18 @@ function mapApiSource(api: ApiCustomerSource): CustomerSource {
     type: api.type,
     description: api.description || '',
     isActive: api.is_active,
-    customerCount: api.customer_count,
+    customerCount: Number(api.customer_count) || 0,
+    orderCount: Number(api.order_count) || 0,
   };
 }
 
-export function useCustomerSources() {
-  const [sources, setSources] = useState<CustomerSource[]>([...DEFAULT_CUSTOMER_SOURCES]);
+export function useCustomerSources(options: {
+  activeOnly?: boolean;
+  preserveId?: string | null;
+} = {}) {
+  const activeOnly = options.activeOnly === true;
+  const preserveId = options.preserveId ?? null;
+  const [sources, setSources] = useState<CustomerSource[]>(activeOnly ? [] : [...DEFAULT_CUSTOMER_SOURCES]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<string>('all');
@@ -221,17 +227,19 @@ export function useCustomerSources() {
     try {
       const response = await fetchCustomerSources({
         type: typeFilter !== 'all' ? typeFilter : undefined,
+        is_active: activeOnly && !preserveId ? true : undefined,
       });
-      if (response.items.length > 0) {
-        setSources(response.items.map(mapApiSource));
-      }
+      const mapped = response.items.map(mapApiSource);
+      setSources(activeOnly
+        ? mapped.filter((source) => source.isActive || source.id === preserveId)
+        : mapped);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load sources');
-      // Keep defaults on error
+      if (activeOnly) setSources([]);
     } finally {
       setLoading(false);
     }
-  }, [typeFilter]);
+  }, [activeOnly, preserveId, typeFilter]);
 
   useEffect(() => {
     loadSources();
@@ -262,7 +270,7 @@ export function useCustomerSources() {
     }
   }
 
-  async function addSource(source: Omit<CustomerSource, 'id' | 'customerCount'>) {
+  async function addSource(source: Omit<CustomerSource, 'id' | 'customerCount' | 'orderCount'>) {
     try {
       const apiSource = await createCustomerSource({
         name: source.name,

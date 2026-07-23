@@ -25,6 +25,14 @@ jobs:
             echo "❌ Generated memory block leaked into authority docs."
             exit 1
           fi
+      - name: Install API test dependencies
+        run: npm ci --prefix api
+      - name: Prove retired customer-source rewrites are not runnable SQL
+        run: npm --prefix api test -- --runTestsByPath tests/customerSourceMigrationArchiveGuard.test.js tests/customerSourceReferenceMigration.test.js tests/customerSourceIntegrity.test.js tests/dbTransaction.test.js tests/q10CustomerSourceRepairGuard.test.js --runInBand
+      - name: Install website test dependencies
+        run: npm ci --prefix website
+      - name: Prove customer-source selection preserves history
+        run: npm --prefix website test -- src/hooks/useSettings.customer-sources.test.tsx src/hooks/useServices.payment-state.test.tsx
 
   # ============================================================
   # PR Title Validation

@@ -146,8 +146,8 @@ Client role mapping: `/api/Employees` still returns legacy boolean flags and tit
 | GET | `/` | Perm:`services.view` | `?offset, limit, search, customerId, companyId, date_from, date_to, state` | `PaginatedResponse<SaleOrder>` |
 | GET | `/lines` | Perm:`services.view` | `?partner_id` required, `offset, limit, sortField, sortOrder` | Customer service lines with payment/order metadata |
 | GET | `/:id` | Perm:`services.view` | — | Sale order detail |
-| POST | `/` | Perm:`customers.edit` | `{ partner_id, company_id, ... }` | Created sale order |
-| PATCH | `/:id` | Perm:`customers.edit` | Order fields; quantity, service, tooth, and price fields also sync to the primary rendered sale-order line | Updated sale order |
+| POST | `/` | Perm:`customers.edit` | `{ partnerid, companyid, sourceid?: active source UUID or null, ... }` | Created sale order; `400 CUSTOMER_SOURCE_NOT_SELECTABLE` for inactive/missing source |
+| PATCH | `/:id` | Perm:`customers.edit` | Order fields; quantity, service, tooth, and price fields also sync to the primary rendered sale-order line. Clients omit `sourceid` on unrelated edits; an explicitly submitted inactive source is allowed only when directly assigned to this same order. | Updated sale order; `400 CUSTOMER_SOURCE_NOT_SELECTABLE` for a new inactive/missing source |
 | PATCH | `/:id/state` | Perm:`customers.edit` | `{ new_state }` | State updated + audit log |
 
 ## Sale Order Lines (`/api/SaleOrderLines`)
@@ -209,11 +209,11 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/` | Auth | `?offset, limit, search` | `PaginatedResponse<Source>` |
-| GET | `/:id` | Auth | — | Source detail |
+| GET | `/` | Auth | `?type, is_active` | Source list with numeric `customer_count`, `order_count`, and aggregates |
+| GET | `/:id` | Auth | — | Source detail with numeric `customer_count`, `order_count` |
 | POST | `/` | Perm:`settings.edit` | `{ name, description, is_active }` | Created source |
-| PUT | `/:id` | Perm:`settings.edit` | Source fields | Updated source |
-| DELETE | `/:id` | Perm:`settings.edit` | — | Deleted source |
+| PUT | `/:id` | Perm:`settings.edit` | Source fields | Updated source with numeric `customer_count` and `order_count` |
+| DELETE | `/:id` | Perm:`settings.edit` | — | Deleted source, or `400 CUSTOMER_SOURCE_IN_USE` with customer/order counts while referenced |
 
 ## Companies / Locations (`/api/Companies`)
 

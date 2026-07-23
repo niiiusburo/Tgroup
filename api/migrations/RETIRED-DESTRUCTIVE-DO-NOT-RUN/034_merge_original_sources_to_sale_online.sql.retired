@@ -1,3 +1,4 @@
+-- RETIRED: destructive customer and sale-order source rewrite; never execute.
 -- Migration: Merge original pre-031 customer source names into Sale Online
 -- For databases where 031_update_customer_sources.sql was never applied.
 -- Replaces: Google, Khác, Bảo hiểm, Facebook, Giới thiệu, Đi ngang qua, Website

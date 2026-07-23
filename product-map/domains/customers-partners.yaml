@@ -64,6 +64,9 @@ ui_surfaces:
   - AddCustomerForm modal
 ui_invariants:
   - Customer source (`sourceid` / `sourcename`, label `Nguồn khách hàng`) is stored for migration/reporting compatibility but must not appear in the customer profile assignment card or the customer profile add/edit form.
+  - CustomerSources list responses expose numeric `customer_count` and `order_count`; settings retain inactive rows for audit and must not offer deletion while either count is nonzero.
+  - "`DELETE /api/CustomerSources/:id` counts references in both `dbo.partners.sourceid` and `dbo.saleorders.sourceid` and returns `CUSTOMER_SOURCE_IN_USE` instead of deleting referenced history."
+  - Customer-source update/delete and sale-order source selection lock the lookup row inside one transaction; validated `ON DELETE RESTRICT` foreign keys retain lookup rows referenced by customers or orders.
   - Customer list search must resolve customers by migrated customer ref, appointment number (`appointments.name`), and service/treatment order number (`saleorders.code` / `saleorders.name`).
   - Lightweight customer resolution uses `GET /api/Partners/resolve?key=` for UUID/ref/phone lookup and returns 404/409 payloads for no-match or ambiguous-match picker flows.
   - Customer-facing searches must be accent-insensitive for Vietnamese names so staff can type without diacritics.
@@ -98,5 +101,9 @@ impact_tests:
   - api/src/routes/partners/__tests__/searchFilters.test.js
   - api/tests/investorIdorScoping.test.js
   - api/tests/investorScopeRoutePermissions.test.js
+  - api/tests/customerSourceIntegrity.test.js
+  - api/tests/customerSourceReferenceMigration.test.js
+  - api/tests/dbTransaction.test.js
+  - website/src/hooks/useSettings.customer-sources.test.tsx
   - website/src/__tests__/customer-deep-link.test.tsx
 risk_level: high

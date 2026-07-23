@@ -1,3 +1,4 @@
+-- RETIRED: historical customer-source rewrite; forensic reference only, never execute.
 -- Migration: Update customer sources to new business-defined list
 -- Replaces old source names with the new dropdown options
 

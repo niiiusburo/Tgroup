@@ -23,6 +23,7 @@
 | v1.0.7 | 2026-07-03 | Employee client role mapping clarified: `Trợ lý bác sĩ` assistant rows map to `doctor-assistant` before generic doctor, even when migrated data also has `isdoctor=true`. |
 | v1.0.8 | 2026-07-04 | Investor users are restricted normal-portal staff sessions: `/api/Auth/login` may authenticate `dbo.investor_accounts`, but all data access stays on existing portal routes and is scoped by `dbo.investor_clients`. |
 | v1.0.9 | 2026-07-08 | Investor visibility admin controls (`GET`/`PATCH /api/Partners/investor-visibility`) are gated by admin group (`assertAdmin`) instead of `permissions.edit`, and admin list/toggle match `dbo.investor_clients` by the SAME scope union (`investor_id` = the investor's `partners.id` OR any active `dbo.investor_accounts.id`) that scopes the investor read. Customer id is validated with the canonical 8-4-4-4-12 UUID pattern. |
+| v1.0.10 | 2026-07-23 | Customer-source usage counts and deletion guards include both customer and sale-order references; new sale orders reject inactive/missing sources while an existing order may preserve its already-assigned inactive historical source. |
 
 ---
 
@@ -203,6 +204,14 @@ PaginatedResponse<{
 
 #### Frontend Employee role mapping
 The API response keeps legacy employee flags (`isdoctor`, `isassistant`, `isreceptionist`) plus `jobtitle`/`hrjobname`. Frontend `Employee.roles` is a single derived role. Rows with `isassistant=true` and a title that normalizes to `tro ly`/`doctor assistant` MUST map to `doctor-assistant` before the generic `doctor` role, so migrated `Trợ lý bác sĩ` rows with both `isdoctor=true` and `isassistant=true` remain selectable in dental-aide staff fields.
+
+#### CustomerSources and SaleOrder source attribution
+
+`GET /api/CustomerSources` returns each lookup with numeric `customer_count` and `order_count`. `POST` and `PUT` return the same numeric count fields for their affected lookup. The optional `is_active=true` query limits selection lists to active sources. Settings may request all rows so inactive historical lookups remain visible for management and audit. Active-only selection surfaces must show no fallback IDs when the lookup request is empty or fails.
+
+`DELETE /api/CustomerSources/:id` returns `400` with `{ code: "CUSTOMER_SOURCE_IN_USE", customerCount, orderCount }` when either `dbo.partners.sourceid` or `dbo.saleorders.sourceid` still references the lookup. A missing unreferenced source returns `404`. Update/delete locks the lookup row for the transaction, and database foreign keys use `ON DELETE RESTRICT` as the final referential guard.
+
+`POST /api/SaleOrders` and `PATCH /api/SaleOrders/:id` accept `sourceid?: string | null`. A non-null source must exist and be active, otherwise the API returns `400` with `{ code: "CUSTOMER_SOURCE_NOT_SELECTABLE" }`. An edit client must omit `sourceid` when the user did not change the displayed effective source, because that value can be inherited from `partners.sourceid`; the PATCH route then leaves the order-level value unchanged. When explicitly submitted, PATCH may preserve an inactive source only when that exact source is already assigned directly to that same non-deleted order; it may not assign the inactive source to another order. Validation takes a transaction-scoped share lock on the lookup (conflicting with settings updates/deletes), and sale-order/line writes commit or roll back together.
 
 ---
 

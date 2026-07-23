@@ -1,3 +1,4 @@
+-- RETIRED: destructive customer and sale-order source rewrite; never execute.
 -- Migration: Merge all listed customer sources into "Sale Online"
 -- Replaces: Khách vãng lai, Hotline, Khách cũ, Khách hàng giới thiệu,
 --           Nội bộ giới thiệu, MKT1, ĐNCB

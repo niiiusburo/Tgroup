@@ -1,3 +1,4 @@
+-- RETIRED: paired recovery attempt for the destructive source rewrite; never execute.
 -- Migration: Restore full list of customer sources
 -- Ensures all 8 business-defined sources exist
 

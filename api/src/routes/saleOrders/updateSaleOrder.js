@@ -1,7 +1,8 @@
 const crypto = require('crypto');
-const { query } = require('../../db');
+const { query, withTransaction } = require('../../db');
 const { calculateSaleOrderPaymentStateFromAllocations } = require('../../lib/saleOrderTotals');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
+const { getCustomerSourceSelectionError } = require('./customerSourceSelection');
 
 async function updateSaleOrder(req, res) {
   try {
@@ -32,11 +33,21 @@ async function updateSaleOrder(req, res) {
       return res.status(400).json({ error: 'quantity must be >= 0' });
     }
 
-    const paymentState = amounttotal !== undefined
-      ? await calculateSaleOrderPaymentStateFromAllocations(query, id, amounttotal)
-      : null;
+    const outcome = await withTransaction(async (transactionQuery) => {
+      const sourceError = await getCustomerSourceSelectionError(
+        sourceid,
+        id,
+        transactionQuery,
+      );
+      if (sourceError) {
+        return { status: 400, body: sourceError };
+      }
 
-    const fields = [
+      const paymentState = amounttotal !== undefined
+        ? await calculateSaleOrderPaymentStateFromAllocations(transactionQuery, id, amounttotal)
+        : null;
+
+      const fields = [
       { key: 'partnerid', val: partnerid },
       { key: 'companyid', val: companyid },
       { key: 'doctorid', val: doctorid },
@@ -49,36 +60,38 @@ async function updateSaleOrder(req, res) {
       { key: 'notes', val: notes },
       { key: 'sourceid', val: sourceid },
     ];
-    if (paymentState) {
-      fields.push(
+      if (paymentState) {
+        fields.push(
         { key: 'amounttotal', val: paymentState.amountTotal },
         { key: 'totalpaid', val: paymentState.totalPaid },
         { key: 'residual', val: paymentState.residual },
-      );
-    }
+        );
+      }
 
-    const updatedOrder = await updateSaleOrderFields(id, fields);
-    if (!updatedOrder && !hasLineUpdate(req.body)) {
-      return res.status(400).json({ error: 'No fields to update' });
-    }
-    if (updatedOrder === null) {
-      return res.status(404).json({ error: 'Sale order not found' });
-    }
+      const updatedOrder = await updateSaleOrderFields(id, fields, transactionQuery);
+      if (!updatedOrder && !hasLineUpdate(req.body)) {
+        return { status: 400, body: { error: 'No fields to update' } };
+      }
+      if (updatedOrder === null) {
+        return { status: 404, body: { error: 'Sale order not found' } };
+      }
 
-    await updatePrimarySaleOrderLine(id, {
-      productid,
-      productname,
-      doctorid,
-      assistantid,
-      quantity,
-      amounttotal,
-      tooth_numbers,
-      tooth_comment,
-      paymentState,
+      await updatePrimarySaleOrderLine(id, {
+        productid,
+        productname,
+        doctorid,
+        assistantid,
+        quantity,
+        amounttotal,
+        tooth_numbers,
+        tooth_comment,
+        paymentState,
+      }, transactionQuery);
+
+      const rows = await fetchSaleOrderById(id, transactionQuery);
+      return { status: 200, body: rows[0] };
     });
-
-    const rows = await fetchSaleOrderById(id);
-    return res.json(rows[0]);
+    return res.status(outcome.status).json(outcome.body);
   } catch (err) {
     console.error('Error updating sale order:', err);
     return res.status(500).json({
@@ -87,7 +100,7 @@ async function updateSaleOrder(req, res) {
   }
 }
 
-async function updateSaleOrderFields(id, fields) {
+async function updateSaleOrderFields(id, fields, queryFn = query) {
   const sets = [];
   const values = [];
   let paramIdx = 1;
@@ -102,7 +115,7 @@ async function updateSaleOrderFields(id, fields) {
 
   if (sets.length === 0) return undefined;
   values.push(id);
-  const rows = await query(
+  const rows = await queryFn(
     `UPDATE saleorders SET ${sets.join(', ')} WHERE id = $${paramIdx} AND isdeleted = false RETURNING *`,
     values,
   );
@@ -122,22 +135,22 @@ function hasLineUpdate(body) {
   );
 }
 
-async function updatePrimarySaleOrderLine(orderId, fields) {
+async function updatePrimarySaleOrderLine(orderId, fields, queryFn = query) {
   if (!hasLineUpdate(fields)) return;
 
-  const existingLine = await query(
+  const existingLine = await queryFn(
     `SELECT id, productid FROM saleorderlines WHERE orderid = $1 AND isdeleted = false LIMIT 1`,
     [orderId],
   );
 
   if (existingLine && existingLine.length > 0) {
-    await updateExistingLine(existingLine[0].id, fields);
+    await updateExistingLine(existingLine[0].id, fields, queryFn);
   } else if (fields.productid) {
-    await insertPrimaryLine(orderId, fields);
+    await insertPrimaryLine(orderId, fields, queryFn);
   }
 }
 
-async function updateExistingLine(lineId, fields) {
+async function updateExistingLine(lineId, fields, queryFn = query) {
   const lineSets = [];
   const lineValues = [];
   let lineIdx = 1;
@@ -191,12 +204,12 @@ async function updateExistingLine(lineId, fields) {
 
   if (lineSets.length === 0) return;
   lineValues.push(lineId);
-  await query(`UPDATE saleorderlines SET ${lineSets.join(', ')} WHERE id = $${lineIdx}`, lineValues);
+  await queryFn(`UPDATE saleorderlines SET ${lineSets.join(', ')} WHERE id = $${lineIdx}`, lineValues);
 }
 
-async function insertPrimaryLine(orderId, fields) {
+async function insertPrimaryLine(orderId, fields, queryFn = query) {
   const lineId = crypto.randomUUID();
-  await query(
+  await queryFn(
     `INSERT INTO saleorderlines (
       id, orderid, productid, productname, employeeid, assistantid,
       productuomqty, pricetotal, tooth_numbers, tooth_comment, isdeleted

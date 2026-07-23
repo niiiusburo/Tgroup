@@ -188,3 +188,24 @@ Execution items:
 - [x] PASS: NK2-only API deploy updates `tgroup-staging-api` without changing NK or NK3 - rebuilt only `/opt/tgroup-staging/runtime` API service after backing up the original builder to `/opt/tgroup-staging/backups/nk2-employee-export-scope/reportSalesEmployeesExport.js.pre-20260704T035337Z`.
 - [x] PASS: Live NK2 API proof shows `companyId=all` workbook branches are limited to the employee's allowed location - local artifact `output/proof/location-report-scope-20260704/nk2-live-api-proof-after.json` shows XLSX branch list `["Tấm Dentist Quận 3"]` and `branchViolations: []`.
 - [x] PASS: Live NK2 negative-path proof returns `403 EXPORT_LOCATION_DENIED` for another branch - local artifact `output/proof/location-report-scope-20260704/nk2-live-api-proof-after.json` shows requested branch `Nha khoa Tấm Dentist` returned 403 with code `EXPORT_LOCATION_DENIED`.
+
+---
+
+# TestSprite Plan: customer-source migration incident guard 2026-07-23
+
+Feature/edit name: Historical `Nguồn khách` attribution recurrence guard.
+
+Changed data flow: five destructive customer-source history files remain available for forensics but use `.sql.retired`, so neither top-level nor recursive `*.sql` selection can execute them. Customer-source lists now expose customer/order usage counts; new sale orders reject inactive/missing sources; an existing order can preserve only its exact inactive historical source; referenced lookups cannot be deleted.
+
+Expected behavior:
+- [x] PASS: Focused Jest proves all five destructive basenames are absent from active migrations.
+- [x] PASS: Focused Jest proves each forensic artifact exists with an explicit `RETIRED` warning and non-executable extension.
+- [x] PASS: Focused Jest simulates recursive `*.sql` discovery and selects no file from the quarantine directory. The combined migration, revenue-export, and import run passed 24/24 tests.
+- [ ] PENDING REMOTE: The PR documentation-governance job now runs the focused customer-source migration guard; GitHub execution awaits a pushed PR.
+- [x] PASS PRODUCTION: After the exact user confirmation, the 43-order Q10 transaction committed in `tdental_demo`. PostgreSQL transaction `276262` wrote exactly 43 `saleorders`, 0 `partners`, 0 `payments`, 1 `customersources`, 43 repair-audit rows, and 1 metadata row; post-checks found zero target mismatches.
+- [x] PASS REHEARSAL: Restored the verified production backup into disposable PostgreSQL 16 databases. Both apply and rollback refused missing confirmation tokens; the authorized apply changed exactly 43 orders to 21 `Giới thiệu`, 16 `Khách cũ`, 4 `Khách hàng giới thiệu`, and 2 `Hotline`; the authorized rollback restored 41 `Sale Online` and 2 `Khách hàng giới thiệu`. Deterministic full-row SHA-256 comparisons against a second clean restore matched for all 39,938 partners, 78,136 payments, 68,268 sale orders, and 11 customer-source rows after rollback.
+- [x] PASS LOCAL: API regression coverage rejects inactive/missing sources, preserves an already-assigned inactive source on the same order, counts sale-order references, and blocks referenced-source deletion. Frontend coverage verifies active-only choices, selected historical preservation, and numeric count mapping.
+- [x] PASS LOCAL RACE/DB GUARD: Sale-order writes and source management use transaction-scoped lookup locks; migration 050 adds validated `ON DELETE RESTRICT` foreign keys. Applying the migration twice to a disposable restore passed, and both referenced-source deletion and orphan-source assignment failed as required.
+- [ ] PENDING FRESH CONFIRMATION: Strict row-key comparison found one additional mismatch, `SO-2026-5176` (`T478964`, `Khách cũ` → `Sale Online`), outside the confirmed manifest. It remains unmodified.
+
+Negative paths: renaming any retired artifact back to `.sql` makes the migration guard fail; submitting an inactive/missing source returns `400 CUSTOMER_SOURCE_NOT_SELECTABLE`; deleting a source referenced by any customer or order returns `400 CUSTOMER_SOURCE_IN_USE`; the checked-in 43-order manifest test explicitly excludes unconfirmed `SO-2026-5176`.

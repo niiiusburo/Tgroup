@@ -47,6 +47,7 @@ export interface CreateServiceInput {
   readonly toothNumbers: readonly string[];
   readonly toothComment?: string;
   readonly sourceId?: string | null;
+  readonly sourceChanged?: boolean;
 }
 
 interface UseServicesOptions {
@@ -194,7 +195,7 @@ export function useServices(selectedLocationId?: string, partnerId?: string, opt
    */
   const updateServiceRecord = useCallback(async (input: CreateServiceInput) => {
     if (!input.id) throw new Error('Missing service record id');
-    const apiPayload = {
+    const apiPayload: Parameters<typeof updateSaleOrder>[1] = {
       partnerid: input.customerId,
       partnername: input.customerName,
       companyid: input.locationId,
@@ -212,8 +213,8 @@ export function useServices(selectedLocationId?: string, partnerId?: string, opt
       notes: input.notes,
       tooth_numbers: input.toothNumbers?.join(',') || null,
       tooth_comment: input.toothComment || null,
-      sourceid: input.sourceId ?? null,
     };
+    if (input.sourceChanged === true) apiPayload.sourceid = input.sourceId ?? null;
 
     const updated = await updateSaleOrder(input.id, apiPayload);
     const mapped = mapSaleOrderToServiceRecord(updated);

@@ -82,7 +82,14 @@ graph TD
 - **Upstream:** `pg` (npm), `dotenv`
 - **Downstream:** EVERY API route file, service, and middleware that queries the database.
 - **Blast radius:** **All API routes + all frontend surfaces that consume them.**
-- **Change rules:** Must not alter `query()` signature without updating all consumers. Date parser (OID 1082) is a global behavior change.
+- **Change rules:** Must not alter `query()` or `withTransaction()` signatures without updating all consumers. Date parser (OID 1082) is a global behavior change. Transaction helpers must keep commit and rollback behavior atomic for route handlers that write multiple related rows.
+
+### `api/src/routes/saleOrders/customerSourceSelection.js`
+- **Layer:** 3
+- **Upstream:** `api/src/db.js`, `dbo.customersources`, `dbo.saleorders`
+- **Downstream:** `api/src/routes/saleOrders/createSaleOrder.js`, `api/src/routes/saleOrders/updateSaleOrder.js`, frontend service/order source selectors through `/api/SaleOrders`.
+- **Blast radius:** **Service/order creation and edits, historical source attribution, source-based reports, and customer-source settings deletion safety.**
+- **Change rules:** Must preserve INV-023 and INV-024. New or changed order attribution may only use active customer sources; an inactive source can be preserved only when it is already assigned directly to the same non-deleted order. Lookup validation must stay transaction-scoped so settings updates/deletes cannot race sale-order writes.
 
 ### `api/src/middleware/auth.js`
 - **Layer:** 3

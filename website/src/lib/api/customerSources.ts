@@ -9,6 +9,7 @@ export interface ApiCustomerSource {
   description: string;
   is_active: boolean;
   customer_count: number;
+  order_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -56,4 +57,3 @@ export function updateCustomerSource(id: string, data: Partial<{
 export function deleteCustomerSource(id: string) {
   return apiFetch<void>(`/CustomerSources/${id}`, { method: 'DELETE' });
 }
-

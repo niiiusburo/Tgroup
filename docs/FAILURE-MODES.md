@@ -128,3 +128,13 @@ Each entry:
 2. Fill all five fields (Symptom, Root Cause, Fix, Prevention, Related).
 3. Append to this file. Never delete or rewrite existing entries.
 4. If the failure mode reveals a new invariant, add it to `INVARIANTS.md` (append-only).
+
+---
+
+## FM-20260723-01: Historical Customer Sources Collapse Into Sale Online
+
+- **Symptom:** Re-exporting a closed reporting period changes the `Nguồn khách` value for untouched visits. Strict Q10 June row-key comparison ultimately found 44 service/order rows across 31 customers changing among `Giới thiệu`, `Khách cũ`, `Khách hàng giới thiệu`, `Hotline`, and `Sale Online`; the first phone/source-set comparison surfaced 43 rows across 30 customers and masked `SO-2026-5176` because that customer still had a mixed source set in both workbooks.
+- **Root Cause:** The directly proven failure is corrupted persisted order-level source attribution, not an Excel formula or report-rendering calculation: before repair, production `saleorders.sourceid` disagreed with the earlier closed-period export, and every confirmed target appeared in the July 7 merge audit. Historical migrations 031/033/034/035/036 contain the matching causal mechanism—SQL designed to rename, rewrite, delete, and partially recreate source data, including broad `partners.sourceid` and `saleorders.sourceid` rewrites in 033/034. This strongly implicates the executed source-merge workflow, while the retained evidence does not isolate one historical migration execution as the sole cause of every affected row.
+- **Fix:** Quarantine all five artifacts with non-executable `.sql.retired` extensions. Repair affected production records only from a verified earlier export or backup using an explicit order-level manifest and transaction; recreating lookup names alone cannot restore lost assignments. The explicitly confirmed first batch repaired exactly 43 orders; `SO-2026-5176` remains unchanged until separately confirmed.
+- **Prevention:** `customerSourceMigrationArchiveGuard.test.js` proves the retired files cannot be selected by top-level or recursive `*.sql` migration scans. Workbook comparisons must use an immutable row key such as order code plus customer reference, not only phone-level source sets. Production source repairs require a fresh backup, exact old-to-new manifest, rollback, and explicit confirmation. Inactive historical lookup selection/deletion is guarded by INV-024.
+- **Related:** INV-023, INV-024, UC-009, UC-013, WF-005, `product-map/domains/customers-partners.yaml`, `product-map/domains/reports-analytics.yaml`.

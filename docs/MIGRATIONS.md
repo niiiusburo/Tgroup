@@ -17,8 +17,8 @@
 
 Current inventory from disk:
 
-- **Canonical directory:** `api/migrations/` — 55 SQL files. This directory contains the `schema_migrations` installer and the full numbered application history used by the root runbook loop.
-- **Supplemental directory:** `api/src/db/migrations/` — 2 SQL files. These are straggler migrations (`payment_category`, customer face embeddings) that should be consolidated into the canonical migration path or explicitly promoted by a future runbook decision.
+- **Canonical directory:** `api/migrations/` — 51 runnable root SQL files. Five customer-source incident artifacts remain under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` with non-executable `.sql.retired` extensions.
+- **Supplemental directory:** `api/src/db/migrations/` — 5 SQL files. These are straggler migrations (`payment_category`, customer face embeddings, payment-proof confirmation/permission/UUID changes) that should be consolidated into the canonical migration path or explicitly promoted by a future runbook decision.
 - **Runbook status:** `docs/RUNBOOK.md` and `docs/runbooks/DEPLOYMENT.md` both use `api/migrations/*.sql` as the canonical deploy loop. Supplemental files under `api/src/db/migrations/` are not covered by that loop unless explicitly run or consolidated.
 
 | # | File | Description | Up | Down / Rollback | Applied On |
@@ -58,12 +58,12 @@ Current inventory from disk:
 | 028 | `028_lock_super_admin_permissions.sql` | Ensures super admin wildcard/system permissions | Permission seed updates | Delete seeded rows only after replacement role exists | 2026-04 |
 | 030 | `030_rename_permission_groups.sql` | Renames built-in permission groups | Data update | Rename groups back from backup/list | 2026-04 |
 | 031 | `031_assign_default_tiers.sql` | Assigns default permission tiers to employees | Permission assignment insert/update | Remove inserted assignments if needed | 2026-04 |
-| 031 | `031_update_customer_sources.sql` | Updates customer source values | Source data update | Restore source rows from backup | 2026-04 |
+| 031 | `RETIRED-DESTRUCTIVE-DO-NOT-RUN/031_update_customer_sources.sql.retired` | **Retired incident artifact:** renamed historical customer-source labels | Not runnable (`.sql.retired`) | Record-level restore from a verified pre-incident source only | 2026-04; quarantined 2026-07 |
 | 032 | `032_add_sourceid_to_saleorders.sql` | Adds source tracking to sale orders | `ALTER TABLE saleorders ADD sourceid` | Drop `saleorders.sourceid` | 2026-04 |
-| 033 | `033_merge_customer_sources_to_sale_online.sql` | Merges customer sources into Sale Online source | Source seed/update | Restore sources from backup | 2026-04 |
-| 034 | `034_merge_original_sources_to_sale_online.sql` | Consolidates original source values into Sale Online | Source data update | Restore original source mapping from backup | 2026-04 |
-| 035 | `035_restore_customer_sources.sql` | Restores customer source rows | Source seed insert | Delete restored rows if duplicate/bad | 2026-04 |
-| 036 | `036_remove_original_customer_source_duplicates.sql` | Removes duplicate original source rows | Source data cleanup | Restore deleted rows from backup | 2026-04 |
+| 033 | `RETIRED-DESTRUCTIVE-DO-NOT-RUN/033_merge_customer_sources_to_sale_online.sql.retired` | **Retired incident artifact:** flattened customer and sale-order sources into Sale Online | Not runnable (`.sql.retired`) | Record-level restore from a verified pre-incident source only | 2026-04; quarantined 2026-07 |
+| 034 | `RETIRED-DESTRUCTIVE-DO-NOT-RUN/034_merge_original_sources_to_sale_online.sql.retired` | **Retired incident artifact:** flattened original source labels into Sale Online | Not runnable (`.sql.retired`) | Record-level restore from a verified pre-incident source only | 2026-04; quarantined 2026-07 |
+| 035 | `RETIRED-DESTRUCTIVE-DO-NOT-RUN/035_restore_customer_sources.sql.retired` | **Retired incident artifact:** recreated lookup rows without restoring record assignments | Not runnable (`.sql.retired`) | Use only as forensic history | 2026-04; quarantined 2026-07 |
+| 036 | `RETIRED-DESTRUCTIVE-DO-NOT-RUN/036_remove_original_customer_source_duplicates.sql.retired` | **Retired incident artifact:** deleted original customer-source lookup rows | Not runnable (`.sql.retired`) | Record-level restore from a verified pre-incident source only | 2026-04; quarantined 2026-07 |
 | 037 | `037_ip_access_control.sql` | Creates global IP access mode and allow/block entries | `CREATE TABLE ip_access_settings`, `ip_access_entries` | Drop entries then settings | 2026-04 |
 | 037 | `037_version_events.sql` | Creates frontend version telemetry table | `CREATE TABLE version_events` + indexes | Drop `version_events` | 2026-04 |
 | 038 | `038_add_accountinvoices_table.sql` | Creates account invoice table for DotKham joins | `CREATE TABLE accountinvoices` | Drop `accountinvoices` | 2026-04 |
@@ -78,8 +78,9 @@ Current inventory from disk:
 | 046 | `046_split_payment_and_hoso_permissions.sql` | Splits payment and treatment-record permission strings | Permission seed inserts | Delete seeded split permissions after replacement mapping | 2026-05 |
 | 048 | `048_investor_customer_scope.sql` | Creates/normalizes investor customer allowlist and seeds read/export-only investor permission group | `CREATE TABLE dbo.investor_clients`; add live-compatible `lob`, `marked_by_partner_id`, `marked_at`, `datecreated`, `lastupdated`; seed `investor` group permissions using case-insensitive group lookup | Drop `dbo.investor_clients` only after removing investor access; delete seeded permissions if replacing group | 2026-07 |
 | 049 | `049_investor_accounts_nk2_credentials.sql` | Adds/normalizes same-portal investor credential records linked to `dbo.partners` | `CREATE TABLE dbo.investor_accounts`; normalize older `is_active`, `created_at`, `updated_at` into `active`, `datecreated`, `lastupdated` | Drop `dbo.investor_accounts` after disabling investor login fallback | 2026-07 |
+| 050 | `050_add_customer_source_foreign_keys.sql` | Retains customer/order attribution lookup rows with validated source foreign keys | Add idempotent `partners.sourceid` and `saleorders.sourceid` → `customersources.id` FKs with `ON DELETE RESTRICT`; live preflight found zero orphans | Drop the two named constraints only if a replacement retention guard exists | Pending normal PR/merge/deploy |
 
-**Total canonical migrations:** 55 files in `api/migrations/`.
+**Total canonical migrations:** 51 runnable `.sql` files in the root of `api/migrations/`. Five customer-source rewrite artifacts are quarantined with `.sql.retired` extensions under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` and are not part of the runnable count.
 
 ## Supplemental Migration Files
 

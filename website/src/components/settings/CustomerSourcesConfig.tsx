@@ -173,8 +173,8 @@ export function CustomerSourcesConfig() {
               <p className="text-xs text-gray-500 mt-0.5">{source.description}</p>
             </div>
             <div className="text-right shrink-0">
-              <div className="text-sm font-semibold text-gray-900">{source.customerCount}</div>
-              <div className="text-xs text-gray-500">customers</div>
+              <div className="text-sm font-semibold text-gray-900">{source.customerCount} / {source.orderCount}</div>
+              <div className="text-xs text-gray-500">{t('customerSourcesConfig.customersOrders', { ns: 'settings' })}</div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <button
@@ -188,7 +188,7 @@ export function CustomerSourcesConfig() {
                   <ToggleLeft className="w-6 h-6 text-gray-400" />
                 )}
               </button>
-              {source.customerCount === 0 && (
+              {source.customerCount === 0 && source.orderCount === 0 && (
                 <button
                   type="button"
                   onClick={() => removeSource(source.id)}
