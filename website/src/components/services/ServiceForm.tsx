@@ -47,6 +47,8 @@ import type { CreateServiceInput } from '@/hooks/useServices';
 import type { Employee } from '@/types/employee';
 import type { Product } from '@/hooks/useProducts';
 import type { AppointmentType } from '@/constants';
+import { evaluateSourceLock, sourceLockMessage } from '@/lib/saleOrderSourceLock';
+import { ServiceSourceField } from './ServiceSourceField';
 
 interface Location {
   id: string;
@@ -63,7 +65,10 @@ interface ServiceFormProps {
   readonly customerId?: string | null;
   readonly onSubmit: (data: CreateServiceInput) => void;
   readonly onClose: () => void;
-  readonly initialData?: Partial<CreateServiceInput>;
+  readonly initialData?: Partial<CreateServiceInput> & {
+    readonly paidAmount?: number;
+    readonly createdAt?: string;
+  };
   readonly isEdit?: boolean;
 }
 
@@ -102,6 +107,16 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
   const { allSources } = useCustomerSources({ activeOnly: true, preserveId: initialData?.sourceId });
+  const sourceLock = useMemo(
+    () => (isEdit
+      ? evaluateSourceLock({
+          paidAmount: initialData?.paidAmount ?? 0,
+          attributionDate: initialData?.startDate || initialData?.createdAt || null,
+        })
+      : { locked: false, reasons: [], openPeriodStart: '' }),
+    [isEdit, initialData?.paidAmount, initialData?.startDate, initialData?.createdAt],
+  );
+  const sourceLockHint = sourceLockMessage(sourceLock);
 
   useEffect(() => {
     if (initialData) {
@@ -259,7 +274,17 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
         sourceId, sourceChanged: Boolean(initialData?.id && sourceId !== (initialData.sourceId ?? null))
       });
     } catch (error) {
-      setErrors((prev) => ({ ...prev, submit: error instanceof Error ? error.message : t('formErrors.saveFailed', 'Lưu thất bại') }));
+      const apiCode = typeof error === 'object' && error && 'code' in error
+        ? String((error as { code?: string }).code || '')
+        : '';
+      const raw = error instanceof Error ? error.message : t('formErrors.saveFailed', 'Lưu thất bại');
+      const locked = apiCode === 'SOURCE_IMMUTABLE'
+        || /SOURCE_IMMUTABLE|source is immutable|closed reporting period|payment activity/i.test(raw);
+      setErrors((prev) => ({
+        ...prev,
+        submit: locked ? sourceLockHint || raw : raw,
+        ...(locked ? { source: sourceLockHint || raw } : {}),
+      }));
     } finally {
       setIsSaving(false);
     }
@@ -286,32 +311,13 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
             </div>
           )}
 
-          {/* Nguồn khách hàng */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-              <FileText className="w-3.5 h-3.5" />
-              Nguồn khách hàng
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {allSources.map((s) => {
-                const isSelected = sourceId === s.id;
-                return (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => setSourceId(isSelected ? null : s.id)}
-                    className={`
-                      px-3 py-1.5 rounded-full text-sm font-medium transition-all border
-                      ${isSelected ?
-                        'bg-orange-500 text-white border-orange-500 shadow-sm' :
-                        'bg-white text-gray-700 border-gray-200 hover:border-orange-300 hover:text-orange-600'}
-                    `}
-                  >
-                    {s.name}
-                  </button>);
-              })}
-            </div>
-          </div>
+          <ServiceSourceField
+            sources={allSources}
+            sourceId={sourceId}
+            onChange={setSourceId}
+            lock={sourceLock}
+            error={errors.source}
+          />
 
           {/* Dịch vụ */}
           <div>

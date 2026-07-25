@@ -89,7 +89,18 @@ describe('customer source selection integrity', () => {
     ['inactive', [{ is_active: false, already_selected: false }]],
     ['missing', []],
   ])('blocks changing an existing order to an %s source', async (_label, rows) => {
-    query.mockResolvedValueOnce(rows);
+    // INV-026 lock probe runs before source selectability check.
+    query
+      .mockResolvedValueOnce([{
+        id: 'order-id',
+        order_sourceid: 'current-source',
+        totalpaid: 0,
+        datestart: '2026-07-10',
+        datecreated: '2026-07-10',
+        isdeleted: false,
+      }])
+      .mockResolvedValueOnce([{ totalpaid: 0 }])
+      .mockResolvedValueOnce(rows);
     const res = responseDouble();
 
     await updateSaleOrder(
@@ -101,7 +112,7 @@ describe('customer source selection integrity', () => {
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
       code: CUSTOMER_SOURCE_NOT_SELECTABLE,
     }));
-    expect(query).toHaveBeenCalledTimes(1);
+    expect(query).toHaveBeenCalledTimes(3);
   });
 });
 

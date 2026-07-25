@@ -3,6 +3,11 @@ const { query, withTransaction } = require('../../db');
 const { calculateSaleOrderPaymentStateFromAllocations } = require('../../lib/saleOrderTotals');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
 const { getCustomerSourceSelectionError } = require('./customerSourceSelection');
+const {
+  buildSourceImmutableError,
+  loadSaleOrderSourceLockState,
+  sourceIdsEqual,
+} = require('../../lib/saleOrderSourceLock');
 
 async function updateSaleOrder(req, res) {
   try {
@@ -34,8 +39,23 @@ async function updateSaleOrder(req, res) {
     }
 
     const outcome = await withTransaction(async (transactionQuery) => {
+      let effectiveSourceId = sourceid;
+      if (sourceid !== undefined) {
+        const lockState = await loadSaleOrderSourceLockState(id, transactionQuery);
+        if (!lockState) {
+          return { status: 404, body: { error: 'Sale order not found' } };
+        }
+
+        if (sourceIdsEqual(lockState.order_sourceid, sourceid)) {
+          // Same value (including null/empty) — treat as no-op so unrelated edits work.
+          effectiveSourceId = undefined;
+        } else if (lockState.locked) {
+          return { status: 409, body: buildSourceImmutableError(lockState) };
+        }
+      }
+
       const sourceError = await getCustomerSourceSelectionError(
-        sourceid,
+        effectiveSourceId,
         id,
         transactionQuery,
       );
@@ -58,7 +78,7 @@ async function updateSaleOrder(req, res) {
       { key: 'datestart', val: datestart },
       { key: 'dateend', val: dateend },
       { key: 'notes', val: notes },
-      { key: 'sourceid', val: sourceid },
+      { key: 'sourceid', val: effectiveSourceId },
     ];
       if (paymentState) {
         fields.push(

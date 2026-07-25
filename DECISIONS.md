@@ -118,3 +118,16 @@ Every NK, NK2, or NK3 deploy must run `scripts/deploy-preflight.js` through `scr
 
 Consequences:
 Old work that already exists must be re-ported or rebased onto the live baseline before deployment. Emergency bypasses must be named in the report with the bypass env var, reason, and rollback path. Worktree audits can identify stale/dirty sibling branches before release planning.
+
+## DEC-20260724-01: Paid And Closed-Period Order Source Immutability
+
+Status: Accepted
+
+Context:
+The snake/Q10 source incident showed ordinary UI/API edits and bulk taxonomy rewrites could change `saleorders.sourceid` after payment and after a reporting month had already been exported, rewriting closed-period revenue attribution.
+
+Decision:
+Define a closed reporting period as any order attribution date strictly before the first day of the current calendar month in `Asia/Ho_Chi_Minh`. Once an order is paid or closed-period, ordinary `PATCH /api/SaleOrders/:id` cannot change `sourceid` (repeat current value is a no-op). Corrections require `POST /api/SaleOrders/:id/source-correction` with permission `services.source_correct`, evidence, reason, expected old value, rollback reference, and a durable audit row. Unrelated non-source edits remain allowed.
+
+Consequences:
+INV-026, migration 051, ServiceForm lock UX, and `saleOrderSourceImmutability` regression tests are mandatory companions. Future period-close tooling may refine the calendar-month default but must not weaken paid-order immutability.

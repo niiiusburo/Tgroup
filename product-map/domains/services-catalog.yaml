@@ -24,9 +24,10 @@ reads:
 writes:
   - dbo.products (insert/update/delete)
   - dbo.productcategories (insert/update/delete)
-  - dbo.saleorders (create + state patch)
+  - dbo.saleorders (create + state patch + locked-source correction)
   - dbo.saleorderlines (CRUD via saleOrderLines route)
   - dbo.saleorder_state_logs (audit logging)
+  - dbo.saleorder_source_corrections (audited source corrections)
   - dbo.dotkhams (payment residual context)
 tables:
   - dbo.products
@@ -35,6 +36,7 @@ tables:
   - dbo.saleorders
   - dbo.saleorderlines
   - dbo.saleorder_state_logs
+  - dbo.saleorder_source_corrections
   - dbo.dotkhamsteps (linked product usage)
   - dbo.dotkhams
 endpoints:
@@ -53,6 +55,7 @@ endpoints:
   - POST   /api/SaleOrders
   - PATCH  /api/SaleOrders/:id
   - PATCH  /api/SaleOrders/:id/state
+  - POST   /api/SaleOrders/:id/source-correction
   - GET    /api/SaleOrderLines
   - DELETE /api/SaleOrderLines/:id
   - GET    /api/DotKhams
@@ -85,7 +88,9 @@ impact_tests:
   - api/tests/customerSourceIntegrity.test.js
   - api/tests/customerSourceReferenceMigration.test.js
   - api/tests/dbTransaction.test.js
+  - api/tests/saleOrderSourceImmutability.test.js
   - website/src/hooks/useSettings.customer-sources.test.tsx
+  - website/src/lib/saleOrderSourceLock.test.ts
 risk_level: high
 notes:
   - STALE/DEAD: api/src/routes/services.js is not mounted in server.js and queries public.services which does not exist.
@@ -97,4 +102,5 @@ notes:
   - Customer profile service edits patch the parent sale order but must also persist rendered line fields such as `saleorderlines.productuomqty`, `tooth_numbers`, and `tooth_comment` because the `Phiếu khám` table is sourced from `/api/SaleOrders/lines`.
   - New service/order source choices must be active CustomerSources. An edit may preserve the exact inactive source already assigned to that order, but the API rejects assigning an inactive or missing source to new or different data with `CUSTOMER_SOURCE_NOT_SELECTABLE`.
   - Sale-order create/update holds a transaction-scoped share lock on a selected source and commits order/line writes together; source update/delete uses the conflicting row lock and database foreign keys restrict lookup deletion.
+  - Paid or closed-period orders lock `saleorders.sourceid` on ordinary PATCH (`SOURCE_IMMUTABLE`); corrections use `POST /api/SaleOrders/:id/source-correction` + `services.source_correct` and write `dbo.saleorder_source_corrections` (INV-026).
   - Tooth picker saves should sync quantity to selected tooth count only while quantity is still following the picker/default count; manual quantity overrides must be preserved.

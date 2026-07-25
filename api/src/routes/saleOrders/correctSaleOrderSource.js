@@ -1,0 +1,161 @@
+'use strict';
+
+const crypto = require('crypto');
+const { withTransaction } = require('../../db');
+const { fetchSaleOrderById } = require('./fetchSaleOrderById');
+const { getCustomerSourceSelectionError } = require('./customerSourceSelection');
+const {
+  SOURCE_CORRECTION_CONFLICT,
+  SOURCE_CORRECTION_INVALID,
+  loadSaleOrderSourceLockState,
+  normalizeSourceId,
+  sourceIdsEqual,
+} = require('../../lib/saleOrderSourceLock');
+
+function trimRequired(value, field, minLen) {
+  if (value === undefined || value === null) {
+    return `${field} is required`;
+  }
+  const text = String(value).trim();
+  if (text.length < minLen) {
+    return `${field} must be at least ${minLen} characters`;
+  }
+  return null;
+}
+
+async function correctSaleOrderSource(req, res) {
+  try {
+    const { id } = req.params;
+    const {
+      new_sourceid,
+      expected_old_sourceid,
+      reason,
+      evidence,
+      rollback_reference,
+    } = req.body || {};
+
+    const reasonErr = trimRequired(reason, 'reason', 10);
+    const evidenceErr = trimRequired(evidence, 'evidence', 5);
+    const rollbackErr = trimRequired(rollback_reference, 'rollback_reference', 3);
+    if (reasonErr || evidenceErr || rollbackErr) {
+      return res.status(400).json({
+        error: reasonErr || evidenceErr || rollbackErr,
+        code: SOURCE_CORRECTION_INVALID,
+      });
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(req.body || {}, 'new_sourceid')) {
+      return res.status(400).json({
+        error: 'new_sourceid is required (use null to clear)',
+        code: SOURCE_CORRECTION_INVALID,
+      });
+    }
+    if (!Object.prototype.hasOwnProperty.call(req.body || {}, 'expected_old_sourceid')) {
+      return res.status(400).json({
+        error: 'expected_old_sourceid is required for concurrency control',
+        code: SOURCE_CORRECTION_INVALID,
+      });
+    }
+
+    const actorId = req.user?.employeeId || req.user?.id || null;
+    if (!actorId) {
+      return res.status(401).json({ error: 'No actor on session' });
+    }
+
+    const requestId = String(
+      req.headers['x-request-id']
+      || req.headers['x-correlation-id']
+      || crypto.randomUUID(),
+    ).slice(0, 128);
+
+    const outcome = await withTransaction(async (tx) => {
+      const lockState = await loadSaleOrderSourceLockState(id, tx);
+      if (!lockState) {
+        return { status: 404, body: { error: 'Sale order not found' } };
+      }
+
+      if (!sourceIdsEqual(lockState.order_sourceid, expected_old_sourceid)) {
+        return {
+          status: 409,
+          body: {
+            error: 'expected_old_sourceid does not match current order source',
+            code: SOURCE_CORRECTION_CONFLICT,
+            order_sourceid: lockState.order_sourceid,
+          },
+        };
+      }
+
+      const nextSourceId = normalizeSourceId(new_sourceid) === null ? null : new_sourceid;
+      if (sourceIdsEqual(lockState.order_sourceid, nextSourceId)) {
+        return {
+          status: 400,
+          body: {
+            error: 'new_sourceid must differ from the current order source',
+            code: SOURCE_CORRECTION_INVALID,
+          },
+        };
+      }
+
+      const sourceError = await getCustomerSourceSelectionError(nextSourceId, id, tx);
+      if (sourceError) {
+        return { status: 400, body: sourceError };
+      }
+
+      const updated = await tx(
+        `UPDATE dbo.saleorders
+         SET sourceid = $1
+         WHERE id = $2 AND COALESCE(isdeleted, false) = false
+         RETURNING id, sourceid`,
+        [nextSourceId, id],
+      );
+      if (!updated?.length) {
+        return { status: 404, body: { error: 'Sale order not found' } };
+      }
+
+      const correctionId = crypto.randomUUID();
+      const auditRows = await tx(
+        `INSERT INTO dbo.saleorder_source_corrections (
+           id, saleorder_id, old_sourceid, new_sourceid,
+           reason, evidence, rollback_reference,
+           actor_employee_id, request_id, created_at
+         ) VALUES (
+           $1, $2, $3, $4,
+           $5, $6, $7,
+           $8, $9, NOW()
+         )
+         RETURNING id, saleorder_id, old_sourceid, new_sourceid,
+                   reason, evidence, rollback_reference,
+                   actor_employee_id, request_id, created_at`,
+        [
+          correctionId,
+          id,
+          lockState.order_sourceid,
+          nextSourceId,
+          String(reason).trim(),
+          String(evidence).trim(),
+          String(rollback_reference).trim(),
+          actorId,
+          requestId,
+        ],
+      );
+
+      const orderRows = await fetchSaleOrderById(id, tx);
+      return {
+        status: 200,
+        body: {
+          order: orderRows[0],
+          correction: auditRows[0],
+        },
+      };
+    });
+
+    return res.status(outcome.status).json(outcome.body);
+  } catch (err) {
+    console.error('Error correcting sale order source:', err);
+    return res.status(500).json({
+      error: err instanceof Error ? err.message : 'Unknown error',
+    });
+  }
+}
+
+module.exports = { correctSaleOrderSource };

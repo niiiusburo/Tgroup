@@ -14,6 +14,20 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.60] — 2026-07-24
+
+### Added
+- Paid / closed-period sale-order source immutability (INV-026): ordinary `PATCH /api/SaleOrders/:id` rejects `sourceid` changes when the order has payment activity or its attribution date is before the open calendar month in `Asia/Ho_Chi_Minh`; repeat-current-source is a no-op so unrelated edits still work — @agent — snake-source-incident Task 10.
+- Permissioned correction path `POST /api/SaleOrders/:id/source-correction` (`services.source_correct`) requiring reason, evidence, expected old source, rollback reference, actor, timestamp, and request id; audit table `dbo.saleorder_source_corrections` + migration 051 — @agent — INV-026.
+- ServiceForm disables source chips with lock copy when paid/closed-period; surfaces `SOURCE_IMMUTABLE` next to the source field — @agent — BEHAVIOR.md / INV-026.
+
+### Testing
+- `api/tests/saleOrderSourceImmutability.test.js` covers open/allowed, paid reject, closed-period reject, unrelated edit, unauthorized-shape correction, conflict, and authorized audited correction — @agent.
+- `website/src/lib/saleOrderSourceLock.test.ts` covers frontend lock evaluation parity — @agent.
+
+### Docs
+- Authority updates: INV-026, CONTRACTS, BEHAVIOR, DECISIONS DEC-20260724-01, DATA-MODEL, SECURITY, USE-CASES UC-009, TEST-MATRIX, MIGRATIONS 051, permission-registry, services-catalog domain — @agent.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed

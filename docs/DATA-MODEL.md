@@ -264,6 +264,24 @@ Investor identities remain `dbo.partners` employee rows assigned to the `investo
 - `saleorders_company_id_idx`
 - `saleorders_state_idx`
 
+**Source immutability (INV-026):** After payment or closed period, `sourceid` changes only via `dbo.saleorder_source_corrections` + the permissioned correction API.
+
+#### `dbo.saleorder_source_corrections` (Audited Source Corrections)
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | uuid | PK |
+| `saleorder_id` | uuid | NOT NULL |
+| `old_sourceid` | uuid | nullable |
+| `new_sourceid` | uuid | nullable |
+| `reason` | text | NOT NULL |
+| `evidence` | text | NOT NULL |
+| `rollback_reference` | text | NOT NULL |
+| `actor_employee_id` | uuid | NOT NULL |
+| `request_id` | varchar(128) | NOT NULL |
+| `created_at` | timestamptz | NOT NULL DEFAULT now() |
+
+**Indexes:** order+created, actor+created, request_id.
+
 ---
 
 #### `dbo.saleorderlines`

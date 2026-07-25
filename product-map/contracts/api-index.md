@@ -147,7 +147,8 @@ Client role mapping: `/api/Employees` still returns legacy boolean flags and tit
 | GET | `/lines` | Perm:`services.view` | `?partner_id` required, `offset, limit, sortField, sortOrder` | Customer service lines with payment/order metadata |
 | GET | `/:id` | Perm:`services.view` | — | Sale order detail |
 | POST | `/` | Perm:`customers.edit` | `{ partnerid, companyid, sourceid?: active source UUID or null, ... }` | Created sale order; `400 CUSTOMER_SOURCE_NOT_SELECTABLE` for inactive/missing source |
-| PATCH | `/:id` | Perm:`customers.edit` | Order fields; quantity, service, tooth, and price fields also sync to the primary rendered sale-order line. Clients omit `sourceid` on unrelated edits; an explicitly submitted inactive source is allowed only when directly assigned to this same order. | Updated sale order; `400 CUSTOMER_SOURCE_NOT_SELECTABLE` for a new inactive/missing source |
+| PATCH | `/:id` | Perm:`customers.edit` | Order fields; quantity, service, tooth, and price fields also sync to the primary rendered sale-order line. Clients omit `sourceid` on unrelated edits; an explicitly submitted inactive source is allowed only when directly assigned to this same order. Paid/closed-period source changes are rejected with `409 SOURCE_IMMUTABLE` (repeat current value is a no-op). | Updated sale order; `400 CUSTOMER_SOURCE_NOT_SELECTABLE` for a new inactive/missing source; `409 SOURCE_IMMUTABLE` when locked |
+| POST | `/:id/source-correction` | Perm:`services.source_correct` | `{ new_sourceid, expected_old_sourceid, reason, evidence, rollback_reference }` | `{ order, correction }` audit row in `saleorder_source_corrections` |
 | PATCH | `/:id/state` | Perm:`customers.edit` | `{ new_state }` | State updated + audit log |
 
 ## Sale Order Lines (`/api/SaleOrderLines`)

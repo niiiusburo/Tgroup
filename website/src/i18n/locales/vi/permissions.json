@@ -36,6 +36,7 @@
       "view": "Xem danh mục dịch vụ",
       "add": "Thêm dịch vụ mới",
       "edit": "Chỉnh sửa dịch vụ",
+      "source_correct": "Sửa nguồn đơn đã thanh toán/kỳ đã chốt (có kiểm toán)",
       "export": "Xuất Excel phiếu điều trị"
     },
     "payment": {

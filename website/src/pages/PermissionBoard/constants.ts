@@ -40,6 +40,7 @@ export const PERMISSION_DESCRIPTIONS: Record<string, string> = {
   'services.view': 'descriptions.services.view',
   'services.add': 'descriptions.services.add',
   'services.edit': 'descriptions.services.edit',
+  'services.source_correct': 'descriptions.services.source_correct',
   'payment.view': 'descriptions.payment.view',
   'payment.add': 'descriptions.payment.add',
   'payment.edit': 'descriptions.payment.edit',

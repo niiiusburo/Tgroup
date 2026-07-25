@@ -117,6 +117,12 @@
 **Enforced by:** `createPartner()` and `updatePartner()` return `PARTNER_SOURCE_READ_ONLY` at the normal mutation boundary; `updatePartner()` preserves undefined writable UUID fields before building its dynamic `UPDATE`. API tests cover source create/change/clear rejection, repeated-source compatibility, omitted-source preservation, and explicit empty-string clearing for a writable non-source UUID. `useCustomers` omits source from frontend create/update payloads.
 **Cite when:** Changing partner/customer update payloads, UUID normalization, or dynamic partner SQL updates.
 
+### INV-026 — Closed-Period / Paid Order Source Immutability
+**Rule:** Ordinary UI/API edits MUST NOT change `saleorders.sourceid` once the order is **paid** or falls in a **closed reporting period**. Paid means `max(saleorders.totalpaid, sum of non-voided payment_allocations) > 0`. Closed period means the order attribution date (`COALESCE(datestart, datecreated)` as a calendar date) is strictly before the first day of the current calendar month in `Asia/Ho_Chi_Minh`. A PATCH that repeats the current source value is a no-op and must not fail. Unrelated field edits on locked orders must still succeed when `sourceid` is omitted. The only mutation path for a locked order source is `POST /api/SaleOrders/:id/source-correction` with permission `services.source_correct`, requiring `new_sourceid`, `expected_old_sourceid`, `reason` (≥10 chars), `evidence` (≥5), `rollback_reference` (≥3), and writing an audit row with actor, timestamp, and request id.
+**Rationale:** Closed-period revenue reports key off order-level source. Ordinary service edits after payment or month-end must not silently rewrite attribution (snake/Q10 incident class).
+**Enforced by:** `api/src/lib/saleOrderSourceLock.js`, `updateSaleOrder.js`, `correctSaleOrderSource.js`, migration `051_saleorder_source_corrections.sql`, ServiceForm disabled source chips, and `api/tests/saleOrderSourceImmutability.test.js`.
+**Cite when:** Changing sale-order update/source UX, payment allocation totals, reporting-period rules, or source repair tooling.
+
 ---
 
 ## Integration Invariants
@@ -211,3 +217,4 @@
 | 2026-07-23 | INV-023 | Added historical customer-source attribution stability after the Q10 June report incident | codex/customer-source-incident-guard |
 | 2026-07-23 | INV-024 | Added inactive-source selection and reference-retention safeguards | codex/customer-source-incident-guard |
 | 2026-07-23 | INV-025 | Added omission-safe semantics for partial partner UUID updates | codex/partner-partial-update-fix |
+| 2026-07-24 | INV-026 | Added paid/closed-period sale-order source immutability + audited correction path | worktree/10-enforce-closed-period-source-immutability |

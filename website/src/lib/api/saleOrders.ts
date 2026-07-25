@@ -114,6 +114,38 @@ export function updateSaleOrderState(id: string, state: string) {
   return apiFetch<ApiSaleOrder>(`/SaleOrders/${id}/state`, { method: 'PATCH', body: { state } });
 }
 
+export interface SaleOrderSourceCorrectionInput {
+  new_sourceid: string | null;
+  expected_old_sourceid: string | null;
+  reason: string;
+  evidence: string;
+  rollback_reference: string;
+}
+
+export interface SaleOrderSourceCorrectionResult {
+  order: ApiSaleOrder;
+  correction: {
+    id: string;
+    saleorder_id: string;
+    old_sourceid: string | null;
+    new_sourceid: string | null;
+    reason: string;
+    evidence: string;
+    rollback_reference: string;
+    actor_employee_id: string;
+    request_id: string;
+    created_at: string;
+  };
+}
+
+/** Audited correction path for paid/closed-period order sources (INV-026). */
+export function correctSaleOrderSource(id: string, data: SaleOrderSourceCorrectionInput) {
+  return apiFetch<SaleOrderSourceCorrectionResult>(`/SaleOrders/${id}/source-correction`, {
+    method: 'POST',
+    body: data,
+  });
+}
+
 // ─── Sale Order Lines (service lines) ─────────────────────────────
 
 export interface ApiSaleOrderLine {

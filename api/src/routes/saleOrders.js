@@ -6,6 +6,7 @@ const { createSaleOrder } = require('./saleOrders/createSaleOrder');
 const { getSaleOrderById } = require('./saleOrders/getSaleOrderById');
 const { updateSaleOrder } = require('./saleOrders/updateSaleOrder');
 const { updateSaleOrderState } = require('./saleOrders/updateSaleOrderState');
+const { correctSaleOrderSource } = require('./saleOrders/correctSaleOrderSource');
 const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 
 const router = express.Router();
@@ -355,6 +356,17 @@ router.post('/', requirePermission('customers.edit'), createSaleOrder);
  * Body: { state: 'sale' | 'done' | 'cancel' | 'draft' }
  */
 router.patch('/:id/state', requirePermission('customers.edit'), updateSaleOrderState);
+
+/**
+ * POST /api/SaleOrders/:id/source-correction
+ * Permissioned audited correction for locked (paid / closed-period) order sources.
+ * Body: { new_sourceid, expected_old_sourceid, reason, evidence, rollback_reference }
+ */
+router.post(
+  '/:id/source-correction',
+  requirePermission('services.source_correct'),
+  correctSaleOrderSource,
+);
 
 router.patch('/:id', requirePermission('customers.edit'), updateSaleOrder);
 

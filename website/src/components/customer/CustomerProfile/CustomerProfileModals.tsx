@@ -122,6 +122,8 @@ export function CustomerProfileModals({
             startDate: editingService.date,
             notes: editingService.notes || '',
             totalCost: editingService.cost,
+            paidAmount: editingService.paidAmount
+              ?? Math.max(0, editingService.cost - (editingService.residual ?? editingService.cost)),
             quantity: editingService.quantity,
             unit: editingService.unit,
             toothNumbers: editingService.tooth ? editingService.tooth.split(',').map((t) => t.trim()).filter(Boolean) : [],

@@ -30,6 +30,7 @@ interface ServiceCreateInput {
   toothNumbers: readonly string[];
   toothComment?: string;
   sourceId?: string | null;
+  sourceChanged?: boolean;
 }
 
 interface ServiceUpdateInput extends ServiceCreateInput {
@@ -117,6 +118,7 @@ export function useCustomerServiceActions({
         toothNumbers: data.toothNumbers,
         toothComment: data.toothComment ?? undefined,
         sourceId: data.sourceId ?? null,
+        sourceChanged: data.sourceChanged === true,
       };
       await updateServiceRecord(payload);
       await loadSaleOrderLines();

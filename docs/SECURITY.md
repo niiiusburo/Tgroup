@@ -132,11 +132,12 @@ Investor customer scope is an additional server-side filter. If an authenticated
 | Table | What it audits |
 |---|---|
 | `saleorder_state_logs` | State transitions on invoices |
+| `saleorder_source_corrections` | Permissioned order-source corrections (actor, reason, evidence, old/new, request id, rollback ref) |
 | `payment_allocations` | Links payments to invoices (immutable) |
 | `exports_audit` | Who downloaded what export when |
 | `error_events` + `error_fix_attempts` | Frontend errors and admin fix attempts |
 
-**Note:** There is no unified audit log table. Financial audit relies on `payments`, `payment_allocations`, and `saleorder_state_logs`.
+**Note:** There is no unified audit log table. Financial audit relies on `payments`, `payment_allocations`, `saleorder_state_logs`, and `saleorder_source_corrections`.
 
 ## Security Incident Response
 

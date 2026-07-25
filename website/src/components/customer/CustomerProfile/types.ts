@@ -29,6 +29,7 @@ export interface ServiceFormPayload {
   toothNumbers: readonly string[];
   toothComment?: string;
   sourceId?: string | null;
+  sourceChanged?: boolean;
 }
 
 export interface ServiceUpdatePayload extends ServiceFormPayload {

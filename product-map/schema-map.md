@@ -227,7 +227,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | **R** | `saleOrders.js`, `saleOrderLines.js`, `payments.js` (allocations), `reports.js`, `partners.js` (KPIs), `appointments.js`, employee revenue export builder |
 | **E** | `GET/POST/PATCH /api/SaleOrders` |
 | **UI** | Services patient records, Payment allocations, CustomerProfile service history, Reports |
-| **Risk** | **High** — state transitions (`draft` → `confirmed` → `done` → `cancelled`) are logged in `saleorder_state_logs` and drive payment residual calculations. `sourceid` is the order-level report attribution; bulk taxonomy rewrites change closed-period revenue output (INV-023). |
+| **Risk** | **High** — state transitions (`draft` → `confirmed` → `done` → `cancelled`) are logged in `saleorder_state_logs` and drive payment residual calculations. `sourceid` is the order-level report attribution; bulk taxonomy rewrites change closed-period revenue output (INV-023). Paid/closed-period ordinary edits cannot change `sourceid` (INV-026); audited corrections go through `saleorder_source_corrections`. |
 
 ### dbo.saleorderlines
 

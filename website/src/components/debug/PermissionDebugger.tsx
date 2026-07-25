@@ -31,6 +31,7 @@ const KEY_PERMISSIONS = [
   { id: 'services.view', label: 'View Services', category: 'Services' },
   { id: 'services.add', label: 'Add Services', category: 'Services' },
   { id: 'services.edit', label: 'Edit Services', category: 'Services' },
+  { id: 'services.source_correct', label: 'Correct Order Source', category: 'Services' },
   { id: 'settings.view', label: 'View Settings', category: 'Settings' },
   { id: 'settings.edit', label: 'Edit Settings', category: 'Settings' },
   { id: '*', label: 'Super Admin (Wildcard)', category: 'Admin' },

@@ -4,6 +4,34 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 ---
 
+# TestSprite Plan: closed-period / paid order source immutability 2026-07-24
+
+Feature/edit name: v0.32.60 — INV-026 paid and closed-period `saleorders.sourceid` lock + audited correction path.
+
+Changed URLs / API routes / data flow:
+- Frontend: Service edit form source chips (`ServiceForm` / `ServiceSourceField`) disable when paid or prior calendar month (`Asia/Ho_Chi_Minh`); ordinary save omits `sourceid` unless the user changed source on an unlocked order.
+- API: `PATCH /api/SaleOrders/:id` rejects locked source changes with `409 SOURCE_IMMUTABLE`; `POST /api/SaleOrders/:id/source-correction` (`services.source_correct`) applies audited corrections.
+- Data: migration `051_saleorder_source_corrections.sql` → `dbo.saleorder_source_corrections` (old/new source, reason, evidence, rollback_reference, actor, request_id, created_at).
+
+Expected behavior:
+- Open unpaid current-month order: source chips editable; PATCH may change `sourceid`.
+- Paid order or attribution date before open month start: source chips disabled with amber lock copy; PATCH with a different `sourceid` → `409 SOURCE_IMMUTABLE`; notes/doctor/etc. still save when `sourceid` is omitted or equal to current.
+- Correction without `services.source_correct` → 403; missing reason/evidence/rollback → `400 SOURCE_CORRECTION_INVALID`; stale `expected_old_sourceid` → `409 SOURCE_CORRECTION_CONFLICT`.
+- Authorized correction writes audit row and returns `{ order, correction }`.
+
+User roles: Staff with `customers.edit` (ordinary service edit); Super Admin/Admin with `services.source_correct` for corrections only.
+
+Execution items:
+- [x] PASS: `api/tests/saleOrderSourceImmutability.test.js` + `customerSourceIntegrity.test.js` — 27/27 (open allow, paid reject, closed-period reject, unrelated edit, correction audit/conflict/invalid, permission wiring).
+- [x] PASS: `website/src/lib/saleOrderSourceLock.test.ts` + `useServices.payment-state.test.tsx` — lock evaluation parity and source omit-unless-changed.
+- [ ] PENDING: Local/manual ServiceForm edit on a paid order shows disabled source chips and still saves notes.
+- [ ] PENDING: Authorized admin correction API smoke with full audit body writes `saleorder_source_corrections` (after migration 051 applied).
+- [ ] PENDING: nk2 live verify — ordinary locked source change blocked; unrelated edit OK; unauthorized correction 403.
+
+Setup/login data: Staff with service edit; admin with `services.source_correct`. Prefer fixture unpaid open-month order + paid/prior-month order. Do not rewrite production closed-period sources without rollback reference.
+
+---
+
 # TestSprite Plan: partner source read-only boundary 2026-07-23
 
 Feature/edit name: v0.32.59 — omission-safe partial customer updates and read-only `partners.sourceid` on normal customer writes.

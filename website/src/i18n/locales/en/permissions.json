@@ -36,6 +36,7 @@
       "view": "View service catalog",
       "add": "Add new service",
       "edit": "Edit service",
+      "source_correct": "Correct paid or closed-period order source (audited)",
       "export": "Export treatment records to Excel"
     },
     "payment": {

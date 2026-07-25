@@ -49,6 +49,7 @@ export const PERMISSIONS: readonly Permission[] = [
   { id: 'services.view', module: 'Services', action: 'View', description: 'View services' },
   { id: 'services.add', module: 'Services', action: 'Add', description: 'Add services' },
   { id: 'services.edit', module: 'Services', action: 'Edit', description: 'Edit services' },
+  { id: 'services.source_correct', module: 'Services', action: 'Correct Source', description: 'Audited correction of paid/closed-period order source' },
   { id: 'payment.view', module: 'Payment', action: 'View', description: 'View payments' },
   { id: 'payment.add', module: 'Payment', action: 'Add', description: 'Add payments' },
   { id: 'payment.edit', module: 'Payment', action: 'Edit', description: 'Edit payments' },

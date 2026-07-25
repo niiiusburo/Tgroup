@@ -36,6 +36,7 @@ If behavior is accepted as product truth, promote it here or to a domain runbook
 - Validate before submit and keep errors next to the field.
 - For edit forms, prefill from canonical backend records, not display-only derived text.
 - For customer and treatment records, IDs from migration should remain searchable and visible where staff use them operationally.
+- **Service/order source chips:** On edit, when the order is paid or belongs to a closed reporting period (prior calendar month in `Asia/Ho_Chi_Minh`), source chips are disabled with nearby amber status copy explaining the lock. Ordinary save must still update non-source fields. A `SOURCE_IMMUTABLE` API error surfaces next to the source field. Authorized corrections use the dedicated audited API path (`services.source_correct`), not the ordinary service form.
 
 ## 5. Dense Lists
 

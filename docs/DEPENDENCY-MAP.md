@@ -87,9 +87,16 @@ graph TD
 ### `api/src/routes/saleOrders/customerSourceSelection.js`
 - **Layer:** 3
 - **Upstream:** `api/src/db.js`, `dbo.customersources`, `dbo.saleorders`
-- **Downstream:** `api/src/routes/saleOrders/createSaleOrder.js`, `api/src/routes/saleOrders/updateSaleOrder.js`, frontend service/order source selectors through `/api/SaleOrders`.
+- **Downstream:** `api/src/routes/saleOrders/createSaleOrder.js`, `api/src/routes/saleOrders/updateSaleOrder.js`, `correctSaleOrderSource.js`, frontend service/order source selectors through `/api/SaleOrders`.
 - **Blast radius:** **Service/order creation and edits, historical source attribution, source-based reports, and customer-source settings deletion safety.**
 - **Change rules:** Must preserve INV-023 and INV-024. New or changed order attribution may only use active customer sources; an inactive source can be preserved only when it is already assigned directly to the same non-deleted order. Lookup validation must stay transaction-scoped so settings updates/deletes cannot race sale-order writes.
+
+### `api/src/lib/saleOrderSourceLock.js`
+- **Layer:** 2
+- **Upstream:** `api/src/lib/saleOrderTotals.js`, `dbo.saleorders`, `dbo.payment_allocations`, `dbo.payments`
+- **Downstream:** `updateSaleOrder.js`, `correctSaleOrderSource.js`, `website/src/lib/saleOrderSourceLock.ts`, ServiceForm lock UX.
+- **Blast radius:** **Order source edits, closed-period revenue attribution, audited correction workflow.**
+- **Change rules:** Must preserve INV-026. Paid and closed-period locks must fail ordinary PATCH source changes; correction path remains the only authorized mutation with full audit fields.
 
 ### `api/src/middleware/auth.js`
 - **Layer:** 3
