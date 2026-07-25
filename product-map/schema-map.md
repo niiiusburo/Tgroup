@@ -397,7 +397,7 @@ Migration `052_order_source_backfill_manifest.sql` is a reviewed-only, no-op man
 | Attribute | Value |
 |-----------|-------|
 | **Primary Key** | `id` (uuid) |
-| **W** | Sale-order create/update, `POST /api/SaleOrders/:id/source-correction`, `POST /api/Partners/:id/source-correction` via `api/src/services/sourceChangeAudit.js`; migration `053_source_change_audit.sql` |
+| **W** | Sale-order create/open-order update, `POST /api/SaleOrders/:id/source-correction`, `POST /api/Partners/:id/source-correction` via `api/src/services/sourceChangeAudit.js`; migration `053_source_change_audit.sql` |
 | **R** | `POST /api/Reports/source-change-reconciliation` (bounded) |
 | **E** | Same write paths + reconciliation report |
 | **UI** | No dedicated UI yet; operator/report consumers |

@@ -39,6 +39,7 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 - Added order/customer semantics, sale-order API, revenue SQL, export-column, export-builder, and frontend mapping regressions; migration 052 remains a reviewed-only no-op manifest template — @agent — INV-023.
 - Extended source-integrity and Settings hook/UI coverage for referenced label/type lock, safe metadata changes, unreferenced renames, delete-in-use, and inactive-history display — @agent — INV-024.
 - `api/tests/sourceChangeAudit.test.js`, `api/tests/sourceChangeAuditMigration.test.js`, `api/src/services/__tests__/sourceChangeAlert.test.js` cover mutation/no-op/rejection/rollback paths, unexpected classification, observability alert, and migration append-only guards — @agent — INV-027.
+- Final integration matrix: 16 API suites / 188 tests and 4 frontend files / 19 tests passed; local Chromium proved referenced taxonomy locks and a paid/closed order with all 16 source choices disabled while a notes-only save preserved attribution — @codex — Tasks 10–15.
 
 ### Docs
 - Authority updates: INV-023/024/026/027, CONTRACTS, BEHAVIOR, DECISIONS DEC-20260724-01/02, DATA-MODEL, SECURITY, OBSERVABILITY, FAILURE-MODES, USE-CASES UC-009, TEST-MATRIX, MIGRATIONS 051/052/053, permission-registry, affected product domains, dependency map, API index, and schema map — @agent.

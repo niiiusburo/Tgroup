@@ -6,25 +6,10 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Users, Plus, ToggleLeft, ToggleRight, Trash2, Globe, MapPin, UserPlus, X, Lock } from 'lucide-react';
+import { Plus, Users, X } from 'lucide-react';
 import { useCustomerSources } from '@/hooks/useSettings';
 import type { CustomerSource } from '@/types/settings';
-
-const TYPE_ICONS: Record<string, React.ReactNode> = {
-  online: <Globe className="w-4 h-4" />,
-  offline: <MapPin className="w-4 h-4" />,
-  referral: <UserPlus className="w-4 h-4" />,
-  normal: <MapPin className="w-4 h-4" />,
-};
-
-const TYPE_COLORS: Record<string, string> = {
-  online: 'bg-blue-100 text-blue-700',
-  offline: 'bg-amber-100 text-amber-700',
-  referral: 'bg-green-100 text-green-700',
-  normal: 'bg-gray-100 text-gray-700',
-};
-
-const FALLBACK_TYPE_COLOR = 'bg-gray-100 text-gray-700';
+import { CustomerSourceRow } from './CustomerSourceRow';
 
 const TYPE_FILTERS: { labelKey: string; value: string }[] = [
   { labelKey: 'allTypes', value: 'all' },
@@ -183,95 +168,22 @@ export function CustomerSourcesConfig() {
         {sources.map((source) => {
           const referenced = isSourceReferenced(source);
           return (
-            <div
+            <CustomerSourceRow
               key={source.id}
-              data-testid={`customer-source-row-${source.id}`}
-              data-source-name={source.name}
-              data-referenced={referenced ? 'true' : 'false'}
-              className={`bg-white rounded-xl shadow-card p-4 flex items-center gap-4 transition-opacity ${
-                !source.isActive ? 'opacity-60' : ''
-              }`}
-            >
-              <div className={`p-2 rounded-lg ${TYPE_COLORS[source.type] || FALLBACK_TYPE_COLOR}`}>
-                {TYPE_ICONS[source.type] || <MapPin className="w-4 h-4" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-medium text-gray-900" data-testid="source-name">{source.name}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${TYPE_COLORS[source.type] || FALLBACK_TYPE_COLOR}`}>
-                    {source.type}
-                  </span>
-                  {referenced && (
-                    <span
-                      className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600"
-                      title={t('customerSourcesConfig.labelLockedTitle')}
-                    >
-                      <Lock className="w-3 h-3" />
-                      {t('customerSourcesConfig.labelLocked')}
-                    </span>
-                  )}
-                </div>
-                {editingDescId === source.id ? (
-                  <input
-                    type="text"
-                    value={draftDesc}
-                    onChange={(e) => setDraftDesc(e.target.value)}
-                    onBlur={() => commitDescription(source)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        commitDescription(source);
-                      }
-                      if (e.key === 'Escape') {
-                        setEditingDescId(null);
-                      }
-                    }}
-                    autoFocus
-                    className="mt-1 w-full px-2 py-1 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
-                    aria-label={t('customerSourcesConfig.description')}
-                  />
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingDescId(source.id);
-                      setDraftDesc(source.description);
-                    }}
-                    className="text-xs text-gray-500 mt-0.5 text-left hover:text-gray-700"
-                    title={t('customerSourcesConfig.editDescription')}
-                  >
-                    {source.description || t('customerSourcesConfig.addDescription')}
-                  </button>
-                )}
-              </div>
-              <div className="text-right shrink-0">
-                <div className="text-sm font-semibold text-gray-900">{source.customerCount} / {source.orderCount}</div>
-                <div className="text-xs text-gray-500">{t('customerSourcesConfig.customersOrders')}</div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => toggleSourceActive(source.id)}
-                  title={source.isActive ? t('customerSourcesConfig.deactivate') : t('customerSourcesConfig.activate')}
-                >
-                  {source.isActive ? (
-                    <ToggleRight className="w-6 h-6 text-green-500" />
-                  ) : (
-                    <ToggleLeft className="w-6 h-6 text-gray-400" />
-                  )}
-                </button>
-                {!referenced && (
-                  <button
-                    type="button"
-                    onClick={() => removeSource(source.id)}
-                    className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                    title={t('customerSourcesConfig.removeSource')}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            </div>
+              source={source}
+              referenced={referenced}
+              editing={editingDescId === source.id}
+              draftDescription={draftDesc}
+              onDraftDescriptionChange={setDraftDesc}
+              onEditDescription={() => {
+                setEditingDescId(source.id);
+                setDraftDesc(source.description);
+              }}
+              onCancelDescription={() => setEditingDescId(null)}
+              onCommitDescription={() => commitDescription(source)}
+              onToggleActive={() => toggleSourceActive(source.id)}
+              onRemove={() => removeSource(source.id)}
+            />
           );
         })}
         {sources.length === 0 && (

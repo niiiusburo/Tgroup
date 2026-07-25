@@ -43,6 +43,7 @@ export const PERMISSIONS: readonly Permission[] = [
   { id: 'customers.edit', module: 'Customers', action: 'Edit', description: 'Edit customers' },
   { id: 'customers.delete', module: 'Customers', action: 'Delete', description: 'Soft delete customers' },
   { id: 'customers.hard_delete', module: 'Customers', action: 'Hard Delete', description: 'Permanently delete customers' },
+  { id: 'customers.source_correct', module: 'Customers', action: 'Source Correct', description: 'Audited correction of customer acquisition source' },
   { id: 'appointments.view', module: 'Appointments', action: 'View', description: 'View appointments' },
   { id: 'appointments.add', module: 'Appointments', action: 'Add', description: 'Add appointments' },
   { id: 'appointments.edit', module: 'Appointments', action: 'Edit', description: 'Edit appointments' },

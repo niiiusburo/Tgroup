@@ -24,7 +24,7 @@ User roles: Staff with `customers.edit` (ordinary service edit); Super Admin/Adm
 Execution items:
 - [x] PASS: `api/tests/saleOrderSourceImmutability.test.js` + `customerSourceIntegrity.test.js` — 27/27 (open allow, paid reject, closed-period reject, unrelated edit, correction audit/conflict/invalid, permission wiring).
 - [x] PASS: `website/src/lib/saleOrderSourceLock.test.ts` + `useServices.payment-state.test.tsx` — lock evaluation parity and source omit-unless-changed.
-- [ ] PENDING: Local/manual ServiceForm edit on a paid order shows disabled source chips and still saves notes.
+- [x] PASS: Local/manual ServiceForm edit on a paid order showed 16 disabled source chips plus the controlled-correction message; a notes-only update succeeded, preserved `sourceid`, and the smoke-test note was restored immediately. Screenshot: `website/output/playwright/source-attribution-incident/paid-closed-order-source-lock.png`.
 - [ ] PENDING: Authorized admin correction API smoke with full audit body writes `saleorder_source_corrections` (after migration 051 applied).
 - [ ] PENDING: nk2 live verify — ordinary locked source change blocked; unrelated edit OK; unauthorized correction 403.
 
@@ -81,7 +81,7 @@ User roles: Staff/admin with `settings.edit` for mutations; any authenticated us
 Execution items:
 - [x] PASS: API `customerSourceIntegrity.test.js` — 17/17 including label lock, safe edits, unreferenced rename, delete-in-use.
 - [x] PASS: Frontend `useSettings.customer-sources.test.tsx` — 7/7 label-lock helper, description update, referenced delete block.
-- [ ] PENDING: Integrated export regression must preserve immutable lookup labels while using the Task 11 split order/customer joins without `COALESCE`.
+- [x] PASS: Integrated export regression preserved immutable lookup labels and the split order/customer joins without `COALESCE`; included in the 16-suite / 188-test source-attribution candidate matrix.
 - [x] PASS: Settings UI smoke — Playwright `customer-sources-label-lock.spec.ts` on local `:5175`/`:3002`; referenced Sale Online shows Label locked, inactive rows readable, Add Source create-version hint visible, MKT1 active toggle off/on restored. Screenshots: `website/e2e/screenshots/task12-source-label-lock/`.
 - [x] PASS: Direct negative API on referenced Sale Online `f3efa245-838e-4b5a-b8f6-afe3007ce234` — rename/type → `400 CUSTOMER_SOURCE_LABEL_LOCKED` (20341 customers / 35445 orders); delete → `400 CUSTOMER_SOURCE_IN_USE`; description PUT 200 then restored; DB name|type stayed `Sale Online|normal`. Evidence: `/var/folders/.../T/opencode/task12-evidence/`.
 
@@ -110,8 +110,8 @@ Expected behavior:
 User roles: Staff with `customers.edit` / `services.view`; Super Admin/Admin for `services.source_correct` and `customers.source_correct`; `reports.view` for reconciliation.
 
 Execution items:
-- [ ] PENDING: Integrated `sourceChangeAudit.test.js` + migration + alert tests after INV-026/027 merge.
-- [ ] PENDING: Apply migration 053 on disposable/local DB and prove INSERT works while UPDATE/DELETE raise.
+- [x] PASS: Integrated `sourceChangeAudit.test.js` + migration + alert coverage passed inside the final 16-suite / 188-test source-attribution candidate matrix.
+- [x] PASS: Migrations 051 and 053 were applied twice on the disposable PostgreSQL 16 clone; a transaction probe inserted one correction plus one audit row, UPDATE/DELETE were rejected by the append-only triggers, and the probe rolled back. The exact migrations were also applied successfully to the local E2E database.
 - [ ] PENDING: NK2 operator smoke — authorized correction writes audit; reconciliation lists the row; no audit on read-only GET.
 
 Setup/login data: local/staging staff admin; do not run bulk source repairs on production without Task 08/09 gates.

@@ -302,7 +302,7 @@ Investor identities remain `dbo.partners` employee rows assigned to the `investo
 | `transaction_id` | uuid | DB work unit id |
 | `correction_manifest_ref` | text | optional repair/correction manifest key |
 | `change_channel` | text | e.g. `api_create`, `api_patch`, `source_correction`, `partner_source_correction` |
-| `is_unexpected` | boolean | paid/closed ordinary mutation |
+| `is_unexpected` | boolean | defense-in-depth flag for a locked-order entry from a non-authorized channel |
 | `unexpected_reasons` | text[] | `paid` / `closed_period` |
 | `alerted_at` | timestamptz | nullable |
 | `created_at` | timestamptz | default now() |

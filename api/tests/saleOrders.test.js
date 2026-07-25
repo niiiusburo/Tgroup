@@ -387,6 +387,15 @@ describe('SaleOrders source semantics', () => {
       if (sql.startsWith('INSERT INTO saleorders')) {
         return [{ id: 'new-order' }];
       }
+      if (sql.includes('INSERT INTO dbo.source_change_audit')) {
+        return [{
+          id: 'audit-new-order',
+          entity_type: 'saleorder',
+          entity_id: 'new-order',
+          new_sourceid: 'snap-source',
+          change_channel: 'api_create',
+        }];
+      }
       if (sql.includes('FROM saleorders so') && sql.includes('WHERE so.id')) {
         return [{
           id: 'new-order',
@@ -406,6 +415,14 @@ describe('SaleOrders source semantics', () => {
     expect(res.status).toBe(201);
     const insert = query.mock.calls.find(([sql]) => sql.startsWith('INSERT INTO saleorders'));
     expect(insert?.[1]).toEqual(expect.arrayContaining(['snap-source']));
+    const auditInsert = query.mock.calls.find(([sql]) =>
+      sql.includes('INSERT INTO dbo.source_change_audit'),
+    );
+    expect(auditInsert?.[1]).toEqual(expect.arrayContaining([
+      'saleorder',
+      'snap-source',
+      'api_create',
+    ]));
     expect(res.body.sourceid).toBe('snap-source');
   });
 
@@ -421,6 +438,15 @@ describe('SaleOrders source semantics', () => {
       }
       if (sql.startsWith('INSERT INTO saleorders')) {
         return [{ id: 'new-order-2' }];
+      }
+      if (sql.includes('INSERT INTO dbo.source_change_audit')) {
+        return [{
+          id: 'audit-new-order-2',
+          entity_type: 'saleorder',
+          entity_id: 'new-order-2',
+          new_sourceid: 'order-src',
+          change_channel: 'api_create',
+        }];
       }
       if (sql.includes('FROM saleorders so') && sql.includes('WHERE so.id')) {
         return [{
@@ -447,6 +473,9 @@ describe('SaleOrders source semantics', () => {
     expect(query.mock.calls.some(([sql]) => sql.includes('SELECT sourceid FROM partners'))).toBe(false);
     const insert = query.mock.calls.find(([sql]) => sql.startsWith('INSERT INTO saleorders'));
     expect(insert?.[1]).toEqual(expect.arrayContaining(['order-src']));
+    expect(query.mock.calls.some(([sql]) =>
+      sql.includes('INSERT INTO dbo.source_change_audit'),
+    )).toBe(true);
   });
 
   it('PATCH with only non-source fields does not write sourceid', async () => {
@@ -492,6 +521,16 @@ describe('SaleOrders source semantics', () => {
       if (sql.startsWith('UPDATE saleorders')) {
         return [{ id: 'order-id', sourceid: null }];
       }
+      if (sql.includes('INSERT INTO dbo.source_change_audit')) {
+        return [{
+          id: 'audit-clear-order-source',
+          entity_type: 'saleorder',
+          entity_id: 'order-id',
+          old_sourceid: 'order-src',
+          new_sourceid: null,
+          change_channel: 'api_patch',
+        }];
+      }
       if (sql.includes('FROM saleorders so')) {
         return [{
           id: 'order-id',
@@ -512,6 +551,9 @@ describe('SaleOrders source semantics', () => {
     const orderUpdate = query.mock.calls.find(([sql]) => sql.startsWith('UPDATE saleorders'));
     expect(orderUpdate?.[0]).toContain('sourceid');
     expect(orderUpdate?.[1]).toEqual(expect.arrayContaining([null, 'order-id']));
+    expect(query.mock.calls.some(([sql]) =>
+      sql.includes('INSERT INTO dbo.source_change_audit'),
+    )).toBe(true);
     expect(res.body.sourceid).toBeNull();
     expect(res.body.customersourceid).toBe('cust-src');
   });

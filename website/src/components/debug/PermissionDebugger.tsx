@@ -18,6 +18,7 @@ const KEY_PERMISSIONS = [
   { id: 'customers.add', label: 'Add Customers', category: 'Customers' },
   { id: 'customers.edit', label: 'Edit Customers', category: 'Customers' },
   { id: 'customers.delete', label: 'Delete Customers', category: 'Customers' },
+  { id: 'customers.source_correct', label: 'Correct Customer Source', category: 'Customers' },
   { id: 'appointments.view', label: 'View Appointments', category: 'Appointments' },
   { id: 'appointments.add', label: 'Add Appointments', category: 'Appointments' },
   { id: 'appointments.edit', label: 'Edit Appointments', category: 'Appointments' },
