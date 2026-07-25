@@ -14,12 +14,16 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
-## [0.32.60] — 2026-07-24
+## [0.33.0] — 2026-07-25
 
 ### Added
 - Paid / closed-period sale-order source immutability (INV-026): ordinary `PATCH /api/SaleOrders/:id` rejects `sourceid` changes when the order has payment activity or its attribution date is before the open calendar month in `Asia/Ho_Chi_Minh`; repeat-current-source is a no-op so unrelated edits still work — @agent — snake-source-incident Task 10.
 - Permissioned correction path `POST /api/SaleOrders/:id/source-correction` (`services.source_correct`) requiring reason, evidence, expected old source, rollback reference, actor, timestamp, and request id; audit table `dbo.saleorder_source_corrections` + migration 051 — @agent — INV-026.
 - ServiceForm disables source chips with lock copy when paid/closed-period; surfaces `SOURCE_IMMUTABLE` next to the source field — @agent — BEHAVIOR.md / INV-026.
+- Append-only source-change audit ledger `dbo.source_change_audit` (migration 053) for every successful `partners.sourceid` / `saleorders.sourceid` mutation with entity id, old/new source, actor, reason, request id, transaction id, correction-manifest reference, channel, and unexpected flags — @agent — INV-027 / snake-source-incident Task 13.
+- Mutation-path audit wiring: sale-order create/open-order update, authorized `POST /api/SaleOrders/:id/source-correction` (`services.source_correct`), and authorized `POST /api/Partners/:id/source-correction` (`customers.source_correct`); normal reads, rejected locked writes, and other failed writes write zero audit rows — @agent — INV-026/027.
+- Defense-in-depth alerts for any unexpected paid/closed-order source ledger entry via Lark (`LARK_SOURCE_AUDIT_WEBHOOK_URL` or feedback webhook) and bounded reconciliation report `POST /api/Reports/source-change-reconciliation` — @agent — OBSERVABILITY / INV-027.
+- DB triggers block UPDATE/DELETE on the ledger; semgrep rules under `.semgrep/source-change-audit.yaml` guard app-level silent edits — @agent — INV-027.
 
 ### Changed
 - Separate order attribution from customer acquisition (INV-023): API reads expose `sourceid`/`sourcename` and `customersourceid`/`customersourcename` without `COALESCE`; new orders snapshot the customer source only at creation; revenue-by-source and closed-period exports use the direct order source; exports label `Nguồn đơn` and `Nguồn KH` distinctly — @agent — snake-source-incident Task 11.
@@ -34,9 +38,10 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 - `website/src/lib/saleOrderSourceLock.test.ts` covers frontend lock evaluation parity — @agent.
 - Added order/customer semantics, sale-order API, revenue SQL, export-column, export-builder, and frontend mapping regressions; migration 052 remains a reviewed-only no-op manifest template — @agent — INV-023.
 - Extended source-integrity and Settings hook/UI coverage for referenced label/type lock, safe metadata changes, unreferenced renames, delete-in-use, and inactive-history display — @agent — INV-024.
+- `api/tests/sourceChangeAudit.test.js`, `api/tests/sourceChangeAuditMigration.test.js`, `api/src/services/__tests__/sourceChangeAlert.test.js` cover mutation/no-op/rejection/rollback paths, unexpected classification, observability alert, and migration append-only guards — @agent — INV-027.
 
 ### Docs
-- Authority updates: INV-023/024/026, CONTRACTS, BEHAVIOR, DECISIONS DEC-20260724-01/02, DATA-MODEL, SECURITY, FAILURE-MODES, USE-CASES UC-009, TEST-MATRIX, MIGRATIONS 051/052, permission-registry, affected product domains, dependency map, and schema map — @agent.
+- Authority updates: INV-023/024/026/027, CONTRACTS, BEHAVIOR, DECISIONS DEC-20260724-01/02, DATA-MODEL, SECURITY, OBSERVABILITY, FAILURE-MODES, USE-CASES UC-009, TEST-MATRIX, MIGRATIONS 051/052/053, permission-registry, affected product domains, dependency map, API index, and schema map — @agent.
 
 ## [0.32.59] — 2026-07-23
 

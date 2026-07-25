@@ -1,6 +1,12 @@
 const crypto = require('crypto');
 const { query, withTransaction } = require('../../db');
 const { calculateSaleOrderPaymentStateFromAllocations } = require('../../lib/saleOrderTotals');
+const {
+  recordSourceChange,
+  resolveActorId,
+  resolveRequestId,
+  resolveTransactionId,
+} = require('../../services/sourceChangeAudit');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
 const { getCustomerSourceSelectionError } = require('./customerSourceSelection');
 const {
@@ -38,19 +44,27 @@ async function updateSaleOrder(req, res) {
       return res.status(400).json({ error: 'quantity must be >= 0' });
     }
 
+    const sourceSubmitted = Object.prototype.hasOwnProperty.call(req.body || {}, 'sourceid');
+    const requestId = resolveRequestId(req);
+    const actorEmployeeId = resolveActorId(req);
+    const transactionId = resolveTransactionId();
+
     const outcome = await withTransaction(async (transactionQuery) => {
       let effectiveSourceId = sourceid;
-      if (sourceid !== undefined) {
-        const lockState = await loadSaleOrderSourceLockState(id, transactionQuery);
-        if (!lockState) {
+      let lockContext = null;
+      let previousSourceId;
+      if (sourceSubmitted) {
+        lockContext = await loadSaleOrderSourceLockState(id, transactionQuery);
+        if (!lockContext) {
           return { status: 404, body: { error: 'Sale order not found' } };
         }
+        previousSourceId = lockContext.order_sourceid;
 
-        if (sourceIdsEqual(lockState.order_sourceid, sourceid)) {
+        if (sourceIdsEqual(previousSourceId, sourceid)) {
           // Same value (including null/empty) — treat as no-op so unrelated edits work.
           effectiveSourceId = undefined;
-        } else if (lockState.locked) {
-          return { status: 409, body: buildSourceImmutableError(lockState) };
+        } else if (lockContext.locked) {
+          return { status: 409, body: buildSourceImmutableError(lockContext) };
         }
       }
 
@@ -94,6 +108,25 @@ async function updateSaleOrder(req, res) {
       }
       if (updatedOrder === null) {
         return { status: 404, body: { error: 'Sale order not found' } };
+      }
+
+      if (
+        sourceSubmitted
+        && lockContext
+        && effectiveSourceId !== undefined
+      ) {
+        await recordSourceChange(transactionQuery, {
+          entityType: 'saleorder',
+          entityId: id,
+          oldSourceId: previousSourceId,
+          newSourceId: effectiveSourceId === '' ? null : effectiveSourceId,
+          actorEmployeeId,
+          requestId,
+          transactionId,
+          changeChannel: 'api_patch',
+          lockState: lockContext,
+          correctionManifestRef: req.body?.correction_manifest_ref || null,
+        });
       }
 
       await updatePrimarySaleOrderLine(id, {

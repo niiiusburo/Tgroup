@@ -17,7 +17,7 @@
 
 Current inventory from disk:
 
-- **Canonical directory:** `api/migrations/` — 51 runnable root SQL files. Five customer-source incident artifacts remain under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` with non-executable `.sql.retired` extensions.
+- **Canonical directory:** `api/migrations/` — 52 runnable root SQL files. Five customer-source incident artifacts remain under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` with non-executable `.sql.retired` extensions.
 - **Supplemental directory:** `api/src/db/migrations/` — 5 SQL files. These are straggler migrations (`payment_category`, customer face embeddings, payment-proof confirmation/permission/UUID changes) that should be consolidated into the canonical migration path or explicitly promoted by a future runbook decision.
 - **Runbook status:** `docs/RUNBOOK.md` and `docs/runbooks/DEPLOYMENT.md` both use `api/migrations/*.sql` as the canonical deploy loop. Supplemental files under `api/src/db/migrations/` are not covered by that loop unless explicitly run or consolidated.
 
@@ -81,6 +81,7 @@ Current inventory from disk:
 | 050 | `050_add_customer_source_foreign_keys.sql` | Retains customer/order attribution lookup rows with validated source foreign keys | Add idempotent `partners.sourceid` and `saleorders.sourceid` → `customersources.id` FKs with `ON DELETE RESTRICT`; live preflight found zero orphans | Drop the two named constraints only if a replacement retention guard exists | Pending normal PR/merge/deploy |
 | 051 | `051_saleorder_source_corrections.sql` | Audited sale-order source corrections + `services.source_correct` permission seed | `CREATE TABLE dbo.saleorder_source_corrections`; grant permission to Super Admin/Admin | `DROP TABLE dbo.saleorder_source_corrections`; delete seeded permission rows | Pending local/PR deploy |
 | 052 | `052_order_source_backfill_manifest.sql` | Reviewed-only manifest template for backfilling null `saleorders.sourceid` from customer source; no auto data change (INV-023) | Leave nulls as-is; do not run unreviewed UPDATE | N/A — dry-run only unless approved | 2026-07 |
+| 053 | `053_source_change_audit.sql` | Append-only source-change audit ledger + correction permission seeds (INV-027) | `CREATE TABLE dbo.source_change_audit` + no-update/no-delete triggers + seed `services.source_correct` / `customers.source_correct` | Drop triggers/function/table only after replacement audit path exists; delete seeded permissions if replacing | Pending normal PR/merge/deploy |
 
 **Total canonical migrations:** 52 runnable `.sql` files in the root of `api/migrations/`. Five customer-source rewrite artifacts are quarantined with `.sql.retired` extensions under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` and are not part of the runnable count.
 

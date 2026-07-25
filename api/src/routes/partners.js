@@ -5,6 +5,7 @@ const { PartnerCreateSchema, PartnerUpdateSchema } = require('@tgroup/contracts'
 const { getPartnerById } = require('./partners/getPartnerById');
 const { checkPartnerUnique, getPartnerKpis, listPartners } = require('./partners/readHandlers');
 const { createPartner, hardDeletePartner, softDeletePartner, updatePartner } = require('./partners/mutationHandlers');
+const { correctPartnerSource } = require('./partners/correctPartnerSource');
 const { resolvePartner } = require('./partners/resolveHandler');
 const { listInvestorVisibility, setInvestorVisibility } = require('./partners/investorVisibility');
 
@@ -25,6 +26,11 @@ router.get('/:id/GetKPIs', requirePermission('customers.view'), getPartnerKpis);
 router.patch('/:id/investor-visibility', setInvestorVisibility);
 router.post('/', requirePermission('customers.add'), validate(PartnerCreateSchema), createPartner);
 router.put('/:id', requirePermission('customers.edit'), validate(PartnerUpdateSchema), updatePartner);
+router.post(
+  '/:id/source-correction',
+  requirePermission('customers.source_correct'),
+  correctPartnerSource,
+);
 router.patch('/:id/soft-delete', requirePermission('customers.delete'), softDeletePartner);
 router.delete('/:id/hard-delete', requirePermission('customers.hard_delete'), hardDeletePartner);
 

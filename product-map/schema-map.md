@@ -392,6 +392,17 @@ Migration `052_order_source_backfill_manifest.sql` is a reviewed-only, no-op man
 | **UI** | No direct UI surface; supports auditability for operational Excel exports |
 | **Risk** | **Medium** — audit writes are non-blocking/catch-and-log in the route, so export success does not guarantee an audit row exists unless explicitly verified. |
 
+### dbo.source_change_audit
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Key** | `id` (uuid) |
+| **W** | Sale-order create/update, `POST /api/SaleOrders/:id/source-correction`, `POST /api/Partners/:id/source-correction` via `api/src/services/sourceChangeAudit.js`; migration `053_source_change_audit.sql` |
+| **R** | `POST /api/Reports/source-change-reconciliation` (bounded) |
+| **E** | Same write paths + reconciliation report |
+| **UI** | No dedicated UI yet; operator/report consumers |
+| **Risk** | **High** — only durable attribution trail for source mutations. Append-only (UPDATE/DELETE triggers). Unexpected paid/closed rows alert via Lark. |
+
 ### dbo.feedback_threads + feedback_messages + feedback_attachments
 
 | Attribute | Value |

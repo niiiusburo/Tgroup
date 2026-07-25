@@ -2,8 +2,6 @@
 
 const crypto = require('crypto');
 const { withTransaction } = require('../../db');
-const { fetchSaleOrderById } = require('./fetchSaleOrderById');
-const { getCustomerSourceSelectionError } = require('./customerSourceSelection');
 const {
   SOURCE_CORRECTION_CONFLICT,
   SOURCE_CORRECTION_INVALID,
@@ -11,6 +9,14 @@ const {
   normalizeSourceId,
   sourceIdsEqual,
 } = require('../../lib/saleOrderSourceLock');
+const {
+  recordSourceChange,
+  resolveActorId,
+  resolveRequestId,
+  resolveTransactionId,
+} = require('../../services/sourceChangeAudit');
+const { fetchSaleOrderById } = require('./fetchSaleOrderById');
+const { getCustomerSourceSelectionError } = require('./customerSourceSelection');
 
 function trimRequired(value, field, minLen) {
   if (value === undefined || value === null) {
@@ -23,6 +29,11 @@ function trimRequired(value, field, minLen) {
   return null;
 }
 
+/**
+ * Authorized sale-order source correction path.
+ * Writes both the correction record and append-only source-change audit in the
+ * same transaction as the source update.
+ */
 async function correctSaleOrderSource(req, res) {
   try {
     const { id } = req.params;
@@ -32,6 +43,7 @@ async function correctSaleOrderSource(req, res) {
       reason,
       evidence,
       rollback_reference,
+      correction_manifest_ref,
     } = req.body || {};
 
     const reasonErr = trimRequired(reason, 'reason', 10);
@@ -57,16 +69,16 @@ async function correctSaleOrderSource(req, res) {
       });
     }
 
-    const actorId = req.user?.employeeId || req.user?.id || null;
+    const actorId = resolveActorId(req);
     if (!actorId) {
       return res.status(401).json({ error: 'No actor on session' });
     }
 
-    const requestId = String(
-      req.headers['x-request-id']
-      || req.headers['x-correlation-id']
-      || crypto.randomUUID(),
-    ).slice(0, 128);
+    const requestId = resolveRequestId(req);
+    const transactionId = resolveTransactionId();
+    const manifestRef = correction_manifest_ref
+      ? String(correction_manifest_ref).trim()
+      : String(rollback_reference).trim();
 
     const outcome = await withTransaction(async (tx) => {
       const lockState = await loadSaleOrderSourceLockState(id, tx);
@@ -113,7 +125,7 @@ async function correctSaleOrderSource(req, res) {
       }
 
       const correctionId = crypto.randomUUID();
-      const auditRows = await tx(
+      const correctionRows = await tx(
         `INSERT INTO dbo.saleorder_source_corrections (
            id, saleorder_id, old_sourceid, new_sourceid,
            reason, evidence, rollback_reference,
@@ -139,12 +151,31 @@ async function correctSaleOrderSource(req, res) {
         ],
       );
 
+      const audit = await recordSourceChange(tx, {
+        entityType: 'saleorder',
+        entityId: id,
+        oldSourceId: lockState.order_sourceid,
+        newSourceId: nextSourceId,
+        actorEmployeeId: actorId,
+        requestId,
+        transactionId,
+        changeChannel: 'source_correction',
+        lockState,
+        correctionManifestRef: manifestRef,
+        reason: [
+          String(reason).trim(),
+          `evidence=${String(evidence).trim()}`,
+          `rollback=${String(rollback_reference).trim()}`,
+        ].join(' | '),
+      });
+
       const orderRows = await fetchSaleOrderById(id, tx);
       return {
         status: 200,
         body: {
           order: orderRows[0],
-          correction: auditRows[0],
+          correction: correctionRows[0],
+          audit,
         },
       };
     });
@@ -158,4 +189,8 @@ async function correctSaleOrderSource(req, res) {
   }
 }
 
-module.exports = { correctSaleOrderSource };
+module.exports = {
+  SOURCE_CORRECTION_CONFLICT,
+  SOURCE_CORRECTION_INVALID,
+  correctSaleOrderSource,
+};

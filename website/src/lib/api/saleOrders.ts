@@ -126,6 +126,24 @@ export interface SaleOrderSourceCorrectionInput {
   reason: string;
   evidence: string;
   rollback_reference: string;
+  correction_manifest_ref?: string;
+}
+
+export interface SourceChangeAuditRow {
+  id: string;
+  entity_type: 'partner' | 'saleorder';
+  entity_id: string;
+  old_sourceid: string | null;
+  new_sourceid: string | null;
+  actor_employee_id: string | null;
+  reason: string;
+  request_id: string;
+  transaction_id: string;
+  correction_manifest_ref: string | null;
+  change_channel: string;
+  is_unexpected: boolean;
+  unexpected_reasons: string[];
+  created_at: string;
 }
 
 export interface SaleOrderSourceCorrectionResult {
@@ -142,6 +160,7 @@ export interface SaleOrderSourceCorrectionResult {
     request_id: string;
     created_at: string;
   };
+  audit: SourceChangeAuditRow;
 }
 
 /** Audited correction path for paid/closed-period order sources (INV-026). */

@@ -285,6 +285,30 @@ Investor identities remain `dbo.partners` employee rows assigned to the `investo
 
 **Indexes:** order+created, actor+created, request_id.
 
+**Source audit (INV-027):** Every successful change to `saleorders.sourceid` writes one row to `dbo.source_change_audit` in the same transaction.
+
+#### `dbo.source_change_audit` (Append-Only Source Ledger)
+
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | uuid | PK |
+| `entity_type` | text | `partner` \| `saleorder` |
+| `entity_id` | uuid | partner or saleorder id |
+| `old_sourceid` | uuid | nullable |
+| `new_sourceid` | uuid | nullable; must differ from old |
+| `actor_employee_id` | uuid | nullable system actor |
+| `reason` | text | required |
+| `request_id` | varchar(128) | request/correlation id |
+| `transaction_id` | uuid | DB work unit id |
+| `correction_manifest_ref` | text | optional repair/correction manifest key |
+| `change_channel` | text | e.g. `api_create`, `api_patch`, `source_correction`, `partner_source_correction` |
+| `is_unexpected` | boolean | paid/closed ordinary mutation |
+| `unexpected_reasons` | text[] | `paid` / `closed_period` |
+| `alerted_at` | timestamptz | nullable |
+| `created_at` | timestamptz | default now() |
+
+**Rules:** INSERT-only. BEFORE UPDATE/DELETE triggers raise. No app UPDATE/DELETE routes. Ordinary paid/closed-period PATCH changes are rejected before mutation; explicit correction routes write this ledger and the domain-specific correction record atomically. Created by migration `053_source_change_audit.sql`.
+
 ---
 
 #### `dbo.saleorderlines`

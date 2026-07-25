@@ -123,6 +123,12 @@
 **Enforced by:** `api/src/lib/saleOrderSourceLock.js`, `updateSaleOrder.js`, `correctSaleOrderSource.js`, migration `051_saleorder_source_corrections.sql`, ServiceForm disabled source chips, and `api/tests/saleOrderSourceImmutability.test.js`.
 **Cite when:** Changing sale-order update/source UX, payment allocation totals, reporting-period rules, or source repair tooling.
 
+### INV-027 — Append-Only Source-Change Audit
+**Rule:** Every successful mutation of `partners.sourceid` or `saleorders.sourceid` MUST write exactly one durable row to `dbo.source_change_audit` in the same transaction, capturing entity type/id, old/new source, actor, reason, request id, transaction id, optional correction-manifest reference, change channel, and timestamp. Normal reads and failed/rolled-back writes MUST write zero audit rows. Audit rows are append-only: application code MUST NOT UPDATE or DELETE them (DB triggers raise on UPDATE/DELETE). Ordinary `api_patch` changes to paid or closed-period sale orders are rejected by INV-026 before mutation and therefore write zero audit rows. Classification and alerting for any unexpected locked-order ledger entry remain defense in depth; authorized channels (`source_correction`, `repair_manifest`, `import_manifest`, `partner_source_correction`) are expected. A bounded reconciliation report is available for operators.
+**Rationale:** Snake/Q10 incident class — silent source rewrites on paid/closed orders are undetectable without a durable ledger and alerts.
+**Enforced by:** migration `053_source_change_audit.sql`, `api/src/services/sourceChangeAudit.js`, sale-order create/update + correction routes, partner source-correction route, `sourceChangeAlert.js`, `POST /api/Reports/source-change-reconciliation`, semgrep `.semgrep/source-change-audit.yaml`, and `api/tests/sourceChangeAudit*.test.js`.
+**Cite when:** Changing source mutation paths, repair tooling, audit schema, or source observability.
+
 ---
 
 ## Integration Invariants
@@ -226,3 +232,4 @@
 | 2026-07-24 | INV-026 | Added paid/closed-period sale-order source immutability + audited correction path | worktree/10-enforce-closed-period-source-immutability |
 | 2026-07-24 | INV-023 | Separate order attribution source from customer acquisition source | 11-separate-order-and-customer-source-semantics |
 | 2026-07-24 | INV-024 | Extended retention to lock referenced source name/type labels | worktree/12-protect-referenced-source-labels-and-types |
+| 2026-07-24 | INV-027 | Added append-only source-change audit ledger, unexpected alerts, and reconciliation report | worktree/13-add-append-only-source-change-audit-and-alerts |

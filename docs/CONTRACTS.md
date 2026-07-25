@@ -210,6 +210,25 @@ The API response keeps legacy employee flags (`isdoctor`, `isassistant`, `isrece
 
 Normal `POST /api/Partners` and `PUT /api/Partners/:id` do not assign or change `partners.sourceid`. Customer create rejects a non-null source with `400 PARTNER_SOURCE_READ_ONLY`; customer update rejects a changed or cleared source with the same code. Source attribution is owned by the order/service flow and controlled repair/import paths.
 
+**Source-change audit (INV-027):** Successful create/open-order update of `saleorders.sourceid` and authorized partner/order source-correction paths each insert one `dbo.source_change_audit` row (entity, old/new source, actor, reason, request id, transaction id, optional `correction_manifest_ref`, channel, unexpected flags). Reads, rejected locked-order changes, and other failed writes insert nothing. Audit rows cannot be updated/deleted through the app.
+
+#### POST /api/SaleOrders/:id/source-correction
+**Auth:** `services.source_correct`
+**Body:** `{ new_sourceid, expected_old_sourceid, reason, evidence, rollback_reference, correction_manifest_ref? }`
+**Success 200:** `{ order, correction, audit }` where `correction` is the detailed domain correction record and `audit` is the append-only ledger row (`change_channel=source_correction`).
+**Errors:** `400 SOURCE_CORRECTION_INVALID` / `CUSTOMER_SOURCE_NOT_SELECTABLE`; `409 SOURCE_CORRECTION_CONFLICT`; `403` / `404`.
+
+#### POST /api/Partners/:id/source-correction
+**Auth:** `customers.source_correct`
+**Body:** `{ new_sourceid, expected_old_sourceid, reason, correction_manifest_ref }`
+**Success 200:** `{ partner, audit }` (`change_channel=partner_source_correction`).
+**Errors:** `400 PARTNER_SOURCE_CORRECTION_INVALID` / `CUSTOMER_SOURCE_NOT_SELECTABLE`; `409 PARTNER_SOURCE_CORRECTION_CONFLICT`; `403` / `404`.
+
+#### POST /api/Reports/source-change-reconciliation
+**Auth:** `reports.view`
+**Body:** `{ dateFrom?, dateTo?, entityType?: 'partner'|'saleorder', unexpectedOnly?: boolean, limit?: number, offset?: number }`
+**Success 200:** `{ summary, rows, limit, offset, bounded: true }` with `limit` capped at 500.
+
 `GET /api/CustomerSources` returns each lookup with numeric `customer_count` and `order_count`. `POST` and `PUT` return the same numeric count fields for their affected lookup. The optional `is_active=true` query limits selection lists to active sources. Settings may request all rows so inactive historical lookups remain visible for management and audit. Active-only selection surfaces must show no fallback IDs when the lookup request is empty or fails.
 
 `PUT /api/CustomerSources/:id` may update `description` and `is_active` at any time. When either `dbo.partners.sourceid` or `dbo.saleorders.sourceid` still references the lookup, changing `name` or `type` to a different value returns `400` with `{ code: "CUSTOMER_SOURCE_LABEL_LOCKED", customerCount, orderCount, lockedFields: ["name"|"type", ...] }`. Repeating the current name/type is a no-op. Semantic renames require creating a new source via `POST` (and optionally deactivating the old row). Unreferenced sources may still change name/type freely.
@@ -219,22 +238,6 @@ Normal `POST /api/Partners` and `PUT /api/Partners/:id` do not assign or change 
 `POST /api/SaleOrders` and `PATCH /api/SaleOrders/:id` accept `sourceid?: string | null`. A non-null source must exist and be active, otherwise the API returns `400` with `{ code: "CUSTOMER_SOURCE_NOT_SELECTABLE" }`. An edit client must omit `sourceid` when the user did not change the displayed effective source, because that value can be inherited from `partners.sourceid`; the PATCH route then leaves the order-level value unchanged. When explicitly submitted, PATCH may preserve an inactive source only when that exact source is already assigned directly to that same non-deleted order; it may not assign the inactive source to another order. Validation takes a transaction-scoped share lock on the lookup (conflicting with settings updates/deletes), and sale-order/line writes commit or roll back together.
 
 **Closed-period / paid source lock (INV-026):** When `sourceid` is present on `PATCH /api/SaleOrders/:id` and differs from the order's current `saleorders.sourceid`, and the order is paid (`max(totalpaid, non-void allocation sum) > 0`) or its attribution date is before the open calendar month start in `Asia/Ho_Chi_Minh`, the API returns `409` with `{ code: "SOURCE_IMMUTABLE", reasons: ["paid"|"closed_period"], open_period_start, order_sourceid }`. Repeating the current source is ignored (no-op). Omitting `sourceid` allows unrelated field updates on locked orders.
-
-#### POST /api/SaleOrders/:id/source-correction
-**Auth:** Requires `services.source_correct` (Super Admin / Admin by seed).
-**Body:**
-```json
-{
-  "new_sourceid": "uuid|null",
-  "expected_old_sourceid": "uuid|null",
-  "reason": "string (>=10)",
-  "evidence": "string (>=5)",
-  "rollback_reference": "string (>=3)"
-}
-```
-**Headers:** Optional `X-Request-Id` (else server generates).
-**Success 200:** `{ order: SaleOrder, correction: { id, saleorder_id, old_sourceid, new_sourceid, reason, evidence, rollback_reference, actor_employee_id, request_id, created_at } }` — audit row persisted in `dbo.saleorder_source_corrections`.
-**Errors:** `400 SOURCE_CORRECTION_INVALID` / `CUSTOMER_SOURCE_NOT_SELECTABLE`; `409 SOURCE_CORRECTION_CONFLICT` when `expected_old_sourceid` mismatches; `403` without permission; `404` missing order.
 
 ---
 

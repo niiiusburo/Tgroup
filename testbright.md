@@ -89,6 +89,35 @@ Setup/login data: Local demo DB `tdental_demo@127.0.0.1:5433`, API `:3002`, Vite
 
 ---
 
+# TestSprite Plan: append-only source-change audit 2026-07-24
+
+Feature/edit name: v0.33.0 — append-only `source_change_audit` ledger, defense-in-depth unexpected-change alerts, bounded reconciliation (Task 13 / INV-027).
+
+Changed URLs / API routes / data flow:
+- API: `POST /api/SaleOrders`, `PATCH /api/SaleOrders/:id`, `POST /api/SaleOrders/:id/source-correction`, `POST /api/Partners/:id/source-correction`, `POST /api/Reports/source-change-reconciliation`.
+- Data: `dbo.source_change_audit` (migration 053); Lark alert via `LARK_SOURCE_AUDIT_WEBHOOK_URL` or feedback webhook.
+- Normal Partner POST/PUT remain source read-only (no audit on rejected writes).
+
+Expected behavior:
+- Successful order source create/change writes exactly one audit row in the same transaction.
+- Unrelated order edits and failed source validations write zero audit rows.
+- Paid/closed ordinary `api_patch` source changes are rejected with `409 SOURCE_IMMUTABLE`, mutate nothing, and write zero audit rows.
+- Authorized corrections write both the correction record and append-only audit with the expected channel and no unexpected flag.
+- Any unexpected locked-order ledger insertion from a future/internal non-authorized channel is classified and queues a non-blocking alert.
+- Audit rows cannot be updated/deleted through the app (DB trigger).
+- Reconciliation report returns bounded summary+rows (limit ≤ 500).
+
+User roles: Staff with `customers.edit` / `services.view`; Super Admin/Admin for `services.source_correct` and `customers.source_correct`; `reports.view` for reconciliation.
+
+Execution items:
+- [ ] PENDING: Integrated `sourceChangeAudit.test.js` + migration + alert tests after INV-026/027 merge.
+- [ ] PENDING: Apply migration 053 on disposable/local DB and prove INSERT works while UPDATE/DELETE raise.
+- [ ] PENDING: NK2 operator smoke — authorized correction writes audit; reconciliation lists the row; no audit on read-only GET.
+
+Setup/login data: local/staging staff admin; do not run bulk source repairs on production without Task 08/09 gates.
+
+---
+
 # TestSprite Plan: partner source read-only boundary 2026-07-23
 
 Feature/edit name: v0.32.59 — omission-safe partial customer updates and read-only `partners.sourceid` on normal customer writes.

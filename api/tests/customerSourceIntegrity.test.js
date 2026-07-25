@@ -89,7 +89,7 @@ describe('customer source selection integrity', () => {
     ['inactive', [{ is_active: false, already_selected: false }]],
     ['missing', []],
   ])('blocks changing an existing order to an %s source', async (_label, rows) => {
-    // INV-026 lock probe runs before source selectability check.
+    // INV-026 lock probe (FOR UPDATE + allocated paid) runs before selectability check.
     query
       .mockResolvedValueOnce([{
         id: 'order-id',

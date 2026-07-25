@@ -105,6 +105,13 @@ graph TD
 - **Blast radius:** **Historical report labels, settings taxonomy, and any surface that displays `customersources.name`.**
 - **Change rules:** Must preserve INV-024 label lock: referenced name/type cannot mutate; delete blocked while referenced; description/`is_active` remain editable; semantic changes create a new row.
 
+### `api/src/services/sourceChangeAudit.js`
+- **Layer:** 3
+- **Upstream:** `api/src/db.js`, `api/src/lib/sourceChangeLock.js`, `dbo.source_change_audit`, `api/src/services/sourceChangeAlert.js`
+- **Downstream:** sale-order create/update/correction, partner source-correction, `reports/sourceChangeReconciliation.js`
+- **Blast radius:** **All customer/order source mutation attribution, unexpected paid/closed alerts, operator reconciliation.**
+- **Change rules:** Must preserve INV-027. Successful source mutations write exactly one append-only ledger row in the same transaction; reads, rejected locked mutations, and other failed writes write none; never UPDATE/DELETE audit rows from app code.
+
 ### `api/src/middleware/auth.js`
 - **Layer:** 3
 - **Upstream:** `jsonwebtoken`, `db.js`, `services/permissionService.js`

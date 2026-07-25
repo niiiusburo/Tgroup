@@ -1,0 +1,55 @@
+rules:
+  - id: tgroup-no-source-change-audit-update
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >
+      dbo.source_change_audit is append-only (INV-027). Do not UPDATE or DELETE
+      audit rows from application code. Insert via recordSourceChange only.
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $Q($SQL, ...)
+          - pattern: |
+              await $Q($SQL, ...)
+      - metavariable-regex:
+          metavariable: $SQL
+          regex: (?is).*(UPDATE|DELETE)\s+(dbo\.)?source_change_audit.*
+    paths:
+      include:
+        - "**/api/src/**/*.js"
+      exclude:
+        - "**/api/src/**/__tests__/**"
+        - "**/api/tests/**"
+
+  - id: tgroup-sourceid-mutation-must-audit
+    languages: [javascript]
+    severity: WARNING
+    message: >
+      Direct saleorders/partners sourceid UPDATE should go through a path that
+      calls recordSourceChange in the same transaction (INV-027).
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $Q($SQL, ...)
+          - pattern: |
+              await $Q($SQL, ...)
+      - metavariable-regex:
+          metavariable: $SQL
+          regex: (?is).*UPDATE\s+(dbo\.)?(saleorders|partners)\s+SET\s+sourceid\s*=.*
+      - pattern-not-inside: |
+          async function $FN(...) {
+            ...
+            recordSourceChange(...);
+            ...
+          }
+      - pattern-not-inside: |
+          async function $FN(...) {
+            ...
+            await recordSourceChange(...);
+            ...
+          }
+    paths:
+      include:
+        - "**/api/src/routes/**/*.js"
+      exclude:
+        - "**/api/src/**/__tests__/**"

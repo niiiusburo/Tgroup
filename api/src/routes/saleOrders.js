@@ -4,10 +4,10 @@ const { requirePermission } = require('../middleware/auth');
 const { resolveInvestorScope } = require('../services/permissionService');
 const { orderAndCustomerSourceSelectSql } = require('../lib/orderSourceSemantics');
 const { createSaleOrder } = require('./saleOrders/createSaleOrder');
+const { correctSaleOrderSource } = require('./saleOrders/correctSaleOrderSource');
 const { getSaleOrderById } = require('./saleOrders/getSaleOrderById');
 const { updateSaleOrder } = require('./saleOrders/updateSaleOrder');
 const { updateSaleOrderState } = require('./saleOrders/updateSaleOrderState');
-const { correctSaleOrderSource } = require('./saleOrders/correctSaleOrderSource');
 const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 
 const router = express.Router();
@@ -363,7 +363,8 @@ router.patch('/:id/state', requirePermission('customers.edit'), updateSaleOrderS
 /**
  * POST /api/SaleOrders/:id/source-correction
  * Permissioned audited correction for locked (paid / closed-period) order sources.
- * Body: { new_sourceid, expected_old_sourceid, reason, evidence, rollback_reference }
+ * Body: { new_sourceid, expected_old_sourceid, reason, evidence,
+ *         rollback_reference, correction_manifest_ref? }
  */
 router.post(
   '/:id/source-correction',

@@ -98,6 +98,11 @@ describe('ordinary PATCH source immutability', () => {
       .mockResolvedValueOnce([{ is_active: true, already_selected: false }])
       .mockResolvedValueOnce([{ id: ORDER_ID, sourceid: SOURCE_B }]) // update fields
       .mockResolvedValueOnce([{
+        id: 'audit-open-patch',
+        entity_type: 'saleorder',
+        is_unexpected: false,
+      }])
+      .mockResolvedValueOnce([{
         id: ORDER_ID,
         sourceid: SOURCE_B,
         totalpaid: 0,
@@ -314,6 +319,15 @@ describe('permissioned source correction path', () => {
         created_at: createdAt,
       }])
       .mockResolvedValueOnce([{
+        id: 'audit-corr-1',
+        entity_type: 'saleorder',
+        entity_id: ORDER_ID,
+        old_sourceid: SOURCE_A,
+        new_sourceid: SOURCE_B,
+        change_channel: 'source_correction',
+        is_unexpected: false,
+      }])
+      .mockResolvedValueOnce([{
         id: ORDER_ID,
         sourceid: SOURCE_B,
         totalpaid: 100,
@@ -349,9 +363,17 @@ describe('permissioned source correction path', () => {
       created_at: createdAt,
     }));
     expect(body.order.sourceid).toBe(SOURCE_B);
+    expect(body.audit).toEqual(expect.objectContaining({
+      old_sourceid: SOURCE_A,
+      new_sourceid: SOURCE_B,
+      change_channel: 'source_correction',
+      is_unexpected: false,
+    }));
 
     const insertSql = query.mock.calls.find(([sql]) => /INSERT INTO dbo\.saleorder_source_corrections/i.test(sql))?.[0];
     expect(insertSql).toBeTruthy();
+    const appendOnlySql = query.mock.calls.find(([sql]) => /INSERT INTO dbo\.source_change_audit/i.test(sql))?.[0];
+    expect(appendOnlySql).toBeTruthy();
   });
 
   it('rejects inactive target source on correction path', async () => {

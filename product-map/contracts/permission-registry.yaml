@@ -154,7 +154,10 @@ backend_permissions:
   - string: services.source_correct
     routes:
       - POST /api/SaleOrders/:id/source-correction
-    note: Super Admin/Admin only (migration 051). Audited correction of paid/closed-period saleorders.sourceid (INV-026).
+    note: Super Admin/Admin only (migrations 051 and 053). Audited correction of paid/closed-period saleorders.sourceid (INV-026/027).
+  - string: customers.source_correct
+    routes:
+      - POST /api/Partners/:id/source-correction
   - string: products.export
     routes:
       - POST /api/Exports/service-catalog/preview
