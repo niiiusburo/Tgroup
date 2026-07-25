@@ -29,7 +29,7 @@
 | Migration 051/053 clone rehearsal | PASS — idempotent apply; correction + audit insert; UPDATE/DELETE blocked; probe rolled back |
 | Migration 051/053 local E2E apply | PASS — both tables, two grants, and two append-only triggers present |
 | Source-audit semgrep | PASS — 0 findings |
-| Default semgrep on changed production code | PASS — 41 paths, 0 findings, 0 scan errors |
+| Default semgrep on changed production code | PASS — 39 paths, 0 findings, 0 scan errors |
 | Default semgrep on changed tests too | REVIEWED — 5 test-harness-only heuristics (4 WARNING, 1 INFO), 0 HIGH/ERROR and no production finding |
 | Website lint | PASS with 40 non-fatal existing warnings |
 | Website build | PASS with existing bundle/dynamic-import warnings |
