@@ -323,6 +323,7 @@ sequenceDiagram
 - Export audit insert failure is best effort and must not corrupt the workbook response.
 - Bulk source-taxonomy rewrites can change closed-period output even when the report builder is correct; INV-023 forbids that mutation pattern.
 - Ordinary service/order edits must not rewrite paid or closed-period `saleorders.sourceid` (INV-026); only `POST /api/SaleOrders/:id/source-correction` with `services.source_correct` may change locked sources, and each change writes `saleorder_source_corrections`.
+- In-place Settings renames of still-referenced source name/type are blocked (`CUSTOMER_SOURCE_LABEL_LOCKED`); staff must create a new source for semantic changes (INV-024).
 
 ---
 

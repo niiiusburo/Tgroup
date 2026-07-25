@@ -6,7 +6,7 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 # TestSprite Plan: closed-period / paid order source immutability 2026-07-24
 
-Feature/edit name: v0.32.60 — INV-026 paid and closed-period `saleorders.sourceid` lock + audited correction path.
+Feature/edit name: v0.33.0 — INV-026 paid and closed-period `saleorders.sourceid` lock + audited correction path.
 
 Changed URLs / API routes / data flow:
 - Frontend: Service edit form source chips (`ServiceForm` / `ServiceSourceField`) disable when paid or prior calendar month (`Asia/Ho_Chi_Minh`); ordinary save omits `sourceid` unless the user changed source on an unlocked order.
@@ -57,6 +57,35 @@ Execution items:
 - [ ] PENDING: Post-deploy live verify — revenue-by-source and revenue-flat export show `Nguồn đơn` separately from `Nguồn KH`.
 
 Setup/login data: local/demo staff account supplied through approved test configuration; never print credentials.
+---
+
+# TestSprite Plan: protect referenced source labels and types 2026-07-24
+
+Feature/edit name: v0.33.0 — referenced customer-source name/type lock and Settings label-lock UX.
+
+Changed URLs / API routes / data flow:
+- Frontend: `/settings` Customer Sources panel (`CustomerSourcesConfig`, `useCustomerSources`).
+- API: `PUT /api/CustomerSources/:id`, `DELETE /api/CustomerSources/:id`.
+- Data flow: Settings taxonomy edit → reference-aware CustomerSources mutation → reports/exports continue joining historical IDs to immutable labels.
+
+Expected behavior:
+- Referenced name or type change returns `400 CUSTOMER_SOURCE_LABEL_LOCKED` with counts and locked fields; no UPDATE of name/type.
+- Referenced delete returns `400 CUSTOMER_SOURCE_IN_USE`.
+- Description and `is_active` updates succeed on referenced rows; inactive historical labels remain listable.
+- Unreferenced sources may rename/retype/delete.
+- UI shows label-lock badge, allows description/active edits, hides delete when referenced, and guides create-new for semantic renames.
+- Revenue/service export source join still uses `customersources.name` without rewriting historical IDs.
+
+User roles: Staff/admin with `settings.edit` for mutations; any authenticated user for GET lists used by selectors.
+
+Execution items:
+- [x] PASS: API `customerSourceIntegrity.test.js` — 17/17 including label lock, safe edits, unreferenced rename, delete-in-use.
+- [x] PASS: Frontend `useSettings.customer-sources.test.tsx` — 7/7 label-lock helper, description update, referenced delete block.
+- [ ] PENDING: Integrated export regression must preserve immutable lookup labels while using the Task 11 split order/customer joins without `COALESCE`.
+- [x] PASS: Settings UI smoke — Playwright `customer-sources-label-lock.spec.ts` on local `:5175`/`:3002`; referenced Sale Online shows Label locked, inactive rows readable, Add Source create-version hint visible, MKT1 active toggle off/on restored. Screenshots: `website/e2e/screenshots/task12-source-label-lock/`.
+- [x] PASS: Direct negative API on referenced Sale Online `f3efa245-838e-4b5a-b8f6-afe3007ce234` — rename/type → `400 CUSTOMER_SOURCE_LABEL_LOCKED` (20341 customers / 35445 orders); delete → `400 CUSTOMER_SOURCE_IN_USE`; description PUT 200 then restored; DB name|type stayed `Sale Online|normal`. Evidence: `/var/folders/.../T/opencode/task12-evidence/`.
+
+Setup/login data: Local demo DB `tdental_demo@127.0.0.1:5433`, API `:3002`, Vite `:5175`, and the seeded local admin account supplied through the approved test configuration. Never use or record production credentials, and do not rename production historical labels.
 
 ---
 

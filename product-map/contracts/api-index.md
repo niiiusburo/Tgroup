@@ -213,7 +213,7 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 | GET | `/` | Auth | `?type, is_active` | Source list with numeric `customer_count`, `order_count`, and aggregates |
 | GET | `/:id` | Auth | — | Source detail with numeric `customer_count`, `order_count` |
 | POST | `/` | Perm:`settings.edit` | `{ name, description, is_active }` | Created source |
-| PUT | `/:id` | Perm:`settings.edit` | Source fields | Updated source with numeric `customer_count` and `order_count` |
+| PUT | `/:id` | Perm:`settings.edit` | Source fields | Updated source with numeric counts; `400 CUSTOMER_SOURCE_LABEL_LOCKED` when referenced name/type would change; description/`is_active` always allowed |
 | DELETE | `/:id` | Perm:`settings.edit` | — | Deleted source, or `400 CUSTOMER_SOURCE_IN_USE` with customer/order counts while referenced |
 
 ## Companies / Locations (`/api/Companies`)

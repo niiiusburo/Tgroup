@@ -7,6 +7,13 @@
   "roleConfig": "Cấu hình chức vụ",
   "serviceCatalog": "Cài đặt danh mục dịch vụ",
   "customerSources": "Nguồn khách hàng",
+  "tabs": {
+    "system": "Cài đặt hệ thống",
+    "sources": "Nguồn khách hàng",
+    "bank": "Tài khoản ngân hàng",
+    "ip": "Kiểm soát truy cập IP",
+    "feedback": "Phản hồi"
+  },
   "feedbackAdmin": {
     "title": "Quản lý phản hồi",
     "review": "Xem xét",
@@ -74,9 +81,28 @@
   "customerSourcesConfig": {
     "title": "Nguồn khách hàng",
     "addSource": "Thêm nguồn",
+    "newSource": "Nguồn khách hàng mới",
     "sourceName": "Tên nguồn",
     "description": "Mô tả",
-    "customersOrders": "khách hàng / phiếu khám"
+    "addDescription": "Thêm mô tả",
+    "editDescription": "Sửa mô tả",
+    "customersOrders": "khách hàng / phiếu khám",
+    "totalSources": "Tổng nguồn",
+    "active": "Đang dùng",
+    "totalCustomers": "Tổng khách",
+    "topSource": "Nguồn hàng đầu",
+    "allTypes": "Tất cả loại",
+    "online": "Online",
+    "offline": "Offline",
+    "referral": "Giới thiệu",
+    "activate": "Kích hoạt",
+    "deactivate": "Ngưng dùng",
+    "removeSource": "Xóa nguồn",
+    "empty": "Không có nguồn nào cho bộ lọc này.",
+    "labelLocked": "Nhãn đã khóa",
+    "labelLockedTitle": "Tên và loại giữ nguyên khi còn khách hàng hoặc phiếu khám tham chiếu nguồn này",
+    "historicalLockHint": "Nguồn đã được khách hàng hoặc phiếu khám sử dụng giữ nguyên tên và loại để báo cáo lịch sử vẫn đọc được. Có thể ngưng dùng hoặc sửa mô tả; tạo nguồn mới khi cần đổi nghĩa nhãn.",
+    "createVersionHint": "Tạo nguồn mới khi đổi nghĩa nhãn hoặc loại. Nhãn đã được tham chiếu sẽ không bị ghi đè."
   },
   "timezoneSelector": {
     "label": "Chọn múi giờ",

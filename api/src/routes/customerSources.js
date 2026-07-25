@@ -8,6 +8,30 @@ const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
+const CUSTOMER_SOURCE_IN_USE = 'CUSTOMER_SOURCE_IN_USE';
+const CUSTOMER_SOURCE_LABEL_LOCKED = 'CUSTOMER_SOURCE_LABEL_LOCKED';
+
+async function getSourceReferenceCounts(transactionQuery, sourceId) {
+  const usages = await transactionQuery(
+    `SELECT
+       (SELECT COUNT(*) FROM dbo.partners WHERE sourceid = $1) AS customer_count,
+       (SELECT COUNT(*) FROM dbo.saleorders WHERE sourceid = $1) AS order_count`,
+    [sourceId],
+  );
+  return {
+    customerCount: parseInt(usages[0].customer_count, 10) || 0,
+    orderCount: parseInt(usages[0].order_count, 10) || 0,
+  };
+}
+
+function withCounts(row, customerCount = 0, orderCount = 0) {
+  return {
+    ...row,
+    customer_count: customerCount,
+    order_count: orderCount,
+  };
+}
+
 // GET /api/CustomerSources - List all sources with customer counts
 router.get('/', async (req, res) => {
   try {
@@ -53,8 +77,8 @@ router.get('/', async (req, res) => {
     const sources = await query(sql, params);
     const items = sources.map((source) => ({
       ...source,
-      customer_count: parseInt(source.customer_count || 0),
-      order_count: parseInt(source.order_count || 0),
+      customer_count: parseInt(source.customer_count || 0, 10),
+      order_count: parseInt(source.order_count || 0, 10),
     }));
 
     res.json({
@@ -87,18 +111,9 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Source not found' });
     }
 
-    const usages = await query(
-      `SELECT
-         (SELECT COUNT(*) FROM dbo.partners WHERE sourceid = $1) AS customer_count,
-         (SELECT COUNT(*) FROM dbo.saleorders WHERE sourceid = $1) AS order_count`,
-      [req.params.id]
-    );
+    const { customerCount, orderCount } = await getSourceReferenceCounts(query, req.params.id);
 
-    res.json({
-      ...sources[0],
-      customer_count: parseInt(usages[0].customer_count),
-      order_count: parseInt(usages[0].order_count)
-    });
+    res.json(withCounts(sources[0], customerCount, orderCount));
   } catch (err) {
     console.error('CustomerSources GET/:id error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -120,11 +135,7 @@ router.post('/', requirePermission('settings.edit'), async (req, res) => {
       [name, type || 'offline', description, is_active !== false]
     );
 
-    res.status(201).json({
-      ...result[0],
-      customer_count: 0,
-      order_count: 0
-    });
+    res.status(201).json(withCounts(result[0], 0, 0));
   } catch (err) {
     console.error('CustomerSources POST error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -132,54 +143,82 @@ router.post('/', requirePermission('settings.edit'), async (req, res) => {
 });
 
 // PUT /api/CustomerSources/:id
+// Referenced sources: name/type are immutable (historical report labels).
+// description and is_active remain mutable. Semantic renames use POST (new row).
 router.put('/:id', requirePermission('settings.edit'), async (req, res) => {
   try {
     const { name, type, description, is_active } = req.body;
 
-    const updates = [];
-    const values = [];
-    let paramIdx = 1;
-
-    const fields = { name, type, description, is_active };
-    for (const [key, value] of Object.entries(fields)) {
-      if (value !== undefined) {
-        updates.push(`${key} = $${paramIdx}`);
-        values.push(value);
-        paramIdx++;
-      }
-    }
-
-    if (updates.length === 0) {
+    if (name === undefined && type === undefined && description === undefined && is_active === undefined) {
       return res.status(400).json({ error: 'No fields to update' });
     }
 
     const outcome = await withTransaction(async (transactionQuery) => {
       const locked = await transactionQuery(
-        'SELECT id FROM dbo.customersources WHERE id = $1 FOR UPDATE',
+        'SELECT id, name, type FROM dbo.customersources WHERE id = $1 FOR UPDATE',
         [req.params.id],
       );
       if (locked.length === 0) {
         return { status: 404, body: { error: 'Source not found' } };
       }
 
-      updates.push(`updated_at = CURRENT_TIMESTAMP`);
+      const current = locked[0];
+      const nameChanging = name !== undefined && name !== current.name;
+      const typeChanging = type !== undefined && type !== current.type;
+
+      let customerCount = 0;
+      let orderCount = 0;
+      if (nameChanging || typeChanging) {
+        const refs = await getSourceReferenceCounts(transactionQuery, req.params.id);
+        customerCount = refs.customerCount;
+        orderCount = refs.orderCount;
+        if (customerCount > 0 || orderCount > 0) {
+          const lockedFields = [];
+          if (nameChanging) lockedFields.push('name');
+          if (typeChanging) lockedFields.push('type');
+          return {
+            status: 400,
+            body: {
+              error: 'Cannot change name or type of a source referenced by customers or sale orders',
+              code: CUSTOMER_SOURCE_LABEL_LOCKED,
+              customerCount,
+              orderCount,
+              lockedFields,
+            },
+          };
+        }
+      }
+
+      const updates = [];
+      const values = [];
+      let paramIdx = 1;
+      const fields = { name, type, description, is_active };
+      for (const [key, value] of Object.entries(fields)) {
+        if (value !== undefined) {
+          updates.push(`${key} = $${paramIdx}`);
+          values.push(value);
+          paramIdx++;
+        }
+      }
+
+      updates.push('updated_at = CURRENT_TIMESTAMP');
       values.push(req.params.id);
 
       const result = await transactionQuery(
         `UPDATE dbo.customersources SET ${updates.join(', ')} WHERE id = $${paramIdx} RETURNING *`,
         values,
       );
-      const usages = await transactionQuery(
-        `SELECT
-           (SELECT COUNT(*) FROM dbo.partners WHERE sourceid = $1) AS customer_count,
-           (SELECT COUNT(*) FROM dbo.saleorders WHERE sourceid = $1) AS order_count`,
-        [req.params.id],
-      );
-      return { status: 200, body: {
-        ...result[0],
-        customer_count: parseInt(usages[0].customer_count),
-        order_count: parseInt(usages[0].order_count),
-      } };
+
+      if (!(nameChanging || typeChanging)) {
+        const refs = await getSourceReferenceCounts(transactionQuery, req.params.id);
+        customerCount = refs.customerCount;
+        orderCount = refs.orderCount;
+      }
+
+      return {
+        status: 200,
+        body: withCounts(result[0], customerCount, orderCount),
+      };
     });
     return res.status(outcome.status).json(outcome.body);
   } catch (err) {
@@ -200,22 +239,21 @@ router.delete('/:id', requirePermission('settings.edit'), async (req, res) => {
         return { status: 404, body: { error: 'Source not found' } };
       }
 
-      const usages = await transactionQuery(
-        `SELECT
-           (SELECT COUNT(*) FROM dbo.partners WHERE sourceid = $1) AS customer_count,
-           (SELECT COUNT(*) FROM dbo.saleorders WHERE sourceid = $1) AS order_count`,
-        [req.params.id],
+      const { customerCount, orderCount } = await getSourceReferenceCounts(
+        transactionQuery,
+        req.params.id,
       );
-      const customerCount = parseInt(usages[0].customer_count);
-      const orderCount = parseInt(usages[0].order_count);
 
       if (customerCount > 0 || orderCount > 0) {
-        return { status: 400, body: {
-          error: 'Cannot delete source with existing customer or sale-order references',
-          code: 'CUSTOMER_SOURCE_IN_USE',
-          customerCount,
-          orderCount,
-        } };
+        return {
+          status: 400,
+          body: {
+            error: 'Cannot delete source with existing customer or sale-order references',
+            code: CUSTOMER_SOURCE_IN_USE,
+            customerCount,
+            orderCount,
+          },
+        };
       }
 
       await transactionQuery(
@@ -232,3 +270,5 @@ router.delete('/:id', requirePermission('settings.edit'), async (req, res) => {
 });
 
 module.exports = router;
+module.exports.CUSTOMER_SOURCE_IN_USE = CUSTOMER_SOURCE_IN_USE;
+module.exports.CUSTOMER_SOURCE_LABEL_LOCKED = CUSTOMER_SOURCE_LABEL_LOCKED;

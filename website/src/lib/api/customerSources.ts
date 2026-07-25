@@ -5,7 +5,7 @@ import { apiFetch } from './core';
 export interface ApiCustomerSource {
   id: string;
   name: string;
-  type: 'online' | 'offline' | 'referral';
+  type: 'online' | 'offline' | 'referral' | 'normal' | string;
   description: string;
   is_active: boolean;
   customer_count: number;

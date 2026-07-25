@@ -24,14 +24,19 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 ### Changed
 - Separate order attribution from customer acquisition (INV-023): API reads expose `sourceid`/`sourcename` and `customersourceid`/`customersourcename` without `COALESCE`; new orders snapshot the customer source only at creation; revenue-by-source and closed-period exports use the direct order source; exports label `Nguồn đơn` and `Nguồn KH` distinctly — @agent — snake-source-incident Task 11.
 - Service forms label the editable field as order attribution, and edit mapping never resubmits a customer-inherited source as the direct order source — @agent — INV-023.
+- Settings Customer Sources is a dedicated tab with label-lock status, inactive-history visibility, description/active edits, and create-new guidance for semantic renames — @agent — snake-source-incident Task 12 / INV-024.
+
+### Fixed
+- Referenced customer-source name/type mutations now fail with `CUSTOMER_SOURCE_LABEL_LOCKED`; delete remains `CUSTOMER_SOURCE_IN_USE`; description and deactivation stay allowed, preventing taxonomy maintenance from silently rewriting historical report labels — @agent — INV-024.
 
 ### Testing
 - `api/tests/saleOrderSourceImmutability.test.js` covers open/allowed, paid reject, closed-period reject, unrelated edit, unauthorized-shape correction, conflict, and authorized audited correction — @agent.
 - `website/src/lib/saleOrderSourceLock.test.ts` covers frontend lock evaluation parity — @agent.
 - Added order/customer semantics, sale-order API, revenue SQL, export-column, export-builder, and frontend mapping regressions; migration 052 remains a reviewed-only no-op manifest template — @agent — INV-023.
+- Extended source-integrity and Settings hook/UI coverage for referenced label/type lock, safe metadata changes, unreferenced renames, delete-in-use, and inactive-history display — @agent — INV-024.
 
 ### Docs
-- Authority updates: INV-023, INV-026, CONTRACTS, BEHAVIOR, DECISIONS DEC-20260724-01, DATA-MODEL, SECURITY, USE-CASES UC-009, TEST-MATRIX, MIGRATIONS 051/052, permission-registry, services-catalog/report domains, and schema map — @agent.
+- Authority updates: INV-023/024/026, CONTRACTS, BEHAVIOR, DECISIONS DEC-20260724-01/02, DATA-MODEL, SECURITY, FAILURE-MODES, USE-CASES UC-009, TEST-MATRIX, MIGRATIONS 051/052, permission-registry, affected product domains, dependency map, and schema map — @agent.
 
 ## [0.32.59] — 2026-07-23
 

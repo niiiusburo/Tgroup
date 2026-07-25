@@ -79,4 +79,11 @@ Component reference: `website/src/components/shared/ExpandableText.tsx`.
 
 - New user-visible text needs English and Vietnamese keys.
 - Do not mix hardcoded English labels into Vietnamese operational pages unless the product decision is explicit.
+
+## 10. Customer Source Taxonomy
+
+- Settings may list inactive historical sources so staff can audit and read closed-period labels.
+- A source referenced by any customer or sale order keeps its name and type fixed. Staff may deactivate it or edit the description only.
+- Semantic renames or type changes require creating a new source (and optionally deactivating the old one). Do not rewrite the historical lookup row in place.
+- Delete is available only for unreferenced sources. Disabled delete controls must explain that customers/orders still use the label.
 - Preserve clinic terms staff already use, including customer codes, appointment refs, treatment/service refs, and payment language.

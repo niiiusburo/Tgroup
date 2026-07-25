@@ -142,7 +142,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | **R** | Customer settings, ServiceForm, customer/deposit exports, revenue/service exports and source breakdowns |
 | **E** | `GET/POST/PUT/DELETE /api/CustomerSources` |
 | **UI** | Settings customer sources; service/order source selector; report/export `Nguồn khách` |
-| **Risk** | **Critical** — bulk renames, merges, or deletes can rewrite both current and historical attribution. Five incident migrations are quarantined with `.sql.retired`; inactive lookups are excluded from new selection, transaction locks serialize source management with sale-order writes, and validated foreign keys block deletion while either partners or saleorders references remain (INV-024); future repairs require a verified manifest, backup, rollback, and explicit production confirmation (INV-023). |
+| **Risk** | **Critical** — bulk renames, merges, or deletes can rewrite both current and historical attribution. Five incident migrations are quarantined with `.sql.retired`; inactive lookups are excluded from new selection; transaction locks serialize source management with sale-order writes; validated foreign keys plus API guards block deletion and name/type mutation while either partners or saleorders references remain (`CUSTOMER_SOURCE_IN_USE` / `CUSTOMER_SOURCE_LABEL_LOCKED`, INV-024); future repairs require a verified manifest, backup, rollback, and explicit production confirmation (INV-023). |
 
 ### dbo.investor_clients
 

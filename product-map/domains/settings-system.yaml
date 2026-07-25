@@ -81,7 +81,7 @@ ui_surfaces:
   - BankSettingsForm
   - TimezoneSelector
   - IpAccessControl
-  - CustomerSourcesConfig
+  - CustomerSourcesConfig (Settings tab "Customer Sources")
   - PermissionGroupConfig / RoleConfig
   - ErrorBoundary / ErrorReporter
   - Version update prompt
@@ -108,5 +108,7 @@ risk_level: medium
 notes:
   - "`POST /api/telemetry/errors` is intentionally public and rate-limited before the global `/api` auth middleware; telemetry reads, writes, stats, fix-attempts, and version events are authenticated by the global middleware."
   - "`GET /api/CustomerSources*` and `GET /api/StockPickings*` are authenticated only by the global `/api` auth middleware; their create/update/delete routes require `settings.edit`."
+  - "Referenced CustomerSources rows keep name/type immutable (`CUSTOMER_SOURCE_LABEL_LOCKED`) and cannot be deleted (`CUSTOMER_SOURCE_IN_USE`); description and is_active remain editable. Semantic renames create a new source (INV-024)."
+  - "impact_tests for source taxonomy: api/tests/customerSourceIntegrity.test.js, website/src/hooks/useSettings.customer-sources.test.tsx"
   - "`GET /api/IpAccess/check` is public via the server allowlist; settings and entries reads require `settings.view`, while mode/entry mutations require `settings.edit`."
   - "`GET /api/Places/autocomplete` and `GET /api/Places/details` are server-proxied Google Places calls; browser code must not require or expose `VITE_GOOGLE_PLACES_API_KEY`, and cosmetic LOB routing must bypass `/Places/*` rewrites."

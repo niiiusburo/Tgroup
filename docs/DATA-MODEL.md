@@ -163,7 +163,7 @@ Investor identities remain `dbo.partners` employee rows assigned to the `investo
 | `description` | text | nullable |
 | `is_active` | boolean | nullable, default true |
 
-`partners.sourceid` stores the current customer-level source. `saleorders.sourceid` stores the service/order attribution used first by historical revenue exports. Both columns have validated foreign keys to `customersources.id` with `ON DELETE RESTRICT` (migration 050). Lookup taxonomy maintenance must not bulk rewrite those references; a record-level correction requires a verified earlier source, an explicit manifest, backup, transaction rollback, and production confirmation. Inactive lookups are historical-only: they cannot be selected for a new order, but an existing order may retain its already-assigned inactive value. Application deletion is blocked while either `partners` or `saleorders` has a reference.
+`partners.sourceid` stores the current customer-level source. `saleorders.sourceid` stores the service/order attribution used first by historical revenue exports. Both columns have validated foreign keys to `customersources.id` with `ON DELETE RESTRICT` (migration 050). Lookup taxonomy maintenance must not bulk rewrite those references; a record-level correction requires a verified earlier source, an explicit manifest, backup, transaction rollback, and production confirmation. Inactive lookups are historical-only: they cannot be selected for a new order, but an existing order may retain its already-assigned inactive value. Application deletion is blocked while either `partners` or `saleorders` has a reference. While referenced, `customersources.name` and `customersources.type` are application-immutable (`CUSTOMER_SOURCE_LABEL_LOCKED`) so report joins keep historical labels; only `description` and `is_active` may change. Semantic renames create a new lookup row.
 
 #### `dbo.investor_clients`
 | Column | Type | Constraints |
@@ -609,7 +609,7 @@ If `dbo.customer_face_embeddings` exists and the local provider is active, the e
 `payments.receipt_number` uses a per-year counter. The sequence MUST reset on January 1st of each calendar year. The generation function uses `EXTRACT(YEAR FROM NOW())` as the partition key.
 
 ### INV-SCHEMA-008 — Historical Customer-Source Attribution Stability
-Customer-source taxonomy maintenance must not bulk rewrite `partners.sourceid` or `saleorders.sourceid` for already-recorded activity. Known destructive rewrite files remain forensic artifacts with `.sql.retired` extensions; any repair must be record-scoped and reversible.
+Customer-source taxonomy maintenance must not bulk rewrite `partners.sourceid` or `saleorders.sourceid` for already-recorded activity, and must not rename/retype a still-referenced `customersources` row in place. Known destructive rewrite files remain forensic artifacts with `.sql.retired` extensions; any repair must be record-scoped and reversible.
 
 ---
 

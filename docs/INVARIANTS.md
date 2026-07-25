@@ -106,9 +106,9 @@
 **Cite when:** Editing customer-source migrations, `partners.sourceid`, `saleorders.sourceid`, source imports, or source-based reports/exports.
 
 ### INV-024 — Historical Customer-Source Lookup Retention
-**Rule:** An inactive customer source MUST NOT be offered or accepted for new order attribution. An existing order MAY retain its exact inactive source during unrelated edits, and a customer-source lookup MUST NOT be deleted while any `partners` or `saleorders` row references it.
-**Rationale:** Historical lookup rows are needed to render closed-period attribution. Reusing them creates new ambiguous data; deleting them breaks existing report labels.
-**Enforced by:** `ServiceForm`, transaction-scoped lookup locks in `getCustomerSourceSelectionError()` and CustomerSources update/delete, validated `ON DELETE RESTRICT` foreign keys from `partners.sourceid` and `saleorders.sourceid`, and the reference-aware `DELETE /api/CustomerSources/:id` guard. Covered by `dbTransaction.test.js`, `customerSourceIntegrity.test.js`, `customerSourceReferenceMigration.test.js`, and `useSettings.customer-sources.test.tsx`.
+**Rule:** An inactive customer source MUST NOT be offered or accepted for new order attribution. An existing order MAY retain its exact inactive source during unrelated edits, and a customer-source lookup MUST NOT be deleted while any `partners` or `saleorders` row references it. While referenced, the lookup's `name` and `type` are immutable (`CUSTOMER_SOURCE_LABEL_LOCKED`); only `description` and `is_active` may change. Semantic label/type changes require a new `customersources` row via `POST`, leaving historical IDs and report labels intact.
+**Rationale:** Historical lookup rows are needed to render closed-period attribution. Reusing them creates new ambiguous data; deleting or renaming them silently rewrites past report labels.
+**Enforced by:** `ServiceForm`, Settings `CustomerSourcesConfig`, transaction-scoped lookup locks in `getCustomerSourceSelectionError()` and CustomerSources update/delete, validated `ON DELETE RESTRICT` foreign keys from `partners.sourceid` and `saleorders.sourceid`, and the reference-aware `PUT`/`DELETE /api/CustomerSources/:id` guards. Covered by `dbTransaction.test.js`, `customerSourceIntegrity.test.js`, `customerSourceReferenceMigration.test.js`, and `useSettings.customer-sources.test.tsx`.
 **Cite when:** Changing customer-source selectors, source CRUD, sale-order create/update, or historical attribution handling.
 
 ### INV-025 — Partial Partner Update Omission Safety
@@ -225,3 +225,4 @@
 | 2026-07-23 | INV-025 | Added omission-safe semantics for partial partner UUID updates | codex/partner-partial-update-fix |
 | 2026-07-24 | INV-026 | Added paid/closed-period sale-order source immutability + audited correction path | worktree/10-enforce-closed-period-source-immutability |
 | 2026-07-24 | INV-023 | Separate order attribution source from customer acquisition source | 11-separate-order-and-customer-source-semantics |
+| 2026-07-24 | INV-024 | Extended retention to lock referenced source name/type labels | worktree/12-protect-referenced-source-labels-and-types |

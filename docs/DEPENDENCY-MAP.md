@@ -98,6 +98,13 @@ graph TD
 - **Blast radius:** **Order source edits, closed-period revenue attribution, audited correction workflow.**
 - **Change rules:** Must preserve INV-026. Paid and closed-period locks must fail ordinary PATCH source changes; correction path remains the only authorized mutation with full audit fields.
 
+### `api/src/routes/customerSources.js`
+- **Layer:** 3
+- **Upstream:** `api/src/db.js`, `dbo.customersources`, `dbo.partners`, `dbo.saleorders`
+- **Downstream:** Settings Customer Sources UI, service/order selectors, report/export source labels via live lookup joins.
+- **Blast radius:** **Historical report labels, settings taxonomy, and any surface that displays `customersources.name`.**
+- **Change rules:** Must preserve INV-024 label lock: referenced name/type cannot mutate; delete blocked while referenced; description/`is_active` remain editable; semantic changes create a new row.
+
 ### `api/src/middleware/auth.js`
 - **Layer:** 3
 - **Upstream:** `jsonwebtoken`, `db.js`, `services/permissionService.js`

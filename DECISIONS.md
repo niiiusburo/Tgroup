@@ -131,3 +131,16 @@ Define a closed reporting period as any order attribution date strictly before t
 
 Consequences:
 INV-026, migration 051, ServiceForm lock UX, and `saleOrderSourceImmutability` regression tests are mandatory companions. Future period-close tooling may refine the calendar-month default but must not weaken paid-order immutability.
+
+## DEC-20260724-02: Referenced Source Labels Are Immutable
+
+Status: Accepted
+
+Context:
+Closed-period revenue labels join `partners.sourceid` / `saleorders.sourceid` to live `customersources.name`. Renaming or retyping a referenced lookup in Settings silently rewrote historical report output (snake-source-incident Task 12).
+
+Decision:
+While any customer or sale-order reference remains, block name/type mutation and deletion. Permit description and active-flag changes. Semantic taxonomy changes create a new source row instead of rewriting the historical ID.
+
+Consequences:
+API returns stable `CUSTOMER_SOURCE_LABEL_LOCKED` / `CUSTOMER_SOURCE_IN_USE`. Settings UI exposes the lock and steers staff to "add source" for renames. INV-024 documents the retention and label-lock rule.
