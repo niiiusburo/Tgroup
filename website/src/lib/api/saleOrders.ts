@@ -30,8 +30,12 @@ export interface ApiSaleOrder {
   notes: string | null;
   tooth_numbers: string | null;
   tooth_comment: string | null;
+  /** Direct order attribution (saleorders.sourceid). Never inherited from customer. */
   sourceid: string | null;
   sourcename: string | null;
+  /** Customer acquisition source (partners.sourceid). May change over time. */
+  customersourceid?: string | null;
+  customersourcename?: string | null;
   lastupdated: string | null;
   isdeleted?: boolean;
   /** Sale order reference code (e.g. SO-2024-001). */
@@ -80,6 +84,7 @@ export function createSaleOrder(data: {
   notes?: string;
   tooth_numbers?: string | null;
   tooth_comment?: string | null;
+  /** Order-level source; when omitted/null, API snapshots customer source. */
   sourceid?: string | null;
 }) {
   return apiFetch<ApiSaleOrder>('/SaleOrders', { method: 'POST', body: data });
@@ -105,6 +110,7 @@ export function updateSaleOrder(id: string, data: {
   notes?: string | null;
   tooth_numbers?: string | null;
   tooth_comment?: string | null;
+  /** Direct order source only — never send customer-inherited source. */
   sourceid?: string | null;
 }) {
   return apiFetch<ApiSaleOrder>(`/SaleOrders/${id}`, { method: 'PATCH', body: data });
@@ -191,6 +197,8 @@ export interface ApiSaleOrderLine {
   companyId?: string | null;
   sourceid?: string | null;
   sourceId?: string | null;
+  customersourceid?: string | null;
+  customerSourceId?: string | null;
   unit?: string | null;
   orderid?: string | null;
   orderId?: string | null;

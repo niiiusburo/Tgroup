@@ -257,12 +257,15 @@ Investor identities remain `dbo.partners` employee rows assigned to the `investo
 | `state` | text | draft/confirmed/done/cancelled |
 | `datestart` | date | |
 | `dateend` | date | |
+| `sourceid` | uuid | FK → customersources; **order attribution** (nullable for legacy). Snapshotted on create when omitted. Distinct from `partners.sourceid` (INV-023). |
 | `isdeleted` | boolean | DEFAULT false |
 
 **Indexes:**
 - `saleorders_partner_id_idx`
 - `saleorders_company_id_idx`
 - `saleorders_state_idx`
+
+**Source semantics:** `saleorders.sourceid` is order-level attribution. `partners.sourceid` is customer acquisition. Do not COALESCE for writes or closed-period reports.
 
 **Source immutability (INV-026):** After payment or closed period, `sourceid` changes only via `dbo.saleorder_source_corrections` + the permissioned correction API.
 

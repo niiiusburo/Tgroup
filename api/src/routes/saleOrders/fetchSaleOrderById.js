@@ -1,6 +1,8 @@
 const { query } = require('../../db');
+const { orderAndCustomerSourceSelectSql } = require('../../lib/orderSourceSemantics');
 
 function fetchSaleOrderById(id, queryFn = query) {
+  const sourceFields = orderAndCustomerSourceSelectSql();
   return queryFn(
     `SELECT
       so.id,
@@ -26,8 +28,7 @@ function fetchSaleOrderById(id, queryFn = query) {
       so.datestart,
       so.dateend,
       so.notes,
-      COALESCE(so.sourceid, p.sourceid) AS sourceid,
-      cs.name AS sourcename,
+      ${sourceFields.select},
       (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
       (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
       (SELECT sol.tooth_numbers FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_numbers,
@@ -40,7 +41,7 @@ function fetchSaleOrderById(id, queryFn = query) {
     LEFT JOIN employees doc ON doc.id = so.doctorid
     LEFT JOIN employees asst ON asst.id = so.assistantid
     LEFT JOIN employees da ON da.id = so.dentalaideid
-    LEFT JOIN customersources cs ON cs.id = COALESCE(so.sourceid, p.sourceid)
+    ${sourceFields.joins}
     WHERE so.id = $1 AND so.isdeleted = false`,
     [id],
   );

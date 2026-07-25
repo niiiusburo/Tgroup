@@ -154,11 +154,17 @@ columns:
     width: 12.5
     source: dbo.hremployee.name (dental aid)
   - position: 22
-    key: customerSource
-    header_vi: Nguồn khách
+    key: orderSource
+    header_vi: Nguồn đơn
     style: text
     width: 14
-    source: dbo.utmsource.name (customer source)
+    source: dbo.customersources.name via saleorders.sourceid (immutable order attribution)
+  - position: 23
+    key: customerSource
+    header_vi: Nguồn KH
+    style: text
+    width: 14
+    source: dbo.customersources.name via partners.sourceid (customer acquisition; may change)
 
 filters_accepted:
   - name: dateFrom
@@ -172,10 +178,13 @@ filters_accepted:
   - name: search
     type: string
 
-verified_against_live: "2026-05-20 — verified from lock test legacyFlatReportColumns.lock.test.js"
+verified_against_live: "2026-07-24 — order vs customer source split; lock test legacyFlatReportColumns.lock.test.js"
 
 notes: |
   This export shares row mapper with deposit-flat (uses the same
   legacyFlatReportsExport.js builder, but with REVENUE_COLUMNS instead of
   DEPOSIT_COLUMNS). The SQL query is specific to each (legacyFlatRevenueQuery vs
   legacyFlatDepositQuery).
+  Closed-period attribution uses saleorders.sourceid only (Nguồn đơn).
+  Nguồn KH is partners.sourceid and is display-only for acquisition context.
+  Do not COALESCE order source with customer source.

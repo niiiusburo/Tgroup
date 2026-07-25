@@ -32,6 +32,34 @@ Setup/login data: Staff with service edit; admin with `services.source_correct`.
 
 ---
 
+# TestSprite Plan: separate order and customer source semantics 2026-07-24
+
+Feature/edit name: v0.33.0 — INV-023 order source ≠ customer source (no COALESCE into sourceid).
+
+Changed URLs / API routes / data flow:
+- API: `GET/POST/PATCH /api/SaleOrders` — dual fields `sourceid` (order) + `customersourceid` (customer); create snapshots customer source when order source omitted.
+- API: `POST /api/Reports/revenue/by-source` — attributes by `saleorders.sourceid` only.
+- Exports: `revenue-flat` columns `Nguồn đơn` + `Nguồn KH`; services export same split; deposit-flat header `Nguồn KH`.
+- Frontend: service form label `Nguồn đơn hàng`; mapper keeps customer source separate so edits do not resubmit inherited source.
+
+Expected behavior:
+- Order with null `sourceid` and customer source Facebook → GET returns `sourceid=null`, `customersourceid=<fb>`; edit without touching source leaves order null.
+- New order without sourceid → order gets a validated snapshot of customer source.
+- Customer source change does not move closed-period revenue buckets for existing orders.
+- Export headers distinguish order vs customer source.
+
+User roles: staff with `services.view` / `customers.edit` / `reports.view` / `payments.export`.
+
+Execution items:
+- [x] PASS: API unit suites — orderSourceSemantics, saleOrders source semantics, revenueRecognition by-source SQL, legacyFlat + allBuilderColumns + featureCatalog — 57/57 in the focused Task 11 rerun.
+- [x] PASS: Frontend `mapSaleOrderToServiceRecord.test.ts` — 2/2.
+- [ ] PENDING: Integrated local UI/API smoke — create service without picking source → order snapshots customer source; notes-only edit leaves direct order source unchanged.
+- [ ] PENDING: Post-deploy live verify — revenue-by-source and revenue-flat export show `Nguồn đơn` separately from `Nguồn KH`.
+
+Setup/login data: local/demo staff account supplied through approved test configuration; never print credentials.
+
+---
+
 # TestSprite Plan: partner source read-only boundary 2026-07-23
 
 Feature/edit name: v0.32.59 — omission-safe partial customer updates and read-only `partners.sourceid` on normal customer writes.

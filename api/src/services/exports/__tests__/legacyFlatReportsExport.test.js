@@ -65,7 +65,8 @@ describe('legacyFlatReportsExport', () => {
         assistantname: 'Phụ tá D',
         dentalaidename: 'Trợ lý E',
         paymentnote: 'Khách chuyển khoản BIDV, thu đủ đợt 1',
-        customersourcename: 'Sale Online',
+        ordersourcename: 'Sale Online',
+        customersourcename: 'Facebook',
       },
     ]);
 
@@ -101,7 +102,8 @@ describe('legacyFlatReportsExport', () => {
       'Bác sĩ',
       'Phụ tá',
       'Trợ lý bác sĩ',
-      'Nguồn khách',
+      'Nguồn đơn',
+      'Nguồn KH',
     ]);
     expect(sheet.getColumn(1).width).toBeUndefined();
     expect(sheet.getColumn(2).width).toBe(16);
@@ -130,9 +132,10 @@ describe('legacyFlatReportsExport', () => {
     expect(sheet.getCell('T2').value).toBe('Phụ tá D');
     expect(sheet.getCell('U2').value).toBe('Trợ lý E');
     expect(sheet.getCell('V2').value).toBe('Sale Online');
+    expect(sheet.getCell('W2').value).toBe('Facebook');
   });
 
-  it('uses saleorders.code in column E, exposes so.name separately, and search/source precedence matches SO context', async () => {
+  it('uses saleorders.code in column E, exposes so.name separately, and separates order vs customer source', async () => {
     query.mockResolvedValueOnce([{ total: '0', total_amount: '0' }]);
 
     await legacyFlatReportsExport.revenue.preview({
@@ -150,7 +153,9 @@ describe('legacyFlatReportsExport', () => {
     expect(sql).toContain(') AS saleordername');
     expect(sql).toContain('so.code ILIKE');
     expect(sql).toContain('p.notes AS paymentnote');
-    expect(sql).toContain('LEFT JOIN customersources cs ON cs.id = COALESCE(so.sourceid, cust.sourceid)');
+    expect(sql).toContain('LEFT JOIN customersources order_cs ON order_cs.id = so.sourceid');
+    expect(sql).toContain('LEFT JOIN customersources cust_cs ON cust_cs.id = cust.sourceid');
+    expect(sql).not.toContain('COALESCE(so.sourceid, cust.sourceid)');
     expect(params).toContain('%SO-2026-0644%');
   });
 
@@ -228,7 +233,7 @@ describe('legacyFlatReportsExport', () => {
       'Note cọc tiền',
       'Sale online',
       'CSKH',
-      'Nguồn khách',
+      'Nguồn KH',
     ]);
     expect(sheet.getColumn(5).width).toBe(12.796875);
     expect(sheet.getColumn(9).width).toBe(16);

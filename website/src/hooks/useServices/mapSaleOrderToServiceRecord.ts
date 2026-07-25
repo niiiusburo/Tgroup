@@ -70,7 +70,10 @@ export function mapSaleOrderToServiceRecord(order: ApiSaleOrder): ServiceRecord 
     createdAt: order.datecreated?.slice(0, 10) || '',
     orderName: order.name || undefined,
     orderCode: extractOrderCode(order),
+    // Direct order attribution only — never inherit customersourceid here.
     sourceId: order.sourceid ?? null,
     sourceName: order.sourcename || undefined,
+    customerSourceId: order.customersourceid ?? null,
+    customerSourceName: order.customersourcename || undefined,
   };
 }

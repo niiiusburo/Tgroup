@@ -98,7 +98,9 @@
     "unitPlaceholder": "răng",
     "subtitleEdit": "Cập nhật thông tin điều trị",
     "subtitleCreate": "Tạo hồ sơ dịch vụ điều trị mới",
-    "notes": "Ghi chú"
+    "notes": "Ghi chú",
+    "orderSource": "Nguồn đơn hàng",
+    "orderSourceHint": "Nguồn gán cho phiếu (không tự kế thừa nguồn KH khi sửa)"
   },
   "formErrors": {
     "selectService": "Vui lòng chọn dịch vụ",
@@ -129,7 +131,7 @@
     "inactive": "Ngừng sử dụng"
   },
   "noServicesFound": "Không tìm thấy dịch vụ nào",
-  "ngunKhchHng": "Nguồn khách hàng",
+  "ngunKhchHng": "Nguồn đơn hàng",
   "defaultUnit": "Lần",
   "chnRng": "Chọn răng",
   "ghiChRng": "Ghi chú răng",

@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const { withTransaction } = require('../../db');
 const { getVietnamToday, getVietnamYear } = require('../../lib/dateUtils');
+const { resolveCreateOrderSourceId } = require('../../lib/orderSourceSemantics');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
 const { getCustomerSourceSelectionError } = require('./customerSourceSelection');
 
@@ -36,8 +37,12 @@ async function createSaleOrder(req, res) {
     }
 
     const outcome = await withTransaction(async (transactionQuery) => {
-      const sourceError = await getCustomerSourceSelectionError(
+      const resolvedSourceId = await resolveCreateOrderSourceId(transactionQuery, {
+        partnerId: partnerid,
         sourceid,
+      });
+      const sourceError = await getCustomerSourceSelectionError(
+        resolvedSourceId,
         null,
         transactionQuery,
       );
@@ -78,7 +83,7 @@ async function createSaleOrder(req, res) {
         datestart || null,
         dateend || null,
         notes || null,
-        sourceid || null,
+        resolvedSourceId,
         false,
       ],
     );

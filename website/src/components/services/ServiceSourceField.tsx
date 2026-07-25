@@ -1,4 +1,5 @@
 import { FileText } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { sourceLockMessage, type SourceLockState } from '@/lib/saleOrderSourceLock';
 
 export interface ServiceSourceOption {
@@ -21,6 +22,7 @@ export function ServiceSourceField({
   lock,
   error,
 }: ServiceSourceFieldProps) {
+  const { t } = useTranslation('services');
   const locked = lock.locked;
   const lockHint = sourceLockMessage(lock);
 
@@ -28,7 +30,7 @@ export function ServiceSourceField({
     <div>
       <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-gray-700">
         <FileText className="h-3.5 w-3.5" />
-        Nguồn khách hàng
+        {t('form.orderSource', 'Nguồn đơn hàng')}
       </label>
       <div className="flex flex-wrap gap-2">
         {sources.map((s) => {

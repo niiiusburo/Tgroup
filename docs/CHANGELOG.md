@@ -21,12 +21,17 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 - Permissioned correction path `POST /api/SaleOrders/:id/source-correction` (`services.source_correct`) requiring reason, evidence, expected old source, rollback reference, actor, timestamp, and request id; audit table `dbo.saleorder_source_corrections` + migration 051 — @agent — INV-026.
 - ServiceForm disables source chips with lock copy when paid/closed-period; surfaces `SOURCE_IMMUTABLE` next to the source field — @agent — BEHAVIOR.md / INV-026.
 
+### Changed
+- Separate order attribution from customer acquisition (INV-023): API reads expose `sourceid`/`sourcename` and `customersourceid`/`customersourcename` without `COALESCE`; new orders snapshot the customer source only at creation; revenue-by-source and closed-period exports use the direct order source; exports label `Nguồn đơn` and `Nguồn KH` distinctly — @agent — snake-source-incident Task 11.
+- Service forms label the editable field as order attribution, and edit mapping never resubmits a customer-inherited source as the direct order source — @agent — INV-023.
+
 ### Testing
 - `api/tests/saleOrderSourceImmutability.test.js` covers open/allowed, paid reject, closed-period reject, unrelated edit, unauthorized-shape correction, conflict, and authorized audited correction — @agent.
 - `website/src/lib/saleOrderSourceLock.test.ts` covers frontend lock evaluation parity — @agent.
+- Added order/customer semantics, sale-order API, revenue SQL, export-column, export-builder, and frontend mapping regressions; migration 052 remains a reviewed-only no-op manifest template — @agent — INV-023.
 
 ### Docs
-- Authority updates: INV-026, CONTRACTS, BEHAVIOR, DECISIONS DEC-20260724-01, DATA-MODEL, SECURITY, USE-CASES UC-009, TEST-MATRIX, MIGRATIONS 051, permission-registry, services-catalog domain — @agent.
+- Authority updates: INV-023, INV-026, CONTRACTS, BEHAVIOR, DECISIONS DEC-20260724-01, DATA-MODEL, SECURITY, USE-CASES UC-009, TEST-MATRIX, MIGRATIONS 051/052, permission-registry, services-catalog/report domains, and schema map — @agent.
 
 ## [0.32.59] — 2026-07-23
 

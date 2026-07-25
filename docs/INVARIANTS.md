@@ -189,6 +189,12 @@
 **Enforced by:** `scripts/deploy-build-args.sh` calling `scripts/deploy-preflight.js`; release planning may also run `scripts/deploy-worktree-audit.js`.
 **Cite when:** Deploying, preparing a hotfix, or changing release scripts.
 
+### INV-023 — Order Source ≠ Customer Source
+**Rule:** `saleorders.sourceid` is the immutable order-attribution source. `partners.sourceid` is the customer-acquisition source and may change over time. Closed-period revenue reports and default exports MUST attribute by `saleorders.sourceid` only. API reads MUST expose both fields separately and MUST NOT `COALESCE(so.sourceid, partner.sourceid)` into `sourceid`. New orders snapshot the customer's current source onto `saleorders.sourceid` when no explicit order source is provided. Normal order edits MUST never rewrite a null order source with the inherited customer source. Legacy COALESCE is allowed only under the explicit version label `legacy_coalesce_v1` and never as the default closed-period path. Bulk backfill of historical null order sources requires a reviewed manifest (not auto-run).
+**Rationale:** Silent COALESCE caused order edits to materialize inherited customer source as direct attribution and made customer-source changes rewrite historical revenue.
+**Enforced by:** `api/src/lib/orderSourceSemantics.js`, sale-order fetch/create/update, `reports/revenue/by-source`, revenue-flat and services exports.
+**Cite when:** Changing sale-order source fields, revenue-by-source, flat exports, or customer source edits.
+
 ---
 
 ## Incident-Derived Invariants
@@ -218,3 +224,4 @@
 | 2026-07-23 | INV-024 | Added inactive-source selection and reference-retention safeguards | codex/customer-source-incident-guard |
 | 2026-07-23 | INV-025 | Added omission-safe semantics for partial partner UUID updates | codex/partner-partial-update-fix |
 | 2026-07-24 | INV-026 | Added paid/closed-period sale-order source immutability + audited correction path | worktree/10-enforce-closed-period-source-immutability |
+| 2026-07-24 | INV-023 | Separate order attribution source from customer acquisition source | 11-separate-order-and-customer-source-semantics |

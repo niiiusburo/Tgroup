@@ -17,7 +17,8 @@ const COLUMNS = [
   { key: 'doctorName', header: 'Bác sĩ', width: 18 },
   { key: 'assistantName', header: 'Phụ tá', width: 18 },
   { key: 'dentalAideName', header: 'Trợ lý BS', width: 18 },
-  { key: 'sourcename', header: 'Nguồn', width: 18 },
+  { key: 'orderSource', header: 'Nguồn đơn', width: 18 },
+  { key: 'customerSource', header: 'Nguồn KH', width: 18 },
   { key: 'amountTotal', header: 'Tổng tiền', width: 16, style: 'vnd' },
   { key: 'totalPaid', header: 'Đã thu', width: 16, style: 'vnd' },
   { key: 'residual', header: 'Còn lại', width: 16, style: 'vnd' },
@@ -103,7 +104,8 @@ async function getRows(filters, investorScope) {
       doc.name AS doctorname,
       asst.name AS assistantname,
       da.name AS dentalaidename,
-      cs.name AS sourcename,
+      order_cs.name AS ordersourcename,
+      cust_cs.name AS customersourcename,
       (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
       (SELECT sol.tooth_numbers FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_numbers,
       (SELECT sol.tooth_comment FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_comment
@@ -113,7 +115,8 @@ async function getRows(filters, investorScope) {
     LEFT JOIN employees doc ON doc.id = so.doctorid
     LEFT JOIN employees asst ON asst.id = so.assistantid
     LEFT JOIN employees da ON da.id = so.dentalaideid
-    LEFT JOIN customersources cs ON cs.id = COALESCE(so.sourceid, p.sourceid)
+    LEFT JOIN customersources order_cs ON order_cs.id = so.sourceid
+    LEFT JOIN customersources cust_cs ON cust_cs.id = p.sourceid
     WHERE ${where}
     ORDER BY so.datecreated DESC NULLS LAST
     LIMIT ${MAX_ROWS + 1}
@@ -196,7 +199,8 @@ async function build(filters, user) {
       doctorName: r.doctorname || '',
       assistantName: r.assistantname || '',
       dentalAideName: r.dentalaidename || '',
-      sourcename: r.sourcename || '',
+      orderSource: r.ordersourcename || '',
+      customerSource: r.customersourcename || '',
       amountTotal: parseFloat(r.amounttotal || 0),
       totalPaid: parseFloat(r.totalpaid || 0),
       residual: parseFloat(r.residual || 0),

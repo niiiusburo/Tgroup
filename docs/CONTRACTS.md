@@ -24,6 +24,7 @@
 | v1.0.8 | 2026-07-04 | Investor users are restricted normal-portal staff sessions: `/api/Auth/login` may authenticate `dbo.investor_accounts`, but all data access stays on existing portal routes and is scoped by `dbo.investor_clients`. |
 | v1.0.9 | 2026-07-08 | Investor visibility admin controls (`GET`/`PATCH /api/Partners/investor-visibility`) are gated by admin group (`assertAdmin`) instead of `permissions.edit`, and admin list/toggle match `dbo.investor_clients` by the SAME scope union (`investor_id` = the investor's `partners.id` OR any active `dbo.investor_accounts.id`) that scopes the investor read. Customer id is validated with the canonical 8-4-4-4-12 UUID pattern. |
 | v1.0.10 | 2026-07-23 | Customer-source usage counts and deletion guards include both customer and sale-order references; new sale orders reject inactive/missing sources while an existing order may preserve its already-assigned inactive historical source. |
+| v1.0.11 | 2026-07-24 | Sale order source contract split: `sourceid`/`sourcename` = direct order attribution; `customersourceid`/`customersourcename` = partner acquisition. Create snapshots customer source when order source omitted. Revenue by-source and closed-period exports use order source only (INV-023). |
 
 ---
 
@@ -421,6 +422,36 @@ Face error responses:
 ```
 
 ---
+
+### 1.7b Sale Orders (source semantics)
+
+#### GET /api/SaleOrders, GET /api/SaleOrders/:id
+**Response fields (source):**
+```ts
+{
+  sourceid: string | null;           // direct order attribution (saleorders.sourceid)
+  sourcename: string | null;
+  customersourceid: string | null;   // partner acquisition (partners.sourceid)
+  customersourcename: string | null;
+}
+```
+`sourceid` MUST NOT be filled via COALESCE from the customer. Null order source stays null.
+
+#### POST /api/SaleOrders
+**Request:** may include `sourceid`. When omitted/null/empty, server snapshots `partners.sourceid` onto the new order (deterministic create semantics).
+**Response:** same dual source fields as GET.
+
+#### PATCH /api/SaleOrders/:id
+**Request:** `sourceid` updates only the order column when present. Never treat customer source as order source.
+
+#### POST /api/Reports/revenue/by-source
+Attributes paid revenue by `saleorders.sourceid` only. Null → unassigned (`Chưa gán nguồn`). Customer source changes do not move historical order buckets.
+
+#### Export revenue-flat columns
+- `orderSource` / header `Nguồn đơn` ← order source name
+- `customerSource` / header `Nguồn KH` ← customer acquisition name
+
+Invariants: INV-023.
 
 ### 1.8 Reports
 
