@@ -229,7 +229,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | **UI** | Services patient records, Payment allocations, CustomerProfile service history, Reports |
 | **Risk** | **High** — state transitions (`draft` → `confirmed` → `done` → `cancelled`) are logged in `saleorder_state_logs` and drive payment residual calculations. `sourceid` is order attribution and must remain distinct from `partners.sourceid` customer acquisition; closed-period reports must not fill it with `COALESCE`. Bulk taxonomy rewrites change historical revenue output (INV-023). Paid/closed-period ordinary edits cannot change `sourceid` (INV-026); audited corrections go through `saleorder_source_corrections`. |
 
-Migration `052_order_source_backfill_manifest.sql` is a reviewed-only, no-op manifest template for legacy rows whose `saleorders.sourceid` is null while the customer has a source. It does not change schema or data unless an operator supplies an approved row manifest and passes the separate production-data confirmation gate.
+Migration `074_order_source_backfill_manifest.sql` is a reviewed-only, no-op manifest template for legacy rows whose `saleorders.sourceid` is null while the customer has a source. It does not change schema or data unless an operator supplies an approved row manifest and passes the separate production-data confirmation gate.
 
 ### dbo.saleorderlines
 
@@ -397,7 +397,7 @@ Migration `052_order_source_backfill_manifest.sql` is a reviewed-only, no-op man
 | Attribute | Value |
 |-----------|-------|
 | **Primary Key** | `id` (uuid) |
-| **W** | Sale-order create/open-order update, `POST /api/SaleOrders/:id/source-correction`, `POST /api/Partners/:id/source-correction` via `api/src/services/sourceChangeAudit.js`; migration `053_source_change_audit.sql` |
+| **W** | Sale-order create/open-order update, `POST /api/SaleOrders/:id/source-correction`, `POST /api/Partners/:id/source-correction` via `api/src/services/sourceChangeAudit.js`; migration `075_source_change_audit.sql` |
 | **R** | `POST /api/Reports/source-change-reconciliation` (bounded) |
 | **E** | Same write paths + reconciliation report |
 | **UI** | No dedicated UI yet; operator/report consumers |

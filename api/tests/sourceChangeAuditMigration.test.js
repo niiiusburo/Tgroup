@@ -5,10 +5,10 @@ const path = require('path');
 
 const migrationPath = path.join(
   __dirname,
-  '../migrations/053_source_change_audit.sql',
+  '../migrations/075_source_change_audit.sql',
 );
 
-describe('migration 053 source_change_audit', () => {
+describe('migration 075 source_change_audit', () => {
   let content;
 
   beforeAll(() => {

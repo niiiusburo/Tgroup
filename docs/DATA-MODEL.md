@@ -307,7 +307,7 @@ Investor identities remain `dbo.partners` employee rows assigned to the `investo
 | `alerted_at` | timestamptz | nullable |
 | `created_at` | timestamptz | default now() |
 
-**Rules:** INSERT-only. BEFORE UPDATE/DELETE triggers raise. No app UPDATE/DELETE routes. Ordinary paid/closed-period PATCH changes are rejected before mutation; explicit correction routes write this ledger and the domain-specific correction record atomically. Created by migration `053_source_change_audit.sql`.
+**Rules:** INSERT-only. BEFORE UPDATE/DELETE triggers raise. No app UPDATE/DELETE routes. Ordinary paid/closed-period PATCH changes are rejected before mutation; explicit correction routes write this ledger and the domain-specific correction record atomically. Created by migration `075_source_change_audit.sql`.
 
 ---
 
