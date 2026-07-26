@@ -1,11 +1,24 @@
 /**
- * Notifications Page — Placeholder for SMS/Email notification management
+ * Notifications Page — static placeholder for SMS/Email notification management.
+ *
+ * NOTHING ON THIS PAGE IS WIRED TO A BACKEND. There is no notifications API, no
+ * notification table, and no send path. Every card, template row, and count below is
+ * hardcoded in this file.
+ *
+ * It previously rendered invented telemetry — "1,240 sent this month", "856 sent this
+ * month", and two channels badged "Active" — which read to clinic staff as a live,
+ * working integration. Those numbers were removed rather than kept, because a
+ * placeholder that reports fake sends is worse than an obviously empty one.
+ *
+ * If you wire this up, delete the hardcoded arrays; do not backfill them with plausible
+ * numbers.
+ *
  * @crossref:route[/notifications]
  * @crossref:used-in[App]
  * @crossref:uses[Payment, Customers]
  */
 
-import { Bell, Mail, MessageSquare, Send } from 'lucide-react';
+import { Bell, Info, Mail, MessageSquare, Send } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/shared/PageHeader';
 
@@ -18,18 +31,28 @@ export function Notifications() {
         subtitle={t('notifications:subtitle')}
         icon={<Bell className="w-6 h-6 text-primary" />}
         actions={
-          <button className="px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm">
+          <button
+            disabled
+            title={t('notifications:newTemplateDisabled')}
+            className="px-3 py-1.5 bg-gray-100 text-gray-400 rounded-lg text-sm cursor-not-allowed"
+          >
             New Template
           </button>
         }
       />
 
-      {/* Channel cards */}
+      {/* States plainly that nothing here is live, before any of the cards are read. */}
+      <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+        <Info className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+        <p className="text-sm text-amber-800">{t('notifications:previewBanner')}</p>
+      </div>
+
+      {/* Channel cards — no channel is configured, so none reports a status or a count */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
-          { label: 'Email Notifications', sent: '1,240', icon: Mail, color: '#0EA5E9', status: 'Active' },
-          { label: 'SMS Notifications', sent: '856', icon: MessageSquare, color: '#10B981', status: 'Active' },
-          { label: 'Push Notifications', sent: '—', icon: Send, color: '#8B5CF6', status: 'Coming Soon' },
+          { label: 'Email Notifications', icon: Mail, color: '#0EA5E9' },
+          { label: 'SMS Notifications', icon: MessageSquare, color: '#10B981' },
+          { label: 'Push Notifications', icon: Send, color: '#8B5CF6' },
         ].map((channel) => (
           <div key={channel.label} className="bg-white rounded-xl p-5 shadow-card">
             <div className="flex items-center justify-between mb-3">
@@ -39,18 +62,12 @@ export function Notifications() {
               >
                 <channel.icon className="w-5 h-5" style={{ color: channel.color }} />
               </div>
-              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                channel.status === 'Active'
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-gray-100 text-gray-500'
-              }`}>
-                {channel.status}
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                {t('notifications:notConfigured')}
               </span>
             </div>
             <div className="font-medium text-gray-900 text-sm">{channel.label}</div>
-            <div className="text-xs text-gray-400 mt-1">
-              {channel.sent !== '—' ? `${channel.sent} sent this month` : 'Not configured'}
-            </div>
+            <div className="text-xs text-gray-400 mt-1">{t('notifications:notConfigured')}</div>
           </div>
         ))}
       </div>
@@ -59,6 +76,7 @@ export function Notifications() {
       <div className="bg-white rounded-xl shadow-card overflow-hidden">
         <div className="p-4 border-b border-gray-200">
           <h3 className="font-medium text-gray-900">{t('notifications:notificationTemplates')}</h3>
+          <p className="text-xs text-gray-400 mt-0.5">{t('notifications:templatesArePlanned')}</p>
         </div>
         <div className="divide-y divide-gray-50">
           {[
@@ -70,7 +88,7 @@ export function Notifications() {
           ].map((tpl) => (
             <div
               key={tpl.name}
-              className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer"
+              className="p-4 flex items-center justify-between"
             >
               <div>
                 <div className="font-medium text-sm text-gray-900">{tpl.name}</div>

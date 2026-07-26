@@ -8,7 +8,15 @@ async function updateSaleOrderState(req, res) {
     const { state } = req.body;
     const changedBy = req.user?.employeeId || req.user?.id || null;
 
-    const validStates = ['sale', 'done', 'cancel', 'draft'];
+    // Three vocabularies exist for this one column and they barely intersect:
+    //   DB holds        pending (60,382) | sale (7,014) | completed (860) | draft (213)
+    //   frontend sends  completed | cancelled | pending | draft | cancel
+    //   this list held  sale | done | cancel | draft
+    // 'pending'/'completed'/'draft' are frozen legacy values from the tdental import
+    // (nothing has been created with them since the 2026-04-23 cutover); 'sale' is what
+    // the live app writes. Accepting the union stops the endpoint rejecting the values
+    // the UI actually sends, without migrating 68k historical rows.
+    const validStates = ['draft', 'pending', 'sale', 'completed', 'cancelled', 'cancel', 'done'];
     if (!state || !validStates.includes(state)) {
       return res.status(400).json({ error: `Invalid state. Must be one of: ${validStates.join(', ')}` });
     }

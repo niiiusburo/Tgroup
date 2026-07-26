@@ -66,10 +66,9 @@ describe('owned backend read route permissions', () => {
       ['/lines', 'services.view'],
       ['/:id', 'services.view'],
     ]],
-    ['accountPayments', require('../src/routes/accountPayments'), [
-      ['/', 'payment.view'],
-      ['/:id', 'payment.view'],
-    ]],
+    // accountPayments was removed in 0.32.60 — it selected ~40 columns from a
+    // 5-column accountpayments VIEW and joined accountjournals/currencies/
+    // accountaccounts, none of which exist, so it always returned 500.
     ['payments', require('../src/routes/payments'), [
       ['/', 'payment.view'],
       ['/deposits', 'payment.view'],
@@ -171,5 +170,38 @@ describe('external checkups route permissions', () => {
   it('patient creation and image upload use separate permissions', () => {
     expectRoutePermission(externalCheckupsRouter, 'post', '/:customerCode/patient', 'external_checkups.upload');
     expectRoutePermission(externalCheckupsRouter, 'post', '/:customerCode/health-checkups', 'external_checkups.upload');
+  });
+});
+
+describe('telemetry route permissions', () => {
+  const telemetryRouter = require('../src/routes/telemetry');
+  const publicTelemetryRouter = require('../src/routes/publicTelemetryErrors');
+
+  // error_events rows hold stack traces, captured api_body payloads, user_id and
+  // ip_address. Before 0.32.60 these sat behind requireAuth only, so any signed-in
+  // user — receptionist, CTV, investor — could read and mutate every recorded error.
+  it('GET /errors requires settings.view', () => {
+    expectRoutePermission(telemetryRouter, 'get', '/errors', 'settings.view');
+  });
+
+  it('GET /stats requires settings.view', () => {
+    expectRoutePermission(telemetryRouter, 'get', '/stats', 'settings.view');
+  });
+
+  it('PUT /errors/:id requires settings.edit', () => {
+    expectRoutePermission(telemetryRouter, 'put', '/errors/:id', 'settings.edit');
+  });
+
+  it('POST /errors/:id/fix-attempts requires settings.edit', () => {
+    expectRoutePermission(telemetryRouter, 'post', '/errors/:id/fix-attempts', 'settings.edit');
+  });
+
+  // Deliberately open: the browser posts crash reports here while logged out, and every
+  // signed-in client reports its own version transitions. Rate limiting is the control.
+  // If either of these ever gains a permission, error reporting goes silent instead of
+  // failing loudly, so the absence is asserted on purpose.
+  it('leaves crash reporting and version telemetry ungated', () => {
+    expect(routePermissions(publicTelemetryRouter, 'post', '/')).toEqual([]);
+    expect(routePermissions(telemetryRouter, 'post', '/version')).toEqual([]);
   });
 });

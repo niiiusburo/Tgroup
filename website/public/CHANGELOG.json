@@ -1,5 +1,71 @@
 [
   {
+    "version": "0.32.60",
+    "date": "2026-07-26",
+    "commit": "pending",
+    "highlights": "Audit remediation: payment over-allocation guards, atomic permission updates, unbroken customer deletion, cancelled appointments no longer shown as active, and nine dead route families removed.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Cancelled appointments with the state 'cancel' were rendered as active bookings on the calendar and in the appointment list; both mapping layers now recognise it, and the two layers no longer disagree on the same state.",
+          "Deleting a customer permanently always failed with a server error because the reference check queried two tables that do not exist; the check now covers only real tables and runs inside a transaction that locks the customer row.",
+          "Updating a sale order's state rejected the states the database actually uses, so the operation failed for most orders."
+        ]
+      },
+      {
+        "title": "Money Integrity",
+        "items": [
+          "A payment's allocations can no longer add up to more than the payment itself. This is the flaw behind the historical rows whose allocation equals the whole order total instead of that instalment's share.",
+          "Several allocations pointing at the same invoice or visit are now summed before being checked against the outstanding balance; previously each was checked alone, so two half-payments could both pass against one balance.",
+          "Editing a payment now re-checks the balance while holding a row lock, and refunds allocate their receipt number and insert the payment in one transaction, so a failure cannot consume a receipt number or leave a partial payment."
+        ]
+      },
+      {
+        "title": "Security",
+        "items": [
+          "Recorded application errors — which contain stack traces, captured request bodies, user ids and IP addresses — were readable and editable by any signed-in user. Reading and modifying them now requires the settings permissions held by Admin and Super Admin. Crash reporting itself stays open so errors are never lost."
+        ]
+      },
+      {
+        "title": "Reliability",
+        "items": [
+          "Saving an employee's permissions performed six writes without a transaction, two of them a delete followed by an insert. A failure in between could leave an employee with no branch access at all. The whole update is now atomic, and an update aimed at a non-existent employee or group is rolled back instead of half-applied.",
+          "The database connection pool was left at the default of 10 connections, which serialised requests and showed up as slow admin pages. Raised to 15 with a 30 second statement timeout, idle-connection release, and a bounded wait, sized to fit the one server shared by nk, nk2 and both NK3 databases.",
+          "An error on an idle database connection no longer risks bringing down the API process."
+        ]
+      },
+      {
+        "title": "Removed",
+        "items": [
+          "Nine route families inherited from the old Odoo-era schema (account payments, cashbooks, receipts, journals, stock pickings, CRM tasks, commissions, HR payslips and dashboard reports) were mounted but every one queried tables that do not exist, so they could only ever return a server error. No screen used them.",
+          "Two queries and one export selected a legacy customer-care status column that is effectively a constant and was displayed nowhere."
+        ]
+      },
+      {
+        "title": "Honesty Fixes",
+        "items": [
+          "The notifications page reported invented delivery figures and marked two channels 'Active' while no notification service exists. It now states plainly that nothing is connected and sends nothing.",
+          "The location edit form appeared to save but no endpoint exists to persist it, so every change was silently lost on reload. The form now says so."
+        ]
+      },
+      {
+        "title": "Database",
+        "items": [
+          "Seven foreign keys added for staff, service and branch references, each verified against production to have no orphaned rows first. Two further candidates were left alone because they have 22 orphans each that need reconciling by hand.",
+          "Created the sale-order state audit table, which was missing, so every state change had been silently failing to record who made it.",
+          "Added a branch-and-date index for revenue reporting, and a migration that collapses two spellings of the same customer permission into one."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "New coverage for the allocation guards including the exact production corruption pattern, the permission-update transaction and its rollback paths, telemetry permission boundaries, and every appointment state present in the live database."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.58",
     "date": "2026-07-23",
     "commit": "pending",

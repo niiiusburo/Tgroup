@@ -4,5 +4,9 @@
   "emailNotifications": "Thông báo Email",
   "smsNotifications": "Thông báo SMS",
   "notificationTemplates": "Mẫu thông báo",
-  "comingSoon": "Quản lý thông báo đầy đủ sắp ra mắt"
+  "comingSoon": "Quản lý thông báo đầy đủ sắp ra mắt",
+  "previewBanner": "Chỉ là bản xem trước — trang này chưa kết nối với dịch vụ gửi thông báo. Không có thông báo nào được gửi, và các mẫu bên dưới chỉ là ví dụ, không phải cài đặt đã lưu.",
+  "notConfigured": "Chưa cấu hình",
+  "templatesArePlanned": "Mẫu dự kiến — chưa hoạt động",
+  "newTemplateDisabled": "Sẽ khả dụng khi kết nối dịch vụ gửi thông báo"
 }

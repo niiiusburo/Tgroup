@@ -23,19 +23,10 @@ const saleOrdersRoutes = require('./routes/saleOrders');
 const appointmentsRoutes = require('./routes/appointments');
 const customerReceiptsRoutes = require('./routes/customerReceipts');
 const dotKhamsRoutes = require('./routes/dotKhams');
-const accountPaymentsRoutes = require('./routes/accountPayments');
-const cashbooksRoutes = require('./routes/cashbooks');
-const receiptsRoutes = require('./routes/receipts');
-const journalsRoutes = require('./routes/journals');
-const stockPickingsRoutes = require('./routes/stockPickings');
-const crmTasksRoutes = require('./routes/crmTasks');
-const commissionsRoutes = require('./routes/commissions');
-const hrPayslipsRoutes = require('./routes/hrPayslips');
 const employeesRoutes = require('./routes/employees');
 const productsRoutes = require('./routes/products');
 const productCategoriesRoutes = require('./routes/productCategories');
 const saleOrderLinesRoutes = require('./routes/saleOrderLines');
-const dashboardReportsRoutes = require('./routes/dashboardReports');
 const permissionsRoutes = require('./routes/permissions');
 const authRoutes = require('./routes/auth');
 const paymentsRoutes = require('./routes/payments');
@@ -150,19 +141,27 @@ app.use('/api/SaleOrders', saleOrdersRoutes);
 app.use('/api/Appointments', appointmentsRoutes);
 app.use('/api/CustomerReceipts', customerReceiptsRoutes);
 app.use('/api/DotKhams', dotKhamsRoutes);
-app.use('/api/AccountPayments', accountPaymentsRoutes);
-app.use('/api/CashBooks', cashbooksRoutes);
-app.use('/api/Receipts', receiptsRoutes);
-app.use('/api/AccountJournals', journalsRoutes);
-app.use('/api/StockPickings', stockPickingsRoutes);
-app.use('/api/CrmTasks', crmTasksRoutes);
-app.use('/api/Commissions', commissionsRoutes);
-app.use('/api/HrPayslips', hrPayslipsRoutes);
+// REMOVED in 0.32.60 — nine Odoo-era route families were mounted here but every one
+// of them queried a table that does not exist in tdental_demo, so they could only ever
+// return HTTP 500. No frontend code referenced any of them (verified by grep over
+// website/src). Route files deleted with the mounts; recover from git if a real screen
+// is ever built for these. Do not re-mount without creating the backing tables first.
+//   /api/AccountPayments  -> accountjournals, currencies, accountaccounts (and selected
+//                            ~40 columns from a 5-column accountpayments VIEW)
+//   /api/CashBooks        -> accountjournals, currencies
+//   /api/Receipts         -> accountjournals
+//   /api/AccountJournals  -> accountjournals
+//   /api/StockPickings    -> stockpickings, householdbusinesses
+//   /api/CrmTasks         -> crmtasks, crmtaskcategories, crmtasktypes
+//   /api/Commissions      -> commissions, commissionhistories,
+//                            saleorderlinepartnercommissions
+//   /api/HrPayslips       -> hrpayrollstructures, hrpayslipruns
+//   /api/DashboardReports -> accountpayments JOIN accountjournals
+// Live revenue reporting is served by /api/Reports, which does not touch these tables.
 app.use('/api/Employees', employeesRoutes);
 app.use('/api/Products', productsRoutes);
 app.use('/api/ProductCategories', productCategoriesRoutes);
 app.use('/api/SaleOrderLines', saleOrderLinesRoutes);
-app.use('/api/DashboardReports', dashboardReportsRoutes);
 app.use('/api/Permissions', permissionsRoutes);
 app.use('/api/Auth', authRoutes);
 app.use('/api/Payments', paymentsRoutes);

@@ -103,7 +103,6 @@ async function getRows(filters, investorScope) {
       a.note,
       a.isrepeatcustomer,
       a.color,
-      a.customercarestatus,
       p.ref AS partnercode,
       p.name AS partnername,
       p.displayname AS partnerdisplayname,

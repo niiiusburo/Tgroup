@@ -14,6 +14,36 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.60] — 2026-07-26
+
+### Fixed
+- Recognise the live `cancel` sale/appointment state in both frontend mapping layers so cancelled appointments stop rendering as active bookings; the two layers previously disagreed on the same input — @claude — `calendarUtils.mapStateToStatus` / `appointmentStatusMapping.apiStateToPhase`, 7 rows on nk.
+- Unbreak permanent customer deletion, which always returned 500 because the reference check queried `crmtasks` and `stockpickings` (neither exists); the remaining checks are data-driven and run inside a transaction that locks the partner row — @claude — `partners/mutationHandlers.js`.
+- Widen sale-order state validation to the union the database actually holds (`pending` 60,382 / `sale` 7,051 / `completed` 860 / `draft` 213), which the previous four-value list rejected — @claude — `updateSaleOrderState.js`.
+
+### Security
+- Require `settings.view` / `settings.edit` on the telemetry error-management endpoints. `error_events` rows carry stack traces, captured `api_body` payloads, `user_id` and `ip_address`, and were readable and mutable by any authenticated user. Crash reporting and version telemetry stay deliberately open — @claude — `routes/telemetry.js`, asserted in `readRoutePermissions.test.js`.
+
+### Changed
+- Enforce INV-003 properly: allocations are summed against their payment, and multiple allocations on one target are summed before the residual check. PATCH re-validates under `FOR UPDATE`, and refunds take their receipt number and insert in one transaction — @claude — `payments/helpers.js`, `payments.js`.
+- Wrap the employee permission update (six writes, two of them delete-then-insert) in one transaction, with the read-back inside it; an update against an unresolvable employee/group now rolls back instead of committing and returning 404 — @claude — `routes/permissions.js`.
+- Size the connection pool to 15 with a 30s statement timeout, idle release, bounded acquisition wait, and an idle-client error handler. Sized against the single Postgres server (max_connections=100) shared by nk, nk2, tdental_nk3 and tcosmetic_nk3 — @claude — `db.js`, env-tunable via `DB_POOL_MAX`.
+
+### Removed
+- Nine Odoo-era route families (`AccountPayments`, `Cashbooks`, `Receipts`, `Journals`, `StockPickings`, `CrmTasks`, `Commissions`, `HrPayslips`, `DashboardReports`) that were mounted but queried non-existent tables, so every one could only return 500. No frontend reference existed — @claude — `server.js` plus the nine route files.
+- Three dead `appointments.customercarestatus` selects; the column is 188,559 rows of `1`, 82,016 null and 11 noise values, and was rendered nowhere. Distinct from the live `partners.cskhid` customer-care feature, which is untouched — @claude — `appointments/readHandlers.js`, `appointmentsExport.js`.
+
+### Added
+- Migration 051: seven foreign keys for staff/service/branch references, each preflighted to zero orphans on nk. `partners.salestaffid` and `saleorders.partnerid` deliberately excluded — 22 orphans each — @claude.
+- Migration 052: create `saleorder_state_logs`, absent on nk, so the audit write in `updateSaleOrderState.js` had been failing silently inside its try/catch since it shipped. Migration 016 cannot be applied as written — its CHECK constraint contradicts 61,242 live rows. Also adds the `(companyid, datecreated)` revenue index — @claude.
+- Migration 053: normalise `customers.view.all` to `customers.view_all`. Both spellings are live grants, so the frontend compatibility check must remain until this has run everywhere — @claude.
+
+### Docs
+- Stated in the UI that the notifications page is not connected to any service (it reported invented send counts and two "Active" channels), and that the location edit form does not persist (no companies write endpoint exists, so saves were silently discarded) — @claude.
+
+### Testing
+- Added `paymentAllocationGuards.test.js` (16 cases, including the exact nk corruption fingerprint), `permissionsTransaction.test.js` (commit/rollback/release against the real `withTransaction`), telemetry permission boundaries, and a coverage test asserting every appointment state present in the live database is mapped deliberately by both layers — @claude.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed
