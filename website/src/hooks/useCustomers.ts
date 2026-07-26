@@ -13,6 +13,16 @@ import {
 export type { Customer, CustomerLocationFilter, CustomerStatus, CustomerStatusFilter } from './useCustomers/customerMapper';
 export { CUSTOMER_PAGE_SIZE } from './useCustomers/customerMapper';
 
+/**
+ * Legacy spelling. On nk, dbo.group_permissions holds BOTH 'customers.view.all' (1 group)
+ * and 'customers.view_all' (3 groups) — only the underscore form appears in the permission
+ * board, so the dotted one is invisible drift that is nonetheless a live grant.
+ *
+ * Migration 053_normalize_customers_view_all_permission.sql rewrites the dotted rows to the
+ * canonical spelling. Do not drop this constant or the fallback check below it until that
+ * migration has run on every environment, or the group holding the dotted grant instantly
+ * loses access to the unfiltered customer list.
+ */
 export const PERMISSION_VIEW_ALL_CUSTOMERS = 'customers.view.all';
 export const MIN_SEARCH_LENGTH = 3;
 

@@ -355,77 +355,67 @@ async function softDeletePartner(req, res) {
  * DELETE /api/Partners/:id/hard-delete
  * Hard-deletes a partner after FK-safe checks
  */
+// Tables checked before a partner may be hard-deleted. Each entry is
+// [responseKey, SQL] and the SQL takes the partner id as $1.
+// NOTE: crmtasks and stockpickings were removed here — neither table exists in
+// tdental_demo, so every hard-delete request threw
+// 'relation "crmtasks" does not exist' and returned 500. See docs/CHANGELOG.md 0.32.60.
+const HARD_DELETE_REFERENCE_CHECKS = [
+  ['appointments', 'SELECT COUNT(*) AS count FROM appointments WHERE partnerid = $1'],
+  ['saleorders', 'SELECT COUNT(*) AS count FROM saleorders WHERE partnerid = $1 AND isdeleted = false'],
+  ['dotkhams', 'SELECT COUNT(*) AS count FROM dotkhams WHERE partnerid = $1 AND isdeleted = false'],
+  ['payments', 'SELECT COUNT(*) AS count FROM payments WHERE customer_id = $1'],
+  ['accountpayments', 'SELECT COUNT(*) AS count FROM accountpayments WHERE partnerid = $1'],
+  ['customerreceipts', 'SELECT COUNT(*) AS count FROM customerreceipts WHERE partnerid = $1'],
+  ['monthlyplans', 'SELECT COUNT(*) AS count FROM monthlyplans WHERE customer_id = $1'],
+  ['employeePermissions', 'SELECT COUNT(*) AS count FROM employee_permissions WHERE employee_id = $1'],
+  ['employeeLocationScopes', 'SELECT COUNT(*) AS count FROM employee_location_scope WHERE employee_id = $1'],
+];
+
 async function hardDeletePartner(req, res) {
   try {
-    const q = getRequestQuery(req);
     const { id } = req.params;
 
-    const existing = await q(
-      'SELECT id FROM partners WHERE id = $1 AND customer = true',
-      [id]
-    );
+    // The reference checks and the DELETE run in one transaction with the partner
+    // row locked, so a concurrent write cannot slip a reference in between the
+    // check and the delete. (The FK constraints added in migration 055 are the
+    // hard guarantee; this narrows the window for the columns that still lack one.)
+    const outcome = await db.withTransaction(async (tx) => {
+      const existing = await tx(
+        'SELECT id FROM partners WHERE id = $1 AND customer = true FOR UPDATE',
+        [id]
+      );
 
-    if (!existing || existing.length === 0) {
-      return res.status(404).json({ error: 'Partner not found' });
-    }
+      if (!existing || existing.length === 0) {
+        return { status: 404, body: { error: 'Partner not found' } };
+      }
 
-    const [
-      aptResult, soResult, dkResult,
-      payResult, acpResult, crResult,
-      crmResult, spResult, mpResult,
-      epResult, elsResult
-    ] = await Promise.all([
-      q('SELECT COUNT(*) AS count FROM appointments WHERE partnerid = $1', [id]),
-      q('SELECT COUNT(*) AS count FROM saleorders WHERE partnerid = $1 AND isdeleted = false', [id]),
-      q('SELECT COUNT(*) AS count FROM dotkhams WHERE partnerid = $1 AND isdeleted = false', [id]),
-      q('SELECT COUNT(*) AS count FROM payments WHERE customer_id = $1', [id]),
-      q('SELECT COUNT(*) AS count FROM accountpayments WHERE partnerid = $1', [id]),
-      q('SELECT COUNT(*) AS count FROM customerreceipts WHERE partnerid = $1', [id]),
-      q('SELECT COUNT(*) AS count FROM crmtasks WHERE partnerid = $1', [id]),
-      q('SELECT COUNT(*) AS count FROM stockpickings WHERE partnerid = $1', [id]),
-      q('SELECT COUNT(*) AS count FROM monthlyplans WHERE customer_id = $1', [id]),
-      q('SELECT COUNT(*) AS count FROM employee_permissions WHERE employee_id = $1', [id]),
-      q('SELECT COUNT(*) AS count FROM employee_location_scope WHERE employee_id = $1', [id]),
-    ]);
+      const linked = {};
+      for (const [key, sql] of HARD_DELETE_REFERENCE_CHECKS) {
+        const rows = await tx(sql, [id]);
+        linked[key] = parseInt(rows[0]?.count || '0', 10);
+      }
 
-    const appointments = parseInt(aptResult[0]?.count || '0', 10);
-    const saleorders = parseInt(soResult[0]?.count || '0', 10);
-    const dotkhams = parseInt(dkResult[0]?.count || '0', 10);
-    const payments = parseInt(payResult[0]?.count || '0', 10);
-    const accountpayments = parseInt(acpResult[0]?.count || '0', 10);
-    const customerreceipts = parseInt(crResult[0]?.count || '0', 10);
-    const crmtasks = parseInt(crmResult[0]?.count || '0', 10);
-    const stockpickings = parseInt(spResult[0]?.count || '0', 10);
-    const monthlyplans = parseInt(mpResult[0]?.count || '0', 10);
-    const employeePermissions = parseInt(epResult[0]?.count || '0', 10);
-    const employeeLocationScopes = parseInt(elsResult[0]?.count || '0', 10);
+      if (Object.values(linked).some((count) => count > 0)) {
+        return {
+          status: 409,
+          body: { error: 'Partner has linked records', linked },
+        };
+      }
 
-    if (
-      appointments > 0 || saleorders > 0 || dotkhams > 0 ||
-      payments > 0 || accountpayments > 0 || customerreceipts > 0 ||
-      crmtasks > 0 || stockpickings > 0 || monthlyplans > 0 ||
-      employeePermissions > 0 || employeeLocationScopes > 0
-    ) {
-      return res.status(409).json({
-        error: 'Partner has linked records',
-        linked: {
-          appointments, saleorders, dotkhams, payments, accountpayments,
-          customerreceipts, crmtasks, stockpickings, monthlyplans,
-          employeePermissions, employeeLocationScopes,
-        },
-      });
-    }
+      const deleteResult = await tx(
+        'DELETE FROM partners WHERE id = $1 AND customer = true RETURNING id',
+        [id]
+      );
 
-    const deleteResult = await q(
-      'DELETE FROM partners WHERE id = $1 AND customer = true RETURNING id',
-      [id]
-    );
+      if (!deleteResult || deleteResult.length === 0) {
+        return { status: 404, body: { error: 'Partner not found' } };
+      }
 
-    if (!deleteResult || deleteResult.length === 0) {
-      return res.status(404).json({ error: 'Partner not found' });
-    }
+      return { status: 200, body: { success: true, id: deleteResult[0].id } };
+    });
 
-    return res.json({ success: true, id: deleteResult[0].id });
+    return res.status(outcome.status).json(outcome.body);
   } catch (err) {
     console.error('Error hard-deleting partner:', err);
     return res.status(500).json({

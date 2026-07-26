@@ -1,5 +1,5 @@
 const express = require('express');
-const { query } = require('../db');
+const { query, withTransaction } = require('../db');
 const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
@@ -255,73 +255,86 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
       return res.status(400).json({ error: 'groupId is required' });
     }
 
-    // Update tier on partners record
-    await query(
-      `UPDATE partners SET tier_id = $1, lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') WHERE id = $2`,
-      [groupId, employeeId]
-    );
-
-    // Upsert employee_permissions for backward compatibility
-    await query(
-      `INSERT INTO employee_permissions (employee_id, group_id, loc_scope, lastupdated)
-       VALUES ($1, $2, $3, (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'))
-       ON CONFLICT (employee_id) DO UPDATE
-         SET group_id = EXCLUDED.group_id,
-             loc_scope = EXCLUDED.loc_scope,
-             lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`,
-      [employeeId, groupId, locScope]
-    );
-
-    // Replace location scopes
-    await query(`DELETE FROM employee_location_scope WHERE employee_id = $1`, [employeeId]);
-    if (locationIds.length > 0) {
-      const placeholders = locationIds.map((_, i) => `($1, $${i + 2})`).join(', ');
-      await query(
-        `INSERT INTO employee_location_scope (employee_id, company_id) VALUES ${placeholders} ON CONFLICT DO NOTHING`,
-        [employeeId, ...locationIds]
+    // One transaction for all six writes. Each "replace" below is a DELETE followed by
+    // an INSERT, so a failure between them used to leave the employee with NO location
+    // scope or NO overrides — a half-applied permission set. Losing every location row
+    // is the same state that once left a user pinned to a branch with no appointments
+    // and a blank calendar, so this must be all-or-nothing.
+    const { epRows, locRows, overrideRows } = await withTransaction(async (tx) => {
+      // Update tier on partners record
+      await tx(
+        `UPDATE partners SET tier_id = $1, lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') WHERE id = $2`,
+        [groupId, employeeId]
       );
-    }
 
-    // Replace permission overrides
-    await query(`DELETE FROM permission_overrides WHERE employee_id = $1`, [employeeId]);
-    const allOverrides = [
-      ...(overrides.grant || []).map(p => ({ permission: p, type: 'grant' })),
-      ...(overrides.revoke || []).map(p => ({ permission: p, type: 'revoke' })),
-    ];
-    if (allOverrides.length > 0) {
-      const placeholders = allOverrides.map((_, i) => `($1, $${i * 2 + 2}, $${i * 2 + 3})`).join(', ');
-      const params = [employeeId];
-      for (const ov of allOverrides) {
-        params.push(ov.permission, ov.type);
+      // Upsert employee_permissions for backward compatibility
+      await tx(
+        `INSERT INTO employee_permissions (employee_id, group_id, loc_scope, lastupdated)
+         VALUES ($1, $2, $3, (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'))
+         ON CONFLICT (employee_id) DO UPDATE
+           SET group_id = EXCLUDED.group_id,
+               loc_scope = EXCLUDED.loc_scope,
+               lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`,
+        [employeeId, groupId, locScope]
+      );
+
+      // Replace location scopes
+      await tx(`DELETE FROM employee_location_scope WHERE employee_id = $1`, [employeeId]);
+      if (locationIds.length > 0) {
+        const placeholders = locationIds.map((_, i) => `($1, $${i + 2})`).join(', ');
+        await tx(
+          `INSERT INTO employee_location_scope (employee_id, company_id) VALUES ${placeholders} ON CONFLICT DO NOTHING`,
+          [employeeId, ...locationIds]
+        );
       }
-      await query(
-        `INSERT INTO permission_overrides (employee_id, permission, override_type) VALUES ${placeholders} ON CONFLICT DO NOTHING`,
-        params
+
+      // Replace permission overrides
+      await tx(`DELETE FROM permission_overrides WHERE employee_id = $1`, [employeeId]);
+      const allOverrides = [
+        ...(overrides.grant || []).map(p => ({ permission: p, type: 'grant' })),
+        ...(overrides.revoke || []).map(p => ({ permission: p, type: 'revoke' })),
+      ];
+      if (allOverrides.length > 0) {
+        const placeholders = allOverrides.map((_, i) => `($1, $${i * 2 + 2}, $${i * 2 + 3})`).join(', ');
+        const params = [employeeId];
+        for (const ov of allOverrides) {
+          params.push(ov.permission, ov.type);
+        }
+        await tx(
+          `INSERT INTO permission_overrides (employee_id, permission, override_type) VALUES ${placeholders} ON CONFLICT DO NOTHING`,
+          params
+        );
+      }
+
+      // Read back inside the same transaction so the response describes exactly what was
+      // committed, with no window for another writer to change it in between.
+      const employeeRows = await tx(
+        `SELECT
+          ep.employee_id AS "employeeId",
+          p.name AS "employeeName",
+          p.email AS "employeeEmail",
+          ep.group_id AS "groupId",
+          pg.name AS "groupName",
+          pg.color AS "groupColor",
+          ep.loc_scope AS "locScope"
+         FROM employee_permissions ep
+         JOIN partners p ON p.id = ep.employee_id
+         JOIN permission_groups pg ON pg.id = ep.group_id
+         WHERE ep.employee_id = $1`,
+        [employeeId]
       );
-    }
 
-    // Return updated employee data
-    const epRows = await query(
-      `SELECT
-        ep.employee_id AS "employeeId",
-        p.name AS "employeeName",
-        p.email AS "employeeEmail",
-        ep.group_id AS "groupId",
-        pg.name AS "groupName",
-        pg.color AS "groupColor",
-        ep.loc_scope AS "locScope"
-       FROM employee_permissions ep
-       JOIN partners p ON p.id = ep.employee_id
-       JOIN permission_groups pg ON pg.id = ep.group_id
-       WHERE ep.employee_id = $1`,
-      [employeeId]
-    );
+      // Empty here means the employee or the requested group does not resolve, so the
+      // writes above were made against a bad target. Throwing rolls them back; the old
+      // code committed them and then returned 404, leaving tier_id pointing at a group
+      // that does not exist.
+      if (!employeeRows || employeeRows.length === 0) {
+        const err = new Error('Employee permission not found');
+        err.httpStatus = 404;
+        throw err;
+      }
 
-    if (!epRows || epRows.length === 0) {
-      return res.status(404).json({ error: 'Employee permission not found' });
-    }
-
-    const locRows = await query(
+      const locationRows = await tx(
       `WITH location_candidates AS (
          SELECT c.id AS location_id, c.name AS location_name, 0 AS sort_order
          FROM partners p
@@ -343,13 +356,20 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
        SELECT location_id, location_name
        FROM deduped_locations
        ORDER BY sort_order, location_name`,
-      [employeeId]
-    );
+        [employeeId]
+      );
 
-    const overrideRows = await query(
-      `SELECT permission, override_type FROM permission_overrides WHERE employee_id = $1`,
-      [employeeId]
-    );
+      const overrideRowsResult = await tx(
+        `SELECT permission, override_type FROM permission_overrides WHERE employee_id = $1`,
+        [employeeId]
+      );
+
+      return {
+        epRows: employeeRows,
+        locRows: locationRows,
+        overrideRows: overrideRowsResult,
+      };
+    });
 
     const emp = epRows[0];
     const resultOverrides = { grant: [], revoke: [] };
@@ -369,6 +389,11 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
       overrides: resultOverrides,
     });
   } catch (err) {
+    // The transaction throws this to roll back writes aimed at an unresolvable
+    // employee/group; it is a client error, not a server fault.
+    if (err.httpStatus === 404) {
+      return res.status(404).json({ error: err.message });
+    }
     console.error('Error updating employee permissions:', err);
     return res.status(500).json({ error: 'Internal server error' });
   }

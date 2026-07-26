@@ -43,6 +43,13 @@ export function mapStateToStatus(state: string | null): CalendarAppointment['sta
     done: 'completed',
     completed: 'completed',
     cancelled: 'cancelled',
+    // 'cancel' is a real state in the database (7 appointments on nk) that was missing
+    // here, so it fell through to the 'scheduled' default below and cancelled
+    // appointments rendered as active bookings on the calendar.
+    cancel: 'cancelled',
+    // apiStateToPhase already accepts this spelling; keep both mappers in agreement so
+    // the same state can never be cancelled in one layer and scheduled in the other.
+    canceled: 'cancelled',
   };
   return stateMap[state?.toLowerCase().trim() || ''] || 'scheduled';
 }

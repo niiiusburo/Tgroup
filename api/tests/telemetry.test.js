@@ -9,6 +9,16 @@ jest.mock('../src/db', () => ({
   query: jest.fn(),
 }));
 
+// The error-management endpoints require settings.view / settings.edit as of 0.32.60,
+// because error_events rows carry stack traces, captured request bodies and IPs. This suite
+// covers handler behaviour (dedup, validation, aggregation) against a minimal app with no
+// auth layer, so the guard is stubbed here. The permissions themselves are asserted in
+// tests/readRoutePermissions.test.js — do not weaken the route to make this file pass.
+jest.mock('../src/middleware/auth', () => ({
+  requireAuth: (_req, _res, next) => next(),
+  requirePermission: () => (_req, _res, next) => next(),
+}));
+
 const db = require('../src/db');
 
 // We need to import the router — require the app to test through supertest

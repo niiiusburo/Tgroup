@@ -65,19 +65,70 @@ async function checkDotkhamResidual(id, amt, queryable = query) {
   return null;
 }
 
-async function checkOneAllocationResidual(a, queryable = query) {
-  if ((!a.invoice_id && !a.dotkham_id) || a.allocated_amount == null) return null;
-  const amt = parseFloat(a.allocated_amount);
-  if (a.invoice_id) return checkInvoiceResidual(a.invoice_id, amt, queryable);
-  return checkDotkhamResidual(a.dotkham_id, amt, queryable);
+const RESIDUAL_TOLERANCE = 0.01;
+
+// An allocation is only persisted when it has a target and an amount — see the
+// matching `continue` in the POST /Payments allocation insert loop. The guards below
+// must measure exactly what will be written, otherwise a request could be rejected
+// because of a row that is silently dropped anyway.
+function isPersistableAllocation(a) {
+  return Boolean(a) && (Boolean(a.invoice_id) || Boolean(a.dotkham_id)) && a.allocated_amount != null;
 }
 
-async function validateAllocationResidual(allocations, queryable = query) {
-  if (!Array.isArray(allocations)) return null;
+function sumAllocations(allocations) {
+  if (!Array.isArray(allocations)) return 0;
+  return allocations
+    .filter(isPersistableAllocation)
+    .reduce((total, a) => total + (parseFloat(a.allocated_amount) || 0), 0);
+}
+
+// Group allocations by their target so that N allocations pointing at the same
+// invoice are validated as one total. Previously each was checked individually,
+// so [5M, 5M] against a 10M residual both passed while together they consumed it.
+function groupAllocationsByTarget(allocations) {
+  const groups = new Map();
   for (const a of allocations) {
-    const e = await checkOneAllocationResidual(a, queryable);
-    if (e) return e;
+    if (!isPersistableAllocation(a)) continue;
+    const kind = a.invoice_id ? 'invoice' : 'dotkham';
+    const id = a.invoice_id || a.dotkham_id;
+    const key = `${kind}:${id}`;
+    const previous = groups.get(key);
+    groups.set(key, {
+      kind,
+      id,
+      amount: (previous ? previous.amount : 0) + (parseFloat(a.allocated_amount) || 0),
+    });
   }
+  return Array.from(groups.values());
+}
+
+/**
+ * Invariant: payment.amount.not-exceeding-residual (INV-003).
+ *
+ * Two guards, both of which were missing:
+ *  1. the allocations of a payment may never total more than the payment itself
+ *     (pass paymentAmount to enable — this is what allowed 8 rows on nk to hold
+ *     an allocation equal to the whole order total instead of the payment's share)
+ *  2. the total allocated to one target may not exceed that target's residual
+ */
+async function validateAllocationResidual(allocations, queryable = query, paymentAmount = null) {
+  if (!Array.isArray(allocations)) return null;
+
+  if (paymentAmount !== null && paymentAmount !== undefined) {
+    const allocated = sumAllocations(allocations);
+    const payable = parseFloat(paymentAmount) || 0;
+    if (allocated > payable + RESIDUAL_TOLERANCE) {
+      return `Allocated total (${allocated}) exceeds the payment amount (${payable})`;
+    }
+  }
+
+  for (const target of groupAllocationsByTarget(allocations)) {
+    const err = target.kind === 'invoice'
+      ? await checkInvoiceResidual(target.id, target.amount, queryable)
+      : await checkDotkhamResidual(target.id, target.amount, queryable);
+    if (err) return err;
+  }
+
   return null;
 }
 
@@ -85,5 +136,6 @@ module.exports = {
   generateReceiptNumber,
   mapAllocations,
   rowsFrom,
+  sumAllocations,
   validateAllocationResidual,
 };

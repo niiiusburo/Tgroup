@@ -4,5 +4,9 @@
   "emailNotifications": "Email Notifications",
   "smsNotifications": "SMS Notifications",
   "notificationTemplates": "Notification Templates",
-  "comingSoon": "Full notification management coming soon"
+  "comingSoon": "Full notification management coming soon",
+  "previewBanner": "Preview only — this page is not connected to a notification service yet. Nothing here is sent, and the templates below are examples, not saved settings.",
+  "notConfigured": "Not configured",
+  "templatesArePlanned": "Planned templates — not active",
+  "newTemplateDisabled": "Available once a notification service is connected"
 }

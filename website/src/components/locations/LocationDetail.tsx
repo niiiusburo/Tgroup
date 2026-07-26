@@ -12,6 +12,7 @@ import {
   X,
   Check,
   Building2,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   STATUS_LABELS,
@@ -139,6 +140,21 @@ export function LocationDetail({ location, metrics, onBack, onUpdate, canEdit: c
               Save Changes
             </button>
           </div>
+        </div>
+
+        {/*
+          There is no companies write endpoint: onUpdate only updates React state in
+          useLocations, so a save here is lost on the next refetch. Two permission groups
+          hold locations.edit and were getting a success-looking save that discarded their
+          changes. Say so until PUT /api/Companies/:id exists.
+        */}
+        <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+          <p className="text-sm text-amber-800">
+            Changes here are not saved to the server yet — they apply to this screen only and
+            are lost when the page reloads. Branch details still have to be changed directly
+            in the database.
+          </p>
         </div>
 
         {/* Edit Form */}

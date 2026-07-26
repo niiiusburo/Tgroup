@@ -46,34 +46,12 @@ function expectGate(router, method, path, permission) {
 }
 
 describe('newly-secured customer-data routes are permission-gated', () => {
-  it('cashbooks GET routes require payment.view', () => {
-    const r = require('../src/routes/cashbooks');
-    expectGate(r, 'get', '/GetDetails', 'payment.view');
-    expectGate(r, 'get', '/GetSumary', 'payment.view');
-    expectGate(r, 'get', '/:id', 'payment.view');
-  });
-
-  it('crmTasks customer routes require customers.view', () => {
-    const r = require('../src/routes/crmTasks');
-    expectGate(r, 'get', '/GetPagedV2', 'customers.view');
-    expectGate(r, 'get', '/:id', 'customers.view');
-  });
-
-  it('receipts routes require payment.view', () => {
-    const r = require('../src/routes/receipts');
-    expectGate(r, 'get', '/', 'payment.view');
-    expectGate(r, 'get', '/:id', 'payment.view');
-    expectGate(r, 'get', '/:id/GetPayments', 'payment.view');
-  });
-
-  it('commissions routes require commission.view (investor lacks it → auto-403)', () => {
-    const r = require('../src/routes/commissions');
-    expectGate(r, 'get', '/', 'commission.view');
-    expectGate(r, 'get', '/SaleOrderLinePartnerCommissions', 'commission.view');
-    expectGate(r, 'get', '/:id', 'commission.view');
-    expectGate(r, 'get', '/:id/Histories', 'commission.view');
-  });
-
+  // The cashbooks / crmTasks / receipts / commissions gate assertions that used to
+  // live here were removed in 0.32.60 together with those route files: each queried
+  // a table absent from tdental_demo (accountjournals, crmtasks, commissions, ...) so
+  // they returned 500 on every call, and no frontend referenced them. Deleting the
+  // routes removes the investor-leak surface outright, which is a stronger guarantee
+  // than gating it. See server.js for the full list and the reason.
   it('monthlyPlans mutation routes require payment.edit', () => {
     const r = require('../src/routes/monthlyPlans');
     expectGate(r, 'put', '/:id', 'payment.edit');

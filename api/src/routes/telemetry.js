@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const express = require('express');
 const router = express.Router();
 const { query } = require('../db');
+const { requirePermission } = require('../middleware/auth');
 
 // ── Rate limiting ──────────────────────────────────────────────────
 const RATE_LIMIT = new Map(); // ip -> Array<timestamp>
@@ -48,6 +49,10 @@ function makeFingerprint(err) {
 }
 
 // ── POST /api/telemetry/errors ─────────────────────────────────────
+// UNREACHABLE for POST /api/telemetry/errors: server.js mounts publicTelemetryErrorRoutes on
+// that exact path first (before auth, on purpose, so the frontend can report crashes while
+// logged out) and it answers the request without calling next(). Kept because it is the
+// authenticated variant and harmless, but do not add behaviour here expecting it to run.
 router.post('/errors', async (req, res) => {
   const ip = req.ip || req.socket?.remoteAddress || 'unknown';
   recordHit(ip);
@@ -143,7 +148,11 @@ router.post('/errors', async (req, res) => {
 });
 
 // ── GET /api/telemetry/errors — for auto-fixer & dashboard ─────────
-router.get('/errors', async (req, res) => {
+// Gated: error_events rows carry stack traces, captured api_body payloads, user_id and
+// ip_address. Being logged in is not enough to read other people's error contents, so this
+// requires the same grant as the rest of the admin settings surface (held by Admin and
+// Super Admin only). Reporting an error stays public; reading them back does not.
+router.get('/errors', requirePermission('settings.view'), async (req, res) => {
   try {
     const { status, limit = 50, offset = 0, type } = req.query;
     let where = 'WHERE 1=1';
@@ -178,7 +187,7 @@ router.get('/errors', async (req, res) => {
 });
 
 // ── PUT /api/telemetry/errors/:id — update error status ────────────
-router.put('/errors/:id', async (req, res) => {
+router.put('/errors/:id', requirePermission('settings.edit'), async (req, res) => {
   try {
     const { id } = req.params;
     const { status, fix_summary, fix_commit } = req.body;
@@ -221,7 +230,7 @@ router.put('/errors/:id', async (req, res) => {
 });
 
 // ── POST /api/telemetry/errors/:id/fix-attempts ────────────────────
-router.post('/errors/:id/fix-attempts', async (req, res) => {
+router.post('/errors/:id/fix-attempts', requirePermission('settings.edit'), async (req, res) => {
   try {
     const { id } = req.params;
     const { attempt_number, action, status, details, files_changed, test_output, agent_session } = req.body;
@@ -242,7 +251,7 @@ router.post('/errors/:id/fix-attempts', async (req, res) => {
 });
 
 // ── GET /api/telemetry/stats — aggregated error stats ──────────────
-router.get('/stats', async (req, res) => {
+router.get('/stats', requirePermission('settings.view'), async (req, res) => {
   try {
     const [byType, byStatus, recent] = await Promise.all([
       query(`SELECT error_type, COUNT(*) as count FROM dbo.error_events GROUP BY error_type ORDER BY count DESC`),
@@ -263,6 +272,9 @@ router.get('/stats', async (req, res) => {
 });
 
 // ── POST /api/telemetry/version (existing) ─────────────────────────
+// Intentionally NOT permission-gated: every signed-in client reports its own version
+// transitions here for the auto-update system, and the row (event, versions, trigger, UA, IP)
+// carries nothing another user could not already see. Auth + the rate limiter are the controls.
 router.post('/version', async (req, res) => {
   const ip = req.ip || req.socket?.remoteAddress;
   if (isRateLimited(ip, 10)) {

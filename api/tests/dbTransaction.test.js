@@ -4,6 +4,9 @@ const mockClient = {
 };
 const mockPool = {
   connect: jest.fn(),
+  // db.js attaches an 'error' listener so a killed idle client cannot crash the process
+  // via an unhandled pool error event. A Pool stand-in has to provide this.
+  on: jest.fn(),
 };
 
 jest.mock('pg', () => ({

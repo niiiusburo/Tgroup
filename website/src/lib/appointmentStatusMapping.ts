@@ -18,7 +18,10 @@ export function apiStateToPhase(state: string | null | undefined): CalendarPhase
   if (s === 'arrived') return 'waiting';
   if (s === 'in examination' || s === 'in-progress') return 'in-treatment';
   if (s === 'done' || s === 'completed') return 'done';
-  if (s === 'cancelled' || s === 'canceled') return 'cancelled';
+  // 'cancel' (no trailing 'led') is a real state in the database — 7 appointments on
+  // nk — and was missing here, so it fell through to 'scheduled' below and cancelled
+  // appointments showed as active. Same omission existed in calendarUtils.mapStateToStatus.
+  if (s === 'cancelled' || s === 'canceled' || s === 'cancel') return 'cancelled';
   return 'scheduled';
 }
 
