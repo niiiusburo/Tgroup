@@ -2,7 +2,7 @@
   {
     "version": "0.32.60",
     "date": "2026-07-26",
-    "commit": "pending",
+    "commit": "deec3463a",
     "highlights": "Audit remediation: payment over-allocation guards, atomic permission updates, unbroken customer deletion, cancelled appointments no longer shown as active, and nine dead route families removed.",
     "sections": [
       {
