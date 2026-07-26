@@ -1,5 +1,38 @@
 [
   {
+    "version": "0.33.0",
+    "date": "2026-07-26",
+    "commit": "pending",
+    "highlights": "Closed the source-attribution incident safeguards, and scoped the audited correction paths to the caller’s own customers.",
+    "sections": [
+      {
+        "title": "Security",
+        "items": [
+          "The audited source-correction endpoints for sale orders and customers now enforce investor row scope: a caller holding the correction permission can no longer change attribution on a customer outside their assigned allow-list. Out-of-scope requests return 404 rather than 403 so the endpoints cannot be used to discover which records exist."
+        ]
+      },
+      {
+        "title": "Data Integrity",
+        "items": [
+          "Source changes on paid or closed-period orders are rejected on the ordinary edit path and permitted only through the audited correction path.",
+          "Every successful source change writes one append-only audit row in the same transaction, and referenced source labels and types are protected from rename or reuse."
+        ]
+      },
+      {
+        "title": "Migrations",
+        "items": [
+          "Renumbered the source-attribution migrations to 073-075 to clear a filename collision with three unrelated in-flight migrations that claimed 051-053. The deploy loop globs api/migrations/*.sql and does not consult dbo.schema_migrations, so a duplicate number would have silently discarded one lane’s schema."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added negative-path coverage proving an out-of-scope investor is rejected with no UPDATE and no audit row written, plus the in-scope case so the guard cannot over-block. Both were mutation-checked: disabling the guard fails these tests and no others."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.58",
     "date": "2026-07-23",
     "commit": "pending",

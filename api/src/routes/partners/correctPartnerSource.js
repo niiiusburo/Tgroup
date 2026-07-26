@@ -11,6 +11,7 @@ const {
   resolveRequestId,
   resolveTransactionId,
 } = require('../../services/sourceChangeAudit');
+const { resolveInvestorScope } = require('../../services/permissionService');
 
 const PARTNER_SOURCE_CORRECTION_INVALID = 'PARTNER_SOURCE_CORRECTION_INVALID';
 const PARTNER_SOURCE_CORRECTION_CONFLICT = 'PARTNER_SOURCE_CORRECTION_CONFLICT';
@@ -69,6 +70,16 @@ async function correctPartnerSource(req, res) {
 
     const requestId = resolveRequestId(req);
     const transactionId = resolveTransactionId();
+
+    // Row scoping, checked before the transaction opens so an out-of-scope caller never
+    // takes a row lock. customers.source_correct grants the capability, not the reach:
+    // investors only see an allow-listed subset of customers, and here the record id IS
+    // the customer id. 404 rather than 403 matches routes/saleOrders.js and keeps the
+    // endpoint from confirming that an out-of-scope customer exists.
+    const investorScope = await resolveInvestorScope(actorId);
+    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(id)) {
+      return res.status(404).json({ error: 'Partner not found' });
+    }
 
     const outcome = await withTransaction(async (tx) => {
       const existing = await tx(

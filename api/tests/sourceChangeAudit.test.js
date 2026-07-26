@@ -22,7 +22,15 @@ jest.mock('../src/db', () => {
   };
 });
 
+// Both correction endpoints resolve investor row scope before mutating. Unmocked, the real
+// resolveInvestorScope issues its own query() and eats an entry from the ordered mock queue,
+// shifting every later assertion. Default "not an investor" keeps existing cases unrestricted.
+jest.mock('../src/services/permissionService', () => ({
+  resolveInvestorScope: jest.fn(async () => ({ isInvestor: false, allowedCustomerIds: [] })),
+}));
+
 const { query, withTransaction } = require('../src/db');
+const { resolveInvestorScope } = require('../src/services/permissionService');
 const {
   recordSourceChange,
   buildSourceChangeReconciliation,
@@ -445,6 +453,36 @@ describe('authorized correction paths', () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json.mock.calls[0][0].audit.entity_type).toBe('partner');
+  });
+
+  it('partner correction rejects an investor outside their customer scope', async () => {
+    // customers.source_correct grants the capability, not the reach. Here the record id IS the
+    // customer id, so an unscoped investor must be turned away before any row lock is taken.
+    resolveInvestorScope.mockResolvedValueOnce({
+      isInvestor: true,
+      allowedCustomerIds: ['99999999-9999-4999-8999-999999999999'],
+    });
+
+    const req = {
+      params: { id: PARTNER_ID },
+      body: {
+        new_sourceid: SOURCE_B,
+        expected_old_sourceid: SOURCE_A,
+        reason: 'Attempted out-of-scope partner correction',
+        correction_manifest_ref: 'scope-test',
+      },
+      user: { employeeId: ACTOR },
+      headers: {},
+    };
+    const res = responseDouble();
+    await correctPartnerSource(req, res);
+
+    // 404 not 403 — a 403 would confirm the customer exists outside the caller's scope.
+    expect(res.status).toHaveBeenCalledWith(404);
+    // Fail-closed: rejected before the transaction, so nothing is read, written or audited.
+    expect(withTransaction).not.toHaveBeenCalled();
+    expect(query.mock.calls.some(([sql]) => /UPDATE\s+dbo\.partners/i.test(sql))).toBe(false);
+    expect(query.mock.calls.some(([sql]) => /INSERT INTO dbo\.source_change_audit/i.test(sql))).toBe(false);
   });
 
   it('partner correction conflict does not mutate or audit', async () => {

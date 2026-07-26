@@ -65,6 +65,7 @@ async function loadSaleOrderSourceLockState(saleOrderId, queryFn) {
   const rows = await queryFn(
     `SELECT
        so.id,
+       so.partnerid,
        so.sourceid AS order_sourceid,
        so.totalpaid,
        so.datestart,
@@ -87,6 +88,10 @@ async function loadSaleOrderSourceLockState(saleOrderId, queryFn) {
 
   return {
     id: order.id,
+    // Owning customer. Callers need this to enforce investor row scoping before they
+    // mutate the source, and it must come from this locked read so the scope decision
+    // cannot race a concurrent partner reassignment.
+    partnerid: order.partnerid ?? null,
     order_sourceid: order.order_sourceid ?? null,
     total_paid: totalPaid,
     attribution_date: toDateOnly(attributionDate),

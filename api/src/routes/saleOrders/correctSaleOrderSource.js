@@ -15,6 +15,7 @@ const {
   resolveRequestId,
   resolveTransactionId,
 } = require('../../services/sourceChangeAudit');
+const { resolveInvestorScope } = require('../../services/permissionService');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
 const { getCustomerSourceSelectionError } = require('./customerSourceSelection');
 
@@ -83,6 +84,17 @@ async function correctSaleOrderSource(req, res) {
     const outcome = await withTransaction(async (tx) => {
       const lockState = await loadSaleOrderSourceLockState(id, tx);
       if (!lockState) {
+        return { status: 404, body: { error: 'Sale order not found' } };
+      }
+
+      // Row scoping. services.source_correct only says the caller may correct sources at
+      // all; it does not say WHICH customers' orders they may touch. Investors see a
+      // filtered subset of customers, so without this an investor holding the permission
+      // could rewrite the attribution of an order they cannot even read.
+      // 404 (not 403) matches the house pattern in routes/saleOrders.js so the endpoint
+      // cannot be used to probe which order ids exist outside the caller's scope.
+      const investorScope = await resolveInvestorScope(actorId);
+      if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(lockState.partnerid)) {
         return { status: 404, body: { error: 'Sale order not found' } };
       }
 
