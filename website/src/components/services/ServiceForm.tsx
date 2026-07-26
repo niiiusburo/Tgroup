@@ -116,8 +116,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       : { locked: false, reasons: [], openPeriodStart: '' }),
     [isEdit, initialData?.paidAmount, initialData?.startDate, initialData?.createdAt],
   );
-  const sourceLockMessageId = sourceLockMessageKey(sourceLock);
-  const sourceLockHint = sourceLockMessageId ? t(sourceLockMessageId) : '';
+  const sourceLockHint = sourceLock.locked ? t(sourceLockMessageKey(sourceLock)) : '';
 
   useEffect(() => {
     if (initialData) {

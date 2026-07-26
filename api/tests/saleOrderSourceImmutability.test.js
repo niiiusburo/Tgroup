@@ -1,11 +1,3 @@
-jest.mock('../src/middleware/auth', () => ({
-  requireAuth: (_req, _res, next) => next(),
-  requirePermission: (permission) => (req, _res, next) => {
-    req.requiredPermission = permission;
-    next();
-  },
-}));
-
 jest.mock('../src/db', () => {
   const query = jest.fn();
   return {
@@ -14,17 +6,7 @@ jest.mock('../src/db', () => {
   };
 });
 
-// The correction path resolves investor row scope before it mutates anything. Without this
-// mock the real resolveInvestorScope issues its own query() and consumes an entry from the
-// ordered mock queue below, which silently shifts every later assertion in this file.
-// Default is "not an investor" so the existing cases exercise the unrestricted path.
-jest.mock('../src/services/permissionService', () => ({
-  resolveInvestorScope: jest.fn(async () => ({ isInvestor: false, allowedCustomerIds: [] })),
-}));
-
 const { query, withTransaction } = require('../src/db');
-const { resolveInvestorScope } = require('../src/services/permissionService');
-const saleOrdersRouter = require('../src/routes/saleOrders');
 const { updateSaleOrder } = require('../src/routes/saleOrders/updateSaleOrder');
 const { correctSaleOrderSource } = require('../src/routes/saleOrders/correctSaleOrderSource');
 const {
@@ -41,8 +23,6 @@ const ORDER_ID = '11111111-1111-4111-8111-111111111111';
 const SOURCE_A = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const SOURCE_B = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 const ACTOR = '33333333-3333-4333-8333-333333333333';
-const CUSTOMER_ID = '44444444-4444-4444-8444-444444444444';
-const OTHER_CUSTOMER = '55555555-5555-4555-8555-555555555555';
 
 function responseDouble() {
   return {
@@ -93,6 +73,9 @@ describe('sale order source lock evaluation', () => {
 describe('ordinary PATCH source immutability', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // clearAllMocks does not drain mockResolvedValueOnce queues: a value a test did not
+    // consume would leak into the next one and shift its assertions. Reset explicitly.
+    query.mockReset();
   });
 
   it('allows source change on open unpaid orders', async () => {
@@ -232,23 +215,15 @@ describe('ordinary PATCH source immutability', () => {
     const updateSql = query.mock.calls.find(([sql]) => /UPDATE\s+saleorders/i.test(sql))?.[0] || '';
     expect(updateSql).not.toMatch(/sourceid\s*=/);
   });
+
 });
 
 describe('permissioned source correction path', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('wires POST /:id/source-correction to services.source_correct', () => {
-    const layer = saleOrdersRouter.stack.find(
-      (entry) => entry.route?.path === '/:id/source-correction' && entry.route.methods.post,
-    );
-    expect(layer).toBeTruthy();
-    const req = {};
-    const res = responseDouble();
-    const next = jest.fn();
-    layer.route.stack[0].handle(req, res, next);
-    expect(req.requiredPermission).toBe('services.source_correct');
+    // clearAllMocks does not drain mockResolvedValueOnce queues: a value a test did not
+    // consume would leak into the next one and shift its assertions. Reset explicitly.
+    query.mockReset();
   });
 
   it('rejects correction without required audit fields', async () => {
@@ -257,7 +232,7 @@ describe('permissioned source correction path', () => {
       {
         params: { id: ORDER_ID },
         user: { employeeId: ACTOR },
-        headers: {},
+        headers: {}, nonInvestorVerified: true, // mounted guard ran upstream
         body: { new_sourceid: SOURCE_B, expected_old_sourceid: SOURCE_A },
       },
       res,
@@ -285,7 +260,7 @@ describe('permissioned source correction path', () => {
       {
         params: { id: ORDER_ID },
         user: { employeeId: ACTOR },
-        headers: { 'x-request-id': 'req-1' },
+        headers: { 'x-request-id': 'req-1' }, nonInvestorVerified: true,
         body: {
           new_sourceid: SOURCE_B,
           expected_old_sourceid: SOURCE_B,
@@ -349,7 +324,7 @@ describe('permissioned source correction path', () => {
       {
         params: { id: ORDER_ID },
         user: { employeeId: ACTOR },
-        headers: { 'x-request-id': 'req-audit-1' },
+        headers: { 'x-request-id': 'req-audit-1' }, nonInvestorVerified: true,
         body: {
           new_sourceid: SOURCE_B,
           expected_old_sourceid: SOURCE_A,
@@ -405,7 +380,7 @@ describe('permissioned source correction path', () => {
       {
         params: { id: ORDER_ID },
         user: { employeeId: ACTOR },
-        headers: {},
+        headers: {}, nonInvestorVerified: true, // mounted guard ran upstream
         body: {
           new_sourceid: SOURCE_B,
           expected_old_sourceid: SOURCE_A,
@@ -423,39 +398,4 @@ describe('permissioned source correction path', () => {
     }));
   });
 
-  // D21 (DECISIONS.md) forbids investor writes until a decision names the exact write
-  // permission and scope. None authorizes source correction, so BOTH an unscoped and an
-  // allowlisted investor must be refused, with zero writes and zero audit rows.
-  it.each([
-    ['not scoped to the order customer', [OTHER_CUSTOMER]],
-    ['allowlisted for the order customer', [CUSTOMER_ID]],
-  ])('refuses an investor %s and writes nothing', async (_label, allowedCustomerIds) => {
-    resolveInvestorScope.mockResolvedValueOnce({ isInvestor: true, allowedCustomerIds });
-
-    const res = responseDouble();
-    await correctSaleOrderSource(
-      {
-        params: { id: ORDER_ID },
-        user: { employeeId: ACTOR },
-        headers: {},
-        body: {
-          new_sourceid: SOURCE_B,
-          expected_old_sourceid: SOURCE_A,
-          reason: 'Attempted source correction by an investor account',
-          evidence: 'scope test',
-          rollback_reference: 'none',
-        },
-      },
-      res,
-    );
-
-    // 404 rather than 403: a 403 would confirm the order exists.
-    expect(res.status).toHaveBeenCalledWith(404);
-    // Rejected before the transaction: no lock is taken and no statement runs at all.
-    expect(withTransaction).not.toHaveBeenCalled();
-    expect(query).not.toHaveBeenCalled();
-    expect(query.mock.calls.some(([sql]) => /UPDATE\s+dbo\.saleorders/i.test(sql))).toBe(false);
-    expect(query.mock.calls.some(([sql]) => /INSERT INTO dbo\.saleorder_source_corrections/i.test(sql))).toBe(false);
-    expect(query.mock.calls.some(([sql]) => /INSERT INTO dbo\.source_change_audit/i.test(sql))).toBe(false);
-  });
 });

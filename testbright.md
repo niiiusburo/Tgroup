@@ -350,3 +350,27 @@ Expected behavior:
 - [ ] PENDING FRESH CONFIRMATION: Strict row-key comparison found one additional mismatch, `SO-2026-5176` (`T478964`, `Khách cũ` → `Sale Online`), outside the confirmed manifest. It remains unmodified.
 
 Negative paths: renaming any retired artifact back to `.sql` makes the migration guard fail; submitting an inactive/missing source returns `400 CUSTOMER_SOURCE_NOT_SELECTABLE`; deleting a source referenced by any customer or order returns `400 CUSTOMER_SOURCE_IN_USE`; the checked-in 43-order manifest test explicitly excludes unconfirmed `SO-2026-5176`.
+
+---
+
+# TestSprite Plan: source-correction route ordering + INV-026 no-op PATCH (2026-07-26)
+
+Feature/edit name: v0.33.0 — mounted investor guard on both source-correction routes, and the source-only no-op PATCH contract.
+
+Changed data flow: `POST /api/SaleOrders/:id/source-correction` and `POST /api/Partners/:id/source-correction` are now mounted behind `requireNonInvestorPermission(permission, notFoundMessage)` (`api/src/middleware/auth.js`) instead of `requirePermission`. The guard resolves the caller once via `resolveEffectivePermissions`, refuses `groupName = investor` with `404` BEFORE the permission comparison and before the handler validates or acts on the body, then sets `req.nonInvestorVerified` so the handlers' defence-in-depth investor check does not repeat the scope query on the mounted path. `PATCH /api/SaleOrders/:id` submitting only the order's current `sourceid` now returns `200` with the unchanged order instead of `400 No fields to update`.
+
+Roles: an account in the investor permission group, an admin account, and a non-investor staff group holding neither `services.source_correct` nor `customers.source_correct`. Accounts are identified by ROLE only here; take local session credentials from the gitignored local environment/session config per `docs/SECURITY.md` § Secret Storage Locations. Never inline an email address or password in this file.
+
+Expected behavior:
+- [x] PASS LOCAL: Investor with a VALID correction body → `404` on both routes; handler never reached; zero `query`, zero `withTransaction`, zero audit row.
+- [x] PASS LOCAL: Investor with a MALFORMED body → identical `404` (no `400` leak proving the handler validated their input).
+- [x] PASS LOCAL: Investor holding the correction permission → `404`. Investor holding `*` → `404`. D21 beats permission.
+- [x] PASS LOCAL: Non-investor without the permission → `403 Permission denied: <permission>`; with no assignment → `403 No permission assignment found`; unauthenticated → `401` before any permission lookup.
+- [x] PASS LOCAL: Authorized non-investor reaches the handler (both mounted layers run) and the mounted path issues NO duplicate `resolveInvestorScope` call.
+- [x] PASS LOCAL: Source-only no-op PATCH returns `200` with the unchanged order on locked AND unlocked orders, with zero `UPDATE saleorders` and zero `source_change_audit` INSERT; a PATCH with no fields at all still returns `400`.
+- [x] PASS MUTATION: Disabling the guard's investor branch fails 8 ordering cases and no others; disabling the no-op branch fails exactly the 2 no-op cases and no others.
+- [ ] PENDING LIVE: Investor `404` cannot be exercised end-to-end locally — only Admin holds `services.source_correct`, so the live investor path is proven by the mounted-chain regressions, not by a browser session. Re-verify on nk2 after deploy.
+
+Negative paths: an investor must never receive `403` from these routes (that would confirm the record exists and leak permission state); an investor must never receive a body-shape `400`; a non-investor must still receive the ordinary `403`; a genuinely empty PATCH must still be rejected.
+
+Setup data: any existing sale order and customer; no fixture writes. Suites are `api/tests/sourceCorrectionRouteOrdering.test.js` and `api/tests/saleOrderSourceNoOpPatch.test.js`, dispatched in-process via `api/tests/helpers/dispatchRoute.js` because express 5 + supertest intermittently returns transport-level `400`s in this environment (reproduced with a bare Express app containing no project code, and on the base commit).

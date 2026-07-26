@@ -1,6 +1,6 @@
 const express = require('express');
 const { query } = require('../db');
-const { requirePermission } = require('../middleware/auth');
+const { requirePermission, requireNonInvestorPermission } = require('../middleware/auth');
 const { resolveInvestorScope } = require('../services/permissionService');
 const { orderAndCustomerSourceSelectSql } = require('../lib/orderSourceSemantics');
 const { createSaleOrder } = require('./saleOrders/createSaleOrder');
@@ -366,9 +366,12 @@ router.patch('/:id/state', requirePermission('customers.edit'), updateSaleOrderS
  * Body: { new_sourceid, expected_old_sourceid, reason, evidence,
  *         rollback_reference, correction_manifest_ref? }
  */
+// requireNonInvestorPermission, not requirePermission: D21 forbids investor writes, so an
+// investor is refused 404 here before the permission comparison and before the handler
+// validates or acts on the body. Non-investors keep the usual 401/403 behaviour.
 router.post(
   '/:id/source-correction',
-  requirePermission('services.source_correct'),
+  requireNonInvestorPermission('services.source_correct', 'Sale order not found'),
   correctSaleOrderSource,
 );
 

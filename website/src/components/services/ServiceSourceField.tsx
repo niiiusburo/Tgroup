@@ -24,8 +24,7 @@ export function ServiceSourceField({
 }: ServiceSourceFieldProps) {
   const { t } = useTranslation('services');
   const locked = lock.locked;
-  const lockMessageKey = sourceLockMessageKey(lock);
-  const lockHint = lockMessageKey ? t(lockMessageKey) : '';
+  const lockHint = lock.locked ? t(sourceLockMessageKey(lock)) : '';
 
   return (
     <div>

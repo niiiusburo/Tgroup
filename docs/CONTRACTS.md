@@ -217,7 +217,15 @@ refused on both source-correction endpoints and on the reconciliation report. `D
 keeps investor writes forbidden until a decision names the exact write permission and scope, and no
 decision authorizes source correction — so an investor is denied even when allowlisted for the
 customer, because the allowlist grants read scope, never write capability. Denial happens before any
-transaction, row lock, write or audit row, and before request-body validation.
+transaction, row lock, write or audit row, and before the handler validates or acts on the body.
+
+On both mounted source-correction routes the denial is a route guard
+(`requireNonInvestorPermission`, `api/src/middleware/auth.js`) that runs **before** the permission
+comparison, so an investor's response is identical whether they lack the correction permission, hold
+it, or hold `*` — no permission state is inferable. Non-investors keep unchanged `401`/`403`
+behaviour. The handlers keep the same check as defence-in-depth for direct/internal invocation and
+skip it when the guard already set `req.nonInvestorVerified`, so the mounted path performs no
+duplicate scope query.
 
 #### POST /api/SaleOrders/:id/source-correction
 **Auth:** `services.source_correct`; investor accounts are always refused.
@@ -245,7 +253,7 @@ transaction, row lock, write or audit row, and before request-body validation.
 
 `POST /api/SaleOrders` and `PATCH /api/SaleOrders/:id` accept `sourceid?: string | null`. A non-null source must exist and be active, otherwise the API returns `400` with `{ code: "CUSTOMER_SOURCE_NOT_SELECTABLE" }`. An edit client must omit `sourceid` when the user did not change the displayed effective source, because that value can be inherited from `partners.sourceid`; the PATCH route then leaves the order-level value unchanged. When explicitly submitted, PATCH may preserve an inactive source only when that exact source is already assigned directly to that same non-deleted order; it may not assign the inactive source to another order. Validation takes a transaction-scoped share lock on the lookup (conflicting with settings updates/deletes), and sale-order/line writes commit or roll back together.
 
-**Closed-period / paid source lock (INV-026):** When `sourceid` is present on `PATCH /api/SaleOrders/:id` and differs from the order's current `saleorders.sourceid`, and the order is paid (`max(totalpaid, non-void allocation sum) > 0`) or its attribution date is before the open calendar month start in `Asia/Ho_Chi_Minh`, the API returns `409` with `{ code: "SOURCE_IMMUTABLE", reasons: ["paid"|"closed_period"], open_period_start, order_sourceid }`. Repeating the current source is ignored (no-op). Omitting `sourceid` allows unrelated field updates on locked orders.
+**Closed-period / paid source lock (INV-026):** When `sourceid` is present on `PATCH /api/SaleOrders/:id` and differs from the order's current `saleorders.sourceid`, and the order is paid (`max(totalpaid, non-void allocation sum) > 0`) or its attribution date is before the open calendar month start in `Asia/Ho_Chi_Minh`, the API returns `409` with `{ code: "SOURCE_IMMUTABLE", reasons: ["paid"|"closed_period"], open_period_start, order_sourceid }`. Repeating the current source is ignored (no-op). A PATCH whose only field is the order's current `sourceid` returns `200` with the unchanged order and performs zero `UPDATE` and zero audit row — locked or not — instead of `400 No fields to update`, so an idempotent resubmit is not a client error. A PATCH with no fields at all still returns `400 No fields to update`. Omitting `sourceid` allows unrelated field updates on locked orders.
 
 ---
 

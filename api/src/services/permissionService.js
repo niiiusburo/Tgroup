@@ -116,7 +116,12 @@ async function hasPermission(employeeId, permission) {
  * visibility is limited to an explicit per-customer allowlist in
  * dbo.investor_clients — mirroring employee_location_scope, but keyed by
  * customer instead of location. Callers MUST apply the returned allowlist to
- * every customer-touching query (reads) and validate it on writes.
+ * every customer-touching READ.
+ *
+ * The allowlist scopes reads only — it never grants an investor write capability.
+ * Per DECISIONS.md D21 / INV-021 investor writes stay forbidden until a decision names
+ * the exact write permission and scope, so a write path must deny on isInvestor=true
+ * regardless of allowedCustomerIds (see middleware/auth requireNonInvestorPermission).
  *
  * @param {string} employeeId - UUID of the logged-in employee (req.user.employeeId)
  * @returns {Promise<{ isInvestor: boolean, allowedCustomerIds: string[] }>}

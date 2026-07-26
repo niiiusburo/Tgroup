@@ -38,6 +38,29 @@ function trimRequired(value, field, minLen) {
 async function correctSaleOrderSource(req, res) {
   try {
     const { id } = req.params;
+
+    const actorId = resolveActorId(req);
+    if (!actorId) {
+      return res.status(401).json({ error: 'No actor on session' });
+    }
+
+    // D21 / INV-021: investor writes are forbidden until a decision names the exact write
+    // permission and scope, and none authorizes source correction. So EVERY investor is
+    // denied -- before body validation, before the transaction, before any row lock, and
+    // before any write or audit row. Being allowlisted for a customer grants read scope,
+    // never write capability. 404 rather than 403 matches routes/saleOrders.js: a 403 would
+    // confirm the order exists.
+    //
+    // On the mounted route requireNonInvestorPermission already proved this and set the
+    // flag, so skip the duplicate scope query; this branch is the defence for direct
+    // invocation (tests, internal callers) where no middleware ran.
+    if (!req.nonInvestorVerified) {
+      const investorScope = await resolveInvestorScope(actorId);
+      if (investorScope.isInvestor) {
+        return res.status(404).json({ error: 'Sale order not found' });
+      }
+    }
+
     const {
       new_sourceid,
       expected_old_sourceid,
@@ -68,21 +91,6 @@ async function correctSaleOrderSource(req, res) {
         error: 'expected_old_sourceid is required for concurrency control',
         code: SOURCE_CORRECTION_INVALID,
       });
-    }
-
-    const actorId = resolveActorId(req);
-    if (!actorId) {
-      return res.status(401).json({ error: 'No actor on session' });
-    }
-
-    // D21 / INV-021: investor writes are forbidden until a decision names the exact write
-    // permission and scope, and none authorizes source correction. So EVERY investor is
-    // denied here -- before the transaction, before any row lock, and before any write or
-    // audit row. Being allowlisted for a customer grants read scope, never write capability.
-    // 404 rather than 403 matches routes/saleOrders.js: a 403 would confirm the order exists.
-    const investorScope = await resolveInvestorScope(actorId);
-    if (investorScope.isInvestor) {
-      return res.status(404).json({ error: 'Sale order not found' });
     }
 
     const requestId = resolveRequestId(req);

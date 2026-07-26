@@ -9,7 +9,8 @@
         "title": "Security",
         "items": [
           "Investor accounts are now refused outright on both audited source-correction endpoints, before any row lock, write or audit row. Per DECISIONS.md D21 investor writes stay forbidden until a decision names the exact write permission and scope, and none authorizes source correction — so being allowlisted for a customer grants read scope, never write capability.",
-          "The source-change reconciliation report now denies investor accounts before querying the ledger, which spans both customer and order entities and carries actor ids, reasons, request ids and manifest refs with no per-entity customer scoping available."
+          "The source-change reconciliation report now denies investor accounts before querying the ledger, which spans both customer and order entities and carries actor ids, reasons, request ids and manifest refs with no per-entity customer scoping available.",
+          "Investor denial on both source-correction endpoints is now a mounted route guard that runs before the permission check, so an investor gets the same 404 whether they lack the correction permission, hold it, or hold a wildcard — no permission state is inferable, and the request never reaches the handler."
         ]
       },
       {
@@ -17,6 +18,12 @@
         "items": [
           "Source changes on paid or closed-period orders are rejected on the ordinary edit path and permitted only through the audited correction path.",
           "Every successful source change writes one append-only audit row in the same transaction, and referenced source labels and types are protected from rename or reuse."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "A service edit that resubmits the order's current source without changing anything else now returns the unchanged order instead of failing with \"No fields to update\". Retries, autosaves and unchanged form submits no longer look like errors, and nothing is written or audited. A genuinely empty request is still rejected."
         ]
       },
       {
@@ -29,7 +36,8 @@
       {
         "title": "Testing",
         "items": [
-          "Added negative-path coverage proving both an unscoped and an allowlisted investor are refused with zero database calls and zero audit rows, plus a regression proving the reconciliation ledger is never queried for an investor. The correction tests were mutation-checked: disabling the guard fails them and no others."
+          "Added negative-path coverage proving both an unscoped and an allowlisted investor are refused with zero database calls and zero audit rows, plus a regression proving the reconciliation ledger is never queried for an investor. The correction tests were mutation-checked: disabling the guard fails them and no others.",
+          "Added mounted-route regressions for both correction endpoints (investor with a malformed body, a valid body, the correction permission, and a wildcard all get 404 with the handler never reached; non-investors keep 401/403; authorized staff pass through) and no-op PATCH regressions on locked and unlocked orders. Both new guards were mutation-checked. These suites dispatch in-process rather than over HTTP after an environment-level flake was reproduced with a bare Express app containing no project code."
         ]
       }
     ]

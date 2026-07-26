@@ -53,6 +53,7 @@ async function updateSaleOrder(req, res) {
       let effectiveSourceId = sourceid;
       let lockContext = null;
       let previousSourceId;
+      let sourceNoOp = false;
       if (sourceSubmitted) {
         lockContext = await loadSaleOrderSourceLockState(id, transactionQuery);
         if (!lockContext) {
@@ -63,6 +64,7 @@ async function updateSaleOrder(req, res) {
         if (sourceIdsEqual(previousSourceId, sourceid)) {
           // Same value (including null/empty) — treat as no-op so unrelated edits work.
           effectiveSourceId = undefined;
+          sourceNoOp = true;
         } else if (lockContext.locked) {
           return { status: 409, body: buildSourceImmutableError(lockContext) };
         }
@@ -104,6 +106,14 @@ async function updateSaleOrder(req, res) {
 
       const updatedOrder = await updateSaleOrderFields(id, fields, transactionQuery);
       if (!updatedOrder && !hasLineUpdate(req.body)) {
+        // INV-026: resubmitting the CURRENT source with no other field is a no-op, not an
+        // error — the requested state already holds. Return the unchanged order with zero
+        // UPDATE and zero audit row. A locked source behaves identically: the lock forbids
+        // CHANGING the source, and nothing changes here.
+        if (sourceNoOp) {
+          const currentRows = await fetchSaleOrderById(id, transactionQuery);
+          return { status: 200, body: currentRows[0] };
+        }
         return { status: 400, body: { error: 'No fields to update' } };
       }
       if (updatedOrder === null) {

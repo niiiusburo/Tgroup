@@ -34,6 +34,29 @@ function trimRequired(value, field, minLen) {
 async function correctPartnerSource(req, res) {
   try {
     const { id } = req.params;
+
+    const actorId = resolveActorId(req);
+    if (!actorId) {
+      return res.status(401).json({ error: 'No actor on session' });
+    }
+
+    // D21 / INV-021: investor writes are forbidden until a decision names the exact write
+    // permission and scope, and none authorizes source correction. So EVERY investor is
+    // denied -- before body validation and before the transaction opens, so no row lock is
+    // taken and nothing is written or audited. Being allowlisted for a customer grants read
+    // scope, never write capability. 404 rather than 403 keeps the endpoint from confirming
+    // the customer exists.
+    //
+    // On the mounted route requireNonInvestorPermission already proved this and set the
+    // flag, so skip the duplicate scope query; this branch is the defence for direct
+    // invocation (tests, internal callers) where no middleware ran.
+    if (!req.nonInvestorVerified) {
+      const investorScope = await resolveInvestorScope(actorId);
+      if (investorScope.isInvestor) {
+        return res.status(404).json({ error: 'Partner not found' });
+      }
+    }
+
     const {
       new_sourceid,
       expected_old_sourceid,
@@ -63,23 +86,8 @@ async function correctPartnerSource(req, res) {
       });
     }
 
-    const actorId = resolveActorId(req);
-    if (!actorId) {
-      return res.status(401).json({ error: 'No actor on session' });
-    }
-
     const requestId = resolveRequestId(req);
     const transactionId = resolveTransactionId();
-
-    // D21 / INV-021: investor writes are forbidden until a decision names the exact write
-    // permission and scope, and none authorizes source correction. So EVERY investor is
-    // denied here -- before the transaction opens, so no row lock is taken and nothing is
-    // written or audited. Being allowlisted for a customer grants read scope, never write
-    // capability. 404 rather than 403 keeps the endpoint from confirming the customer exists.
-    const investorScope = await resolveInvestorScope(actorId);
-    if (investorScope.isInvestor) {
-      return res.status(404).json({ error: 'Partner not found' });
-    }
 
     const outcome = await withTransaction(async (tx) => {
       const existing = await tx(

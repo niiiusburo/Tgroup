@@ -71,4 +71,20 @@ Required order, only after PR merge and a synchronized `main`:
 `050_add_customer_source_foreign_keys.sql` stays separate under **CP-G** and must not be bundled
 into this sequence.
 
+#### The audit-table dependency is deliberate and fail-closed
+
+A reviewer asked whether the app should tolerate a missing `dbo.source_change_audit` — for example
+by skipping the audit insert when the table is absent. It must not, and no such fallback exists.
+INV-027 requires exactly one durable audit row in the **same transaction** as every successful
+source mutation. A "write the source, skip the audit" path would silently reproduce the original
+incident: attributions changing with no record of who changed them or why. Failing loudly on a
+missing table is the correct behaviour; the mitigation is deploy order, not a code fallback.
+
+There is no existing startup schema-preflight pattern in this codebase (`api/src/server.js` has no
+table-existence checks), so none was invented here — inventing one would be a new always-on startup
+surface for a single release. The gate is the expand-first sequence above: migrations 073 and 075
+apply **before** the app deploy, step 2 verifies both tables and both append-only triggers, and
+step 4 smokes an ordinary order create/update — the exact path that would 500 if the table were
+missing. That failure is loud, immediate, and caught before users see it.
+
 Production source repair remains explicitly out of scope until CP-E closes per clinic and a fresh CP-F confirmation authorizes the exact approved rows.

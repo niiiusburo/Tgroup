@@ -154,10 +154,11 @@ backend_permissions:
   - string: services.source_correct
     routes:
       - POST /api/SaleOrders/:id/source-correction
-    note: Super Admin/Admin only (migrations 073 and 075). Audited correction of paid/closed-period saleorders.sourceid (INV-026/027).
+    note: Super Admin/Admin only (migrations 073 and 075). Audited correction of paid/closed-period saleorders.sourceid (INV-026/027). Mounted behind requireNonInvestorPermission, which refuses investors with 404 before this permission is compared (D21/INV-021), so holding this permission never lets an investor write.
   - string: customers.source_correct
     routes:
       - POST /api/Partners/:id/source-correction
+    note: Mounted behind requireNonInvestorPermission; investors are refused 404 before the permission comparison (D21/INV-021).
   - string: products.export
     routes:
       - POST /api/Exports/service-catalog/preview
