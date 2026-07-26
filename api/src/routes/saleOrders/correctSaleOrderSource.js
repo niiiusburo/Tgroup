@@ -75,6 +75,16 @@ async function correctSaleOrderSource(req, res) {
       return res.status(401).json({ error: 'No actor on session' });
     }
 
+    // D21 / INV-021: investor writes are forbidden until a decision names the exact write
+    // permission and scope, and none authorizes source correction. So EVERY investor is
+    // denied here -- before the transaction, before any row lock, and before any write or
+    // audit row. Being allowlisted for a customer grants read scope, never write capability.
+    // 404 rather than 403 matches routes/saleOrders.js: a 403 would confirm the order exists.
+    const investorScope = await resolveInvestorScope(actorId);
+    if (investorScope.isInvestor) {
+      return res.status(404).json({ error: 'Sale order not found' });
+    }
+
     const requestId = resolveRequestId(req);
     const transactionId = resolveTransactionId();
     const manifestRef = correction_manifest_ref
@@ -84,17 +94,6 @@ async function correctSaleOrderSource(req, res) {
     const outcome = await withTransaction(async (tx) => {
       const lockState = await loadSaleOrderSourceLockState(id, tx);
       if (!lockState) {
-        return { status: 404, body: { error: 'Sale order not found' } };
-      }
-
-      // Row scoping. services.source_correct only says the caller may correct sources at
-      // all; it does not say WHICH customers' orders they may touch. Investors see a
-      // filtered subset of customers, so without this an investor holding the permission
-      // could rewrite the attribution of an order they cannot even read.
-      // 404 (not 403) matches the house pattern in routes/saleOrders.js so the endpoint
-      // cannot be used to probe which order ids exist outside the caller's scope.
-      const investorScope = await resolveInvestorScope(actorId);
-      if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(lockState.partnerid)) {
         return { status: 404, body: { error: 'Sale order not found' } };
       }
 

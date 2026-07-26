@@ -85,6 +85,14 @@ Current inventory from disk:
 
 **Total canonical migrations:** 52 runnable `.sql` files in the root of `api/migrations/`. Five customer-source rewrite artifacts are quarantined with `.sql.retired` extensions under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` and are not part of the runnable count.
 
+### Numbering
+
+Prefixes are **not** unique and never have been — `main` already carries duplicates at 001, 006, 008, 018, 019, 020, 037 and 045. The deploy loop globs `api/migrations/*.sql` and runs every distinct filename, so a shared prefix does not drop a file; what it does create is arbitrary relative apply order between the two and an ambiguous `dbo.schema_migrations` trail. The source-attribution set was therefore renumbered from 051–053 to **073–075**, chosen above every number in use on any branch at the time.
+
+### Apply-order caveat for 073–075 (expand-first)
+
+`docs/runbooks/DEPLOYMENT.md` documents the generic "deploy app, then apply migrations" order. That is unsafe for this set: sale-order create and update call `recordSourceChange()`, which INSERTs into `dbo.source_change_audit`, so shipping the app first makes ordinary source-bearing order writes fail with `relation "dbo.source_change_audit" does not exist` until the migration lands. Apply **073 then 075 before** deploying the app; `074` is an intentional no-op manifest. Rolling the app back afterwards is safe — do not drop 073/075 while any deployed code writes to them. Full sequence and smoke steps: `docs/audits/2026-07-25-source-attribution-release-candidate.md`. Migration `050` stays separate under CP-G.
+
 ## Supplemental Migration Files
 
 These files are visible under `api/src/db/migrations/` but are not part of the canonical root migration index yet.

@@ -3,12 +3,13 @@
     "version": "0.33.0",
     "date": "2026-07-26",
     "commit": "pending",
-    "highlights": "Closed the source-attribution incident safeguards, and scoped the audited correction paths to the caller’s own customers.",
+    "highlights": "Closed the source-attribution incident safeguards and made investor accounts fail closed on every source write and on the audit ledger.",
     "sections": [
       {
         "title": "Security",
         "items": [
-          "The audited source-correction endpoints for sale orders and customers now enforce investor row scope: a caller holding the correction permission can no longer change attribution on a customer outside their assigned allow-list. Out-of-scope requests return 404 rather than 403 so the endpoints cannot be used to discover which records exist."
+          "Investor accounts are now refused outright on both audited source-correction endpoints, before any row lock, write or audit row. Per DECISIONS.md D21 investor writes stay forbidden until a decision names the exact write permission and scope, and none authorizes source correction — so being allowlisted for a customer grants read scope, never write capability.",
+          "The source-change reconciliation report now denies investor accounts before querying the ledger, which spans both customer and order entities and carries actor ids, reasons, request ids and manifest refs with no per-entity customer scoping available."
         ]
       },
       {
@@ -21,13 +22,14 @@
       {
         "title": "Migrations",
         "items": [
-          "Renumbered the source-attribution migrations to 073-075 to clear a filename collision with three unrelated in-flight migrations that claimed 051-053. The deploy loop globs api/migrations/*.sql and does not consult dbo.schema_migrations, so a duplicate number would have silently discarded one lane’s schema."
+          "Renumbered the source-attribution migrations to 073-075. Three unrelated in-flight lanes already claimed 051-053, but with different filenames, so nothing would have been lost: the deploy loop globs api/migrations/*.sql and runs every distinct file, and main already carries duplicate numeric prefixes (045 appears twice, among others). The renumber instead removes cross-branch ordering and ledger ambiguity, since two files sharing a prefix apply in arbitrary relative order and make dbo.schema_migrations harder to reason about.",
+          "Recorded a release-specific expand-first order for this change: apply and verify 073 and 075 before deploying the app, because the create/update paths write to dbo.source_change_audit and would fail until it exists. 074 is an intentional no-op manifest."
         ]
       },
       {
         "title": "Testing",
         "items": [
-          "Added negative-path coverage proving an out-of-scope investor is rejected with no UPDATE and no audit row written, plus the in-scope case so the guard cannot over-block. Both were mutation-checked: disabling the guard fails these tests and no others."
+          "Added negative-path coverage proving both an unscoped and an allowlisted investor are refused with zero database calls and zero audit rows, plus a regression proving the reconciliation ledger is never queried for an investor. The correction tests were mutation-checked: disabling the guard fails them and no others."
         ]
       }
     ]

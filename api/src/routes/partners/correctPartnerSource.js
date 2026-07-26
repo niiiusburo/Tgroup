@@ -71,13 +71,13 @@ async function correctPartnerSource(req, res) {
     const requestId = resolveRequestId(req);
     const transactionId = resolveTransactionId();
 
-    // Row scoping, checked before the transaction opens so an out-of-scope caller never
-    // takes a row lock. customers.source_correct grants the capability, not the reach:
-    // investors only see an allow-listed subset of customers, and here the record id IS
-    // the customer id. 404 rather than 403 matches routes/saleOrders.js and keeps the
-    // endpoint from confirming that an out-of-scope customer exists.
+    // D21 / INV-021: investor writes are forbidden until a decision names the exact write
+    // permission and scope, and none authorizes source correction. So EVERY investor is
+    // denied here -- before the transaction opens, so no row lock is taken and nothing is
+    // written or audited. Being allowlisted for a customer grants read scope, never write
+    // capability. 404 rather than 403 keeps the endpoint from confirming the customer exists.
     const investorScope = await resolveInvestorScope(actorId);
-    if (investorScope.isInvestor && !investorScope.allowedCustomerIds.includes(id)) {
+    if (investorScope.isInvestor) {
       return res.status(404).json({ error: 'Partner not found' });
     }
 

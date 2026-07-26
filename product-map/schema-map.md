@@ -398,10 +398,10 @@ Migration `074_order_source_backfill_manifest.sql` is a reviewed-only, no-op man
 |-----------|-------|
 | **Primary Key** | `id` (uuid) |
 | **W** | Sale-order create/open-order update, `POST /api/SaleOrders/:id/source-correction`, `POST /api/Partners/:id/source-correction` via `api/src/services/sourceChangeAudit.js`; migration `075_source_change_audit.sql` |
-| **R** | `POST /api/Reports/source-change-reconciliation` (bounded) |
+| **R** | `POST /api/Reports/source-change-reconciliation` (bounded); investor accounts refused `403` before the query |
 | **E** | Same write paths + reconciliation report |
 | **UI** | No dedicated UI yet; operator/report consumers |
-| **Risk** | **High** — only durable attribution trail for source mutations. Append-only (UPDATE/DELETE triggers). Unexpected paid/closed rows alert via Lark. |
+| **Risk** | **High** — only durable attribution trail for source mutations. Append-only (UPDATE/DELETE triggers). Unexpected paid/closed rows alert via Lark. Investors are denied on every read and write path (D21 / INV-021). Coverage is app-layer only: no DB trigger compels an audit row, so raw SQL remains the residual gap; active migrations are held to it by `api/tests/customerSourceMigrationArchiveGuard.test.js`, which rejects executable `UPDATE`s assigning `sourceid`. |
 
 ### dbo.feedback_threads + feedback_messages + feedback_attachments
 

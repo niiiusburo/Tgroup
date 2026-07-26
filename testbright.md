@@ -11,7 +11,7 @@ Feature/edit name: v0.33.0 — INV-026 paid and closed-period `saleorders.source
 Changed URLs / API routes / data flow:
 - Frontend: Service edit form source chips (`ServiceForm` / `ServiceSourceField`) disable when paid or prior calendar month (`Asia/Ho_Chi_Minh`); ordinary save omits `sourceid` unless the user changed source on an unlocked order.
 - API: `PATCH /api/SaleOrders/:id` rejects locked source changes with `409 SOURCE_IMMUTABLE`; `POST /api/SaleOrders/:id/source-correction` (`services.source_correct`) applies audited corrections.
-- Data: migration `051_saleorder_source_corrections.sql` → `dbo.saleorder_source_corrections` (old/new source, reason, evidence, rollback_reference, actor, request_id, created_at).
+- Data: migration `073_saleorder_source_corrections.sql` → `dbo.saleorder_source_corrections` (old/new source, reason, evidence, rollback_reference, actor, request_id, created_at).
 
 Expected behavior:
 - Open unpaid current-month order: source chips editable; PATCH may change `sourceid`.
@@ -25,7 +25,7 @@ Execution items:
 - [x] PASS: `api/tests/saleOrderSourceImmutability.test.js` + `customerSourceIntegrity.test.js` — 27/27 (open allow, paid reject, closed-period reject, unrelated edit, correction audit/conflict/invalid, permission wiring).
 - [x] PASS: `website/src/lib/saleOrderSourceLock.test.ts` + `useServices.payment-state.test.tsx` — lock evaluation parity and source omit-unless-changed.
 - [x] PASS: Local/manual ServiceForm edit on a paid order showed 16 disabled source chips plus the controlled-correction message; a notes-only update succeeded, preserved `sourceid`, and the smoke-test note was restored immediately. Screenshot: `website/output/playwright/source-attribution-incident/paid-closed-order-source-lock.png`.
-- [ ] PENDING: Authorized admin correction API smoke with full audit body writes `saleorder_source_corrections` (after migration 051 applied).
+- [ ] PENDING: Authorized admin correction API smoke with full audit body writes `saleorder_source_corrections` (after migration 073 applied).
 - [ ] PENDING: nk2 live verify — ordinary locked source change blocked; unrelated edit OK; unauthorized correction 403.
 
 Setup/login data: Staff with service edit; admin with `services.source_correct`. Prefer fixture unpaid open-month order + paid/prior-month order. Do not rewrite production closed-period sources without rollback reference.
@@ -95,7 +95,7 @@ Feature/edit name: v0.33.0 — append-only `source_change_audit` ledger, defense
 
 Changed URLs / API routes / data flow:
 - API: `POST /api/SaleOrders`, `PATCH /api/SaleOrders/:id`, `POST /api/SaleOrders/:id/source-correction`, `POST /api/Partners/:id/source-correction`, `POST /api/Reports/source-change-reconciliation`.
-- Data: `dbo.source_change_audit` (migration 053); Lark alert via `LARK_SOURCE_AUDIT_WEBHOOK_URL` or feedback webhook.
+- Data: `dbo.source_change_audit` (migration 075); Lark alert via `LARK_SOURCE_AUDIT_WEBHOOK_URL` or feedback webhook.
 - Normal Partner POST/PUT remain source read-only (no audit on rejected writes).
 
 Expected behavior:
@@ -111,7 +111,7 @@ User roles: Staff with `customers.edit` / `services.view`; Super Admin/Admin for
 
 Execution items:
 - [x] PASS: Integrated `sourceChangeAudit.test.js` + migration + alert coverage passed inside the final 16-suite / 188-test source-attribution candidate matrix.
-- [x] PASS: Migrations 051 and 053 were applied twice on the disposable PostgreSQL 16 clone; a transaction probe inserted one correction plus one audit row, UPDATE/DELETE were rejected by the append-only triggers, and the probe rolled back. The exact migrations were also applied successfully to the local E2E database.
+- [x] PASS: Migrations 073 and 075 were applied twice on the disposable PostgreSQL 16 clone; a transaction probe inserted one correction plus one audit row, UPDATE/DELETE were rejected by the append-only triggers, and the probe rolled back. The exact migrations were also applied successfully to the local E2E database.
 - [ ] PENDING: NK2 operator smoke — authorized correction writes audit; reconciliation lists the row; no audit on read-only GET.
 
 Setup/login data: local/staging staff admin; do not run bulk source repairs on production without Task 08/09 gates.

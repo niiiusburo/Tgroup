@@ -423,26 +423,14 @@ describe('permissioned source correction path', () => {
     }));
   });
 
-  it('rejects correction when the investor is not scoped to the order customer', async () => {
-    // services.source_correct grants the capability, not the reach. An investor who holds the
-    // permission must still not be able to rewrite attribution on a customer outside their
-    // investor_clients allow-list.
-    resolveInvestorScope.mockResolvedValueOnce({
-      isInvestor: true,
-      allowedCustomerIds: [OTHER_CUSTOMER],
-    });
-
-    query
-      .mockResolvedValueOnce([{
-        id: ORDER_ID,
-        partnerid: CUSTOMER_ID,
-        order_sourceid: SOURCE_A,
-        totalpaid: 0,
-        datestart: '2026-07-10',
-        datecreated: '2026-07-10',
-        isdeleted: false,
-      }])
-      .mockResolvedValueOnce([{ totalpaid: 0 }]);
+  // D21 (DECISIONS.md) forbids investor writes until a decision names the exact write
+  // permission and scope. None authorizes source correction, so BOTH an unscoped and an
+  // allowlisted investor must be refused, with zero writes and zero audit rows.
+  it.each([
+    ['not scoped to the order customer', [OTHER_CUSTOMER]],
+    ['allowlisted for the order customer', [CUSTOMER_ID]],
+  ])('refuses an investor %s and writes nothing', async (_label, allowedCustomerIds) => {
+    resolveInvestorScope.mockResolvedValueOnce({ isInvestor: true, allowedCustomerIds });
 
     const res = responseDouble();
     await correctSaleOrderSource(
@@ -453,7 +441,7 @@ describe('permissioned source correction path', () => {
         body: {
           new_sourceid: SOURCE_B,
           expected_old_sourceid: SOURCE_A,
-          reason: 'Attempted out-of-scope correction by an investor',
+          reason: 'Attempted source correction by an investor account',
           evidence: 'scope test',
           rollback_reference: 'none',
         },
@@ -461,55 +449,13 @@ describe('permissioned source correction path', () => {
       res,
     );
 
-    // 404 rather than 403: a 403 would confirm the order exists, turning this endpoint into a
-    // way to enumerate records outside the caller's scope.
+    // 404 rather than 403: a 403 would confirm the order exists.
     expect(res.status).toHaveBeenCalledWith(404);
+    // Rejected before the transaction: no lock is taken and no statement runs at all.
+    expect(withTransaction).not.toHaveBeenCalled();
+    expect(query).not.toHaveBeenCalled();
     expect(query.mock.calls.some(([sql]) => /UPDATE\s+dbo\.saleorders/i.test(sql))).toBe(false);
     expect(query.mock.calls.some(([sql]) => /INSERT INTO dbo\.saleorder_source_corrections/i.test(sql))).toBe(false);
     expect(query.mock.calls.some(([sql]) => /INSERT INTO dbo\.source_change_audit/i.test(sql))).toBe(false);
-  });
-
-  it('allows correction when the investor IS scoped to the order customer', async () => {
-    // Guards the inverse: the scope check must not block a legitimately scoped investor.
-    resolveInvestorScope.mockResolvedValueOnce({
-      isInvestor: true,
-      allowedCustomerIds: [CUSTOMER_ID],
-    });
-
-    query
-      .mockResolvedValueOnce([{
-        id: ORDER_ID,
-        partnerid: CUSTOMER_ID,
-        order_sourceid: SOURCE_A,
-        totalpaid: 0,
-        datestart: '2026-07-10',
-        datecreated: '2026-07-10',
-        isdeleted: false,
-      }])
-      .mockResolvedValueOnce([{ totalpaid: 0 }])
-      .mockResolvedValueOnce([{ is_active: true, already_selected: false }])
-      .mockResolvedValueOnce([{ id: ORDER_ID, sourceid: SOURCE_B }])
-      .mockResolvedValueOnce([{ id: 'corr-scoped', saleorder_id: ORDER_ID }])
-      .mockResolvedValueOnce([{ id: 'audit-scoped', change_channel: 'source_correction' }])
-      .mockResolvedValueOnce([{ id: ORDER_ID, sourceid: SOURCE_B }]);
-
-    const res = responseDouble();
-    await correctSaleOrderSource(
-      {
-        params: { id: ORDER_ID },
-        user: { employeeId: ACTOR },
-        headers: {},
-        body: {
-          new_sourceid: SOURCE_B,
-          expected_old_sourceid: SOURCE_A,
-          reason: 'In-scope correction by an investor',
-          evidence: 'scope test',
-          rollback_reference: 'none',
-        },
-      },
-      res,
-    );
-
-    expect(res.status).toHaveBeenCalledWith(200);
   });
 });

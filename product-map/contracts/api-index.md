@@ -105,7 +105,7 @@ PUT handler-level validation: `companyId` (when present) must be a UUID (`400 IN
 | PATCH | `/:id/investor-visibility` | Admin (`assertAdmin`) | `{ visible: boolean }` | `{ investorId, customerId, visible }`; admin-only. Tick writes under the canonical key; untick clears the customer under EVERY key in the scope union (partner id OR any active account id) so a removed client cannot stay visible. Rejects a non-UUID `:id` with 400 `VALIDATION` |
 | POST | `/` | Perm:`customers.add` | Partner fields; normal customer creation must omit `sourceid` | Created partner with backend-generated `ref`; dental uses `T######`, cosmetic mirror uses collision-checked `TM######`; non-null `sourceid` returns `400 PARTNER_SOURCE_READ_ONLY` |
 | PUT | `/:id` | Perm:`customers.edit` | Partial partner fields; omitted fields remain unchanged and normal clients must omit `sourceid` | Updated partner; a changed or cleared `sourceid` returns `400 PARTNER_SOURCE_READ_ONLY`, while an explicitly repeated current value is ignored for compatibility |
-| POST | `/:id/source-correction` | Perm:`customers.source_correct` | `{ new_sourceid, expected_old_sourceid, reason, correction_manifest_ref }` | `{ partner, audit }` authorized partner source correction (only approved partner source write path) |
+| POST | `/:id/source-correction` | Perm:`customers.source_correct` | `{ new_sourceid, expected_old_sourceid, reason, correction_manifest_ref }` | `{ partner, audit }` authorized partner source correction (only approved partner source write path); investor accounts refused `404` before the transaction (D21/INV-021) |
 | PATCH | `/:id/soft-delete` | Perm:`customers.delete` | — | Soft-deleted partner |
 | DELETE | `/:id/hard-delete` | Perm:`customers.hard_delete` | — | Hard-deleted partner |
 
@@ -149,7 +149,7 @@ Client role mapping: `/api/Employees` still returns legacy boolean flags and tit
 | GET | `/:id` | Perm:`services.view` | — | Sale order detail |
 | POST | `/` | Perm:`customers.edit` | `{ partnerid, companyid, sourceid?: active source UUID or null, ... }` | Created sale order; `400 CUSTOMER_SOURCE_NOT_SELECTABLE` for inactive/missing source; non-null source writes one `source_change_audit` row (`api_create`) |
 | PATCH | `/:id` | Perm:`customers.edit` | Order fields; quantity, service, tooth, and price fields also sync to the primary rendered sale-order line. Clients omit `sourceid` on unrelated edits; an explicitly submitted inactive source is allowed only when directly assigned to this same order. Paid/closed-period source changes are rejected with `409 SOURCE_IMMUTABLE` (repeat current value is a no-op). | Updated sale order; `400 CUSTOMER_SOURCE_NOT_SELECTABLE` for a new inactive/missing source; `409 SOURCE_IMMUTABLE` when locked; successful open-order source changes write one `source_change_audit` row (`api_patch`) |
-| POST | `/:id/source-correction` | Perm:`services.source_correct` | `{ new_sourceid, expected_old_sourceid, reason, evidence, rollback_reference, correction_manifest_ref? }` | `{ order, correction, audit }` authorized correction in both correction and append-only ledgers (`change_channel=source_correction`) |
+| POST | `/:id/source-correction` | Perm:`services.source_correct` | `{ new_sourceid, expected_old_sourceid, reason, evidence, rollback_reference, correction_manifest_ref? }` | `{ order, correction, audit }` authorized correction in both correction and append-only ledgers (`change_channel=source_correction`); investor accounts refused `404` before any lock or write (D21/INV-021) |
 | PATCH | `/:id/state` | Perm:`customers.edit` | `{ new_state }` | State updated + audit log |
 
 ## Sale Order Lines (`/api/SaleOrderLines`)
@@ -254,7 +254,7 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 | POST | `/employees/overview` | Perm:`reports.view` | `{ companyId? }` | `{ success, data: { roles, byLocation[], employees[] } }` |
 | POST | `/services/breakdown` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { categories[], revenueByCategory[], revenueBySource[], popularProducts[] } }` |
 | POST | `/locations/comparison` | Perm:`reports.view` | `{ dateFrom?, dateTo? }` | `{ success, data: { locations[], trend[] } }` |
-| POST | `/source-change-reconciliation` | Perm:`reports.view` | `{ dateFrom?, dateTo?, entityType?, unexpectedOnly?, limit?, offset? }` | Bounded `{ summary, rows, limit, offset, bounded:true }` over append-only `source_change_audit` (max limit 500) |
+| POST | `/source-change-reconciliation` | Perm:`reports.view` | `{ dateFrom?, dateTo?, entityType?, unexpectedOnly?, limit?, offset? }` | Bounded `{ summary, rows, limit, offset, bounded:true }` over append-only `source_change_audit` (max limit 500); investor accounts refused `403` before the ledger is queried (DEC-20260704-01/INV-021) |
 
 ## Operational Exports (`/api/Exports`)
 

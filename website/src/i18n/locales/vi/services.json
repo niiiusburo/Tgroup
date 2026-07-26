@@ -163,5 +163,10 @@
     "amount": "Thành tiền",
     "paid": "Thanh toán",
     "remaining": "Còn lại"
+  },
+  "sourceLock": {
+    "paidAndClosedPeriod": "Nguồn khách đã khóa (đã thanh toán và thuộc kỳ đã chốt). Dùng đường sửa nguồn có kiểm soát.",
+    "paid": "Nguồn khách đã khóa vì đơn đã có thanh toán. Dùng đường sửa nguồn có kiểm soát.",
+    "closedPeriod": "Nguồn khách đã khóa vì thuộc kỳ báo cáo đã chốt. Dùng đường sửa nguồn có kiểm soát."
   }
 }

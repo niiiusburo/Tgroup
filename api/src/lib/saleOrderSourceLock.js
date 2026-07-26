@@ -65,7 +65,6 @@ async function loadSaleOrderSourceLockState(saleOrderId, queryFn) {
   const rows = await queryFn(
     `SELECT
        so.id,
-       so.partnerid,
        so.sourceid AS order_sourceid,
        so.totalpaid,
        so.datestart,

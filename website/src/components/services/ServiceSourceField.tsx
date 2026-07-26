@@ -1,6 +1,6 @@
 import { FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { sourceLockMessage, type SourceLockState } from '@/lib/saleOrderSourceLock';
+import { sourceLockMessageKey, type SourceLockState } from '@/lib/saleOrderSourceLock';
 
 export interface ServiceSourceOption {
   readonly id: string;
@@ -24,7 +24,8 @@ export function ServiceSourceField({
 }: ServiceSourceFieldProps) {
   const { t } = useTranslation('services');
   const locked = lock.locked;
-  const lockHint = sourceLockMessage(lock);
+  const lockMessageKey = sourceLockMessageKey(lock);
+  const lockHint = lockMessageKey ? t(lockMessageKey) : '';
 
   return (
     <div>

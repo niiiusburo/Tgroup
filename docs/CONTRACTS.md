@@ -212,22 +212,30 @@ Normal `POST /api/Partners` and `PUT /api/Partners/:id` do not assign or change 
 
 **Source-change audit (INV-027):** Successful create/open-order update of `saleorders.sourceid` and authorized partner/order source-correction paths each insert one `dbo.source_change_audit` row (entity, old/new source, actor, reason, request id, transaction id, optional `correction_manifest_ref`, channel, unexpected flags). Reads, rejected locked-order changes, and other failed writes insert nothing. Audit rows cannot be updated/deleted through the app.
 
+**Investor denial on every source-mutation and ledger path (D21 / INV-021):** investor accounts are
+refused on both source-correction endpoints and on the reconciliation report. `DECISIONS.md` D21
+keeps investor writes forbidden until a decision names the exact write permission and scope, and no
+decision authorizes source correction — so an investor is denied even when allowlisted for the
+customer, because the allowlist grants read scope, never write capability. Denial happens before any
+transaction, row lock, write or audit row, and before request-body validation.
+
 #### POST /api/SaleOrders/:id/source-correction
-**Auth:** `services.source_correct`
+**Auth:** `services.source_correct`; investor accounts are always refused.
 **Body:** `{ new_sourceid, expected_old_sourceid, reason, evidence, rollback_reference, correction_manifest_ref? }`
 **Success 200:** `{ order, correction, audit }` where `correction` is the detailed domain correction record and `audit` is the append-only ledger row (`change_channel=source_correction`).
-**Errors:** `400 SOURCE_CORRECTION_INVALID` / `CUSTOMER_SOURCE_NOT_SELECTABLE`; `409 SOURCE_CORRECTION_CONFLICT`; `403` / `404`.
+**Errors:** `400 SOURCE_CORRECTION_INVALID` / `CUSTOMER_SOURCE_NOT_SELECTABLE`; `409 SOURCE_CORRECTION_CONFLICT`; `403` / `404`. Investors receive `404` (not `403`) so the endpoint cannot confirm which orders exist.
 
 #### POST /api/Partners/:id/source-correction
-**Auth:** `customers.source_correct`
+**Auth:** `customers.source_correct`; investor accounts are always refused.
 **Body:** `{ new_sourceid, expected_old_sourceid, reason, correction_manifest_ref }`
 **Success 200:** `{ partner, audit }` (`change_channel=partner_source_correction`).
-**Errors:** `400 PARTNER_SOURCE_CORRECTION_INVALID` / `CUSTOMER_SOURCE_NOT_SELECTABLE`; `409 PARTNER_SOURCE_CORRECTION_CONFLICT`; `403` / `404`.
+**Errors:** `400 PARTNER_SOURCE_CORRECTION_INVALID` / `CUSTOMER_SOURCE_NOT_SELECTABLE`; `409 PARTNER_SOURCE_CORRECTION_CONFLICT`; `403` / `404`. Investors receive `404` before the transaction opens, so no row lock is taken.
 
 #### POST /api/Reports/source-change-reconciliation
-**Auth:** `reports.view`
+**Auth:** `reports.view`; investor accounts are refused with `403` before the ledger is queried.
 **Body:** `{ dateFrom?, dateTo?, entityType?: 'partner'|'saleorder', unexpectedOnly?: boolean, limit?: number, offset?: number }`
 **Success 200:** `{ summary, rows, limit, offset, bounded: true }` with `limit` capped at 500.
+**Errors:** `400` invalid `dateFrom`/`dateTo`/`entityType`; `403` for investor accounts. The ledger spans both partner and saleorder entities and carries entity ids, actor ids, reasons, request ids and manifest refs with no per-entity customer join, so it is denied outright rather than row-scoped. `403` (not `404`) is correct here because the path is static and carries no record id, so no existence is leaked.
 
 `GET /api/CustomerSources` returns each lookup with numeric `customer_count` and `order_count`. `POST` and `PUT` return the same numeric count fields for their affected lookup. The optional `is_active=true` query limits selection lists to active sources. Settings may request all rows so inactive historical lookups remain visible for management and audit. Active-only selection surfaces must show no fallback IDs when the lookup request is empty or fails.
 

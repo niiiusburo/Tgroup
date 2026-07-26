@@ -44,13 +44,19 @@ export function evaluateSourceLock(input: {
   return { locked: reasons.length > 0, reasons, openPeriodStart };
 }
 
-export function sourceLockMessage(state: SourceLockState): string {
+/**
+ * Select the i18n key for the lock explanation. Returns a key, not a sentence, so this module
+ * stays pure and framework-free (it is also unit-tested without an i18n provider). Callers
+ * translate it with their existing `useTranslation('services')` hook — see ServiceSourceField
+ * and ServiceForm. Returns '' when the source is not locked, so callers can treat it as falsy.
+ */
+export function sourceLockMessageKey(state: SourceLockState): string {
   if (!state.locked) return '';
   if (state.reasons.includes('paid') && state.reasons.includes('closed_period')) {
-    return 'Nguồn khách đã khóa (đã thanh toán và thuộc kỳ đã chốt). Dùng đường sửa nguồn có kiểm soát.';
+    return 'sourceLock.paidAndClosedPeriod';
   }
   if (state.reasons.includes('paid')) {
-    return 'Nguồn khách đã khóa vì đơn đã có thanh toán. Dùng đường sửa nguồn có kiểm soát.';
+    return 'sourceLock.paid';
   }
-  return 'Nguồn khách đã khóa vì thuộc kỳ báo cáo đã chốt. Dùng đường sửa nguồn có kiểm soát.';
+  return 'sourceLock.closedPeriod';
 }

@@ -1,4 +1,4 @@
--- Migration 052: Order source backfill MANIFEST (reviewed only — do not auto-apply)
+-- Migration 074: Order source backfill MANIFEST (reviewed only — do not auto-apply)
 -- INV-023 / Task 11
 --
 -- Purpose:

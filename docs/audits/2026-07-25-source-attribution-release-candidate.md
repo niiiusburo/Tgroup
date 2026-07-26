@@ -26,8 +26,8 @@
 | Focused frontend matrix | PASS — 4 files / 19 tests |
 | Settings Chromium smoke | PASS — referenced lock badges, inactive history, create-new guidance, active toggle restored |
 | Paid/closed ServiceForm smoke | PASS — 16 source buttons disabled; lock copy visible; notes-only save succeeded; source unchanged; note restored |
-| Migration 051/053 clone rehearsal | PASS — idempotent apply; correction + audit insert; UPDATE/DELETE blocked; probe rolled back |
-| Migration 051/053 local E2E apply | PASS — both tables, two grants, and two append-only triggers present |
+| Migration 073/075 clone rehearsal | PASS — idempotent apply; correction + audit insert; UPDATE/DELETE blocked; probe rolled back |
+| Migration 073/075 local E2E apply | PASS — both tables, two grants, and two append-only triggers present |
 | Source-audit semgrep | PASS — 0 findings |
 | Default semgrep on changed production code | PASS — 39 paths, 0 findings, 0 scan errors |
 | Default semgrep on changed tests too | REVIEWED — 5 test-harness-only heuristics (4 WARNING, 1 INFO), 0 HIGH/ERROR and no production finding |
@@ -42,7 +42,33 @@ The full repository sweeps remain at unrelated pre-existing baselines: API 80/82
 1. **PR review/merge:** human review plus required CI is the merge boundary.
 2. **CP-E clinic approvals:** 0/6 clinics approved; 220 proposed repair rows remain non-executable.
 3. **CP-G migration 050:** separate immediate production confirmation is required; it must not be bundled with app deployment or repair.
-4. **Migrations 051/053 and app deploy:** execute only from synchronized merged `main`, under a fresh immediate production confirmation and rollback plan.
+4. **Migrations 073/075 and app deploy:** execute only from synchronized merged `main`, under a fresh immediate production confirmation and rollback plan, following the expand-first order below.
 5. **Live acceptance:** prove canonical deployed SHA plus locked edit, correction/audit, taxonomy protection, and order/customer report separation before calling the incident closed.
+
+### Release-specific expand-first order (overrides the generic runbook for this release)
+
+`docs/runbooks/DEPLOYMENT.md` documents the generic order "deploy app, then apply migrations."
+That order is unsafe for **this** release. The sale-order create and update paths call
+`recordSourceChange()`, which INSERTs into `dbo.source_change_audit`. If the app ships first,
+every ordinary source-bearing order write returns 500 with
+`relation "dbo.source_change_audit" does not exist` until the migration lands — a self-inflicted
+outage window on the normal booking path, not just on the correction path.
+
+Required order, only after PR merge and a synchronized `main`:
+
+1. Fresh backup plus an exact, immediate production database confirmation naming the target DB.
+2. Apply `073_saleorder_source_corrections.sql`, then `075_source_change_audit.sql`. Verify both
+   tables exist and that `source_change_audit` carries its no-UPDATE and no-DELETE triggers.
+   `074_order_source_backfill_manifest.sql` is an intentional no-op manifest — applying it is
+   harmless and changes nothing.
+3. Deploy the app, then confirm the served revision matches the merged SHA.
+4. Smoke, in order: order create, order update, an audited correction, and the reconciliation
+   report. Confirm one audit row per successful mutation and zero rows for rejected ones.
+5. Rollback check: the app tolerates the tables existing without the new code, so rolling the
+   app back is safe. Dropping 073/075 is **not** part of rollback while any deployed code writes
+   to them.
+
+`050_add_customer_source_foreign_keys.sql` stays separate under **CP-G** and must not be bundled
+into this sequence.
 
 Production source repair remains explicitly out of scope until CP-E closes per clinic and a fresh CP-F confirmation authorizes the exact approved rows.

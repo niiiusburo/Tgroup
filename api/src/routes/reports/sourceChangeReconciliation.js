@@ -4,6 +4,7 @@ const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
 const { buildSourceChangeReconciliation } = require('../../services/sourceChangeAudit');
+const { resolveInvestorScope } = require('../../services/permissionService');
 const { err, validDate } = require('./helpers');
 
 const router = express.Router();
@@ -18,6 +19,19 @@ router.post(
   requirePermission('reports.view'),
   async (req, res) => {
     try {
+      // DEC-20260704-01 / INV-021: every investor-reachable customer-derived read, report
+      // and export must restrict rows to that investor's dbo.investor_clients allowlist, or
+      // fail closed. This operator ledger spans both partner and saleorder entities and
+      // carries entity ids, actor ids, reasons, request ids and manifest refs with no
+      // per-entity customer join available, so it cannot be row-scoped without a wider
+      // change. Deny investors before the ledger is queried rather than serve an unscoped
+      // extract. 403 not 404 here: the path is static and carries no record id, so there is
+      // no existence to leak -- unlike the source-correction endpoints.
+      const investorScope = await resolveInvestorScope(req.user?.employeeId);
+      if (investorScope.isInvestor) {
+        return err(res, 403, 'Source-change reconciliation is not available for investor accounts');
+      }
+
       const {
         dateFrom,
         dateTo,

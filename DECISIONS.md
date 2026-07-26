@@ -130,7 +130,7 @@ Decision:
 Define a closed reporting period as any order attribution date strictly before the first day of the current calendar month in `Asia/Ho_Chi_Minh`. Once an order is paid or closed-period, ordinary `PATCH /api/SaleOrders/:id` cannot change `sourceid` (repeat current value is a no-op). Corrections require `POST /api/SaleOrders/:id/source-correction` with permission `services.source_correct`, evidence, reason, expected old value, rollback reference, and a durable audit row. Unrelated non-source edits remain allowed.
 
 Consequences:
-INV-026, migration 051, ServiceForm lock UX, and `saleOrderSourceImmutability` regression tests are mandatory companions. Future period-close tooling may refine the calendar-month default but must not weaken paid-order immutability.
+INV-026, migration 073, ServiceForm lock UX, and `saleOrderSourceImmutability` regression tests are mandatory companions. Future period-close tooling may refine the calendar-month default but must not weaken paid-order immutability.
 
 ## DEC-20260724-02: Referenced Source Labels Are Immutable
 

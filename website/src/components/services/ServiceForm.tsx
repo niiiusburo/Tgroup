@@ -47,7 +47,7 @@ import type { CreateServiceInput } from '@/hooks/useServices';
 import type { Employee } from '@/types/employee';
 import type { Product } from '@/hooks/useProducts';
 import type { AppointmentType } from '@/constants';
-import { evaluateSourceLock, sourceLockMessage } from '@/lib/saleOrderSourceLock';
+import { evaluateSourceLock, sourceLockMessageKey } from '@/lib/saleOrderSourceLock';
 import { ServiceSourceField } from './ServiceSourceField';
 
 interface Location {
@@ -116,7 +116,8 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       : { locked: false, reasons: [], openPeriodStart: '' }),
     [isEdit, initialData?.paidAmount, initialData?.startDate, initialData?.createdAt],
   );
-  const sourceLockHint = sourceLockMessage(sourceLock);
+  const sourceLockMessageId = sourceLockMessageKey(sourceLock);
+  const sourceLockHint = sourceLockMessageId ? t(sourceLockMessageId) : '';
 
   useEffect(() => {
     if (initialData) {

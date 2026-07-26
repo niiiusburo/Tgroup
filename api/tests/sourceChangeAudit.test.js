@@ -455,13 +455,13 @@ describe('authorized correction paths', () => {
     expect(res.json.mock.calls[0][0].audit.entity_type).toBe('partner');
   });
 
-  it('partner correction rejects an investor outside their customer scope', async () => {
-    // customers.source_correct grants the capability, not the reach. Here the record id IS the
-    // customer id, so an unscoped investor must be turned away before any row lock is taken.
-    resolveInvestorScope.mockResolvedValueOnce({
-      isInvestor: true,
-      allowedCustomerIds: ['99999999-9999-4999-8999-999999999999'],
-    });
+  // D21 forbids investor writes until a decision names the exact write permission and scope.
+  // None authorizes source correction, so an allowlisted investor must be refused too.
+  it.each([
+    ['outside their customer scope', ['99999999-9999-4999-8999-999999999999']],
+    ['allowlisted for that very customer', [PARTNER_ID]],
+  ])('partner correction refuses an investor %s with zero writes', async (_label, allowedCustomerIds) => {
+    resolveInvestorScope.mockResolvedValueOnce({ isInvestor: true, allowedCustomerIds });
 
     const req = {
       params: { id: PARTNER_ID },
@@ -477,10 +477,11 @@ describe('authorized correction paths', () => {
     const res = responseDouble();
     await correctPartnerSource(req, res);
 
-    // 404 not 403 — a 403 would confirm the customer exists outside the caller's scope.
+    // 404 not 403 — a 403 would confirm the customer exists.
     expect(res.status).toHaveBeenCalledWith(404);
     // Fail-closed: rejected before the transaction, so nothing is read, written or audited.
     expect(withTransaction).not.toHaveBeenCalled();
+    expect(query).not.toHaveBeenCalled();
     expect(query.mock.calls.some(([sql]) => /UPDATE\s+dbo\.partners/i.test(sql))).toBe(false);
     expect(query.mock.calls.some(([sql]) => /INSERT INTO dbo\.source_change_audit/i.test(sql))).toBe(false);
   });

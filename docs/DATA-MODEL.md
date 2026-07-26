@@ -309,6 +309,10 @@ Investor identities remain `dbo.partners` employee rows assigned to the `investo
 
 **Rules:** INSERT-only. BEFORE UPDATE/DELETE triggers raise. No app UPDATE/DELETE routes. Ordinary paid/closed-period PATCH changes are rejected before mutation; explicit correction routes write this ledger and the domain-specific correction record atomically. Created by migration `075_source_change_audit.sql`.
 
+**Access:** investor accounts can neither write nor read this ledger. Both source-correction routes refuse investors with `404` before any transaction or row lock, and `POST /api/Reports/source-change-reconciliation` refuses them with `403` before querying (D21 / DEC-20260704-01 / INV-021). The ledger spans partner and saleorder entities and carries entity ids, actor ids, reasons, request ids and manifest refs with no per-entity customer join, so it is denied outright rather than row-scoped.
+
+**Write-path coverage caveat:** the one-row-per-mutation guarantee in INV-027 is enforced at the application layer only — there is no database trigger on `dbo.partners` or `dbo.saleorders` compelling an audit row. Raw SQL that bypasses the app (the June 2026 incident mechanism) would still mutate `sourceid` unaudited. Active migrations are held to this by CI: `api/tests/customerSourceMigrationArchiveGuard.test.js` strips SQL comments and rejects any executable `UPDATE` assigning `partners.sourceid` or `saleorders.sourceid` under `api/migrations/`. Reviewed production repairs belong in `scripts/data-repairs` behind a manifest, backup and explicit confirmation — never in the auto-applied migration glob.
+
 ---
 
 #### `dbo.saleorderlines`

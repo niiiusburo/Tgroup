@@ -163,5 +163,10 @@
     "amount": "Amount",
     "paid": "Paid",
     "remaining": "Remaining"
+  },
+  "sourceLock": {
+    "paidAndClosedPeriod": "Customer source is locked — this order is paid and belongs to a closed reporting period. Use the audited source-correction path.",
+    "paid": "Customer source is locked because this order has payment activity. Use the audited source-correction path.",
+    "closedPeriod": "Customer source is locked because this order belongs to a closed reporting period. Use the audited source-correction path."
   }
 }
