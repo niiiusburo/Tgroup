@@ -369,8 +369,35 @@ Expected behavior:
 - [x] PASS LOCAL: Authorized non-investor reaches the handler (both mounted layers run) and the mounted path issues NO duplicate `resolveInvestorScope` call.
 - [x] PASS LOCAL: Source-only no-op PATCH returns `200` with the unchanged order on locked AND unlocked orders, with zero `UPDATE saleorders` and zero `source_change_audit` INSERT; a PATCH with no fields at all still returns `400`.
 - [x] PASS MUTATION: Disabling the guard's investor branch fails 8 ordering cases and no others; disabling the no-op branch fails exactly the 2 no-op cases and no others.
-- [ ] PENDING LIVE: Investor `404` cannot be exercised end-to-end locally — only Admin holds `services.source_correct`, so the live investor path is proven by the mounted-chain regressions, not by a browser session. Re-verify on nk2 after deploy.
+- [x] PASS LOCAL: Investor `404` proven end-to-end with a real investor session (local Investor-group account `pr69.investor@test.local`) — saleorder correction `404`, partner correction `404`, malformed body still `404` (no body-validation leak), reconciliation ledger `403`, zero audit rows written. A non-privileged Receptionist gets `403 Permission denied: <permission>` on both routes. Remains PENDING LIVE on nk2 after deploy.
 
 Negative paths: an investor must never receive `403` from these routes (that would confirm the record exists and leak permission state); an investor must never receive a body-shape `400`; a non-investor must still receive the ordinary `403`; a genuinely empty PATCH must still be rejected.
 
 Setup data: any existing sale order and customer; no fixture writes. Suites are `api/tests/sourceCorrectionRouteOrdering.test.js` and `api/tests/saleOrderSourceNoOpPatch.test.js`, dispatched in-process via `api/tests/helpers/dispatchRoute.js` because express 5 + supertest intermittently returns transport-level `400`s in this environment (reproduced with a bare Express app containing no project code, and on the base commit).
+
+---
+
+# TestSprite Plan: PR69 Phase 2 local acceptance run (2026-07-27)
+
+Feature/edit name: Full local acceptance of the source-attribution safeguards on one coherent PR69 stack.
+
+Changed data flow: none — this is a verification run against `d899ddbb5` with API and Vite both served from the PR69 worktree, local `tdental_demo` carrying migrations 073/075.
+
+Expected behavior:
+- [x] PASS LOCAL: Locked (paid + closed-period) order `SO62147` — all 13 order-source chips rendered disabled with lock copy "Nguồn khách đã khóa (đã thanh toán và thuộc kỳ đã chốt)". Field labelled `Nguồn đơn hàng`, confirming INV-023 order/customer separation in the UI.
+- [x] PASS LOCAL: Ordinary `PATCH` source change on that order returns `409 SOURCE_IMMUTABLE` with reasons `["paid","closed_period"]`, zero audit rows.
+- [x] PASS LOCAL: Non-source edit on the locked order returns `200`; source unchanged; zero audit rows.
+- [x] PASS LOCAL: Source-only no-op `PATCH` returns `200` with the unchanged order; zero audit rows (INV-026).
+- [x] PASS LOCAL: Correction endpoint rejects missing `reason`, `evidence`, `rollback_reference` and `expected_old_sourceid` with `400 SOURCE_CORRECTION_INVALID`, zero writes.
+- [x] PASS LOCAL: Wrong `expected_old_sourceid` returns `409 SOURCE_CORRECTION_CONFLICT`, zero writes.
+- [x] PASS LOCAL: Authorized correction commits order + `saleorder_source_corrections` + one `source_change_audit` row atomically, `change_channel=source_correction`.
+- [x] PASS LOCAL: Exactly one audit row per successful mutation (create, open-order patch, correction); zero for every rejected or no-op operation.
+- [x] PASS LOCAL: Audit `UPDATE` and `DELETE` both raise "source_change_audit is append-only".
+- [x] PASS LOCAL: Customer source write refused (`PARTNER_SOURCE_READ_ONLY` path); order attribution unchanged.
+- [x] PASS LOCAL: Referenced source rename → `CUSTOMER_SOURCE_LABEL_LOCKED`; delete → `CUSTOMER_SOURCE_IN_USE`; description edit still `200`.
+- [x] PASS LOCAL: Exports carry distinct `Nguồn đơn` (orderSource) and `Nguồn KH` (customerSource) columns; the legacy COALESCE is versioned opt-in and asserted absent from export SQL.
+- [x] PASS LOCAL: 18/18 API acceptance cases; focused API matrix 13 suites / 110 tests; frontend 5 files / 19 tests; typecheck clean; semgrep `.semgrep` 0 and `p/default` 0.
+
+Negative paths: investor `404` on both correction routes even with a valid body, the correction permission, or a malformed body; Receptionist `403`; wrong expected-old-source `409`; audit mutation rejected at the database.
+
+Setup data: local-only test logins `pr69.investor@test.local` (Investor) and `pr69.staff@test.local` (Receptionist), created in `tdental_demo` for the auth-boundary cases. Permanent audit residue from this run: 3 `source_change_audit` rows and 1 `saleorder_source_corrections` row on the local database — append-only by design and deliberately not deleted.
