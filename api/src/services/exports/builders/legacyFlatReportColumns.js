@@ -22,7 +22,8 @@ const REVENUE_COLUMNS = [
   { key: 'doctorName', header: 'Bác sĩ', width: 10.8984375 },
   { key: 'assistantName', header: 'Phụ tá' },
   { key: 'dentalAideName', header: 'Trợ lý bác sĩ', width: 12.5 },
-  { key: 'customerSource', header: 'Nguồn khách', width: 14 },
+  { key: 'orderSource', header: 'Nguồn đơn', width: 14 },
+  { key: 'customerSource', header: 'Nguồn KH', width: 14 },
 ];
 
 const DEPOSIT_COLUMNS = [
@@ -38,7 +39,7 @@ const DEPOSIT_COLUMNS = [
   { key: 'depositNote', header: 'Note cọc tiền', width: 28 },
   { key: 'saleOnline', header: 'Sale online', width: 14.296875 },
   { key: 'customerCare', header: 'CSKH' },
-  { key: 'customerSource', header: 'Nguồn khách', width: 14 },
+  { key: 'customerSource', header: 'Nguồn KH', width: 14 },
 ];
 
 module.exports = {

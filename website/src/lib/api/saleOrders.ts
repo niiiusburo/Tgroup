@@ -30,8 +30,12 @@ export interface ApiSaleOrder {
   notes: string | null;
   tooth_numbers: string | null;
   tooth_comment: string | null;
+  /** Direct order attribution (saleorders.sourceid). Never inherited from customer. */
   sourceid: string | null;
   sourcename: string | null;
+  /** Customer acquisition source (partners.sourceid). May change over time. */
+  customersourceid?: string | null;
+  customersourcename?: string | null;
   lastupdated: string | null;
   isdeleted?: boolean;
   /** Sale order reference code (e.g. SO-2024-001). */
@@ -80,6 +84,7 @@ export function createSaleOrder(data: {
   notes?: string;
   tooth_numbers?: string | null;
   tooth_comment?: string | null;
+  /** Order-level source; when omitted/null, API snapshots customer source. */
   sourceid?: string | null;
 }) {
   return apiFetch<ApiSaleOrder>('/SaleOrders', { method: 'POST', body: data });
@@ -105,6 +110,7 @@ export function updateSaleOrder(id: string, data: {
   notes?: string | null;
   tooth_numbers?: string | null;
   tooth_comment?: string | null;
+  /** Direct order source only — never send customer-inherited source. */
   sourceid?: string | null;
 }) {
   return apiFetch<ApiSaleOrder>(`/SaleOrders/${id}`, { method: 'PATCH', body: data });
@@ -112,6 +118,57 @@ export function updateSaleOrder(id: string, data: {
 
 export function updateSaleOrderState(id: string, state: string) {
   return apiFetch<ApiSaleOrder>(`/SaleOrders/${id}/state`, { method: 'PATCH', body: { state } });
+}
+
+export interface SaleOrderSourceCorrectionInput {
+  new_sourceid: string | null;
+  expected_old_sourceid: string | null;
+  reason: string;
+  evidence: string;
+  rollback_reference: string;
+  correction_manifest_ref?: string;
+}
+
+export interface SourceChangeAuditRow {
+  id: string;
+  entity_type: 'partner' | 'saleorder';
+  entity_id: string;
+  old_sourceid: string | null;
+  new_sourceid: string | null;
+  actor_employee_id: string | null;
+  reason: string;
+  request_id: string;
+  transaction_id: string;
+  correction_manifest_ref: string | null;
+  change_channel: string;
+  is_unexpected: boolean;
+  unexpected_reasons: string[];
+  created_at: string;
+}
+
+export interface SaleOrderSourceCorrectionResult {
+  order: ApiSaleOrder;
+  correction: {
+    id: string;
+    saleorder_id: string;
+    old_sourceid: string | null;
+    new_sourceid: string | null;
+    reason: string;
+    evidence: string;
+    rollback_reference: string;
+    actor_employee_id: string;
+    request_id: string;
+    created_at: string;
+  };
+  audit: SourceChangeAuditRow;
+}
+
+/** Audited correction path for paid/closed-period order sources (INV-026). */
+export function correctSaleOrderSource(id: string, data: SaleOrderSourceCorrectionInput) {
+  return apiFetch<SaleOrderSourceCorrectionResult>(`/SaleOrders/${id}/source-correction`, {
+    method: 'POST',
+    body: data,
+  });
 }
 
 // ─── Sale Order Lines (service lines) ─────────────────────────────
@@ -159,6 +216,8 @@ export interface ApiSaleOrderLine {
   companyId?: string | null;
   sourceid?: string | null;
   sourceId?: string | null;
+  customersourceid?: string | null;
+  customerSourceId?: string | null;
   unit?: string | null;
   orderid?: string | null;
   orderId?: string | null;

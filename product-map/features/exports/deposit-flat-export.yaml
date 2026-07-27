@@ -101,10 +101,10 @@ columns:
     source: dbo.partners.name (via cskhid)
   - position: 13
     key: customerSource
-    header_vi: Nguồn khách
+    header_vi: Nguồn KH
     style: text
     width: 14
-    source: dbo.customersources.name (via sourceid)
+    source: dbo.customersources.name via partners.sourceid (acquisition; deposits have no order source)
 
 filters_accepted:
   - name: dateFrom

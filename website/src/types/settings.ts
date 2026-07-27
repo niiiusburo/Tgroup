@@ -38,7 +38,7 @@ export interface CustomerSource {
   readonly id: string;
   readonly name: string;
   readonly label?: string; // Extended field for dropdown
-  readonly type: 'online' | 'offline' | 'referral';
+  readonly type: 'online' | 'offline' | 'referral' | 'normal' | string;
   readonly description: string;
   readonly isActive: boolean;
   readonly customerCount: number;

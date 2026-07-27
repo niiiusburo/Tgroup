@@ -313,6 +313,26 @@ describe('reports revenue recognition', () => {
     expect(query).not.toHaveBeenCalled();
   });
 
+  it('by-source attributes revenue to immutable order source only (not customer source)', async () => {
+    resolveEffectivePermissions.mockResolvedValue({
+      groupName: 'Super Admin',
+      effectivePermissions: ['reports.view'],
+      locations: [],
+    });
+    query.mockResolvedValueOnce([]);
+
+    const res = await request(makeApp())
+      .post('/api/Reports/revenue/by-source')
+      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+
+    expect(res.status).toBe(200);
+    const sql = query.mock.calls[0][0];
+    expect(sql).toContain('so.sourceid AS sourceid');
+    expect(sql).not.toMatch(/COALESCE\s*\(\s*so\.sourceid\s*,\s*customer\.sourceid\s*\)/i);
+    // Customer join remains for investor/customer filters, not source attribution.
+    expect(sql).toContain('LEFT JOIN dbo.partners customer');
+  });
+
   it('super admin still gets an unrestricted by-source report (no ANY(), no extra params)', async () => {
     resolveEffectivePermissions.mockResolvedValue({
       groupName: 'Super Admin',

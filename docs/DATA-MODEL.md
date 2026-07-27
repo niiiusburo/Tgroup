@@ -163,7 +163,7 @@ Investor identities remain `dbo.partners` employee rows assigned to the `investo
 | `description` | text | nullable |
 | `is_active` | boolean | nullable, default true |
 
-`partners.sourceid` stores the current customer-level source. `saleorders.sourceid` stores the service/order attribution used first by historical revenue exports. Both columns have validated foreign keys to `customersources.id` with `ON DELETE RESTRICT` (migration 050). Lookup taxonomy maintenance must not bulk rewrite those references; a record-level correction requires a verified earlier source, an explicit manifest, backup, transaction rollback, and production confirmation. Inactive lookups are historical-only: they cannot be selected for a new order, but an existing order may retain its already-assigned inactive value. Application deletion is blocked while either `partners` or `saleorders` has a reference.
+`partners.sourceid` stores the current customer-level source. `saleorders.sourceid` stores the service/order attribution used first by historical revenue exports. Both columns have validated foreign keys to `customersources.id` with `ON DELETE RESTRICT` (migration 050). Lookup taxonomy maintenance must not bulk rewrite those references; a record-level correction requires a verified earlier source, an explicit manifest, backup, transaction rollback, and production confirmation. Inactive lookups are historical-only: they cannot be selected for a new order, but an existing order may retain its already-assigned inactive value. Application deletion is blocked while either `partners` or `saleorders` has a reference. While referenced, `customersources.name` and `customersources.type` are application-immutable (`CUSTOMER_SOURCE_LABEL_LOCKED`) so report joins keep historical labels; only `description` and `is_active` may change. Semantic renames create a new lookup row.
 
 #### `dbo.investor_clients`
 | Column | Type | Constraints |
@@ -257,12 +257,61 @@ Investor identities remain `dbo.partners` employee rows assigned to the `investo
 | `state` | text | draft/confirmed/done/cancelled |
 | `datestart` | date | |
 | `dateend` | date | |
+| `sourceid` | uuid | FK → customersources; **order attribution** (nullable for legacy). Snapshotted on create when omitted. Distinct from `partners.sourceid` (INV-023). |
 | `isdeleted` | boolean | DEFAULT false |
 
 **Indexes:**
 - `saleorders_partner_id_idx`
 - `saleorders_company_id_idx`
 - `saleorders_state_idx`
+
+**Source semantics:** `saleorders.sourceid` is order-level attribution. `partners.sourceid` is customer acquisition. Do not COALESCE for writes or closed-period reports.
+
+**Source immutability (INV-026):** After payment or closed period, `sourceid` changes only via `dbo.saleorder_source_corrections` + the permissioned correction API.
+
+#### `dbo.saleorder_source_corrections` (Audited Source Corrections)
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | uuid | PK |
+| `saleorder_id` | uuid | NOT NULL |
+| `old_sourceid` | uuid | nullable |
+| `new_sourceid` | uuid | nullable |
+| `reason` | text | NOT NULL |
+| `evidence` | text | NOT NULL |
+| `rollback_reference` | text | NOT NULL |
+| `actor_employee_id` | uuid | NOT NULL |
+| `request_id` | varchar(128) | NOT NULL |
+| `created_at` | timestamptz | NOT NULL DEFAULT now() |
+
+**Indexes:** order+created, actor+created, request_id.
+
+**Source audit (INV-027):** Every successful change to `saleorders.sourceid` writes one row to `dbo.source_change_audit` in the same transaction.
+
+#### `dbo.source_change_audit` (Append-Only Source Ledger)
+
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | uuid | PK |
+| `entity_type` | text | `partner` \| `saleorder` |
+| `entity_id` | uuid | partner or saleorder id |
+| `old_sourceid` | uuid | nullable |
+| `new_sourceid` | uuid | nullable; must differ from old |
+| `actor_employee_id` | uuid | nullable system actor |
+| `reason` | text | required |
+| `request_id` | varchar(128) | request/correlation id |
+| `transaction_id` | uuid | DB work unit id |
+| `correction_manifest_ref` | text | optional repair/correction manifest key |
+| `change_channel` | text | e.g. `api_create`, `api_patch`, `source_correction`, `partner_source_correction` |
+| `is_unexpected` | boolean | defense-in-depth flag for a locked-order entry from a non-authorized channel |
+| `unexpected_reasons` | text[] | `paid` / `closed_period` |
+| `alerted_at` | timestamptz | nullable |
+| `created_at` | timestamptz | default now() |
+
+**Rules:** INSERT-only. BEFORE UPDATE/DELETE triggers raise. No app UPDATE/DELETE routes. Ordinary paid/closed-period PATCH changes are rejected before mutation; explicit correction routes write this ledger and the domain-specific correction record atomically. Created by migration `075_source_change_audit.sql`.
+
+**Access:** investor accounts can neither write nor read this ledger. Both source-correction routes refuse investors with `404` before any transaction or row lock, and `POST /api/Reports/source-change-reconciliation` refuses them with `403` before querying (D21 / DEC-20260704-01 / INV-021). The ledger spans partner and saleorder entities and carries entity ids, actor ids, reasons, request ids and manifest refs with no per-entity customer join, so it is denied outright rather than row-scoped.
+
+**Write-path coverage caveat:** the one-row-per-mutation guarantee in INV-027 is enforced at the application layer only — there is no database trigger on `dbo.partners` or `dbo.saleorders` compelling an audit row. Raw SQL that bypasses the app (the June 2026 incident mechanism) would still mutate `sourceid` unaudited. Active migrations are held to this by CI: `api/tests/customerSourceMigrationArchiveGuard.test.js` strips SQL comments and rejects any executable `UPDATE` assigning `partners.sourceid` or `saleorders.sourceid` under `api/migrations/`. Reviewed production repairs belong in `scripts/data-repairs` behind a manifest, backup and explicit confirmation — never in the auto-applied migration glob.
 
 ---
 
@@ -588,7 +637,7 @@ If `dbo.customer_face_embeddings` exists and the local provider is active, the e
 `payments.receipt_number` uses a per-year counter. The sequence MUST reset on January 1st of each calendar year. The generation function uses `EXTRACT(YEAR FROM NOW())` as the partition key.
 
 ### INV-SCHEMA-008 — Historical Customer-Source Attribution Stability
-Customer-source taxonomy maintenance must not bulk rewrite `partners.sourceid` or `saleorders.sourceid` for already-recorded activity. Known destructive rewrite files remain forensic artifacts with `.sql.retired` extensions; any repair must be record-scoped and reversible.
+Customer-source taxonomy maintenance must not bulk rewrite `partners.sourceid` or `saleorders.sourceid` for already-recorded activity, and must not rename/retype a still-referenced `customersources` row in place. Known destructive rewrite files remain forensic artifacts with `.sql.retired` extensions; any repair must be record-scoped and reversible.
 
 ---
 

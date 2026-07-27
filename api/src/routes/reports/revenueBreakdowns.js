@@ -193,26 +193,26 @@ router.post('/revenue/by-source', requirePermission('reports.view'), async (req,
     }
     const rows = await query(
       `WITH ${ALLOCATION_TOTALS_CTE},
-       allocated_service_payments AS (
-         SELECT COALESCE(so.sourceid, customer.sourceid) AS sourceid,
-                so.id AS order_id,
-                ${CAPPED_ALLOCATED_AMOUNT_SQL} AS paid
-         FROM dbo.payment_allocations pa
-         JOIN dbo.payments p ON p.id = pa.payment_id
-         LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
-         JOIN dbo.saleorders so ON so.id = pa.invoice_id AND so.isdeleted=false
-         LEFT JOIN dbo.partners customer ON customer.id = COALESCE(p.customer_id, so.partnerid)
-         WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${paymentWhere}
-       ),
-       direct_service_payments AS (
-         SELECT COALESCE(so.sourceid, customer.sourceid) AS sourceid,
-                so.id AS order_id,
-                ${DIRECT_SERVICE_PAYMENT_AMOUNT_SQL} AS paid
-         FROM dbo.payments p
-         LEFT JOIN dbo.saleorders so ON so.id = p.service_id AND so.isdeleted=false
-         LEFT JOIN dbo.partners customer ON customer.id = COALESCE(p.customer_id, so.partnerid)
-         WHERE ${UNALLOCATED_SERVICE_PAYMENT_CONDITION} ${directWhere}
-       ),
+        allocated_service_payments AS (
+          SELECT so.sourceid AS sourceid,
+                 so.id AS order_id,
+                 ${CAPPED_ALLOCATED_AMOUNT_SQL} AS paid
+          FROM dbo.payment_allocations pa
+          JOIN dbo.payments p ON p.id = pa.payment_id
+          LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
+          JOIN dbo.saleorders so ON so.id = pa.invoice_id AND so.isdeleted=false
+          LEFT JOIN dbo.partners customer ON customer.id = COALESCE(p.customer_id, so.partnerid)
+          WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${paymentWhere}
+        ),
+        direct_service_payments AS (
+          SELECT so.sourceid AS sourceid,
+                 so.id AS order_id,
+                 ${DIRECT_SERVICE_PAYMENT_AMOUNT_SQL} AS paid
+          FROM dbo.payments p
+          LEFT JOIN dbo.saleorders so ON so.id = p.service_id AND so.isdeleted=false
+          LEFT JOIN dbo.partners customer ON customer.id = COALESCE(p.customer_id, so.partnerid)
+          WHERE ${UNALLOCATED_SERVICE_PAYMENT_CONDITION} ${directWhere}
+        ),
        recognized_service_payments AS (
          SELECT sourceid, order_id, paid FROM allocated_service_payments
          UNION ALL

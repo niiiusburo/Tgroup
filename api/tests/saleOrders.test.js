@@ -1,6 +1,8 @@
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret';
+
 jest.mock('../src/middleware/auth', () => ({
   requireAuth: (_req, _res, next) => next(),
-  requirePermission: () => (_req, _res, next) => next(),
+  requirePermission: () => (_req, _res, next) => next(), requireNonInvestorPermission: () => (_req, _res, next) => next(),
 }));
 
 jest.mock('uuid', () => ({
@@ -320,5 +322,239 @@ describe('GET /api/SaleOrders/lines', () => {
     expect(listQuery?.[0]).toContain('so.dentalaideid');
     expect(listQuery?.[0]).toContain('da.name as dentalaidename');
     expect(listQuery?.[0]).toContain('LEFT JOIN employees da ON da.id = so.dentalaideid');
+  });
+});
+
+describe('SaleOrders source semantics', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  function mockIpDisabled(sql) {
+    if (sql.includes('ip_access_settings')) return [{ mode: 'disabled' }];
+    if (sql.includes('ip_access_entries')) return [];
+    return null;
+  }
+
+  it('GET list exposes direct order source and customer source separately (no COALESCE into sourceid)', async () => {
+    query.mockImplementation(async (sql) => {
+      const ip = mockIpDisabled(sql);
+      if (ip) return ip;
+      if (sql.includes('COUNT(*) AS count') || sql.includes('COUNT(*) as count')) {
+        return [{ count: '1' }];
+      }
+      if (sql.includes('FROM saleorders so')) {
+        return [{
+          id: 'order-1',
+          sourceid: null,
+          sourcename: null,
+          customersourceid: 'cust-src',
+          customersourcename: 'Facebook',
+        }];
+      }
+      throw new Error(`Unexpected query: ${sql}`);
+    });
+
+    const res = await request(app).get('/api/SaleOrders');
+    expect(res.status).toBe(200);
+
+    const listSql = query.mock.calls.find(([sql]) =>
+      sql.includes('FROM saleorders so') && sql.includes('sourceid'),
+    )?.[0];
+    expect(listSql).toContain('so.sourceid AS sourceid');
+    expect(listSql).toContain('p.sourceid AS customersourceid');
+    expect(listSql).not.toMatch(/COALESCE\s*\(\s*so\.sourceid\s*,\s*p\.sourceid\s*\)/i);
+    expect(res.body.items[0]).toMatchObject({
+      sourceid: null,
+      customersourceid: 'cust-src',
+      customersourcename: 'Facebook',
+    });
+  });
+
+  it('POST snapshots customer source when body omits sourceid', async () => {
+    query.mockImplementation(async (sql) => {
+      const ip = mockIpDisabled(sql);
+      if (ip) return ip;
+      if (sql.includes("nextval('dbo.saleorder_code_seq')")) {
+        return [{ seq: '42' }];
+      }
+      if (sql.includes('SELECT sourceid FROM partners')) {
+        return [{ sourceid: 'snap-source' }];
+      }
+      if (sql.includes('FROM dbo.customersources cs')) {
+        return [{ is_active: true, already_selected: false }];
+      }
+      if (sql.startsWith('INSERT INTO saleorders')) {
+        return [{ id: 'new-order' }];
+      }
+      if (sql.includes('INSERT INTO dbo.source_change_audit')) {
+        return [{
+          id: 'audit-new-order',
+          entity_type: 'saleorder',
+          entity_id: 'new-order',
+          new_sourceid: 'snap-source',
+          change_channel: 'api_create',
+        }];
+      }
+      if (sql.includes('FROM saleorders so') && sql.includes('WHERE so.id')) {
+        return [{
+          id: 'new-order',
+          sourceid: 'snap-source',
+          sourcename: 'Hotline',
+          customersourceid: 'snap-source',
+          customersourcename: 'Hotline',
+        }];
+      }
+      throw new Error(`Unexpected query: ${sql}`);
+    });
+
+    const res = await request(app)
+      .post('/api/SaleOrders')
+      .send({ partnerid: 'partner-1', amounttotal: 1000, productname: 'Implant' });
+
+    expect(res.status).toBe(201);
+    const insert = query.mock.calls.find(([sql]) => sql.startsWith('INSERT INTO saleorders'));
+    expect(insert?.[1]).toEqual(expect.arrayContaining(['snap-source']));
+    const auditInsert = query.mock.calls.find(([sql]) =>
+      sql.includes('INSERT INTO dbo.source_change_audit'),
+    );
+    expect(auditInsert?.[1]).toEqual(expect.arrayContaining([
+      'saleorder',
+      'snap-source',
+      'api_create',
+    ]));
+    expect(res.body.sourceid).toBe('snap-source');
+  });
+
+  it('POST keeps explicit sourceid and does not overwrite with customer source', async () => {
+    query.mockImplementation(async (sql) => {
+      const ip = mockIpDisabled(sql);
+      if (ip) return ip;
+      if (sql.includes("nextval('dbo.saleorder_code_seq')")) {
+        return [{ seq: '43' }];
+      }
+      if (sql.includes('FROM dbo.customersources cs')) {
+        return [{ is_active: true, already_selected: false }];
+      }
+      if (sql.startsWith('INSERT INTO saleorders')) {
+        return [{ id: 'new-order-2' }];
+      }
+      if (sql.includes('INSERT INTO dbo.source_change_audit')) {
+        return [{
+          id: 'audit-new-order-2',
+          entity_type: 'saleorder',
+          entity_id: 'new-order-2',
+          new_sourceid: 'order-src',
+          change_channel: 'api_create',
+        }];
+      }
+      if (sql.includes('FROM saleorders so') && sql.includes('WHERE so.id')) {
+        return [{
+          id: 'new-order-2',
+          sourceid: 'order-src',
+          sourcename: 'Sale Online',
+          customersourceid: 'cust-src',
+          customersourcename: 'Facebook',
+        }];
+      }
+      throw new Error(`Unexpected query: ${sql}`);
+    });
+
+    const res = await request(app)
+      .post('/api/SaleOrders')
+      .send({
+        partnerid: 'partner-1',
+        amounttotal: 1000,
+        sourceid: 'order-src',
+        productname: 'Niềng',
+      });
+
+    expect(res.status).toBe(201);
+    expect(query.mock.calls.some(([sql]) => sql.includes('SELECT sourceid FROM partners'))).toBe(false);
+    const insert = query.mock.calls.find(([sql]) => sql.startsWith('INSERT INTO saleorders'));
+    expect(insert?.[1]).toEqual(expect.arrayContaining(['order-src']));
+    expect(query.mock.calls.some(([sql]) =>
+      sql.includes('INSERT INTO dbo.source_change_audit'),
+    )).toBe(true);
+  });
+
+  it('PATCH with only non-source fields does not write sourceid', async () => {
+    query.mockImplementation(async (sql) => {
+      const ip = mockIpDisabled(sql);
+      if (ip) return ip;
+      if (sql.startsWith('UPDATE saleorders')) {
+        return [{ id: 'order-id' }];
+      }
+      if (sql.includes('FROM saleorders so')) {
+        return [{ id: 'order-id', notes: 'updated', sourceid: null }];
+      }
+      throw new Error(`Unexpected query: ${sql}`);
+    });
+
+    const res = await request(app)
+      .patch('/api/SaleOrders/order-id')
+      .send({ notes: 'updated' });
+
+    expect(res.status).toBe(200);
+    const orderUpdate = query.mock.calls.find(([sql]) => sql.startsWith('UPDATE saleorders'));
+    expect(orderUpdate?.[0]).toContain('notes');
+    expect(orderUpdate?.[0]).not.toContain('sourceid');
+  });
+
+  it('PATCH clears only the direct source on an open order (never inherits customer source)', async () => {
+    query.mockImplementation(async (sql) => {
+      const ip = mockIpDisabled(sql);
+      if (ip) return ip;
+      if (sql.includes('so.sourceid AS order_sourceid')) {
+        return [{
+          id: 'order-id',
+          order_sourceid: 'order-src',
+          totalpaid: '0',
+          datestart: new Date().toISOString().slice(0, 10),
+          datecreated: new Date().toISOString(),
+          isdeleted: false,
+        }];
+      }
+      if (sql.includes('FROM payment_allocations pa')) {
+        return [{ totalpaid: '0' }];
+      }
+      if (sql.startsWith('UPDATE saleorders')) {
+        return [{ id: 'order-id', sourceid: null }];
+      }
+      if (sql.includes('INSERT INTO dbo.source_change_audit')) {
+        return [{
+          id: 'audit-clear-order-source',
+          entity_type: 'saleorder',
+          entity_id: 'order-id',
+          old_sourceid: 'order-src',
+          new_sourceid: null,
+          change_channel: 'api_patch',
+        }];
+      }
+      if (sql.includes('FROM saleorders so')) {
+        return [{
+          id: 'order-id',
+          sourceid: null,
+          sourcename: null,
+          customersourceid: 'cust-src',
+          customersourcename: 'Facebook',
+        }];
+      }
+      throw new Error(`Unexpected query: ${sql}`);
+    });
+
+    const res = await request(app)
+      .patch('/api/SaleOrders/order-id')
+      .send({ sourceid: null });
+
+    expect(res.status).toBe(200);
+    const orderUpdate = query.mock.calls.find(([sql]) => sql.startsWith('UPDATE saleorders'));
+    expect(orderUpdate?.[0]).toContain('sourceid');
+    expect(orderUpdate?.[1]).toEqual(expect.arrayContaining([null, 'order-id']));
+    expect(query.mock.calls.some(([sql]) =>
+      sql.includes('INSERT INTO dbo.source_change_audit'),
+    )).toBe(true);
+    expect(res.body.sourceid).toBeNull();
+    expect(res.body.customersourceid).toBe('cust-src');
   });
 });

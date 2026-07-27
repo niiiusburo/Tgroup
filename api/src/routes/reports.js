@@ -12,5 +12,6 @@ router.use('/', require('./reports/customers'));
 router.use('/', require('./reports/employeesOverview'));
 router.use('/', require('./reports/servicesBreakdown'));
 router.use('/', require('./reports/locationsComparison'));
+router.use('/', require('./reports/sourceChangeReconciliation'));
 
 module.exports = router;

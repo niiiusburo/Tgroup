@@ -4,6 +4,120 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 ---
 
+# TestSprite Plan: closed-period / paid order source immutability 2026-07-24
+
+Feature/edit name: v0.33.0 — INV-026 paid and closed-period `saleorders.sourceid` lock + audited correction path.
+
+Changed URLs / API routes / data flow:
+- Frontend: Service edit form source chips (`ServiceForm` / `ServiceSourceField`) disable when paid or prior calendar month (`Asia/Ho_Chi_Minh`); ordinary save omits `sourceid` unless the user changed source on an unlocked order.
+- API: `PATCH /api/SaleOrders/:id` rejects locked source changes with `409 SOURCE_IMMUTABLE`; `POST /api/SaleOrders/:id/source-correction` (`services.source_correct`) applies audited corrections.
+- Data: migration `073_saleorder_source_corrections.sql` → `dbo.saleorder_source_corrections` (old/new source, reason, evidence, rollback_reference, actor, request_id, created_at).
+
+Expected behavior:
+- Open unpaid current-month order: source chips editable; PATCH may change `sourceid`.
+- Paid order or attribution date before open month start: source chips disabled with amber lock copy; PATCH with a different `sourceid` → `409 SOURCE_IMMUTABLE`; notes/doctor/etc. still save when `sourceid` is omitted or equal to current.
+- Correction without `services.source_correct` → 403; missing reason/evidence/rollback → `400 SOURCE_CORRECTION_INVALID`; stale `expected_old_sourceid` → `409 SOURCE_CORRECTION_CONFLICT`.
+- Authorized correction writes audit row and returns `{ order, correction }`.
+
+User roles: Staff with `customers.edit` (ordinary service edit); Super Admin/Admin with `services.source_correct` for corrections only.
+
+Execution items:
+- [x] PASS: `api/tests/saleOrderSourceImmutability.test.js` + `customerSourceIntegrity.test.js` — 27/27 (open allow, paid reject, closed-period reject, unrelated edit, correction audit/conflict/invalid, permission wiring).
+- [x] PASS: `website/src/lib/saleOrderSourceLock.test.ts` + `useServices.payment-state.test.tsx` — lock evaluation parity and source omit-unless-changed.
+- [x] PASS: Local/manual ServiceForm edit on a paid order showed 16 disabled source chips plus the controlled-correction message; a notes-only update succeeded, preserved `sourceid`, and the smoke-test note was restored immediately. Screenshot: `website/output/playwright/source-attribution-incident/paid-closed-order-source-lock.png`.
+- [ ] PENDING: Authorized admin correction API smoke with full audit body writes `saleorder_source_corrections` (after migration 073 applied).
+- [ ] PENDING: nk2 live verify — ordinary locked source change blocked; unrelated edit OK; unauthorized correction 403.
+
+Setup/login data: Staff with service edit; admin with `services.source_correct`. Prefer fixture unpaid open-month order + paid/prior-month order. Do not rewrite production closed-period sources without rollback reference.
+
+---
+
+# TestSprite Plan: separate order and customer source semantics 2026-07-24
+
+Feature/edit name: v0.33.0 — INV-023 order source ≠ customer source (no COALESCE into sourceid).
+
+Changed URLs / API routes / data flow:
+- API: `GET/POST/PATCH /api/SaleOrders` — dual fields `sourceid` (order) + `customersourceid` (customer); create snapshots customer source when order source omitted.
+- API: `POST /api/Reports/revenue/by-source` — attributes by `saleorders.sourceid` only.
+- Exports: `revenue-flat` columns `Nguồn đơn` + `Nguồn KH`; services export same split; deposit-flat header `Nguồn KH`.
+- Frontend: service form label `Nguồn đơn hàng`; mapper keeps customer source separate so edits do not resubmit inherited source.
+
+Expected behavior:
+- Order with null `sourceid` and customer source Facebook → GET returns `sourceid=null`, `customersourceid=<fb>`; edit without touching source leaves order null.
+- New order without sourceid → order gets a validated snapshot of customer source.
+- Customer source change does not move closed-period revenue buckets for existing orders.
+- Export headers distinguish order vs customer source.
+
+User roles: staff with `services.view` / `customers.edit` / `reports.view` / `payments.export`.
+
+Execution items:
+- [x] PASS: API unit suites — orderSourceSemantics, saleOrders source semantics, revenueRecognition by-source SQL, legacyFlat + allBuilderColumns + featureCatalog — 57/57 in the focused Task 11 rerun.
+- [x] PASS: Frontend `mapSaleOrderToServiceRecord.test.ts` — 2/2.
+- [ ] PENDING: Integrated local UI/API smoke — create service without picking source → order snapshots customer source; notes-only edit leaves direct order source unchanged.
+- [ ] PENDING: Post-deploy live verify — revenue-by-source and revenue-flat export show `Nguồn đơn` separately from `Nguồn KH`.
+
+Setup/login data: local/demo staff account supplied through approved test configuration; never print credentials.
+---
+
+# TestSprite Plan: protect referenced source labels and types 2026-07-24
+
+Feature/edit name: v0.33.0 — referenced customer-source name/type lock and Settings label-lock UX.
+
+Changed URLs / API routes / data flow:
+- Frontend: `/settings` Customer Sources panel (`CustomerSourcesConfig`, `useCustomerSources`).
+- API: `PUT /api/CustomerSources/:id`, `DELETE /api/CustomerSources/:id`.
+- Data flow: Settings taxonomy edit → reference-aware CustomerSources mutation → reports/exports continue joining historical IDs to immutable labels.
+
+Expected behavior:
+- Referenced name or type change returns `400 CUSTOMER_SOURCE_LABEL_LOCKED` with counts and locked fields; no UPDATE of name/type.
+- Referenced delete returns `400 CUSTOMER_SOURCE_IN_USE`.
+- Description and `is_active` updates succeed on referenced rows; inactive historical labels remain listable.
+- Unreferenced sources may rename/retype/delete.
+- UI shows label-lock badge, allows description/active edits, hides delete when referenced, and guides create-new for semantic renames.
+- Revenue/service export source join still uses `customersources.name` without rewriting historical IDs.
+
+User roles: Staff/admin with `settings.edit` for mutations; any authenticated user for GET lists used by selectors.
+
+Execution items:
+- [x] PASS: API `customerSourceIntegrity.test.js` — 17/17 including label lock, safe edits, unreferenced rename, delete-in-use.
+- [x] PASS: Frontend `useSettings.customer-sources.test.tsx` — 7/7 label-lock helper, description update, referenced delete block.
+- [x] PASS: Integrated export regression preserved immutable lookup labels and the split order/customer joins without `COALESCE`; included in the 16-suite / 188-test source-attribution candidate matrix.
+- [x] PASS: Settings UI smoke — Playwright `customer-sources-label-lock.spec.ts` on local `:5175`/`:3002`; referenced Sale Online shows Label locked, inactive rows readable, Add Source create-version hint visible, MKT1 active toggle off/on restored. Screenshots: `website/e2e/screenshots/task12-source-label-lock/`.
+- [x] PASS: Direct negative API on referenced Sale Online `f3efa245-838e-4b5a-b8f6-afe3007ce234` — rename/type → `400 CUSTOMER_SOURCE_LABEL_LOCKED` (20341 customers / 35445 orders); delete → `400 CUSTOMER_SOURCE_IN_USE`; description PUT 200 then restored; DB name|type stayed `Sale Online|normal`. Evidence: `/var/folders/.../T/opencode/task12-evidence/`.
+
+Setup/login data: Local demo DB `tdental_demo@127.0.0.1:5433`, API `:3002`, Vite `:5175`, and the seeded local admin account supplied through the approved test configuration. Never use or record production credentials, and do not rename production historical labels.
+
+---
+
+# TestSprite Plan: append-only source-change audit 2026-07-24
+
+Feature/edit name: v0.33.0 — append-only `source_change_audit` ledger, defense-in-depth unexpected-change alerts, bounded reconciliation (Task 13 / INV-027).
+
+Changed URLs / API routes / data flow:
+- API: `POST /api/SaleOrders`, `PATCH /api/SaleOrders/:id`, `POST /api/SaleOrders/:id/source-correction`, `POST /api/Partners/:id/source-correction`, `POST /api/Reports/source-change-reconciliation`.
+- Data: `dbo.source_change_audit` (migration 075); Lark alert via `LARK_SOURCE_AUDIT_WEBHOOK_URL` or feedback webhook.
+- Normal Partner POST/PUT remain source read-only (no audit on rejected writes).
+
+Expected behavior:
+- Successful order source create/change writes exactly one audit row in the same transaction.
+- Unrelated order edits and failed source validations write zero audit rows.
+- Paid/closed ordinary `api_patch` source changes are rejected with `409 SOURCE_IMMUTABLE`, mutate nothing, and write zero audit rows.
+- Authorized corrections write both the correction record and append-only audit with the expected channel and no unexpected flag.
+- Any unexpected locked-order ledger insertion from a future/internal non-authorized channel is classified and queues a non-blocking alert.
+- Audit rows cannot be updated/deleted through the app (DB trigger).
+- Reconciliation report returns bounded summary+rows (limit ≤ 500).
+
+User roles: Staff with `customers.edit` / `services.view`; Super Admin/Admin for `services.source_correct` and `customers.source_correct`; `reports.view` for reconciliation.
+
+Execution items:
+- [x] PASS: Integrated `sourceChangeAudit.test.js` + migration + alert coverage passed inside the final 16-suite / 188-test source-attribution candidate matrix.
+- [x] PASS: Migrations 073 and 075 were applied twice on the disposable PostgreSQL 16 clone; a transaction probe inserted one correction plus one audit row, UPDATE/DELETE were rejected by the append-only triggers, and the probe rolled back. The exact migrations were also applied successfully to the local E2E database.
+- [ ] PENDING: NK2 operator smoke — authorized correction writes audit; reconciliation lists the row; no audit on read-only GET.
+
+Setup/login data: local/staging staff admin; do not run bulk source repairs on production without Task 08/09 gates.
+
+---
+
 # TestSprite Plan: partner source read-only boundary 2026-07-23
 
 Feature/edit name: v0.32.59 — omission-safe partial customer updates and read-only `partners.sourceid` on normal customer writes.
@@ -236,3 +350,54 @@ Expected behavior:
 - [ ] PENDING FRESH CONFIRMATION: Strict row-key comparison found one additional mismatch, `SO-2026-5176` (`T478964`, `Khách cũ` → `Sale Online`), outside the confirmed manifest. It remains unmodified.
 
 Negative paths: renaming any retired artifact back to `.sql` makes the migration guard fail; submitting an inactive/missing source returns `400 CUSTOMER_SOURCE_NOT_SELECTABLE`; deleting a source referenced by any customer or order returns `400 CUSTOMER_SOURCE_IN_USE`; the checked-in 43-order manifest test explicitly excludes unconfirmed `SO-2026-5176`.
+
+---
+
+# TestSprite Plan: source-correction route ordering + INV-026 no-op PATCH (2026-07-26)
+
+Feature/edit name: v0.33.0 — mounted investor guard on both source-correction routes, and the source-only no-op PATCH contract.
+
+Changed data flow: `POST /api/SaleOrders/:id/source-correction` and `POST /api/Partners/:id/source-correction` are now mounted behind `requireNonInvestorPermission(permission, notFoundMessage)` (`api/src/middleware/auth.js`) instead of `requirePermission`. The guard resolves the caller once via `resolveEffectivePermissions`, refuses `groupName = investor` with `404` BEFORE the permission comparison and before the handler validates or acts on the body, then sets `req.nonInvestorVerified` so the handlers' defence-in-depth investor check does not repeat the scope query on the mounted path. `PATCH /api/SaleOrders/:id` submitting only the order's current `sourceid` now returns `200` with the unchanged order instead of `400 No fields to update`.
+
+Roles: an account in the investor permission group, an admin account, and a non-investor staff group holding neither `services.source_correct` nor `customers.source_correct`. Accounts are identified by ROLE only here; take local session credentials from the gitignored local environment/session config per `docs/SECURITY.md` § Secret Storage Locations. Never inline an email address or password in this file.
+
+Expected behavior:
+- [x] PASS LOCAL: Investor with a VALID correction body → `404` on both routes; handler never reached; zero `query`, zero `withTransaction`, zero audit row.
+- [x] PASS LOCAL: Investor with a MALFORMED body → identical `404` (no `400` leak proving the handler validated their input).
+- [x] PASS LOCAL: Investor holding the correction permission → `404`. Investor holding `*` → `404`. D21 beats permission.
+- [x] PASS LOCAL: Non-investor without the permission → `403 Permission denied: <permission>`; with no assignment → `403 No permission assignment found`; unauthenticated → `401` before any permission lookup.
+- [x] PASS LOCAL: Authorized non-investor reaches the handler (both mounted layers run) and the mounted path issues NO duplicate `resolveInvestorScope` call.
+- [x] PASS LOCAL: Source-only no-op PATCH returns `200` with the unchanged order on locked AND unlocked orders, with zero `UPDATE saleorders` and zero `source_change_audit` INSERT; a PATCH with no fields at all still returns `400`.
+- [x] PASS MUTATION: Disabling the guard's investor branch fails 8 ordering cases and no others; disabling the no-op branch fails exactly the 2 no-op cases and no others.
+- [x] PASS LOCAL: Investor `404` proven end-to-end with a real investor session (local Investor-group account `pr69.investor@test.local`) — saleorder correction `404`, partner correction `404`, malformed body still `404` (no body-validation leak), reconciliation ledger `403`, zero audit rows written. A non-privileged Receptionist gets `403 Permission denied: <permission>` on both routes. Remains PENDING LIVE on nk2 after deploy.
+
+Negative paths: an investor must never receive `403` from these routes (that would confirm the record exists and leak permission state); an investor must never receive a body-shape `400`; a non-investor must still receive the ordinary `403`; a genuinely empty PATCH must still be rejected.
+
+Setup data: any existing sale order and customer; no fixture writes. Suites are `api/tests/sourceCorrectionRouteOrdering.test.js` and `api/tests/saleOrderSourceNoOpPatch.test.js`, dispatched in-process via `api/tests/helpers/dispatchRoute.js` because express 5 + supertest intermittently returns transport-level `400`s in this environment (reproduced with a bare Express app containing no project code, and on the base commit).
+
+---
+
+# TestSprite Plan: PR69 Phase 2 local acceptance run (2026-07-27)
+
+Feature/edit name: Full local acceptance of the source-attribution safeguards on one coherent PR69 stack.
+
+Changed data flow: none — this is a verification run against `d899ddbb5` with API and Vite both served from the PR69 worktree, local `tdental_demo` carrying migrations 073/075.
+
+Expected behavior:
+- [x] PASS LOCAL: Locked (paid + closed-period) order `SO62147` — all 13 order-source chips rendered disabled with lock copy "Nguồn khách đã khóa (đã thanh toán và thuộc kỳ đã chốt)". Field labelled `Nguồn đơn hàng`, confirming INV-023 order/customer separation in the UI.
+- [x] PASS LOCAL: Ordinary `PATCH` source change on that order returns `409 SOURCE_IMMUTABLE` with reasons `["paid","closed_period"]`, zero audit rows.
+- [x] PASS LOCAL: Non-source edit on the locked order returns `200`; source unchanged; zero audit rows.
+- [x] PASS LOCAL: Source-only no-op `PATCH` returns `200` with the unchanged order; zero audit rows (INV-026).
+- [x] PASS LOCAL: Correction endpoint rejects missing `reason`, `evidence`, `rollback_reference` and `expected_old_sourceid` with `400 SOURCE_CORRECTION_INVALID`, zero writes.
+- [x] PASS LOCAL: Wrong `expected_old_sourceid` returns `409 SOURCE_CORRECTION_CONFLICT`, zero writes.
+- [x] PASS LOCAL: Authorized correction commits order + `saleorder_source_corrections` + one `source_change_audit` row atomically, `change_channel=source_correction`.
+- [x] PASS LOCAL: Exactly one audit row per successful mutation (create, open-order patch, correction); zero for every rejected or no-op operation.
+- [x] PASS LOCAL: Audit `UPDATE` and `DELETE` both raise "source_change_audit is append-only".
+- [x] PASS LOCAL: Customer source write refused (`PARTNER_SOURCE_READ_ONLY` path); order attribution unchanged.
+- [x] PASS LOCAL: Referenced source rename → `CUSTOMER_SOURCE_LABEL_LOCKED`; delete → `CUSTOMER_SOURCE_IN_USE`; description edit still `200`.
+- [x] PASS LOCAL: Exports carry distinct `Nguồn đơn` (orderSource) and `Nguồn KH` (customerSource) columns; the legacy COALESCE is versioned opt-in and asserted absent from export SQL.
+- [x] PASS LOCAL: 18/18 API acceptance cases; focused API matrix 13 suites / 110 tests; frontend 5 files / 19 tests; typecheck clean; semgrep `.semgrep` 0 and `p/default` 0.
+
+Negative paths: investor `404` on both correction routes even with a valid body, the correction permission, or a malformed body; Receptionist `403`; wrong expected-old-source `409`; audit mutation rejected at the database.
+
+Setup data: local-only test logins `pr69.investor@test.local` (Investor) and `pr69.staff@test.local` (Receptionist), created in `tdental_demo` for the auth-boundary cases. Permanent audit residue from this run: 3 `source_change_audit` rows and 1 `saleorder_source_corrections` row on the local database — append-only by design and deliberately not deleted.

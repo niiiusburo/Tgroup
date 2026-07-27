@@ -7,6 +7,8 @@ const mockRequirePermission = jest.fn((permission) => {
 jest.mock('../src/middleware/auth', () => ({
   requireAuth: (_req, _res, next) => next(),
   requirePermission: mockRequirePermission,
+  // Same shape so mounted permissions stay inspectable via handle.permission.
+  requireNonInvestorPermission: mockRequirePermission,
 }));
 
 jest.mock('../src/db', () => ({

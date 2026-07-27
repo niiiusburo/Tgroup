@@ -65,7 +65,8 @@ const EXPECTED_REVENUE_COLUMNS = [
   { key: 'doctorName',         header: 'Bác sĩ' },
   { key: 'assistantName',      header: 'Phụ tá' },
   { key: 'dentalAideName',     header: 'Trợ lý bác sĩ' },
-  { key: 'customerSource',     header: 'Nguồn khách' },
+  { key: 'orderSource',        header: 'Nguồn đơn' },
+  { key: 'customerSource',     header: 'Nguồn KH' },
 ];
 
 const EXPECTED_DEPOSIT_COLUMNS = [
@@ -81,7 +82,7 @@ const EXPECTED_DEPOSIT_COLUMNS = [
   { key: 'depositNote',     header: 'Note cọc tiền' },
   { key: 'saleOnline',      header: 'Sale online' },
   { key: 'customerCare',    header: 'CSKH' },
-  { key: 'customerSource',  header: 'Nguồn khách' },
+  { key: 'customerSource',  header: 'Nguồn KH' },
 ];
 
 describe('legacyFlatReportColumns — locked source of truth', () => {

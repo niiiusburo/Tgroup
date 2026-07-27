@@ -142,7 +142,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | **R** | Customer settings, ServiceForm, customer/deposit exports, revenue/service exports and source breakdowns |
 | **E** | `GET/POST/PUT/DELETE /api/CustomerSources` |
 | **UI** | Settings customer sources; service/order source selector; report/export `Nguồn khách` |
-| **Risk** | **Critical** — bulk renames, merges, or deletes can rewrite both current and historical attribution. Five incident migrations are quarantined with `.sql.retired`; inactive lookups are excluded from new selection, transaction locks serialize source management with sale-order writes, and validated foreign keys block deletion while either partners or saleorders references remain (INV-024); future repairs require a verified manifest, backup, rollback, and explicit production confirmation (INV-023). |
+| **Risk** | **Critical** — bulk renames, merges, or deletes can rewrite both current and historical attribution. Five incident migrations are quarantined with `.sql.retired`; inactive lookups are excluded from new selection; transaction locks serialize source management with sale-order writes; validated foreign keys plus API guards block deletion and name/type mutation while either partners or saleorders references remain (`CUSTOMER_SOURCE_IN_USE` / `CUSTOMER_SOURCE_LABEL_LOCKED`, INV-024); future repairs require a verified manifest, backup, rollback, and explicit production confirmation (INV-023). |
 
 ### dbo.investor_clients
 
@@ -227,7 +227,9 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | **R** | `saleOrders.js`, `saleOrderLines.js`, `payments.js` (allocations), `reports.js`, `partners.js` (KPIs), `appointments.js`, employee revenue export builder |
 | **E** | `GET/POST/PATCH /api/SaleOrders` |
 | **UI** | Services patient records, Payment allocations, CustomerProfile service history, Reports |
-| **Risk** | **High** — state transitions (`draft` → `confirmed` → `done` → `cancelled`) are logged in `saleorder_state_logs` and drive payment residual calculations. `sourceid` is the order-level report attribution; bulk taxonomy rewrites change closed-period revenue output (INV-023). |
+| **Risk** | **High** — state transitions (`draft` → `confirmed` → `done` → `cancelled`) are logged in `saleorder_state_logs` and drive payment residual calculations. `sourceid` is order attribution and must remain distinct from `partners.sourceid` customer acquisition; closed-period reports must not fill it with `COALESCE`. Bulk taxonomy rewrites change historical revenue output (INV-023). Paid/closed-period ordinary edits cannot change `sourceid` (INV-026); audited corrections go through `saleorder_source_corrections`. |
+
+Migration `074_order_source_backfill_manifest.sql` is a reviewed-only, no-op manifest template for legacy rows whose `saleorders.sourceid` is null while the customer has a source. It does not change schema or data unless an operator supplies an approved row manifest and passes the separate production-data confirmation gate.
 
 ### dbo.saleorderlines
 
@@ -389,6 +391,17 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | **E** | Indirect via `POST /api/Exports/:type/preview` and `POST /api/Exports/:type/download` for customers, appointments, services, payments, service-catalog, report-sales-employees, revenue-flat, and deposit-flat |
 | **UI** | No direct UI surface; supports auditability for operational Excel exports |
 | **Risk** | **Medium** — audit writes are non-blocking/catch-and-log in the route, so export success does not guarantee an audit row exists unless explicitly verified. |
+
+### dbo.source_change_audit
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Key** | `id` (uuid) |
+| **W** | Sale-order create/open-order update, `POST /api/SaleOrders/:id/source-correction`, `POST /api/Partners/:id/source-correction` via `api/src/services/sourceChangeAudit.js`; migration `075_source_change_audit.sql` |
+| **R** | `POST /api/Reports/source-change-reconciliation` (bounded); investor accounts refused `403` before the query |
+| **E** | Same write paths + reconciliation report |
+| **UI** | No dedicated UI yet; operator/report consumers |
+| **Risk** | **High** — only durable attribution trail for source mutations. Append-only (UPDATE/DELETE triggers). Unexpected paid/closed rows alert via Lark. Investors are denied on every read and write path (D21 / INV-021). Coverage is app-layer only: no DB trigger compels an audit row, so raw SQL remains the residual gap; active migrations are held to it by `api/tests/customerSourceMigrationArchiveGuard.test.js`, which rejects executable `UPDATE`s assigning `sourceid`. |
 
 ### dbo.feedback_threads + feedback_messages + feedback_attachments
 

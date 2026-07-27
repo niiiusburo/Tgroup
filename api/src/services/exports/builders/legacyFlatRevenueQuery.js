@@ -118,7 +118,8 @@ function revenueCte(where) {
         doc.name AS doctorname,
         asst.name AS assistantname,
         da.name AS dentalaidename,
-        cs.name AS customersourcename,
+        order_cs.name AS ordersourcename,
+        cust_cs.name AS customersourcename,
         p.created_at
       FROM payment_allocations pa
       JOIN payments p ON p.id = pa.payment_id
@@ -131,7 +132,8 @@ function revenueCte(where) {
       LEFT JOIN employees doc ON doc.id = so.doctorid
       LEFT JOIN employees asst ON asst.id = so.assistantid
       LEFT JOIN employees da ON da.id = so.dentalaideid
-      LEFT JOIN customersources cs ON cs.id = COALESCE(so.sourceid, cust.sourceid)
+      LEFT JOIN customersources order_cs ON order_cs.id = so.sourceid
+      LEFT JOIN customersources cust_cs ON cust_cs.id = cust.sourceid
       WHERE ${where}
     )
   `;
@@ -165,6 +167,7 @@ async function getRevenueRows(filters, maxRows, user) {
       doctorname,
       assistantname,
       dentalaidename,
+      ordersourcename,
       customersourcename
     FROM revenue_rows
     ORDER BY paymentdate DESC NULLS LAST, created_at DESC NULLS LAST, saleordercode NULLS LAST

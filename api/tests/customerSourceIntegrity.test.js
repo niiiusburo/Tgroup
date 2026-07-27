@@ -89,7 +89,18 @@ describe('customer source selection integrity', () => {
     ['inactive', [{ is_active: false, already_selected: false }]],
     ['missing', []],
   ])('blocks changing an existing order to an %s source', async (_label, rows) => {
-    query.mockResolvedValueOnce(rows);
+    // INV-026 lock probe (FOR UPDATE + allocated paid) runs before selectability check.
+    query
+      .mockResolvedValueOnce([{
+        id: 'order-id',
+        order_sourceid: 'current-source',
+        totalpaid: 0,
+        datestart: '2026-07-10',
+        datecreated: '2026-07-10',
+        isdeleted: false,
+      }])
+      .mockResolvedValueOnce([{ totalpaid: 0 }])
+      .mockResolvedValueOnce(rows);
     const res = responseDouble();
 
     await updateSaleOrder(
@@ -101,7 +112,7 @@ describe('customer source selection integrity', () => {
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
       code: CUSTOMER_SOURCE_NOT_SELECTABLE,
     }));
-    expect(query).toHaveBeenCalledTimes(1);
+    expect(query).toHaveBeenCalledTimes(3);
   });
 });
 
@@ -160,10 +171,9 @@ describe('customer source reference guards', () => {
     expect(query.mock.calls[2][0]).toContain('DELETE FROM dbo.customersources');
   });
 
-  it('returns reference counts after updating a source', async () => {
+  it('blocks renaming a referenced source so historical report labels stay stable', async () => {
     query
-      .mockResolvedValueOnce([{ id: 'source-id' }])
-      .mockResolvedValueOnce([{ id: 'source-id', name: 'Renamed source', is_active: true }])
+      .mockResolvedValueOnce([{ id: 'source-id', name: 'Historical', type: 'referral' }])
       .mockResolvedValueOnce([{ customer_count: '3', order_count: '7' }]);
     const res = responseDouble();
 
@@ -172,11 +182,115 @@ describe('customer source reference guards', () => {
       body: { name: 'Renamed source' },
     }, res);
 
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      error: 'Cannot change name or type of a source referenced by customers or sale orders',
+      code: 'CUSTOMER_SOURCE_LABEL_LOCKED',
+      customerCount: 3,
+      orderCount: 7,
+      lockedFields: ['name'],
+    });
+    expect(query.mock.calls.some((call) => String(call[0]).includes('UPDATE dbo.customersources'))).toBe(false);
+  });
+
+  it('blocks type mutation when sale orders still reference the source', async () => {
+    query
+      .mockResolvedValueOnce([{ id: 'source-id', name: 'Historical', type: 'referral' }])
+      .mockResolvedValueOnce([{ customer_count: '0', order_count: '21' }]);
+    const res = responseDouble();
+
+    await routeHandler('put', '/:id')({
+      params: { id: 'source-id' },
+      body: { type: 'online' },
+    }, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+      code: 'CUSTOMER_SOURCE_LABEL_LOCKED',
+      lockedFields: ['type'],
+      orderCount: 21,
+    }));
+  });
+
+  it('allows deactivation and description edits on referenced sources', async () => {
+    query
+      .mockResolvedValueOnce([{ id: 'source-id', name: 'Historical', type: 'referral' }])
+      .mockResolvedValueOnce([{
+        id: 'source-id',
+        name: 'Historical',
+        type: 'referral',
+        description: 'kept for history',
+        is_active: false,
+      }])
+      .mockResolvedValueOnce([{ customer_count: '3', order_count: '7' }]);
+    const res = responseDouble();
+
+    await routeHandler('put', '/:id')({
+      params: { id: 'source-id' },
+      body: { description: 'kept for history', is_active: false },
+    }, res);
+
     expect(query.mock.calls[0][0]).toContain('FOR UPDATE');
+    expect(query.mock.calls[1][0]).toContain('UPDATE dbo.customersources');
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
       id: 'source-id',
+      name: 'Historical',
+      is_active: false,
       customer_count: 3,
       order_count: 7,
     }));
+  });
+
+  it('allows name/type edits when the source is unreferenced', async () => {
+    query
+      .mockResolvedValueOnce([{ id: 'source-id', name: 'Scratch', type: 'offline' }])
+      .mockResolvedValueOnce([{ customer_count: '0', order_count: '0' }])
+      .mockResolvedValueOnce([{
+        id: 'source-id',
+        name: 'New Label',
+        type: 'online',
+        is_active: true,
+      }]);
+    const res = responseDouble();
+
+    await routeHandler('put', '/:id')({
+      params: { id: 'source-id' },
+      body: { name: 'New Label', type: 'online' },
+    }, res);
+
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+      name: 'New Label',
+      type: 'online',
+      customer_count: 0,
+      order_count: 0,
+    }));
+  });
+
+  it('treats repeated current name/type as a no-op on referenced sources', async () => {
+    query
+      .mockResolvedValueOnce([{ id: 'source-id', name: 'Historical', type: 'referral' }])
+      .mockResolvedValueOnce([{
+        id: 'source-id',
+        name: 'Historical',
+        type: 'referral',
+        is_active: true,
+      }])
+      .mockResolvedValueOnce([{ customer_count: '2', order_count: '4' }]);
+    const res = responseDouble();
+
+    await routeHandler('put', '/:id')({
+      params: { id: 'source-id' },
+      body: { name: 'Historical', type: 'referral' },
+    }, res);
+
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+      name: 'Historical',
+      type: 'referral',
+      customer_count: 2,
+      order_count: 4,
+    }));
+    expect(query.mock.calls.some((call) => (
+      String(call[0]).includes('SELECT COUNT(*)') && String(call[0]).includes('partners')
+    ))).toBe(true);
   });
 });

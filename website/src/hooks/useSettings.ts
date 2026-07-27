@@ -257,6 +257,10 @@ export function useCustomerSources(options: {
     topSource: [...sources].sort((a, b) => b.customerCount - a.customerCount)[0]?.name ?? '-',
   }), [sources]);
 
+  function isSourceReferenced(source: CustomerSource) {
+    return source.customerCount > 0 || source.orderCount > 0;
+  }
+
   async function toggleSourceActive(id: string) {
     const source = sources.find(s => s.id === id);
     if (!source) return;
@@ -267,6 +271,20 @@ export function useCustomerSources(options: {
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update source');
+    }
+  }
+
+  async function updateSourceDescription(id: string, description: string) {
+    const source = sources.find((s) => s.id === id);
+    if (!source || source.description === description) return;
+    try {
+      const apiSource = await updateCustomerSource(id, { description });
+      setSources((prev) =>
+        prev.map((s) => (s.id === id ? mapApiSource(apiSource) : s))
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update source');
+      throw err;
     }
   }
 
@@ -286,6 +304,12 @@ export function useCustomerSources(options: {
   }
 
   async function removeSource(id: string) {
+    const source = sources.find((s) => s.id === id);
+    if (source && isSourceReferenced(source)) {
+      const message = 'Cannot delete a source still referenced by customers or orders';
+      setError(message);
+      throw new Error(message);
+    }
     try {
       await deleteCustomerSource(id);
       setSources((prev) => prev.filter((s) => s.id !== id));
@@ -303,7 +327,9 @@ export function useCustomerSources(options: {
     stats,
     typeFilter,
     setTypeFilter,
+    isSourceReferenced,
     toggleSourceActive,
+    updateSourceDescription,
     addSource,
     removeSource,
     refresh: loadSources,

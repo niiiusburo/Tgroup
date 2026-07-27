@@ -2,27 +2,37 @@
  * Settings Page — System settings with IP Access Control
  * @crossref:route[/settings]
  * @crossref:used-in[App]
- * @crossref:uses[SystemPreferences, IpAccessControl]
+ * @crossref:uses[SystemPreferences, IpAccessControl, CustomerSourcesConfig]
  */
 
 import { useState } from 'react';
-import { Settings as SettingsIcon, SlidersHorizontal, Shield, Globe, Building2, MessageSquare } from 'lucide-react';
+import {
+  Settings as SettingsIcon,
+  SlidersHorizontal,
+  Shield,
+  Globe,
+  Building2,
+  MessageSquare,
+  Users,
+} from 'lucide-react';
 import { SystemPreferencesContent } from '@/components/settings/SystemPreferencesContent';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { IpAccessControl } from '@/components/settings/IpAccessControl';
 import { TimezoneSelector } from '@/components/settings/TimezoneSelector';
 import { BankSettingsForm } from '@/components/settings/BankSettingsForm';
 import { FeedbackAdminContent } from '@/components/settings/FeedbackAdminContent';
+import { CustomerSourcesConfig } from '@/components/settings/CustomerSourcesConfig';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
-type SettingsTab = 'system' | 'bank' | 'ip' | 'feedback';
+type SettingsTab = 'system' | 'sources' | 'bank' | 'ip' | 'feedback';
 
-const ALL_TABS: { id: SettingsTab; label: string; icon: React.ReactNode; admin?: boolean }[] = [
-  { id: 'system', label: 'System Settings', icon: <SlidersHorizontal className="w-5 h-5" /> },
-  { id: 'bank', label: 'Bank Account', icon: <Building2 className="w-5 h-5" /> },
-  { id: 'ip', label: 'IP Access Control', icon: <Shield className="w-5 h-5" /> },
-  { id: 'feedback', label: 'Feedback', icon: <MessageSquare className="w-5 h-5" />, admin: true },
+const ALL_TABS: { id: SettingsTab; labelKey: string; icon: React.ReactNode; admin?: boolean }[] = [
+  { id: 'system', labelKey: 'tabs.system', icon: <SlidersHorizontal className="w-5 h-5" /> },
+  { id: 'sources', labelKey: 'tabs.sources', icon: <Users className="w-5 h-5" /> },
+  { id: 'bank', labelKey: 'tabs.bank', icon: <Building2 className="w-5 h-5" /> },
+  { id: 'ip', labelKey: 'tabs.ip', icon: <Shield className="w-5 h-5" /> },
+  { id: 'feedback', labelKey: 'tabs.feedback', icon: <MessageSquare className="w-5 h-5" />, admin: true },
 ];
 
 export function Settings() {
@@ -42,7 +52,6 @@ export function Settings() {
         icon={<SettingsIcon className="w-6 h-6 text-primary" />}
       />
 
-      {/* Timezone Selector - Prominent at top */}
       <div className="bg-primary/5 rounded-xl border border-primary/20 overflow-hidden">
         <div className="px-6 py-5">
           <div className="flex items-center gap-3 mb-4">
@@ -60,11 +69,9 @@ export function Settings() {
         </div>
       </div>
 
-      {/* Main tab navigation - Styled with website color */}
       <div className="bg-white rounded-xl shadow-card overflow-hidden">
-        {/* Tab header with primary color background */}
         <div className="bg-primary px-6 py-1">
-          <div className="flex gap-1">
+          <div className="flex gap-1 overflow-x-auto">
             {TABS.map((tab) => (
               <button
                 key={tab.id}
@@ -82,15 +89,15 @@ export function Settings() {
                 `}
               >
                 {tab.icon}
-                {tab.label}
+                {t(tab.labelKey)}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Tab content area */}
         <div className="p-6">
           {activeTab === 'system' && <SystemPreferencesContent canEdit={canEditSettings} />}
+          {activeTab === 'sources' && <CustomerSourcesConfig />}
           {activeTab === 'bank' && <BankSettingsForm canEdit={canEditSettings} />}
           {activeTab === 'ip' && <IpAccessControl canEdit={canEditSettings} />}
           {activeTab === 'feedback' && <FeedbackAdminContent canEdit={canEditFeedback} />}

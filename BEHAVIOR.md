@@ -36,6 +36,7 @@ If behavior is accepted as product truth, promote it here or to a domain runbook
 - Validate before submit and keep errors next to the field.
 - For edit forms, prefill from canonical backend records, not display-only derived text.
 - For customer and treatment records, IDs from migration should remain searchable and visible where staff use them operationally.
+- **Service/order source chips:** On edit, when the order is paid or belongs to a closed reporting period (prior calendar month in `Asia/Ho_Chi_Minh`), source chips are disabled with nearby amber status copy explaining the lock. Ordinary save must still update non-source fields. A `SOURCE_IMMUTABLE` API error surfaces next to the source field. Authorized corrections use the dedicated audited API path (`services.source_correct`), not the ordinary service form.
 
 ## 5. Dense Lists
 
@@ -78,4 +79,11 @@ Component reference: `website/src/components/shared/ExpandableText.tsx`.
 
 - New user-visible text needs English and Vietnamese keys.
 - Do not mix hardcoded English labels into Vietnamese operational pages unless the product decision is explicit.
+
+## 10. Customer Source Taxonomy
+
+- Settings may list inactive historical sources so staff can audit and read closed-period labels.
+- A source referenced by any customer or sale order keeps its name and type fixed. Staff may deactivate it or edit the description only.
+- Semantic renames or type changes require creating a new source (and optionally deactivating the old one). Do not rewrite the historical lookup row in place.
+- Delete is available only for unreferenced sources. Disabled delete controls must explain that customers/orders still use the label.
 - Preserve clinic terms staff already use, including customer codes, appointment refs, treatment/service refs, and payment language.

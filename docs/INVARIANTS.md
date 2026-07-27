@@ -106,9 +106,9 @@
 **Cite when:** Editing customer-source migrations, `partners.sourceid`, `saleorders.sourceid`, source imports, or source-based reports/exports.
 
 ### INV-024 — Historical Customer-Source Lookup Retention
-**Rule:** An inactive customer source MUST NOT be offered or accepted for new order attribution. An existing order MAY retain its exact inactive source during unrelated edits, and a customer-source lookup MUST NOT be deleted while any `partners` or `saleorders` row references it.
-**Rationale:** Historical lookup rows are needed to render closed-period attribution. Reusing them creates new ambiguous data; deleting them breaks existing report labels.
-**Enforced by:** `ServiceForm`, transaction-scoped lookup locks in `getCustomerSourceSelectionError()` and CustomerSources update/delete, validated `ON DELETE RESTRICT` foreign keys from `partners.sourceid` and `saleorders.sourceid`, and the reference-aware `DELETE /api/CustomerSources/:id` guard. Covered by `dbTransaction.test.js`, `customerSourceIntegrity.test.js`, `customerSourceReferenceMigration.test.js`, and `useSettings.customer-sources.test.tsx`.
+**Rule:** An inactive customer source MUST NOT be offered or accepted for new order attribution. An existing order MAY retain its exact inactive source during unrelated edits, and a customer-source lookup MUST NOT be deleted while any `partners` or `saleorders` row references it. While referenced, the lookup's `name` and `type` are immutable (`CUSTOMER_SOURCE_LABEL_LOCKED`); only `description` and `is_active` may change. Semantic label/type changes require a new `customersources` row via `POST`, leaving historical IDs and report labels intact.
+**Rationale:** Historical lookup rows are needed to render closed-period attribution. Reusing them creates new ambiguous data; deleting or renaming them silently rewrites past report labels.
+**Enforced by:** `ServiceForm`, Settings `CustomerSourcesConfig`, transaction-scoped lookup locks in `getCustomerSourceSelectionError()` and CustomerSources update/delete, validated `ON DELETE RESTRICT` foreign keys from `partners.sourceid` and `saleorders.sourceid`, and the reference-aware `PUT`/`DELETE /api/CustomerSources/:id` guards. Covered by `dbTransaction.test.js`, `customerSourceIntegrity.test.js`, `customerSourceReferenceMigration.test.js`, and `useSettings.customer-sources.test.tsx`.
 **Cite when:** Changing customer-source selectors, source CRUD, sale-order create/update, or historical attribution handling.
 
 ### INV-025 — Partial Partner Update Omission Safety
@@ -116,6 +116,18 @@
 **Rationale:** Customer forms submit partial edits. Treating absence as a clear operation can silently remove assignments such as `partners.sourceid`, changing customer attribution and report fallback values during an unrelated edit.
 **Enforced by:** `createPartner()` and `updatePartner()` return `PARTNER_SOURCE_READ_ONLY` at the normal mutation boundary; `updatePartner()` preserves undefined writable UUID fields before building its dynamic `UPDATE`. API tests cover source create/change/clear rejection, repeated-source compatibility, omitted-source preservation, and explicit empty-string clearing for a writable non-source UUID. `useCustomers` omits source from frontend create/update payloads.
 **Cite when:** Changing partner/customer update payloads, UUID normalization, or dynamic partner SQL updates.
+
+### INV-026 — Closed-Period / Paid Order Source Immutability
+**Rule:** Ordinary UI/API edits MUST NOT change `saleorders.sourceid` once the order is **paid** or falls in a **closed reporting period**. Paid means `max(saleorders.totalpaid, sum of non-voided payment_allocations) > 0`. Closed period means the order attribution date (`COALESCE(datestart, datecreated)` as a calendar date) is strictly before the first day of the current calendar month in `Asia/Ho_Chi_Minh`. A PATCH that repeats the current source value is a no-op and must not fail. Unrelated field edits on locked orders must still succeed when `sourceid` is omitted. The only mutation path for a locked order source is `POST /api/SaleOrders/:id/source-correction` with permission `services.source_correct`, requiring `new_sourceid`, `expected_old_sourceid`, `reason` (≥10 chars), `evidence` (≥5), `rollback_reference` (≥3), and writing an audit row with actor, timestamp, and request id.
+**Rationale:** Closed-period revenue reports key off order-level source. Ordinary service edits after payment or month-end must not silently rewrite attribution (snake/Q10 incident class).
+**Enforced by:** `api/src/lib/saleOrderSourceLock.js`, `updateSaleOrder.js`, `correctSaleOrderSource.js`, migration `073_saleorder_source_corrections.sql`, ServiceForm disabled source chips, and `api/tests/saleOrderSourceImmutability.test.js`.
+**Cite when:** Changing sale-order update/source UX, payment allocation totals, reporting-period rules, or source repair tooling.
+
+### INV-027 — Append-Only Source-Change Audit
+**Rule:** Every successful mutation of `partners.sourceid` or `saleorders.sourceid` MUST write exactly one durable row to `dbo.source_change_audit` in the same transaction, capturing entity type/id, old/new source, actor, reason, request id, transaction id, optional correction-manifest reference, change channel, and timestamp. Normal reads and failed/rolled-back writes MUST write zero audit rows. Audit rows are append-only: application code MUST NOT UPDATE or DELETE them (DB triggers raise on UPDATE/DELETE). Ordinary `api_patch` changes to paid or closed-period sale orders are rejected by INV-026 before mutation and therefore write zero audit rows. Classification and alerting for any unexpected locked-order ledger entry remain defense in depth; authorized channels (`source_correction`, `repair_manifest`, `import_manifest`, `partner_source_correction`) are expected. A bounded reconciliation report is available for operators.
+**Rationale:** Snake/Q10 incident class — silent source rewrites on paid/closed orders are undetectable without a durable ledger and alerts.
+**Enforced by:** migration `075_source_change_audit.sql`, `api/src/services/sourceChangeAudit.js`, sale-order create/update + correction routes, partner source-correction route, `sourceChangeAlert.js`, `POST /api/Reports/source-change-reconciliation`, semgrep `.semgrep/source-change-audit.yaml`, and `api/tests/sourceChangeAudit*.test.js`.
+**Cite when:** Changing source mutation paths, repair tooling, audit schema, or source observability.
 
 ---
 
@@ -183,6 +195,12 @@
 **Enforced by:** `scripts/deploy-build-args.sh` calling `scripts/deploy-preflight.js`; release planning may also run `scripts/deploy-worktree-audit.js`.
 **Cite when:** Deploying, preparing a hotfix, or changing release scripts.
 
+### INV-023 — Order Source ≠ Customer Source
+**Rule:** `saleorders.sourceid` is the immutable order-attribution source. `partners.sourceid` is the customer-acquisition source and may change over time. Closed-period revenue reports and default exports MUST attribute by `saleorders.sourceid` only. API reads MUST expose both fields separately and MUST NOT `COALESCE(so.sourceid, partner.sourceid)` into `sourceid`. New orders snapshot the customer's current source onto `saleorders.sourceid` when no explicit order source is provided. Normal order edits MUST never rewrite a null order source with the inherited customer source. Legacy COALESCE is allowed only under the explicit version label `legacy_coalesce_v1` and never as the default closed-period path. Bulk backfill of historical null order sources requires a reviewed manifest (not auto-run).
+**Rationale:** Silent COALESCE caused order edits to materialize inherited customer source as direct attribution and made customer-source changes rewrite historical revenue.
+**Enforced by:** `api/src/lib/orderSourceSemantics.js`, sale-order fetch/create/update, `reports/revenue/by-source`, revenue-flat and services exports.
+**Cite when:** Changing sale-order source fields, revenue-by-source, flat exports, or customer source edits.
+
 ---
 
 ## Incident-Derived Invariants
@@ -211,3 +229,7 @@
 | 2026-07-23 | INV-023 | Added historical customer-source attribution stability after the Q10 June report incident | codex/customer-source-incident-guard |
 | 2026-07-23 | INV-024 | Added inactive-source selection and reference-retention safeguards | codex/customer-source-incident-guard |
 | 2026-07-23 | INV-025 | Added omission-safe semantics for partial partner UUID updates | codex/partner-partial-update-fix |
+| 2026-07-24 | INV-026 | Added paid/closed-period sale-order source immutability + audited correction path | worktree/10-enforce-closed-period-source-immutability |
+| 2026-07-24 | INV-023 | Separate order attribution source from customer acquisition source | 11-separate-order-and-customer-source-semantics |
+| 2026-07-24 | INV-024 | Extended retention to lock referenced source name/type labels | worktree/12-protect-referenced-source-labels-and-types |
+| 2026-07-24 | INV-027 | Added append-only source-change audit ledger, unexpected alerts, and reconciliation report | worktree/13-add-append-only-source-change-audit-and-alerts |

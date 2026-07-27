@@ -78,6 +78,7 @@ const revenue = createBuilder({
     doctorName: row.doctorname || '',
     assistantName: row.assistantname || '',
     dentalAideName: row.dentalaidename || '',
+    orderSource: row.ordersourcename || '',
     customerSource: row.customersourcename || '',
   }),
 });

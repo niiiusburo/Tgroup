@@ -17,7 +17,7 @@
 
 Current inventory from disk:
 
-- **Canonical directory:** `api/migrations/` — 51 runnable root SQL files. Five customer-source incident artifacts remain under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` with non-executable `.sql.retired` extensions.
+- **Canonical directory:** `api/migrations/` — 52 runnable root SQL files. Five customer-source incident artifacts remain under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` with non-executable `.sql.retired` extensions.
 - **Supplemental directory:** `api/src/db/migrations/` — 5 SQL files. These are straggler migrations (`payment_category`, customer face embeddings, payment-proof confirmation/permission/UUID changes) that should be consolidated into the canonical migration path or explicitly promoted by a future runbook decision.
 - **Runbook status:** `docs/RUNBOOK.md` and `docs/runbooks/DEPLOYMENT.md` both use `api/migrations/*.sql` as the canonical deploy loop. Supplemental files under `api/src/db/migrations/` are not covered by that loop unless explicitly run or consolidated.
 
@@ -79,8 +79,19 @@ Current inventory from disk:
 | 048 | `048_investor_customer_scope.sql` | Creates/normalizes investor customer allowlist and seeds read/export-only investor permission group | `CREATE TABLE dbo.investor_clients`; add live-compatible `lob`, `marked_by_partner_id`, `marked_at`, `datecreated`, `lastupdated`; seed `investor` group permissions using case-insensitive group lookup | Drop `dbo.investor_clients` only after removing investor access; delete seeded permissions if replacing group | 2026-07 |
 | 049 | `049_investor_accounts_nk2_credentials.sql` | Adds/normalizes same-portal investor credential records linked to `dbo.partners` | `CREATE TABLE dbo.investor_accounts`; normalize older `is_active`, `created_at`, `updated_at` into `active`, `datecreated`, `lastupdated` | Drop `dbo.investor_accounts` after disabling investor login fallback | 2026-07 |
 | 050 | `050_add_customer_source_foreign_keys.sql` | Retains customer/order attribution lookup rows with validated source foreign keys | Add idempotent `partners.sourceid` and `saleorders.sourceid` → `customersources.id` FKs with `ON DELETE RESTRICT`; live preflight found zero orphans | Drop the two named constraints only if a replacement retention guard exists | Pending normal PR/merge/deploy |
+| 073 | `073_saleorder_source_corrections.sql` | Audited sale-order source corrections + `services.source_correct` permission seed | `CREATE TABLE dbo.saleorder_source_corrections`; grant permission to Super Admin/Admin | `DROP TABLE dbo.saleorder_source_corrections`; delete seeded permission rows | Pending local/PR deploy |
+| 074 | `074_order_source_backfill_manifest.sql` | Reviewed-only manifest template for backfilling null `saleorders.sourceid` from customer source; no auto data change (INV-023) | Leave nulls as-is; do not run unreviewed UPDATE | N/A — dry-run only unless approved | 2026-07 |
+| 075 | `075_source_change_audit.sql` | Append-only source-change audit ledger + correction permission seeds (INV-027) | `CREATE TABLE dbo.source_change_audit` + no-update/no-delete triggers + seed `services.source_correct` / `customers.source_correct` | Drop triggers/function/table only after replacement audit path exists; delete seeded permissions if replacing | Pending normal PR/merge/deploy |
 
-**Total canonical migrations:** 51 runnable `.sql` files in the root of `api/migrations/`. Five customer-source rewrite artifacts are quarantined with `.sql.retired` extensions under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` and are not part of the runnable count.
+**Total canonical migrations:** 52 runnable `.sql` files in the root of `api/migrations/`. Five customer-source rewrite artifacts are quarantined with `.sql.retired` extensions under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` and are not part of the runnable count.
+
+### Numbering
+
+Prefixes are **not** unique and never have been — `main` already carries duplicates at 001, 006, 008, 018, 019, 020, 037 and 045. The deploy loop globs `api/migrations/*.sql` and runs every distinct filename, so a shared prefix does not drop a file; what it does create is arbitrary relative apply order between the two and an ambiguous `dbo.schema_migrations` trail. The source-attribution set was therefore renumbered from 051–053 to **073–075**, chosen above every number in use on any branch at the time.
+
+### Apply-order caveat for 073–075 (expand-first)
+
+`docs/runbooks/DEPLOYMENT.md` documents the generic "deploy app, then apply migrations" order. That is unsafe for this set: sale-order create and update call `recordSourceChange()`, which INSERTs into `dbo.source_change_audit`, so shipping the app first makes ordinary source-bearing order writes fail with `relation "dbo.source_change_audit" does not exist` until the migration lands. Apply **073 then 075 before** deploying the app; `074` is an intentional no-op manifest. Rolling the app back afterwards is safe — do not drop 073/075 while any deployed code writes to them. Full sequence and smoke steps: `docs/audits/2026-07-25-source-attribution-release-candidate.md`. Migration `050` stays separate under CP-G.
 
 ## Supplemental Migration Files
 

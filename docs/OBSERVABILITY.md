@@ -37,6 +37,7 @@ All API logs are written to stdout/stderr and collected by Docker logging driver
 - **Production only:** `apiFetch` reports API errors to the AutoDebugger pipeline.
 - **ErrorBoundary:** Catches React render errors and calls `POST /api/telemetry/errors`.
 - **Feedback Lark alert:** When `LARK_FEEDBACK_WEBHOOK_URL` is configured, new manual feedback threads and first-seen auto-detected feedback threads queue a non-blocking text alert to the T-Group Lark custom bot after DB commit. Alert failures log with the `[Lark]` prefix and do not fail the source request.
+- **Source-change unexpected alert (INV-027):** When a paid or closed-period sale-order source changes outside an authorized channel, `sourceChangeAlert` queues a non-blocking Lark text alert after the audit INSERT. Prefer `LARK_SOURCE_AUDIT_WEBHOOK_URL` (falls back to `LARK_FEEDBACK_WEBHOOK_URL`). Failures log with `[Lark]` / `[SourceAudit]` and never roll back the mutation. Operators reconcile via `POST /api/Reports/source-change-reconciliation`.
 - **Shape:**
 ```json
 {
@@ -78,6 +79,7 @@ All API logs are written to stdout/stderr and collected by Docker logging driver
 | API p99 latency > 2s | > 2000ms | Investigate slow query |
 | DB connection pool exhausted | pool.waitingCount > 0 | Scale or restart API |
 | Face service down > 5 min | health = false | Warn (optional, INV-014) |
+| Unexpected source change on paid/closed order | any `source_change_audit.is_unexpected=true` | Lark source-audit alert + recon report (INV-027) |
 | Export timeout rate > 10% | > 10% | Check nginx timeout + query performance |
 | Login failure rate > 20% | > 20% | Check rate limiter + credential issues |
 | Disk usage > 85% | > 85% | Clean logs or expand volume |

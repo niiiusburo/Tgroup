@@ -87,9 +87,30 @@ graph TD
 ### `api/src/routes/saleOrders/customerSourceSelection.js`
 - **Layer:** 3
 - **Upstream:** `api/src/db.js`, `dbo.customersources`, `dbo.saleorders`
-- **Downstream:** `api/src/routes/saleOrders/createSaleOrder.js`, `api/src/routes/saleOrders/updateSaleOrder.js`, frontend service/order source selectors through `/api/SaleOrders`.
+- **Downstream:** `api/src/routes/saleOrders/createSaleOrder.js`, `api/src/routes/saleOrders/updateSaleOrder.js`, `correctSaleOrderSource.js`, frontend service/order source selectors through `/api/SaleOrders`.
 - **Blast radius:** **Service/order creation and edits, historical source attribution, source-based reports, and customer-source settings deletion safety.**
 - **Change rules:** Must preserve INV-023 and INV-024. New or changed order attribution may only use active customer sources; an inactive source can be preserved only when it is already assigned directly to the same non-deleted order. Lookup validation must stay transaction-scoped so settings updates/deletes cannot race sale-order writes.
+
+### `api/src/lib/saleOrderSourceLock.js`
+- **Layer:** 2
+- **Upstream:** `api/src/lib/saleOrderTotals.js`, `dbo.saleorders`, `dbo.payment_allocations`, `dbo.payments`
+- **Downstream:** `updateSaleOrder.js`, `correctSaleOrderSource.js`, `website/src/lib/saleOrderSourceLock.ts`, ServiceForm lock UX.
+- **Blast radius:** **Order source edits, closed-period revenue attribution, audited correction workflow.**
+- **Change rules:** Must preserve INV-026. Paid and closed-period locks must fail ordinary PATCH source changes; correction path remains the only authorized mutation with full audit fields.
+
+### `api/src/routes/customerSources.js`
+- **Layer:** 3
+- **Upstream:** `api/src/db.js`, `dbo.customersources`, `dbo.partners`, `dbo.saleorders`
+- **Downstream:** Settings Customer Sources UI, service/order selectors, report/export source labels via live lookup joins.
+- **Blast radius:** **Historical report labels, settings taxonomy, and any surface that displays `customersources.name`.**
+- **Change rules:** Must preserve INV-024 label lock: referenced name/type cannot mutate; delete blocked while referenced; description/`is_active` remain editable; semantic changes create a new row.
+
+### `api/src/services/sourceChangeAudit.js`
+- **Layer:** 3
+- **Upstream:** `api/src/db.js`, `api/src/lib/sourceChangeLock.js`, `dbo.source_change_audit`, `api/src/services/sourceChangeAlert.js`
+- **Downstream:** sale-order create/update/correction, partner source-correction, `reports/sourceChangeReconciliation.js`
+- **Blast radius:** **All customer/order source mutation attribution, unexpected paid/closed alerts, operator reconciliation.**
+- **Change rules:** Must preserve INV-027. Successful source mutations write exactly one append-only ledger row in the same transaction; reads, rejected locked mutations, and other failed writes write none; never UPDATE/DELETE audit rows from app code.
 
 ### `api/src/middleware/auth.js`
 - **Layer:** 3

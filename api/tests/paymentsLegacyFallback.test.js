@@ -1,6 +1,7 @@
 jest.mock('../src/middleware/auth', () => ({
   requireAuth: (_req, _res, next) => next(),
   requirePermission: () => (_req, _res, next) => next(),
+  requireNonInvestorPermission: () => (_req, _res, next) => next(),
 }));
 
 jest.mock('../src/db', () => ({

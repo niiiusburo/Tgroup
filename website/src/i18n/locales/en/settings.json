@@ -7,6 +7,13 @@
   "roleConfig": "Role Configuration",
   "serviceCatalog": "Service Catalog Settings",
   "customerSources": "Customer Sources",
+  "tabs": {
+    "system": "System Settings",
+    "sources": "Customer Sources",
+    "bank": "Bank Account",
+    "ip": "IP Access Control",
+    "feedback": "Feedback"
+  },
   "feedbackAdmin": {
     "title": "Feedback Management",
     "review": "Review",
@@ -74,9 +81,28 @@
   "customerSourcesConfig": {
     "title": "Customer Sources",
     "addSource": "Add Source",
+    "newSource": "New Customer Source",
     "sourceName": "Source Name",
     "description": "Description",
-    "customersOrders": "customers / orders"
+    "addDescription": "Add description",
+    "editDescription": "Edit description",
+    "customersOrders": "customers / orders",
+    "totalSources": "Total Sources",
+    "active": "Active",
+    "totalCustomers": "Total Customers",
+    "topSource": "Top Source",
+    "allTypes": "All Types",
+    "online": "Online",
+    "offline": "Offline",
+    "referral": "Referral",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "removeSource": "Remove source",
+    "empty": "No sources found for this filter.",
+    "labelLocked": "Label locked",
+    "labelLockedTitle": "Name and type stay fixed while customers or orders still reference this source",
+    "historicalLockHint": "Sources already used by customers or orders keep their name and type so historical reports stay readable. Deactivate or edit the description here; create a new source for any semantic rename.",
+    "createVersionHint": "Use a new source for semantic label or type changes. Existing referenced labels are not rewritten."
   },
   "timezoneSelector": {
     "label": "Select Timezone",

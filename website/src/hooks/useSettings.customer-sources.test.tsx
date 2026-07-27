@@ -136,4 +136,43 @@ describe('useCustomerSources', () => {
     expect(result.current.allSources).toEqual([]);
     expect(result.current.error).toBe('lookup unavailable');
   });
+
+  it('marks referenced sources as label-locked and allows description updates', async () => {
+    apiMocks.fetchCustomerSources.mockResolvedValue({
+      items: [activeSource],
+      aggregates: { total: 1, active: 1, totalCustomers: 3, topSource: 'Hotline' },
+    });
+    apiMocks.updateCustomerSource.mockResolvedValue({
+      ...activeSource,
+      description: 'kept for history',
+    });
+
+    const { result } = renderHook(() => useCustomerSources());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.isSourceReferenced(result.current.allSources[0])).toBe(true);
+
+    await result.current.updateSourceDescription('active-source', 'kept for history');
+    expect(apiMocks.updateCustomerSource).toHaveBeenCalledWith('active-source', {
+      description: 'kept for history',
+    });
+    await waitFor(() => {
+      expect(result.current.allSources[0].description).toBe('kept for history');
+    });
+  });
+
+  it('blocks client-side delete for referenced sources before calling the API', async () => {
+    apiMocks.fetchCustomerSources.mockResolvedValue({
+      items: [activeSource],
+      aggregates: { total: 1, active: 1, totalCustomers: 3, topSource: 'Hotline' },
+    });
+
+    const { result } = renderHook(() => useCustomerSources());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await expect(result.current.removeSource('active-source')).rejects.toThrow(
+      /still referenced/i,
+    );
+    expect(apiMocks.deleteCustomerSource).not.toHaveBeenCalled();
+  });
 });

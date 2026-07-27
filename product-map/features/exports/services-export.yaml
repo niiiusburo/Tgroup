@@ -87,42 +87,48 @@ columns:
     width: 18
     source: employees.name (dental aid)
   - position: 11
-    key: sourcename
-    header_vi: Nguồn
+    key: orderSource
+    header_vi: Nguồn đơn
     style: text
     width: 18
-    source: customersources.name
+    source: customersources.name via saleorders.sourceid
   - position: 12
+    key: customerSource
+    header_vi: Nguồn KH
+    style: text
+    width: 18
+    source: customersources.name via partners.sourceid
+  - position: 13
     key: amountTotal
     header_vi: Tổng tiền
     style: vnd
     width: 14
     source: saleorder.amount_total
-  - position: 13
+  - position: 14
     key: totalPaid
     header_vi: Đã thu
     style: vnd
     width: 14
     source: saleorder.amount_paid
-  - position: 14
+  - position: 15
     key: residual
     header_vi: Còn lại
     style: vnd
     width: 14
     source: saleorder.residual
-  - position: 15
+  - position: 16
     key: state
     header_vi: Trạng thái
     style: text
     width: 12
     source: saleorder.state (mapped via STATE_LABELS)
-  - position: 16
+  - position: 17
     key: companyName
     header_vi: Chi nhánh
     style: text
     width: 20
     source: companies.name
-  - position: 17
+  - position: 18
     key: notes
     header_vi: Ghi chú
     style: text

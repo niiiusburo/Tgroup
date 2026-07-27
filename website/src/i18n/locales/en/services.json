@@ -98,7 +98,9 @@
     "unitPlaceholder": "tooth",
     "subtitleEdit": "Update treatment information",
     "subtitleCreate": "Create new treatment service record",
-    "notes": "Notes"
+    "notes": "Notes",
+    "orderSource": "Order source",
+    "orderSourceHint": "Attribution on this order (edits do not inherit customer source)"
   },
   "formErrors": {
     "selectService": "Please select a service",
@@ -129,7 +131,7 @@
     "inactive": "Inactive"
   },
   "noServicesFound": "No services found",
-  "ngunKhchHng": "Customer source",
+  "ngunKhchHng": "Order source",
   "defaultUnit": "Time",
   "chnRng": "Select tooth",
   "ghiChRng": "Tooth notes",
@@ -161,5 +163,10 @@
     "amount": "Amount",
     "paid": "Paid",
     "remaining": "Remaining"
+  },
+  "sourceLock": {
+    "paidAndClosedPeriod": "Customer source is locked — this order is paid and belongs to a closed reporting period. Use the audited source-correction path.",
+    "paid": "Customer source is locked because this order has payment activity. Use the audited source-correction path.",
+    "closedPeriod": "Customer source is locked because this order belongs to a closed reporting period. Use the audited source-correction path."
   }
 }

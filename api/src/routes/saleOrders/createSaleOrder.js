@@ -1,6 +1,13 @@
 const crypto = require('crypto');
 const { withTransaction } = require('../../db');
 const { getVietnamToday, getVietnamYear } = require('../../lib/dateUtils');
+const { resolveCreateOrderSourceId } = require('../../lib/orderSourceSemantics');
+const {
+  recordSourceChange,
+  resolveActorId,
+  resolveRequestId,
+  resolveTransactionId,
+} = require('../../services/sourceChangeAudit');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
 const { getCustomerSourceSelectionError } = require('./customerSourceSelection');
 
@@ -35,9 +42,17 @@ async function createSaleOrder(req, res) {
       return res.status(400).json({ error: 'quantity must be >= 0' });
     }
 
+    const requestId = resolveRequestId(req);
+    const actorEmployeeId = resolveActorId(req);
+    const transactionId = resolveTransactionId();
+
     const outcome = await withTransaction(async (transactionQuery) => {
-      const sourceError = await getCustomerSourceSelectionError(
+      const resolvedSourceId = await resolveCreateOrderSourceId(transactionQuery, {
+        partnerId: partnerid,
         sourceid,
+      });
+      const sourceError = await getCustomerSourceSelectionError(
+        resolvedSourceId,
         null,
         transactionQuery,
       );
@@ -78,7 +93,7 @@ async function createSaleOrder(req, res) {
         datestart || null,
         dateend || null,
         notes || null,
-        sourceid || null,
+        resolvedSourceId,
         false,
       ],
     );
@@ -103,6 +118,21 @@ async function createSaleOrder(req, res) {
           false,
         ],
         );
+      }
+
+      if (resolvedSourceId !== null) {
+        await recordSourceChange(transactionQuery, {
+          entityType: 'saleorder',
+          entityId: id,
+          oldSourceId: null,
+          newSourceId: resolvedSourceId,
+          actorEmployeeId,
+          requestId,
+          transactionId,
+          changeChannel: 'api_create',
+          lockState: { locked: false, reasons: [] },
+          correctionManifestRef: req.body?.correction_manifest_ref || null,
+        });
       }
 
       const rows = await fetchSaleOrderById(id, transactionQuery);

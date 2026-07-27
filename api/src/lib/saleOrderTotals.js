@@ -12,7 +12,7 @@ async function getAllocatedPaymentTotal(query, saleOrderId) {
        AND COALESCE(p.status, 'posted') != 'voided'`,
     [saleOrderId],
   );
-  return parseMoney(rows[0]?.totalpaid);
+  return parseMoney(rows?.[0]?.totalpaid);
 }
 
 function calculateSaleOrderPaymentState(amountTotal, allocatedPaid) {

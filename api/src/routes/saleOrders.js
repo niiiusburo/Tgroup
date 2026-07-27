@@ -1,8 +1,10 @@
 const express = require('express');
 const { query } = require('../db');
-const { requirePermission } = require('../middleware/auth');
+const { requirePermission, requireNonInvestorPermission } = require('../middleware/auth');
 const { resolveInvestorScope } = require('../services/permissionService');
+const { orderAndCustomerSourceSelectSql } = require('../lib/orderSourceSemantics');
 const { createSaleOrder } = require('./saleOrders/createSaleOrder');
+const { correctSaleOrderSource } = require('./saleOrders/correctSaleOrderSource');
 const { getSaleOrderById } = require('./saleOrders/getSaleOrderById');
 const { updateSaleOrder } = require('./saleOrders/updateSaleOrder');
 const { updateSaleOrderState } = require('./saleOrders/updateSaleOrderState');
@@ -89,6 +91,7 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
     }
 
     const whereClause = conditions.join(' AND ');
+    const sourceFields = orderAndCustomerSourceSelectSql();
 
     const items = await query(
       `SELECT
@@ -115,8 +118,7 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
         so.datestart,
         so.dateend,
         so.notes,
-        COALESCE(so.sourceid, p.sourceid) AS sourceid,
-        cs.name AS sourcename,
+        ${sourceFields.select},
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
         (SELECT sol.tooth_numbers FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_numbers,
@@ -129,7 +131,7 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
       LEFT JOIN employees doc ON doc.id = so.doctorid
       LEFT JOIN employees asst ON asst.id = so.assistantid
       LEFT JOIN employees da ON da.id = so.dentalaideid
-      LEFT JOIN customersources cs ON cs.id = COALESCE(so.sourceid, p.sourceid)
+      ${sourceFields.joins}
       WHERE ${whereClause}
       ORDER BY ${orderByCol} ${orderDir} NULLS LAST
       LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
@@ -239,6 +241,7 @@ router.get('/lines', requirePermission('services.view'), async (req, res) => {
         so.dentalaideid,
         so.companyid,
         so.sourceid,
+        p.sourceid AS customersourceid,
         COALESCE(NULLIF(NULLIF(so.unit, ''), 'services.form.unitPlaceholder'), pr.uomname) as unit,
         so.id as orderid,
         so.name as ordername,
@@ -255,6 +258,7 @@ router.get('/lines', requirePermission('services.view'), async (req, res) => {
         COALESCE(lc.order_line_count, 1) as order_line_count
       FROM saleorderlines sol
       JOIN saleorders so ON so.id = sol.orderid
+      LEFT JOIN partners p ON p.id = so.partnerid
       LEFT JOIN products pr ON pr.id = sol.productid
       LEFT JOIN employees doc ON doc.id = COALESCE(sol.employeeid, so.doctorid)
       LEFT JOIN employees asst ON asst.id = COALESCE(sol.assistantid, so.assistantid)
@@ -355,6 +359,21 @@ router.post('/', requirePermission('customers.edit'), createSaleOrder);
  * Body: { state: 'sale' | 'done' | 'cancel' | 'draft' }
  */
 router.patch('/:id/state', requirePermission('customers.edit'), updateSaleOrderState);
+
+/**
+ * POST /api/SaleOrders/:id/source-correction
+ * Permissioned audited correction for locked (paid / closed-period) order sources.
+ * Body: { new_sourceid, expected_old_sourceid, reason, evidence,
+ *         rollback_reference, correction_manifest_ref? }
+ */
+// requireNonInvestorPermission, not requirePermission: D21 forbids investor writes, so an
+// investor is refused 404 here before the permission comparison and before the handler
+// validates or acts on the body. Non-investors keep the usual 401/403 behaviour.
+router.post(
+  '/:id/source-correction',
+  requireNonInvestorPermission('services.source_correct', 'Sale order not found'),
+  correctSaleOrderSource,
+);
 
 router.patch('/:id', requirePermission('customers.edit'), updateSaleOrder);
 

@@ -14,6 +14,7 @@
       "edit": "Edit customer information",
       "delete": "Delete customer",
       "hardDelete": "Permanently delete customer from system",
+      "source_correct": "Correct customer acquisition source (audited)",
       "export": "Export customer list to Excel"
     },
     "appointments": {
@@ -36,6 +37,7 @@
       "view": "View service catalog",
       "add": "Add new service",
       "edit": "Edit service",
+      "source_correct": "Correct paid or closed-period order source (audited)",
       "export": "Export treatment records to Excel"
     },
     "payment": {

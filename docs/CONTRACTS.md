@@ -24,6 +24,7 @@
 | v1.0.8 | 2026-07-04 | Investor users are restricted normal-portal staff sessions: `/api/Auth/login` may authenticate `dbo.investor_accounts`, but all data access stays on existing portal routes and is scoped by `dbo.investor_clients`. |
 | v1.0.9 | 2026-07-08 | Investor visibility admin controls (`GET`/`PATCH /api/Partners/investor-visibility`) are gated by admin group (`assertAdmin`) instead of `permissions.edit`, and admin list/toggle match `dbo.investor_clients` by the SAME scope union (`investor_id` = the investor's `partners.id` OR any active `dbo.investor_accounts.id`) that scopes the investor read. Customer id is validated with the canonical 8-4-4-4-12 UUID pattern. |
 | v1.0.10 | 2026-07-23 | Customer-source usage counts and deletion guards include both customer and sale-order references; new sale orders reject inactive/missing sources while an existing order may preserve its already-assigned inactive historical source. |
+| v1.0.11 | 2026-07-24 | Sale order source contract split: `sourceid`/`sourcename` = direct order attribution; `customersourceid`/`customersourcename` = partner acquisition. Create snapshots customer source when order source omitted. Revenue by-source and closed-period exports use order source only (INV-023). |
 
 ---
 
@@ -209,11 +210,50 @@ The API response keeps legacy employee flags (`isdoctor`, `isassistant`, `isrece
 
 Normal `POST /api/Partners` and `PUT /api/Partners/:id` do not assign or change `partners.sourceid`. Customer create rejects a non-null source with `400 PARTNER_SOURCE_READ_ONLY`; customer update rejects a changed or cleared source with the same code. Source attribution is owned by the order/service flow and controlled repair/import paths.
 
+**Source-change audit (INV-027):** Successful create/open-order update of `saleorders.sourceid` and authorized partner/order source-correction paths each insert one `dbo.source_change_audit` row (entity, old/new source, actor, reason, request id, transaction id, optional `correction_manifest_ref`, channel, unexpected flags). Reads, rejected locked-order changes, and other failed writes insert nothing. Audit rows cannot be updated/deleted through the app.
+
+**Investor denial on every source-mutation and ledger path (D21 / INV-021):** investor accounts are
+refused on both source-correction endpoints and on the reconciliation report. `DECISIONS.md` D21
+keeps investor writes forbidden until a decision names the exact write permission and scope, and no
+decision authorizes source correction — so an investor is denied even when allowlisted for the
+customer, because the allowlist grants read scope, never write capability. Denial happens before any
+transaction, row lock, write or audit row, and before the handler validates or acts on the body.
+
+On both mounted source-correction routes the denial is a route guard
+(`requireNonInvestorPermission`, `api/src/middleware/auth.js`) that runs **before** the permission
+comparison, so an investor's response is identical whether they lack the correction permission, hold
+it, or hold `*` — no permission state is inferable. Non-investors keep unchanged `401`/`403`
+behaviour. The handlers keep the same check as defence-in-depth for direct/internal invocation and
+skip it when the guard already set `req.nonInvestorVerified`, so the mounted path performs no
+duplicate scope query.
+
+#### POST /api/SaleOrders/:id/source-correction
+**Auth:** `services.source_correct`; investor accounts are always refused.
+**Body:** `{ new_sourceid, expected_old_sourceid, reason, evidence, rollback_reference, correction_manifest_ref? }`
+**Success 200:** `{ order, correction, audit }` where `correction` is the detailed domain correction record and `audit` is the append-only ledger row (`change_channel=source_correction`).
+**Errors:** `400 SOURCE_CORRECTION_INVALID` / `CUSTOMER_SOURCE_NOT_SELECTABLE`; `409 SOURCE_CORRECTION_CONFLICT`; `403` / `404`. Investors receive `404` (not `403`) so the endpoint cannot confirm which orders exist.
+
+#### POST /api/Partners/:id/source-correction
+**Auth:** `customers.source_correct`; investor accounts are always refused.
+**Body:** `{ new_sourceid, expected_old_sourceid, reason, correction_manifest_ref }`
+**Success 200:** `{ partner, audit }` (`change_channel=partner_source_correction`).
+**Errors:** `400 PARTNER_SOURCE_CORRECTION_INVALID` / `CUSTOMER_SOURCE_NOT_SELECTABLE`; `409 PARTNER_SOURCE_CORRECTION_CONFLICT`; `403` / `404`. Investors receive `404` before the transaction opens, so no row lock is taken.
+
+#### POST /api/Reports/source-change-reconciliation
+**Auth:** `reports.view`; investor accounts are refused with `403` before the ledger is queried.
+**Body:** `{ dateFrom?, dateTo?, entityType?: 'partner'|'saleorder', unexpectedOnly?: boolean, limit?: number, offset?: number }`
+**Success 200:** `{ summary, rows, limit, offset, bounded: true }` with `limit` capped at 500.
+**Errors:** `400` invalid `dateFrom`/`dateTo`/`entityType`; `403` for investor accounts. The ledger spans both partner and saleorder entities and carries entity ids, actor ids, reasons, request ids and manifest refs with no per-entity customer join, so it is denied outright rather than row-scoped. `403` (not `404`) is correct here because the path is static and carries no record id, so no existence is leaked.
+
 `GET /api/CustomerSources` returns each lookup with numeric `customer_count` and `order_count`. `POST` and `PUT` return the same numeric count fields for their affected lookup. The optional `is_active=true` query limits selection lists to active sources. Settings may request all rows so inactive historical lookups remain visible for management and audit. Active-only selection surfaces must show no fallback IDs when the lookup request is empty or fails.
+
+`PUT /api/CustomerSources/:id` may update `description` and `is_active` at any time. When either `dbo.partners.sourceid` or `dbo.saleorders.sourceid` still references the lookup, changing `name` or `type` to a different value returns `400` with `{ code: "CUSTOMER_SOURCE_LABEL_LOCKED", customerCount, orderCount, lockedFields: ["name"|"type", ...] }`. Repeating the current name/type is a no-op. Semantic renames require creating a new source via `POST` (and optionally deactivating the old row). Unreferenced sources may still change name/type freely.
 
 `DELETE /api/CustomerSources/:id` returns `400` with `{ code: "CUSTOMER_SOURCE_IN_USE", customerCount, orderCount }` when either `dbo.partners.sourceid` or `dbo.saleorders.sourceid` still references the lookup. A missing unreferenced source returns `404`. Update/delete locks the lookup row for the transaction, and database foreign keys use `ON DELETE RESTRICT` as the final referential guard.
 
 `POST /api/SaleOrders` and `PATCH /api/SaleOrders/:id` accept `sourceid?: string | null`. A non-null source must exist and be active, otherwise the API returns `400` with `{ code: "CUSTOMER_SOURCE_NOT_SELECTABLE" }`. An edit client must omit `sourceid` when the user did not change the displayed effective source, because that value can be inherited from `partners.sourceid`; the PATCH route then leaves the order-level value unchanged. When explicitly submitted, PATCH may preserve an inactive source only when that exact source is already assigned directly to that same non-deleted order; it may not assign the inactive source to another order. Validation takes a transaction-scoped share lock on the lookup (conflicting with settings updates/deletes), and sale-order/line writes commit or roll back together.
+
+**Closed-period / paid source lock (INV-026):** When `sourceid` is present on `PATCH /api/SaleOrders/:id` and differs from the order's current `saleorders.sourceid`, and the order is paid (`max(totalpaid, non-void allocation sum) > 0`) or its attribution date is before the open calendar month start in `Asia/Ho_Chi_Minh`, the API returns `409` with `{ code: "SOURCE_IMMUTABLE", reasons: ["paid"|"closed_period"], open_period_start, order_sourceid }`. Repeating the current source is ignored (no-op). A PATCH whose only field is the order's current `sourceid` returns `200` with the unchanged order and performs zero `UPDATE` and zero audit row — locked or not — instead of `400 No fields to update`, so an idempotent resubmit is not a client error. A PATCH with no fields at all still returns `400 No fields to update`. Omitting `sourceid` allows unrelated field updates on locked orders.
 
 ---
 
@@ -403,6 +443,36 @@ Face error responses:
 ```
 
 ---
+
+### 1.7b Sale Orders (source semantics)
+
+#### GET /api/SaleOrders, GET /api/SaleOrders/:id
+**Response fields (source):**
+```ts
+{
+  sourceid: string | null;           // direct order attribution (saleorders.sourceid)
+  sourcename: string | null;
+  customersourceid: string | null;   // partner acquisition (partners.sourceid)
+  customersourcename: string | null;
+}
+```
+`sourceid` MUST NOT be filled via COALESCE from the customer. Null order source stays null.
+
+#### POST /api/SaleOrders
+**Request:** may include `sourceid`. When omitted/null/empty, server snapshots `partners.sourceid` onto the new order (deterministic create semantics).
+**Response:** same dual source fields as GET.
+
+#### PATCH /api/SaleOrders/:id
+**Request:** `sourceid` updates only the order column when present. Never treat customer source as order source.
+
+#### POST /api/Reports/revenue/by-source
+Attributes paid revenue by `saleorders.sourceid` only. Null → unassigned (`Chưa gán nguồn`). Customer source changes do not move historical order buckets.
+
+#### Export revenue-flat columns
+- `orderSource` / header `Nguồn đơn` ← order source name
+- `customerSource` / header `Nguồn KH` ← customer acquisition name
+
+Invariants: INV-023.
 
 ### 1.8 Reports
 

@@ -14,6 +14,43 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.33.0] — 2026-07-25
+
+### Added
+- Paid / closed-period sale-order source immutability (INV-026): ordinary `PATCH /api/SaleOrders/:id` rejects `sourceid` changes when the order has payment activity or its attribution date is before the open calendar month in `Asia/Ho_Chi_Minh`; repeat-current-source is a no-op so unrelated edits still work — @agent — snake-source-incident Task 10.
+- Permissioned correction path `POST /api/SaleOrders/:id/source-correction` (`services.source_correct`) requiring reason, evidence, expected old source, rollback reference, actor, timestamp, and request id; audit table `dbo.saleorder_source_corrections` + migration 073 — @agent — INV-026.
+- ServiceForm disables source chips with lock copy when paid/closed-period; surfaces `SOURCE_IMMUTABLE` next to the source field — @agent — BEHAVIOR.md / INV-026.
+- Append-only source-change audit ledger `dbo.source_change_audit` (migration 075) for every successful `partners.sourceid` / `saleorders.sourceid` mutation with entity id, old/new source, actor, reason, request id, transaction id, correction-manifest reference, channel, and unexpected flags — @agent — INV-027 / snake-source-incident Task 13.
+- Mutation-path audit wiring: sale-order create/open-order update, authorized `POST /api/SaleOrders/:id/source-correction` (`services.source_correct`), and authorized `POST /api/Partners/:id/source-correction` (`customers.source_correct`); normal reads, rejected locked writes, and other failed writes write zero audit rows — @agent — INV-026/027.
+- Defense-in-depth alerts for any unexpected paid/closed-order source ledger entry via Lark (`LARK_SOURCE_AUDIT_WEBHOOK_URL` or feedback webhook) and bounded reconciliation report `POST /api/Reports/source-change-reconciliation` — @agent — OBSERVABILITY / INV-027.
+- DB triggers block UPDATE/DELETE on the ledger; semgrep rules under `.semgrep/source-change-audit.yaml` guard app-level silent edits — @agent — INV-027.
+
+### Changed
+- Separate order attribution from customer acquisition (INV-023): API reads expose `sourceid`/`sourcename` and `customersourceid`/`customersourcename` without `COALESCE`; new orders snapshot the customer source only at creation; revenue-by-source and closed-period exports use the direct order source; exports label `Nguồn đơn` and `Nguồn KH` distinctly — @agent — snake-source-incident Task 11.
+- Service forms label the editable field as order attribution, and edit mapping never resubmits a customer-inherited source as the direct order source — @agent — INV-023.
+- Settings Customer Sources is a dedicated tab with label-lock status, inactive-history visibility, description/active edits, and create-new guidance for semantic renames — @agent — snake-source-incident Task 12 / INV-024.
+
+### Security
+- Investor denial on both `/:id/source-correction` routes moved into a mounted guard `requireNonInvestorPermission` (`api/src/middleware/auth.js`) that runs BEFORE `requirePermission` and before the handler validates or acts on the body — @agent — D21 / INV-021. Previously the handler-level check ran after `requirePermission`, so a normal investor got `403` (a different answer than the intended record-safe `404`) and body-shape `400`s could precede the denial. The guard answers `404` identically whether the investor lacks the correction permission, holds it, or holds `*`. Non-investors keep unchanged `401`/`403`/pass-through behaviour; the handlers keep the same check for direct/internal invocation and skip it when the guard set `req.nonInvestorVerified`, so the mounted path does no duplicate scope query.
+
+### Fixed
+- Referenced customer-source name/type mutations now fail with `CUSTOMER_SOURCE_LABEL_LOCKED`; delete remains `CUSTOMER_SOURCE_IN_USE`; description and deactivation stay allowed, preventing taxonomy maintenance from silently rewriting historical report labels — @agent — INV-024.
+- `PATCH /api/SaleOrders/:id` carrying only the order's CURRENT `sourceid` returned `400 No fields to update` — @agent — INV-026 says a repeat-current-source PATCH must not fail. It now returns `200` with the unchanged order and performs zero `UPDATE` and zero audit row, on locked and unlocked orders alike; a PATCH with no fields at all still returns `400`. Idempotent resubmits (retry, autosave, unchanged form submit) are no longer reported as client errors.
+- Removed a dead `partnerid` field and its comment from `loadSaleOrderSourceLockState`'s return: the SQL no longer selects that column, and the blanket investor denial removed the need for it — @agent.
+
+### Testing
+- `api/tests/saleOrderSourceImmutability.test.js` covers open/allowed, paid reject, closed-period reject, unrelated edit, unauthorized-shape correction, conflict, and authorized audited correction — @agent.
+- `website/src/lib/saleOrderSourceLock.test.ts` covers frontend lock evaluation parity — @agent.
+- `api/tests/sourceCorrectionRouteOrdering.test.js` (24 cases) walks the real mounted chain on both correction routes: guard mounted ahead of the handler; investor `404` with a malformed body, a valid body, the correction permission, and `*`, with the handler never reached; non-investor `401`/`403`/pass-through; no duplicate scope query on the mounted path; plus handler-only denial for direct invocation — @agent — D21/INV-021. `api/tests/saleOrderSourceNoOpPatch.test.js` covers the INV-026 no-op contract. Both guards mutation-checked: disabling each fails exactly its own cases and no others.
+- These two suites and `sourceChangeReconciliation.test.js` dispatch routes in-process (`api/tests/helpers/dispatchRoute.js`) instead of over HTTP: express 5 + supertest intermittently answers ~2% of requests in this environment with a transport-level `400` and an empty body, reproduced with a bare Express app containing no project code and confirmed on the base commit. That environmental flake also affects several pre-existing supertest suites (dashboard reports, locations comparison, sale-order lines, login rate limiter) and is reported, not fixed, here — @agent.
+- Added order/customer semantics, sale-order API, revenue SQL, export-column, export-builder, and frontend mapping regressions; migration 074 remains a reviewed-only no-op manifest template — @agent — INV-023.
+- Extended source-integrity and Settings hook/UI coverage for referenced label/type lock, safe metadata changes, unreferenced renames, delete-in-use, and inactive-history display — @agent — INV-024.
+- `api/tests/sourceChangeAudit.test.js`, `api/tests/sourceChangeAuditMigration.test.js`, `api/src/services/__tests__/sourceChangeAlert.test.js` cover mutation/no-op/rejection/rollback paths, unexpected classification, observability alert, and migration append-only guards — @agent — INV-027.
+- Final integration matrix: 16 API suites / 188 tests and 4 frontend files / 19 tests passed; local Chromium proved referenced taxonomy locks and a paid/closed order with all 16 source choices disabled while a notes-only save preserved attribution — @codex — Tasks 10–15.
+
+### Docs
+- Authority updates: INV-023/024/026/027, CONTRACTS, BEHAVIOR, DECISIONS DEC-20260724-01/02, DATA-MODEL, SECURITY, OBSERVABILITY, FAILURE-MODES, USE-CASES UC-009, TEST-MATRIX, MIGRATIONS 073/074/075, permission-registry, affected product domains, dependency map, API index, and schema map — @agent.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed

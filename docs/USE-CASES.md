@@ -217,9 +217,11 @@ When a use case is created or materially edited, add one compact `Traceability` 
   - **AF-1 Service not in catalog:** Must create service first (UC-041 analog).
   - **AF-2 Tooth picker missing data:** Validation fails for multi-tooth services.
   - **AF-3 Inactive or missing source submitted:** Backend returns `400 CUSTOMER_SOURCE_NOT_SELECTABLE`; no sale-order data is written.
+  - **AF-4 Paid or closed-period source change on ordinary edit:** Backend returns `409 SOURCE_IMMUTABLE`; UI keeps source chips disabled with lock copy; non-source fields may still save when `sourceid` is omitted.
+  - **AF-5 Authorized source correction:** Actor with `services.source_correct` calls `POST /api/SaleOrders/:id/source-correction` with reason, evidence, expected old value, and rollback reference; audit row written.
 - **Postconditions:** SaleOrder created; appointment linked; revenue recognized.
-- **Invariants touched:** INV-003 (residual non-negative on any immediate payment), INV-017 (dense list), INV-023 and INV-024 (historical source stability and retention).
-- **Traceability:** Contracts/routes: `POST /api/SaleOrders`, `PATCH /api/SaleOrders/:id`, `GET /api/CustomerSources?is_active=true`. Data/tables: `dbo.saleorders`, `dbo.saleorderlines`, `dbo.customersources`. Tests: `api/tests/customerSourceIntegrity.test.js`, `website/src/hooks/useSettings.customer-sources.test.tsx`, `website/src/hooks/useServices.payment-state.test.tsx`. Product-map domains: `services-catalog`, `customers-partners`.
+- **Invariants touched:** INV-003 (residual non-negative on any immediate payment), INV-017 (dense list), INV-023, INV-024, INV-026 (paid/closed-period source immutability).
+- **Traceability:** Contracts/routes: `POST /api/SaleOrders`, `PATCH /api/SaleOrders/:id`, `POST /api/SaleOrders/:id/source-correction`, `GET /api/CustomerSources?is_active=true`. Data/tables: `dbo.saleorders`, `dbo.saleorderlines`, `dbo.customersources`, `dbo.saleorder_source_corrections`. Tests: `api/tests/customerSourceIntegrity.test.js`, `api/tests/saleOrderSourceImmutability.test.js`, `website/src/hooks/useSettings.customer-sources.test.tsx`, `website/src/hooks/useServices.payment-state.test.tsx`, `website/src/lib/saleOrderSourceLock.test.ts`. Product-map domains: `services-catalog`, `customers-partners`.
 
 ---
 

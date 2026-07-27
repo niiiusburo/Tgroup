@@ -230,6 +230,7 @@ Git worktree used for parallel feature/fix lanes. See `AGENTS.md` §12 and `.age
 | **Employee** (`employee=true` partner) | **Doctor** (`isdoctor=true` partner) | Employee = anyone on payroll. Doctor = a clinical role; a doctor is also an employee. |
 | **Service** (user-facing term) | **Product** (legacy table name) | They are the same thing. Table = `products`. UI label = "Dịch vụ" / Service. |
 | **Invoice** (payment allocation target) | **SaleOrder** (treatment plan record) | In allocations, `invoice_id` = `saleorders.id`. Conceptually, a SaleOrder becomes an invoice when it has a residual > 0. |
+| **Order source** (`saleorders.sourceid`) | **Customer source** (`partners.sourceid`) | Order source = immutable attribution on the treatment order (Nguồn đơn). Customer source = acquisition channel on the partner (Nguồn KH); may change later. Never COALESCE for closed-period reports or edit payloads (INV-023). |
 | **Company** (table name) | **Location** (user-facing term) | They are the same thing. Table = `companies`. UI label = "Chi nhánh" / Location. |
 | **Face Subject ID** (engine identifier) | **Partner ID** (database UUID) | Face Subject ID is assigned by Compreface/face-service. Partner ID is the DB PK. |
 | **Allocation** (payment split row) | **Payment** (money row) | One payment can have many allocations. |
