@@ -174,9 +174,9 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 | GET | `/deposits` | Perm:`payment.view` | `?customerId, dateFrom, dateTo, receiptNumber, type, limit, offset` | `{ items[], totalItems }` |
 | GET | `/deposit-usage` | Perm:`payment.view` | `?customerId, dateFrom, dateTo, limit, offset` | `{ items[], totalItems }` |
 | GET | `/:id` | Perm:`payment.view` | — | Payment with allocations |
-| POST | `/` | Perm:`payment.add` | `{ customer_id, service_id, amount, method: cash\|bank_transfer\|deposit\|mixed, notes, payment_date, reference_code, status, deposit_used, cash_amount, bank_amount, deposit_type, receipt_number, allocations[] }` | Created payment |
+| POST | `/` | Perm:`payment.add` | `{ customer_id, service_id, amount, method: cash\|bank_transfer\|deposit\|mixed, notes, payment_date, reference_code, status?: posted, deposit_used, cash_amount, bank_amount, deposit_type, receipt_number, allocations[] (positive amounts) }` | Created payment; `status=voided` is rejected and allocation sums are guarded per `docs/CONTRACTS.md` |
 | POST | `/refund` | Perm:`payment.refund` | `{ customer_id, amount, method, notes, payment_date }` | Created refund |
-| PATCH | `/:id` | Perm:`payment.add` | `{ amount, method: cash\|bank_transfer\|deposit\|mixed, notes, payment_date, reference_code, status, deposit_type, receipt_number }` | Updated payment |
+| PATCH | `/:id` | Perm:`payment.edit` | `{ amount, method: cash\|bank_transfer\|deposit\|mixed, notes, payment_date, reference_code, status?: posted, deposit_type, receipt_number }` | Updated payment; `status=voided` is rejected in favor of `POST /:id/void` |
 | DELETE | `/:id` | Perm:`payment.void` | — | `{ success, id }` + reverses allocations |
 | POST | `/:id/void` | Perm:`payment.void` | `{ reason }` | `{ success, payment }` + reverses allocations |
 | POST | `/:id/proof` | Perm:`payment.add` | `{ proofImageBase64, qrDescription }` | `{ success, proofId }` |

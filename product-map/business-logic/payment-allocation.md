@@ -122,6 +122,6 @@ The backend stores mixed payments as a single `payments` row with:
 | Over-allocation | Blocked at Step C (validation) |
 | Allocation to non-existent invoice/dotkham | Returns 400 with "not found" or "exceeds balance" |
 | Void then re-pay same invoice | Allowed; residual can exceed original invoice total |
-| Patch amount on allocated payment | Allocations and residuals stay stale |
+| Patch amount below allocated total | Blocked with 409; PATCH never reallocates existing rows |
 | Refund amount > deposit balance | Not checked against customer balance; just creates negative payment |
 | Legacy fallback active | `allocations` array is empty; `id` comes from `accountpayments` |

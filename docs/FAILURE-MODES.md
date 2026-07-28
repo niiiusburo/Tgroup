@@ -102,6 +102,7 @@ Each entry:
 - **Root Cause:** No row-level lock or serializable transaction around residual read → allocation insert → residual update.
 - **Fix:** Added `validateAllocationResidual()` pre-check; `GREATEST(0, residual - amount)` prevents negative DB value, but race condition still possible.
 - **Prevention:** Use `SELECT FOR UPDATE` on `saleorders` during allocation transactions. Long-term: move allocation to a queue.
+- **Current status (2026-07-28):** Superseded by FM-20260728-01, which records the implemented transaction-scoped row locks, stable multi-target lock order, and PostgreSQL contention regression.
 - **Related:** INV-003, INV-012.
 
 ## FM-20260310-01: Mock Data Masks API Failure in Production

@@ -125,7 +125,12 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 | `src/routes/partners/__tests__/mutationHandlers.test.js` | Customers | Customer edit allows phone values to overlap customer refs/phones while keeping UUID as identity |
 | `src/routes/partners/__tests__/readHandlers.test.js` | Customers | Customer uniqueness helper treats phone as non-blocking and keeps email duplicate checks active |
 | `src/routes/partners/__tests__/searchFilters.test.js` | Customers | Customer search matches related appointment and service order numbers |
-| `saleOrders.test.js` | Services/Payments | Sale order edits recalculate residual display from `payment_allocations` |
+| `saleOrders.test.js` | Services/Payments | Sale order edits lock before allocation reads and recalculate residual display from `payment_allocations` |
+| `paymentAllocationConcurrency.integration.test.js` | Payments | PostgreSQL two-connection invoice/dotkham contention proves waiting allocators reload committed residuals |
+| `paymentAllocationGuards.test.js` | Payments | Positive amounts, payment-total limits, same-target grouped sums, and stable residual lock order |
+| `paymentPatchVoidBan.test.js` | Payments | PATCH void ban, metadata updates, and allocated-total guard on amount reductions |
+| `paymentReversalGuards.test.js` | Payments | Payment/target lock ordering plus repeated-void rejection before reversal |
+| `paymentsTransaction.test.js` | Payments | Create transaction boundaries, create-time void ban, positive allocations, rollback, and residual writes |
 | `tdentalImport.test.js` | Data/Money | TDental import mapping, payment status, local-only payment cleanup, CSV date parsing, and anomaly policy |
 | `tdentalDryRun.test.js` | Data/Migration | Full-export dry-run staff/product matching and compact import planning |
 | `telemetry.test.js` | Settings/Telemetry | Telemetry error ingestion, deduplication, management updates, fix attempts, and stats |
@@ -145,7 +150,7 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 
 | Domain | Missing Test Coverage |
 |--------|----------------------|
-| **Payments (backend)** | No backend tests for payment allocation, void, refund, or deposit logic |
+| **Payments (backend)** | Allocation, transaction, concurrency, PATCH/void, and reversal guards are covered; refund balance and deposit classification coverage remains thinner |
 | **Exports (backend)** | `legacyFlatReportsExport` and `reportSalesEmployeesExport` have focused builder coverage; route-level gaps remain for `POST /api/Exports/:type/preview`, `POST /api/Exports/:type/download`, permission filtering, row-limit HTTP responses, and `exports_audit` failure behavior |
 | **Auth (backend)** | No backend tests for `requirePermission` or `resolvePermissions` divergence |
 | **Appointments (backend)** | Calendar list optimization is covered; no backend tests for appointment create/update/delete validation |

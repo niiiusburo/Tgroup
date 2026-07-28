@@ -276,7 +276,7 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Alternate flows:**
   - **AF-1 Already voided:** Button disabled; a repeated backend void request returns `409` before allocations are read or changed.
 - **Postconditions:** Payment status = `voided`; invoice or medical-record residual is restored by the current route.
-- **Invariants touched:** INV-003 (residual non-negative). Current route behavior diverges from INV-010's immutable-allocation wording; fix the invariant or route before treating void semantics as locked.
+- **Invariants touched:** INV-003 (residual integrity), INV-010 (void + new payment is the designated allocation-correction path).
 - **Traceability:** Related WF: WF-003. Contracts/routes: `POST /api/Payments/:id/void`, `DELETE /api/Payments/:id` legacy destructive path. Creating a payment or patching one with `status=voided` is rejected (AUD-009) — both must use POST void. Data/tables: `dbo.payments`, `dbo.payment_allocations`, `dbo.saleorders`, `dbo.dotkhams`. Tests: `api/tests/readRoutePermissions.test.js`, `api/tests/paymentPatchVoidBan.test.js`, `api/tests/paymentReversalGuards.test.js`, `api/tests/paymentsTransaction.test.js`. Product-map domains: `payments-deposits`.
 
 ---

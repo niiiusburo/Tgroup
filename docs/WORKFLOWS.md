@@ -210,7 +210,7 @@ sequenceDiagram
     DB-->>API: Locked current residual per target
     alt Allocated amount > residual + 0.01
         API->>DB: ROLLBACK
-        API-->>FE: 400 { error: 'Over-allocation to invoice X' }
+        API-->>FE: 400 { error: 'Payment amount exceeds outstanding balance' }
         FE-->>S: ✗ Show error
     else Allocation valid
         API->>DB: INSERT INTO payments { ...deposit_type='deposit', status='posted' }
