@@ -14,6 +14,19 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.60] — 2026-07-28
+
+### Security
+- Face ID routes (`POST /api/face/recognize`, `POST /api/face/register`, `POST /api/face/re-register`, `GET /api/face/status/:partnerId`) now apply `resolveInvestorScope()` fail-closed — @agent — AUD-004 / INV-021; investors previously received any match's name/phone and could probe status/register for non-allowlisted customers.
+- Recognize responses filter `match` and `candidates` to the investor allowlist (empty allowlist → no match / no candidates, no PII leak); status/register/re-register return 404 `PARTNER_NOT_FOUND` for outsiders before DB mutation — @agent — same-portal investor customer scope.
+
+### Testing
+- Added `api/tests/faceRecognitionInvestorScope.test.js` (investor IDOR: strip outsider match/candidates, empty-allowlist fail-closed, staff unscoped, status/register/re-register 404 before query/mutation) — @agent — AUD-004.
+- Existing `api/tests/faceRecognition.test.js` mocks `resolveInvestorScope` as non-investor so contract coverage stays stable — @agent — regression guard.
+
+### Docs
+- Documented Face ID investor allowlist on the `/api/face/*` contract, INV-021 enforcement list, integrations product-map, and test matrix — @agent — AUD-004 / INV-021.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed

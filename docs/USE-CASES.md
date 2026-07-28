@@ -182,7 +182,7 @@ When a use case is created or materially edited, add one compact `Traceability` 
   - **AF-4 No appointments today:** Show "Hôm nay không có lịch hẹn".
 - **Postconditions:** Appointment state = `arrived`; check-in timestamp recorded.
 - **Invariants touched:** INV-005 (embedding dimension), INV-014 (Compreface optional startup).
-- **Traceability:** Related WF: WF-007, UC-003, UC-008. Contracts/routes: `POST /api/face/recognize`, `GET /api/Appointments?partnerId=...&date=...`, `PUT /api/Appointments/:id`. Data/tables: `dbo.customer_face_embeddings`, `dbo.partners`, `dbo.appointments`. Tests: `api/tests/faceRecognition.test.js`, `website/src/hooks/__tests__/useFaceRecognition.test.ts`, `website/src/components/shared/GlobalFaceIdButton.test.tsx`, `website/src/components/modules/PatientCheckIn.test.tsx`. Product-map domains: `customers-partners`, `appointments-calendar`, `integrations`.
+- **Traceability:** Related WF: WF-007, UC-003, UC-008. Invariants touched: INV-021 (investor Face ID results must be allowlist-filtered). Contracts/routes: `POST /api/face/recognize`, `GET /api/Appointments?partnerId=...&date=...`, `PUT /api/Appointments/:id`. Data/tables: `dbo.customer_face_embeddings`, `dbo.partners`, `dbo.appointments`. Tests: `api/tests/faceRecognition.test.js`, `api/tests/faceRecognitionInvestorScope.test.js`, `website/src/hooks/__tests__/useFaceRecognition.test.ts`, `website/src/components/shared/GlobalFaceIdButton.test.tsx`, `website/src/components/modules/PatientCheckIn.test.tsx`. Product-map domains: `customers-partners`, `appointments-calendar`, `integrations`.
 
 ---
 

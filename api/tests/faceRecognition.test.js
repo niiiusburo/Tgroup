@@ -7,6 +7,13 @@ jest.mock('../src/middleware/auth', () => ({
   requirePermission: () => (_req, _res, next) => next(),
 }));
 
+// Default non-investor so existing face contract tests stay unscoped.
+jest.mock('../src/services/permissionService', () => ({
+  resolveInvestorScope: jest.fn().mockResolvedValue({ isInvestor: false, allowedCustomerIds: [] }),
+  resolveEffectivePermissions: jest.fn().mockResolvedValue({ effectivePermissions: ['*'] }),
+  hasPermission: jest.fn().mockResolvedValue(true),
+}));
+
 const request = require('supertest');
 const app = require('../src/server');
 

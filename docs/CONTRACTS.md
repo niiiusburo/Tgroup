@@ -24,6 +24,7 @@
 | v1.0.8 | 2026-07-04 | Investor users are restricted normal-portal staff sessions: `/api/Auth/login` may authenticate `dbo.investor_accounts`, but all data access stays on existing portal routes and is scoped by `dbo.investor_clients`. |
 | v1.0.9 | 2026-07-08 | Investor visibility admin controls (`GET`/`PATCH /api/Partners/investor-visibility`) are gated by admin group (`assertAdmin`) instead of `permissions.edit`, and admin list/toggle match `dbo.investor_clients` by the SAME scope union (`investor_id` = the investor's `partners.id` OR any active `dbo.investor_accounts.id`) that scopes the investor read. Customer id is validated with the canonical 8-4-4-4-12 UUID pattern. |
 | v1.0.10 | 2026-07-23 | Customer-source usage counts and deletion guards include both customer and sale-order references; new sale orders reject inactive/missing sources while an existing order may preserve its already-assigned inactive historical source. |
+| v1.0.11 | 2026-07-28 | Face ID `/api/face/*` applies investor allowlist (INV-021): recognize filters match/candidates; status/register/re-register 404 outside allowlist. |
 
 ---
 
@@ -372,6 +373,10 @@ Normal `POST /api/Partners` and `PUT /api/Partners/:id` do not assign or change 
   }>;
 }
 ```
+
+**Investor scope (INV-021):** When the caller resolves to the `investor` group, `match` and `candidates` are filtered to `dbo.investor_clients` allowlisted partner ids only. A match outside the allowlist is returned as `match: null` (no name/phone disclosure). An empty allowlist fails closed to `{ match: null, candidates: [] }`. Non-investor staff are unscoped.
+
+**Investor scope on register / re-register / status:** `POST /api/face/register`, `POST /api/face/re-register`, and `GET /api/face/status/:partnerId` call `resolveInvestorScope()` and return 404 `PARTNER_NOT_FOUND` when `partnerId` is outside the allowlist (indistinguishable from missing; no mutation).
 
 Provider behavior:
 - `FACE_RECOGNITION_PROVIDER=local` sends captures to `FACE_SERVICE_URL` for SFace embeddings and stores vectors in `dbo.customer_face_embeddings`.

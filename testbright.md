@@ -4,6 +4,31 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 ---
 
+# TestSprite Plan: Face ID investor allowlist (AUD-004) 2026-07-28
+
+Feature/edit name: v0.32.60 — Face ID routes apply `resolveInvestorScope` fail-closed (INV-021).
+
+Changed URLs / API routes / data flow:
+- API: `POST /api/face/recognize`, `POST /api/face/register`, `POST /api/face/re-register`, `GET /api/face/status/:partnerId` (`api/src/routes/faceRecognition.js`).
+- Data flow: authenticated investor JWT → `resolveInvestorScope(employeeId)` → filter recognize match/candidates OR 404 status/register/re-register when partnerId outside `dbo.investor_clients` allowlist.
+
+Expected behavior:
+- Investor recognize of a non-allowlisted face returns `{ match: null, candidates: [] }` with no name/phone leak.
+- Investor recognize of an allowlisted face still returns match PII.
+- Investor status/register/re-register on outsider partnerId → 404 `PARTNER_NOT_FOUND` before mutation.
+- Staff/admin Face ID behavior unchanged (unscoped).
+
+User roles: Investor with `customers.view`; staff with face permissions.
+
+Execution items:
+- [x] PASS: `api/tests/faceRecognitionInvestorScope.test.js` + `api/tests/faceRecognition.test.js` — 44/44 with `JWT_SECRET=test-secret`.
+- [ ] PENDING: Live investor session Face ID recognize of a non-allowlisted customer yields no PII (nk2 after deploy).
+- [ ] PENDING: Live investor status GET for outsider partnerId returns 404.
+
+Setup/login data: Investor account with a known allowlisted client; do not print credentials.
+
+---
+
 # TestSprite Plan: partner source read-only boundary 2026-07-23
 
 Feature/edit name: v0.32.59 — omission-safe partial customer updates and read-only `partners.sourceid` on normal customer writes.
