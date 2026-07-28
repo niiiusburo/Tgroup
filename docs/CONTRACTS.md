@@ -24,6 +24,7 @@
 | v1.0.8 | 2026-07-04 | Investor users are restricted normal-portal staff sessions: `/api/Auth/login` may authenticate `dbo.investor_accounts`, but all data access stays on existing portal routes and is scoped by `dbo.investor_clients`. |
 | v1.0.9 | 2026-07-08 | Investor visibility admin controls (`GET`/`PATCH /api/Partners/investor-visibility`) are gated by admin group (`assertAdmin`) instead of `permissions.edit`, and admin list/toggle match `dbo.investor_clients` by the SAME scope union (`investor_id` = the investor's `partners.id` OR any active `dbo.investor_accounts.id`) that scopes the investor read. Customer id is validated with the canonical 8-4-4-4-12 UUID pattern. |
 | v1.0.10 | 2026-07-23 | Customer-source usage counts and deletion guards include both customer and sale-order references; new sale orders reject inactive/missing sources while an existing order may preserve its already-assigned inactive historical source. |
+| v1.0.11 | 2026-07-28 | Employee POST/PUT responses use a safe detail projection, and Partner create/update/soft-delete receipts omit `password_hash` and plaintext `password` (AUD-011). |
 
 ---
 
@@ -181,7 +182,7 @@ PaginatedResponse<{
   // ... plus Odoo legacy fields
 }
 ```
-**Response 201:** Created partner row. The backend owns `ref` generation; dental creates use `T######`, while cosmetic creates through `/api/cosmetic/Partners` use `TM######` and check for collisions in the request-scoped database before insert.
+**Response 201:** Created partner row with `password` and `password_hash` omitted. The backend owns `ref` generation; dental creates use `T######`, while cosmetic creates through `/api/cosmetic/Partners` use `TM######` and check for collisions in the request-scoped database before insert.
 
 #### GET /api/Partners/investor-visibility
 **Auth:** Admin group only — `assertAdmin` (admin / super admin / system administrator / `*`), NOT `permissions.edit` (the Admin group does not hold it, which previously 403'd admins who could see the checkbox). Global `requireAuth` still applies.
@@ -195,15 +196,23 @@ PaginatedResponse<{
 
 #### PUT /api/Partners/:id
 **Body:** Partial partner fields. Omitted fields remain unchanged. For writable UUID fields, an explicitly submitted empty string is normalized to `null`, while an omitted field is not added to the update. `sourceid` is read-only on normal Partner mutations: clients must omit it; the backend ignores an explicitly repeated current UUID for compatibility (UUID letter case is not significant) and returns `400` with `PARTNER_SOURCE_READ_ONLY` for a changed or cleared value. `ref` cannot be changed after creation (enforced by backend).
+**Response 200:** Updated partner receipt with `password` and `password_hash` omitted, including the unchanged-source compatibility no-op path.
 
 #### PATCH /api/Partners/:id/soft-delete
 **Effect:** Sets `isdeleted = true`. Requires `customers.delete`.
+**Response 200:** Soft-deleted partner receipt with `password` and `password_hash` omitted.
 
 #### DELETE /api/Partners/:id/hard-delete
 **Effect:** Physical row removal. Requires `customers.hard_delete`.
 
 #### Frontend Employee role mapping
 The API response keeps legacy employee flags (`isdoctor`, `isassistant`, `isreceptionist`) plus `jobtitle`/`hrjobname`. Frontend `Employee.roles` is a single derived role. Rows with `isassistant=true` and a title that normalizes to `tro ly`/`doctor assistant` MUST map to `doctor-assistant` before the generic `doctor` role, so migrated `Trợ lý bác sĩ` rows with both `isdoctor=true` and `isassistant=true` remain selectable in dental-aide staff fields.
+
+#### POST /api/Employees and PUT /api/Employees/:id
+**Auth:** `employees.edit`.
+**Body:** Employee profile fields plus optional `password` (plaintext write-only). Optional `tierId`, `locationScopeIds`, role flags, wage/allowance/jobtitle.
+**Response 201/200:** Safe employee mutation receipt using the GET `/api/Employees/:id` key set (plus `jobtitle` and `locationScopeIds`). Joined or derived names may be `null` until the client performs a detail GET. The receipt MUST NOT include `password`, `password_hash`, or other partner secret columns. Password is bcrypt-hashed and stored on `partners.password_hash` when provided; absence of hash in the response does not mean the write was skipped. PUT returns `404` before tier/location side effects or commit when no employee row matches.
+**Coverage:** `api/tests/employeeMutationsPasswordHash.test.js` (AUD-011).
 
 #### CustomerSources and SaleOrder source attribution
 

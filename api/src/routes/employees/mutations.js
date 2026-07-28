@@ -7,6 +7,82 @@ const { getVietnamNow } = require('../../lib/dateUtils');
 const router = express.Router();
 
 /**
+ * Safe employee mutation receipt aligned with GET /api/Employees/:id keys.
+ * Never include password_hash or other secrets in mutation responses.
+ * @crossref:used-in[POST /api/Employees, PUT /api/Employees/:id]
+ */
+const EMPLOYEE_DETAIL_SAFE_FIELDS = [
+  'id',
+  'name',
+  'ref',
+  'phone',
+  'email',
+  'address',
+  'identitycard',
+  'birthday',
+  'avatar',
+  'isdoctor',
+  'isassistant',
+  'isreceptionist',
+  'active',
+  'companyid',
+  'companyname',
+  'hrjobid',
+  'hrjobname',
+  'wage',
+  'hourlywage',
+  'allowance',
+  'startworkdate',
+  'leavepermonth',
+  'regularhour',
+  'overtimerate',
+  'restdayrate',
+  'enrollnumber',
+  'medicalprescriptioncode',
+  'datecreated',
+  'lastupdated',
+  'tierId',
+  'tierName',
+  'jobtitle',
+];
+
+function toEmployeeDetailResponse(row, locationScopeIds = []) {
+  if (!row) return row;
+  const src = {
+    ...row,
+    address: row.address ?? row.street ?? null,
+    identitycard: row.identitycard ?? null,
+    birthday: row.birthday ?? null,
+    companyname: row.companyname ?? null,
+    hrjobname: row.hrjobname ?? null,
+    hourlywage: row.hourlywage ?? null,
+    leavepermonth: row.leavepermonth ?? null,
+    regularhour: row.regularhour ?? null,
+    overtimerate: row.overtimerate ?? null,
+    restdayrate: row.restdayrate ?? null,
+    enrollnumber: row.enrollnumber ?? null,
+    medicalprescriptioncode: row.medicalprescriptioncode ?? null,
+    tierId: row.tierId ?? row.tier_id ?? null,
+    tierName: row.tierName ?? null,
+    jobtitle: row.jobtitle ?? null,
+  };
+  const out = {};
+  for (const key of EMPLOYEE_DETAIL_SAFE_FIELDS) {
+    out[key] = src[key] !== undefined ? src[key] : null;
+  }
+  out.locationScopeIds = Array.isArray(locationScopeIds) ? locationScopeIds : [];
+  return out;
+}
+
+/** Explicit partners columns for mutation RETURNING — never password_hash. */
+const EMPLOYEE_MUTATION_RETURNING = `
+  id, name, ref, phone, email, street, avatar,
+  isdoctor, isassistant, isreceptionist, active, companyid,
+  hrjobid, wage, allowance, startworkdate, jobtitle,
+  tier_id, datecreated, lastupdated
+`;
+
+/**
  * POST /api/Employees
  * Creates a new employee (inserts into partners table with employee=true)
  * Body: { name, phone?, email?, companyid?, active? }
@@ -59,7 +135,7 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
         password_hash, jobtitle, wage, allowance, hrjobid, tier_id,
         datecreated, lastupdated
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
-      RETURNING *`,
+      RETURNING ${EMPLOYEE_MUTATION_RETURNING}`,
       [
         id,
         name.trim(),
@@ -105,8 +181,10 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
 
     await client.query('COMMIT');
 
-    const employee = result.rows[0];
-    employee.locationScopeIds = scopes.filter((sid) => sid && sid !== primaryId);
+    const employee = toEmployeeDetailResponse(
+      result.rows[0],
+      scopes.filter((sid) => sid && sid !== primaryId)
+    );
     return res.status(201).json(employee);
   } catch (err) {
     await client.query('ROLLBACK');
@@ -206,20 +284,20 @@ router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
       values.push(id);
 
       result = await client.query(
-        `UPDATE partners SET ${updates.join(', ')} WHERE id = $${paramIdx} AND employee = true RETURNING *`,
+        `UPDATE partners SET ${updates.join(', ')} WHERE id = $${paramIdx} AND employee = true RETURNING ${EMPLOYEE_MUTATION_RETURNING}`,
         values
       );
 
-      if (!result || result.length === 0) {
+      if (!result || result.rows.length === 0) {
         await client.query('ROLLBACK');
         return res.status(404).json({ error: 'Employee not found' });
       }
     } else {
       result = await client.query(
-        'SELECT * FROM partners WHERE id = $1 AND employee = true',
+        `SELECT ${EMPLOYEE_MUTATION_RETURNING} FROM partners WHERE id = $1 AND employee = true`,
         [id]
       );
-      if (!result || result.length === 0) {
+      if (!result || result.rows.length === 0) {
         await client.query('ROLLBACK');
         return res.status(404).json({ error: 'Employee not found' });
       }
@@ -258,8 +336,10 @@ router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
 
     await client.query('COMMIT');
 
-    const updatedEmployee = result.rows[0];
-    updatedEmployee.locationScopeIds = await fetchLocationScopeIds(id);
+    const updatedEmployee = toEmployeeDetailResponse(
+      result.rows[0],
+      await fetchLocationScopeIds(id)
+    );
 
     return res.json(updatedEmployee);
   } catch (err) {

@@ -14,6 +14,23 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.60] — 2026-07-28
+
+### Fixed
+- PR title validation now accepts optional Conventional Commit scopes such as `fix(api):` while preserving the existing allowed change types — @codex — CI compatibility for PR #76.
+
+### Security
+- Employee POST/PUT responses no longer return `password_hash` or other partner secrets; mutations use an explicit safe column list aligned with GET employee detail while still hashing and persisting passwords on write — @pi-crewmate — AUD-011 / secret-handling.
+- Partner mutation receipts now omit `password` and `password_hash` at a shared response boundary, including normal updates, unchanged-source compatibility no-ops, and soft-delete responses — @codex — AUD-011 review follow-up.
+
+### Testing
+- Added `api/tests/employeeMutationsPasswordHash.test.js` covering POST/PUT response key exclusion, bcrypt write-path negative proof, and no plaintext password logging — @pi-crewmate — AUD-011.
+- Extended AUD-011 coverage for missing-employee PUT rollback before side effects and Partner redaction on normal PUT, compatibility no-op, and soft-delete responses — @codex — review findings.
+
+### Docs
+- Documented employee mutation response projection, test mapping, and domain impact tests — @pi-crewmate — `/api/Employees` POST/PUT.
+- Propagated safe mutation receipt behavior to the API index, both test matrices, TestSprite ledger, Partner domain map, and contract wording — @codex — AUD-011 governance ledgers.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed

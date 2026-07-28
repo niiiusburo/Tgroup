@@ -103,9 +103,9 @@ PUT handler-level validation: `companyId` (when present) must be a UUID (`400 IN
 | GET | `/:id/GetKPIs` | Perm:`customers.view` | — | KPI stats |
 | GET | `/investor-visibility` | Admin (`assertAdmin`) | — | `{ investorId, customerIds }`; admin-only (admin/super-admin/system-admin/`*`), NOT `permissions.edit`. `customerIds` is the union of rows keyed by the investor's partner id OR any active `investor_accounts.id` — exactly what the investor sees via `resolveInvestorScope`. `investorId` is the same-portal partner id even when stored rows use legacy `investor_accounts.id` |
 | PATCH | `/:id/investor-visibility` | Admin (`assertAdmin`) | `{ visible: boolean }` | `{ investorId, customerId, visible }`; admin-only. Tick writes under the canonical key; untick clears the customer under EVERY key in the scope union (partner id OR any active account id) so a removed client cannot stay visible. Rejects a non-UUID `:id` with 400 `VALIDATION` |
-| POST | `/` | Perm:`customers.add` | Partner fields; normal customer creation must omit `sourceid` | Created partner with backend-generated `ref`; dental uses `T######`, cosmetic mirror uses collision-checked `TM######`; non-null `sourceid` returns `400 PARTNER_SOURCE_READ_ONLY` |
-| PUT | `/:id` | Perm:`customers.edit` | Partial partner fields; omitted fields remain unchanged and normal clients must omit `sourceid` | Updated partner; a changed or cleared `sourceid` returns `400 PARTNER_SOURCE_READ_ONLY`, while an explicitly repeated current value is ignored for compatibility |
-| PATCH | `/:id/soft-delete` | Perm:`customers.delete` | — | Soft-deleted partner |
+| POST | `/` | Perm:`customers.add` | Partner fields; normal customer creation must omit `sourceid` | Created partner with backend-generated `ref`; dental uses `T######`, cosmetic mirror uses collision-checked `TM######`; non-null `sourceid` returns `400 PARTNER_SOURCE_READ_ONLY`; mutation receipt omits `password`/`password_hash` |
+| PUT | `/:id` | Perm:`customers.edit` | Partial partner fields; omitted fields remain unchanged and normal clients must omit `sourceid` | Updated partner; a changed or cleared `sourceid` returns `400 PARTNER_SOURCE_READ_ONLY`, while an explicitly repeated current value is ignored for compatibility; normal and compatibility no-op receipts omit `password`/`password_hash` |
+| PATCH | `/:id/soft-delete` | Perm:`customers.delete` | — | Soft-deleted partner receipt with `password`/`password_hash` omitted |
 | DELETE | `/:id/hard-delete` | Perm:`customers.hard_delete` | — | Hard-deleted partner |
 
 ## Employees (`/api/Employees`)
@@ -114,8 +114,8 @@ PUT handler-level validation: `companyId` (when present) must be a UUID (`400 IN
 |--------|------|------|--------------|----------|
 | GET | `/` | Auth | `?offset, limit, search, companyId, active=true|false|all` | `PaginatedResponse<Employee>`; default is active-only, edit-form assignment hydration must request `active=all` |
 | GET | `/:id` | Auth | — | Employee detail |
-| POST | `/` | Perm:`employees.edit` | Employee fields | Created employee |
-| PUT | `/:id` | Perm:`employees.edit` | Employee fields | Updated employee |
+| POST | `/` | Perm:`employees.edit` | Employee fields, optional write-only `password` | Safe mutation receipt; omits `password`/`password_hash` while persisting bcrypt hash |
+| PUT | `/:id` | Perm:`employees.edit` | Employee fields, optional write-only `password` | Safe mutation receipt; omits `password`/`password_hash`; missing employee returns 404 before tier/location side effects |
 | DELETE | `/:id` | Perm:`employees.edit` | — | Deleted employee |
 
 Client role mapping: `/api/Employees` still returns legacy boolean flags and title fields. `website/src/types/employee.ts` derives a single `Employee.roles[]` value; assistant rows whose `jobtitle`/`hrjobname` normalizes to `tro ly` or `doctor assistant` map to `doctor-assistant` before generic `doctor`, including migrated rows where both `isdoctor` and `isassistant` are true.

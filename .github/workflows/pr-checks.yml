@@ -59,15 +59,17 @@ jobs:
               'build:',
               'revert:'
             ];
-            
+
+            // Conventional Commit scopes are optional: fix(api): is equivalent to fix:.
+            const normalizedTitle = title.toLowerCase().replace(/^([a-z]+)\([^)]+\):/, '$1:');
             const hasValidPrefix = validPrefixes.some(prefix => 
-              title.toLowerCase().startsWith(prefix)
+              normalizedTitle.startsWith(prefix)
             );
             
             if (!hasValidPrefix) {
               core.setFailed(
                 `PR title must start with one of: ${validPrefixes.join(', ')}\n` +
-                `Example: "feat: add login page" or "fix: resolve API timeout"`
+                `Example: "feat: add login page" or "fix(api): resolve API timeout"`
               );
             }
 

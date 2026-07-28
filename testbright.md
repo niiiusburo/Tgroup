@@ -4,6 +4,30 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 ---
 
+# TestSprite Plan: AUD-011 safe employee and partner mutation receipts 2026-07-28
+
+Feature/edit name: v0.32.60 — prevent password-hash disclosure from employee and partner mutation responses.
+
+Changed URLs / API routes / data flow:
+- API: `POST /api/Employees`, `PUT /api/Employees/:id`, `POST /api/Partners`, `PUT /api/Partners/:id`, `PATCH /api/Partners/:id/soft-delete`.
+- Data flow: write-only plaintext password → bcrypt hash bound to `partners.password_hash` → safe mutation receipt; Partner mutation rows cross a shared response sanitizer.
+
+Expected behavior:
+- Employee POST/PUT receipts never include `password` or `password_hash`; password writes still bind a bcrypt hash.
+- A missing employee PUT returns 404 after rollback and before tier/location side effects or commit.
+- Partner mutation receipts omit password fields, including normal PUT, unchanged-source compatibility no-op, and soft-delete paths.
+- Joined employee detail names may remain null in the mutation receipt until a follow-up GET.
+
+User roles: Staff/admin with `employees.edit`, `customers.add`, `customers.edit`, or `customers.delete`.
+
+Execution items:
+- [ ] PENDING: focused Jest run for `employeeMutationsPasswordHash.test.js`, `partnerMutationsPasswordHash.test.js`, and the existing Partner mutation regression suite.
+- [ ] PENDING: Scoped Semgrep scan of the employee and partner mutation response paths.
+
+Setup/login data: Jest mocks only; no live credentials or production data required.
+
+---
+
 # TestSprite Plan: partner source read-only boundary 2026-07-23
 
 Feature/edit name: v0.32.59 — omission-safe partial customer updates and read-only `partners.sourceid` on normal customer writes.
