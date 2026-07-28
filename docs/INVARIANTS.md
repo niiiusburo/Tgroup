@@ -26,9 +26,9 @@
 **Cite when:** Editing appointment creation, migration scripts, or sequence logic.
 
 ### INV-003 — Payment Residual Non-Negative
-**Rule:** `saleorders.residual` must never be negative. Allocation logic must reject any payment that would drive residual below `0` (with `0.01` tolerance).
-**Rationale:** Negative residuals imply the clinic owes the patient money on a closed invoice.
-**Enforced by:** `validateAllocationResidual()` in `api/src/routes/payments/helpers.js` + `GREATEST(0, residual - amount)` SQL update.
+**Rule:** `saleorders.residual` must never be negative. Allocation amounts must be positive, and allocation logic must reject any payment that would drive residual below `0` (with `0.01` tolerance). Residual rows must be locked with `SELECT … FOR UPDATE` inside the same payment transaction before the check and decrement (AUD-006) so concurrent allocators cannot both pass against the same balance. Sale-order amount edits must take the same row lock before reading allocations and recomputing residual. Multi-allocations against one target are summed before the residual comparison; total allocations may not exceed the payment amount. Delete/void reversals must lock the payment and target rows before deleting allocations or restoring residual. Neither `POST /api/Payments` nor `PATCH /api/Payments/:id` may persist `status=voided` without reverse logic (AUD-009) — use `POST /api/Payments/:id/void`.
+**Rationale:** Negative residuals imply the clinic owes the patient money on a closed invoice. A plain SELECT without a row lock is a TOCTOU hole under concurrent payment and sale-order writers. Creating or marking a payment voided without reversing allocations leaves residuals understated.
+**Enforced by:** Positive `allocated_amount` schema plus `validateAllocationResidual()` in `api/src/routes/payments/helpers.js` (`FOR UPDATE` + amount/sum/group guards) + `GREATEST(0, residual - amount)` SQL update inside the POST transaction; `reverseAllocations()` stable lock order; create/PATCH void bans and payment-row reversal locks in `api/src/routes/payments.js`; sale-order row lock in `api/src/routes/saleOrders/updateSaleOrder.js`.
 **Cite when:** Changing payment allocation, refund, void, or import logic.
 
 ### INV-004 — Deposit Category Heuristic Stability
@@ -94,9 +94,9 @@
 **Cite when:** Changing receipt generation, fiscal year logic, or accounting exports.
 
 ### INV-012 — Over-Allocation Rejection
-**Rule:** A payment allocation MUST be rejected if `allocated_amount > invoice.residual + 0.01`.
-**Rationale:** Prevents paying more than the outstanding balance on any single invoice.
-**Enforced by:** `validateAllocationResidual()` in `api/src/routes/payments/helpers.js`.
+**Rule:** A payment allocation MUST be rejected if the **sum** of allocations targeting one invoice/dotkham exceeds that target's residual + `0.01`, or if the sum of all allocations on the payment exceeds the payment `amount` + `0.01`. Residual reads use `FOR UPDATE` in the create transaction.
+**Rationale:** Prevents paying more than the outstanding balance on any single invoice and prevents one payment from carrying more allocated amount than it collected.
+**Enforced by:** `validateAllocationResidual(allocations, client, amount)` in `api/src/routes/payments/helpers.js`.
 **Cite when:** Changing allocation math, tolerance values, or payment create validation.
 
 ### INV-023 — Historical Customer-Source Attribution Stability

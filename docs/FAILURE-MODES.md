@@ -102,6 +102,7 @@ Each entry:
 - **Root Cause:** No row-level lock or serializable transaction around residual read → allocation insert → residual update.
 - **Fix:** Added `validateAllocationResidual()` pre-check; `GREATEST(0, residual - amount)` prevents negative DB value, but race condition still possible.
 - **Prevention:** Use `SELECT FOR UPDATE` on `saleorders` during allocation transactions. Long-term: move allocation to a queue.
+- **Current status (2026-07-28):** Superseded by FM-20260728-01, which records the implemented transaction-scoped row locks, stable multi-target lock order, and PostgreSQL contention regression.
 - **Related:** INV-003, INV-012.
 
 ## FM-20260310-01: Mock Data Masks API Failure in Production
@@ -146,3 +147,11 @@ Each entry:
 - **Fix:** Preserve `undefined` writable UUID fields on partner updates, keep explicit empty-string-to-`null` clearing for those writable fields, and make `partners.sourceid` read-only on normal Partner POST/PUT. The frontend no longer includes source in customer create/update payloads.
 - **Prevention:** `api/src/routes/partners/__tests__/mutationHandlers.test.js` proves source create/change/clear rejection, repeated-source compatibility, omitted-field preservation, and explicit clearing of a writable non-source UUID. `useCustomers.cskh.test.ts` proves frontend Partner payloads omit source.
 - **Related:** INV-023, INV-025, `PUT /api/Partners/:id`.
+
+## FM-20260728-01: Residual Writers Use Different Lock Boundaries
+
+- **Symptom:** A payment allocation commits successfully, but a concurrent sale-order amount edit restores an older residual as if that allocation did not exist.
+- **Root Cause:** Payment creation locked the sale order before validating residual, while the amount-edit path read `payment_allocations` before its eventual `UPDATE` acquired the row lock. The waiting update could therefore persist a calculation derived before the payment committed.
+- **Fix:** Lock the sale order before the amount-edit path reads allocations, reject create-time voided payments and non-positive allocations, keep payment validation/updates in one transaction, and lock payment/target rows before reversal.
+- **Prevention:** All writers that derive or change a receivable residual must lock that receivable before reading allocation state and acquire multi-target locks in the same stable order. `saleOrders.test.js` and `paymentReversalGuards.test.js` assert lock order, and `paymentAllocationConcurrency.integration.test.js` uses two PostgreSQL connections to prove invoice and dotkham contenders reload the committed residual and reject over-allocation.
+- **Related:** INV-003, INV-012, WF-003, AUD-006, AUD-009.

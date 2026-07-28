@@ -203,14 +203,16 @@ sequenceDiagram
     FE->>FE: Open modal, show open sale orders (residual > 0)
     S->>FE: Enter amount, select allocation method
     FE->>API: POST /api/Payments { amount, method, deposit_type='deposit', customerId, allocations: [...] }
-    API->>API: Classify deposit; validate allocation residual
-    API->>DB: SELECT residual FROM saleorders WHERE id=$1 AND isdeleted=false
-    DB-->>API: residual per invoice
+    API->>API: Reject status=voided; classify deposit
+    API->>DB: BEGIN
+    API->>API: Require positive amounts; group targets; validate total <= payment amount
+    API->>DB: SELECT residual/amountresidual FROM saleorders/dotkhams WHERE id=$1 FOR UPDATE
+    DB-->>API: Locked current residual per target
     alt Allocated amount > residual + 0.01
-        API-->>FE: 400 { error: 'Over-allocation to invoice X' }
+        API->>DB: ROLLBACK
+        API-->>FE: 400 { error: 'Payment amount exceeds outstanding balance' }
         FE-->>S: ✗ Show error
     else Allocation valid
-        API->>DB: BEGIN
         API->>DB: INSERT INTO payments { ...deposit_type='deposit', status='posted' }
         DB-->>API: payment row
         API->>DB: INSERT INTO payment_allocations { payment_id, invoice_id, allocated_amount }
@@ -232,7 +234,9 @@ sequenceDiagram
 **Invariants:** INV-003, INV-004, INV-010, INV-011, INV-012.
 **Failure modes:**
 - Stale residual (paid via other channel) → over-charge risk.
-- Concurrent deposits → race condition on residual (no row lock currently).
+- Concurrent allocations to the same target serialize on its row lock; the waiting transaction reloads the committed residual and fails if the balance no longer covers it.
+- Sale-order amount edits lock the sale order before reading allocation totals so they cannot overwrite a concurrent payment with stale residual math.
+- Delete/void reversals lock the payment and then target rows in the same stable order before restoring residuals, preventing duplicate reversal and lock-order deadlocks.
 
 ---
 

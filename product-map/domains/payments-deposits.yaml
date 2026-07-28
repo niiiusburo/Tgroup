@@ -5,6 +5,8 @@ summary: |
   dotkhams. Bank settings support VietQR payload creation.
 owns:
   - api/src/routes/payments.js
+  - api/src/routes/payments/helpers.js
+  - api/src/routes/payments/reversalHandlers.js
   - api/src/routes/dotKhams.js (read endpoints for allocation targets)
   - api/src/routes/monthlyPlans.js
   - api/src/routes/bankSettings.js
@@ -89,6 +91,11 @@ affected_by:
   - Changes to VietQR library or bank BIN list
 impact_tests:
   - api/tests/readRoutePermissions.test.js
+  - api/tests/paymentAllocationGuards.test.js
+  - api/tests/paymentAllocationConcurrency.integration.test.js
+  - api/tests/paymentPatchVoidBan.test.js
+  - api/tests/paymentReversalGuards.test.js
+  - api/tests/paymentsTransaction.test.js
   - website/e2e/team-charlie-payments.spec.ts
   - website/e2e/vietqr-payment.spec.ts
   - website/e2e/vps-payment-history.spec.ts
@@ -100,11 +107,14 @@ notes:
   - "`payments` is the canonical money row; `payment_allocations` is the canonical link from payments to saleorders or dotkhams."
   - TDental import and reconciliation work should use relation-driven allocations when source payment relation tables exist, not greedy remaining-balance allocation as durable truth.
   - >-
-    Payment create, update (`PATCH /api/Payments/:id`), and proof upload
-    (`POST /api/Payments/:id/proof`) currently require `payment.add`; refund
-    and destructive reversal are separate permissions: `payment.refund` and
-    `payment.void`. `payment.edit` alone must not grant refund, delete, void,
-    PATCH, or proof-upload access unless the code changes.
+    Payment create requires `payment.add`; PATCH requires `payment.edit`; proof
+    upload requires `payment.add`. Refund and destructive reversal are separate:
+    `payment.refund` and `payment.void`. AUD-006 locks residual rows FOR UPDATE
+    inside the create transaction, before sale-order amount recomputation, and
+    in stable order for reversal; allocation amounts must be positive;
+    AUD-009 rejects create/PATCH status=voided (use POST void). PR Checks runs
+    the required PostgreSQL invoice/dotkham contention matrix through the
+    fail-closed `test:payment-concurrency` command.
   - Payment allocation flows can update `dotkhams.amountresidual`, so DotKhams route/schema drift belongs in payment verification even though `/api/DotKhams` itself is read-only.
   - >-
     Cosmetic workbook money rows import only after dry-run, backup, compare,

@@ -253,13 +253,13 @@ When a use case is created or materially edited, add one compact `Traceability` 
   2. Selects customer and outstanding invoice.
   3. Enters amount, method (`cash`, `bank_transfer`, `mixed`), and optional notes.
   4. Clicks Save → `POST /api/Payments` with allocations.
-  5. Backend validates, inserts payment + allocations, updates residual.
+  5. Backend rejects create-time `status=voided` and non-positive allocations, locks the target residual, validates the committed balance, inserts payment + allocations, and updates residual.
 - **Alternate flows:**
   - **AF-1 Mixed payment:** Actor specifies `cash_amount`, `bank_amount`, `deposit_used` breakdown.
   - **AF-2 Full payment:** `isFullPayment=true` flag covers entire remaining balance.
 - **Postconditions:** Invoice residual reduced; payment history updated.
 - **Invariants touched:** INV-003, INV-012.
-- **Traceability:** Related WF: WF-003, WF-010. Contracts/routes: `POST /api/Payments`. Data/tables: `dbo.payments`, `dbo.payment_allocations`, `dbo.saleorders`, `dbo.dotkhams` when allocated to a medical record. Tests: `website/src/components/payment/__tests__/PaymentForm.submit.test.tsx`, `website/src/lib/allocatePaymentSources.test.ts`, `api/tests/readRoutePermissions.test.js`; backend allocation/void/refund edge coverage remains a known gap. Product-map domains: `payments-deposits`, `services-catalog`, `customers-partners`.
+- **Traceability:** Related WF: WF-003, WF-010. Contracts/routes: `POST /api/Payments`. Data/tables: `dbo.payments`, `dbo.payment_allocations`, `dbo.saleorders`, `dbo.dotkhams` when allocated to a medical record. Tests: `website/src/components/payment/__tests__/PaymentForm.submit.test.tsx`, `website/src/lib/allocatePaymentSources.test.ts`, `api/tests/readRoutePermissions.test.js`, `api/tests/paymentAllocationGuards.test.js`, `api/tests/paymentsTransaction.test.js`, `api/tests/paymentAllocationConcurrency.integration.test.js` (AUD-006 PostgreSQL invoice/dotkham race matrix). Product-map domains: `payments-deposits`, `services-catalog`, `customers-partners`.
 
 ---
 
@@ -274,10 +274,10 @@ When a use case is created or materially edited, add one compact `Traceability` 
   3. Confirms → `POST /api/Payments/:id/void`.
   4. Current backend marks `status='voided'`, deletes payment allocation rows for that payment, and restores `saleorders.residual` or `dotkhams.amountresidual`.
 - **Alternate flows:**
-  - **AF-1 Already voided:** Button disabled; backend idempotent.
+  - **AF-1 Already voided:** Button disabled; a repeated backend void request returns `409` before allocations are read or changed.
 - **Postconditions:** Payment status = `voided`; invoice or medical-record residual is restored by the current route.
-- **Invariants touched:** INV-003 (residual non-negative). Current route behavior diverges from INV-010's immutable-allocation wording; fix the invariant or route before treating void semantics as locked.
-- **Traceability:** Related WF: WF-003. Contracts/routes: `POST /api/Payments/:id/void`, `DELETE /api/Payments/:id` legacy destructive path. Data/tables: `dbo.payments`, `dbo.payment_allocations`, `dbo.saleorders`, `dbo.dotkhams`. Tests: `api/tests/readRoutePermissions.test.js`; backend void math coverage remains a known gap. Product-map domains: `payments-deposits`.
+- **Invariants touched:** INV-003 (residual integrity), INV-010 (void + new payment is the designated allocation-correction path).
+- **Traceability:** Related WF: WF-003. Contracts/routes: `POST /api/Payments/:id/void`, `DELETE /api/Payments/:id` legacy destructive path. Creating a payment or patching one with `status=voided` is rejected (AUD-009) — both must use POST void. Data/tables: `dbo.payments`, `dbo.payment_allocations`, `dbo.saleorders`, `dbo.dotkhams`. Tests: `api/tests/readRoutePermissions.test.js`, `api/tests/paymentPatchVoidBan.test.js`, `api/tests/paymentReversalGuards.test.js`, `api/tests/paymentsTransaction.test.js`. Product-map domains: `payments-deposits`.
 
 ---
 

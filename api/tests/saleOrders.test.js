@@ -76,6 +76,9 @@ describe('PATCH /api/SaleOrders/:id', () => {
       if (sql.includes('ip_access_entries')) {
         return [];
       }
+      if (sql.includes('FROM saleorders') && sql.includes('FOR UPDATE')) {
+        return [{ id: 'order-id' }];
+      }
       if (sql.includes('FROM payment_allocations')) {
         return [{ totalpaid: '0' }];
       }
@@ -107,6 +110,12 @@ describe('PATCH /api/SaleOrders/:id', () => {
 
     expect(res.status).toBe(200);
     expect(query.mock.calls.some(([sql]) => sql.includes('FROM payment_allocations'))).toBe(true);
+    const lockIndex = query.mock.calls.findIndex(([sql]) =>
+      sql.includes('FROM saleorders') && sql.includes('FOR UPDATE'));
+    const allocationReadIndex = query.mock.calls.findIndex(([sql]) =>
+      sql.includes('FROM payment_allocations'));
+    expect(lockIndex).toBeGreaterThanOrEqual(0);
+    expect(lockIndex).toBeLessThan(allocationReadIndex);
 
     const orderUpdate = query.mock.calls.find(([sql]) => sql.startsWith('UPDATE saleorders'));
     expect(orderUpdate?.[0]).toContain('totalpaid');

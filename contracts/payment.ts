@@ -21,7 +21,7 @@ export const PaymentBaseSchema = z.object({
   allocations: z.array(z.object({
     invoice_id: z.string().uuid().optional(),
     dotkham_id: z.string().uuid().optional(),
-    allocated_amount: z.coerce.number().optional(),
+    allocated_amount: z.coerce.number().positive().optional(),
   })).optional().nullable(),
 });
 

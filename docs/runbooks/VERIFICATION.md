@@ -47,6 +47,15 @@ npm --prefix api test
 For route changes, add or update Supertest/Jest coverage where practical.
 Update root `testbright.md` with the changed API routes, affected data flows, roles, happy paths, edge cases, regressions, and setup/login state for TestSprite.
 
+Payment residual-lock changes must also run the required PostgreSQL concurrency gate:
+
+```bash
+TEST_DATABASE_URL='postgresql://test_user:test_password@127.0.0.1:5432/payment_lock_test' \
+  npm --prefix api run test:payment-concurrency
+```
+
+The dedicated command fails when `TEST_DATABASE_URL` is absent. PR Checks supplies an isolated PostgreSQL 16 service and runs both invoice and dotkham contention cases.
+
 Export route changes should also run or update:
 
 ```bash

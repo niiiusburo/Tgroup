@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.32.60",
+    "date": "2026-07-28",
+    "commit": "pending",
+    "highlights": "Money integrity: serialize residual writers and reserve voided status for the reversal endpoint.",
+    "sections": [
+      {
+        "title": "Security",
+        "items": [
+          "Payment allocation now locks invoice/medical-record residual rows inside the create transaction so concurrent payments cannot double-spend the same balance.",
+          "Sale-order amount edits take the same lock before recomputing residuals, preventing a concurrent payment from being overwritten by stale allocation totals.",
+          "Payment delete/void reversals lock payment and target rows in stable order, and allocation amounts must be positive.",
+          "POST and PATCH /Payments can no longer set status=voided; staff must use the void endpoint so allocations reverse correctly."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added positive-allocation, multi-sum, create/PATCH void-ban, sale-order/reversal lock-order, and PostgreSQL two-connection invoice/dotkham race coverage."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.58",
     "date": "2026-07-23",
     "commit": "pending",

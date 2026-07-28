@@ -85,6 +85,8 @@ impact_tests:
   - api/tests/customerSourceIntegrity.test.js
   - api/tests/customerSourceReferenceMigration.test.js
   - api/tests/dbTransaction.test.js
+  - api/tests/saleOrders.test.js
+  - api/tests/paymentAllocationConcurrency.integration.test.js
   - website/src/hooks/useSettings.customer-sources.test.tsx
 risk_level: high
 notes:
@@ -97,4 +99,5 @@ notes:
   - Customer profile service edits patch the parent sale order but must also persist rendered line fields such as `saleorderlines.productuomqty`, `tooth_numbers`, and `tooth_comment` because the `Phiếu khám` table is sourced from `/api/SaleOrders/lines`.
   - New service/order source choices must be active CustomerSources. An edit may preserve the exact inactive source already assigned to that order, but the API rejects assigning an inactive or missing source to new or different data with `CUSTOMER_SOURCE_NOT_SELECTABLE`.
   - Sale-order create/update holds a transaction-scoped share lock on a selected source and commits order/line writes together; source update/delete uses the conflicting row lock and database foreign keys restrict lookup deletion.
+  - Sale-order amount updates lock the parent saleorder before reading payment allocations and recomputing residual so concurrent payment allocation cannot be overwritten by stale totals.
   - Tooth picker saves should sync quantity to selected tooth count only while quantity is still following the picker/default count; manual quantity overrides must be preserved.

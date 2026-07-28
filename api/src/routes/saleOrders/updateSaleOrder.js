@@ -43,6 +43,16 @@ async function updateSaleOrder(req, res) {
         return { status: 400, body: sourceError };
       }
 
+      if (amounttotal !== undefined) {
+        const lockedOrder = await transactionQuery(
+          'SELECT id FROM saleorders WHERE id = $1 AND isdeleted = false FOR UPDATE',
+          [id],
+        );
+        if (lockedOrder.length === 0) {
+          return { status: 404, body: { error: 'Sale order not found' } };
+        }
+      }
+
       const paymentState = amounttotal !== undefined
         ? await calculateSaleOrderPaymentStateFromAllocations(transactionQuery, id, amounttotal)
         : null;

@@ -140,6 +140,13 @@ graph TD
 - **Blast radius:** **Money flow + all revenue reports.**
 - **Change rules:** Method enum must match `website/src/types/payment.ts` and `contracts/payment.ts`. Allocation logic is critical (INV-003, INV-012).
 
+### `api/src/routes/payments/{helpers,reversalHandlers}.js`
+- **Layer:** 4 (backend payment route handlers)
+- **Upstream:** `api/src/db.js`, payment allocation rows, sale-order and dotkham residual rows.
+- **Downstream:** `api/src/routes/payments.js` create, delete, and void flows; sale-order amount edits share the same target-row lock order.
+- **Blast radius:** **Payment allocation, destructive reversal, invoice residual, and dotkham residual integrity.**
+- **Change rules:** All residual writers must lock targets in the same stable order before reading or writing balances. Delete and void must lock the payment row before reading allocations and reverse them in the same transaction.
+
 ### `contracts/*.ts` (`@tgroup/contracts`)
 - **Layer:** 1
 - **Upstream:** Zod

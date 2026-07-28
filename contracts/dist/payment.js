@@ -23,7 +23,7 @@ exports.PaymentBaseSchema = zod_1.z.object({
     allocations: zod_1.z.array(zod_1.z.object({
         invoice_id: zod_1.z.string().uuid().optional(),
         dotkham_id: zod_1.z.string().uuid().optional(),
-        allocated_amount: zod_1.z.coerce.number().optional(),
+        allocated_amount: zod_1.z.coerce.number().positive().optional(),
     })).optional().nullable(),
 });
 exports.PaymentCreateSchema = exports.PaymentBaseSchema.omit({ id: true });

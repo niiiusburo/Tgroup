@@ -28,6 +28,9 @@ A row is a regular payment if:
 
 ## 3. Creating a Payment (`POST /api/Payments`)
 
+### Status transition gate
+`status = 'voided'` is rejected with `409` before a transaction starts. New payments are posted; only `POST /api/Payments/:id/void` may transition a posted payment to voided while reversing allocations.
+
 ### Step A: Auto-detect deposit top-up
 If the request lacks `deposit_type` and `allocations`, and `method` is not `deposit`/`mixed`, and there is no `service_id` and no `deposit_used > 0`, the backend forces `deposit_type = 'deposit'`.
 
@@ -35,15 +38,17 @@ If the request lacks `deposit_type` and `allocations`, and `method` is not `depo
 If `deposit_type = 'deposit'` and no `receipt_number` is provided, `generateReceiptNumber('TUKH')` is called. It upserts into `receipt_sequences (prefix, year)` and returns a zero-padded sequential number.
 
 ### Step C: Residual validation (`validateAllocationResidual`)
-For every allocation object:
-- If `invoice_id` is set, the allocated amount must not exceed `saleorders.residual + 0.01`.
-- If `dotkham_id` is set, the allocated amount must not exceed `dotkhams.amountresidual + 0.01`.
-- If validation fails, the entire request returns `400` with the specific error message.
+Runs **inside** the open payment transaction on the same client:
+1. Every persisted `allocated_amount` must be a positive number.
+2. Sum of persistable allocations may not exceed payment `amount + 0.01`.
+3. Allocations are grouped by target; the **group total** is checked (not each row alone).
+4. Residual is read with `SELECT residual … FOR UPDATE` / `SELECT amountresidual … FOR UPDATE` (AUD-006) so concurrent creates cannot double-spend the same balance. Targets are locked in stable sorted order.
+5. If validation fails, the transaction rolls back and the request returns `400`.
 
-> **Critical invariant:** A payment cannot over-allocate to a receivable.
+> **Critical invariant:** A payment cannot over-allocate to a receivable (INV-003 / INV-012).
 
 ### Step D: Insert payment row
-Standard `INSERT INTO payments` with all fields.
+`INSERT INTO payments` with `status = 'posted'` (explicit or default).
 
 ### Step E: Insert allocations and decrement residuals
 If allocations are provided and valid:
@@ -53,6 +58,9 @@ If allocations are provided and valid:
    - `UPDATE dotkhams SET amountresidual = GREATEST(0, amountresidual - allocated_amount)`
 
 > **Note:** `GREATEST(0, ...)` prevents negative residuals at the DB level, but the pre-validation in Step C is supposed to stop this from happening.
+
+### Sale-order amount edits
+`PATCH /api/SaleOrders/:id` locks the `saleorders` row before reading `payment_allocations` and recomputing `totalpaid`/`residual`. Payment creates and amount edits therefore serialize on the receivable before either path derives or writes residual state.
 
 ## 4. Refund Logic (`POST /api/Payments/refund`)
 
@@ -64,10 +72,11 @@ If allocations are provided and valid:
 ## 5. Void Logic (`POST /api/Payments/:id/void`)
 
 Wrapped in a transaction:
-1. Read all allocations for the payment.
-2. Delete allocations.
+1. Lock the posted payment row.
+2. Read allocations and lock every target in the same stable order used by create.
 3. **Reverse** receivable residuals (`+ allocated_amount`).
-4. Update the payment: `status = 'voided'`, append `" | VOIDED: <reason>"` to notes.
+4. Delete allocations.
+5. Update the payment: `status = 'voided'`, append `" | VOIDED: <reason>"` to notes.
 
 > **Risk:** If the payment was partially paid down a receivable that has since been further paid, reversing the full allocation could make the residual exceed the original total. The system allows this (no cap on the `+` side).
 
@@ -80,7 +89,11 @@ Same reversal as void, but physically deletes the payment row instead of marking
 Allowed fields:
 - `amount`, `method`, `notes`, `payment_date`, `reference_code`, `status`, `deposit_type`, `receipt_number`
 
-> **Important:** `PATCH` does **not** modify allocations. If an admin changes the `amount` of an allocated payment, the allocations remain unchanged and the receivable residuals are **not** recalculated. This is a known partial-update edge case.
+Guards:
+- **AUD-009:** `status = 'voided'` is rejected with **409**; callers must use `POST /api/Payments/:id/void` so allocations reverse.
+- Lowering `amount` below existing allocation sum is rejected with **409** (payment row locked `FOR UPDATE`).
+
+> **Important:** `PATCH` does **not** modify allocations. Corrections that change allocation math require void + new payment (INV-010).
 
 ## 8. Deposit Usage (`GET /api/Payments/deposit-usage`)
 
@@ -109,6 +122,6 @@ The backend stores mixed payments as a single `payments` row with:
 | Over-allocation | Blocked at Step C (validation) |
 | Allocation to non-existent invoice/dotkham | Returns 400 with "not found" or "exceeds balance" |
 | Void then re-pay same invoice | Allowed; residual can exceed original invoice total |
-| Patch amount on allocated payment | Allocations and residuals stay stale |
+| Patch amount below allocated total | Blocked with 409; PATCH never reallocates existing rows |
 | Refund amount > deposit balance | Not checked against customer balance; just creates negative payment |
 | Legacy fallback active | `allocations` array is empty; `id` comes from `accountpayments` |

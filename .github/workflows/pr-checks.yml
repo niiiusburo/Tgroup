@@ -5,6 +5,37 @@ on:
     types: [opened, edited, synchronize, reopened]
 
 jobs:
+  payment-concurrency:
+    name: Payment Concurrency Matrix
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: payment_lock
+          POSTGRES_USER: payment_lock
+          POSTGRES_PASSWORD: payment_lock
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U payment_lock -d payment_lock"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://payment_lock:payment_lock@127.0.0.1:5432/payment_lock
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+      - name: Install API test dependencies
+        run: npm ci --prefix api
+      - name: Prove payment allocation serialization
+        run: npm --prefix api run test:payment-concurrency
+
   # ============================================================
   # Documentation Governance
   # ============================================================
@@ -12,7 +43,7 @@ jobs:
     name: Documentation Governance
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           fetch-depth: 0
       - name: Verify docs, product-map, TestSprite, and changelog cross-checks
@@ -42,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check PR Title
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
         with:
           script: |
             const title = context.payload.pull_request.title;
@@ -60,14 +91,15 @@ jobs:
               'revert:'
             ];
             
-            const hasValidPrefix = validPrefixes.some(prefix => 
-              title.toLowerCase().startsWith(prefix)
-            );
+            const hasValidPrefix = validPrefixes.some(prefix => {
+              const type = prefix.slice(0, -1);
+              return new RegExp(`^${type}(?:\\([^()]+\\))?:`, 'i').test(title);
+            });
             
             if (!hasValidPrefix) {
               core.setFailed(
-                `PR title must start with one of: ${validPrefixes.join(', ')}\n` +
-                `Example: "feat: add login page" or "fix: resolve API timeout"`
+                `PR title must start with an allowed type (optional scope): ${validPrefixes.join(', ')}\n` +
+                `Example: "feat: add login page" or "fix(payments): resolve API timeout"`
               );
             }
 
@@ -79,8 +111,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check Branch Name
+        env:
+          BRANCH: ${{ github.head_ref }}
         run: |
-          BRANCH="${{ github.head_ref }}"
           echo "Branch: $BRANCH"
           
           # Allowed patterns
@@ -106,7 +139,7 @@ jobs:
     name: Check File Sizes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - name: Check for large files
         run: |
           # Find files larger than 500KB
@@ -133,7 +166,7 @@ jobs:
     name: Secrets Scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - name: Basic secrets check
         run: |
           # Check for common patterns (very basic)
@@ -155,7 +188,7 @@ jobs:
     name: Version / CHANGELOG Bump Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           fetch-depth: 0
       - name: Check for website changes
