@@ -1,10 +1,10 @@
 # 14 — Final Audit Report
 
-**TGClinic / TGroup Forensic Audit Control Package**  
-**Baseline pin:** `22d69153501b4ce5cd97e20ecca23e8e4836bbe7`  
-**Versions:** website `0.32.59` · api `1.2.2`  
-**Date:** 2026-07-28  
-**Scope:** Documentation merge of lanes r1 + A–M; no production code changes  
+**TGClinic / TGroup Forensic Audit Control Package**<br>
+**Baseline pin:** `22d69153501b4ce5cd97e20ecca23e8e4836bbe7`<br>
+**Versions:** website `0.32.59` · api `1.2.2`<br>
+**Date:** 2026-07-28<br>
+**Scope:** Documentation merge of lanes r1 + A–M; no production code changes
 
 > **Non-claim:** This report does not certify the system production-ready or bug-free.
 
@@ -41,10 +41,10 @@ See `00-audit-charter.md`. Mission: durable evidence-based control set for remed
 
 ## 2. Baseline and method
 
-- Clean detached HEAD at pin; branch `docs/tgroup-audit-docs` for docs only.
-- Read all lane `report.md` files and captain `backlog.md`.  
-- Merge duplicates into AUD IDs; keep lane IDs in Evidence.  
-- Spot-verify ≥5 S0/S1 paths in worktree (11 paths checked; all confirmed).  
+- Clean detached HEAD at pin; branch `fm/tgroup-audit-docs` for docs only.
+- Read all lane `report.md` files and captain `backlog.md`.
+- Merge duplicates into AUD IDs; keep lane IDs in Evidence.
+- Spot-verify ≥5 S0/S1 paths in worktree (11 paths checked; all confirmed).
 - Prefer code over stale markdown.
 
 ---
@@ -61,8 +61,8 @@ Monorepo: React website + Express API + Zod contracts + product-map governance +
 
 See `03-module-inventory.md` (MOD-001–038).
 
-Critical active modules: auth/permissions (004–006), partners (008), appointments (009), payments (010), reports/exports (015–016), employees (013), products (012).  
-**Absent:** MOD-037 LOB dual-DB, MOD-038 earnings engine.  
+Critical active modules: auth/permissions (004–006), partners (008), appointments (009), payments (010), reports/exports (015–016), employees (013), products (012).<br>
+**Absent:** MOD-037 LOB dual-DB, MOD-038 earnings engine.
 **Unmounted:** MOD-023 account/session/services.
 
 ---
@@ -71,7 +71,7 @@ Critical active modules: auth/permissions (004–006), partners (008), appointme
 
 See `02-business-logic-register.md` (BL-001–025).
 
-Strongest confirmed rules: JWT gate, permission resolution, investor same-portal intent, partners SMI, canonical payments tables, accent search, deploy preflight script.  
+Strongest confirmed rules: JWT gate, permission resolution, investor same-portal intent, partners SMI, canonical payments tables, accent search, deploy preflight script.<br>
 Weakest/missing enforcement: investor fail-closed holes, payment residual matrix, LOB BL-022/023 (docs only), FE location-only scope.
 
 ---
@@ -80,7 +80,7 @@ Weakest/missing enforcement: investor fail-closed holes, payment residual matrix
 
 See `04-flow-inventory.md` (FLOW-001–043).
 
-P0 flows: payment allocate/void/deposit (017–019), reports (026), customer resolve deep link (013), face (032), catalog write (022), employee mutate (023), Hermes (043), imports (038).  
+P0 flows: payment allocate/void/deposit (017–019), reports (026), customer resolve deep link (013), face (032), catalog write (022), employee mutate (023), Hermes (043), imports (038).<br>
 Blocked: LOB/CTV/earnings (041–042).
 
 ---
@@ -252,11 +252,11 @@ See `13-research-opportunities.md` (R-001–012): report truth, LOB pin forensic
 
 ## 21. Recommendations (ordered)
 
-1. **Wave 0 now:** rotate Hermes secrets; quarantine 008 TRUNCATE; fix products import; strip password_hash; fix false-green path test.  
-2. **Wave 1 now:** investor fail-closed revenue + resolve/face/payslips.  
-3. **Captain session:** LOB posture + money four holds + appointment three holds + placeholder/overview.  
-4. **Wave 2** money matrix after or with residual SoT decision.  
-5. **Refresh** unknowns, API_ROUTE_INDEX, GAPS, SECURITY LOB paragraphs per decision.  
+1. **Wave 0 now:** rotate Hermes secrets; quarantine 008 TRUNCATE; fix products import; strip password_hash; fix false-green path test.
+2. **Wave 1 now:** investor fail-closed revenue + resolve/face/payslips.
+3. **Captain session:** LOB posture + money four holds + appointment three holds + placeholder/overview.
+4. **Wave 2** money matrix after or with residual SoT decision.
+5. **Refresh** unknowns, API_ROUTE_INDEX, GAPS, SECURITY LOB paragraphs per decision.
 6. **Do not** merge LOB docs-as-code assumptions into dental hotfixes.
 
 ---
@@ -277,7 +277,7 @@ See `13-research-opportunities.md` (R-001–012): report truth, LOB pin forensic
 
 | Item | Value |
 |---|---|
-| Branch | `docs/tgroup-audit-docs` |
+| Branch | `fm/tgroup-audit-docs` |
 | Code/runtime changes | **None** |
 | Dependency changes | **None** |
 | Migration changes | **None** |

@@ -1,6 +1,6 @@
 # 11 — Agent Coverage Ledger
 
-**Baseline:** `22d691535` · Package task: `tgroup-audit-docs`  
+**Baseline:** `22d691535` · Package task: `tgroup-audit-docs`<br>
 **Worktree:** disposable treehouse path (isolated from primary checkout)
 
 ---
@@ -92,18 +92,20 @@ No spot-check **refuted** a lane S0/S1 claim. Values of secrets were **not** cop
 
 ## 5. Merge / dedup quality notes
 
-- B-F001 ≡ I-F001 → AUD-002  
-- B-F002 slices → AUD-003/004/005  
-- A-F007 ≡ H-F005 → AUD-060  
-- A-F005/D-F014 → AUD-059  
-- L-F004/G-F012 → AUD-042  
+- B-F001 ≡ I-F001 → AUD-002
+- B-F002 slices → AUD-003/004/005
+- A-F007 ≡ H-F005 → AUD-060
+- A-F005/D-F014 → AUD-059
+- L-F004/G-F012 → AUD-042
 - Lane S3/S4 condensed into fewer AUD rows with multi-evidence; the explicit crosswalk below preserves every substantive A–M source ID.
 
 ### Explicit crosswalk for condensed source IDs
 
-The master register consolidates **184 substantive A–M findings** into 86 AUD
-rows. The following IDs were implicit in range notation or cross-lane
-deduplication; this table makes each source-to-master relationship explicit.
+The control package traces **184 substantive A–M finding IDs** into 86 open or
+blocked AUD rows plus an explicit resolved prior-audit disposition. The
+following IDs were implicit in range notation, cross-lane deduplication, or
+that resolved disposition; this table makes each source-to-control relationship
+explicit.
 
 | Source finding IDs | Master AUD mapping | Consolidation basis |
 |---|---|---|
@@ -116,6 +118,8 @@ deduplication; this table makes each source-to-master relationship explicit.
 | D-F007, D-F008, D-F009, D-F010, D-F011, D-F012 | AUD-070 | Condensed Partners data-integrity bundle |
 | E-F009, E-F010, E-F011 | AUD-071 | Condensed appointment contract/time/pagination bundle |
 | F-F014, F-F017, F-F022, F-F023 | AUD-072 | Condensed money-edge and permission-drift bundle |
+| F-F019 | AUD-008 | Historic over-allocation is impact evidence for the missing payment-level allocation cap |
+| F-F020 | No open AUD; `14-final-audit-report.md` §9 | Resolved prior-audit void-path claim; AUD-009 tracks the distinct PATCH shadow-void defect |
 | G-F007, G-F008, G-F009, G-F010, G-F011, G-F013 | AUD-073 | Condensed catalog UX/data-integrity bundle |
 | H-F007, H-F008, H-F009, H-F010, H-F012 | AUD-074 | Condensed HR/permission/map-drift bundle |
 | I-F008, I-F009, I-F010 | AUD-075 | Condensed reports dead-surface/map/export bundle |
@@ -126,8 +130,9 @@ deduplication; this table makes each source-to-master relationship explicit.
 | M-F011 | AUD-079 | Divergent local LOB history slice |
 
 Coverage after explicit crosswalk: **184 / 184 substantive A–M finding IDs
-traceable; 0 absent**. R1 discovery IDs remain separately cross-linked through
-the master Evidence columns and the stable MOD/FLOW/BL/CX/RK registers.
+traceable to an AUD row or explicit resolved disposition; 0 absent**. R1
+discovery IDs remain separately cross-linked through the master Evidence
+columns and the stable MOD/FLOW/BL/CX/RK registers.
 
 ---
 
@@ -146,7 +151,7 @@ the master Evidence columns and the stable MOD/FLOW/BL/CX/RK registers.
 ## 7. Tooling used (package agent)
 
 ```text
-pwd -P; git rev-parse; branch docs/tgroup-audit-docs
+pwd -P; git rev-parse; branch fm/tgroup-audit-docs
 no-mistakes doctor
 cat lane reports + backlog.md
 rg/sed/node spot checks on S0/S1 paths

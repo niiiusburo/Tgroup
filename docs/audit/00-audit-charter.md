@@ -56,7 +56,8 @@ This package consolidates Round-1 discovery (`tgroup-audit-r1`) and specialized 
 | **Medium** | Partial code or docs; needs fixture/runtime proof. |
 | **Low** | Historical claim, other branch, or incomplete inspection — belongs in unresolved/research. |
 
-Prefer **code over stale markdown**. Every finding cites lane IDs and paths.
+Prefer **code over stale markdown**. Every finding retains its source lane ID;
+high-severity findings also cite paths and spot-verification evidence.
 
 ---
 
@@ -138,7 +139,7 @@ Captain holds: `/Users/thuanle/firstmate-homes/tgroup/backlog.md`.
 
 | Role | Responsibility |
 |---|---|
-| Crewmate (docs package) | Merge lane evidence → control files; spot-verify S0/S1; commit on `docs/tgroup-audit-docs` |
+| Crewmate (docs package) | Merge lane evidence → control files; spot-verify S0/S1; commit on `fm/tgroup-audit-docs` |
 | Firstmate | Gate PR / no-mistakes |
 | Captain | Decision holds in `12-unresolved-questions.md`; wave prioritization |
 

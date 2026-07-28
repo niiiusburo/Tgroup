@@ -1,6 +1,6 @@
 # 09 — Remediation Roadmap
 
-**Baseline pin:** `22d691535` · website `0.32.59` · api `1.2.2`  
+**Baseline pin:** `22d691535` · website `0.32.59` · api `1.2.2`<br>
 **Rule:** Waves are sequencing guidance, not a claim that work is done. Fix IDs map to `06-findings-register.md` AUD rows.
 
 ---

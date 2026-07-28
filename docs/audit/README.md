@@ -1,8 +1,8 @@
 # TGClinic / TGroup — Forensic Audit Package
 
-**Baseline pin:** `22d691535` · website `0.32.59` · api `1.2.2`  
-**Package date:** 2026-07-28  
-**Nature:** Documentation-only control set (lanes r1 + A–M).  
+**Baseline pin:** `22d691535` · website `0.32.59` · api `1.2.2`<br>
+**Package date:** 2026-07-28<br>
+**Nature:** Documentation-only control set (lanes r1 + A–M).<br>
 **Non-claim:** Does not certify production-ready or bug-free.
 
 ---
@@ -81,6 +81,6 @@ Absolute prefix: `/Users/thuanle/firstmate-homes/tgroup/data/`
 
 ## Maintenance
 
-- New remediation work should cite **AUD-###** and update Status in `06-findings-register.md` on the fix SHA (not silently on this pin).  
-- Re-baseline requires a new pin SHA and delta pass.  
+- New remediation work should cite **AUD-###** and update Status in `06-findings-register.md` on the fix SHA (not silently on this pin).
+- Re-baseline requires a new pin SHA and delta pass.
 - Captain decisions close rows in `12-unresolved-questions.md` and unblock Wave items in `09-remediation-roadmap.md`.

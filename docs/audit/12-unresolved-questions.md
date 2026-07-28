@@ -1,7 +1,7 @@
 # 12 — Unresolved Questions
 
-**Baseline:** `22d691535`  
-**Sources:** `/Users/thuanle/firstmate-homes/tgroup/backlog.md` captain holds + residual lane unknowns.  
+**Baseline:** `22d691535`<br>
+**Sources:** `/Users/thuanle/firstmate-homes/tgroup/backlog.md` captain holds + residual lane unknowns.<br>
 **State:** All holds below awaited captain decision as of package authoring (2026-07-28).
 
 ---

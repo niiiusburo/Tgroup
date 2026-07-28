@@ -18,7 +18,8 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ### Docs
 - Added the captain-mandated forensic audit control package, including the consolidated findings, contradictions, risks, remediation roadmap, coverage ledger, unresolved holds, and final report — @codex — baseline `22d691535`.
-- Added explicit source-to-master traceability for all 184 substantive A–M audit findings — @codex — `TEST-AUDIT-LANE-TRACEABILITY`.
+- Added explicit source-to-control traceability for all 184 substantive A–M audit finding IDs — @codex — `TEST-AUDIT-LANE-TRACEABILITY`.
+- Corrected the audit package branch identity to `fm/tgroup-audit-docs` — @codex — `TEST-AUDIT-BRANCH-IDENTITY`.
 
 ## [0.32.59] — 2026-07-23
 

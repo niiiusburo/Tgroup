@@ -1,7 +1,7 @@
 # 06 — Findings Register (MASTER)
 
-**Baseline:** `22d691535` · website `0.32.59` · api `1.2.2`  
-**Rule:** Do not invent findings absent from lane reports. Duplicates merged; all substantive A–M lane IDs are retained here or in the explicit crosswalk in `11-agent-coverage-ledger.md`.  
+**Baseline:** `22d691535` · website `0.32.59` · api `1.2.2`<br>
+**Rule:** Do not invent findings absent from lane reports. Duplicates merged; all substantive A–M lane IDs are retained here or in the explicit crosswalk in `11-agent-coverage-ledger.md`.<br>
 **Spot-verify:** See §Spot-verification and `11-agent-coverage-ledger.md`.
 
 ### Column legend

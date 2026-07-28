@@ -1,6 +1,6 @@
 # 01 — Repository Map
 
-**Baseline:** `22d691535` · website `0.32.59` · api `1.2.2`  
+**Baseline:** `22d691535` · website `0.32.59` · api `1.2.2`<br>
 **Source:** R1 §2 + spot checks on this worktree.
 
 ---

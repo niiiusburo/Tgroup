@@ -1,6 +1,6 @@
 # 13 — Research Opportunities
 
-**Baseline:** `22d691535`  
+**Baseline:** `22d691535`<br>
 Items here are **not** confirmed production defects ready for Wave-0 coding. They need investigation, measurement, or a separate pin before becoming AUD fixes.
 
 ---

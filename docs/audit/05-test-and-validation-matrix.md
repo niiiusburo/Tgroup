@@ -1,6 +1,6 @@
 # 05 — Test and Validation Matrix
 
-**Baseline:** `22d691535` · Commands inventoried from package.json / workflows.  
+**Baseline:** `22d691535` · Commands inventoried from package.json / workflows.<br>
 **Note:** This audit package did **not** execute full suites as a pass/fail gate. Lane scouts ran targeted proofs only.
 
 ---
@@ -26,7 +26,7 @@
 | `npm --prefix website run build` | version + tsc + vite | no |
 | `npm --prefix website run build:prod` | prod build | no |
 | `npm --prefix website run lint` | eslint | no |
-| `npx tsc --noEmit` (CI) | typecheck | no |
+| `npm --prefix website exec -- tsc --noEmit` | typecheck (CI runs the equivalent from `website/`) | no |
 | `npm --prefix website test` | vitest run | no |
 | `npm --prefix website run test:e2e` | playwright via dev-e2e.sh | **local stack** |
 | `npm --prefix website run test:e2e:module-audit` | module audit | local 5175+3002 |
@@ -102,7 +102,7 @@ npm run verify:governance
 # FE static
 npm --prefix website ci
 npm --prefix website run lint
-npx --prefix website tsc --noEmit
+npm --prefix website exec -- tsc --noEmit
 npm --prefix website test
 npm --prefix website run build
 

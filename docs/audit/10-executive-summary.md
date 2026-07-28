@@ -1,9 +1,9 @@
 # 10 — Executive Summary
 
-**Product:** TGClinic / TGroup dental portal  
-**Baseline:** git `22d691535` · website **0.32.59** · api **1.2.2**  
-**Audit date:** 2026-07-28  
-**Nature:** Documentation-only forensic package consolidating lanes r1 + A–M  
+**Product:** TGClinic / TGroup dental portal<br>
+**Baseline:** git `22d691535` · website **0.32.59** · api **1.2.2**<br>
+**Audit date:** 2026-07-28<br>
+**Nature:** Documentation-only forensic package consolidating lanes r1 + A–M
 
 ---
 
@@ -70,11 +70,11 @@ Full list: `12-unresolved-questions.md`.
 
 ## Recommended immediate actions (Wave 0–1)
 
-1. Rotate and un-track Hermes credentials.  
-2. Quarantine destructive `008_*` migrations from default apply loops.  
-3. Fix Products `normalizeVietnamese` import; strip employee `password_hash` from responses.  
-4. Fail-closed investor empty allowlist in `canonicalRevenue`; lock down HrPayslips; scope resolve/face.  
-5. Patch nginx export timeouts to match INV-019.  
+1. Rotate and un-track Hermes credentials.
+2. Quarantine destructive `008_*` migrations from default apply loops.
+3. Fix Products `normalizeVietnamese` import; strip employee `password_hash` from responses.
+4. Fail-closed investor empty allowlist in `canonicalRevenue`; lock down HrPayslips; scope resolve/face.
+5. Patch nginx export timeouts to match INV-019.
 6. Schedule captain decision session on LOB posture + money residual/void policies.
 
 Detailed sequencing: `09-remediation-roadmap.md`.
@@ -83,7 +83,7 @@ Detailed sequencing: `09-remediation-roadmap.md`.
 
 ## Explicit non-claims
 
-- This package does **not** certify production readiness.  
-- This package does **not** prove absence of further bugs outside lane scopes.  
-- LOB security on other branches is **unverified** here.  
+- This package does **not** certify production readiness.
+- This package does **not** prove absence of further bugs outside lane scopes.
+- LOB security on other branches is **unverified** here.
 - Financial report accuracy vs Odoo/source systems remains a **research** item.
