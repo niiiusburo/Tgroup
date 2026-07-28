@@ -16,6 +16,9 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ## [0.32.60] — 2026-07-28
 
+### Fixed
+- PR title validation now accepts optional Conventional Commit scopes such as `fix(api):` while preserving the existing allowed change types — @codex — CI compatibility for PR #76.
+
 ### Security
 - Employee POST/PUT responses no longer return `password_hash` or other partner secrets; mutations use an explicit safe column list aligned with GET employee detail while still hashing and persisting passwords on write — @pi-crewmate — AUD-011 / secret-handling.
 - Partner mutation receipts now omit `password` and `password_hash` at a shared response boundary, including normal updates, unchanged-source compatibility no-ops, and soft-delete responses — @codex — AUD-011 review follow-up.
