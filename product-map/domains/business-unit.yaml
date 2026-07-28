@@ -1,8 +1,10 @@
 name: Business Unit / LOB Context (Cosmetic v2)
 summary: |
+  Planned LOB target. The current baseline has no frontend /ctv route and does not redirect is_ctv users.
+  Current protected-route behavior is owned by BEHAVIOR.md section 3; the redirect statements below apply only when the LOB /ctv surface ships.
   The BusinessUnitContext (mirrors LocationContext) manages the active LOB ("dental" | "cosmetic") for admin users.
   Stored in partners.lob_scope TEXT[] (additive column on both DBs, backfilled on dental).
-  CTV partners have empty/null lob_scope + is_ctv=true; never see toggle or admin UI (hard redirect to /ctv).
+  CTV partners may have empty/null lob_scope + is_ctv=true. The current baseline applies normal protected-route permissions; the planned LOB surface will hide the toggle and redirect them to /ctv.
   Feature flag COSMETIC_LOB_ENABLED gates the entire surface (default false → 503 on cosmetic routes, toggle hidden).
   Header LOBSelector placed next to FilterByLocation; selection persisted in localStorage; triggers keyed remount of main content subtree to prevent stale dental/cosmetic data.
   All data hooks and API clients become LOB-aware: resolve to /api/cosmetic/* or legacy dental paths based on context + flag via getDb(lob) / getQuery(req).
@@ -28,12 +30,12 @@ tables:
   - tcosmetic_demo.dbo.partners (same additive columns for 1:1 handler compatibility)
 endpoints:
   - GET /api/me/lob-scope (returns { lob_scope, is_ctv, available_lobs })
-  - POST /api/Auth/login (response now includes lob_scope + is_ctv in user payload; CTV redirect)
+  - POST /api/Auth/login (response includes lob_scope + is_ctv in user payload; no baseline CTV redirect)
   - GET /api/Auth/me (augmented)
 ui_surfaces:
   - Header: LOB toggle dropdown (Dental / Cosmetic) — visible only if partner.lob_scope.length >= 2 AND flag enabled; immediately left of location filter
   - Keyed remount wrapper in Layout/App for <Outlet /> or main content (key={currentLOB})
-  - Login redirect logic: is_ctv ? '/ctv' : normal dashboard (toggle visible iff multi-scope)
+  - "Planned login redirect after /ctv ships: is_ctv=true -> /ctv; the current baseline applies normal protected-route permissions"
   - No toggle ever for CTV or single-scope users
 shared_types:
   - website/src/types/lob.ts (type LOB = 'dental' | 'cosmetic'; BusinessUnitState; etc.)
@@ -50,7 +52,7 @@ impact_tests:
   - LOB isolation: dental-scoped cannot hit cosmetic routes (403 S_LOB_FORBIDDEN)
   - Toggle remount: after switch, no stale dental data visible in cosmetic view (Playwright + keyed key check)
   - Flag off: no toggle rendered, cosmetic routes 503, dental untouched
-  - CTV never sees toggle or reaches admin surfaces
+  - "CTV baseline: is_ctv alone does not redirect; after /ctv ships, CTV users never see the toggle or reach admin surfaces"
   - Persistence: localStorage survives refresh; server state authoritative
 risk_level: high
 notes:

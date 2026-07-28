@@ -1,7 +1,9 @@
 name: CTV (Cộng tác viên / Referrer) Role & Dashboard (v2)
 summary: |
+  Planned LOB target. The current baseline has no frontend /ctv route and does not redirect is_ctv users.
+  Current protected-route behavior is owned by BEHAVIOR.md section 3; the redirect statements below apply only when the LOB /ctv surface ships.
   Dedicated role for external referrers (CTV). Flagged by partners.is_ctv = true (additive column on partners table in dental DB; mirrored in cosmetic DB).
-  CTV partners have empty lob_scope; on login hard-redirected to /ctv and 403'd on any admin route (including cosmetic/dental mirrors).
+  CTV partners may have empty lob_scope. The current baseline applies normal protected-route permissions; after the planned /ctv surface ships, login will redirect there and admin routes will deny CTV users.
   Permissions: ctv.dashboard.view, ctv.commission.view.self, ctv.referrals.view.self (and lob.crossview for admins viewing CTV data).
   Single new UI surface: mobile-first 4-tab dashboard (Home, Commission, Referrals, Me) at /ctv with bottom nav.
   /api/ctv/commission-summary aggregates earnings from BOTH physical DBs (tdental_demo.earnings + tcosmetic_demo.earnings) server-side for the authenticated CTV partner only (via recipient_partner_id).
@@ -12,7 +14,7 @@ owns:
   - website/src/pages/CTV/* (CtvDashboard, CtvHome, CtvCommission, CtvReferrals, CtvMe)
   - website/src/lib/api/ctv.ts
   - website/src/components/ctv/* (LOB pills, split bars, bottom nav)
-  - Login redirect logic in AuthContext / ProtectedRoute / LoginRoute
+  - Planned login redirect logic in AuthContext / ProtectedRoute / LoginRoute after /ctv ships
 reads:
   - tdental_demo.dbo.partners (is_ctv flag for role gating; referred_by_ctv_id for referred clients)
   - tdental_demo.dbo.earnings (CTV's rows via recipient_partner_id; D13 source)
@@ -34,26 +36,26 @@ endpoints:
   - GET /api/ctv/me (profile)
   - GET /api/ctv/* (gated)
 ui_surfaces:
-  - /ctv (full bypass of admin Layout/sidebar; mobile-first with bottom nav 4 tabs; also usable desktop)
-    - Home: greeting + pending tile (split dental/cosmetic) + this-month + recent activity feed with [den]/[cos] pills
-    - Commission: Pending/Paid segmented; earnings list (client, service, amount, LOB pill)
-    - Referrals: list of referred partners (dual LOB badges possible)
-    - Me: profile, logout
-  - Hard redirect on login for partners.is_ctv=true (before any admin mount)
-  - 403 guards on all / (admin) routes for CTV
+  - /ctv (planned full bypass of admin Layout/sidebar; mobile-first with bottom nav 4 tabs; also usable desktop)
+  - "Home tab: greeting + pending tile (split dental/cosmetic) + this-month + recent activity feed with [den]/[cos] pills"
+  - "Commission tab: Pending/Paid segmented; earnings list (client, service, amount, LOB pill)"
+  - "Referrals tab: list of referred partners (dual LOB badges possible)"
+  - "Me tab: profile, logout"
+  - Planned redirect on login for partners.is_ctv=true after the route ships (before any admin mount)
+  - Planned 403 guards on all / (admin) routes for CTV
 shared_types:
   - website/src/lib/api/ctv.ts : CtvCommissionSummary, CtvReferral, CommissionRow (with lob tag)
   - api/src/routes/ctv.js payload contracts
 dependencies:
   - Earnings (D13 engine produces the rows; CTV only reads)
-  - Auth (is_ctv flag + redirect + permission checks)
+  - Auth (is_ctv flag + current baseline handling + planned redirect and permission checks)
   - BusinessUnitContext (not used by CTV; they have no scope)
 affected_by:
   - commissionEngine changes (D13 order or earnings shape)
   - Auth me/login augmentation
   - Any partners column rename
 impact_tests:
-  - CTV login lands on /ctv, 403 on admin
+  - "Baseline: is_ctv alone does not redirect; rollout: CTV login lands on /ctv and admin routes return 403"
   - commission-summary returns live aggregated numbers from both DB earnings tables for the CTV's recipient_partner_id
   - Referred clients show correct LOB tags and status
 risk_level: high (only cross-DB surface)

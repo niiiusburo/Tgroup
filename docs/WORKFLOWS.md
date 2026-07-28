@@ -90,6 +90,8 @@ sequenceDiagram
     end
 ```
 
+**CTV baseline:** WF-001 has no `/ctv` branch until that frontend route ships; current protected-route handling is owned by `BEHAVIOR.md` §3.
+
 **Data state transitions:**
 - `partners.last_login` → current timestamp.
 - `localStorage.tgclinic_token` → new JWT string.

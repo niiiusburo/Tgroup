@@ -1,7 +1,11 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import type { AuthUser } from '../../../lib/api/auth';
 
-describe('ProtectedRoute — is_ctv redirect', () => {
+const appSource = readFileSync(resolve(__dirname, '../../../App.tsx'), 'utf8');
+
+describe('ProtectedRoute — is_ctv redirect (AUD-017)', () => {
   it('should have is_ctv field on AuthUser type', () => {
     const mockUser: AuthUser = {
       id: '1',
@@ -42,9 +46,11 @@ describe('ProtectedRoute — is_ctv redirect', () => {
     expect(mockUser.is_ctv).toBeUndefined();
   });
 
-  it('ProtectedRoute checks is_ctv and redirects to /ctv', () => {
-    // This test verifies the logic in App.tsx ProtectedRoute function
-    // The component checks: if (user?.is_ctv === true) return <Navigate to="/ctv" replace />;
+  it('does not redirect is_ctv users to /ctv until LOB ships', () => {
+    // Dead /ctv route was removed from ProtectedRoute (AUD-017).
+    expect(appSource).not.toMatch(/Navigate to=["']\/ctv["']/);
+    expect(appSource).not.toMatch(/user\?\.is_ctv\s*===\s*true/);
+
     const ctvUser: AuthUser = {
       id: '2',
       name: 'CTV User',
@@ -54,7 +60,7 @@ describe('ProtectedRoute — is_ctv redirect', () => {
       is_ctv: true,
     };
 
-    // Verify that is_ctv=true triggers redirect logic
+    // is_ctv remains on the auth type for future LOB, but must not force navigation.
     expect(ctvUser.is_ctv === true).toBe(true);
   });
 
@@ -68,7 +74,6 @@ describe('ProtectedRoute — is_ctv redirect', () => {
       is_ctv: false,
     };
 
-    // Verify that is_ctv=false does not trigger redirect
     expect(regularUser.is_ctv === true).toBe(false);
   });
 });
