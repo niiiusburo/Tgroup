@@ -35,25 +35,31 @@ function isPartnerInInvestorScope(investorScope, partnerId) {
 }
 
 /**
- * Resolve local partner for investor fail-closed checks.
- * Prefer explicit customerCode; fall back to codes embedded in image filenames.
- * Returns null when no local partner can be proven (investors must 404).
+ * Resolve local partners for investor fail-closed checks.
+ * Validate the explicit customerCode and any different customer code embedded
+ * in the image filename so a safe query value cannot mask a forbidden image.
  */
-async function resolvePartnerForInvestorScope({ customerCode, imageName }) {
-  const codes = [];
-  if (customerCode) codes.push(String(customerCode).trim());
-  if (imageName) {
-    for (const candidate of extractCustomerCodeCandidatesFromImageName(imageName)) {
-      if (!codes.includes(candidate)) codes.push(candidate);
-    }
+async function resolvePartnersForInvestorScope({ customerCode, imageName }) {
+  const partners = [];
+  const explicitCode = customerCode ? String(customerCode).trim() : '';
+  if (explicitCode) {
+    const partner = await getLocalPartner(explicitCode);
+    if (partner?.id) partners.push(partner);
   }
 
-  for (const code of codes) {
-    if (!code) continue;
-    const partner = await getLocalPartner(code);
-    if (partner?.id) return partner;
+  if (imageName) {
+    for (const candidate of extractCustomerCodeCandidatesFromImageName(imageName)) {
+      if (!candidate || candidate === explicitCode) continue;
+      const partner = await getLocalPartner(candidate);
+      if (partner?.id) {
+        if (!partners.some((item) => String(item.id) === String(partner.id))) {
+          partners.push(partner);
+        }
+        break;
+      }
+    }
   }
-  return null;
+  return partners;
 }
 
 /** INV-021: 404 when investor cannot access the customer; no PII in body. */
@@ -66,11 +72,14 @@ router.get('/images/:imageName', requireAuth, requirePermission('external_checku
     // INV-021: investors must prove the image belongs to an allowlisted customer.
     const investorScope = await resolveInvestorScope(req.user?.employeeId);
     if (investorScope.isInvestor) {
-      const partner = await resolvePartnerForInvestorScope({
+      const partners = await resolvePartnersForInvestorScope({
         customerCode: req.query.customerCode,
         imageName: req.params.imageName,
       });
-      if (!isPartnerInInvestorScope(investorScope, partner?.id)) {
+      if (
+        partners.length === 0
+        || partners.some((partner) => !isPartnerInInvestorScope(investorScope, partner.id))
+      ) {
         return investorCustomerNotFound(res);
       }
     }
@@ -100,6 +109,7 @@ router.get('/images/:imageName', requireAuth, requirePermission('external_checku
     const buffer = Buffer.from(await hosoRes.arrayBuffer());
     res.setHeader('Content-Type', hosoRes.headers.get('content-type') || 'application/octet-stream');
     res.setHeader('Cache-Control', 'private, max-age=300');
+    // nosemgrep: javascript.express.security.audit.xss.direct-response-write.direct-response-write -- Authenticated image proxy sends upstream binary bytes, not rendered HTML.
     return res.send(buffer);
   } catch (error) {
     if (error instanceof HosoAuthError) {

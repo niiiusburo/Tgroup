@@ -341,7 +341,7 @@ Lark alert contract: when `LARK_FEEDBACK_WEBHOOK_URL` is configured, `POST /api/
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/images/:imageName` | Perm:`external_checkups.view` + INV-021 investor allowlist | optional `?customerCode=` (also parses T-codes from filename) | Proxied image bytes from Hosoonline appointment media; investor outside allowlist → 404 |
+| GET | `/images/:imageName` | Perm:`external_checkups.view` + INV-021 investor allowlist | optional `?customerCode=` (also parses T-codes from filename; both are validated when resolvable) | Proxied image bytes from Hosoonline appointment media; investor outside allowlist → 404 |
 | GET | `/:customerCode` | Perm:`external_checkups.view` + INV-021 investor allowlist | — | External checkups list; investor outside allowlist → 404 |
 | POST | `/:customerCode/patient` | Perm:`external_checkups.upload` + INV-021 investor allowlist | — | Creates missing Hosoonline patient from local customer name, TDental code, and phone suffix; investor outside allowlist → 404 before side effects |
 | POST | `/:customerCode/health-checkups` | Perm:`external_checkups.upload` + INV-021 investor allowlist | FormData (`photos` repeated, required `service`/`doctor`, optional `date`/`description`/`nextAppointmentDate`/`nextDescription`) | Created checkups; investor outside allowlist → 404 before side effects |

@@ -15,13 +15,14 @@ Changed URLs / API routes / data flow:
 
 Expected behavior:
 - Investor outside allowlist gets 404 on ExternalCheckups customer/image/mutation routes with no name/phone leak and no Hosoonline side effects.
+- An allowlisted image `customerCode` query cannot mask a different forbidden T-code embedded in the filename; both resolvable sources are validated before proxying.
 - Investor StockPickings list SQL includes `sp.partnerid = ANY(...)`; detail 404s for foreign or null partners.
 - Staff without investor group are unchanged aside from StockPickings GET now requiring `settings.view`.
 
 User roles: Investor (allowlisted vs not); staff with `external_checkups.view` / `settings.view`.
 
 Execution items:
-- [x] PASS: `externalCheckupsInvestorScope.test.js` + `stockPickingsInvestorScope.test.js` + permission gate + helper suite — 40/40.
+- [x] PASS: `externalCheckupsInvestorScope.test.js` + `stockPickingsInvestorScope.test.js` + permission gate + helper suite — 41/41, including mismatched image query/filename IDOR.
 - [ ] PENDING: NK2 investor session cannot open ExternalCheckups or StockPicking detail for a non-visible customer (404).
 - [ ] PENDING: NK2 staff with settings.view still lists StockPickings; investor without settings.view gets 403 before SQL.
 

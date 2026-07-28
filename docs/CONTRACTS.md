@@ -331,7 +331,7 @@ Normal `POST /api/Partners` and `PUT /api/Partners/:id` do not assign or change 
 #### GET /api/ExternalCheckups/images/:imageName
 **Auth:** `external_checkups.view` + INV-021 investor allowlist.
 **Query:** optional `customerCode` (preferred; embedded in list image URLs). When absent, backend extracts T-codes from the image filename.
-**Behavior:** Investors must resolve to an allowlisted local partner via `customerCode` and/or filename candidates; otherwise 404 before Hosoonline proxy. Staff are unrestricted beyond the permission gate.
+**Behavior:** Investors must resolve to an allowlisted local partner via `customerCode` and/or filename candidates; otherwise 404 before Hosoonline proxy. When both sources resolve, both must be allowlisted so a safe query value cannot mask a forbidden image filename. Staff are unrestricted beyond the permission gate.
 
 #### POST /api/ExternalCheckups/:customerCode/patient
 **Auth:** `external_checkups.upload` + INV-021 investor allowlist (404 before side effects).

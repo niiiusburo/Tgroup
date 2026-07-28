@@ -176,6 +176,20 @@ describe('GET /api/ExternalCheckups/images/:imageName investor scope', () => {
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
+  it('404s when an allowlisted customerCode is paired with a forbidden embedded image code', async () => {
+    asInvestor([ALLOWED]);
+    query
+      .mockResolvedValueOnce([partnerRow(ALLOWED, ALLOWED_REF)])
+      .mockResolvedValueOnce([partnerRow(FORBIDDEN, FORBIDDEN_REF)]);
+
+    const res = await request(makeApp()).get(
+      `/api/ExternalCheckups/images/2026-04-20_T9999_IMG.jpeg?customerCode=${ALLOWED_REF}`
+    );
+
+    expect(res.status).toBe(404);
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
   it('allows investor image when customerCode query is allowlisted', async () => {
     asInvestor([ALLOWED]);
     query.mockResolvedValueOnce([partnerRow(ALLOWED, ALLOWED_REF)]);
