@@ -253,6 +253,8 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 | POST | `/services/breakdown` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { categories[], revenueByCategory[], revenueBySource[], popularProducts[] } }` |
 | POST | `/locations/comparison` | Perm:`reports.view` | `{ dateFrom?, dateTo? }` | `{ success, data: { locations[], trend[] } }` |
 
+**Investor paid-revenue scope (AUD-002 / INV-021):** `/dashboard` paid + trend, `/doctors/performance` revenue, and `/locations/comparison` revenue use `canonicalRevenue.buildWhere`. Investor sessions pass `{ isInvestor: true, allowedCustomerIds }` from `resolveInvestorScope()`. Empty `allowedCustomerIds: []` fail-closes to zero rows (`so.partnerid = ANY('{}')`); bare `isInvestor` without an allowlist array forces `FALSE`. Never omit the partner filter for investors (company-wide leak). Staff/admin omit both fields. Contract: `docs/CONTRACTS.md` v1.0.11.
+
 ## Operational Exports (`/api/Exports`)
 
 | Method | Path | Auth | Body / Query | Response |
