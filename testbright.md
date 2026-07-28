@@ -22,7 +22,7 @@ Expected behavior:
 User roles: Investor with `customers.view`; staff with face permissions.
 
 Execution items:
-- [ ] PENDING: Focused Face ID route, CompreFace request-shape, and provider tests after AUD004 review fixes.
+- [ ] PENDING: Focused Face ID route, local SQL scope, complete CompreFace prediction request, allowlisted partner hydration, and investor write-denial tests after AUD004 review fixes.
 - [ ] PENDING: Live investor session Face ID recognize of a non-allowlisted customer yields no PII (nk2 after deploy).
 - [ ] PENDING: Live investor status GET for outsider partnerId returns 404.
 

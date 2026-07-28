@@ -26,7 +26,7 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 - Existing `api/tests/faceRecognition.test.js` mocks `resolveInvestorScope` as non-investor so contract coverage stays stable — @agent — regression guard.
 
 ### Docs
-- Documented Face ID investor pre-ranking scope and write denial on the `/api/face/*` contract, INV-021 enforcement list, integrations product-map, and test matrices — @agent / @codex — AUD-004 / INV-021.
+- Documented Face ID investor pre-ranking scope and write denial on the `/api/face/*` contract, INV-021 enforcement list, dependency/schema maps, integrations product-map, test matrices, and user-facing release notes — @agent / @codex — AUD-004 / INV-021.
 
 ## [0.32.59] — 2026-07-23
 

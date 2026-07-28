@@ -66,7 +66,8 @@ function computeCentroid(embeddings) {
 }
 
 /**
- * Compare one embedding against all active customer embeddings.
+ * Compare one embedding against active customer embeddings, optionally limited
+ * to an allowed customer-id set before scoring.
  * Scoring per customer uses MAX(best-sample, centroid) so that:
  *   - A close-match to any one captured pose wins (sample-best),
  *   - AND the averaged identity also gets a vote (centroid),

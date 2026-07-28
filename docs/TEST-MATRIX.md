@@ -72,7 +72,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | `website/src/hooks/useCustomers.ts` Partner write payloads | `npm --prefix website test -- src/hooks/__tests__/useCustomers.cskh.test.ts` | Normal customer create/update payloads must omit `sourceid`; source attribution is not owned by the customer profile form. |
 | `website/src/components/forms/AddCustomerForm/` | `AddCustomerForm.test.tsx`, `website/e2e/customer-create-save.spec.ts` | New-customer intake is high-frequency workflow. |
 | `website/src/components/customer/CustomerProfile/` | `CustomerProfile.test.tsx`, `website/e2e/customer-profile-crud.spec.ts` | Profile tabs (appointments, services, payments, photos). |
-| `api/src/routes/faceRecognition.js` | `api/tests/faceRecognition.test.js`, `api/tests/faceRecognitionInvestorScope.test.js` | Face registration, re-registration, recognition, provider routing, investor pre-ranking allowlist IDOR, UUID case normalization, and investor write denial (INV-021). |
+| `api/src/routes/faceRecognition.js`, `api/src/services/faceMatchEngine.js`, `api/src/services/comprefaceClient.js`, `api/src/services/comprefaceFaceProvider.js` | `api/tests/faceRecognition.test.js`, `api/tests/faceRecognitionInvestorScope.test.js`, `api/src/services/__tests__/faceMatchEngine.test.js`, `api/src/services/__tests__/comprefaceClient.test.js`, `api/src/services/__tests__/comprefaceFaceProvider.test.js` | Face registration, re-registration, recognition, provider routing, investor pre-ranking allowlist IDOR, UUID case normalization, and investor write denial (INV-021). |
 
 ### Employees & HR
 

@@ -151,9 +151,9 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | **Primary Key** | `id` (uuid) |
 | **Key Relationships** | `partner_id` → partners(id) for the visible customer. `investor_id` may be the investor partner id on fresh installs or `investor_accounts.id` on the already-deployed NK/NK2 successor schema; `resolveInvestorScope()` must check both and filter `lob='dental'`. |
 | **W** | `api/src/routes/partners/investorVisibility.js` admin toggle |
-| **R** | `api/src/services/permissionService.js`, partner/customer read handlers, appointments, payments, services, reports, exports |
+| **R** | `api/src/services/permissionService.js`, partner/customer read handlers, Face ID recognition/status, appointments, payments, services, reports, exports |
 | **E** | `GET /api/Partners/investor-visibility`, `PATCH /api/Partners/:id/investor-visibility` |
-| **UI** | Admin-only Customer list visibility checkbox; investor Customer/Profile/Reports reads |
+| **UI** | Admin-only Customer list visibility checkbox; investor Customer/Profile/Reports/Face ID reads |
 | **Risk** | **Critical** — missing filters can disclose customer data; filters must fail closed, preserve existing allowlist rows, and never create a separate investor portal. |
 
 ### dbo.investor_accounts
@@ -473,7 +473,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | `dbo.payment_allocations` | Payments, SaleOrders residuals, CustomerBalance, TDental import scripts, service history paid/residual display |
 | `dbo.saleorders` | Service records UI, Payments (allocations), Reports, CustomerProfile |
 | `dbo.exports_audit` | Export route audit behavior, operational compliance checks |
-| `dbo.investor_clients` / `dbo.investor_accounts` | Same-portal investor login, admin customer visibility assignment, investor customer/report/export scoping |
+| `dbo.investor_clients` / `dbo.investor_accounts` | Same-portal investor login, admin customer visibility assignment, investor customer/report/export/Face ID scoping |
 | `dbo.error_events` / `dbo.error_fix_attempts` | Telemetry ingestion, Feedback auto-thread creation, AutoDebugger scripts |
 | `dbo.permission_groups` / `group_permissions` | Auth middleware, PermissionBoard, Settings RoleConfig |
 | `dbo.company_bank_settings` | BankSettingsForm, VietQrModal, `lib/vietqr.ts` |
