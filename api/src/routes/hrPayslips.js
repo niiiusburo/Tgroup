@@ -1,6 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const { addAccentInsensitiveSearchCondition } = require('../utils/search');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -10,8 +11,9 @@ const router = express.Router();
  * Returns: {offset, limit, totalItems, items[], aggregates}
  *
  * HR-01: Bảng lương (Payslip) - Payroll management
+ * Authz: employees.view (investors are not seeded this permission → 403; AUD-012)
  */
-router.get('/', async (req, res) => {
+router.get('/', requirePermission('employees.view'), async (req, res) => {
   try {
     const {
       offset = '0',
@@ -191,10 +193,10 @@ router.get('/', async (req, res) => {
 });
 
 /**
- * GET /api/HrPayslipRuns
+ * GET /api/HrPayslips/Runs
  * Returns: Payslip run periods for dropdown
  */
-router.get('/Runs', async (req, res) => {
+router.get('/Runs', requirePermission('employees.view'), async (req, res) => {
   try {
     const { offset = '0', limit = '50' } = req.query;
     const offsetNum = parseInt(offset, 10);
@@ -241,10 +243,10 @@ router.get('/Runs', async (req, res) => {
 });
 
 /**
- * GET /api/HrPayrollStructures
+ * GET /api/HrPayslips/Structures
  * Returns: Payroll structures for dropdown
  */
-router.get('/Structures', async (req, res) => {
+router.get('/Structures', requirePermission('employees.view'), async (req, res) => {
   try {
     const items = await query(
       `SELECT
@@ -279,7 +281,7 @@ router.get('/Structures', async (req, res) => {
  * GET /api/HrPayslips/:id
  * Returns: Single payslip with full details
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', requirePermission('employees.view'), async (req, res) => {
   try {
     const { id } = req.params;
 

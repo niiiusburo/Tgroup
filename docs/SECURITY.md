@@ -64,6 +64,8 @@ Effective permissions = (Group ∪ Grants) − Revokes, then filtered by locatio
 
 Investor customer scope is an additional server-side filter. If an authenticated user resolves to the `investor` group, customer-derived routes must apply `dbo.investor_clients` and return empty lists or 404s for non-allowlisted customers without disclosing existence.
 
+Payroll endpoints under `/api/HrPayslips*` require `employees.view`. Investors are not seeded that permission, so any JWT with only the investor permission set is denied with 403 before payslip SQL runs (AUD-012). Do not grant investors `employees.view` to "browse staff"; that would reopen payroll PII.
+
 ### Dangerous Permissions (Require Explicit Assignment)
 
 | Permission | Action | Why Dangerous |

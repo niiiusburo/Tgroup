@@ -11,9 +11,8 @@
 
 ## 2. Permission String Registry
 
-- **Unknown:** Is there a canonical list of all permission strings (e.g., `customers.view`, `appointments.edit`) stored anywhere other than scattered across `ROUTE_PERMISSIONS`, route middleware calls, and the database?
-  - Evidence: `ROUTE_PERMISSIONS` in `App.tsx` maps routes to strings. Backend uses `requirePermission('...')` inline. No central enum or registry file exists.
-- **Risk:** Adding a new permission feature requires manually keeping frontend route guards, backend middleware, and DB seed data in sync.
+- **Resolved owner:** `product-map/contracts/permission-registry.yaml` is the canonical documentation mapping permission strings to backend routes, frontend guards, and navigation surfaces.
+- **Runtime caveat:** Enforcement remains distributed across route middleware, frontend guards, and database seeds/migrations. Permission changes must update those consumers and follow `product-map/contracts/dependency-rules.yaml`.
 
 ## 3. `services.js` Dead Code Intent
 

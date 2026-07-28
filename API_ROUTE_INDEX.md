@@ -1,6 +1,7 @@
 # API Route Index
 
 Generated from `api/src/routes/*.js` on 2026-04-18.
+Authorization contracts are owned by `product-map/contracts/api-index.md` and `product-map/contracts/permission-registry.yaml`.
 
 | Route Module               | Method | Path                                           | Purpose                                                              | DB Tables Queried (primary)                                    |
 | -------------------------- | ------ | ---------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------- |

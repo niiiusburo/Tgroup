@@ -74,6 +74,14 @@ describe('newly-secured customer-data routes are permission-gated', () => {
     expectGate(r, 'get', '/:id/Histories', 'commission.view');
   });
 
+  it('hrPayslips routes require employees.view (investor lacks it → auto-403 payroll PII)', () => {
+    const r = require('../src/routes/hrPayslips');
+    expectGate(r, 'get', '/', 'employees.view');
+    expectGate(r, 'get', '/Runs', 'employees.view');
+    expectGate(r, 'get', '/Structures', 'employees.view');
+    expectGate(r, 'get', '/:id', 'employees.view');
+  });
+
   it('monthlyPlans mutation routes require payment.edit', () => {
     const r = require('../src/routes/monthlyPlans');
     expectGate(r, 'put', '/:id', 'payment.edit');
