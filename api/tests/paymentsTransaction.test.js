@@ -114,14 +114,21 @@ describe('POST /api/Payments transaction integrity', () => {
       ],
     }));
     expect(pool.connect).toHaveBeenCalledTimes(1);
-    expect(client.query.mock.calls.map(([sql]) => sql)).toEqual(expect.arrayContaining([
+    const clientSql = client.query.mock.calls.map(([sql]) => sql);
+    expect(clientSql).toEqual(expect.arrayContaining([
       'BEGIN',
       expect.stringContaining('INSERT INTO payments'),
       expect.stringContaining('INSERT INTO payment_allocations'),
       expect.stringContaining('UPDATE saleorders SET residual'),
       'COMMIT',
     ]));
-    expect(client.query.mock.calls.map(([sql]) => sql)).not.toContain('ROLLBACK');
+    // AUD-006: residual check must lock the saleorder row inside the same txn.
+    expect(clientSql.some((sql) =>
+      typeof sql === 'string'
+      && sql.includes('SELECT residual FROM saleorders')
+      && sql.includes('FOR UPDATE')
+    )).toBe(true);
+    expect(clientSql).not.toContain('ROLLBACK');
     expect(client.release).toHaveBeenCalledTimes(1);
     expect(query.mock.calls.some(([sql]) => sql.includes('INSERT INTO payments'))).toBe(false);
   });

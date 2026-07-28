@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.32.60",
+    "date": "2026-07-28",
+    "commit": "pending",
+    "highlights": "Money integrity: lock residuals FOR UPDATE on payment create and ban voiding payments via PATCH.",
+    "sections": [
+      {
+        "title": "Security",
+        "items": [
+          "Payment allocation now locks invoice/medical-record residual rows inside the create transaction so concurrent payments cannot double-spend the same balance.",
+          "PATCH /Payments can no longer set status=voided; staff must use the void endpoint so allocations reverse correctly."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added allocation multi-sum, residual lock, and PATCH void-ban regression coverage."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.58",
     "date": "2026-07-23",
     "commit": "pending",

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { query, pool } = require("../db");
+const { query, pool, withTransaction } = require("../db");
 const { requirePermission } = require("../middleware/auth");
 const { validate } = require("../middleware/validate");
 const { PaymentCreateSchema, PaymentUpdateSchema } = require("@tgroup/contracts");
@@ -60,8 +60,11 @@ router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema)
       receipt_number = await generateReceiptNumber("TUKH", client);
     }
 
-    // Invariant: payment.amount.not-exceeding-residual (CRITICAL)
-    const residualErr = await validateAllocationResidual(allocations, client);
+    // Invariant: payment.amount.not-exceeding-residual (CRITICAL).
+    // Runs inside BEGIN and SELECTs residual FOR UPDATE (AUD-006) so concurrent
+    // allocators cannot both pass against the same outstanding balance.
+    // `amount` is passed so multi-alloc totals cannot exceed the payment itself.
+    const residualErr = await validateAllocationResidual(allocations, client, amount);
     if (residualErr) {
       await client.query("ROLLBACK");
       return res.status(400).json({ error: residualErr });
@@ -210,11 +213,20 @@ router.post("/refund", requirePermission('payment.refund'), async (req, res) => 
   }
 });
 
-// PATCH /api/Payments/:id - Update payment
+// PATCH /api/Payments/:id - Update payment metadata (not a void path)
 router.patch("/:id", requirePermission('payment.edit'), validate(PaymentUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
+
+    // AUD-009: status=voided without reversing allocations leaves residuals wrong.
+    // Full void lives on POST /api/Payments/:id/void (or DELETE).
+    if (updates.status === 'voided') {
+      return res.status(409).json({
+        error: 'Cannot void a payment via PATCH. Use POST /api/Payments/:id/void to reverse allocations.',
+      });
+    }
+
     const allowedFields = [
       "amount",
       "method",
@@ -241,13 +253,43 @@ router.patch("/:id", requirePermission('payment.edit'), validate(PaymentUpdateSc
 
     values.push(id);
     const sql = `UPDATE payments SET ${fields.join(", ")} WHERE id = $${values.length} RETURNING *`;
-    const result = await query(sql, values);
 
-    if (result.length === 0) {
-      return res.status(404).json({ error: "Payment not found" });
+    // Lock the payment row while checking amount vs existing allocations (INV-003).
+    const outcome = await withTransaction(async (tx) => {
+      const existing = await tx("SELECT amount FROM payments WHERE id = $1 FOR UPDATE", [id]);
+      if (existing.length === 0) {
+        return { status: 404, body: { error: "Payment not found" } };
+      }
+
+      if (updates.amount !== undefined) {
+        const allocRows = await tx(
+          "SELECT COALESCE(SUM(allocated_amount), 0) AS allocated FROM payment_allocations WHERE payment_id = $1",
+          [id]
+        );
+        const allocated = parseFloat(allocRows[0]?.allocated || 0);
+        const nextAmount = parseFloat(updates.amount) || 0;
+        if (allocated > nextAmount + 0.01) {
+          return {
+            status: 409,
+            body: {
+              error: `Cannot set amount to ${nextAmount}: ${allocated} is already allocated to invoices. Reduce the allocations first.`,
+            },
+          };
+        }
+      }
+
+      const updated = await tx(sql, values);
+      if (updated.length === 0) {
+        return { status: 404, body: { error: "Payment not found" } };
+      }
+      return { status: 200, row: updated[0] };
+    });
+
+    if (outcome.status !== 200) {
+      return res.status(outcome.status).json(outcome.body);
     }
 
-    const row = result[0];
+    const row = outcome.row;
     res.json({
       id: row.id,
       customerId: row.customer_id,

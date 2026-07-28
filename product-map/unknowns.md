@@ -41,8 +41,8 @@
 
 ## 7. Payment Allocation Logic Edge Cases
 
-- **Unknown:** How does the backend handle over-allocation when a payment amount exceeds the sum of outstanding invoice residuals?
-  - Evidence: `api/src/routes/payments.js` has allocation logic, but the invariant comments and actual SQL are dense and not fully verified.
+- **Resolved (2026-07-28 / AUD-006 + AUD-009):** Over-allocation is rejected when (a) sum of allocations to one target exceeds that target's residual + 0.01, or (b) sum of allocations exceeds the payment amount + 0.01. Residual reads use `SELECT … FOR UPDATE` inside the create transaction. `PATCH` cannot set `status=voided` without reverse logic.
+  - Evidence: `api/src/routes/payments/helpers.js` `validateAllocationResidual`, `api/src/routes/payments.js` PATCH void ban, tests `paymentAllocationGuards.test.js` / `paymentPatchVoidBan.test.js` / `paymentsTransaction.test.js`.
 - **Unknown:** Are `deposit_type` values (`deposit`, `refund`, `usage`) fully enumerated and enforced at the DB level?
 
 ## 8. Report Aggregation Accuracy

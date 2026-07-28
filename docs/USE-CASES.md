@@ -259,7 +259,7 @@ When a use case is created or materially edited, add one compact `Traceability` 
   - **AF-2 Full payment:** `isFullPayment=true` flag covers entire remaining balance.
 - **Postconditions:** Invoice residual reduced; payment history updated.
 - **Invariants touched:** INV-003, INV-012.
-- **Traceability:** Related WF: WF-003, WF-010. Contracts/routes: `POST /api/Payments`. Data/tables: `dbo.payments`, `dbo.payment_allocations`, `dbo.saleorders`, `dbo.dotkhams` when allocated to a medical record. Tests: `website/src/components/payment/__tests__/PaymentForm.submit.test.tsx`, `website/src/lib/allocatePaymentSources.test.ts`, `api/tests/readRoutePermissions.test.js`; backend allocation/void/refund edge coverage remains a known gap. Product-map domains: `payments-deposits`, `services-catalog`, `customers-partners`.
+- **Traceability:** Related WF: WF-003, WF-010. Contracts/routes: `POST /api/Payments`. Data/tables: `dbo.payments`, `dbo.payment_allocations`, `dbo.saleorders`, `dbo.dotkhams` when allocated to a medical record. Tests: `website/src/components/payment/__tests__/PaymentForm.submit.test.tsx`, `website/src/lib/allocatePaymentSources.test.ts`, `api/tests/readRoutePermissions.test.js`, `api/tests/paymentAllocationGuards.test.js`, `api/tests/paymentsTransaction.test.js` (AUD-006 FOR UPDATE + multi-alloc sum). Product-map domains: `payments-deposits`, `services-catalog`, `customers-partners`.
 
 ---
 
@@ -277,7 +277,7 @@ When a use case is created or materially edited, add one compact `Traceability` 
   - **AF-1 Already voided:** Button disabled; backend idempotent.
 - **Postconditions:** Payment status = `voided`; invoice or medical-record residual is restored by the current route.
 - **Invariants touched:** INV-003 (residual non-negative). Current route behavior diverges from INV-010's immutable-allocation wording; fix the invariant or route before treating void semantics as locked.
-- **Traceability:** Related WF: WF-003. Contracts/routes: `POST /api/Payments/:id/void`, `DELETE /api/Payments/:id` legacy destructive path. Data/tables: `dbo.payments`, `dbo.payment_allocations`, `dbo.saleorders`, `dbo.dotkhams`. Tests: `api/tests/readRoutePermissions.test.js`; backend void math coverage remains a known gap. Product-map domains: `payments-deposits`.
+- **Traceability:** Related WF: WF-003. Contracts/routes: `POST /api/Payments/:id/void`, `DELETE /api/Payments/:id` legacy destructive path. `PATCH /api/Payments/:id` with `status=voided` is rejected (AUD-009) — must use POST void. Data/tables: `dbo.payments`, `dbo.payment_allocations`, `dbo.saleorders`, `dbo.dotkhams`. Tests: `api/tests/readRoutePermissions.test.js`, `api/tests/paymentPatchVoidBan.test.js`; void reverse math still thinner than create guards. Product-map domains: `payments-deposits`.
 
 ---
 

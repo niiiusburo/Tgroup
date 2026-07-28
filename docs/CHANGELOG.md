@@ -14,6 +14,21 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.60] — 2026-07-28
+
+### Security
+- Lock invoice/dotkham residual rows with `SELECT … FOR UPDATE` inside the payment create transaction before allocation (AUD-006 TOCTOU) — @firstmate — INV-003 / INV-012.
+- Reject `PATCH /api/Payments/:id` with `status=voided`; voiding must go through `POST /api/Payments/:id/void` so allocations reverse (AUD-009) — @firstmate — INV-003 / INV-010.
+
+### Fixed
+- Sum multi-allocations against the same target and against the payment amount before insert; block lowering payment amount below already-allocated total on PATCH — @firstmate — INV-003 / coordinates with PR #70 sum/multi-alloc guards.
+
+### Testing
+- Added `paymentAllocationGuards.test.js`, `paymentPatchVoidBan.test.js`, and FOR UPDATE assertion on `paymentsTransaction.test.js` — @firstmate — AUD-006 / AUD-009.
+
+### Docs
+- Documented residual lock + PATCH void ban on payment contracts, invariants, allocation business logic, and test matrix — @firstmate — INV-003 / INV-012 / AUD-006 / AUD-009.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed

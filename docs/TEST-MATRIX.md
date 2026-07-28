@@ -86,8 +86,8 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 
 | If you change... | Run these tests... | Why |
 |---|---|---|
-| `api/src/routes/payments.js` | `api/tests/readRoutePermissions.test.js`, `website/e2e/team-charlie-payments.spec.ts`, `website/src/lib/allocatePaymentSources.test.ts` | Money logic is high-risk. |
-| `api/src/routes/payments/helpers.js` | `website/src/lib/allocatePaymentSources.test.ts`, payment backend tests | Allocation math, receipt generation, residual validation. |
+| `api/src/routes/payments.js` | `api/tests/readRoutePermissions.test.js`, `api/tests/paymentsTransaction.test.js`, `api/tests/paymentPatchVoidBan.test.js`, `website/e2e/team-charlie-payments.spec.ts`, `website/src/lib/allocatePaymentSources.test.ts` | Money logic is high-risk. AUD-006 txn + AUD-009 PATCH void ban. |
+| `api/src/routes/payments/helpers.js` | `api/tests/paymentAllocationGuards.test.js`, `api/tests/paymentsTransaction.test.js`, `website/src/lib/allocatePaymentSources.test.ts` | Allocation math, FOR UPDATE residual lock, multi-alloc sum, receipt generation. |
 | `website/src/components/payment/PaymentForm.tsx` | `PaymentForm.submit.test.tsx`, `website/e2e/vietqr-payment.spec.ts` | Payment entry and mixed-method breakdown. |
 | `contracts/payment.ts` | `npm --prefix contracts run build`, `website/src/hooks/useDeposits.test.tsx`, `website/src/components/payment/PaymentHistory.test.tsx`, `website/src/components/payment/CustomerDeposits.test.tsx`, `website/e2e/team-charlie-payments.spec.ts`, `website/e2e/vietqr-payment.spec.ts` | Schema change cascades into payment method labels, deposit history, VietQR-as-bank-transfer entry, reports/export grouping, and shared package consumers. |
 | `api/src/routes/monthlyPlans.js` | `website/e2e/team-charlie-payments.spec.ts` | Installment plan payments. |
@@ -149,7 +149,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 
 | Domain | Missing Coverage | Risk |
 |---|---|---|
-| **Payments (backend allocation/void/refund)** | No backend unit tests for allocation edge cases, void logic, or refund math | **High** — money correctness relies on manual testing. |
+| **Payments (backend allocation/void/refund)** | Allocation residual FOR UPDATE + multi-alloc sum + PATCH void ban covered (`paymentAllocationGuards`, `paymentPatchVoidBan`, `paymentsTransaction`). Void reverse math and refund balance checks still thinner. | **Medium** — create/patch money guards locked; full void math still worth expanding. |
 | **Auth (backend permission resolution)** | No backend tests for `requirePermission` or `resolvePermissions` divergence | **High** — silent 403s or unauthorized access. |
 | **Reports (legacy reconciliation)** | Targeted tests now cover current revenue recognition, cash-flow classification, services breakdown, and canonical revenue SQL, but there is still no automated full reconciliation against legacy Odoo/TDental audit exports | **Medium** — financial data can still drift outside the covered route formulas. |
 | **Exports route shell** | Builder tests cover `legacyFlatReportsExport` and `reportSalesEmployeesExport`, but `/api/Exports/:type/preview` and `/api/Exports/:type/download` route-level permission filtering, audit-failure behavior, and row-limit response handling still need direct route tests | **Medium** — route wrapper behavior can drift while builder tests pass. |

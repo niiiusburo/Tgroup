@@ -35,12 +35,13 @@ If the request lacks `deposit_type` and `allocations`, and `method` is not `depo
 If `deposit_type = 'deposit'` and no `receipt_number` is provided, `generateReceiptNumber('TUKH')` is called. It upserts into `receipt_sequences (prefix, year)` and returns a zero-padded sequential number.
 
 ### Step C: Residual validation (`validateAllocationResidual`)
-For every allocation object:
-- If `invoice_id` is set, the allocated amount must not exceed `saleorders.residual + 0.01`.
-- If `dotkham_id` is set, the allocated amount must not exceed `dotkhams.amountresidual + 0.01`.
-- If validation fails, the entire request returns `400` with the specific error message.
+Runs **inside** the open payment transaction on the same client:
+1. Sum of persistable allocations may not exceed payment `amount + 0.01`.
+2. Allocations are grouped by target; the **group total** is checked (not each row alone).
+3. Residual is read with `SELECT residual … FOR UPDATE` / `SELECT amountresidual … FOR UPDATE` (AUD-006) so concurrent creates cannot double-spend the same balance. Targets are locked in stable sorted order.
+4. If validation fails, the transaction rolls back and the request returns `400`.
 
-> **Critical invariant:** A payment cannot over-allocate to a receivable.
+> **Critical invariant:** A payment cannot over-allocate to a receivable (INV-003 / INV-012).
 
 ### Step D: Insert payment row
 Standard `INSERT INTO payments` with all fields.
@@ -80,7 +81,11 @@ Same reversal as void, but physically deletes the payment row instead of marking
 Allowed fields:
 - `amount`, `method`, `notes`, `payment_date`, `reference_code`, `status`, `deposit_type`, `receipt_number`
 
-> **Important:** `PATCH` does **not** modify allocations. If an admin changes the `amount` of an allocated payment, the allocations remain unchanged and the receivable residuals are **not** recalculated. This is a known partial-update edge case.
+Guards:
+- **AUD-009:** `status = 'voided'` is rejected with **409**; callers must use `POST /api/Payments/:id/void` so allocations reverse.
+- Lowering `amount` below existing allocation sum is rejected with **409** (payment row locked `FOR UPDATE`).
+
+> **Important:** `PATCH` does **not** modify allocations. Corrections that change allocation math require void + new payment (INV-010).
 
 ## 8. Deposit Usage (`GET /api/Payments/deposit-usage`)
 

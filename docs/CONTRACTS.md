@@ -266,7 +266,7 @@ Normal `POST /api/Partners` and `PUT /api/Partners/:id` do not assign or change 
 **Behavior:** If no allocations and no serviceId, backend classifies as `deposit` (see INV-004).
 
 #### PATCH /api/Payments/:id
-**Auth:** Requires `payment.add`.
+**Auth:** Requires `payment.edit`.
 **Body:** Partial `PaymentUpdateSchema` fields:
 ```ts
 {
@@ -275,12 +275,17 @@ Normal `POST /api/Partners` and `PUT /api/Partners/:id` do not assign or change 
   notes?: string | null;
   payment_date?: string | null;
   reference_code?: string | null;
-  status?: 'posted' | 'voided' | null;
+  status?: 'posted' | null; // 'voided' rejected — use POST /void
   deposit_type?: 'deposit' | 'refund' | 'usage' | null;
   receipt_number?: string | null;
 }
 ```
 **Response:** Updated payment row. Backend rejects an empty update body.
+**Guards (AUD-009 / INV-003):**
+- `status: 'voided'` → **409** directing clients to `POST /api/Payments/:id/void` (PATCH must not void without reversing allocations).
+- Lowering `amount` below the sum of existing `payment_allocations` → **409**.
+- Payment row is locked `FOR UPDATE` during the amount check.
+**Create residual lock (AUD-006):** `POST /api/Payments` validates allocations inside the open transaction with `SELECT residual/amountresidual … FOR UPDATE`, sums multi-allocs per target, and rejects totals above the payment amount.
 
 #### DELETE /api/Payments/:id
 **Auth:** Requires `payment.void`.
