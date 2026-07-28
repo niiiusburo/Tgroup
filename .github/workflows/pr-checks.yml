@@ -87,7 +87,7 @@ jobs:
           if [[ "$BRANCH" =~ ^(main|master|ai-develop)$ ]]; then
             echo "✅ Protected branch allowed for PR"
             exit 0
-          elif [[ "$BRANCH" =~ ^(feature|feat|fix|bugfix|hotfix|release|chore|docs|refactor|fm)/.+$ ]]; then
+          elif [[ "$BRANCH" =~ ^(feature|feat|fix|bugfix|hotfix|release|chore|docs|refactor)/.+$ ]]; then
             echo "✅ Valid branch name"
             exit 0
           elif [[ "$BRANCH" =~ ^(dependabot|renovate)/.+$ ]]; then
@@ -95,7 +95,7 @@ jobs:
             exit 0
           else
             echo "❌ Invalid branch name"
-            echo "Branch must follow pattern: (feature|feat|fix|bugfix|hotfix|release|chore|docs|refactor|fm)/description"
+            echo "Branch must follow pattern: (feature|fix|hotfix|release|chore|docs|refactor)/description"
             exit 1
           fi
 

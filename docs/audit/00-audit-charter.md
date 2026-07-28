@@ -139,7 +139,7 @@ Captain holds: `/Users/thuanle/firstmate-homes/tgroup/backlog.md`.
 
 | Role | Responsibility |
 |---|---|
-| Crewmate (docs package) | Merge lane evidence → control files; spot-verify S0/S1; commit on `fm/tgroup-audit-docs` |
+| Crewmate (docs package) | Merge lane evidence → control files; spot-verify S0/S1; commit on `docs/tgroup-audit-docs` |
 | Firstmate | Gate PR / no-mistakes |
 | Captain | Decision holds in `12-unresolved-questions.md`; wave prioritization |
 

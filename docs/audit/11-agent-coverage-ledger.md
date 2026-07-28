@@ -151,7 +151,7 @@ columns and the stable MOD/FLOW/BL/CX/RK registers.
 ## 7. Tooling used (package agent)
 
 ```text
-pwd -P; git rev-parse; branch fm/tgroup-audit-docs
+pwd -P; git rev-parse; branch docs/tgroup-audit-docs
 no-mistakes doctor
 cat lane reports + backlog.md
 rg/sed/node spot checks on S0/S1 paths
