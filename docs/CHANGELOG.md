@@ -24,6 +24,7 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ### Docs
 - Mapped `products.js` / `utils/search` changes to the new Products normalizeVietnamese regression in the test matrix and services-catalog impact tests — @agent — AUD-010.
+- Updated the PR-title governance check to accept Conventional Commit scopes such as `fix(api):`, while continuing to reject unsupported or malformed title types — @codex — PR #73 CI recovery.
 
 ## [0.32.59] — 2026-07-23
 

@@ -46,28 +46,30 @@ jobs:
         with:
           script: |
             const title = context.payload.pull_request.title;
-            const validPrefixes = [
-              'feat:', 'feature:',
-              'fix:', 'bugfix:',
-              'docs:',
-              'style:',
-              'refactor:',
-              'perf:', 'performance:',
-              'test:',
-              'chore:',
-              'ci:',
-              'build:',
-              'revert:'
+            const validTypes = [
+              'feat', 'feature',
+              'fix', 'bugfix',
+              'docs',
+              'style',
+              'refactor',
+              'perf', 'performance',
+              'test',
+              'chore',
+              'ci',
+              'build',
+              'revert'
             ];
-            
-            const hasValidPrefix = validPrefixes.some(prefix => 
-              title.toLowerCase().startsWith(prefix)
+
+            const titlePattern = new RegExp(
+              `^(?:${validTypes.join('|')})(?:\\([^)\\r\\n]+\\))?:`,
+              'i'
             );
-            
-            if (!hasValidPrefix) {
+
+            if (!titlePattern.test(title)) {
               core.setFailed(
-                `PR title must start with one of: ${validPrefixes.join(', ')}\n` +
-                `Example: "feat: add login page" or "fix: resolve API timeout"`
+                `PR title must start with a supported type, optionally followed by a scope. ` +
+                `Supported types: ${validTypes.join(', ')}\n` +
+                `Example: "feat: add login page" or "fix(api): resolve API timeout"`
               );
             }
 
