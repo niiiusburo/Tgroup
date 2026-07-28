@@ -1,4 +1,5 @@
 const db = require('../../db');
+const { toSafePartnerMutationResponse } = require('./partnerResponse');
 
 const legacyQuery = db.query;
 const getRequestQuery = (req) => (
@@ -201,7 +202,7 @@ async function createPartner(req, res) {
       ]
     );
 
-    return res.status(201).json(result[0]);
+    return res.status(201).json(toSafePartnerMutationResponse(result[0]));
   } catch (err) {
     console.error('Error creating partner:', err);
     const pg = err || {};
@@ -292,7 +293,7 @@ async function updatePartner(req, res) {
     }
 
     if (updates.length === 0) {
-      if (sourceWasSubmitted) return res.json(existing[0]);
+      if (sourceWasSubmitted) return res.json(toSafePartnerMutationResponse(existing[0]));
       return res.status(400).json({ error: 'No fields to update' });
     }
 
@@ -304,7 +305,7 @@ async function updatePartner(req, res) {
       values
     );
 
-    return res.json(result[0]);
+    return res.json(toSafePartnerMutationResponse(result[0]));
   } catch (err) {
     console.error('Error updating partner:', err);
     const pg = err || {};
@@ -342,7 +343,7 @@ async function softDeletePartner(req, res) {
       return res.status(404).json({ error: 'Partner not found' });
     }
 
-    return res.json(result[0]);
+    return res.json(toSafePartnerMutationResponse(result[0]));
   } catch (err) {
     console.error('Error soft-deleting partner:', err);
     return res.status(500).json({

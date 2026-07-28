@@ -6,6 +6,8 @@ summary: |
   payments, and face-recognition flows.
 owns:
   - api/src/routes/partners.js
+  - api/src/routes/partners/mutationHandlers.js
+  - api/src/routes/partners/partnerResponse.js
   - api/src/routes/customerBalance.js
   - api/src/routes/customerReceipts.js
   - api/src/routes/customerSources.js
@@ -77,6 +79,7 @@ ui_invariants:
   - Customer phone is not a durable unique identity. Phone may overlap another phone or match a customer code (`partners.ref`) and must not block customer create/edit saves.
   - Backend customer-code generation owns `partners.ref`: dental creates use collision-checked `T######`; cosmetic creates through `/api/cosmetic/Partners` use collision-checked `TM######` against the request-scoped cosmetic DB.
   - Investor customer reads must filter by `dbo.investor_clients` server-side and fail closed for direct customer URLs that are not allowlisted.
+  - Partner mutation receipts must omit `password` and `password_hash`, including unchanged-source compatibility no-op responses.
   - Single global investor: admin visibility management (`GET`/`PATCH /investor-visibility`) is gated by `assertAdmin` (admin / super-admin / system-admin / `*`), NOT `permissions.edit`. Any admin can tick a client. `getConfiguredInvestor` resolves deterministically to the in-use investor and must NEVER 409 on duplicate/E2E accounts.
   - Admin visibility management and investor read (`resolveInvestorScope`) MUST match `dbo.investor_clients` by the SAME scope union — `investor_id` = the investor's partner id OR any of its active `investor_accounts.id`. The admin list, the tick, and the untick all use that union so the admin panel is the single source of truth for what the investor sees; an untick clears the customer under every key so a removed client cannot remain visible.
   - The customer `:id` on `PATCH /investor-visibility` is validated with the canonical 8-4-4-4-12 UUID pattern (shared with `permissionService`); a malformed pattern that dropped a group is the class of bug that silently blocked every admin tick.
@@ -94,6 +97,7 @@ affected_by:
   - Changes to dbo.companies (location name display)
   - Permission string changes (customers.view, customers.add, customers.edit, customers.delete, customers.hard_delete)
 impact_tests:
+  - api/tests/partnerMutationsPasswordHash.test.js
   - website/e2e/customer-create-save.spec.ts
   - website/e2e/customer-profile-crud.spec.ts
   - website/e2e/customer-persistence-sweep.spec.ts

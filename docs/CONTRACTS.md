@@ -182,7 +182,7 @@ PaginatedResponse<{
   // ... plus Odoo legacy fields
 }
 ```
-**Response 201:** Created partner row. The backend owns `ref` generation; dental creates use `T######`, while cosmetic creates through `/api/cosmetic/Partners` use `TM######` and check for collisions in the request-scoped database before insert.
+**Response 201:** Created partner row with `password` and `password_hash` omitted. The backend owns `ref` generation; dental creates use `T######`, while cosmetic creates through `/api/cosmetic/Partners` use `TM######` and check for collisions in the request-scoped database before insert.
 
 #### GET /api/Partners/investor-visibility
 **Auth:** Admin group only — `assertAdmin` (admin / super admin / system administrator / `*`), NOT `permissions.edit` (the Admin group does not hold it, which previously 403'd admins who could see the checkbox). Global `requireAuth` still applies.
@@ -196,9 +196,11 @@ PaginatedResponse<{
 
 #### PUT /api/Partners/:id
 **Body:** Partial partner fields. Omitted fields remain unchanged. For writable UUID fields, an explicitly submitted empty string is normalized to `null`, while an omitted field is not added to the update. `sourceid` is read-only on normal Partner mutations: clients must omit it; the backend ignores an explicitly repeated current UUID for compatibility (UUID letter case is not significant) and returns `400` with `PARTNER_SOURCE_READ_ONLY` for a changed or cleared value. `ref` cannot be changed after creation (enforced by backend).
+**Response 200:** Updated partner receipt with `password` and `password_hash` omitted, including the unchanged-source compatibility no-op path.
 
 #### PATCH /api/Partners/:id/soft-delete
 **Effect:** Sets `isdeleted = true`. Requires `customers.delete`.
+**Response 200:** Soft-deleted partner receipt with `password` and `password_hash` omitted.
 
 #### DELETE /api/Partners/:id/hard-delete
 **Effect:** Physical row removal. Requires `customers.hard_delete`.
@@ -209,7 +211,7 @@ The API response keeps legacy employee flags (`isdoctor`, `isassistant`, `isrece
 #### POST /api/Employees and PUT /api/Employees/:id
 **Auth:** `employees.edit`.
 **Body:** Employee profile fields plus optional `password` (plaintext write-only). Optional `tierId`, `locationScopeIds`, role flags, wage/allowance/jobtitle.
-**Response 201/200:** Safe employee detail projection matching GET `/api/Employees/:id` field set (plus `jobtitle` and `locationScopeIds`). MUST NOT include `password`, `password_hash`, or other partner secret columns. Password is bcrypt-hashed and stored on `partners.password_hash` when provided; absence of hash in the response does not mean the write was skipped.
+**Response 201/200:** Safe employee mutation receipt using the GET `/api/Employees/:id` key set (plus `jobtitle` and `locationScopeIds`). Joined or derived names may be `null` until the client performs a detail GET. The receipt MUST NOT include `password`, `password_hash`, or other partner secret columns. Password is bcrypt-hashed and stored on `partners.password_hash` when provided; absence of hash in the response does not mean the write was skipped. PUT returns `404` before tier/location side effects or commit when no employee row matches.
 **Coverage:** `api/tests/employeeMutationsPasswordHash.test.js` (AUD-011).
 
 #### CustomerSources and SaleOrder source attribution

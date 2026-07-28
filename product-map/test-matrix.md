@@ -115,6 +115,8 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 
 | Test File | Domain | What It Tests |
 |-----------|--------|---------------|
+| `employeeMutationsPasswordHash.test.js` | Employees / Security | AUD-011 employee POST/PUT safe receipts and bcrypt writes plus missing employee PUT rollback before side effects |
+| `partnerMutationsPasswordHash.test.js` | Customers / Security | AUD-011 Partner password-field omission on normal PUT, compatibility no-op, and soft-delete receipts |
 | `loginRateLimiter.test.js` | Auth | Login rate limiter counts failed attempts only and scopes account lockout by email plus IP |
 | `cosmeticLobImport.test.js` | Cosmetic LOB / Data Imports / Payments | UC-COS-IMPORT-01 / WF-COS-IMPORT-01: exact three-tab workbook validation, phone/branch/payment normalization, dry-run/apply planning into cosmetic partners/deposits/treatments/payments, idempotent source references, and manual-review gating for ambiguous money rows. |
 | `faceRecognition.test.js` | Integrations | Face register/recognize/re-register API in local and CompreFace provider modes |
@@ -122,7 +124,7 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 | `src/services/__tests__/comprefaceFaceProvider.test.js` | Integrations | CompreFace provider mapping from subjects to customer records, registration status, and `NO_FACE` error normalization |
 | `src/routes/appointments/__tests__/readHandlers.test.js` | Appointments | Calendar-mode appointment list allows large week ranges while skipping count/aggregate queries; normal lists remain capped |
 | `src/routes/__tests__/externalCheckups.test.js` | Integrations | Hosoonline auth header, v2 patient search path, generated patient code, and migrated ref lookup behavior |
-| `src/routes/partners/__tests__/mutationHandlers.test.js` | Customers | Customer edit allows phone values to overlap customer refs/phones while keeping UUID as identity |
+| `src/routes/partners/__tests__/mutationHandlers.test.js` | Customers | Customer mutation behavior for code prefixes, partial UUID updates, read-only source compatibility, and phone overlap while keeping UUID as identity |
 | `src/routes/partners/__tests__/readHandlers.test.js` | Customers | Customer uniqueness helper treats phone as non-blocking and keeps email duplicate checks active |
 | `src/routes/partners/__tests__/searchFilters.test.js` | Customers | Customer search matches related appointment and service order numbers |
 | `saleOrders.test.js` | Services/Payments | Sale order edits recalculate residual display from `payment_allocations` |

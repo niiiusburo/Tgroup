@@ -58,7 +58,7 @@ function buildPartnerRow(overrides = {}) {
   };
 }
 
-function makeClient({ partnerRow } = {}) {
+function makeClient({ partnerRow, employeeExists = true } = {}) {
   const row = partnerRow || buildPartnerRow();
   const client = {
     query: jest.fn(async (sql, params = []) => {
@@ -87,17 +87,20 @@ function makeClient({ partnerRow } = {}) {
           (p) => typeof p === 'string' && (p.startsWith('$2a$') || p.startsWith('$2b$'))
         );
         return {
-          rows: [
+          rows: employeeExists ? [
             buildPartnerRow({
               ...row,
               password_hash: hashParam || row.password_hash,
               lastupdated: '2026-07-23T12:00:00',
             }),
-          ],
+          ] : [],
         };
       }
       if (sql.includes('SELECT * FROM partners')) {
         return { rows: [row] };
+      }
+      if (sql.includes('FROM partners WHERE id = $1 AND employee = true')) {
+        return { rows: employeeExists ? [row] : [] };
       }
       if (sql.includes('INSERT INTO employee_location_scope')) {
         return { rows: [] };
@@ -210,5 +213,34 @@ describe('AUD-011 employee mutation password_hash leak', () => {
 
     const logged = consoleError.mock.calls.map((c) => JSON.stringify(c)).join('\n');
     expect(logged).not.toContain(PLAINTEXT_PASSWORD);
+  });
+
+  it('PUT /api/Employees/:id returns 404 before mutation side effects for a missing employee', async () => {
+    const client = makeClient({ employeeExists: false });
+
+    const res = await request(app)
+      .put(`/api/Employees/${EMPLOYEE_ID}`)
+      .send({ name: 'Missing Employee' });
+
+    expect(res.status).toBe(404);
+    const statements = client.query.mock.calls.map(([sql]) => sql);
+    expect(statements).toContain('ROLLBACK');
+    expect(statements).not.toContain('COMMIT');
+    expect(statements.some((sql) => sql.includes('employee_permissions'))).toBe(false);
+    expect(statements.some((sql) => sql.includes('employee_location_scope'))).toBe(false);
+  });
+
+  it('PUT /api/Employees/:id returns 404 for a missing employee on a scope-only update', async () => {
+    const client = makeClient({ employeeExists: false });
+
+    const res = await request(app)
+      .put(`/api/Employees/${EMPLOYEE_ID}`)
+      .send({ locationScopeIds: [] });
+
+    expect(res.status).toBe(404);
+    const statements = client.query.mock.calls.map(([sql]) => sql);
+    expect(statements).toContain('ROLLBACK');
+    expect(statements).not.toContain('COMMIT');
+    expect(statements.some((sql) => sql.includes('DELETE FROM employee_location_scope'))).toBe(false);
   });
 });

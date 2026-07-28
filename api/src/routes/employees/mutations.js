@@ -7,7 +7,7 @@ const { getVietnamNow } = require('../../lib/dateUtils');
 const router = express.Router();
 
 /**
- * Safe employee detail projection matching GET /api/Employees/:id.
+ * Safe employee mutation receipt aligned with GET /api/Employees/:id keys.
  * Never include password_hash or other secrets in mutation responses.
  * @crossref:used-in[POST /api/Employees, PUT /api/Employees/:id]
  */
@@ -288,7 +288,7 @@ router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
         values
       );
 
-      if (!result || result.length === 0) {
+      if (!result || result.rows.length === 0) {
         await client.query('ROLLBACK');
         return res.status(404).json({ error: 'Employee not found' });
       }
@@ -297,7 +297,7 @@ router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
         `SELECT ${EMPLOYEE_MUTATION_RETURNING} FROM partners WHERE id = $1 AND employee = true`,
         [id]
       );
-      if (!result || result.length === 0) {
+      if (!result || result.rows.length === 0) {
         await client.query('ROLLBACK');
         return res.status(404).json({ error: 'Employee not found' });
       }
