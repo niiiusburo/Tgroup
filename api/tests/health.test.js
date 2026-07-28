@@ -76,7 +76,7 @@ describe('GET /api/health', () => {
     expect(res.body.checks.faceService).toBe(false);
   });
 
-  it('returns degraded when both are down', async () => {
+  it('returns 503 degraded when both are down', async () => {
     query.mockRejectedValueOnce(new Error('Connection refused'));
     faceServiceHealth.mockRejectedValueOnce(new Error('ECONNREFUSED'));
 

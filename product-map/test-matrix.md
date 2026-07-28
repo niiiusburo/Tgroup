@@ -117,7 +117,10 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 |-----------|--------|---------------|
 | `loginRateLimiter.test.js` | Auth | Login rate limiter counts failed attempts only and scopes account lockout by email plus IP |
 | `cosmeticLobImport.test.js` | Cosmetic LOB / Data Imports / Payments | UC-COS-IMPORT-01 / WF-COS-IMPORT-01: exact three-tab workbook validation, phone/branch/payment normalization, dry-run/apply planning into cosmetic partners/deposits/treatments/payments, idempotent source references, and manual-review gating for ambiguous money rows. |
+| `health.test.js` | Integrations | Public `/api/health` returns 200 for a healthy DB with an optional face failure and 503 when the DB fails |
+| `nginxTimeouts.test.js` | Reports / Infrastructure | Both tracked nginx `/api` blocks retain 300s read, send, and downstream send timeouts |
 | `faceRecognition.test.js` | Integrations | Face register/recognize/re-register API in local and CompreFace provider modes |
+| `src/services/__tests__/faceRecognitionRuntime.test.js` | Integrations | Never-settling local and CompreFace health probes resolve as bounded provider failures |
 | `src/services/__tests__/comprefaceClient.test.js` | Integrations | CompreFace REST client, native multipart uploads, auth header, subject/example calls, and health check |
 | `src/services/__tests__/comprefaceFaceProvider.test.js` | Integrations | CompreFace provider mapping from subjects to customer records, registration status, and `NO_FACE` error normalization |
 | `src/routes/appointments/__tests__/readHandlers.test.js` | Appointments | Calendar-mode appointment list allows large week ranges while skipping count/aggregate queries; normal lists remain capped |

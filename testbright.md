@@ -4,6 +4,40 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 ---
 
+# TestSprite Plan: nginx export timeout + bounded API health 2026-07-28
+
+Feature/edit name: v0.32.60 — AUD-013 tracked nginx export timeouts and AUD-038 optional face-health degradation.
+
+Changed URLs / API routes / data flow:
+- Public API: `GET /api/health`.
+- Tracked proxy configuration: `nginx.conf` and `nginx.docker.conf` `/api` blocks; no live VPS nginx edit is included.
+- Data flow: health request → required `SELECT 1` database probe + selected local/CompreFace optional probe through a shared 2-second bound → HTTP status and visible `checks` payload.
+- Export flow: browser export request → tracked nginx `/api` proxy with 300s read/send/downstream send timeouts → existing API export route.
+
+Expected behavior:
+
+| Visit / action | Expected result |
+|---|---|
+| Call `/api/health` with DB and face provider up | HTTP 200, `status:"healthy"`, `checks.db:true`, `checks.faceService:true`. |
+| Call `/api/health` with DB up and face provider down or throwing | HTTP 200, `status:"degraded"`, `checks.db:true`, `checks.faceService:false`. |
+| Call `/api/health` with DB up and a never-settling local or CompreFace probe | Response completes after the shared 2-second bound with HTTP 200, `status:"degraded"`, and `checks.faceService:false`. |
+| Call `/api/health` with DB down | HTTP 503, `status:"degraded"`, `checks.db:false`, regardless of optional face state. |
+| Inspect either tracked nginx `/api` block | `proxy_read_timeout`, `proxy_send_timeout`, and `send_timeout` are each `300s`. |
+| Remove or change any required nginx timeout directive in a test fixture/change | `api/tests/nginxTimeouts.test.js` fails instead of silently accepting a 60s regression. |
+
+User roles:
+- Public uptime/readiness monitor for `/api/health`.
+- Authenticated clinic staff requesting an existing large Excel export.
+
+Execution items:
+- [ ] PENDING: Focused Jest for `api/tests/health.test.js`, `api/src/services/__tests__/faceRecognitionRuntime.test.js`, and `api/tests/nginxTimeouts.test.js`.
+- [ ] PENDING: Pipeline documentation-governance check confirms contract, product-map, test-matrix, changelog, and this ledger entry remain aligned.
+- [ ] PENDING: Live VPS timeout and health verification is explicitly out of scope for this local review phase.
+
+Setup/login data: No login is required for `/api/health` or config assertions. Existing authorized export fixtures may be used in later E2E verification; do not add or expose credentials.
+
+---
+
 # TestSprite Plan: partner source read-only boundary 2026-07-23
 
 Feature/edit name: v0.32.59 — omission-safe partial customer updates and read-only `partners.sourceid` on normal customer writes.
