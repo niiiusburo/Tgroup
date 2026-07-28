@@ -28,8 +28,8 @@
 | RK-022 | Catalog | Broken Products POST/PUT (missing import) | S1 | Certain on write | AUD-010 | One-line import fix | Open |
 | RK-023 | HR | password_hash in employee mutation responses | S1 | Certain on write | AUD-011 | Strip RETURNING columns | Open |
 | RK-024 | Exports | Missing nginx 300s timeouts vs INV-019 | S1 | High on large export | AUD-013 | Fix nginx templates | Open |
-| RK-025 | Attachments | Unauth feedback static + weak upload validation | S2–S3 | Medium if URLs leak | AUD-035, AUD-066 | Captain access model + harden upload | Blocked / Open |
-| RK-026 | Appointments | Status collapse done→arrived; double-book; name race | S2 | Medium | AUD-051–053 | Captain policies + eng fixes | Partial blocked |
+| RK-025 | Attachments | Unauth feedback static + weak upload validation | S2–S3 | Medium if URLs leak | AUD-035, AUD-066 | Captain access model + harden upload | Blocked |
+| RK-026 | Appointments | Status collapse done→arrived; double-book; name race | S2 | Medium | AUD-051–053 | Captain policies + eng fixes | Blocked |
 | RK-027 | False green | enterprise-verification path bug hides dead FE client | S2 | Certain in CI | AUD-042 | Fix path assert | Open |
 
 ---

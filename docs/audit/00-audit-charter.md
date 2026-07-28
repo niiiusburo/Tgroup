@@ -88,10 +88,7 @@ Prefer **code over stale markdown**. Every finding cites lane IDs and paths.
 | Status | Meaning |
 |---|---|
 | **Open** | Confirmed, not fixed on baseline |
-| **Accepted risk** | Captain explicitly accepts |
 | **Blocked** | Waiting on captain decision |
-| **Fixed** | Verified on a later SHA (not this baseline) |
-| **Duplicate** | Merged into another AUD row |
 
 ---
 
@@ -141,7 +138,7 @@ Captain holds: `/Users/thuanle/firstmate-homes/tgroup/backlog.md`.
 
 | Role | Responsibility |
 |---|---|
-| Crewmate (docs package) | Merge lane evidence → control files; spot-verify S0/S1; commit on `fm/tgroup-audit-docs` |
+| Crewmate (docs package) | Merge lane evidence → control files; spot-verify S0/S1; commit on `docs/tgroup-audit-docs` |
 | Firstmate | Gate PR / no-mistakes |
 | Captain | Decision holds in `12-unresolved-questions.md`; wave prioritization |
 

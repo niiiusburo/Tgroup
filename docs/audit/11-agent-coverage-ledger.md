@@ -61,7 +61,7 @@ Pre-existing historical files under `docs/audit/` (**preserved, not deleted**):
 
 | # | AUD | Evidence path | Method | Result |
 |---|---|---|---|---|
-| 1 | AUD-002 | `api/src/services/canonicalRevenue.js` | read allowlist branch | **Confirmed** filter only if `.length` |
+| 1 | AUD-002 | `api/src/services/reports/canonicalRevenue.js` | read allowlist branch | **Confirmed** filter only if `.length` |
 | 2 | AUD-006 | `api/src/routes/payments/helpers.js` | rg FOR UPDATE; read residual SELECT | **Confirmed** no row lock |
 | 3 | AUD-009 | `api/src/routes/payments.js` PATCH `allowedFields` | read | **Confirmed** `status` patchable |
 | 4 | AUD-010 | `api/src/routes/products.js` | head imports; rg normalizeVietnamese | **Confirmed** call sans import |
@@ -116,7 +116,7 @@ No spot-check **refuted** a lane S0/S1 claim. Values of secrets were **not** cop
 ## 7. Tooling used (package agent)
 
 ```text
-pwd -P; git rev-parse; branch fm/tgroup-audit-docs
+pwd -P; git rev-parse; branch docs/tgroup-audit-docs
 no-mistakes doctor
 cat lane reports + backlog.md
 rg/sed/node spot checks on S0/S1 paths

@@ -25,7 +25,7 @@ On this pin the clinic portal is a **real, authenticated, single-DB dental opera
 | S2 | ~41 |
 | S3–S4 | condensed remainder |
 | Captain decision holds | 20 (see `12-unresolved-questions.md`) |
-| Spot-verified S0/S1 paths | 10 (≥5 required) |
+| Spot-verified S0/S1 paths | 11 (≥5 required) |
 | LOB runtime on pin | **Absent** |
 | Full test suites run as gate | **No** (commands inventoried only) |
 | Production access | **None** |

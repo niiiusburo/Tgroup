@@ -24,7 +24,7 @@
 | S2 | ~41 |
 | S3–S4 | condensed remainder |
 | Captain holds | 20 |
-| Spot-verified S0/S1 paths | 10 |
+| Spot-verified S0/S1 paths | 11 |
 | LOB runtime present | **No** |
 | Dual-DB pool present | **No** |
 | Full CI suites executed as gate | **No** |
@@ -41,7 +41,7 @@ See `00-audit-charter.md`. Mission: durable evidence-based control set for remed
 
 ## 2. Baseline and method
 
-- Clean detached HEAD at pin; branch `fm/tgroup-audit-docs` for docs only.  
+- Clean detached HEAD at pin; branch `docs/tgroup-audit-docs` for docs only.
 - Read all lane `report.md` files and captain `backlog.md`.  
 - Merge duplicates into AUD IDs; keep lane IDs in Evidence.  
 - Spot-verify ≥5 S0/S1 paths in worktree (11 paths checked; all confirmed).  
@@ -277,7 +277,7 @@ See `13-research-opportunities.md` (R-001–012): report truth, LOB pin forensic
 
 | Item | Value |
 |---|---|
-| Branch | `fm/tgroup-audit-docs` |
+| Branch | `docs/tgroup-audit-docs` |
 | Code/runtime changes | **None** |
 | Dependency changes | **None** |
 | Migration changes | **None** |

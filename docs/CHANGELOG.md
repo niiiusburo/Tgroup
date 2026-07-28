@@ -14,6 +14,11 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [Unreleased] — 2026-07-28
+
+### Docs
+- Added the captain-mandated forensic audit control package, including the consolidated findings, contradictions, risks, remediation roadmap, coverage ledger, unresolved holds, and final report — @codex — baseline `22d691535`.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed
