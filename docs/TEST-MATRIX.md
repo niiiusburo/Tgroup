@@ -74,6 +74,13 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | `website/src/components/customer/CustomerProfile/` | `CustomerProfile.test.tsx`, `website/e2e/customer-profile-crud.spec.ts` | Profile tabs (appointments, services, payments, photos). |
 | `api/src/routes/faceRecognition.js` | `api/tests/faceRecognition.test.js` | Face registration, re-registration, recognition, and provider routing. |
 
+### Services Catalog
+
+| If you change... | Run these tests... | Why |
+|---|---|---|
+| `api/src/routes/products.js` POST/PUT name normalization | `npm --prefix api exec -- jest tests/productsNormalizeVietnamese.test.js --runInBand` | AUD-010 / G-F001: create/update must import `normalizeVietnamese` from `utils/search` and persist accent-stripped `namenosign` for Vietnamese catalog names. |
+| `api/src/utils/search.js` | `npm --prefix api exec -- jest src/utils/search.test.js tests/productsNormalizeVietnamese.test.js --runInBand` | Shared accent-insensitive helper is used by product create/update and list search. |
+
 ### Employees & HR
 
 | If you change... | Run these tests... | Why |
