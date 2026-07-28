@@ -4,6 +4,28 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 ---
 
+# TestSprite Plan: AUD-017 remove dead CTV redirect 2026-07-28
+
+Feature/edit name: v0.32.60 — stop redirecting `is_ctv` users to missing `/ctv` route.
+
+Changed URLs / API routes / data flow:
+- Frontend: `ProtectedRoute` in `website/src/App.tsx` no longer navigates to `/ctv`.
+- No API or backend change.
+
+Expected behavior:
+- Authenticated users with `is_ctv===true` stay on the requested protected route (subject to normal permission checks).
+- No client navigation to `/ctv` until LOB ships a real CTV route.
+
+User roles: Any authenticated staff/partner with `is_ctv` true or false.
+
+Execution items:
+- [x] PASS: `protectedRoute.ctvRedirect.test.tsx` — 5/5; asserts App.tsx has no `/ctv` Navigate for `is_ctv`.
+- [ ] PENDING: Manual login as CTV-flagged user lands on requested app route, not blank `/ctv`.
+
+Setup/login data: Local/dev account with `is_ctv=true` if available; otherwise unit test is the primary gate.
+
+---
+
 # TestSprite Plan: partner source read-only boundary 2026-07-23
 
 Feature/edit name: v0.32.59 — omission-safe partial customer updates and read-only `partners.sourceid` on normal customer writes.

@@ -14,6 +14,14 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.60] — 2026-07-28
+
+### Fixed
+- Remove dead `ProtectedRoute` redirect of `is_ctv===true` users to `/ctv` (no route on this baseline) until LOB ships — @agent — AUD-017.
+
+### Testing
+- Adjusted `protectedRoute.ctvRedirect.test.tsx` to assert App.tsx no longer navigates CTV users to `/ctv` — @agent — AUD-017.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed
