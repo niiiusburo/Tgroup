@@ -374,13 +374,13 @@ Normal `POST /api/Partners` and `PUT /api/Partners/:id` do not assign or change 
 }
 ```
 
-**Investor scope (INV-021):** When the caller resolves to the `investor` group, the allowlisted partner ids constrain provider hydration and ranking before `match` and `candidates` are selected. A hidden customer cannot suppress an allowlisted second-best result, and the response is filtered again before return. An empty allowlist fails closed to `{ match: null, candidates: [] }` with no name/phone disclosure. Non-investor staff are unscoped.
+**Investor scope (INV-021):** When the caller resolves to the `investor` group, the allowlisted partner ids constrain provider hydration and ranking before `match` and `candidates` are selected. The CompreFace path requests the complete subject ranking with `prediction_count=2147483647` before locally hydrating allowlisted partners, so a hidden customer cannot suppress an allowlisted second-best result. The response is filtered again before return. An empty allowlist fails closed to `{ match: null, candidates: [] }` without calling the provider or disclosing name/phone. Non-investor staff retain the default unscoped provider request.
 
 **Investor status and write policy:** `GET /api/face/status/:partnerId` returns 404 `PARTNER_NOT_FOUND` when the customer is outside the investor allowlist. `POST /api/face/register` and `POST /api/face/re-register` return 403 `FORBIDDEN` for every investor, even when an effective permission override grants `customers.edit` and the customer is allowlisted. No face provider or database mutation is reached.
 
 Provider behavior:
 - `FACE_RECOGNITION_PROVIDER=local` sends captures to `FACE_SERVICE_URL` for SFace embeddings and stores vectors in `dbo.customer_face_embeddings`.
-- `FACE_RECOGNITION_PROVIDER=compreface` sends captures to CompreFace, uses `partners.id` as the CompreFace subject, and keeps `partners.face_subject_id` / `face_registered_at` as TGClinic status.
+- `FACE_RECOGNITION_PROVIDER=compreface` sends captures to CompreFace, uses `partners.id` as the CompreFace subject, and keeps `partners.face_subject_id` / `face_registered_at` as TGClinic status. Investor recognition requests all subject predictions before allowlist hydration; staff recognition keeps CompreFace's default single prediction.
 
 Face error responses:
 ```ts

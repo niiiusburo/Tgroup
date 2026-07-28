@@ -37,6 +37,10 @@ describe('comprefaceFaceProvider', () => {
 
     const result = await provider.recognizeFace(Buffer.from('face'), 'image/jpeg');
 
+    expect(comprefaceClient.recognize).toHaveBeenCalledWith(
+      expect.any(Buffer),
+      'image/jpeg'
+    );
     expect(result.match.partnerId).toBe('partner-1');
     expect(result.match.confidence).toBe(0.93);
     expect(result.candidates).toEqual([]);
@@ -78,6 +82,11 @@ describe('comprefaceFaceProvider', () => {
       [ALLOWED_CUSTOMER_ID]
     );
 
+    expect(comprefaceClient.recognize).toHaveBeenCalledWith(
+      expect.any(Buffer),
+      'image/jpeg',
+      2147483647
+    );
     expect(query).toHaveBeenCalledWith(
       expect.stringContaining('p.id = ANY($2::uuid[])'),
       [[HIDDEN_CUSTOMER_ID, ALLOWED_CUSTOMER_ID], [ALLOWED_CUSTOMER_ID]]
@@ -93,6 +102,7 @@ describe('comprefaceFaceProvider', () => {
 
     const result = await provider.recognizeFace(Buffer.from('face'), 'image/jpeg', []);
 
+    expect(comprefaceClient.recognize).not.toHaveBeenCalled();
     expect(query).not.toHaveBeenCalled();
     expect(result).toEqual({ match: null, candidates: [] });
   });

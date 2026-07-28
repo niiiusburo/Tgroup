@@ -87,6 +87,33 @@ describe('comprefaceClient', () => {
       expect(request.headers).not.toHaveProperty('content-type');
     });
 
+    it('requests the configured number of subject predictions', async () => {
+      const { recognize } = loadClient({
+        COMPREFACE_URL: 'http://compreface-test',
+        COMPREFACE_API_KEY: 'secret-key',
+      });
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        text: async () => JSON.stringify({ result: [{ subjects: [] }] }),
+      });
+
+      await recognize(Buffer.from('img'), 'image/jpeg', 2147483647);
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'http://compreface-test/api/v1/recognition/recognize?prediction_count=2147483647',
+        expect.objectContaining({ method: 'POST' }),
+      );
+    });
+
+    it('rejects invalid prediction counts before sending a request', async () => {
+      const { recognize } = loadClient();
+
+      await expect(recognize(Buffer.from('img'), 'image/jpeg', 0)).rejects.toThrow(
+        'predictionCount must be a positive integer',
+      );
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
     it('uses default compreface URL and empty API key when env vars are missing', async () => {
       const { recognize } = loadClient({});
       fetchSpy.mockResolvedValue({

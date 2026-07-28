@@ -45,12 +45,23 @@ function createImageForm(imageBuffer, mimetype, fields = {}) {
  * Recognize a face in an image buffer.
  * @param {Buffer} imageBuffer
  * @param {string} [mimetype='image/jpeg']
+ * @param {number} [predictionCount]
  * @returns {Promise<Array<{subject: string, similarity: number}>>}
  */
-async function recognize(imageBuffer, mimetype = 'image/jpeg') {
-  const form = createImageForm(imageBuffer, mimetype);
+async function recognize(imageBuffer, mimetype = 'image/jpeg', predictionCount) {
+  if (
+    predictionCount !== undefined &&
+    (!Number.isInteger(predictionCount) || predictionCount < 1)
+  ) {
+    throw new RangeError('predictionCount must be a positive integer');
+  }
 
-  const data = await comprefaceFetch('/recognize', {
+  const form = createImageForm(imageBuffer, mimetype);
+  const path = predictionCount === undefined
+    ? '/recognize'
+    : `/recognize?prediction_count=${predictionCount}`;
+
+  const data = await comprefaceFetch(path, {
     method: 'POST',
     body: form,
   });

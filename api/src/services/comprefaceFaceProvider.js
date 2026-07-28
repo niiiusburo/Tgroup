@@ -12,6 +12,7 @@ const AUTO_MATCH_THRESHOLD = parseFloat(process.env.FACE_AUTO_MATCH_THRESHOLD ||
 const CANDIDATE_THRESHOLD = parseFloat(process.env.FACE_CANDIDATE_THRESHOLD || "0.80");
 const AUTO_MATCH_MARGIN = parseFloat(process.env.FACE_AUTO_MATCH_MARGIN || "0.03");
 const MAX_CANDIDATES = parseInt(process.env.FACE_MAX_CANDIDATES || "3", 10);
+const ALL_SUBJECTS_PREDICTION_COUNT = 2147483647;
 
 class ComprefaceFaceError extends Error {
   constructor(code, message, status = 500) {
@@ -83,9 +84,16 @@ async function loadPartnersBySubjects(subjects, allowedCustomerIds) {
 }
 
 async function recognizeFace(imageBuffer, mimetype, allowedCustomerIds) {
+  const scoped = Array.isArray(allowedCustomerIds);
+  if (scoped && allowedCustomerIds.length === 0) {
+    return { match: null, candidates: [] };
+  }
+
   let rawResults;
   try {
-    rawResults = await recognize(imageBuffer, mimetype);
+    rawResults = scoped
+      ? await recognize(imageBuffer, mimetype, ALL_SUBJECTS_PREDICTION_COUNT)
+      : await recognize(imageBuffer, mimetype);
   } catch (err) {
     throw mapComprefaceFailure(
       err,
