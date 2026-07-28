@@ -71,7 +71,7 @@ impact_tests:
   - website/src/components/customer/AuthenticatedCheckupImage.test.tsx
 risk_level: medium
 notes:
-  - Face ID routes apply INV-021 investor customer allowlist via resolveInvestorScope: recognize filters match/candidates; status/register/re-register 404 outside allowlist (fail-closed).
+  - Face ID routes apply INV-021 via resolveInvestorScope: recognize constrains local SQL or CompreFace partner hydration before ranking and filters responses again; status 404s outside the case-insensitive allowlist; register/re-register reject every investor with 403 before mutation.
   - Lark feedback alerts are optional and env-gated. The API process posts a text alert to the configured T-Group custom bot webhook only after a manual feedback thread or auto-detected telemetry feedback thread has committed locally.
   - `FACE_RECOGNITION_PROVIDER=local` uses the Python FastAPI face-service with OpenCV YuNet (detection) and SFace (128-dim embedding extraction).
   - `FACE_RECOGNITION_PROVIDER=compreface` uses CompreFace recognition subjects keyed by `partners.id`; TGClinic still updates `partners.face_subject_id` and `face_registered_at`.

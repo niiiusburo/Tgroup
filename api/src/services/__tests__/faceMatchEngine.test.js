@@ -62,6 +62,21 @@ describe('findMatches', () => {
     const result = await findMatches([0.1, 0.2, 0.3]);
     expect(result.match).toBeNull();
     expect(result.candidates).toEqual([]);
+    expect(query).toHaveBeenCalledWith(expect.not.stringContaining('ANY($1::uuid[])'));
+  });
+
+  it('limits the SQL ranking pool to allowed customer ids', async () => {
+    const { findMatches, query } = loadEngine();
+    const allowedCustomerIds = ['aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'];
+    query.mockResolvedValueOnce([]);
+
+    const result = await findMatches([0.1, 0.2, 0.3], allowedCustomerIds);
+
+    expect(result).toEqual({ match: null, candidates: [] });
+    expect(query).toHaveBeenCalledWith(
+      expect.stringContaining('cfe.partner_id = ANY($1::uuid[])'),
+      [allowedCustomerIds]
+    );
   });
 
   it('returns no-match when DB query returns null', async () => {

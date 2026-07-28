@@ -15,6 +15,9 @@ const comprefaceClient = require('../comprefaceClient');
 const { query } = require('../../db');
 const provider = require('../comprefaceFaceProvider');
 
+const ALLOWED_CUSTOMER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+const HIDDEN_CUSTOMER_ID = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+
 describe('comprefaceFaceProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -52,6 +55,46 @@ describe('comprefaceFaceProvider', () => {
     expect(result.match).toBeNull();
     expect(result.candidates).toHaveLength(1);
     expect(result.candidates[0].partnerId).toBe('partner-1');
+  });
+
+  it('hydrates and ranks only allowlisted customers when scoped', async () => {
+    comprefaceClient.recognize.mockResolvedValue([
+      { subject: HIDDEN_CUSTOMER_ID, similarity: 0.99 },
+      { subject: ALLOWED_CUSTOMER_ID, similarity: 0.93 },
+    ]);
+    query.mockResolvedValue([
+      {
+        id: ALLOWED_CUSTOMER_ID,
+        name: 'Alice',
+        phone: '0901',
+        code: 'T001',
+        face_subject_id: ALLOWED_CUSTOMER_ID,
+      },
+    ]);
+
+    const result = await provider.recognizeFace(
+      Buffer.from('face'),
+      'image/jpeg',
+      [ALLOWED_CUSTOMER_ID]
+    );
+
+    expect(query).toHaveBeenCalledWith(
+      expect.stringContaining('p.id = ANY($2::uuid[])'),
+      [[HIDDEN_CUSTOMER_ID, ALLOWED_CUSTOMER_ID], [ALLOWED_CUSTOMER_ID]]
+    );
+    expect(result.match.partnerId).toBe(ALLOWED_CUSTOMER_ID);
+    expect(result.candidates).toEqual([]);
+  });
+
+  it('fails closed without hydrating subjects for an empty allowlist', async () => {
+    comprefaceClient.recognize.mockResolvedValue([
+      { subject: HIDDEN_CUSTOMER_ID, similarity: 0.99 },
+    ]);
+
+    const result = await provider.recognizeFace(Buffer.from('face'), 'image/jpeg', []);
+
+    expect(query).not.toHaveBeenCalled();
+    expect(result).toEqual({ match: null, candidates: [] });
   });
 
   it('maps Compreface recognize no-face responses to NO_FACE instead of engine error', async () => {

@@ -77,15 +77,21 @@ function computeCentroid(embeddings) {
  *   match: best customer when auto-match rules pass
  *   candidates: up to MAX_CANDIDATES when plausible but not safe
  */
-async function findMatches(embedding) {
-  const rows = await query(
+async function findMatches(embedding, allowedCustomerIds) {
+  const scoped = Array.isArray(allowedCustomerIds);
+  const scopeSql = scoped
+    ? '\n       AND cfe.partner_id = ANY($1::uuid[])'
+    : '';
+  const sql =
     `SELECT cfe.partner_id, cfe.embedding, p.name, p.phone, p.ref AS code
      FROM dbo.customer_face_embeddings cfe
      JOIN dbo.partners p ON p.id = cfe.partner_id
      WHERE cfe.is_active = true
-       AND p.isdeleted = false
-     ORDER BY cfe.partner_id`
-  );
+       AND p.isdeleted = false${scopeSql}
+     ORDER BY cfe.partner_id`;
+  const rows = scoped
+    ? await query(sql, [allowedCustomerIds])
+    : await query(sql);
 
   if (!rows || rows.length === 0) {
     return { match: null, candidates: [] };

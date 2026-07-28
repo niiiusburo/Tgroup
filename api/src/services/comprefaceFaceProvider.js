@@ -60,15 +60,18 @@ function mapComprefaceFailure(err, fallbackCode, fallbackMessage) {
   );
 }
 
-async function loadPartnersBySubjects(subjects) {
-  if (!subjects.length) return new Map();
+async function loadPartnersBySubjects(subjects, allowedCustomerIds) {
+  const scoped = Array.isArray(allowedCustomerIds);
+  if (!subjects.length || (scoped && allowedCustomerIds.length === 0)) return new Map();
 
+  const scopeSql = scoped ? "\n       AND p.id = ANY($2::uuid[])" : "";
+  const params = scoped ? [subjects, allowedCustomerIds] : [subjects];
   const rows = await query(
-    `SELECT id, name, phone, ref AS code, face_subject_id
-     FROM dbo.partners
-     WHERE isdeleted = false
-       AND (id::text = ANY($1::text[]) OR face_subject_id = ANY($1::text[]))`,
-    [subjects]
+    `SELECT p.id, p.name, p.phone, p.ref AS code, p.face_subject_id
+     FROM dbo.partners p
+     WHERE p.isdeleted = false
+       AND (p.id::text = ANY($1::text[]) OR p.face_subject_id = ANY($1::text[]))${scopeSql}`,
+    params
   );
 
   const bySubject = new Map();
@@ -79,7 +82,7 @@ async function loadPartnersBySubjects(subjects) {
   return bySubject;
 }
 
-async function recognizeFace(imageBuffer, mimetype) {
+async function recognizeFace(imageBuffer, mimetype, allowedCustomerIds) {
   let rawResults;
   try {
     rawResults = await recognize(imageBuffer, mimetype);
@@ -91,7 +94,7 @@ async function recognizeFace(imageBuffer, mimetype) {
     );
   }
   const subjects = [...new Set(rawResults.map((r) => String(r.subject)).filter(Boolean))];
-  const partnersBySubject = await loadPartnersBySubjects(subjects);
+  const partnersBySubject = await loadPartnersBySubjects(subjects, allowedCustomerIds);
 
   const byPartner = new Map();
   for (const result of rawResults) {

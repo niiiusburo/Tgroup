@@ -62,7 +62,7 @@ Staff → /login form → POST /api/Auth/login
 
 Effective permissions = (Group ∪ Grants) − Revokes, then filtered by location scope at the UI level. The employee revenue export is a named exception: `companyId=all` means full extraction for accounts with `reports.export`, while explicit branch selections still validate against the caller's location scope unless `*` is present.
 
-Investor customer scope is an additional server-side filter. If an authenticated user resolves to the `investor` group, customer-derived routes must apply `dbo.investor_clients` and return empty lists or 404s for non-allowlisted customers without disclosing existence. Face ID is included: `POST /api/face/recognize` filters `match`/`candidates` to the allowlist (no name/phone leak for outsiders), and `GET /api/face/status/:partnerId` plus register/re-register return 404 outside the allowlist.
+Investor customer scope is an additional server-side filter. If an authenticated user resolves to the `investor` group, customer-derived routes must apply `dbo.investor_clients` and return empty lists or 404s for non-allowlisted customers without disclosing existence. Face ID is included: `POST /api/face/recognize` constrains provider hydration/ranking and filters `match`/`candidates` to the allowlist (no name/phone leak for outsiders), while `GET /api/face/status/:partnerId` returns 404 outside the allowlist. Face register/re-register return 403 for every investor before provider or database mutation, including investors granted `customers.edit` by an override.
 
 ### Dangerous Permissions (Require Explicit Assignment)
 

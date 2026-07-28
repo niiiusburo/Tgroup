@@ -3,10 +3,11 @@
 /**
  * Face recognition investor IDOR scoping — behavioral proof (AUD-004).
  *
- * Face recognize/status/register/re-register return customer PII (name/phone)
- * and must apply resolveInvestorScope fail-closed:
+ * Face recognize/status return customer PII (name/phone) and must apply
+ * resolveInvestorScope fail-closed:
  *   - recognize: filter match + candidates to allowlist (no leakage of outsiders)
- *   - status/register/re-register: 404 when partnerId is outside allowlist
+ *   - status: 404 when partnerId is outside allowlist
+ *   - register/re-register: investors are read-only even when allowlisted
  *   - staff: no extra filtering
  */
 
@@ -72,10 +73,16 @@ const request = require('supertest');
 const express = require('express');
 const { query } = require('../src/db');
 const { getEmbedding } = require('../src/services/faceEngineClient');
-const { findMatches, registerSample, getFaceStatus } = require('../src/services/faceMatchEngine');
+const {
+  findMatches,
+  registerSample,
+  replaceAllSamples,
+  getFaceStatus,
+} = require('../src/services/faceMatchEngine');
+const comprefaceFaceProvider = require('../src/services/comprefaceFaceProvider');
 
-const ALLOWED = 'allowed-customer-id';
-const FORBIDDEN = 'forbidden-customer-id';
+const ALLOWED = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+const FORBIDDEN = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 
 function makeApp() {
   // nosemgrep: javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage -- isolated Jest route harness, not a production Express app.
@@ -129,10 +136,16 @@ describe('POST /api/face/recognize investor scoping', () => {
     expect(mockResolveInvestorScope).toHaveBeenCalledWith('investor-1');
   });
 
-  it('keeps an allowlisted match', async () => {
+  it('keeps an allowlisted match when UUID casing differs', async () => {
     asInvestor();
     findMatches.mockResolvedValue({
-      match: { partnerId: ALLOWED, name: 'Alice', code: 'T001', phone: '0901', confidence: 0.9 },
+      match: {
+        partnerId: ALLOWED.toUpperCase(),
+        name: 'Alice',
+        code: 'T001',
+        phone: '0901',
+        confidence: 0.9,
+      },
       candidates: [],
     });
 
@@ -142,8 +155,44 @@ describe('POST /api/face/recognize investor scoping', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.match).toEqual(
-      expect.objectContaining({ partnerId: ALLOWED, name: 'Alice', phone: '0901' })
+      expect.objectContaining({ partnerId: ALLOWED.toUpperCase(), name: 'Alice', phone: '0901' })
     );
+  });
+
+  it('passes the normalized allowlist into local ranking before matching', async () => {
+    asInvestor([ALLOWED.toUpperCase()]);
+    findMatches.mockResolvedValue({ match: null, candidates: [] });
+
+    const res = await request(makeApp())
+      .post('/api/face/recognize')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg');
+
+    expect(res.status).toBe(200);
+    expect(findMatches).toHaveBeenCalledWith([0.1, 0.2, 0.3], [ALLOWED]);
+    expect(mockResolveInvestorScope.mock.invocationCallOrder[0])
+      .toBeLessThan(findMatches.mock.invocationCallOrder[0]);
+  });
+
+  it('passes the normalized allowlist into CompreFace ranking before matching', async () => {
+    process.env.FACE_RECOGNITION_PROVIDER = 'compreface';
+    asInvestor([ALLOWED.toUpperCase()]);
+    comprefaceFaceProvider.recognizeFace.mockResolvedValue({
+      match: { partnerId: ALLOWED, name: 'Alice', code: 'T001', phone: '0901', confidence: 0.9 },
+      candidates: [],
+    });
+
+    const res = await request(makeApp())
+      .post('/api/face/recognize')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg');
+
+    expect(res.status).toBe(200);
+    expect(comprefaceFaceProvider.recognizeFace).toHaveBeenCalledWith(
+      expect.any(Buffer),
+      'image/jpeg',
+      [ALLOWED]
+    );
+    expect(mockResolveInvestorScope.mock.invocationCallOrder[0])
+      .toBeLessThan(comprefaceFaceProvider.recognizeFace.mock.invocationCallOrder[0]);
   });
 
   it('filters candidates to the allowlist only', async () => {
@@ -210,7 +259,7 @@ describe('GET /api/face/status/:partnerId investor scoping', () => {
     expect(getFaceStatus).not.toHaveBeenCalled();
   });
 
-  it('returns status for an allowlisted partner', async () => {
+  it('returns status for an allowlisted partner when UUID casing differs', async () => {
     asInvestor();
     query.mockResolvedValueOnce([{ id: ALLOWED }]);
     getFaceStatus.mockResolvedValueOnce({
@@ -220,7 +269,7 @@ describe('GET /api/face/status/:partnerId investor scoping', () => {
       lastRegisteredAt: '2026-01-01T00:00:00.000Z',
     });
 
-    const res = await request(makeApp()).get(`/api/face/status/${ALLOWED}`);
+    const res = await request(makeApp()).get(`/api/face/status/${ALLOWED.toUpperCase()}`);
     expect(res.status).toBe(200);
     expect(res.body.partnerId).toBe(ALLOWED);
   });
@@ -241,46 +290,35 @@ describe('GET /api/face/status/:partnerId investor scoping', () => {
 });
 
 describe('POST /api/face/register investor scoping', () => {
-  it('404s before mutating when partner is outside the allowlist', async () => {
-    asInvestor();
-    const res = await request(makeApp())
-      .post('/api/face/register')
-      .field('partnerId', FORBIDDEN)
-      .attach('image', Buffer.from('fake-image'), 'face.jpg');
-
-    expect(res.status).toBe(404);
-    expect(res.body.error).toBe('PARTNER_NOT_FOUND');
-    expect(registerSample).not.toHaveBeenCalled();
-    expect(query).not.toHaveBeenCalled();
-  });
-
-  it('registers an allowlisted partner', async () => {
-    asInvestor();
-    query.mockResolvedValueOnce([{ id: ALLOWED, name: 'Alice' }]);
-    registerSample.mockResolvedValueOnce({ sampleId: 's-1', sampleCount: 1 });
-    getFaceStatus.mockResolvedValueOnce({ lastRegisteredAt: '2026-01-01T00:00:00.000Z' });
-
+  it('rejects an investor before mutation even when the partner is allowlisted', async () => {
+    asInvestor([ALLOWED]);
     const res = await request(makeApp())
       .post('/api/face/register')
       .field('partnerId', ALLOWED)
       .attach('image', Buffer.from('fake-image'), 'face.jpg');
 
-    expect(res.status).toBe(201);
-    expect(res.body.partnerId).toBe(ALLOWED);
-    expect(registerSample).toHaveBeenCalled();
+    expect(res.status).toBe(403);
+    expect(res.body.error).toBe('FORBIDDEN');
+    expect(registerSample).not.toHaveBeenCalled();
+    expect(comprefaceFaceProvider.registerFace).not.toHaveBeenCalled();
+    expect(getEmbedding).not.toHaveBeenCalled();
+    expect(query).not.toHaveBeenCalled();
   });
 });
 
 describe('POST /api/face/re-register investor scoping', () => {
-  it('404s before mutating when partner is outside the allowlist', async () => {
-    asInvestor();
+  it('rejects an investor before mutation even when the partner is allowlisted', async () => {
+    asInvestor([ALLOWED]);
     const res = await request(makeApp())
       .post('/api/face/re-register')
-      .field('partnerId', FORBIDDEN)
+      .field('partnerId', ALLOWED)
       .attach('images', Buffer.from('fake-image'), 'face.jpg');
 
-    expect(res.status).toBe(404);
-    expect(res.body.error).toBe('PARTNER_NOT_FOUND');
+    expect(res.status).toBe(403);
+    expect(res.body.error).toBe('FORBIDDEN');
+    expect(replaceAllSamples).not.toHaveBeenCalled();
+    expect(comprefaceFaceProvider.replaceFaceSamples).not.toHaveBeenCalled();
+    expect(getEmbedding).not.toHaveBeenCalled();
     expect(query).not.toHaveBeenCalled();
   });
 });

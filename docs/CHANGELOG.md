@@ -18,14 +18,15 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ### Security
 - Face ID routes (`POST /api/face/recognize`, `POST /api/face/register`, `POST /api/face/re-register`, `GET /api/face/status/:partnerId`) now apply `resolveInvestorScope()` fail-closed — @agent — AUD-004 / INV-021; investors previously received any match's name/phone and could probe status/register for non-allowlisted customers.
-- Recognize responses filter `match` and `candidates` to the investor allowlist (empty allowlist → no match / no candidates, no PII leak); status/register/re-register return 404 `PARTNER_NOT_FOUND` for outsiders before DB mutation — @agent — same-portal investor customer scope.
+- Investor recognition now constrains local SQL and CompreFace partner hydration before ranking, then filters responses again; empty allowlists return no results, hidden top matches cannot suppress allowlisted candidates, and UUID membership is case-insensitive — @codex — AUD004-2 / AUD004-3.
+- Investor Face ID register/re-register return 403 `FORBIDDEN` before provider or database mutation even for allowlisted customers or `customers.edit` overrides; status continues to return 404 for non-allowlisted customers — @codex — DEC-20260704-01 / AUD004-1.
 
 ### Testing
-- Added `api/tests/faceRecognitionInvestorScope.test.js` (investor IDOR: strip outsider match/candidates, empty-allowlist fail-closed, staff unscoped, status/register/re-register 404 before query/mutation) — @agent — AUD-004.
+- Added `api/tests/faceRecognitionInvestorScope.test.js` plus provider regressions for pre-ranking scope, empty-allowlist fail-closed behavior, UUID case normalization, staff passthrough, status IDOR, and allowlisted investor write denial — @agent / @codex — AUD-004.
 - Existing `api/tests/faceRecognition.test.js` mocks `resolveInvestorScope` as non-investor so contract coverage stays stable — @agent — regression guard.
 
 ### Docs
-- Documented Face ID investor allowlist on the `/api/face/*` contract, INV-021 enforcement list, integrations product-map, and test matrix — @agent — AUD-004 / INV-021.
+- Documented Face ID investor pre-ranking scope and write denial on the `/api/face/*` contract, INV-021 enforcement list, integrations product-map, and test matrices — @agent / @codex — AUD-004 / INV-021.
 
 ## [0.32.59] — 2026-07-23
 
