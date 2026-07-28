@@ -60,14 +60,15 @@ jobs:
               'revert:'
             ];
             
-            const hasValidPrefix = validPrefixes.some(prefix => 
-              title.toLowerCase().startsWith(prefix)
-            );
+            const hasValidPrefix = validPrefixes.some(prefix => {
+              const type = prefix.slice(0, -1);
+              return new RegExp(`^${type}(\\([^)]+\\))?:`, 'i').test(title);
+            });
             
             if (!hasValidPrefix) {
               core.setFailed(
-                `PR title must start with one of: ${validPrefixes.join(', ')}\n` +
-                `Example: "feat: add login page" or "fix: resolve API timeout"`
+                `PR title must use one of these types: ${validPrefixes.join(', ')}\n` +
+                `Example: "feat: add login page" or "fix(api): resolve API timeout"`
               );
             }
 
