@@ -24,7 +24,7 @@
 | v1.0.8 | 2026-07-04 | Investor users are restricted normal-portal staff sessions: `/api/Auth/login` may authenticate `dbo.investor_accounts`, but all data access stays on existing portal routes and is scoped by `dbo.investor_clients`. |
 | v1.0.9 | 2026-07-08 | Investor visibility admin controls (`GET`/`PATCH /api/Partners/investor-visibility`) are gated by admin group (`assertAdmin`) instead of `permissions.edit`, and admin list/toggle match `dbo.investor_clients` by the SAME scope union (`investor_id` = the investor's `partners.id` OR any active `dbo.investor_accounts.id`) that scopes the investor read. Customer id is validated with the canonical 8-4-4-4-12 UUID pattern. |
 | v1.0.10 | 2026-07-23 | Customer-source usage counts and deletion guards include both customer and sale-order references; new sale orders reject inactive/missing sources while an existing order may preserve its already-assigned inactive historical source. |
-| v1.0.11 | 2026-07-28 | Employee POST/PUT responses use a safe detail projection and MUST NOT include `password_hash` or plaintext `password` (AUD-011). |
+| v1.0.11 | 2026-07-28 | Employee POST/PUT responses use a safe detail projection, and Partner create/update/soft-delete receipts omit `password_hash` and plaintext `password` (AUD-011). |
 
 ---
 

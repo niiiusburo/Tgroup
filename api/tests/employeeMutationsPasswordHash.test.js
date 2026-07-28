@@ -120,6 +120,8 @@ function makeClient({ partnerRow, employeeExists = true } = {}) {
 }
 
 function createApp() {
+  // Test-only app uses JSON bodies without cookie-backed authentication.
+  // nosemgrep: javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage
   const app = express();
   app.use(express.json());
   app.use('/api/Employees', employeesRouter);
