@@ -14,6 +14,18 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.60] — 2026-07-28
+
+### Security
+- ExternalCheckups customer-code reads/mutations and image-by-name proxy now call `resolveInvestorScope` and fail closed (404, no PII) outside `dbo.investor_clients`; list image URLs carry `?customerCode=`, filename T-code extraction is the fallback, and the proxy validates both sources when both identify local partners so an allowlisted query cannot mask a forbidden filename — @agent — AUD-005 / INV-021.
+- StockPickings GET list/detail now require `settings.view` and apply investor partner allowlist (`sp.partnerid = ANY(...)`; detail 404s for null/non-allowlisted partners) — @agent — AUD-005 / INV-021.
+
+### Testing
+- Added `api/tests/externalCheckupsInvestorScope.test.js` and `api/tests/stockPickingsInvestorScope.test.js` IDOR coverage, including mismatched image query/filename customer codes; extended `investorScopeRoutePermissions.test.js` for StockPickings GET gates — @agent — AUD-005.
+
+### Docs
+- Documented ExternalCheckups + StockPickings investor fail-closed contracts, permission registry move of StockPickings GET onto `settings.view`, and INV-021 enforcement surfaces — @agent — CONTRACTS / SECURITY / api-index / domains.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed

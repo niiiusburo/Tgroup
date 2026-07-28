@@ -127,7 +127,11 @@ describe('externalCheckups helpers', () => {
         createdAt: '2026-04-20T10:05:00.000Z',
         media: [{ _id: 'media-1', imageLink: '2026-04-20_T8250_IMG.jpeg' }],
       },
-    ]);
+    ], 'T8250');
+
+    expect(helpers.extractCustomerCodeCandidatesFromImageName(
+      '2026-04-18-15-17-06_6397T8250_IMG_6734.jpeg'
+    )).toEqual(expect.arrayContaining(['6397T8250', 'T8250']));
 
     expect(checkups).toEqual([
       {
@@ -140,8 +144,8 @@ describe('externalCheckups helpers', () => {
         nextDescription: '',
         images: [
           {
-            url: '/api/ExternalCheckups/images/2026-04-20_T8250_IMG.jpeg',
-            thumbnailUrl: '/api/ExternalCheckups/images/2026-04-20_T8250_IMG.jpeg',
+            url: '/api/ExternalCheckups/images/2026-04-20_T8250_IMG.jpeg?customerCode=T8250',
+            thumbnailUrl: '/api/ExternalCheckups/images/2026-04-20_T8250_IMG.jpeg?customerCode=T8250',
             label: '2026-04-20_T8250_IMG.jpeg',
             uploadedAt: '2026-04-20T10:05:00.000Z',
           },

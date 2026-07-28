@@ -182,6 +182,8 @@ backend_permissions:
       - GET /api/settings/bank
       - GET /api/IpAccess/settings
       - GET /api/IpAccess/entries
+      - GET /api/StockPickings
+      - GET /api/StockPickings/:id
   - string: website.edit
     routes:
       - POST /api/WebsitePages
@@ -337,8 +339,6 @@ backend_auth_only_routes:
       - GET /api/SaleOrderLines
       - GET /api/CustomerSources
       - GET /api/CustomerSources/:id
-      - GET /api/StockPickings
-      - GET /api/StockPickings/:id
       - GET /api/ProductCategories
     enforcement: Global /api requireAuth only.
   - routes:

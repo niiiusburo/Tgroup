@@ -80,6 +80,12 @@ describe('newly-secured customer-data routes are permission-gated', () => {
     expectGate(r, 'delete', '/:id', 'payment.edit');
     expectGate(r, 'put', '/:id/installments/:installmentId/pay', 'payment.edit');
   });
+
+  it('stockPickings GET routes require settings.view (AUD-005)', () => {
+    const r = require('../src/routes/stockPickings');
+    expectGate(r, 'get', '/', 'settings.view');
+    expectGate(r, 'get', '/:id', 'settings.view');
+  });
 });
 
 describe('pre-existing customer-data routes keep their gates (no regression)', () => {

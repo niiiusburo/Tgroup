@@ -249,8 +249,28 @@ function toDateOnly(value) {
   return null;
 }
 
-function imageProxyUrl(imageLink) {
-  return `/api/ExternalCheckups/images/${encodeURIComponent(imageLink)}`;
+function imageProxyUrl(imageLink, customerCode) {
+  let url = `/api/ExternalCheckups/images/${encodeURIComponent(imageLink)}`;
+  if (customerCode) {
+    url += `?customerCode=${encodeURIComponent(String(customerCode))}`;
+  }
+  return url;
+}
+
+/**
+ * Extract local customer-code candidates embedded in Hosoonline image filenames.
+ * Observed shapes: `..._6397T8250_IMG_....jpeg`, `..._T8250_IMG.jpeg`, `..._1880T056733_image.jpg`.
+ */
+function extractCustomerCodeCandidatesFromImageName(imageName) {
+  const name = decodeURIComponent(String(imageName || ''));
+  const candidates = new Set();
+  const re = /(\d{4})?(T\d{3,})/gi;
+  let match;
+  while ((match = re.exec(name)) !== null) {
+    if (match[0]) candidates.add(match[0]);
+    if (match[2]) candidates.add(match[2]);
+  }
+  return [...candidates];
 }
 
 function normalizeHosoImageUrl(url) {
@@ -299,7 +319,7 @@ async function prepareHosoUploadFile(file) {
   }
 }
 
-function mapHosoAppointmentsToCheckups(appointments) {
+function mapHosoAppointmentsToCheckups(appointments, customerCode) {
   return appointments.map((appointment) => ({
     id: appointment._id,
     date: toDateOnly(appointment.date) || '',
@@ -309,8 +329,8 @@ function mapHosoAppointmentsToCheckups(appointments) {
     nextAppointmentDate: toDateOnly(appointment.nextAppointmentDate),
     nextDescription: appointment.nextDescription || '',
     images: (appointment.media || []).map((media) => ({
-      url: imageProxyUrl(media.imageLink),
-      thumbnailUrl: imageProxyUrl(media.imageLink),
+      url: imageProxyUrl(media.imageLink, customerCode),
+      thumbnailUrl: imageProxyUrl(media.imageLink, customerCode),
       label: media.imageLink,
       uploadedAt: appointment.createdAt || appointment.date || undefined,
     })),
@@ -363,7 +383,7 @@ async function fetchCurrentHosoCheckups(customerCode, partner) {
         suggestedPatientCode,
         patientName: matched?.fullName || partner?.name || 'Unknown',
         patientExists: Boolean(matched?.code || appointmentCode),
-        checkups: mapHosoAppointmentsToCheckups(result.appointments),
+        checkups: mapHosoAppointmentsToCheckups(result.appointments, customerCode),
       };
     }
   }
@@ -446,6 +466,7 @@ module.exports = {
   getHosoHeaders,
   getHosoRequestHeaders,
   getHosoUploadHeaders,
+  extractCustomerCodeCandidatesFromImageName,
   getLocalPartner,
   hasHosoLoginCredentials,
   imageProxyUrl,

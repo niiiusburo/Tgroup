@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const { requireAuth, requirePermission } = require('../middleware/auth');
+const { resolveInvestorScope } = require('../services/permissionService');
 const hosoClient = require('../services/hosoonlineClient');
 const router = express.Router();
 
@@ -13,6 +14,7 @@ const {
   authFailureCheckups,
   createHosoPatientForLocalCustomer,
   emptyCheckups,
+  extractCustomerCodeCandidatesFromImageName,
   fetchCurrentHosoCheckups,
   getHosoRequestHeaders,
   getHosoUploadHeaders,
@@ -24,8 +26,64 @@ const {
   resolveHosoPatientCode,
 } = hosoClient;
 
+/** True when the partner is visible to this caller (staff always; investors only allowlisted). */
+function isPartnerInInvestorScope(investorScope, partnerId) {
+  if (!investorScope?.isInvestor) return true;
+  if (!partnerId) return false;
+  const allowed = new Set((investorScope.allowedCustomerIds || []).map(String));
+  return allowed.has(String(partnerId));
+}
+
+/**
+ * Resolve local partners for investor fail-closed checks.
+ * Validate the explicit customerCode and any different customer code embedded
+ * in the image filename so a safe query value cannot mask a forbidden image.
+ */
+async function resolvePartnersForInvestorScope({ customerCode, imageName }) {
+  const partners = [];
+  const explicitCode = customerCode ? String(customerCode).trim() : '';
+  if (explicitCode) {
+    const partner = await getLocalPartner(explicitCode);
+    if (partner?.id) partners.push(partner);
+  }
+
+  if (imageName) {
+    for (const candidate of extractCustomerCodeCandidatesFromImageName(imageName)) {
+      if (!candidate || candidate === explicitCode) continue;
+      const partner = await getLocalPartner(candidate);
+      if (partner?.id) {
+        if (!partners.some((item) => String(item.id) === String(partner.id))) {
+          partners.push(partner);
+        }
+        break;
+      }
+    }
+  }
+  return partners;
+}
+
+/** INV-021: 404 when investor cannot access the customer; no PII in body. */
+function investorCustomerNotFound(res) {
+  return res.status(404).json({ error: 'Customer not found' });
+}
+
 router.get('/images/:imageName', requireAuth, requirePermission('external_checkups.view'), async (req, res) => {
   try {
+    // INV-021: investors must prove the image belongs to an allowlisted customer.
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      const partners = await resolvePartnersForInvestorScope({
+        customerCode: req.query.customerCode,
+        imageName: req.params.imageName,
+      });
+      if (
+        partners.length === 0
+        || partners.some((partner) => !isPartnerInInvestorScope(investorScope, partner.id))
+      ) {
+        return investorCustomerNotFound(res);
+      }
+    }
+
     if (!HOSOONLINE_API_KEY && !hasHosoLoginCredentials()) {
       return res.status(503).json({ error: 'Hosoonline credentials not configured' });
     }
@@ -51,6 +109,7 @@ router.get('/images/:imageName', requireAuth, requirePermission('external_checku
     const buffer = Buffer.from(await hosoRes.arrayBuffer());
     res.setHeader('Content-Type', hosoRes.headers.get('content-type') || 'application/octet-stream');
     res.setHeader('Cache-Control', 'private, max-age=300');
+    // nosemgrep: javascript.express.security.audit.xss.direct-response-write.direct-response-write -- Authenticated image proxy sends upstream binary bytes, not rendered HTML.
     return res.send(buffer);
   } catch (error) {
     if (error instanceof HosoAuthError) {
@@ -74,6 +133,12 @@ router.get('/:customerCode', requireAuth, requirePermission('external_checkups.v
     const { customerCode } = req.params;
     const partner = await getLocalPartner(customerCode);
     const customerName = partner?.name || 'Unknown';
+
+    // INV-021: investors only see allowlisted customers (fail-closed when unknown).
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !isPartnerInInvestorScope(investorScope, partner?.id)) {
+      return investorCustomerNotFound(res);
+    }
 
     if (!HOSOONLINE_API_KEY && !hasHosoLoginCredentials()) {
       return res.json(emptyCheckups(customerCode, customerName, 'hosoonline-not-configured'));
@@ -149,7 +214,14 @@ router.get('/:customerCode', requireAuth, requirePermission('external_checkups.v
  */
 router.post('/:customerCode/patient', requireAuth, requirePermission('external_checkups.upload'), async (req, res) => {
   try {
-    const result = await createHosoPatientForLocalCustomer(req.params.customerCode);
+    const { customerCode } = req.params;
+    const partner = await getLocalPartner(customerCode);
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !isPartnerInInvestorScope(investorScope, partner?.id)) {
+      return investorCustomerNotFound(res);
+    }
+
+    const result = await createHosoPatientForLocalCustomer(customerCode);
     return res.status(result.created ? 201 : 200).json(result);
   } catch (error) {
     if (error instanceof HosoAuthError) {
@@ -175,6 +247,12 @@ router.post('/:customerCode/patient', requireAuth, requirePermission('external_c
 router.post('/:customerCode/health-checkups', requireAuth, requirePermission('external_checkups.upload'), upload.array('photos'), async (req, res) => {
   try {
     const { customerCode } = req.params;
+
+    const partner = await getLocalPartner(customerCode);
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor && !isPartnerInInvestorScope(investorScope, partner?.id)) {
+      return investorCustomerNotFound(res);
+    }
 
     if (!HOSOONLINE_API_KEY && !hasHosoLoginCredentials()) {
       return res.status(503).json({ error: 'Hosoonline credentials not configured' });

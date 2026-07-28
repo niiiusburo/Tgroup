@@ -1,9 +1,18 @@
 const express = require('express');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
+const { resolveInvestorScope } = require('../services/permissionService');
 const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 
 const router = express.Router();
+
+/** True when the partner is visible to this caller (staff always; investors only allowlisted). */
+function isPartnerInInvestorScope(investorScope, partnerId) {
+  if (!investorScope?.isInvestor) return true;
+  if (!partnerId) return false;
+  const allowed = new Set((investorScope.allowedCustomerIds || []).map(String));
+  return allowed.has(String(partnerId));
+}
 
 /**
  * GET /api/StockPickings
@@ -14,8 +23,10 @@ const router = express.Router();
  * - incoming: Nhập kho (receipts)
  * - outgoing: Xuất kho (deliveries)
  * - internal: Chuyển kho nội bộ
+ *
+ * Authz: settings.view + investor partner allowlist (AUD-005 / INV-021)
  */
-router.get('/', async (req, res) => {
+router.get('/', requirePermission('settings.view'), async (req, res) => {
   try {
     const {
       offset = '0',
@@ -85,6 +96,14 @@ router.get('/', async (req, res) => {
         search,
         paramIdx,
       });
+    }
+
+    // INV-021: investors only see pickings for allowlisted partners (fail-closed).
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (investorScope.isInvestor) {
+      params.push(investorScope.allowedCustomerIds);
+      conditions.push(`sp.partnerid = ANY($${paramIdx}::uuid[])`);
+      paramIdx++;
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -198,8 +217,9 @@ router.get('/', async (req, res) => {
 /**
  * GET /api/StockPickings/:id
  * Returns: full stock picking details
+ * Authz: settings.view + investor partner allowlist (AUD-005 / INV-021)
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', requirePermission('settings.view'), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -250,6 +270,12 @@ router.get('/:id', async (req, res) => {
     );
 
     if (!rows || rows.length === 0) {
+      return res.status(404).json({ error: 'Stock picking not found' });
+    }
+
+    // INV-021: non-allowlisted (or null) partner is indistinguishable from missing.
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (!isPartnerInInvestorScope(investorScope, rows[0].partnerid)) {
       return res.status(404).json({ error: 'Stock picking not found' });
     }
 

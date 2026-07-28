@@ -146,3 +146,11 @@ Each entry:
 - **Fix:** Preserve `undefined` writable UUID fields on partner updates, keep explicit empty-string-to-`null` clearing for those writable fields, and make `partners.sourceid` read-only on normal Partner POST/PUT. The frontend no longer includes source in customer create/update payloads.
 - **Prevention:** `api/src/routes/partners/__tests__/mutationHandlers.test.js` proves source create/change/clear rejection, repeated-source compatibility, omitted-field preservation, and explicit clearing of a writable non-source UUID. `useCustomers.cskh.test.ts` proves frontend Partner payloads omit source.
 - **Related:** INV-023, INV-025, `PUT /api/Partners/:id`.
+
+## FM-20260728-01: Investor IDOR via ExternalCheckups Images and StockPickings GET
+
+- **Symptom:** An investor JWT with `external_checkups.view` (or any authenticated JWT for StockPickings GET) could fetch Hosoonline checkup images by guessed filename and list/detail stock pickings for non-allowlisted partners, leaking customer-derived media and inventory partner linkage outside `dbo.investor_clients`.
+- **Root Cause:** ExternalCheckups image proxy and StockPickings GET only enforced auth/permission (or auth alone) and never called `resolveInvestorScope`. Image URLs had no customer binding, so allowlisted list responses were not required to open bytes; trusting an explicit image `customerCode` without also validating a resolvable filename code would preserve a mismatch bypass.
+- **Fix:** Apply INV-021 fail-closed checks on ExternalCheckups customer-code reads/mutations and image-by-name (query `customerCode` + filename T-code extraction, validating both when both resolve); gate StockPickings GET with `settings.view` and partner allowlist filters.
+- **Prevention:** `api/tests/externalCheckupsInvestorScope.test.js` covers explicit, filename-only, and mismatched query/filename image scope; `api/tests/stockPickingsInvestorScope.test.js` and `investorScopeRoutePermissions` cover StockPickings partner scope and gates.
+- **Related:** INV-021, AUD-005, `GET /api/ExternalCheckups/*`, `GET /api/StockPickings*`.
