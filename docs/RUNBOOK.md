@@ -149,7 +149,7 @@ curl -I https://nk.2checkin.com/
 
 ### Incident C: Exports timeout at 60s
 - **Cause:** Nginx proxy timeout default is 60s.
-- **Fix:** Update nginx `proxy_read_timeout`, `proxy_send_timeout`, `send_timeout` to `300s`.
+- **Fix:** Update nginx `proxy_read_timeout`, `proxy_send_timeout`, `send_timeout` to `300s` on the `/api` block in both tracked `nginx.conf` and `nginx.docker.conf` (INV-019 / AUD-013).
 
 ### Incident D: Face recognition stops working
 - **Cause:** Configured provider is down: `face-service` container/model failure for local mode, or CompreFace container/API-key failure for CompreFace mode.

@@ -14,6 +14,18 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.60] — 2026-07-28
+
+### Fixed
+- Align tracked nginx `/api` proxy blocks with INV-019 300s `proxy_read_timeout` / `proxy_send_timeout` / `send_timeout` in `nginx.conf` and `nginx.docker.conf` — @firstmate — AUD-013 / INV-019.
+- Treat optional face provider as non-blocking for `GET /api/health`: HTTP 200 + `status:"degraded"` + `checks.faceService:false` when DB is up and face is down; HTTP 503 only when DB is down — @firstmate — AUD-038 / INV-014.
+
+### Testing
+- Added nginx conf timeout assertions and health degrade regressions (face down → 200; DB down → 503) — @firstmate — `api/tests/nginxTimeouts.test.js`, `api/tests/health.test.js`.
+
+### Docs
+- Documented health HTTP semantics, INV-014 enforcement, RUNBOOK Incident C tracked conf note, and test-matrix mapping — @firstmate — AUD-013 / AUD-038.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed

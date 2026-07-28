@@ -206,9 +206,11 @@ app.get('/api/health', async (_req, res) => {
     console.error('[Health] Face service check failed:', err.message);
   }
 
-  const allHealthy = checks.db && checks.faceService;
-  res.status(allHealthy ? 200 : 503).json({
-    status: allHealthy ? 'healthy' : 'degraded',
+  // Face is optional (INV-014 / AUD-038): DB down => 503; face down alone => 200 degraded.
+  const coreHealthy = checks.db;
+  const fullyHealthy = checks.db && checks.faceService;
+  res.status(coreHealthy ? 200 : 503).json({
+    status: fullyHealthy ? 'healthy' : 'degraded',
     checks,
     faceProvider: getFaceRecognitionProvider(),
     latency: { db: dbLatency, faceService: faceLatency },

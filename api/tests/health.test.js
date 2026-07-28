@@ -40,7 +40,7 @@ describe('GET /api/health', () => {
     expect(res.body.timestamp).toBeDefined();
   });
 
-  it('returns degraded when DB is down', async () => {
+  it('returns 503 when DB is down even if face-service is up', async () => {
     query.mockRejectedValueOnce(new Error('Connection refused'));
     faceServiceHealth.mockResolvedValueOnce({ ok: true, data: { status: 'ok' } });
 
@@ -52,13 +52,25 @@ describe('GET /api/health', () => {
     expect(res.body.checks.faceService).toBe(true);
   });
 
-  it('returns degraded when face-service is down', async () => {
+  it('returns 200 degraded when DB is up and optional face-service is down (AUD-038)', async () => {
     query.mockResolvedValueOnce([{ '?column?': 1 }]);
     faceServiceHealth.mockResolvedValueOnce({ ok: false, status: 503 });
 
     const res = await request(app).get('/api/health');
 
-    expect(res.status).toBe(503);
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('degraded');
+    expect(res.body.checks.db).toBe(true);
+    expect(res.body.checks.faceService).toBe(false);
+  });
+
+  it('returns 200 degraded when DB is up and face-service throws', async () => {
+    query.mockResolvedValueOnce([{ '?column?': 1 }]);
+    faceServiceHealth.mockRejectedValueOnce(new Error('ECONNREFUSED'));
+
+    const res = await request(app).get('/api/health');
+
+    expect(res.status).toBe(200);
     expect(res.body.status).toBe('degraded');
     expect(res.body.checks.db).toBe(true);
     expect(res.body.checks.faceService).toBe(false);
