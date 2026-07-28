@@ -140,6 +140,7 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 | `src/services/exports/__tests__/reportSalesEmployeesExport.test.js` | Reports/Exports | UC-019/WF-005: `report-sales-employees` preview/download filters, `companyId=all` full extraction, explicit branch rejection when out of scope, employee-type SQL attribution, and grouped workbook rows |
 | `investorVisibilityCompatibility.test.js` | Customers/Investor | `getConfiguredInvestor` write-key selection under both keyings (account-FK present vs same-portal partner id), `scopeMatchIds` union of partner id + every active account id, deterministic resolution across multiple active investor accounts with no 409, and 404 when unconfigured |
 | `investorVisibilityHandlers.test.js` | Customers/Investor | `PATCH /api/Partners/:id/investor-visibility` rejects a malformed customer id with 400 `VALIDATION` before any DB work, ACCEPTS a canonical 8-4-4-4-12 UUID (the regression that blocked every admin tick), and untick clears the client under the scope union via `investor_id = ANY($1::uuid[])` |
+| `src/routes/partners/__tests__/resolveHandler.test.js` + `investorIdorScoping.test.js` (Partners/resolve) | Customers/Investor | AUD-003: `GET /api/Partners/resolve` fail-closed investor allowlist (404 outside scope, no name/phone), soft-delete exclusion (`isdeleted=false`), staff passthrough, and principal+scope cache keys that block staff→investor IDOR cache leaks |
 
 ## Coverage Gaps
 

@@ -98,7 +98,7 @@ PUT handler-level validation: `companyId` (when present) must be a UUID (`400 IN
 |--------|------|------|--------------|----------|
 | GET | `/` | Auth | `?offset, limit, search, companyId` | `PaginatedResponse<Partner>` |
 | GET | `/check-unique` | Auth | `?field, value` (e.g. phone, email) | `{ available: boolean }` |
-| GET | `/resolve` | Perm:`customers.view` | `?key` (UUID, customer ref, or normalized phone) | `{ matchedBy, partner }`, 404 `CUSTOMER_NOT_FOUND`, or 409 `CUSTOMER_LOOKUP_AMBIGUOUS` with candidates |
+| GET | `/resolve` | Perm:`customers.view` | `?key` (UUID, customer ref, or normalized phone) | `{ matchedBy, partner }`, 404 `CUSTOMER_NOT_FOUND`, or 409 `CUSTOMER_LOOKUP_AMBIGUOUS` with candidates. Active customers only (`isdeleted=false`). Investors are fail-closed via `resolveInvestorScope` (404 outside allowlist; cache key is principal+scope scoped). |
 | GET | `/:id` | Perm:`customers.view` | — | Partner detail |
 | GET | `/:id/GetKPIs` | Perm:`customers.view` | — | KPI stats |
 | GET | `/investor-visibility` | Admin (`assertAdmin`) | — | `{ investorId, customerIds }`; admin-only (admin/super-admin/system-admin/`*`), NOT `permissions.edit`. `customerIds` is the union of rows keyed by the investor's partner id OR any active `investor_accounts.id` — exactly what the investor sees via `resolveInvestorScope`. `investorId` is the same-portal partner id even when stored rows use legacy `investor_accounts.id` |

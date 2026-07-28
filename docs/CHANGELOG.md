@@ -14,6 +14,17 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.60] — 2026-07-28
+
+### Security
+- `GET /api/Partners/resolve` now applies `resolveInvestorScope()` fail-closed (404 outside allowlist, no name/phone leak), excludes soft-deleted partners (`isdeleted = false`), and scopes the resolve cache by principal + investor allowlist so staff cache hits cannot IDOR-leak to investors — @pi-fix-resolve — AUD-003 / D-F001 / INV-021.
+
+### Testing
+- Added `resolveHandler` unit coverage and `investorIdorScoping` Partners/resolve cases for investor 404, allowlisted 200, staff passthrough, soft-delete SQL, and principal-scoped cache keys — @pi-fix-resolve — `resolveHandler.test.js` / `investorIdorScoping.test.js`.
+
+### Docs
+- Documented resolve investor scope + soft-delete contract, failure mode, test mapping, and domain invariant — @pi-fix-resolve — AUD-003.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed

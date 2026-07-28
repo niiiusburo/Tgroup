@@ -68,7 +68,7 @@ ui_invariants:
   - "`DELETE /api/CustomerSources/:id` counts references in both `dbo.partners.sourceid` and `dbo.saleorders.sourceid` and returns `CUSTOMER_SOURCE_IN_USE` instead of deleting referenced history."
   - Customer-source update/delete and sale-order source selection lock the lookup row inside one transaction; validated `ON DELETE RESTRICT` foreign keys retain lookup rows referenced by customers or orders.
   - Customer list search must resolve customers by migrated customer ref, appointment number (`appointments.name`), and service/treatment order number (`saleorders.code` / `saleorders.name`).
-  - Lightweight customer resolution uses `GET /api/Partners/resolve?key=` for UUID/ref/phone lookup and returns 404/409 payloads for no-match or ambiguous-match picker flows.
+  - Lightweight customer resolution uses `GET /api/Partners/resolve?key=` for UUID/ref/phone lookup and returns 404/409 payloads for no-match or ambiguous-match picker flows. Resolve must exclude soft-deleted partners (`isdeleted=false`), apply `resolveInvestorScope` fail-closed (404 outside allowlist with no name/phone leak), and key the response cache by principal + investor/staff scope (AUD-003 / INV-021).
   - Customer-facing searches must be accent-insensitive for Vietnamese names so staff can type without diacritics.
   - Face registration for add/edit customer flows should collect straight, left, and right profile samples so recognition works when customers turn their head.
   - Customer profile assignment card and edit form must display the sales employee from `partners.salestaffid` / `salestaffname`, not the customer's `jobtitle` or other personal-detail fields.
@@ -99,6 +99,7 @@ impact_tests:
   - website/e2e/customer-persistence-sweep.spec.ts
   - website/e2e/face-recognition related flows
   - api/src/routes/partners/__tests__/searchFilters.test.js
+  - api/src/routes/partners/__tests__/resolveHandler.test.js
   - api/tests/investorIdorScoping.test.js
   - api/tests/investorScopeRoutePermissions.test.js
   - api/tests/customerSourceIntegrity.test.js

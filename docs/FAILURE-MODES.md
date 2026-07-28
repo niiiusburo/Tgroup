@@ -139,6 +139,14 @@ Each entry:
 - **Prevention:** `customerSourceMigrationArchiveGuard.test.js` proves the retired files cannot be selected by top-level or recursive `*.sql` migration scans. Workbook comparisons must use an immutable row key such as order code plus customer reference, not only phone-level source sets. Production source repairs require a fresh backup, exact old-to-new manifest, rollback, and explicit confirmation. Inactive historical lookup selection/deletion is guarded by INV-024.
 - **Related:** INV-023, INV-024, UC-009, UC-013, WF-005, `product-map/domains/customers-partners.yaml`, `product-map/domains/reports-analytics.yaml`.
 
+## FM-20260728-01: Partners/resolve Investor IDOR + Soft-Delete Leak (AUD-003)
+
+- **Symptom:** An investor (or shared resolve cache) could obtain another customer's `name`/`phone` via `GET /api/Partners/resolve?key=`, including soft-deleted partners.
+- **Root Cause:** `resolveHandler` did not call `resolveInvestorScope`, did not filter `isdeleted = false`, and cached responses by lookup key only (not principal/scope).
+- **Fix:** Apply investor allowlist fail-closed (404 outside scope; filter ambiguous candidates before branching), require `isdeleted = false` on all lookup SQL, and include principal + investor/staff scope in cache keys.
+- **Prevention:** `resolveHandler.test.js` + `investorIdorScoping` Partners/resolve cases cover investor 404, allowlisted 200, staff passthrough, soft-delete SQL, and cross-principal cache isolation.
+- **Related:** INV-021, AUD-003 / D-F001, `docs/CONTRACTS.md` `GET /api/Partners/resolve`.
+
 ## FM-20260723-02: Partial Customer Edit Clears Omitted UUID Fields
 
 - **Symptom:** Saving an unrelated customer edit can silently clear UUID-backed assignments, including `partners.sourceid`, even though the client omitted those fields. Reports that fall back to the customer source may then show a changed or blank attribution.
