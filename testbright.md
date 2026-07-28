@@ -236,3 +236,30 @@ Expected behavior:
 - [ ] PENDING FRESH CONFIRMATION: Strict row-key comparison found one additional mismatch, `SO-2026-5176` (`T478964`, `Khách cũ` → `Sale Online`), outside the confirmed manifest. It remains unmodified.
 
 Negative paths: renaming any retired artifact back to `.sql` makes the migration guard fail; submitting an inactive/missing source returns `400 CUSTOMER_SOURCE_NOT_SELECTABLE`; deleting a source referenced by any customer or order returns `400 CUSTOMER_SOURCE_IN_USE`; the checked-in 43-order manifest test explicitly excludes unconfirmed `SO-2026-5176`.
+
+---
+
+# TestSprite Plan: AUD-001 TDental destructive migration quarantine 2026-07-28
+
+Feature/edit name: Quarantine the three one-shot 008 TDental bulk-import migrations and ban `TRUNCATE` from active root migrations.
+
+Changed URLs / API routes / data flow:
+- URLs / API routes: none.
+- Data flow: deploy and runbook discovery reads only the non-recursive active-root `api/migrations/*.sql` glob; the three 008 TDental imports remain under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` as non-executable `.sql.retired` artifacts.
+
+Expected behavior:
+- The default non-recursive migration glob cannot select any 008 TDental bulk import.
+- A recursive `*.sql` scan cannot select the retired 008 artifacts.
+- Every retired 008 artifact remains preserved with a `RETIRED` header and a non-executable `.sql.retired` extension.
+- Any `TRUNCATE` token in an active root migration fails the focused CI guard, regardless of table.
+- Migrations 051-053 remain unchanged, and no migration is applied to a database during this filesystem-only guard.
+
+User roles: Deployment captain approving exceptional migration execution; reviewer or QA validating migration discovery safety.
+
+Execution items:
+- [ ] PENDING LOCAL: Run `npm --prefix api test -- --runTestsByPath tests/destructiveTruncateMigrationArchiveGuard.test.js --runInBand`.
+- [ ] PENDING REMOTE: Confirm the PR documentation-governance job runs the focused guard.
+
+Negative paths: renaming any retired 008 artifact back to `.sql` must fail; adding an active root migration containing the `TRUNCATE` token must fail; no negative-path check may execute SQL against a real database.
+
+Setup/login data: No login or database is required; use only the checked-out migration filesystem and do not execute retired SQL.

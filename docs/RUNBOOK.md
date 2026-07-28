@@ -52,17 +52,34 @@ curl -s https://nk.2checkin.com/api/health | jq .
 curl -s https://nk.2checkin.com/version.json | jq .
 # Expected: { "version": "x.y.z", "buildTime": "..." }
 
-# 5. Apply any pending canonical DB migrations on VPS
-for f in /opt/tgroup/api/migrations/*.sql; do
-  docker exec -i tgroup-db psql -U postgres -d tdental_demo < "$f"
-done
+# 5. Discover top-level candidates — never recurse into RETIRED-DESTRUCTIVE-DO-NOT-RUN/
+printf '%s\n' /opt/tgroup/api/migrations/*.sql
+
+# After confirming one file is unapplied and reviewing its rollback/idempotency notes:
+migration_file=/opt/tgroup/api/migrations/NNN_name.sql
+docker exec -i tgroup-db psql -U postgres -d tdental_demo < "$migration_file"
 ```
 
-`api/migrations/` is the canonical migration path for deployment. `api/src/db/migrations/`
-currently contains supplemental straggler SQL files (`003_add_payment_category.sql`,
-`046_customer_face_embeddings.sql`); review `docs/MIGRATIONS.md` before deploy when a
-change depends on either supplemental migration, and consolidate or run it explicitly
-instead of assuming it is covered by the canonical loop.
+`api/migrations/` is the canonical migration path for deployment. Use the
+**non-recursive** top-level glob `api/migrations/*.sql` only to discover candidates.
+Before invoking an exact file, confirm it is unapplied using `dbo.schema_migrations`
+and the current schema, then review its entry in `docs/MIGRATIONS.md`. Active
+migration history is not uniformly idempotent, so never bulk re-run the directory.
+
+**Forbidden blind apply (AUD-001):** Do **not** run anything under
+`api/migrations/RETIRED-DESTRUCTIVE-DO-NOT-RUN/` during deployment or routine
+migration work. Those artifacts use `.sql.retired` extensions on purpose. In
+particular, the retired `008_data_migration_from_tdental*` files `TRUNCATE` core
+tables and must never be re-applied on live, staging-with-data, or any shared DB.
+Exceptional one-shot use on a disposable or intentionally empty target requires
+deployment-captain approval and a verified backup; follow that folder's `README.md`
+and `docs/MIGRATIONS.md`.
+
+`api/src/db/migrations/` currently contains supplemental straggler SQL files
+(`003_add_payment_category.sql`, `046_customer_face_embeddings.sql`); review
+`docs/MIGRATIONS.md` before deploy when a change depends on either supplemental
+migration, and consolidate or run it explicitly instead of assuming it is covered
+by the canonical loop.
 
 ## Rollback Procedure
 

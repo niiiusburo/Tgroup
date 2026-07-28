@@ -7,7 +7,7 @@
 ## Schema Statistics
 
 - **Tables / Views:** Baseline schema plus migration-added objects; verify the target database for an exact live count before sync/deploy decisions.
-- **Migrations:** 53 canonical SQL files in `api/migrations/`; 2 supplemental SQL files in `api/src/db/migrations/` need consolidation or an explicit runbook decision.
+- **Migrations:** See `docs/MIGRATIONS.md` for the current canonical and supplemental inventory, quarantine status, and consolidation decisions.
 - **Schema:** `dbo`
 - **Date handling:** `types.setTypeParser(1082, (val) => val)` returns DATE as plain `YYYY-MM-DD` strings. API process runs with `TZ=Asia/Ho_Chi_Minh`.
 
@@ -594,10 +594,9 @@ Customer-source taxonomy maintenance must not bulk rewrite `partners.sourceid` o
 
 ## Migration Inventory
 
-- Canonical root index: `docs/MIGRATIONS.md`.
-- Canonical migration directory: `api/migrations/` (50 runnable root `.sql` files). Five historical customer-source rewrite artifacts are quarantined under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` with `.sql.retired` extensions.
-- Supplemental migration directory: `api/src/db/migrations/` (5 SQL files: `003_add_payment_category.sql`, `046_customer_face_embeddings.sql`, `047_payment_proof_confirmation.sql`, `048_grant_payment_confirm_permission.sql`, `051_payment_proofs_payment_id_uuid.sql`).
-- Runbook status: `docs/RUNBOOK.md` and `docs/runbooks/DEPLOYMENT.md` both use `api/migrations/*.sql` as the canonical deploy loop. Supplemental files under `api/src/db/migrations/` require explicit review, consolidation, or manual execution when a change depends on them.
+- Inventory and quarantine policy: `docs/MIGRATIONS.md` (authoritative).
+- AUD-001 classifies the retired 008 one-shot TDental imports as forensic reconstruction tools, not current-schema authority or runnable migrations.
+- Execution policy: `docs/RUNBOOK.md` and `docs/runbooks/DEPLOYMENT.md`.
 
 ---
 

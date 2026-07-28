@@ -14,6 +14,17 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [Docs] — 2026-07-28
+
+### Security
+- Quarantined three one-shot TDental bulk-import migrations (`008_data_migration_from_tdental{,_v2,_v3}`) that `TRUNCATE` core tables into `api/migrations/RETIRED-DESTRUCTIVE-DO-NOT-RUN/*.sql.retired` so they cannot match the default deploy/runbook `api/migrations/*.sql` glob — @crewmate — AUD-001; prevents catastrophic re-apply on live DB.
+
+### Testing
+- Added CI-required guard `api/tests/destructiveTruncateMigrationArchiveGuard.test.js` proving default migration listing excludes 008 artifacts, recursive `*.sql` cannot select them, and no active root migration contains any `TRUNCATE` statement; PR-title validation now accepts scoped Conventional Commit titles such as `fix(api):` so the AUD-001 safety change is not rejected for declaring its API scope — @crewmate — AUD-001.
+
+### Docs
+- Documented forbidden blind re-run and the opt-in-only procedure; made `docs/MIGRATIONS.md` the authoritative 48 runnable / 8 retired inventory, completed its five-file supplemental table, routed duplicate inventory facts to that owner, and assigned the retired archive in `docs/OWNERSHIP.md` — @crewmate — AUD-001.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed

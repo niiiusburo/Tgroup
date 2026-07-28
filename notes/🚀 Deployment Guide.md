@@ -99,28 +99,14 @@ The script stores compressed custom-format dumps in
 `/opt/tgroup/backups/nk-db-daily/`, creates a `.sha256` checksum, and retains
 only the latest 3 dump files.
 
-### Applying Stray Migrations
+### Migration Execution
 
-> **The canonical migration directory is `api/src/db/migrations/`** (the
-> `api/migrations/` path used in older docs is the legacy location and is
-> currently unused). Migrations are **not** auto-applied — they must be run
-> manually after any deploy that introduces a new file there.
-
-If the backup is slightly behind the code, run any missing migrations manually:
-
-```bash
-# Run all migrations (idempotent — every migration uses IF NOT EXISTS).
-for f in /opt/tgroup/api/src/db/migrations/*.sql; do
-  echo "Applying $f..."
-  docker exec -i tgroup-db psql -U postgres -d tdental_demo < "$f"
-done
-```
-
-**Symptom of a missed migration:** API endpoints return 500 with messages like
-`relation "dbo.<table>" does not exist`. Example: face recognition returned
-`ENGINE_ERROR` because `dbo.customer_face_embeddings` was never created on
-prod (migration `046_customer_face_embeddings.sql`). Apply the file above
-and the feature recovers without a redeploy.
+This supporting guide does not own migration inventory or execution policy.
+Use `docs/MIGRATIONS.md` for the canonical inventory and
+`docs/runbooks/DEPLOYMENT.md` for the deployment procedure.
+`api/src/db/migrations/` contains supplemental stragglers only; do not bulk-run
+that directory. Never include
+`api/migrations/RETIRED-DESTRUCTIVE-DO-NOT-RUN/` in a migration glob.
 
 ## Production Deployment (VPS)
 

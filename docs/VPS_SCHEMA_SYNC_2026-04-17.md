@@ -4,6 +4,12 @@
 **DB:** tdental_demo inside tgroup-db container  
 **Branch:** v2-schema-sync (worktree: `.worktrees/V2`)
 
+> Historical snapshot only. Current migration inventory and execution policy
+> are owned by `docs/MIGRATIONS.md` and `docs/runbooks/DEPLOYMENT.md`. The three
+> 008 imports listed below were quarantined on 2026-07-28 under
+> `api/migrations/RETIRED-DESTRUCTIVE-DO-NOT-RUN/` as `.sql.retired` artifacts
+> and must never be selected by a migration glob.
+
 ---
 
 ## Executive Summary
