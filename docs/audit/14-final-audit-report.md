@@ -17,7 +17,7 @@
 | Baseline SHA | `22d691535` |
 | Website / API | 0.32.59 / 1.2.2 |
 | Lanes ingested | 14 (r1, A–M) |
-| Raw lane findings (approx.) | ~145 |
+| Substantive A–M lane findings | 184 |
 | Master findings (AUD-*) | 86 merged rows |
 | S0 | 1 (latent destructive migration path) |
 | S1 | 14 |

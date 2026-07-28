@@ -18,7 +18,7 @@ On this pin the clinic portal is a **real, authenticated, single-DB dental opera
 | Metric | Value |
 |---|---|
 | Lane reports ingested | 14 (r1, A–M) |
-| Raw lane findings (approx.) | ~145 |
+| Substantive A–M lane findings | 184 |
 | Master AUD rows (merged) | 86 (AUD-001–086) |
 | S0 | 1 (latent ops TRUNCATE path) |
 | S1 | 14 |

@@ -1,7 +1,7 @@
 # 06 — Findings Register (MASTER)
 
 **Baseline:** `22d691535` · website `0.32.59` · api `1.2.2`  
-**Rule:** Do not invent findings absent from lane reports. Duplicates merged; lane IDs retained in Evidence.  
+**Rule:** Do not invent findings absent from lane reports. Duplicates merged; all substantive A–M lane IDs are retained here or in the explicit crosswalk in `11-agent-coverage-ledger.md`.  
 **Spot-verify:** See §Spot-verification and `11-agent-coverage-ledger.md`.
 
 ### Column legend
@@ -188,6 +188,6 @@ ID · Severity · Priority · Confidence · Category · Module · Flow · Busine
 | S2 | 41 |
 | S3 | 23 condensed (+ sub-bullets) |
 | S4 | 7 condensed |
-| **Lane raw before merge** | ~145 lane-prefixed rows |
+| **Lane raw before merge** | 184 substantive A–M finding IDs |
 
 All master rows **Open** on baseline unless marked Blocked on captain decision. None marked Fixed on this SHA.

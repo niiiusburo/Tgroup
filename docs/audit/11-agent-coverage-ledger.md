@@ -97,7 +97,37 @@ No spot-check **refuted** a lane S0/S1 claim. Values of secrets were **not** cop
 - A-F007 ≡ H-F005 → AUD-060  
 - A-F005/D-F014 → AUD-059  
 - L-F004/G-F012 → AUD-042  
-- Lane S3/S4 condensed into fewer AUD rows with multi-evidence; raw lane IDs retained in Evidence columns  
+- Lane S3/S4 condensed into fewer AUD rows with multi-evidence; the explicit crosswalk below preserves every substantive A–M source ID.
+
+### Explicit crosswalk for condensed source IDs
+
+The master register consolidates **184 substantive A–M findings** into 86 AUD
+rows. The following IDs were implicit in range notation or cross-lane
+deduplication; this table makes each source-to-master relationship explicit.
+
+| Source finding IDs | Master AUD mapping | Consolidation basis |
+|---|---|---|
+| A-F012 | AUD-062 | Camera quick-add mock slice |
+| B-F004 | AUD-072, AUD-074, AUD-077, AUD-078, AUD-079 | Permission-registry drift split across the owning money, HR, integration, platform, and LOB rows |
+| C-F010 | AUD-043 | Customer-source Settings surface |
+| C-F011 | AUD-073 | Duplicate of the dual catalog-editor finding |
+| C-F012 | AUD-043, AUD-044 | Unmounted/mock Settings component family |
+| C-F014, C-F015, C-F016 | AUD-083 | Settings hygiene bundle |
+| D-F007, D-F008, D-F009, D-F010, D-F011, D-F012 | AUD-070 | Condensed Partners data-integrity bundle |
+| E-F009, E-F010, E-F011 | AUD-071 | Condensed appointment contract/time/pagination bundle |
+| F-F014, F-F017, F-F022, F-F023 | AUD-072 | Condensed money-edge and permission-drift bundle |
+| G-F007, G-F008, G-F009, G-F010, G-F011, G-F013 | AUD-073 | Condensed catalog UX/data-integrity bundle |
+| H-F007, H-F008, H-F009, H-F010, H-F012 | AUD-074 | Condensed HR/permission/map-drift bundle |
+| I-F008, I-F009, I-F010 | AUD-075 | Condensed reports dead-surface/map/export bundle |
+| J-F006, J-F008, J-F010, J-F011, J-F012, J-F013 | AUD-076 | Condensed feedback/CMS bundle |
+| K-F007 | AUD-077 | Integration auth-model/configuration slice |
+| L-F006, L-F007, L-F008, L-F009 | AUD-078 | Condensed platform footgun/documentation bundle |
+| M-F007 | AUD-015, AUD-017 | Baseline LOB absence and dead-end CTV redirect |
+| M-F011 | AUD-079 | Divergent local LOB history slice |
+
+Coverage after explicit crosswalk: **184 / 184 substantive A–M finding IDs
+traceable; 0 absent**. R1 discovery IDs remain separately cross-linked through
+the master Evidence columns and the stable MOD/FLOW/BL/CX/RK registers.
 
 ---
 
