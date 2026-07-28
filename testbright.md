@@ -4,6 +4,31 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 ---
 
+# TestSprite Plan: canonical revenue investor fail-closed 2026-07-28
+
+Feature/edit name: v0.32.60 — AUD-002 canonicalRevenue empty allowlist fail-closed.
+
+Changed URLs / API routes / data flow:
+- Backend helper only: `api/src/services/reports/canonicalRevenue.js` `buildWhere()` used by Dashboard paid revenue / trend, Doctors revenue, Locations Comparison revenue.
+- No route URL shape change; investor filters already pass `allowedCustomerIds` (including `[]`).
+
+Expected behavior:
+- Investor with non-empty allowlist: `so.partnerid = ANY($n::uuid[])` with those IDs.
+- Investor with empty allowlist: same ANY filter with `[]` → zero rows (not company-wide totals).
+- `isInvestor: true` without allowlist array: `FALSE` predicate → zero rows.
+- Staff/admin without allowlist / isInvestor: no partner filter (company-wide as permitted).
+
+User roles: Investor (permission group), staff/admin unrestricted reports.
+
+Execution items:
+- [x] PASS: `npx jest src/services/reports/__tests__/canonicalRevenue.test.js` — 29/29 including empty-allowlist fail-closed, isInvestor+FALSE, staff omit, scoped allowlist, multi-param ordering.
+- [ ] PENDING: Live investor session with zero visible clients shows 0 paid revenue on Dashboard/Doctors/Locations (not clinic-wide).
+- [ ] PENDING: Live investor with assigned clients still sees only allowlisted customer revenue.
+
+Setup/login data: NK2 Investor Demo (empty vs assigned allowlist); read-only verification only.
+
+---
+
 # TestSprite Plan: partner source read-only boundary 2026-07-23
 
 Feature/edit name: v0.32.59 — omission-safe partial customer updates and read-only `partners.sourceid` on normal customer writes.

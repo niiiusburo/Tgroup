@@ -362,6 +362,7 @@ describe('reports doctors performance', () => {
       dateFrom: '2026-05-01',
       dateTo: '2026-05-31',
       companyId: [LOC_B],
+      isInvestor: true,
       allowedCustomerIds: ['66666666-6666-4666-8666-666666666666'],
     });
   });
@@ -449,6 +450,7 @@ describe('reports doctors performance', () => {
       dateFrom: '2026-05-01',
       dateTo: '2026-05-31',
       companyId: [LOC_A],
+      isInvestor: true,
       allowedCustomerIds: ['77777777-7777-4777-8777-777777777777'],
     });
     expect(res.body.data[0].revenue).toBe(12000000);

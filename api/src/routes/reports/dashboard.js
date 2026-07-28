@@ -25,7 +25,7 @@ function applyInvestorPartnerScope(filter, column, investorScope) {
 
 function investorRevenueFilters(baseFilters, investorScope) {
   return investorScope.isInvestor
-    ? { ...baseFilters, allowedCustomerIds: investorScope.allowedCustomerIds }
+    ? { ...baseFilters, isInvestor: true, allowedCustomerIds: investorScope.allowedCustomerIds }
     : baseFilters;
 }
 

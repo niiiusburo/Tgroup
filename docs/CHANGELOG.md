@@ -14,6 +14,17 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.60] — 2026-07-28
+
+### Security
+- Fail-closed investor scope in canonical revenue `buildWhere()`: an empty `allowedCustomerIds` array (or `isInvestor` without an allowlist) now forces zero rows via `so.partnerid = ANY($n::uuid[])` / `FALSE` instead of omitting the filter and leaking company-wide paid revenue — @agent-pi — AUD-002 B-F001 / I-F001 / INV-021.
+
+### Testing
+- Inverted and extended `canonicalRevenue.test.js` for empty-allowlist fail-closed, `isInvestor` without allowlist → `FALSE`, staff/admin unscoped path, and all four canonical getters — @agent-pi — AUD-002.
+
+### Docs
+- Documented the fail-closed empty-allowlist contract on canonical revenue filters — @agent-pi — INV-021 / AUD-002.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed

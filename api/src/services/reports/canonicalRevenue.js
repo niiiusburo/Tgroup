@@ -13,7 +13,7 @@ const {
   CAPPED_ALLOCATED_AMOUNT_SQL,
 } = require('../../routes/reports/revenueRecognition');
 
-function buildWhere({ dateFrom, dateTo, companyId, allowedCustomerIds }) {
+function buildWhere({ dateFrom, dateTo, companyId, allowedCustomerIds, isInvestor }) {
   const conditions = [SERVICE_REVENUE_PAYMENT_CONDITION, 'COALESCE(so.isdeleted, false) = false'];
   const params = [];
   let idx = 1;
@@ -39,13 +39,18 @@ function buildWhere({ dateFrom, dateTo, companyId, allowedCustomerIds }) {
     params.push(companyId);
     idx += 1;
   }
-  if (Array.isArray(allowedCustomerIds) && allowedCustomerIds.length) {
-    // Investor customer allowlist (see permissionService.resolveInvestorScope) — restricts
-    // canonical revenue to only the investor's assigned customers/patients. Without this,
-    // getCanonicalRevenue* silently returned the FULL company-wide total to every investor.
+  // Investor customer allowlist (INV-021 / permissionService.resolveInvestorScope).
+  // Callers pass allowedCustomerIds only for investor scope — including [] when empty.
+  // Empty array MUST still apply the filter: PostgreSQL `= ANY('{}'::uuid[])` matches no
+  // rows (fail-closed). Omitting the condition on empty allowlist leaked company-wide paid
+  // revenue (AUD-002 B-F001 / I-F001).
+  if (Array.isArray(allowedCustomerIds)) {
     conditions.push(`so.partnerid = ANY($${idx}::uuid[])`);
     params.push(allowedCustomerIds);
     idx += 1;
+  } else if (isInvestor) {
+    // Investor flag without an allowlist array — force zero rows rather than unscoped totals.
+    conditions.push('FALSE');
   }
 
   return { where: conditions.join(' AND '), params };
