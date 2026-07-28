@@ -92,6 +92,17 @@ function sumAllocations(allocations) {
     .reduce((total, a) => total + (parseFloat(a.allocated_amount) || 0), 0);
 }
 
+function getAllocationAmountError(allocations) {
+  for (const allocation of allocations) {
+    if (!isPersistableAllocation(allocation)) continue;
+    const amount = Number(allocation.allocated_amount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return 'Allocation amount must be a positive number';
+    }
+  }
+  return null;
+}
+
 // Group allocations by target so N rows against one invoice are one residual check.
 // Sort keys so concurrent transactions acquire row locks in a stable order.
 function groupAllocationsByTarget(allocations) {
@@ -123,6 +134,9 @@ function groupAllocationsByTarget(allocations) {
 async function validateAllocationResidual(allocations, queryable = query, paymentAmount = null) {
   if (!Array.isArray(allocations)) return null;
 
+  const amountError = getAllocationAmountError(allocations);
+  if (amountError) return amountError;
+
   if (paymentAmount !== null && paymentAmount !== undefined) {
     const allocated = sumAllocations(allocations);
     const payable = parseFloat(paymentAmount) || 0;
@@ -141,9 +155,28 @@ async function validateAllocationResidual(allocations, queryable = query, paymen
   return null;
 }
 
+async function reverseAllocations(allocations, queryable = query) {
+  const targets = groupAllocationsByTarget(allocations);
+
+  for (const target of targets) {
+    const sql = target.kind === 'invoice'
+      ? 'SELECT id FROM saleorders WHERE id = $1 FOR UPDATE'
+      : 'SELECT id FROM dotkhams WHERE id = $1 FOR UPDATE';
+    await rowsFrom(queryable, sql, [target.id]);
+  }
+
+  for (const target of targets) {
+    const sql = target.kind === 'invoice'
+      ? 'UPDATE saleorders SET residual = residual + $1 WHERE id = $2'
+      : 'UPDATE dotkhams SET amountresidual = amountresidual + $1 WHERE id = $2';
+    await rowsFrom(queryable, sql, [target.amount, target.id]);
+  }
+}
+
 module.exports = {
   generateReceiptNumber,
   mapAllocations,
+  reverseAllocations,
   rowsFrom,
   sumAllocations,
   validateAllocationResidual,

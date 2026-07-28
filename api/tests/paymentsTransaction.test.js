@@ -133,6 +133,36 @@ describe('POST /api/Payments transaction integrity', () => {
     expect(query.mock.calls.some(([sql]) => sql.includes('INSERT INTO payments'))).toBe(false);
   });
 
+  it('rejects creating a voided payment before opening a transaction', async () => {
+    const res = await request(app)
+      .post('/api/Payments')
+      .send({
+        customer_id: CUSTOMER_ID,
+        amount: 1200000,
+        method: 'cash',
+        status: 'voided',
+        allocations: [{ invoice_id: INVOICE_ID, allocated_amount: 1200000 }],
+      });
+
+    expect(res.status).toBe(409);
+    expect(res.body.error).toMatch(/create it as posted.*POST \/api\/Payments\/:id\/void/i);
+    expect(pool.connect).not.toHaveBeenCalled();
+  });
+
+  it('rejects non-positive allocations before opening a transaction', async () => {
+    const res = await request(app)
+      .post('/api/Payments')
+      .send({
+        customer_id: CUSTOMER_ID,
+        amount: 1200000,
+        method: 'cash',
+        allocations: [{ invoice_id: INVOICE_ID, allocated_amount: -1 }],
+      });
+
+    expect(res.status).toBe(400);
+    expect(pool.connect).not.toHaveBeenCalled();
+  });
+
   it('rolls back the payment insert when allocation insert fails', async () => {
     const client = makeClient(async (sql) => {
       if (sql === 'BEGIN' || sql === 'COMMIT' || sql === 'ROLLBACK') return { rows: [] };

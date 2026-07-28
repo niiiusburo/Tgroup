@@ -250,7 +250,7 @@ Normal `POST /api/Partners` and `PUT /api/Partners/:id` do not assign or change 
   notes?: string | null;
   payment_date?: string | null;
   reference_code?: string | null;
-  status?: 'posted' | 'voided' | null;
+  status?: 'posted' | 'voided' | null; // 'voided' is schema-valid but rejected by this route
   deposit_used?: number | null;
   cash_amount?: number | null;
   bank_amount?: number | null;
@@ -259,11 +259,11 @@ Normal `POST /api/Partners` and `PUT /api/Partners/:id` do not assign or change 
   allocations?: Array<{
     invoice_id?: string | null;
     dotkham_id?: string | null;
-    allocated_amount?: number;
+    allocated_amount?: number; // must be > 0 when present
   }> | null;
 }
 ```
-**Behavior:** If no allocations and no serviceId, backend classifies as `deposit` (see INV-004).
+**Behavior:** If no allocations and no serviceId, backend classifies as `deposit` (see INV-004). `status: 'voided'` returns **409** before a transaction starts; creation is posted-only and void transitions must use `POST /api/Payments/:id/void`.
 
 #### PATCH /api/Payments/:id
 **Auth:** Requires `payment.edit`.
@@ -285,7 +285,7 @@ Normal `POST /api/Partners` and `PUT /api/Partners/:id` do not assign or change 
 - `status: 'voided'` → **409** directing clients to `POST /api/Payments/:id/void` (PATCH must not void without reversing allocations).
 - Lowering `amount` below the sum of existing `payment_allocations` → **409**.
 - Payment row is locked `FOR UPDATE` during the amount check.
-**Create residual lock (AUD-006):** `POST /api/Payments` validates allocations inside the open transaction with `SELECT residual/amountresidual … FOR UPDATE`, sums multi-allocs per target, and rejects totals above the payment amount.
+**Create residual lock (AUD-006):** `POST /api/Payments` rejects non-positive allocation amounts, validates allocations inside the open transaction with `SELECT residual/amountresidual … FOR UPDATE`, sums multi-allocs per target, and rejects totals above the payment amount. `PATCH /api/SaleOrders/:id` acquires the same sale-order lock before recomputing `totalpaid` and `residual`. Delete/void reversals lock the payment first, then all target rows in the same stable order before restoring residuals.
 
 #### DELETE /api/Payments/:id
 **Auth:** Requires `payment.void`.
@@ -296,6 +296,7 @@ Normal `POST /api/Partners` and `PUT /api/Partners/:id` do not assign or change 
 **Auth:** Requires `payment.void`.
 **Body:** `{ reason?: string }`
 **Effect:** Marks payment `status = 'voided'` and reverses linked allocations.
+**Guard:** Only a posted payment can be voided; a repeated void request returns **409** before allocation reads or reversal writes.
 
 #### POST /api/Payments/refund
 **Auth:** Requires `payment.refund`.

@@ -236,3 +236,39 @@ Expected behavior:
 - [ ] PENDING FRESH CONFIRMATION: Strict row-key comparison found one additional mismatch, `SO-2026-5176` (`T478964`, `Khách cũ` → `Sale Online`), outside the confirmed manifest. It remains unmodified.
 
 Negative paths: renaming any retired artifact back to `.sql` makes the migration guard fail; submitting an inactive/missing source returns `400 CUSTOMER_SOURCE_NOT_SELECTABLE`; deleting a source referenced by any customer or order returns `400 CUSTOMER_SOURCE_IN_USE`; the checked-in 43-order manifest test explicitly excludes unconfirmed `SO-2026-5176`.
+
+---
+
+# TestSprite Plan: payment residual writer serialization 2026-07-28
+
+Feature/edit name: AUD-006/AUD-009 payment residual writer serialization and void transition guards.
+
+Changed URLs / API routes / data flow:
+- API: `POST /api/Payments`, `PATCH /api/Payments/:id`, `DELETE /api/Payments/:id`, `POST /api/Payments/:id/void`, `PATCH /api/SaleOrders/:id`.
+- Data flow: payment create transaction → target residual row lock → grouped allocation validation → payment/allocation inserts → residual decrement.
+- Data flow: sale-order amount edit transaction → saleorder row lock → committed allocation total → `totalpaid`/`residual` recomputation.
+- Data flow: payment delete/void transaction → payment row lock → stable target locks → residual restoration → allocation deletion → payment delete/status update.
+
+User roles: Cashier with `payment.add`; staff with `services.edit`; manager/admin with `payment.void`.
+
+| Visit / action | Expected result |
+|---|---|
+| Submit two overlapping invoice allocations that each fit the original residual but not the committed remainder | One transaction commits; the waiting transaction reloads the new residual and returns over-allocation without a second decrement. |
+| Repeat the overlap against one dotkham | The same serialization and rejection behavior applies to `amountresidual`. |
+| Edit a sale order amount while a payment allocation targets it | The amount edit waits on the same row lock and recomputes from committed allocations before writing residual. |
+| `POST /api/Payments` with `status=voided` | `409`; no DB transaction, allocation insert, or residual update starts. |
+| `PATCH /api/Payments/:id` with `status=voided` | `409`; clients are directed to `POST /api/Payments/:id/void`. |
+| Submit a zero or negative allocation amount | Validation returns `400`; no transaction or residual write starts. |
+| Void or delete one payment with allocations across multiple targets | Payment and target rows lock before reversal writes; targets use the same stable order as create. |
+| Submit a second void for an already voided payment | `409`; allocations are not read, deleted, or restored again. |
+| Create valid multi-allocations whose grouped target totals and grand total fit | Payment, allocations, and residual updates commit together. |
+
+Execution items:
+- [x] PASS LOCAL: Focused API Jest passed 42 tests across payment allocation, transaction, void-ban, reversal, and sale-order lock-order suites; the 2 database matrix cases were skipped because `TEST_DATABASE_URL` was not configured.
+- [ ] PENDING DB: PostgreSQL two-connection invoice/dotkham race matrix with `TEST_DATABASE_URL`.
+- [x] PASS LOCAL: `@tgroup/contracts` build and changed JavaScript syntax checks passed.
+- [x] PASS LOCAL: Scoped Semgrep scanned 5 changed payment, sale-order, and contract files with 210 rules and found 0 findings.
+
+Negative paths: create-time voided status performs no database write; a waiting allocator cannot reuse the pre-commit residual; a sale-order amount edit cannot overwrite a concurrent payment with stale allocation totals.
+
+Setup/login data: Use disposable UUID rows in a dedicated test database/schema. Do not use clinic or production records. No deploy or live mutation is part of this plan.

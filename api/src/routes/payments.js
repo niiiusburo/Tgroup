@@ -4,7 +4,16 @@ const { query, pool, withTransaction } = require("../db");
 const { requirePermission } = require("../middleware/auth");
 const { validate } = require("../middleware/validate");
 const { PaymentCreateSchema, PaymentUpdateSchema } = require("@tgroup/contracts");
-const { generateReceiptNumber, mapAllocations, rowsFrom, validateAllocationResidual } = require("./payments/helpers");
+const {
+  generateReceiptNumber,
+  mapAllocations,
+  rowsFrom,
+  validateAllocationResidual,
+} = require("./payments/helpers");
+const {
+  deletePayment,
+  voidPayment,
+} = require("./payments/reversalHandlers");
 const {
   getPaymentById,
   listDepositUsage,
@@ -32,6 +41,9 @@ router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema)
 
     if (!customer_id || amount === undefined || amount === null || !method || parseFloat(amount) <= 0) {
       return res.status(400).json({ error: "customer_id, positive amount, and method are required" });
+    }
+    if (status === "voided") {
+      return res.status(409).json({ error: "Cannot create a voided payment. Create it as posted, then use POST /api/Payments/:id/void." });
     }
 
     // Determine payment_category explicitly
@@ -311,97 +323,10 @@ router.patch("/:id", requirePermission('payment.edit'), validate(PaymentUpdateSc
 });
 
 // DELETE /api/Payments/:id - Delete payment and reverse allocations
-router.delete("/:id", requirePermission('payment.void'), async (req, res) => {
-  const { id } = req.params;
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-
-    const allocationsToReverse = await client.query(
-      "SELECT invoice_id, dotkham_id, allocated_amount FROM payment_allocations WHERE payment_id = $1",
-      [id]
-    );
-
-    await client.query("DELETE FROM payment_allocations WHERE payment_id = $1", [id]);
-
-    for (const a of allocationsToReverse.rows) {
-      if (a.invoice_id) {
-        await client.query(
-          "UPDATE saleorders SET residual = residual + $1 WHERE id = $2",
-          [a.allocated_amount, a.invoice_id]
-        );
-      } else if (a.dotkham_id) {
-        await client.query(
-          "UPDATE dotkhams SET amountresidual = amountresidual + $1 WHERE id = $2",
-          [a.allocated_amount, a.dotkham_id]
-        );
-      }
-    }
-
-    const result = await client.query("DELETE FROM payments WHERE id = $1 RETURNING id", [id]);
-    if (result.rows.length === 0) {
-      await client.query("ROLLBACK");
-      return res.status(404).json({ error: "Payment not found" });
-    }
-
-    await client.query("COMMIT");
-    res.json({ success: true, id: result.rows[0].id });
-  } catch (err) {
-    await client.query("ROLLBACK");
-    console.error("Delete error:", err);
-    res.status(500).json({ error: "Failed to delete payment" });
-  } finally {
-    client.release();
-  }
-});
+router.delete("/:id", requirePermission('payment.void'), deletePayment);
 
 // POST /api/Payments/:id/void - Void payment and reverse allocations
-router.post("/:id/void", requirePermission('payment.void'), async (req, res) => {
-  const { id } = req.params;
-  const { reason } = req.body || {};
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-
-    const allocationsToReverse = await client.query(
-      "SELECT invoice_id, dotkham_id, allocated_amount FROM payment_allocations WHERE payment_id = $1",
-      [id]
-    );
-
-    await client.query("DELETE FROM payment_allocations WHERE payment_id = $1", [id]);
-
-    for (const a of allocationsToReverse.rows) {
-      if (a.invoice_id) {
-        await client.query(
-          "UPDATE saleorders SET residual = residual + $1 WHERE id = $2",
-          [a.allocated_amount, a.invoice_id]
-        );
-      } else if (a.dotkham_id) {
-        await client.query(
-          "UPDATE dotkhams SET amountresidual = amountresidual + $1 WHERE id = $2",
-          [a.allocated_amount, a.dotkham_id]
-        );
-      }
-    }
-
-    const result = await client.query(
-      `UPDATE payments SET status = 'voided', notes = COALESCE(notes, '') || ' | VOIDED: ' || $2 WHERE id = $1 AND status = 'posted' RETURNING *`,
-      [id, reason || ""]
-    );
-    if (result.rows.length === 0) {
-      await client.query("ROLLBACK");
-      return res.status(404).json({ error: "Payment not found" });
-    }
-    await client.query("COMMIT");
-    res.json({ success: true, payment: result.rows[0] });
-  } catch (err) {
-    await client.query("ROLLBACK");
-    console.error("Void error:", err);
-    res.status(500).json({ error: "Failed to void payment" });
-  } finally {
-    client.release();
-  }
-});
+router.post("/:id/void", requirePermission('payment.void'), voidPayment);
 
 // POST /api/Payments/:id/proof - Upload payment proof image
 router.post("/:id/proof", requirePermission('payment.add'), async (req, res) => {

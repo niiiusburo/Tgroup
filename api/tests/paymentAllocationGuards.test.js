@@ -10,6 +10,7 @@
  */
 
 const {
+  reverseAllocations,
   sumAllocations,
   validateAllocationResidual,
 } = require('../src/routes/payments/helpers');
@@ -110,6 +111,15 @@ describe('validateAllocationResidual — payment amount guard', () => {
       queryable
     );
     expect(err).toBeNull();
+  });
+
+  it.each([-1, 0, 'not-a-number'])('rejects non-positive allocation amount %p', async (allocatedAmount) => {
+    const err = await validateAllocationResidual(
+      [{ invoice_id: 'inv-1', allocated_amount: allocatedAmount }],
+      queryable,
+      10_000_000
+    );
+    expect(err).toMatch(/positive number/);
   });
 });
 
@@ -256,5 +266,33 @@ describe('validateAllocationResidual — AUD-006 FOR UPDATE lock', () => {
       'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
     ]);
+  });
+});
+
+describe('reverseAllocations', () => {
+  it('locks grouped targets in stable order before restoring residuals', async () => {
+    const calls = [];
+    const queryable = async (sql, params) => {
+      calls.push({ sql, params });
+      return [];
+    };
+
+    await reverseAllocations([
+      { invoice_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', allocated_amount: 2 },
+      { dotkham_id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc', allocated_amount: 3 },
+      { invoice_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', allocated_amount: 4 },
+      { invoice_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', allocated_amount: 5 },
+    ], queryable);
+
+    const lockCalls = calls.filter(({ sql }) => sql.includes('FOR UPDATE'));
+    const updateCalls = calls.filter(({ sql }) => sql.startsWith('UPDATE'));
+    expect(lockCalls.map(({ params }) => params[0])).toEqual([
+      'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+      'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+    ]);
+    expect(calls.indexOf(updateCalls[0])).toBeGreaterThan(calls.indexOf(lockCalls.at(-1)));
+    expect(updateCalls.find(({ params }) =>
+      params[1] === 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa').params[0]).toBe(9);
   });
 });

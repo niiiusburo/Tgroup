@@ -19,15 +19,18 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 ### Security
 - Lock invoice/dotkham residual rows with `SELECT … FOR UPDATE` inside the payment create transaction before allocation (AUD-006 TOCTOU) — @firstmate — INV-003 / INV-012.
 - Reject `PATCH /api/Payments/:id` with `status=voided`; voiding must go through `POST /api/Payments/:id/void` so allocations reverse (AUD-009) — @firstmate — INV-003 / INV-010.
+- Reject `POST /api/Payments` with `status=voided` or non-positive allocations; lock sale-order amount edits and delete/void reversals before residual writes — @codex — INV-003 / FM-20260728-01.
 
 ### Fixed
 - Sum multi-allocations against the same target and against the payment amount before insert; block lowering payment amount below already-allocated total on PATCH — @firstmate — INV-003 / coordinates with PR #70 sum/multi-alloc guards.
 
 ### Testing
 - Added `paymentAllocationGuards.test.js`, `paymentPatchVoidBan.test.js`, and FOR UPDATE assertion on `paymentsTransaction.test.js` — @firstmate — AUD-006 / AUD-009.
+- Added a real PostgreSQL two-connection invoice/dotkham contention matrix plus sale-order/reversal lock-order, positive-allocation, and create-void regressions — @codex — AUD-006 / AUD-009.
 
 ### Docs
 - Documented residual lock + PATCH void ban on payment contracts, invariants, allocation business logic, and test matrix — @firstmate — INV-003 / INV-012 / AUD-006 / AUD-009.
+- Synchronized WF-003, the TestSprite ledger, payment module dependencies, both affected product domains, and the cross-writer failure mode — @codex — FM-20260728-01.
 
 ## [0.32.59] — 2026-07-23
 
