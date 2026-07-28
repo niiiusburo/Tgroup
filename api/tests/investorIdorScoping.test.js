@@ -218,3 +218,81 @@ describe('monthlyPlans investor WRITE scoping (IDOR on mutations)', () => {
     expect(pool.connect).not.toHaveBeenCalled();
   });
 });
+
+describe('Partners/resolve investor scoping (AUD-003)', () => {
+  const router = require('../src/routes/partners');
+  const { clearResolveCache } = require('../src/routes/partners/resolveHandler');
+
+  beforeEach(() => {
+    clearResolveCache();
+  });
+
+  it('GET /resolve: investor 404s on a non-allowlisted customer (no name/phone leak)', async () => {
+    asInvestor();
+    query.mockResolvedValueOnce([
+      {
+        id: FORBIDDEN,
+        code: 'T999999',
+        name: 'Secret Name',
+        displayname: 'Secret Name',
+        phone: '0900000000',
+        lastupdated: null,
+      },
+    ]);
+    const res = await request(makeApp('/api/Partners', router)).get(
+      `/api/Partners/resolve?key=${FORBIDDEN}`
+    );
+    expect(res.status).toBe(404);
+    expect(res.body.code).toBe('CUSTOMER_NOT_FOUND');
+    expect(JSON.stringify(res.body)).not.toContain('Secret Name');
+    expect(JSON.stringify(res.body)).not.toContain('0900000000');
+  });
+
+  it('GET /resolve: investor sees an allowlisted customer', async () => {
+    asInvestor();
+    query.mockResolvedValueOnce([
+      {
+        id: ALLOWED,
+        code: 'T100000',
+        name: 'Allowed Name',
+        displayname: 'Allowed Name',
+        phone: '0911111111',
+        lastupdated: null,
+      },
+    ]);
+    const res = await request(makeApp('/api/Partners', router)).get(
+      `/api/Partners/resolve?key=${ALLOWED}`
+    );
+    expect(res.status).toBe(200);
+    expect(res.body.partner.id).toBe(ALLOWED);
+    expect(res.body.partner.name).toBe('Allowed Name');
+  });
+
+  it('GET /resolve: staff is not investor-filtered', async () => {
+    asStaff();
+    query.mockResolvedValueOnce([
+      {
+        id: FORBIDDEN,
+        code: 'T999999',
+        name: 'Any Name',
+        displayname: 'Any Name',
+        phone: '0900000000',
+        lastupdated: null,
+      },
+    ]);
+    const res = await request(makeApp('/api/Partners', router)).get(
+      `/api/Partners/resolve?key=${FORBIDDEN}`
+    );
+    expect(res.status).toBe(200);
+    expect(res.body.partner.id).toBe(FORBIDDEN);
+  });
+
+  it('GET /resolve: lookup SQL excludes soft-deleted partners', async () => {
+    asStaff();
+    query.mockResolvedValueOnce([]);
+    await request(makeApp('/api/Partners', router)).get(
+      `/api/Partners/resolve?key=${ALLOWED}`
+    );
+    expect(query.mock.calls[0][0]).toMatch(/isdeleted\s*=\s*false/i);
+  });
+});

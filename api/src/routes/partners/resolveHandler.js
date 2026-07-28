@@ -1,6 +1,7 @@
 'use strict';
 
 const { query } = require('../../db');
+const { resolveInvestorScope } = require('../../services/permissionService');
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -13,6 +14,23 @@ function normalizePhone(value) {
 const CACHE_TTL_MS = 60_000;
 const CACHE_MAX = 500;
 const cache = new Map(); // key -> { value, expiresAt }
+
+function clearResolveCache() {
+  cache.clear();
+}
+
+/**
+ * Principal + investor-scope aware cache key.
+ * Prevents staff cache hits from leaking name/phone to investors (and vice versa).
+ */
+function buildResolveCacheKey({ employeeId, isInvestor, allowedCustomerIds, lookupKey }) {
+  const principal = employeeId || 'anonymous';
+  const scope = isInvestor
+    ? `investor:${[...(allowedCustomerIds || [])].map(String).sort().join(',')}`
+    : 'staff';
+  const key = String(lookupKey || '').trim().toLowerCase();
+  return `${principal}|${scope}|${key}`;
+}
 
 function cacheGet(key) {
   const entry = cache.get(key);
@@ -41,13 +59,16 @@ const CANDIDATE_FIELDS = `
   p.lastupdated
 `;
 
+// Soft-deleted partners must never resolve (AUD-003).
+const ACTIVE_CUSTOMER = `p.customer = true AND p.isdeleted = false`;
+
 async function lookupCandidates(key) {
   const trimmed = String(key || '').trim();
   if (!trimmed) return { matchedBy: null, rows: [] };
 
   if (UUID_RE.test(trimmed)) {
     const rows = await query(
-      `SELECT ${CANDIDATE_FIELDS} FROM partners p WHERE p.id = $1 AND p.customer = true LIMIT 5`,
+      `SELECT ${CANDIDATE_FIELDS} FROM partners p WHERE p.id = $1 AND ${ACTIVE_CUSTOMER} LIMIT 5`,
       [trimmed]
     );
     return { matchedBy: 'uuid', rows };
@@ -55,7 +76,7 @@ async function lookupCandidates(key) {
 
   // Try exact ref match
   const byRef = await query(
-    `SELECT ${CANDIDATE_FIELDS} FROM partners p WHERE p.ref = $1 AND p.customer = true LIMIT 5`,
+    `SELECT ${CANDIDATE_FIELDS} FROM partners p WHERE p.ref = $1 AND ${ACTIVE_CUSTOMER} LIMIT 5`,
     [trimmed]
   );
   if (byRef.length > 0) return { matchedBy: 'ref', rows: byRef };
@@ -64,13 +85,27 @@ async function lookupCandidates(key) {
   const phone = normalizePhone(trimmed);
   if (phone.length >= 6) {
     const byPhone = await query(
-      `SELECT ${CANDIDATE_FIELDS} FROM partners p WHERE regexp_replace(COALESCE(p.phone, ''), '\\D', '', 'g') = $1 AND p.customer = true LIMIT 5`,
+      `SELECT ${CANDIDATE_FIELDS} FROM partners p WHERE regexp_replace(COALESCE(p.phone, ''), '\\D', '', 'g') = $1 AND ${ACTIVE_CUSTOMER} LIMIT 5`,
       [phone]
     );
     if (byPhone.length > 0) return { matchedBy: 'phone', rows: byPhone };
   }
 
   return { matchedBy: null, rows: [] };
+}
+
+function applyInvestorAllowlist(rows, investorScope) {
+  if (!investorScope?.isInvestor) return rows;
+  const allowed = new Set((investorScope.allowedCustomerIds || []).map(String));
+  return rows.filter((row) => allowed.has(String(row.id)));
+}
+
+function notFoundBody(key) {
+  return {
+    error: 'No patient matches the provided key',
+    code: 'CUSTOMER_NOT_FOUND',
+    key,
+  };
 }
 
 async function resolvePartner(req, res) {
@@ -82,7 +117,24 @@ async function resolvePartner(req, res) {
     });
   }
 
-  const cacheKey = key.trim().toLowerCase();
+  // Investor scope first so cache keys are principal/scope-aware (fail-closed).
+  let investorScope;
+  try {
+    investorScope = await resolveInvestorScope(req.user?.employeeId);
+  } catch (err) {
+    return res.status(500).json({
+      error: 'Lookup failed',
+      code: 'CUSTOMER_LOOKUP_ERROR',
+      detail: err.message,
+    });
+  }
+
+  const cacheKey = buildResolveCacheKey({
+    employeeId: req.user?.employeeId,
+    isInvestor: investorScope.isInvestor,
+    allowedCustomerIds: investorScope.allowedCustomerIds,
+    lookupKey: key,
+  });
   const cached = cacheGet(cacheKey);
   if (cached) {
     return res.status(cached.status).json(cached.body);
@@ -100,22 +152,22 @@ async function resolvePartner(req, res) {
     });
   }
 
-  if (result.rows.length === 0) {
-    const body = {
-      error: 'No patient matches the provided key',
-      code: 'CUSTOMER_NOT_FOUND',
-      key,
-    };
+  // Restrict candidates before 0/1/many branching so investors never see
+  // out-of-scope name/phone (including ambiguous picker payloads).
+  const scopedRows = applyInvestorAllowlist(result.rows, investorScope);
+
+  if (scopedRows.length === 0) {
+    const body = notFoundBody(key);
     cacheSet(cacheKey, { status: 404, body });
     return res.status(404).json(body);
   }
 
-  if (result.rows.length > 1) {
+  if (scopedRows.length > 1) {
     const body = {
       error: 'Multiple patients match the provided key',
       code: 'CUSTOMER_LOOKUP_AMBIGUOUS',
       matchedBy: result.matchedBy,
-      candidates: result.rows.map((r) => ({
+      candidates: scopedRows.map((r) => ({
         id: r.id,
         code: r.code,
         name: r.displayname || r.name,
@@ -127,7 +179,7 @@ async function resolvePartner(req, res) {
     return res.status(409).json(body);
   }
 
-  const row = result.rows[0];
+  const row = scopedRows[0];
   const body = {
     matchedBy: result.matchedBy,
     partner: {
@@ -141,4 +193,8 @@ async function resolvePartner(req, res) {
   return res.status(200).json(body);
 }
 
-module.exports = { resolvePartner };
+module.exports = {
+  resolvePartner,
+  clearResolveCache,
+  buildResolveCacheKey,
+};

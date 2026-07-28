@@ -166,6 +166,22 @@ PaginatedResponse<{
 }
 ```
 
+#### GET /api/Partners/resolve
+**Auth:** `customers.view`
+**Query:** `?key=` — customer UUID, exact `partners.ref`, or normalized phone (digits, length ≥ 6).
+**Behavior:**
+- Looks up active customers only (`customer = true` AND `isdeleted = false`).
+- Applies `resolveInvestorScope(req.user.employeeId)` before returning candidates (INV-021).
+  - Investor outside allowlist (or empty allowlist) → `404 CUSTOMER_NOT_FOUND` with no partner/candidates payload (fail-closed; no name/phone disclosure).
+  - Ambiguous phone/ref matches are filtered to the allowlist before the 0/1/many branch (one survivor → 200; multiple survivors → 409).
+  - Non-investor staff are not allowlist-filtered.
+- In-memory response cache keys include principal id + investor/staff scope + lookup key so a staff hit cannot be served to an investor (and scopes do not cross principals).
+**Responses:**
+- `200` `{ matchedBy: 'uuid'|'ref'|'phone', partner: { id, code, name, phone } }`
+- `404` `{ error, code: 'CUSTOMER_NOT_FOUND', key }`
+- `409` `{ error, code: 'CUSTOMER_LOOKUP_AMBIGUOUS', matchedBy, candidates[] }`
+- `400` `{ code: 'CUSTOMER_LOOKUP_KEY_REQUIRED' }` when `key` is missing/non-string
+
 #### POST /api/Partners
 **Body (customer create):**
 ```ts
