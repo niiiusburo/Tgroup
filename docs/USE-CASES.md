@@ -85,7 +85,7 @@ When a use case is created or materially edited, add one compact `Traceability` 
 
 - **Actor:** Receptionist / Cashier
 - **Trigger:** Customer profile → FaceCaptureModal button; or appointment check-in flow
-- **Preconditions:** Customer exists; camera available.
+- **Preconditions:** Customer exists; camera available; actor is a non-investor with `customers.edit`.
 - **Main flow:**
   1. Actor clicks face capture button.
   2. System detects/captures face via the live browser camera.
@@ -97,9 +97,10 @@ When a use case is created or materially edited, add one compact `Traceability` 
   - **AF-1 No face detected:** Camera stays open; shows "Không phát hiện khuôn mặt" / "Face not detected"; only explicit close/cancel dismisses capture.
   - **AF-2 Face too small:** Quality feedback "Xin vui lòng tiến lại gần".
   - **AF-3 Face already registered:** Overwrites with new embedding.
+  - **AF-4 Investor write attempt:** Backend returns 403 before local or CompreFace mutation, even if a permission override grants `customers.edit`.
 - **Postconditions:** Customer can now use face recognition check-in (UC-007).
-- **Invariants touched:** INV-005 (local 128-dim embedding lock), INV-014 (optional face integration startup).
-- **Traceability:** Related WF: WF-007. Contracts/routes: `POST /api/face/register`, `POST /api/face/re-register`, `GET /api/face/status/:partnerId`. Data/tables: `dbo.partners.face_subject_id`, `dbo.partners.face_registered_at`, `dbo.customer_face_embeddings` when local provider is active. Tests: `api/tests/faceRecognition.test.js`, `api/src/services/__tests__/comprefaceClient.test.js`, `api/src/services/__tests__/comprefaceFaceProvider.test.js`, `website/src/hooks/__tests__/useFaceRecognition.test.ts`, `website/src/components/shared/FaceCaptureModal.test.tsx`. Product-map domains: `customers-partners`, `integrations`.
+- **Invariants touched:** INV-005 (local 128-dim embedding lock), INV-014 (optional face integration startup), INV-021 (investor writes forbidden).
+- **Traceability:** Related WF: WF-007. Contracts/routes: `POST /api/face/register`, `POST /api/face/re-register`, `GET /api/face/status/:partnerId`. Data/tables: `dbo.partners.face_subject_id`, `dbo.partners.face_registered_at`, `dbo.customer_face_embeddings` when local provider is active. Tests: `api/tests/faceRecognition.test.js`, `api/tests/faceRecognitionInvestorScope.test.js`, `api/src/services/__tests__/comprefaceClient.test.js`, `api/src/services/__tests__/comprefaceFaceProvider.test.js`, `website/src/hooks/__tests__/useFaceRecognition.test.ts`, `website/src/components/shared/FaceCaptureModal.test.tsx`. Product-map domains: `customers-partners`, `integrations`.
 
 ---
 
@@ -182,7 +183,7 @@ When a use case is created or materially edited, add one compact `Traceability` 
   - **AF-4 No appointments today:** Show "Hôm nay không có lịch hẹn".
 - **Postconditions:** Appointment state = `arrived`; check-in timestamp recorded.
 - **Invariants touched:** INV-005 (embedding dimension), INV-014 (Compreface optional startup).
-- **Traceability:** Related WF: WF-007, UC-003, UC-008. Contracts/routes: `POST /api/face/recognize`, `GET /api/Appointments?partnerId=...&date=...`, `PUT /api/Appointments/:id`. Data/tables: `dbo.customer_face_embeddings`, `dbo.partners`, `dbo.appointments`. Tests: `api/tests/faceRecognition.test.js`, `website/src/hooks/__tests__/useFaceRecognition.test.ts`, `website/src/components/shared/GlobalFaceIdButton.test.tsx`, `website/src/components/modules/PatientCheckIn.test.tsx`. Product-map domains: `customers-partners`, `appointments-calendar`, `integrations`.
+- **Traceability:** Related WF: WF-007, UC-003, UC-008. Invariants touched: INV-021 (investor Face ID results must be allowlist-filtered). Contracts/routes: `POST /api/face/recognize`, `GET /api/Appointments?partnerId=...&date=...`, `PUT /api/Appointments/:id`. Data/tables: `dbo.customer_face_embeddings`, `dbo.partners`, `dbo.appointments`. Tests: `api/tests/faceRecognition.test.js`, `api/tests/faceRecognitionInvestorScope.test.js`, `website/src/hooks/__tests__/useFaceRecognition.test.ts`, `website/src/components/shared/GlobalFaceIdButton.test.tsx`, `website/src/components/modules/PatientCheckIn.test.tsx`. Product-map domains: `customers-partners`, `appointments-calendar`, `integrations`.
 
 ---
 
@@ -457,7 +458,7 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Alternate flows:**
   - **AF-1 No allowlist:** Lists/reports/export downloads return empty scoped results.
   - **AF-2 Direct URL for hidden customer:** Backend returns 404 or empty results without disclosing existence.
-  - **AF-3 Write attempt:** Existing permission gates return 403 because investors do not receive write permissions.
+  - **AF-3 Write attempt:** Permission gates and role-level mutation guards return 403, including when an override accidentally grants a write permission.
 - **Postconditions:** Investor sees only admin-approved customers and customer-derived records; no separate investor portal/session exists.
 - **Invariants touched:** INV-008, INV-021, INV-020.
 - **Traceability:** Related WF: WF-015. Contracts/routes: `POST /api/Auth/login`, `GET/PATCH /api/Partners/*investor-visibility`, customer/appointment/payment/service/report/export read routes. Data/tables: `dbo.partners`, `dbo.permission_groups`, `dbo.group_permissions`, `dbo.investor_accounts`, `dbo.investor_clients`. Tests: `api/tests/authInvestorLogin.test.js`, `api/tests/investorIdorScoping.test.js`, `api/tests/investorScopeRoutePermissions.test.js`, live NK/NK2 browser proof after deploy. Product-map domains: `auth`, `customers-partners`, `reports-analytics`, `payments-deposits`, `services-catalog`.

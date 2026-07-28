@@ -12,6 +12,7 @@ const AUTO_MATCH_THRESHOLD = parseFloat(process.env.FACE_AUTO_MATCH_THRESHOLD ||
 const CANDIDATE_THRESHOLD = parseFloat(process.env.FACE_CANDIDATE_THRESHOLD || "0.80");
 const AUTO_MATCH_MARGIN = parseFloat(process.env.FACE_AUTO_MATCH_MARGIN || "0.03");
 const MAX_CANDIDATES = parseInt(process.env.FACE_MAX_CANDIDATES || "3", 10);
+const ALL_SUBJECTS_PREDICTION_COUNT = 2147483647;
 
 class ComprefaceFaceError extends Error {
   constructor(code, message, status = 500) {
@@ -60,15 +61,18 @@ function mapComprefaceFailure(err, fallbackCode, fallbackMessage) {
   );
 }
 
-async function loadPartnersBySubjects(subjects) {
-  if (!subjects.length) return new Map();
+async function loadPartnersBySubjects(subjects, allowedCustomerIds) {
+  const scoped = Array.isArray(allowedCustomerIds);
+  if (!subjects.length || (scoped && allowedCustomerIds.length === 0)) return new Map();
 
+  const scopeSql = scoped ? "\n       AND p.id = ANY($2::uuid[])" : "";
+  const params = scoped ? [subjects, allowedCustomerIds] : [subjects];
   const rows = await query(
-    `SELECT id, name, phone, ref AS code, face_subject_id
-     FROM dbo.partners
-     WHERE isdeleted = false
-       AND (id::text = ANY($1::text[]) OR face_subject_id = ANY($1::text[]))`,
-    [subjects]
+    `SELECT p.id, p.name, p.phone, p.ref AS code, p.face_subject_id
+     FROM dbo.partners p
+     WHERE p.isdeleted = false
+       AND (p.id::text = ANY($1::text[]) OR p.face_subject_id = ANY($1::text[]))${scopeSql}`,
+    params
   );
 
   const bySubject = new Map();
@@ -79,10 +83,17 @@ async function loadPartnersBySubjects(subjects) {
   return bySubject;
 }
 
-async function recognizeFace(imageBuffer, mimetype) {
+async function recognizeFace(imageBuffer, mimetype, allowedCustomerIds) {
+  const scoped = Array.isArray(allowedCustomerIds);
+  if (scoped && allowedCustomerIds.length === 0) {
+    return { match: null, candidates: [] };
+  }
+
   let rawResults;
   try {
-    rawResults = await recognize(imageBuffer, mimetype);
+    rawResults = scoped
+      ? await recognize(imageBuffer, mimetype, ALL_SUBJECTS_PREDICTION_COUNT)
+      : await recognize(imageBuffer, mimetype);
   } catch (err) {
     throw mapComprefaceFailure(
       err,
@@ -91,7 +102,7 @@ async function recognizeFace(imageBuffer, mimetype) {
     );
   }
   const subjects = [...new Set(rawResults.map((r) => String(r.subject)).filter(Boolean))];
-  const partnersBySubject = await loadPartnersBySubjects(subjects);
+  const partnersBySubject = await loadPartnersBySubjects(subjects, allowedCustomerIds);
 
   const byPartner = new Map();
   for (const result of rawResults) {

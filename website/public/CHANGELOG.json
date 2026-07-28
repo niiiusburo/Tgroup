@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.32.60",
+    "date": "2026-07-28",
+    "commit": "pending",
+    "highlights": "Restricted investor Face ID results and status checks to admin-allowlisted customers.",
+    "sections": [
+      {
+        "title": "Security",
+        "items": [
+          "Investor Face ID recognition now returns only allowlisted customer matches and candidates, and an empty allowlist returns no result without exposing customer names or phone numbers.",
+          "Investor Face ID status checks return not found outside the allowlist, while face registration and re-registration are denied before any local or CompreFace data changes.",
+          "Face ID behavior for non-investor staff and administrators is unchanged."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.58",
     "date": "2026-07-23",
     "commit": "pending",

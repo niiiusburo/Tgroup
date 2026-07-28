@@ -4,6 +4,32 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 ---
 
+# TestSprite Plan: Face ID investor allowlist (AUD-004) 2026-07-28
+
+Feature/edit name: v0.32.60 — Face ID routes apply `resolveInvestorScope` fail-closed (INV-021).
+
+Changed URLs / API routes / data flow:
+- API: `POST /api/face/recognize`, `POST /api/face/register`, `POST /api/face/re-register`, `GET /api/face/status/:partnerId` (`api/src/routes/faceRecognition.js`).
+- Data flow: authenticated investor JWT → `resolveInvestorScope(employeeId)` → constrain local SQL or CompreFace partner hydration before recognition ranking → filter response again; status checks the allowlist, while register/re-register reject the investor role before mutation.
+
+Expected behavior:
+- Investor recognize of a non-allowlisted face returns `{ match: null, candidates: [] }` with no name/phone leak.
+- An allowlisted second-best face can still match when a hidden face scores higher.
+- Investor status on an outsider partnerId → 404 `PARTNER_NOT_FOUND`; UUID casing does not change membership.
+- Investor register/re-register → 403 `FORBIDDEN` before mutation even for an allowlisted partner or `customers.edit` override.
+- Staff/admin Face ID behavior unchanged (unscoped).
+
+User roles: Investor with `customers.view`; staff with face permissions.
+
+Execution items:
+- [ ] PENDING: Focused Face ID route, local SQL scope, complete CompreFace prediction request, allowlisted partner hydration, and investor write-denial tests after AUD004 review fixes.
+- [ ] PENDING: Live investor session Face ID recognize of a non-allowlisted customer yields no PII (nk2 after deploy).
+- [ ] PENDING: Live investor status GET for outsider partnerId returns 404.
+
+Setup/login data: Investor account with a known allowlisted client; do not print credentials.
+
+---
+
 # TestSprite Plan: partner source read-only boundary 2026-07-23
 
 Feature/edit name: v0.32.59 — omission-safe partial customer updates and read-only `partners.sourceid` on normal customer writes.

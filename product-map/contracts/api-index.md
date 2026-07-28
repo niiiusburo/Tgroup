@@ -332,10 +332,10 @@ Lark alert contract: when `LARK_FEEDBACK_WEBHOOK_URL` is configured, `POST /api/
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| POST | `/recognize` | Perm:`customers.view` | FormData (`image`) | `{ match: FaceCandidate \| null, candidates: FaceCandidate[] }`; provider selected by `FACE_RECOGNITION_PROVIDER=local|compreface` |
-| POST | `/register` | Perm:`customers.edit` | FormData (`partnerId`, `image`, optional `source`) | `{ success: true, partnerId, sampleId, sampleCount, faceRegisteredAt }` |
-| POST | `/re-register` | Perm:`customers.edit` | FormData (`partnerId`, repeated `images`, optional `source`) | `{ success: true, partnerId, sampleIds, sampleCount, faceRegisteredAt }` |
-| GET | `/status/:partnerId` | Perm:`customers.view` | — | `{ partnerId, registered, sampleCount, lastRegisteredAt }` |
+| POST | `/recognize` | Perm:`customers.view` | FormData (`image`) | `{ match: FaceCandidate \| null, candidates: FaceCandidate[] }`; provider selected by `FACE_RECOGNITION_PROVIDER=local|compreface`; investors constrain local SQL or request the complete CompreFace ranking before allowlisted hydration/filtering |
+| POST | `/register` | Perm:`customers.edit` + non-investor | FormData (`partnerId`, `image`, optional `source`) | `{ success: true, partnerId, sampleId, sampleCount, faceRegisteredAt }`; investors receive 403 before mutation |
+| POST | `/re-register` | Perm:`customers.edit` + non-investor | FormData (`partnerId`, repeated `images`, optional `source`) | `{ success: true, partnerId, sampleIds, sampleCount, faceRegisteredAt }`; investors receive 403 before mutation |
+| GET | `/status/:partnerId` | Perm:`customers.view` | — | `{ partnerId, registered, sampleCount, lastRegisteredAt }`; investors receive 404 outside the allowlist |
 
 ## External Checkups (`/api/ExternalCheckups`)
 

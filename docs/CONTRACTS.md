@@ -24,6 +24,7 @@
 | v1.0.8 | 2026-07-04 | Investor users are restricted normal-portal staff sessions: `/api/Auth/login` may authenticate `dbo.investor_accounts`, but all data access stays on existing portal routes and is scoped by `dbo.investor_clients`. |
 | v1.0.9 | 2026-07-08 | Investor visibility admin controls (`GET`/`PATCH /api/Partners/investor-visibility`) are gated by admin group (`assertAdmin`) instead of `permissions.edit`, and admin list/toggle match `dbo.investor_clients` by the SAME scope union (`investor_id` = the investor's `partners.id` OR any active `dbo.investor_accounts.id`) that scopes the investor read. Customer id is validated with the canonical 8-4-4-4-12 UUID pattern. |
 | v1.0.10 | 2026-07-23 | Customer-source usage counts and deletion guards include both customer and sale-order references; new sale orders reject inactive/missing sources while an existing order may preserve its already-assigned inactive historical source. |
+| v1.0.11 | 2026-07-28 | Face ID `/api/face/*` applies investor policy (INV-021): recognize ranks only allowlisted customers, status returns 404 outside the allowlist, and register/re-register reject every investor with 403. |
 
 ---
 
@@ -373,9 +374,13 @@ Normal `POST /api/Partners` and `PUT /api/Partners/:id` do not assign or change 
 }
 ```
 
+**Investor scope (INV-021):** When the caller resolves to the `investor` group, the allowlisted partner ids constrain provider hydration and ranking before `match` and `candidates` are selected. The CompreFace path requests the complete subject ranking with `prediction_count=2147483647` before locally hydrating allowlisted partners, so a hidden customer cannot suppress an allowlisted second-best result. The response is filtered again before return. An empty allowlist fails closed to `{ match: null, candidates: [] }` without calling the provider or disclosing name/phone. Non-investor staff retain the default unscoped provider request.
+
+**Investor status and write policy:** `GET /api/face/status/:partnerId` returns 404 `PARTNER_NOT_FOUND` when the customer is outside the investor allowlist. `POST /api/face/register` and `POST /api/face/re-register` return 403 `FORBIDDEN` for every investor, even when an effective permission override grants `customers.edit` and the customer is allowlisted. No face provider or database mutation is reached.
+
 Provider behavior:
 - `FACE_RECOGNITION_PROVIDER=local` sends captures to `FACE_SERVICE_URL` for SFace embeddings and stores vectors in `dbo.customer_face_embeddings`.
-- `FACE_RECOGNITION_PROVIDER=compreface` sends captures to CompreFace, uses `partners.id` as the CompreFace subject, and keeps `partners.face_subject_id` / `face_registered_at` as TGClinic status.
+- `FACE_RECOGNITION_PROVIDER=compreface` sends captures to CompreFace, uses `partners.id` as the CompreFace subject, and keeps `partners.face_subject_id` / `face_registered_at` as TGClinic status. Investor recognition requests all subject predictions before allowlist hydration; staff recognition keeps CompreFace's default single prediction.
 
 Face error responses:
 ```ts

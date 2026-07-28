@@ -14,6 +14,20 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.60] — 2026-07-28
+
+### Security
+- Face ID routes (`POST /api/face/recognize`, `POST /api/face/register`, `POST /api/face/re-register`, `GET /api/face/status/:partnerId`) now apply `resolveInvestorScope()` fail-closed — @agent — AUD-004 / INV-021; investors previously received any match's name/phone and could probe status/register for non-allowlisted customers.
+- Investor recognition now constrains local SQL before ranking and requests CompreFace's complete subject ranking before allowlisted partner hydration; empty allowlists skip the provider and return no results, hidden top matches cannot suppress allowlisted candidates, and UUID membership is case-insensitive — @codex — AUD004-2 / AUD004-3 / AUD004-4.
+- Investor Face ID register/re-register return 403 `FORBIDDEN` before provider or database mutation even for allowlisted customers or `customers.edit` overrides; status continues to return 404 for non-allowlisted customers — @codex — DEC-20260704-01 / AUD004-1.
+
+### Testing
+- Added `api/tests/faceRecognitionInvestorScope.test.js` plus provider/client regressions for scoped CompreFace `prediction_count`, pre-ranking scope, empty-allowlist fail-closed behavior, UUID case normalization, staff passthrough, status IDOR, and allowlisted investor write denial — @agent / @codex — AUD-004.
+- Existing `api/tests/faceRecognition.test.js` mocks `resolveInvestorScope` as non-investor so contract coverage stays stable — @agent — regression guard.
+
+### Docs
+- Documented Face ID investor pre-ranking scope and write denial on the `/api/face/*` contract, INV-021 enforcement list, dependency/schema maps, integrations product-map, test matrices, and user-facing release notes — @agent / @codex — AUD-004 / INV-021.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed

@@ -3,6 +3,7 @@ const multer = require('multer');
 const crypto = require('crypto');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
+const { resolveInvestorScope } = require('../services/permissionService');
 const { getEmbedding, FaceEngineError } = require('../services/faceEngineClient');
 const { findMatches, registerSample, replaceAllSamples, getFaceStatus, FaceQualityError } = require('../services/faceMatchEngine');
 const { getFaceRecognitionProvider } = require('../services/faceRecognitionRuntime');
@@ -34,6 +35,41 @@ function isComprefaceProvider() {
   return getFaceRecognitionProvider() === 'compreface';
 }
 
+function normalizePartnerId(partnerId) {
+  return String(partnerId || '').toLowerCase();
+}
+
+function normalizedInvestorCustomerIds(investorScope) {
+  return (investorScope?.allowedCustomerIds || []).map(normalizePartnerId);
+}
+
+/** True when the partner is visible to this caller (staff always; investors only allowlisted). */
+function isPartnerInInvestorScope(investorScope, partnerId) {
+  if (!investorScope?.isInvestor) return true;
+  return normalizedInvestorCustomerIds(investorScope).includes(normalizePartnerId(partnerId));
+}
+
+/**
+ * Strip recognize results that fall outside the investor allowlist.
+ * Fail-closed: empty allowlist yields no match and no candidates, with no PII leak.
+ */
+function applyInvestorScopeToRecognizeResult({ match, candidates }, investorScope) {
+  if (!investorScope?.isInvestor) {
+    return { match: match ?? null, candidates: candidates || [] };
+  }
+  const allowed = new Set(normalizedInvestorCustomerIds(investorScope));
+  const scopedMatch = match && allowed.has(normalizePartnerId(match.partnerId)) ? match : null;
+  const scopedCandidates = (candidates || [])
+    .filter((candidate) => allowed.has(normalizePartnerId(candidate.partnerId)));
+  return { match: scopedMatch, candidates: scopedCandidates };
+}
+
+function denyInvestorWrite(res, investorScope) {
+  if (!investorScope?.isInvestor) return false;
+  res.status(403).json({ error: 'FORBIDDEN', message: 'Investor access is read-only' });
+  return true;
+}
+
 /**
  * POST /api/face/recognize
  * Body: multipart/form-data with field `image`
@@ -46,12 +82,25 @@ router.post('/recognize', requirePermission('customers.view'), upload.single('im
       return res.status(400).json({ error: 'MISSING_IMAGE', message: 'Missing image file' });
     }
 
-    const { match, candidates } = isComprefaceProvider()
-      ? await comprefaceFaceProvider.recognizeFace(req.file.buffer, req.file.mimetype)
-      : await (async () => {
-          const { embedding } = await getEmbedding(req.file.buffer, req.file.mimetype);
-          return findMatches(embedding);
-        })();
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    const allowedCustomerIds = normalizedInvestorCustomerIds(investorScope);
+    let raw;
+    if (isComprefaceProvider()) {
+      raw = investorScope.isInvestor
+        ? await comprefaceFaceProvider.recognizeFace(
+            req.file.buffer,
+            req.file.mimetype,
+            allowedCustomerIds
+          )
+        : await comprefaceFaceProvider.recognizeFace(req.file.buffer, req.file.mimetype);
+    } else {
+      const { embedding } = await getEmbedding(req.file.buffer, req.file.mimetype);
+      raw = investorScope.isInvestor
+        ? await findMatches(embedding, allowedCustomerIds)
+        : await findMatches(embedding);
+    }
+
+    const { match, candidates } = applyInvestorScopeToRecognizeResult(raw, investorScope);
 
     const duration = Date.now() - start;
     console.log(`[FaceRecognize] result=${match ? 'match' : candidates.length ? 'candidates' : 'no_match'} duration=${duration}ms`);
@@ -80,6 +129,9 @@ router.post('/register', requirePermission('customers.edit'), upload.single('ima
     if (!req.file) {
       return res.status(400).json({ error: 'MISSING_IMAGE', message: 'Missing image file' });
     }
+
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (denyInvestorWrite(res, investorScope)) return;
 
     const partnerRows = await query(
       'SELECT id, name FROM dbo.partners WHERE id = $1 AND isdeleted = false',
@@ -149,6 +201,9 @@ router.post(
         return res.status(400).json({ error: 'MISSING_IMAGES', message: 'At least one image required' });
       }
 
+      const investorScope = await resolveInvestorScope(req.user?.employeeId);
+      if (denyInvestorWrite(res, investorScope)) return;
+
       const partnerRows = await query(
         'SELECT id, name FROM dbo.partners WHERE id = $1 AND isdeleted = false',
         [partnerId]
@@ -212,6 +267,13 @@ router.post(
 router.get('/status/:partnerId', requirePermission('customers.view'), async (req, res) => {
   try {
     const { partnerId } = req.params;
+
+    // INV-021: non-allowlisted partner is indistinguishable from missing (404).
+    const investorScope = await resolveInvestorScope(req.user?.employeeId);
+    if (!isPartnerInInvestorScope(investorScope, partnerId)) {
+      return res.status(404).json({ error: 'PARTNER_NOT_FOUND', message: 'Customer not found' });
+    }
+
     const partnerRows = await query(
       'SELECT id FROM dbo.partners WHERE id = $1 AND isdeleted = false',
       [partnerId]

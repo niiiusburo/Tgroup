@@ -117,9 +117,10 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 |-----------|--------|---------------|
 | `loginRateLimiter.test.js` | Auth | Login rate limiter counts failed attempts only and scopes account lockout by email plus IP |
 | `cosmeticLobImport.test.js` | Cosmetic LOB / Data Imports / Payments | UC-COS-IMPORT-01 / WF-COS-IMPORT-01: exact three-tab workbook validation, phone/branch/payment normalization, dry-run/apply planning into cosmetic partners/deposits/treatments/payments, idempotent source references, and manual-review gating for ambiguous money rows. |
-| `faceRecognition.test.js` | Integrations | Face register/recognize/re-register API in local and CompreFace provider modes |
-| `src/services/__tests__/comprefaceClient.test.js` | Integrations | CompreFace REST client, native multipart uploads, auth header, subject/example calls, and health check |
-| `src/services/__tests__/comprefaceFaceProvider.test.js` | Integrations | CompreFace provider mapping from subjects to customer records, registration status, and `NO_FACE` error normalization |
+| `faceRecognition.test.js`, `faceRecognitionInvestorScope.test.js` | Integrations / Investor | Face register/recognize/re-register API in local and CompreFace modes; investor pre-ranking allowlist, UUID case normalization, status IDOR, and write denial |
+| `src/services/__tests__/faceMatchEngine.test.js` | Integrations / Investor | Local face SQL limits the ranking pool to allowed customer ids while staff remain unscoped |
+| `src/services/__tests__/comprefaceClient.test.js` | Integrations | CompreFace REST client, scoped `prediction_count` request shape and validation, native multipart uploads, auth header, subject/example calls, and health check |
+| `src/services/__tests__/comprefaceFaceProvider.test.js` | Integrations / Investor | CompreFace provider mapping, complete scoped prediction request, allowlisted subject hydration/ranking, empty-scope provider bypass, registration status, and `NO_FACE` normalization |
 | `src/routes/appointments/__tests__/readHandlers.test.js` | Appointments | Calendar-mode appointment list allows large week ranges while skipping count/aggregate queries; normal lists remain capped |
 | `src/routes/__tests__/externalCheckups.test.js` | Integrations | Hosoonline auth header, v2 patient search path, generated patient code, and migrated ref lookup behavior |
 | `src/routes/partners/__tests__/mutationHandlers.test.js` | Customers | Customer edit allows phone values to overlap customer refs/phones while keeping UUID as identity |
