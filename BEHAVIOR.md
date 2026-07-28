@@ -25,6 +25,7 @@ If behavior is accepted as product truth, promote it here or to a domain runbook
 ## 3. Auth And Permissions
 
 - Frontend route guards and backend `requirePermission()` checks must stay aligned.
+- On the current baseline, `is_ctv` is an auth-role field only: because no frontend `/ctv` route ships yet, protected routes must not redirect CTV-flagged users there and must apply the same permission checks as other authenticated users. The planned CTV redirect becomes valid only when the LOB `/ctv` surface ships.
 - Admin users can edit/create/delete according to granted permissions.
 - Manager-like roles may view admin surfaces only when permission rules allow it; mutation still requires explicit edit/create/delete permissions.
 - 401 means the session is invalid or expired; return the user to login or trigger re-auth.

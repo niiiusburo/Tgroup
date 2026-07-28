@@ -1,10 +1,12 @@
 name: Cosmetic Line of Business (v2)
 summary: |
+  Planned LOB target. The current baseline has no frontend /ctv route and does not redirect is_ctv users.
+  Current protected-route behavior is owned by BEHAVIOR.md section 3; the redirect statements below apply only when the LOB /ctv surface ships.
   Fully isolated cosmetic business unit provisioned in a physically separate Postgres database (tcosmetic_demo) alongside the untouched dental database (tdental_demo).
   One shared login with role-based LOB scoping via partners.lob_scope TEXT[] and is_ctv flag (partners is the canonical auth/identity source; NO separate users table for LOB scope per migration 047).
-  Admin users with multiple scopes see a header LOB dropdown (BusinessUnitContext); staff see only their LOB; CTV-flagged users are redirected to the dedicated mobile-first /ctv dashboard and never enter admin UI.
+  Admin users with multiple scopes see a header LOB dropdown (BusinessUnitContext); staff see only their LOB. After the planned /ctv surface ships, CTV-flagged users will be redirected there and kept out of the admin UI; the current baseline applies normal protected-route permissions.
   Existing dental admin UI (overview, customers, calendar, appointments, employees, services, payment, reports, settings) is reused 1:1 for cosmetic when LOB=cosmetic; all /api/cosmetic/* routes mirror dental routes against the cosmetic DB.
-  The single new UI surface is the CTV (Cộng tác viên / referrer) commission dashboard at /ctv with four bottom-nav tabs (Home, Commission, Referrals, Me) that aggregates commission rows across both physical databases.
+  The single planned new UI surface is the CTV (Cộng tác viên / referrer) commission dashboard at /ctv with four bottom-nav tabs (Home, Commission, Referrals, Me) that aggregates commission rows across both physical databases.
   Commission attribution engine (D13 recipient resolution using partners + earnings) and consultation cards (cosmetic-only, invisible to admin UI) are backend-only in v1. All dental schema changes are strictly additive (new nullable columns + new tables per migration 047). Two-DB topology (tdental_demo + tcosmetic_demo); getDb(lob)/getQuery(req) for routing. Feature-flagged behind COSMETIC_LOB_ENABLED.
 owns:
   - api/src/routes/cosmetic/*.js (mirrors of dental routes, gated by requireLobScope('cosmetic'))
@@ -68,19 +70,19 @@ endpoints:
   - PUT/PATCH/DELETE /api/cosmetic/* (same)
   - GET    /api/ctv/commission-summary (cross-DB read of both earnings tables via recipient_partner_id for the authenticated CTV partner; returns LOB-tagged rows + aggregates per D13)
   - GET    /api/ctv/referrals (CTV's referred partners across LOBs with status/earned totals)
-  - POST   /api/Auth/login (now returns lob_scope + is_ctv; triggers hard redirect to /ctv when is_ctv=true)
+  - POST   /api/Auth/login (returns lob_scope + is_ctv; the current baseline does not redirect)
   - GET    /api/Auth/me (augmented with lob_scope / is_ctv)
 ui_surfaces:
   - Header LOB dropdown (visible only when user.lob_scope.length >= 2; renders next to LocationContext; Dental/Cosmetic options; last selection in localStorage; toggling keys entire React subtree via BusinessUnitContext to prevent stale dental/cosmetic data flash)
   - /overview, /customers, /customers/:id, /calendar, /appointments, /employees, /services, /payment, /reports/* , /settings (all reuse existing dental components when LOB=cosmetic; data sourced from cosmetic DB)
   - /customers/:id cross-LOB badge ("also a dental client →") — visible only to users with lob.crossview permission; server-side phone match probe; opens other LOB profile in new tab
-  - /ctv (CTV-only mobile-first dashboard; hard redirect on login for is_ctv users; 403 on any admin route)
-    - Home tab: greeting, pending-commission tile (dental/cosmetic split bar + totals), this-month stats (referrals, services, paid out), recent-activity feed with [den]/[cos] LOB pills
-    - Commission tab: segmented Pending vs Paid toggle; list of commission rows (client, service, amount, LOB pill); payout cycles view
-    - Referrals tab: list of referred clients (LOB pill(s) — some appear in both DBs); earning status; total earned; last activity
-    - Me tab: CTV profile, language, notifications, logout
+  - /ctv (planned CTV-only mobile-first dashboard; once shipped, login redirects is_ctv users and admin routes deny them)
+  - "CTV Home tab: greeting, pending-commission tile (dental/cosmetic split bar + totals), this-month stats (referrals, services, paid out), recent-activity feed with [den]/[cos] LOB pills"
+  - "CTV Commission tab: segmented Pending vs Paid toggle; list of commission rows (client, service, amount, LOB pill); payout cycles view"
+  - "CTV Referrals tab: list of referred clients (LOB pill(s) — some appear in both DBs); earning status; total earned; last activity"
+  - "CTV Me tab: profile, language, notifications, logout"
   - CTV bottom nav (4 tabs)
-  - Login redirect logic: is_ctv=true → /ctv; lob_scope present and !is_ctv → existing dashboard (toggle visible iff >=2 scopes); no scope → 403
+  - "Login lifecycle: the current baseline applies normal permissions without an is_ctv redirect; after /ctv ships, is_ctv=true redirects there while scoped non-CTV users use the existing dashboard"
 ui_invariants:
   - LOB toggle must never be shown to CTV users (scope may be empty for them).
   - Cosmetic admin experience is pixel-identical to dental; only data source and optional cross-LOB badge differ.
@@ -110,14 +112,14 @@ affected_by:
 impact_tests:
   - Pre-existing full Jest + Playwright suite (dental regression must remain 100% green)
   - LOB isolation tests: cosmetic-scoped user cannot call dental routes and vice-versa (403 S_LOB_FORBIDDEN)
-  - CTV role gating: is_ctv=true cannot reach any /customers or admin route
+  - "CTV role gating: on the baseline, is_ctv alone does not redirect; after /ctv ships, CTV users cannot reach /customers or other admin routes"
   - CTV aggregation: seed commissions in both DBs for one CTV; /api/ctv/commission-summary must return correct per-LOB split and totals
   - LOB toggle unmount-remount: toggle must cause full subtree remount (no stale dental customer visible after switch to cosmetic)
   - Commission recipient precedence: referred_by_ctv_id wins over active consultation card
   - Refund reversal: payment creates +amount row; refund creates -amount reversal; net zero; original row untouched
   - Migration rollback dry-run on dental additive changes
   - Real-browser smoke: admin with both scopes sees toggle, can switch, sees empty cosmetic state, switches back with dental data intact
-  - CTV login lands on /ctv and sees cross-DB pending/paid data
+  - "CTV rollout gate: after /ctv ships, CTV login lands there and shows cross-DB pending/paid data"
   - Cosmetic source workbook import rejects missing/extra tabs, plans/applies `Hồ sơ`/`Phiếu cọc`/`Phiếu khám` into existing cosmetic tables only, preserves unmatched money rows as manual-review anomalies, and reruns dry-run idempotency checks after apply
 risk_level: high
 notes:

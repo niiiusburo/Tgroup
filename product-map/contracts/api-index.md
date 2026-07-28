@@ -22,7 +22,7 @@
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
 | GET | `/api/me/lob-scope` | Auth | — | `{ lob_scope: string[], is_ctv: boolean, default_lob }` |
-| (augmented) | `GET /api/Auth/me` | Auth | — | User payload now includes `lob_scope[]` and `is_ctv` (affects login redirect and header toggle visibility) |
+| (augmented) | `GET /api/Auth/me` | Auth | — | User payload includes `lob_scope[]` and `is_ctv`; frontend handling is defined in `BEHAVIOR.md` §3 |
 
 Note: All existing routes are now implicitly under a selected LOB via BusinessUnitContext. Cosmetic routes live under `/api/cosmetic/*` prefix and are distinct from dental.
 
@@ -72,7 +72,7 @@ When `COSMETIC_LOB_ENABLED=false` the entire family returns 503.
 | GET | `/api/ctv/referrals` | CTV (ctv.referrals.view.self) | — | List of referred clients across both DBs with status (earning / no visit), totals earned, LOB pills |
 | (internal) | commission recipient resolution | — | — | Implements D13 priority: referred_by_ctv_id > active consultation card (cosmetic) > salestaffid (dental) |
 
-CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin route.
+The current frontend baseline has no `/ctv` route and does not redirect CTV users; see `BEHAVIOR.md` §3. The dedicated redirect remains part of the planned LOB surface.
 
 ## Account (`/api/Account`)
 

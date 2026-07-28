@@ -79,7 +79,7 @@ postgres (127.0.0.1:5433)
 
 #### tdental_demo.dbo.partners (additive columns — canonical identity)
 - lob_scope TEXT[] — hard gate for LOB access (replaces early 'users' concept)
-- is_ctv BOOLEAN — CTV partners bypass admin UI entirely, land on /ctv
+- is_ctv BOOLEAN — CTV role marker; current frontend handling is owned by `BEHAVIOR.md` §3
 - referred_by_ctv_id — first-class CTV attribution
 
 #### tdental_demo.dbo.products (additive)

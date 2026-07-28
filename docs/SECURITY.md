@@ -2,7 +2,7 @@
 
 > Auth flow, RBAC roles, secret storage locations, token structure, sensitive-action approval thresholds.
 
-**Cosmetic LOB v2 (2026-05-19 sync):** LOB gate (requireLobScope), CTV role gate (is_ctv on partners + 403 redirect), scope=empty = legacy dental, soft-ref validation on recipient_partner_id, lob.crossview perm. partners table is auth source (not users). See AGENTS.md, product-map ct v/earnings, v2 spec §272.
+**Cosmetic LOB v2 (2026-05-19 sync):** LOB gate (requireLobScope), CTV role gate (`is_ctv` on partners + 403 denial), scope=empty = legacy dental, soft-ref validation on recipient_partner_id, lob.crossview perm. partners table is auth source (not users). Current frontend handling is owned by `BEHAVIOR.md` §3; the `/ctv` redirect remains a future LOB behavior. See AGENTS.md, product-map CTV/earnings, v2 spec §272.
 
 
 

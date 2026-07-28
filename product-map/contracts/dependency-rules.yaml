@@ -175,12 +175,12 @@ rules:
       - product-map/contracts/permission-registry.yaml (the 9+ new keys + LOB gates)
       - product-map/contracts/api-index.md (cosmetic and ctv route families)
       - product-map/contracts/dependency-rules.yaml
-      - AGENTS.md, ARCHITECTURE.md, DECISIONS.md, DESIGN.md, BEHAVIOR.md (LOB toggle, S_LOB_FORBIDDEN, CTV redirect)
+      - AGENTS.md, ARCHITECTURE.md, DECISIONS.md, DESIGN.md, BEHAVIOR.md (LOB toggle, S_LOB_FORBIDDEN, current CTV handling, and future redirect rollout)
       - docs/CONTRACTS.md, docs/DATA-MODEL.md, docs/MIGRATIONS.md, docs/SECURITY.md, docs/RUNBOOK.md, docs/runbooks/DEPLOYMENT.md, docs/TEST-MATRIX.md
       - api/src/middleware/auth.js + lobScope middleware
       - All dual-pool db access and ctv aggregator code
-      - Frontend BusinessUnitContext + header toggle + login redirect
-      - E2E tests for LOB isolation, CTV aggregation, toggle remount, and dental regression
+      - Frontend BusinessUnitContext + header toggle + CTV baseline/redirect lifecycle
+      - E2E tests for LOB isolation, current CTV no-redirect behavior, future CTV aggregation/redirect rollout, toggle remount, and dental regression
     should_review:
       - Every requirePermission and requireLobScope call site
       - Cross-LOB badge phone-match probe (privacy + lob.crossview)

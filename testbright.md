@@ -20,7 +20,7 @@ User roles: Any authenticated staff/partner with `is_ctv` true or false.
 
 Execution items:
 - [x] PASS: `protectedRoute.ctvRedirect.test.tsx` — 5/5; asserts App.tsx has no `/ctv` Navigate for `is_ctv`.
-- [ ] PENDING: Manual login as CTV-flagged user lands on requested app route, not blank `/ctv`.
+- [x] PASS: Playwright/Chrome login with `is_ctv=true` stayed on `/notifications`; a permitted user saw the Notifications page, while a user without `notifications.view` saw the normal access-denied surface instead of `/ctv`.
 
 Setup/login data: Local/dev account with `is_ctv=true` if available; otherwise unit test is the primary gate.
 
