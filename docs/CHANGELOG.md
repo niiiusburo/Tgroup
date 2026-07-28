@@ -14,6 +14,17 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.60] — 2026-07-28
+
+### Security
+- Employee POST/PUT responses no longer return `password_hash` or other partner secrets; mutations use an explicit safe column list aligned with GET employee detail while still hashing and persisting passwords on write — @pi-crewmate — AUD-011 / secret-handling.
+
+### Testing
+- Added `api/tests/employeeMutationsPasswordHash.test.js` covering POST/PUT response key exclusion, bcrypt write-path negative proof, and no plaintext password logging — @pi-crewmate — AUD-011.
+
+### Docs
+- Documented employee mutation response projection, test mapping, and domain impact tests — @pi-crewmate — `/api/Employees` POST/PUT.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed

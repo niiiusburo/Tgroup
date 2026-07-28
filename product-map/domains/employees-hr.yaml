@@ -5,6 +5,7 @@ summary: |
   schedule blocks, linked employees, payslips, and commissions.
 owns:
   - api/src/routes/employees.js
+  - api/src/routes/employees/mutations.js
   - api/src/routes/hrPayslips.js
   - api/src/routes/commissions.js
   - website/src/pages/Employees/index.tsx
@@ -66,6 +67,7 @@ affected_by:
   - Changes to dbo.hrjobs (dropdown data)
   - Employee and permission-board searches must remain accent-insensitive for Vietnamese staff, role, and location names.
 impact_tests:
+  - api/tests/employeeMutationsPasswordHash.test.js
   - website/src/types/employee.test.ts
   - website/e2e/check_employees_page.spec.ts
   - website/e2e/employee-save.spec.ts

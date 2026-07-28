@@ -103,6 +103,9 @@ Investor customer scope is an additional server-side filter. If an authenticated
 
 **Policy:** `.env.example` documents the shape. Real values are local-only and gitignored. If a secret is ever committed, treat it as exposed and rotate immediately.
 
+### Password hashes must not leave write paths
+`partners.password_hash` is write/verify-only. Login and password-change handlers may read the hash server-side for `bcrypt.compare`, but list/detail/mutation JSON responses for employees and partners MUST omit `password_hash` and plaintext `password`. Employee create/update (`api/src/routes/employees/mutations.js`) returns an explicit safe column projection and never logs submitted password values (AUD-011).
+
 ## Rate Limiting
 
 | Endpoint | Limit | Scope |
