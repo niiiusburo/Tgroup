@@ -307,7 +307,8 @@ Normal `POST /api/Partners` and `PUT /api/Partners/:id` do not assign or change 
 
 ### 1.5 External Checkups (Hosoonline)
 
-#### GET /api/ExternalCheckups/:customerCode/health-checkups
+#### GET /api/ExternalCheckups/:customerCode
+**Auth:** `external_checkups.view` + INV-021 investor allowlist (fail-closed 404 when customer is outside `dbo.investor_clients` or cannot be resolved).
 **Headers:** `Authorization: Bearer <token>`
 **Response 200:**
 ```ts
@@ -319,11 +320,32 @@ Normal `POST /api/Partners` and `PUT /api/Partners/:id` do not assign or change 
     images: Array<{
       name: string;
       url: string;       // proxied through TGClinic; NOT direct hosoonline.com URL
+                         // may include ?customerCode= for investor image scope
     }>;
   }>;
 }
 ```
+**Response 404:** `{ error: 'Customer not found' }` for investors outside allowlist (no PII).
 **Behavior:** If `HOSOONLINE_USERNAME`/`PASSWORD` are configured, backend logs in to Hosoonline, searches by `customerCode`, and proxies image metadata. If credentials absent, falls back to `HOSOONLINE_API_KEY` contract.
+
+#### GET /api/ExternalCheckups/images/:imageName
+**Auth:** `external_checkups.view` + INV-021 investor allowlist.
+**Query:** optional `customerCode` (preferred; embedded in list image URLs). When absent, backend extracts T-codes from the image filename.
+**Behavior:** Investors must resolve to an allowlisted local partner via `customerCode` and/or filename candidates; otherwise 404 before Hosoonline proxy. Staff are unrestricted beyond the permission gate.
+
+#### POST /api/ExternalCheckups/:customerCode/patient
+**Auth:** `external_checkups.upload` + INV-021 investor allowlist (404 before side effects).
+
+#### POST /api/ExternalCheckups/:customerCode/health-checkups
+**Auth:** `external_checkups.upload` + INV-021 investor allowlist (404 before side effects).
+
+### 1.5b Stock Pickings
+
+#### GET /api/StockPickings
+**Auth:** `settings.view` + INV-021 investor partner allowlist (`sp.partnerid = ANY(...)`, fail-closed empty list).
+
+#### GET /api/StockPickings/:id
+**Auth:** `settings.view` + INV-021 investor partner allowlist (404 when `partnerid` is null or outside allowlist; body does not leak picking name).
 
 ---
 

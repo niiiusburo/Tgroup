@@ -341,10 +341,10 @@ Lark alert contract: when `LARK_FEEDBACK_WEBHOOK_URL` is configured, `POST /api/
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/images/:imageName` | Perm:`external_checkups.view` | — | Proxied image bytes from Hosoonline appointment media |
-| GET | `/:customerCode` | Perm:`external_checkups.view` | — | External checkups list |
-| POST | `/:customerCode/patient` | Perm:`external_checkups.create` | — | Creates missing Hosoonline patient from local customer name, TDental code, and phone suffix |
-| POST | `/:customerCode/health-checkups` | Perm:`external_checkups.upload` | FormData (`photos` repeated, required `service`/`doctor`, optional `date`/`description`/`nextAppointmentDate`/`nextDescription`) | Created checkups |
+| GET | `/images/:imageName` | Perm:`external_checkups.view` + INV-021 investor allowlist | optional `?customerCode=` (also parses T-codes from filename) | Proxied image bytes from Hosoonline appointment media; investor outside allowlist → 404 |
+| GET | `/:customerCode` | Perm:`external_checkups.view` + INV-021 investor allowlist | — | External checkups list; investor outside allowlist → 404 |
+| POST | `/:customerCode/patient` | Perm:`external_checkups.upload` + INV-021 investor allowlist | — | Creates missing Hosoonline patient from local customer name, TDental code, and phone suffix; investor outside allowlist → 404 before side effects |
+| POST | `/:customerCode/health-checkups` | Perm:`external_checkups.upload` + INV-021 investor allowlist | FormData (`photos` repeated, required `service`/`doctor`, optional `date`/`description`/`nextAppointmentDate`/`nextDescription`) | Created checkups; investor outside allowlist → 404 before side effects |
 
 Hosoonline uses a mixed current contract: if `HOSOONLINE_USERNAME` and `HOSOONLINE_PASSWORD` are configured, TGClinic logs in to Hosoonline, sends `Authorization: Bearer <token>` plus the returned cookie, searches appointments, and proxies `/api/appointments/image/:imageName`. Patient create/search uses the v2 API-key collection endpoints `/api/patients/_create` and `/api/patients/_search`; the bare `/api/patients` path remains reserved for the staff UI cookie-routed v1 behavior. If login credentials are absent, the route falls back to the older `HOSOONLINE_API_KEY` / `X-API-Key` patient health-checkup endpoints where still supported.
 
@@ -410,8 +410,8 @@ Hosoonline uses a mixed current contract: if `HOSOONLINE_USERNAME` and `HOSOONLI
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/` | Auth | `?offset, limit, search, companyId, state` | `PaginatedResponse<StockPicking>` |
-| GET | `/:id` | Auth | — | Detail |
+| GET | `/` | Perm:`settings.view` + INV-021 partner allowlist | `?offset, limit, search, companyId, state` | `PaginatedResponse<StockPicking>` (investor rows filtered by `sp.partnerid`) |
+| GET | `/:id` | Perm:`settings.view` + INV-021 partner allowlist | — | Detail; investor outside allowlist / null partner → 404 |
 | POST | `/` | Perm:`settings.edit` | Picking fields | Created |
 | PUT | `/:id` | Perm:`settings.edit` | Picking fields | Updated |
 | DELETE | `/:id` | Perm:`settings.edit` | — | Deleted |

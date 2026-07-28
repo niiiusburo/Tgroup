@@ -62,7 +62,7 @@ Staff → /login form → POST /api/Auth/login
 
 Effective permissions = (Group ∪ Grants) − Revokes, then filtered by location scope at the UI level. The employee revenue export is a named exception: `companyId=all` means full extraction for accounts with `reports.export`, while explicit branch selections still validate against the caller's location scope unless `*` is present.
 
-Investor customer scope is an additional server-side filter. If an authenticated user resolves to the `investor` group, customer-derived routes must apply `dbo.investor_clients` and return empty lists or 404s for non-allowlisted customers without disclosing existence.
+Investor customer scope is an additional server-side filter. If an authenticated user resolves to the `investor` group, customer-derived routes must apply `dbo.investor_clients` and return empty lists or 404s for non-allowlisted customers without disclosing existence. This includes ExternalCheckups (customer code + image-by-name proxy) and StockPickings GET (partner-scoped list/detail behind `settings.view`).
 
 ### Dangerous Permissions (Require Explicit Assignment)
 

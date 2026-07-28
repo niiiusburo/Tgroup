@@ -4,6 +4,31 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 ---
 
+# TestSprite Plan: AUD-005 ExternalCheckups + StockPickings investor scope 2026-07-28
+
+Feature/edit name: v0.32.60 — investor fail-closed scope on ExternalCheckups and StockPickings GET.
+
+Changed URLs / API routes / data flow:
+- `GET/POST /api/ExternalCheckups/:customerCode*` and `GET /api/ExternalCheckups/images/:imageName`
+- `GET /api/StockPickings`, `GET /api/StockPickings/:id`
+- Data flow: JWT → requirePermission → resolveInvestorScope → partner allowlist filter or 404
+
+Expected behavior:
+- Investor outside allowlist gets 404 on ExternalCheckups customer/image/mutation routes with no name/phone leak and no Hosoonline side effects.
+- Investor StockPickings list SQL includes `sp.partnerid = ANY(...)`; detail 404s for foreign or null partners.
+- Staff without investor group are unchanged aside from StockPickings GET now requiring `settings.view`.
+
+User roles: Investor (allowlisted vs not); staff with `external_checkups.view` / `settings.view`.
+
+Execution items:
+- [x] PASS: `externalCheckupsInvestorScope.test.js` + `stockPickingsInvestorScope.test.js` + permission gate + helper suite — 40/40.
+- [ ] PENDING: NK2 investor session cannot open ExternalCheckups or StockPicking detail for a non-visible customer (404).
+- [ ] PENDING: NK2 staff with settings.view still lists StockPickings; investor without settings.view gets 403 before SQL.
+
+Setup/login data: NK2 investor demo account + staff with settings.view; use one allowlisted and one non-allowlisted customer code.
+
+---
+
 # TestSprite Plan: partner source read-only boundary 2026-07-23
 
 Feature/edit name: v0.32.59 — omission-safe partial customer updates and read-only `partners.sourceid` on normal customer writes.
