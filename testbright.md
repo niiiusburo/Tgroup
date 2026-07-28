@@ -255,8 +255,10 @@ Expected behavior:
 
 User roles: Staff/admin with `employees.view`; investors must be denied.
 
+Setup/login data: Local Jest uses mocked JWT users and permission resolution; no live credentials, deployment, or production data are required.
+
 Execution items:
-- [x] PASS: Focused Jest `readRoutePermissions` + `investorScopeRoutePermissions` — 31/31; all four HrPayslips paths require `employees.view`.
+- [x] PASS: Focused Jest `hrPayslipsAuthorization` + `readRoutePermissions` + `investorScopeRoutePermissions` — 40/40; all four paths return investor 403 before SQL, retain authorized staff access, and require `employees.view`.
 - [ ] PENDING REMOTE: PR checks green after no-mistakes push.
 
 Negative paths: removing any route gate fails the permission tests; granting investors `employees.view` would reopen payroll PII and is documented as forbidden in SECURITY.md.

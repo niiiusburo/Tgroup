@@ -210,7 +210,7 @@ The API response keeps legacy employee flags (`isdoctor`, `isassistant`, `isrece
 **Auth:** Requires `employees.view` on every route (global `requireAuth` plus `requirePermission('employees.view')`).
 **Sensitivity:** Payroll PII — net salary, tax, insurance, advances, employee phone/email.
 **Investor deny:** Investor group seed (migration 048) does not include `employees.view`; authenticated investors receive `403 Permission denied: employees.view` before SQL runs (AUD-012 / H-F002).
-**Coverage:** `api/tests/readRoutePermissions.test.js`, `api/tests/investorScopeRoutePermissions.test.js`.
+**Coverage:** `api/tests/hrPayslipsAuthorization.test.js`, `api/tests/readRoutePermissions.test.js`, `api/tests/investorScopeRoutePermissions.test.js`.
 
 #### CustomerSources and SaleOrder source attribution
 

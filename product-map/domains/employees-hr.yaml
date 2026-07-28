@@ -66,6 +66,7 @@ affected_by:
   - Changes to dbo.hrjobs (dropdown data)
   - Employee and permission-board searches must remain accent-insensitive for Vietnamese staff, role, and location names.
 impact_tests:
+  - api/tests/hrPayslipsAuthorization.test.js
   - api/tests/readRoutePermissions.test.js
   - api/tests/investorScopeRoutePermissions.test.js
   - website/src/types/employee.test.ts

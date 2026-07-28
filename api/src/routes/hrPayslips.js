@@ -193,7 +193,7 @@ router.get('/', requirePermission('employees.view'), async (req, res) => {
 });
 
 /**
- * GET /api/HrPayslipRuns
+ * GET /api/HrPayslips/Runs
  * Returns: Payslip run periods for dropdown
  */
 router.get('/Runs', requirePermission('employees.view'), async (req, res) => {
@@ -243,7 +243,7 @@ router.get('/Runs', requirePermission('employees.view'), async (req, res) => {
 });
 
 /**
- * GET /api/HrPayrollStructures
+ * GET /api/HrPayslips/Structures
  * Returns: Payroll structures for dropdown
  */
 router.get('/Structures', requirePermission('employees.view'), async (req, res) => {

@@ -361,9 +361,9 @@ Hosoonline uses a mixed current contract: if `HOSOONLINE_USERNAME` and `HOSOONLI
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/` | Perm:`employees.view` | `?offset, limit, search, employeeId, runId` | `PaginatedResponse<Payslip>` |
+| GET | `/` | Perm:`employees.view` | `?offset, limit, search, employeeId, state, payslipRunId, dateFrom, dateTo` | `PaginatedResponse<Payslip> + aggregates` |
 | GET | `/:id` | Perm:`employees.view` | — | Payslip detail |
-| GET | `/Runs` | Perm:`employees.view` | — | Payslip runs |
+| GET | `/Runs` | Perm:`employees.view` | `?offset, limit` | Payslip runs |
 | GET | `/Structures` | Perm:`employees.view` | — | Payroll structures |
 
 Payroll PII (net salary, tax, insurance, advances, employee phone/email). Investors are not seeded `employees.view`, so they receive 403 (AUD-012).

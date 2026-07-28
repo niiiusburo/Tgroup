@@ -78,7 +78,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 
 | If you change... | Run these tests... | Why |
 |---|---|---|
-| `api/src/routes/hrPayslips.js` | `api/tests/readRoutePermissions.test.js`, `api/tests/investorScopeRoutePermissions.test.js` | Every `/api/HrPayslips*` GET must declare `employees.view` so investor/random staff JWTs cannot read payroll PII (AUD-012). |
+| `api/src/routes/hrPayslips.js` | `api/tests/hrPayslipsAuthorization.test.js`, `api/tests/readRoutePermissions.test.js`, `api/tests/investorScopeRoutePermissions.test.js` | Every `/api/HrPayslips*` GET must declare `employees.view`; behavioral coverage must prove investor 403-before-SQL and preserve authorized staff access to payroll PII (AUD-012). |
 | `website/src/types/employee.ts` / `website/src/hooks/useEmployees.ts` role inference | `npm --prefix website run test -- src/types/employee.test.ts`, `website/e2e/appointment-doctor-dropdown.spec.ts` when browser verification is needed | Staff assignment selectors depend on mapping employee DB flags and Vietnamese job titles into `doctor`, `assistant`, and `doctor-assistant` roles. |
 | `website/src/components/employees/EmployeeTable.tsx` | `website/src/components/employees/__tests__/EmployeeTable.test.tsx`, `/employees` 1280x720, 1366x768, and 1440x900 screenshot checks | Long role/location labels must not push the edit action offscreen on desktop workstations. |
 | `website/src/components/shared/DataTable.tsx` sticky-column behavior | Component tests for each table using `sticky: 'right'`, plus the affected route screenshot check | Sticky action cells are shared table infrastructure and must not introduce page-level horizontal overflow or hide row actions. |
