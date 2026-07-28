@@ -21,6 +21,9 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 - Added explicit source-to-control traceability for all 184 substantive A–M audit finding IDs — @codex — `TEST-AUDIT-LANE-TRACEABILITY`.
 - Corrected the audit package branch identity to `fm/tgroup-audit-docs` — @codex — `TEST-AUDIT-BRANCH-IDENTITY`.
 
+### Fixed
+- Allowed the established `fm/` work-branch namespace in PR branch-name validation while retaining rejection for unknown prefixes — @codex — PR #71 CI recovery.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed
