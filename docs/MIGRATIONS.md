@@ -17,7 +17,7 @@
 
 Current inventory from disk:
 
-- **Canonical directory:** `api/migrations/` — 51 runnable root SQL files. Five customer-source incident artifacts remain under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` with non-executable `.sql.retired` extensions.
+- **Canonical directory:** `api/migrations/` — 48 runnable root SQL files. Quarantined under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` with non-executable `.sql.retired` extensions: five customer-source incident artifacts (031/033–036) and three one-shot TDental bulk-import TRUNCATE scripts (008 v1/v2/v3). None are part of the default deploy glob.
 - **Supplemental directory:** `api/src/db/migrations/` — 5 SQL files. These are straggler migrations (`payment_category`, customer face embeddings, payment-proof confirmation/permission/UUID changes) that should be consolidated into the canonical migration path or explicitly promoted by a future runbook decision.
 - **Runbook status:** `docs/RUNBOOK.md` and `docs/runbooks/DEPLOYMENT.md` both use `api/migrations/*.sql` as the canonical deploy loop. Supplemental files under `api/src/db/migrations/` are not covered by that loop unless explicitly run or consolidated.
 
@@ -33,9 +33,9 @@ Current inventory from disk:
 | 006 | `006_dotkham_payment_allocations.sql` | Adds `dotkham_id` to `payment_allocations` | `ALTER TABLE payment_allocations ADD COLUMN dotkham_id ...` | `ALTER TABLE payment_allocations DROP COLUMN dotkham_id` | 2026-01 |
 | 006 | `006_fix_location_scope_column.sql` | Column rename/fix | `ALTER TABLE ... RENAME COLUMN ...` | Reverse rename | 2026-01 |
 | 007 | `007_add_external_checkups_permission.sql` | Adds permission strings for external checkups | `INSERT INTO group_permissions ...` | `DELETE FROM group_permissions WHERE permission_string IN (...)` | 2026-02 |
-| 008 | `008_data_migration_from_tdental.sql` | TDental import schema adjustments (v1) | Multiple ALTER TABLE | Reverse per column | 2026-02 |
-| 008 | `008_data_migration_from_tdental_v2.sql` | TDental import schema adjustments (v2) | Multiple ALTER TABLE | Reverse per column | 2026-02 |
-| 008 | `008_data_migration_from_tdental_v3.sql` | TDental import schema adjustments (v3) | Multiple ALTER TABLE | Reverse per column | 2026-02 |
+| 008 | `RETIRED-DESTRUCTIVE-DO-NOT-RUN/008_data_migration_from_tdental.sql.retired` | **Retired one-shot:** TDental bulk import v1 — `TRUNCATE`s core tables then reloads via dblink | Not runnable (`.sql.retired`); forbidden from blind deploy/runbook apply | Restore only from verified backup; never re-run on live data | 2026-02; quarantined 2026-07 (AUD-001) |
+| 008 | `RETIRED-DESTRUCTIVE-DO-NOT-RUN/008_data_migration_from_tdental_v2.sql.retired` | **Retired one-shot:** TDental bulk import v2 — same TRUNCATE class | Not runnable (`.sql.retired`); opt-in only per README | Restore only from verified backup | 2026-02; quarantined 2026-07 (AUD-001) |
+| 008 | `RETIRED-DESTRUCTIVE-DO-NOT-RUN/008_data_migration_from_tdental_v3.sql.retired` | **Retired one-shot:** TDental bulk import v3 — same TRUNCATE class | Not runnable (`.sql.retired`); opt-in only per README | Restore only from verified backup | 2026-02; quarantined 2026-07 (AUD-001) |
 | 011 | `011_fix_payment_proofs_type.sql` | Type correction on `payment_proofs` | `ALTER TABLE payment_proofs ALTER COLUMN ...` | Reverse type | 2026-02 |
 | 012 | `012_add_cskhid_salestaffid.sql` | Adds `cskhid` and `salestaffid` to `partners` | `ALTER TABLE partners ADD COLUMN ...` | `ALTER TABLE partners DROP COLUMN cskhid, salestaffid` | 2026-02 |
 | 013 | `013_add_employee_role_fields.sql` | Adds `isdoctor`, `isassistant`, `isreceptionist` | `ALTER TABLE partners ADD COLUMN ...` | `ALTER TABLE partners DROP COLUMN ...` | 2026-03 |
@@ -80,7 +80,14 @@ Current inventory from disk:
 | 049 | `049_investor_accounts_nk2_credentials.sql` | Adds/normalizes same-portal investor credential records linked to `dbo.partners` | `CREATE TABLE dbo.investor_accounts`; normalize older `is_active`, `created_at`, `updated_at` into `active`, `datecreated`, `lastupdated` | Drop `dbo.investor_accounts` after disabling investor login fallback | 2026-07 |
 | 050 | `050_add_customer_source_foreign_keys.sql` | Retains customer/order attribution lookup rows with validated source foreign keys | Add idempotent `partners.sourceid` and `saleorders.sourceid` → `customersources.id` FKs with `ON DELETE RESTRICT`; live preflight found zero orphans | Drop the two named constraints only if a replacement retention guard exists | Pending normal PR/merge/deploy |
 
-**Total canonical migrations:** 51 runnable `.sql` files in the root of `api/migrations/`. Five customer-source rewrite artifacts are quarantined with `.sql.retired` extensions under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` and are not part of the runnable count.
+**Total canonical migrations:** 48 runnable `.sql` files in the root of `api/migrations/`. Eight destructive artifacts are quarantined with `.sql.retired` extensions under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` (five customer-source rewrites + three 008 TRUNCATE bulk imports) and are not part of the runnable count.
+
+### Forbidden blind re-run (AUD-001)
+
+- **Never** include `RETIRED-DESTRUCTIVE-DO-NOT-RUN/**` in deploy loops, `for f in api/migrations/*.sql`, or recursive `find … -name '*.sql'` apply paths.
+- The 008 TDental imports issue `TRUNCATE TABLE … CASCADE` on core clinic tables (`partners`, `payments`, `saleorders`, `employees`, `appointments`, `products`, `companies`, …). Re-applying them on any non-empty DB is catastrophic.
+- Opt-in execution requires captain written approval, a verified backup, a disposable/intentionally empty target, and a single-file manual invocation — see `api/migrations/RETIRED-DESTRUCTIVE-DO-NOT-RUN/README.md`.
+- CI guards: `api/tests/customerSourceMigrationArchiveGuard.test.js`, `api/tests/destructiveTruncateMigrationArchiveGuard.test.js`.
 
 ## Supplemental Migration Files
 
