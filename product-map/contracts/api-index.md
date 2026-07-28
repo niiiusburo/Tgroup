@@ -361,10 +361,12 @@ Hosoonline uses a mixed current contract: if `HOSOONLINE_USERNAME` and `HOSOONLI
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/` | Auth | `?offset, limit, search, employeeId, runId` | `PaginatedResponse<Payslip>` |
-| GET | `/:id` | Auth | — | Payslip detail |
-| GET | `/Runs` | Auth | — | Payslip runs |
-| GET | `/Structures` | Auth | — | Payroll structures |
+| GET | `/` | Perm:`employees.view` | `?offset, limit, search, employeeId, runId` | `PaginatedResponse<Payslip>` |
+| GET | `/:id` | Perm:`employees.view` | — | Payslip detail |
+| GET | `/Runs` | Perm:`employees.view` | — | Payslip runs |
+| GET | `/Structures` | Perm:`employees.view` | — | Payroll structures |
+
+Payroll PII (net salary, tax, insurance, advances, employee phone/email). Investors are not seeded `employees.view`, so they receive 403 (AUD-012).
 
 ## CashBooks (`/api/CashBooks`)
 

@@ -236,3 +236,27 @@ Expected behavior:
 - [ ] PENDING FRESH CONFIRMATION: Strict row-key comparison found one additional mismatch, `SO-2026-5176` (`T478964`, `Khách cũ` → `Sale Online`), outside the confirmed manifest. It remains unmodified.
 
 Negative paths: renaming any retired artifact back to `.sql` makes the migration guard fail; submitting an inactive/missing source returns `400 CUSTOMER_SOURCE_NOT_SELECTABLE`; deleting a source referenced by any customer or order returns `400 CUSTOMER_SOURCE_IN_USE`; the checked-in 43-order manifest test explicitly excludes unconfirmed `SO-2026-5176`.
+
+
+---
+
+# TestSprite Plan: AUD-012 HrPayslips authz 2026-07-28
+
+Feature/edit name: v0.32.60 — gate `/api/HrPayslips*` with `employees.view` so investors cannot read payroll PII.
+
+Changed URLs / API routes / data flow:
+- API: `GET /api/HrPayslips`, `/Runs`, `/Structures`, `/:id` (`api/src/routes/hrPayslips.js`).
+- Authz: `requirePermission('employees.view')` on every payslip route; investor seed lacks the permission → 403.
+
+Expected behavior:
+- Authenticated staff with `employees.view` can list/detail payslips as before.
+- Authenticated investor (or any JWT without `employees.view`) receives 403 before SQL.
+- Route stack declares `employees.view` on all four GET paths.
+
+User roles: Staff/admin with `employees.view`; investors must be denied.
+
+Execution items:
+- [x] PASS: Focused Jest `readRoutePermissions` + `investorScopeRoutePermissions` — 31/31; all four HrPayslips paths require `employees.view`.
+- [ ] PENDING REMOTE: PR checks green after no-mistakes push.
+
+Negative paths: removing any route gate fails the permission tests; granting investors `employees.view` would reopen payroll PII and is documented as forbidden in SECURITY.md.

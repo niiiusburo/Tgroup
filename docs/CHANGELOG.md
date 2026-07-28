@@ -14,6 +14,17 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.60] — 2026-07-28
+
+### Security
+- `/api/HrPayslips*` GETs now require `employees.view`; investors and other JWTs without that permission are denied payroll PII (salary, tax, insurance, contact fields) — @pi-crewmate — AUD-012 / H-F002.
+
+### Testing
+- Extended `api/tests/readRoutePermissions.test.js` and `api/tests/investorScopeRoutePermissions.test.js` to lock `employees.view` on `/`, `/Runs`, `/Structures`, and `/:id` payslip routes — @pi-crewmate — AUD-012.
+
+### Docs
+- Documented payslip authz in CONTRACTS, SECURITY, TEST-MATRIX, permission-registry, api-index, and employees-hr domain — @pi-crewmate — `/api/HrPayslips*`.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed

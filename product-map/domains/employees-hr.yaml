@@ -38,10 +38,10 @@ endpoints:
   - POST   /api/Employees
   - PUT    /api/Employees/:id
   - DELETE /api/Employees/:id
-  - GET    /api/HrPayslips
-  - GET    /api/HrPayslips/:id
-  - GET    /api/HrPayslips/Runs
-  - GET    /api/HrPayslips/Structures
+  - GET    /api/HrPayslips              # requirePermission employees.view (AUD-012)
+  - GET    /api/HrPayslips/:id          # requirePermission employees.view (AUD-012)
+  - GET    /api/HrPayslips/Runs         # requirePermission employees.view (AUD-012)
+  - GET    /api/HrPayslips/Structures   # requirePermission employees.view (AUD-012)
   - GET    /api/Commissions
   - GET    /api/Commissions/:id
   - GET    /api/Commissions/:id/Histories
@@ -66,6 +66,8 @@ affected_by:
   - Changes to dbo.hrjobs (dropdown data)
   - Employee and permission-board searches must remain accent-insensitive for Vietnamese staff, role, and location names.
 impact_tests:
+  - api/tests/readRoutePermissions.test.js
+  - api/tests/investorScopeRoutePermissions.test.js
   - website/src/types/employee.test.ts
   - website/e2e/check_employees_page.spec.ts
   - website/e2e/employee-save.spec.ts

@@ -57,6 +57,12 @@ describe('owned backend read route permissions', () => {
       ['/', 'employees.view'],
       ['/:id', 'employees.view'],
     ]],
+    ['hrPayslips', require('../src/routes/hrPayslips'), [
+      ['/', 'employees.view'],
+      ['/Runs', 'employees.view'],
+      ['/Structures', 'employees.view'],
+      ['/:id', 'employees.view'],
+    ]],
     ['products', require('../src/routes/products'), [
       ['/', 'services.view'],
       ['/:id', 'services.view'],

@@ -57,6 +57,10 @@ backend_permissions:
     routes:
       - GET /api/Employees
       - GET /api/Employees/:id
+      - GET /api/HrPayslips
+      - GET /api/HrPayslips/Runs
+      - GET /api/HrPayslips/Structures
+      - GET /api/HrPayslips/:id
   - string: employees.edit
     routes:
       - POST /api/Employees
