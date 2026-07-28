@@ -595,7 +595,7 @@ Customer-source taxonomy maintenance must not bulk rewrite `partners.sourceid` o
 ## Migration Inventory
 
 - Canonical root index: `docs/MIGRATIONS.md`.
-- Canonical migration directory: `api/migrations/` (50 runnable root `.sql` files). Five historical customer-source rewrite artifacts are quarantined under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` with `.sql.retired` extensions.
+- Canonical migration directory: `api/migrations/` (48 runnable root `.sql` files). Eight destructive artifacts are quarantined under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` with `.sql.retired` extensions: five historical customer-source rewrites and three one-shot 008 TDental bulk imports (AUD-001).
 - Supplemental migration directory: `api/src/db/migrations/` (5 SQL files: `003_add_payment_category.sql`, `046_customer_face_embeddings.sql`, `047_payment_proof_confirmation.sql`, `048_grant_payment_confirm_permission.sql`, `051_payment_proofs_payment_id_uuid.sql`).
 - Runbook status: `docs/RUNBOOK.md` and `docs/runbooks/DEPLOYMENT.md` both use `api/migrations/*.sql` as the canonical deploy loop. Supplemental files under `api/src/db/migrations/` require explicit review, consolidation, or manual execution when a change depends on them.
 

@@ -12,8 +12,7 @@ const retiredTruncateBasenames = [
   '008_data_migration_from_tdental_v3.sql',
 ];
 
-const CORE_TRUNCATE_RE =
-  /\bTRUNCATE(?:\s+TABLE)?\s+dbo\.(?:partners|payments|saleorders|employees|appointments|products|companies)\b/i;
+const TRUNCATE_RE = /\bTRUNCATE\b/i;
 
 function listDefaultGlobSql() {
   // Mirrors runbook / deploy loop: api/migrations/*.sql (non-recursive top-level only).
@@ -53,13 +52,13 @@ describe('destructive TRUNCATE migration quarantine (AUD-001 / 008)', () => {
       .toEqual([]);
   });
 
-  it('default migration path has no TRUNCATE of core tables', () => {
+  it('default migration path has no TRUNCATE statements', () => {
     const activeSql = listDefaultGlobSql();
     const offenders = [];
 
     for (const name of activeSql) {
       const body = fs.readFileSync(path.join(migrationsDir, name), 'utf8');
-      if (CORE_TRUNCATE_RE.test(body)) {
+      if (TRUNCATE_RE.test(body)) {
         offenders.push(name);
       }
     }
