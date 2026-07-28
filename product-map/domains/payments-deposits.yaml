@@ -112,7 +112,9 @@ notes:
     `payment.refund` and `payment.void`. AUD-006 locks residual rows FOR UPDATE
     inside the create transaction, before sale-order amount recomputation, and
     in stable order for reversal; allocation amounts must be positive;
-    AUD-009 rejects create/PATCH status=voided (use POST void).
+    AUD-009 rejects create/PATCH status=voided (use POST void). PR Checks runs
+    the required PostgreSQL invoice/dotkham contention matrix through the
+    fail-closed `test:payment-concurrency` command.
   - Payment allocation flows can update `dotkhams.amountresidual`, so DotKhams route/schema drift belongs in payment verification even though `/api/DotKhams` itself is read-only.
   - >-
     Cosmetic workbook money rows import only after dry-run, backup, compare,

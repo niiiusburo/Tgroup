@@ -27,6 +27,7 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 ### Testing
 - Added `paymentAllocationGuards.test.js`, `paymentPatchVoidBan.test.js`, and FOR UPDATE assertion on `paymentsTransaction.test.js` — @firstmate — AUD-006 / AUD-009.
 - Added a real PostgreSQL two-connection invoice/dotkham contention matrix plus sale-order/reversal lock-order, positive-allocation, and create-void regressions — @codex — AUD-006 / AUD-009.
+- Made the PostgreSQL contention matrix a required PR check with an isolated PostgreSQL 16 service, pinned GitHub actions, and a command that fails when `TEST_DATABASE_URL` is absent — @codex — AUD-006 / INV-003.
 
 ### Docs
 - Documented residual lock + PATCH void ban on payment contracts, invariants, allocation business logic, and test matrix — @firstmate — INV-003 / INV-012 / AUD-006 / AUD-009.

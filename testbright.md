@@ -265,9 +265,11 @@ User roles: Cashier with `payment.add`; staff with `services.edit`; manager/admi
 
 Execution items:
 - [x] PASS LOCAL: Focused API Jest passed 42 tests across payment allocation, transaction, void-ban, reversal, and sale-order lock-order suites; the 2 database matrix cases were skipped because `TEST_DATABASE_URL` was not configured.
-- [ ] PENDING DB: PostgreSQL two-connection invoice/dotkham race matrix with `TEST_DATABASE_URL`.
+- [x] PASS LOCAL DB: The fail-closed command rejected a missing `TEST_DATABASE_URL`, then both invoice and dotkham race cases passed against disposable PostgreSQL 15. Evidence: `/var/folders/5b/24325_5d3dq2jcp4dntycnyc0000gq/T/no-mistakes-evidence/payment-concurrency-final.nGvP9s`.
+- [ ] PENDING CI: The required `Payment Concurrency Matrix` PR job supplies PostgreSQL 16 and runs the fail-closed `npm --prefix api run test:payment-concurrency` command for both invoice and dotkham races.
 - [x] PASS LOCAL: `@tgroup/contracts` build and changed JavaScript syntax checks passed.
 - [x] PASS LOCAL: Scoped Semgrep scanned 5 changed payment, sale-order, and contract files with 210 rules and found 0 findings.
+- [x] PASS LOCAL: Baseline Semgrep scanned the changed PR workflow and package command with 85 rules and found 0 new findings after pinning the added GitHub actions.
 
 Negative paths: create-time voided status performs no database write; a waiting allocator cannot reuse the pre-commit residual; a sale-order amount edit cannot overwrite a concurrent payment with stale allocation totals.
 
