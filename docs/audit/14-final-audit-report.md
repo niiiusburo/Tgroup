@@ -186,7 +186,7 @@ See `10-executive-summary.md` for leadership one-pager.
 
 ## 15. Agent coverage
 
-See `11-agent-coverage-ledger.md`. All lanes present; 10 S0/S1 spot-checks confirmed; historical docs/audit files preserved.
+See `11-agent-coverage-ledger.md`. All lanes present; 11 S0/S1 spot-checks confirmed; historical docs/audit files preserved.
 
 ---
 
