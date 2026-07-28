@@ -140,9 +140,34 @@ describe('canonicalRevenue — mirrors Excel revenue-flat export', () => {
     expect(lastParams()).toContainEqual(allowed);
   });
 
-  test('omits the customer allowlist condition when allowedCustomerIds is empty or absent', async () => {
+  test('fail-closed: empty allowedCustomerIds still applies partner ANY filter (no company-wide leak)', async () => {
+    // Investor callers pass allowedCustomerIds: [] when the allowlist is empty (INV-021).
+    // PostgreSQL `= ANY('{}'::uuid[])` matches no rows — must NOT omit the condition.
     await getCanonicalRevenue({ dateFrom: '2026-04-01', dateTo: '2026-04-30', allowedCustomerIds: [] });
+    expect(lastSql()).toContain('so.partnerid = ANY(');
+    expect(lastParams()).toEqual(['2026-04-01', '2026-04-30', []]);
+  });
+
+  test('fail-closed: isInvestor with empty allowlist forces zero rows across all canonical getters', async () => {
+    const filters = { dateFrom: '2026-04-01', dateTo: '2026-04-30', isInvestor: true, allowedCustomerIds: [] };
+    for (const fn of [getCanonicalRevenue, getCanonicalRevenueByMonth, getCanonicalRevenueByDoctor, getCanonicalRevenueByLocation]) {
+      query.mockClear();
+      await fn(filters);
+      expect(lastSql()).toContain('so.partnerid = ANY(');
+      expect(lastParams()).toEqual(['2026-04-01', '2026-04-30', []]);
+    }
+  });
+
+  test('fail-closed: isInvestor without allowlist array forces FALSE (no company-wide leak)', async () => {
+    await getCanonicalRevenue({ dateFrom: '2026-04-01', dateTo: '2026-04-30', isInvestor: true });
+    expect(lastSql()).toMatch(/\bFALSE\b/);
+    expect(lastParams()).toEqual(['2026-04-01', '2026-04-30']);
+  });
+
+  test('staff/admin (no allowedCustomerIds, not isInvestor) omits the partner filter', async () => {
+    await getCanonicalRevenue({ dateFrom: '2026-04-01', dateTo: '2026-04-30' });
     expect(lastSql()).not.toContain('so.partnerid');
+    expect(lastSql()).not.toMatch(/\bFALSE\b/);
     expect(lastParams()).toEqual(['2026-04-01', '2026-04-30']);
   });
 

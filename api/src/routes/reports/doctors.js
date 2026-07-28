@@ -37,7 +37,7 @@ router.post('/doctors/performance', requirePermission('reports.view'), async (re
 
     // Canonical revenue grouped by saleorder.doctorid (matches Excel attribution).
     const revenueFilters = investorScope.isInvestor
-      ? { dateFrom, dateTo, companyId: scope.companyIds, allowedCustomerIds: investorScope.allowedCustomerIds }
+      ? { dateFrom, dateTo, companyId: scope.companyIds, isInvestor: true, allowedCustomerIds: investorScope.allowedCustomerIds }
       : { dateFrom, dateTo, companyId: scope.companyIds };
     const revenueByDoctor = await getCanonicalRevenueByDoctor(revenueFilters);
     const revenueMap = new Map(revenueByDoctor.map(r => [r.doctorId, r.revenue]));

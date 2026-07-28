@@ -60,7 +60,7 @@ router.post('/locations/comparison', requirePermission('reports.view'), async (r
 
     // Get canonical revenue by location and merge into locations.
     const revenueFilters = investorScope.isInvestor
-      ? { dateFrom, dateTo, allowedCustomerIds: investorScope.allowedCustomerIds }
+      ? { dateFrom, dateTo, isInvestor: true, allowedCustomerIds: investorScope.allowedCustomerIds }
       : { dateFrom, dateTo };
     const revenueData = await getCanonicalRevenueByLocation(revenueFilters);
     const revenueMap = new Map(revenueData.map(r => [r.companyId, r.revenue]));
