@@ -24,6 +24,7 @@
 | v1.0.8 | 2026-07-04 | Investor users are restricted normal-portal staff sessions: `/api/Auth/login` may authenticate `dbo.investor_accounts`, but all data access stays on existing portal routes and is scoped by `dbo.investor_clients`. |
 | v1.0.9 | 2026-07-08 | Investor visibility admin controls (`GET`/`PATCH /api/Partners/investor-visibility`) are gated by admin group (`assertAdmin`) instead of `permissions.edit`, and admin list/toggle match `dbo.investor_clients` by the SAME scope union (`investor_id` = the investor's `partners.id` OR any active `dbo.investor_accounts.id`) that scopes the investor read. Customer id is validated with the canonical 8-4-4-4-12 UUID pattern. |
 | v1.0.10 | 2026-07-23 | Customer-source usage counts and deletion guards include both customer and sale-order references; new sale orders reject inactive/missing sources while an existing order may preserve its already-assigned inactive historical source. |
+| v1.0.11 | 2026-07-28 | Canonical revenue filter contract (AUD-002): investor scope always fail-closes. `getCanonicalRevenue*` `buildWhere` accepts `{ allowedCustomerIds?: uuid[]; isInvestor?: boolean }`. When `allowedCustomerIds` is an array (including `[]`), SQL always includes `so.partnerid = ANY($n::uuid[])` — empty array matches zero rows. When `isInvestor` is true without an allowlist array, SQL includes `FALSE`. Staff/admin omit both fields and remain unscoped by partner. Callers: Dashboard paid/trend, Doctors performance revenue, Locations comparison revenue. |
 
 ---
 
@@ -431,6 +432,8 @@ Date-scoped endpoints accept `{ dateFrom?: 'YYYY-MM-DD'; dateTo?: 'YYYY-MM-DD'; 
 | `/api/Reports/customers/summary` | Date scope | `{ total, newInPeriod, gender[], cities[], topSpenders[], outstanding[], growth[] }` |
 | `/api/Reports/locations/comparison` | `{ dateFrom?: string; dateTo?: string }` | `{ locations[], trend[] }` |
 | `/api/Reports/doctors/performance` | Date scope | `{ id, name, totalAppointments, done, cancelled, revenue, unassigned? }[]` |
+
+**Investor paid-revenue scope (canonical helper):** Dashboard `paid`/trend, Doctors `revenue`, and Locations comparison `revenue` are sourced from `api/src/services/reports/canonicalRevenue.js`. Investor callers must pass `{ isInvestor: true, allowedCustomerIds }` from `resolveInvestorScope()`. Empty allowlist is fail-closed (zero rows), never company-wide. Non-investor callers must not pass these fields. Invariants: INV-021. Tests: `canonicalRevenue.test.js`.
 
 ### 1.9 Exports
 

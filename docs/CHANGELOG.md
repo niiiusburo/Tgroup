@@ -23,7 +23,7 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 - Inverted and extended `canonicalRevenue.test.js` for empty-allowlist fail-closed, `isInvestor` without allowlist → `FALSE`, staff/admin unscoped path, and all four canonical getters — @agent-pi — AUD-002.
 
 ### Docs
-- Documented the fail-closed empty-allowlist contract on canonical revenue filters — @agent-pi — INV-021 / AUD-002.
+- Documented the fail-closed empty-allowlist contract on canonical revenue filters (`docs/CONTRACTS.md` v1.0.11, INV-021, test matrices, testbright) — @agent-pi — INV-021 / AUD-002.
 
 ## [0.32.59] — 2026-07-23
 
