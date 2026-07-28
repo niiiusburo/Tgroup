@@ -14,6 +14,18 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.60] — 2026-07-28
+
+### Fixed
+- Import `normalizeVietnamese` in `api/src/routes/products.js` so POST/PUT `/api/Products` can persist accent-stripped `namenosign` for Vietnamese service names without throwing `ReferenceError` — @agent — AUD-010 / G-F001.
+
+### Testing
+- Added focused Products create/update regressions for Vietnamese diacritics, missing-name rejection, and the `utils/search` export contract — @agent — `api/tests/productsNormalizeVietnamese.test.js`.
+
+### Docs
+- Mapped `products.js` / `utils/search` changes to the new Products normalizeVietnamese regression in the test matrix and services-catalog impact tests — @agent — AUD-010.
+- Updated the PR-title governance check to accept Conventional Commit scopes such as `fix(api):`, while continuing to reject unsupported or malformed title types — @codex — PR #73 CI recovery.
+
 ## [0.32.59] — 2026-07-23
 
 ### Fixed

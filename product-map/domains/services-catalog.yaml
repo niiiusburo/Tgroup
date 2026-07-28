@@ -82,6 +82,7 @@ impact_tests:
   - website/src/components/services/serviceFormToothQuantity.test.ts
   - website/e2e/export-downloads.spec.ts (services/service-catalog export menus)
   - website/e2e/team-bravo-records.spec.ts
+  - api/tests/productsNormalizeVietnamese.test.js
   - api/tests/customerSourceIntegrity.test.js
   - api/tests/customerSourceReferenceMigration.test.js
   - api/tests/dbTransaction.test.js

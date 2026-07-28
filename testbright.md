@@ -4,6 +4,30 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 ---
 
+# TestSprite Plan: Products Vietnamese name normalization 2026-07-28
+
+Feature/edit name: v0.32.60 — AUD-010 / G-F001 Products create/update `normalizeVietnamese` import regression.
+
+Changed URLs / API routes / data flow:
+- API: `POST /api/Products`, `PUT /api/Products/:id`.
+- Data flow: service name → `normalizeVietnamese(name.trim())` → `dbo.products.namenosign`; request and response shapes remain unchanged.
+
+Expected behavior:
+- POST and PUT accept Vietnamese diacritics and persist the accent-stripped `namenosign`.
+- `api/src/utils/search.js` continues exporting `normalizeVietnamese`; export removal or misspelling fails the focused regression.
+- POST with a missing or blank name returns `400` before any database query.
+
+User roles: Staff with `services.edit`; admin inherits the same route behavior.
+
+Execution items:
+- [ ] PENDING: `api/tests/productsNormalizeVietnamese.test.js` proves POST and PUT persist accent-stripped Vietnamese names.
+- [ ] PENDING: The focused export-contract check proves `normalizeVietnamese` is present and a misspelled export is absent.
+- [ ] PENDING: The missing-name negative path returns `400` and performs no database query.
+
+Setup/login data: Local mocked API dependencies only; no login credentials or live database data are required.
+
+---
+
 # TestSprite Plan: partner source read-only boundary 2026-07-23
 
 Feature/edit name: v0.32.59 — omission-safe partial customer updates and read-only `partners.sourceid` on normal customer writes.

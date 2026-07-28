@@ -130,6 +130,8 @@ Client role mapping: `/api/Employees` still returns legacy boolean flags and tit
 | PUT | `/:id` | Perm:`services.edit` | Product fields | Updated product |
 | DELETE | `/:id` | Perm:`services.edit` | — | 204 or 409 if linked records exist |
 
+Mutation semantics are owned by [`docs/CONTRACTS.md` §1.12](../../docs/CONTRACTS.md#112-products--services-catalog).
+
 ## Product Categories (`/api/ProductCategories`)
 
 | Method | Path | Auth | Body / Query | Response |

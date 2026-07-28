@@ -537,6 +537,14 @@ Feedback attachment behavior:
 
 ---
 
+### 1.12 Products / Services Catalog
+
+#### POST /api/Products and PUT /api/Products/:id
+
+The existing request and response shapes are unchanged. For valid `name` values, create and update trim the displayed name and persist its accent-stripped copy in `namenosign`; POST requests with a missing or blank name still return `400`.
+
+---
+
 ## 2. Cross-Module Function Signatures
 
 ### 2.1 apiFetch (Frontend → Backend Bridge)
