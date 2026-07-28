@@ -4,6 +4,38 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 ---
 
+# TestSprite Plan: Partners/resolve investor scope (AUD-003) 2026-07-28
+
+Feature/edit name: v0.32.60 — `GET /api/Partners/resolve` investor allowlist fail-closed, soft-delete exclusion, principal-scoped cache.
+
+Changed URLs / API routes / data flow:
+- API: `GET /api/Partners/resolve?key=` (`api/src/routes/partners/resolveHandler.js`).
+- Data flow: authenticated staff/investor JWT → `requirePermission(customers.view)` → `resolveInvestorScope(employeeId)` → active-customer lookup (`customer=true AND isdeleted=false`) → allowlist filter before 0/1/many branch → response cache keyed by `principal|scope|key`.
+- No frontend URL change; CustomerSelector / deep-link resolve callers inherit the safer backend contract.
+
+Expected behavior:
+- Investor resolving a non-allowlisted customer UUID/ref/phone → `404 CUSTOMER_NOT_FOUND` with no `partner` / `candidates` (no name/phone leak).
+- Investor resolving an allowlisted active customer → `200` with `{ matchedBy, partner }`.
+- Investor with empty allowlist → always `404` (fail-closed).
+- Soft-deleted partners never resolve for any role.
+- Staff (non-investor) still resolve any active customer; staff cache hits must not be served to investors for the same key.
+- Ambiguous phone matches are filtered to the investor allowlist before 409 vs 200 branching.
+
+User roles:
+- Investor (`investor` permission group, `customers.view`).
+- Staff/admin with `customers.view` (unscoped resolve).
+
+Execution items:
+- [x] PASS: `api/src/routes/partners/__tests__/resolveHandler.test.js` — 8/8 (soft-delete SQL, investor 404/200, empty allowlist, ambiguous filter, staff passthrough, principal-scoped cache isolation, missing key 400).
+- [x] PASS: `api/tests/investorIdorScoping.test.js` Partners/resolve section — investor 404 no PII, allowlisted 200, staff passthrough, soft-delete SQL (suite 29/29 with resolveHandler).
+- [x] PASS: Semgrep `resolveHandler.js` — 0 findings.
+- [ ] PENDING: NK2 authenticated investor negative path — login investor → `GET /api/Partners/resolve?key=<non-allowlisted-uuid>` returns 404 without name/phone; allowlisted key returns 200.
+- [ ] PENDING: NK2 staff positive path — staff resolve of an active customer still 200; soft-deleted customer 404.
+
+Setup/login data: NK2 investor + staff accounts with `customers.view`; use a known allowlisted and non-allowlisted dental customer UUID; do not print credentials.
+
+---
+
 # TestSprite Plan: partner source read-only boundary 2026-07-23
 
 Feature/edit name: v0.32.59 — omission-safe partial customer updates and read-only `partners.sourceid` on normal customer writes.
