@@ -130,6 +130,8 @@ Client role mapping: `/api/Employees` still returns legacy boolean flags and tit
 | PUT | `/:id` | Perm:`services.edit` | Product fields | Updated product |
 | DELETE | `/:id` | Perm:`services.edit` | — | 204 or 409 if linked records exist |
 
+POST and PUT request/response shapes are unchanged. Valid names are trimmed and persisted with an accent-stripped `namenosign` derived by the shared `normalizeVietnamese` helper.
+
 ## Product Categories (`/api/ProductCategories`)
 
 | Method | Path | Auth | Body / Query | Response |
