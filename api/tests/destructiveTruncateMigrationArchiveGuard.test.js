@@ -15,7 +15,7 @@ const retiredTruncateBasenames = [
 const TRUNCATE_RE = /\bTRUNCATE\b/i;
 
 function listDefaultGlobSql() {
-  // Mirrors runbook / deploy loop: api/migrations/*.sql (non-recursive top-level only).
+  // Mirrors the runbook/deploy discovery boundary: api/migrations/*.sql (top-level only).
   return fs.readdirSync(migrationsDir).filter((name) => name.endsWith('.sql'));
 }
 

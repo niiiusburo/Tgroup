@@ -1,4 +1,4 @@
--- RETIRED: one-shot TDental bulk import with TRUNCATE of core tables; forensic reference only, never execute. Opt-in only after explicit backup + captain approval — never part of deploy/runbook blind apply.
+-- RETIRED: one-shot TDental bulk import with TRUNCATE of core tables; forensic reference only. Never execute via deploy/runbook; exceptional disposable-target use requires a verified backup and deployment-captain approval.
 -- ============================================================================
 -- Migration: Full data migration from old tdental DB to tdental_demo DB
 -- Uses dblink to connect old DB (tdental@172.17.0.1:54323) from demo DB

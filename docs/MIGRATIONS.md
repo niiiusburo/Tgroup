@@ -8,7 +8,7 @@
 
 ## Migration System Rules
 
-1. Every migration file is idempotent: use `IF NOT EXISTS` for CREATE, `IF EXISTS` for DROP/ALTER.
+1. Every new active migration must be idempotent: use `IF NOT EXISTS` for CREATE, `IF EXISTS` for DROP/ALTER, or an equivalent guarded form. Existing exceptions must be checked and applied explicitly; active-directory membership alone does not make a blind re-run safe.
 2. Migrations are applied manually via `psql` (Docker or direct).
 3. There is no auto-down migration. Rollback requires writing and running a reverse script.
 4. Track applied migrations in `dbo.schema_migrations` (installed by `000_install_schema_migrations_table.sql`).
@@ -19,7 +19,7 @@ Current inventory from disk:
 
 - **Canonical directory:** `api/migrations/` — 48 runnable root SQL files. Quarantined under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/` with non-executable `.sql.retired` extensions: five customer-source incident artifacts (031/033–036) and three one-shot TDental bulk-import TRUNCATE scripts (008 v1/v2/v3). None are part of the default deploy glob.
 - **Supplemental directory:** `api/src/db/migrations/` — 5 SQL files. These are straggler migrations (`payment_category`, customer face embeddings, payment-proof confirmation/permission/UUID changes) that should be consolidated into the canonical migration path or explicitly promoted by a future runbook decision.
-- **Runbook status:** `docs/RUNBOOK.md` and `docs/runbooks/DEPLOYMENT.md` both use `api/migrations/*.sql` as the canonical deploy loop. Supplemental files under `api/src/db/migrations/` are not covered by that loop unless explicitly run or consolidated.
+- **Runbook status:** `docs/RUNBOOK.md` and `docs/runbooks/DEPLOYMENT.md` use `api/migrations/*.sql` only to discover top-level candidates. Each confirmed-unapplied file is reviewed and invoked explicitly. Supplemental files under `api/src/db/migrations/` require separate review and promotion or explicit execution.
 
 | # | File | Description | Up | Down / Rollback | Applied On |
 |---|---|---|---|---|---|
@@ -97,6 +97,9 @@ These files are visible under `api/src/db/migrations/` but are not part of the c
 |---|---|---|---|
 | 003 | `003_add_payment_category.sql` | Adds/backfills `payments.payment_category`, check constraint, `idx_payments_category` | Already reflected in the data model; should be copied or renumbered into `api/migrations/` before relying on root runbook execution. |
 | 046 | `046_customer_face_embeddings.sql` | Creates `customer_face_embeddings` and ensures partner face status columns exist | Already reflected in the data model; overlaps earlier face-column history and needs one canonical execution path. |
+| 047 | `047_payment_proof_confirmation.sql` | Adds payment-proof confirmation metadata, partner FK, and confirmation lookup index | Promote into the canonical sequence before relying on root runbook execution. |
+| 048 | `048_grant_payment_confirm_permission.sql` | Grants `payment.confirm` to Dentist and Super Admin groups | Promote with its permission-contract documentation before relying on root runbook execution. |
+| 051 | `051_payment_proofs_payment_id_uuid.sql` | Corrects `payment_proofs.payment_id` from integer to UUID and adds the payment FK/index | Promote into the canonical sequence before relying on root runbook execution. |
 
 ## Rollback Procedures
 

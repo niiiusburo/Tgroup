@@ -23,7 +23,7 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 - Added CI-required guard `api/tests/destructiveTruncateMigrationArchiveGuard.test.js` proving default migration listing excludes 008 artifacts, recursive `*.sql` cannot select them, and no active root migration contains any `TRUNCATE` statement — @crewmate — AUD-001.
 
 ### Docs
-- Documented forbidden blind re-run, opt-in-only procedure, and the 48 runnable / 8 retired migration inventory in `docs/MIGRATIONS.md`, `docs/DATA-MODEL.md`, `docs/RUNBOOK.md`, `docs/TEST-MATRIX.md`, `product-map/schema-map.md`, `testbright.md`, and the quarantine README — @crewmate — AUD-001.
+- Documented forbidden blind re-run and the opt-in-only procedure; made `docs/MIGRATIONS.md` the authoritative 48 runnable / 8 retired inventory, completed its five-file supplemental table, routed duplicate inventory facts to that owner, and assigned the retired archive in `docs/OWNERSHIP.md` — @crewmate — AUD-001.
 
 ## [0.32.59] — 2026-07-23
 

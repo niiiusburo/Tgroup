@@ -27,7 +27,7 @@ jobs:
           fi
       - name: Install API test dependencies
         run: npm ci --prefix api
-      - name: Prove retired customer-source rewrites are not runnable SQL
+      - name: Prove destructive migration quarantine and source integrity
         run: npm --prefix api test -- --runTestsByPath tests/customerSourceMigrationArchiveGuard.test.js tests/destructiveTruncateMigrationArchiveGuard.test.js tests/customerSourceReferenceMigration.test.js tests/customerSourceIntegrity.test.js tests/dbTransaction.test.js tests/q10CustomerSourceRepairGuard.test.js --runInBand
       - name: Install website test dependencies
         run: npm ci --prefix website

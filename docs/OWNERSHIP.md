@@ -79,6 +79,7 @@
 | `api/src/services/*.js` | Backend | Shared business logic. |
 | `api/src/domains/*/` | Backend | Enterprise clean-architecture routes. Preferred for new features. |
 | `api/migrations/*.sql` | Data/Money | Manual migrations; must be idempotent (`IF NOT EXISTS`). |
+| `api/migrations/RETIRED-DESTRUCTIVE-DO-NOT-RUN/*.sql.retired` | Data/Money + QA/Verification | Forensic artifacts only; follow the folder README and never rename, copy into the active path, or include in a migration glob. |
 | `api/tests/*.test.js` | QA/Verification + Backend | API tests. |
 | `api/package.json` | Backend + Infra/Release | Dependency changes. |
 

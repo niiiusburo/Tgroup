@@ -2,7 +2,7 @@
 
 > Database entity map: relationships, writers, readers, endpoints, and frontend surfaces.
 
-> Migration inventory: 48 runnable root SQL files under `api/migrations/` as of 2026-07-28, plus 8 non-executable destructive artifacts under `RETIRED-DESTRUCTIVE-DO-NOT-RUN/`: five customer-source incident rewrites and three one-shot 008 TDental bulk imports (AUD-001). Duplicate numeric prefixes exist, so treat filename order as inventory, not a strict linear version sequence.
+> Migration inventory and quarantine status are owned by `docs/MIGRATIONS.md`. Retired `.sql.retired` artifacts are historical reconstruction evidence and are excluded from runnable schema sources.
 
 ## Legend
 

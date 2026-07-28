@@ -34,15 +34,16 @@ They are **forbidden** from the default deploy/runbook path
 
 ### Opt-in only (explicit, never automated)
 
-1. Captain / owner written approval naming the exact target database.
+1. Deployment captain written approval naming the exact target database.
 2. Verified full backup + restore drill of that database.
 3. Disposable or intentionally empty target only — never production, staging
    with real data, or any DB that still holds clinic history.
-4. Manual single-file invocation of the chosen `.sql.retired` artifact after
-   temporary, reviewed rename — never via the deploy loop or a directory glob.
-5. Immediate re-quarantine (`.sql.retired`) after the one-shot run.
+4. Manual single-file invocation by the exact `.sql.retired` path (for example,
+   `psql --file=...sql.retired`) — never rename or copy the artifact, and never
+   use the deploy loop or a directory glob.
+5. Confirm the artifact remains quarantined as `.sql.retired` after the run.
 
 Never rename these artifacts back to `.sql` or copy them into the active
-migration directory as part of normal work. Guards:
+migration directory. Guards:
 `api/tests/customerSourceMigrationArchiveGuard.test.js` and
 `api/tests/destructiveTruncateMigrationArchiveGuard.test.js`.
