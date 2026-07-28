@@ -114,7 +114,7 @@ docker exec tgroup-web cat /var/log/nginx/error.log | tail -n 50
 
 | Endpoint | Purpose | Expected |
 |---|---|---|
-| `GET /api/health` | API + DB + face service status | HTTP 200 when DB up (even if the optional face probe fails or exceeds its 2-second bound); HTTP 503 only when DB down. Body: `{"status":"healthy"\|"degraded","checks":{"db":true\|false,"faceService":true\|false},"faceProvider":"local"\|"compreface"\|...}` (AUD-038 / INV-014) |
+| `GET /api/health` | API + DB + face service status | HTTP 200 when DB up (even if the optional face probe fails or exceeds its 2-second bound, which aborts the provider request); HTTP 503 only when DB down. Body: `{"status":"healthy"\|"degraded","checks":{"db":true\|false,"faceService":true\|false},"faceProvider":"local"\|"compreface"\|...}` (AUD-038 / INV-014) |
 | `GET /health` (face-service) | Face inference service | `{"status":"ok"}` |
 | `GET /version.json` | Frontend build version | `{"version":"x.y.z","buildTime":"..."}` |
 

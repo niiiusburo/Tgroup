@@ -11,7 +11,7 @@ Feature/edit name: v0.32.60 — AUD-013 tracked nginx export timeouts and AUD-03
 Changed URLs / API routes / data flow:
 - Public API: `GET /api/health`.
 - Tracked proxy configuration: `nginx.conf` and `nginx.docker.conf` `/api` blocks; no live VPS nginx edit is included.
-- Data flow: health request → required `SELECT 1` database probe + selected local/CompreFace optional probe through a shared 2-second bound → HTTP status and visible `checks` payload.
+- Data flow: health request → required `SELECT 1` database probe + selected local/CompreFace optional probe through a shared 2-second bound and AbortSignal → provider request cancellation on timeout → HTTP status and visible `checks` payload.
 - Export flow: browser export request → tracked nginx `/api` proxy with 300s read/send/downstream send timeouts → existing API export route.
 
 Expected behavior:
@@ -20,7 +20,7 @@ Expected behavior:
 |---|---|
 | Call `/api/health` with DB and face provider up | HTTP 200, `status:"healthy"`, `checks.db:true`, `checks.faceService:true`. |
 | Call `/api/health` with DB up and face provider down or throwing | HTTP 200, `status:"degraded"`, `checks.db:true`, `checks.faceService:false`. |
-| Call `/api/health` with DB up and a never-settling local or CompreFace probe | Response completes after the shared 2-second bound with HTTP 200, `status:"degraded"`, and `checks.faceService:false`. |
+| Call `/api/health` with DB up and a never-settling local or CompreFace probe | The provider request receives an abort signal; the response completes after the shared 2-second bound with HTTP 200, `status:"degraded"`, and `checks.faceService:false`. |
 | Call `/api/health` with DB down | HTTP 503, `status:"degraded"`, `checks.db:false`, regardless of optional face state. |
 | Inspect either tracked nginx `/api` block | `proxy_read_timeout`, `proxy_send_timeout`, and `send_timeout` are each `300s`. |
 | Remove or change any required nginx timeout directive in a test fixture/change | `api/tests/nginxTimeouts.test.js` fails instead of silently accepting a 60s regression. |
@@ -30,7 +30,7 @@ User roles:
 - Authenticated clinic staff requesting an existing large Excel export.
 
 Execution items:
-- [ ] PENDING: Focused Jest for `api/tests/health.test.js`, `api/src/services/__tests__/faceRecognitionRuntime.test.js`, and `api/tests/nginxTimeouts.test.js`.
+- [ ] PENDING: Focused Jest for `api/tests/health.test.js`, `api/src/services/__tests__/faceRecognitionRuntime.test.js`, `api/src/services/__tests__/faceEngineClient.test.js`, `api/src/services/__tests__/comprefaceClient.test.js`, and `api/tests/nginxTimeouts.test.js`.
 - [ ] PENDING: Pipeline documentation-governance check confirms contract, product-map, test-matrix, changelog, and this ledger entry remain aligned.
 - [ ] PENDING: Live VPS timeout and health verification is explicitly out of scope for this local review phase.
 

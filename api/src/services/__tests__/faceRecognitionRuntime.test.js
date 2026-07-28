@@ -30,11 +30,18 @@ it.each([
 ])("bounds a never-settling %s health probe", async (provider, providerHealth) => {
   jest.useFakeTimers();
   process.env.FACE_RECOGNITION_PROVIDER = provider;
-  providerHealth.mockReturnValueOnce(new Promise(() => {}));
+  let receivedSignal;
+  providerHealth.mockImplementationOnce((signal) => {
+    receivedSignal = signal;
+    return new Promise(() => {});
+  });
 
   const resultPromise = healthCheck();
   await jest.runOnlyPendingTimersAsync();
 
+  expect(providerHealth).toHaveBeenCalledWith(receivedSignal);
+  expect(receivedSignal).toBeDefined();
+  expect(receivedSignal.aborted).toBe(true);
   await expect(resultPromise).resolves.toEqual({
     ok: false,
     status: 0,

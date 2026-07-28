@@ -35,8 +35,8 @@ async function getEmbedding(imageBuffer, mimeType) {
   };
 }
 
-async function healthCheck() {
-  const res = await fetch(`${FACE_SERVICE_URL}/health`, { method: "GET" });
+async function healthCheck(signal) {
+  const res = await fetch(`${FACE_SERVICE_URL}/health`, { method: "GET", signal });
   if (!res.ok) return { ok: false, status: res.status };
   return { ok: true, data: await res.json() };
 }

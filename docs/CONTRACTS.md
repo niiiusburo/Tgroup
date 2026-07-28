@@ -543,7 +543,7 @@ Feedback attachment behavior:
 #### GET /api/health
 **Auth:** None.
 
-**Response 200:** The database probe succeeded. `status` is `"healthy"` when the selected face provider also succeeds and `"degraded"` when the optional face provider fails, throws, or exceeds the shared 2-second probe bound.
+**Response 200:** The database probe succeeded. `status` is `"healthy"` when the selected face provider also succeeds and `"degraded"` when the optional face provider fails, throws, or exceeds the shared 2-second probe bound. Exceeding the bound aborts the selected provider request.
 
 **Response 503:** The database probe failed. `status` is `"degraded"` regardless of the optional face-provider result.
 
@@ -563,7 +563,7 @@ Feedback attachment behavior:
 }
 ```
 
-The timeout path preserves `checks.faceService: false`; it does not report the optional provider as healthy or turn a healthy database response into HTTP 503.
+The timeout path aborts the in-flight provider request and preserves `checks.faceService: false`; it does not report the optional provider as healthy or turn a healthy database response into HTTP 503.
 
 ---
 

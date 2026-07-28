@@ -14,6 +14,7 @@ function getFaceRecognitionProvider() {
 
 async function healthCheck() {
   const provider = getFaceRecognitionProvider();
+  const controller = new AbortController();
   let timeoutId;
   const timeoutResult = new Promise((resolve) => {
     timeoutId = setTimeout(() => {
@@ -22,13 +23,16 @@ async function healthCheck() {
         status: 0,
         message: `Face recognition health check timed out after ${FACE_HEALTH_TIMEOUT_MS}ms`,
       });
+      controller.abort();
     }, FACE_HEALTH_TIMEOUT_MS);
   });
 
   let result;
   try {
     result = await Promise.race([
-      provider === "compreface" ? comprefaceHealth() : faceServiceHealth(),
+      provider === "compreface"
+        ? comprefaceHealth(controller.signal)
+        : faceServiceHealth(controller.signal),
       timeoutResult,
     ]);
   } finally {

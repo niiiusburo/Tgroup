@@ -21,7 +21,7 @@
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/api/health` | Public | — | DB up: HTTP 200 with `status: healthy` when face is up or `status: degraded` with `checks.faceService:false` when optional face fails or exceeds the shared 2s bound. DB down: HTTP 503 with `status: degraded`. Always includes `checks`, `faceProvider`, `latency`, and `timestamp`. |
+| GET | `/api/health` | Public | — | DB up: HTTP 200 with `status: healthy` when face is up or `status: degraded` with `checks.faceService:false` when optional face fails or exceeds the shared 2s bound; timeout aborts the provider request. DB down: HTTP 503 with `status: degraded`. Always includes `checks`, `faceProvider`, `latency`, and `timestamp`. |
 
 ## LOB & Business Unit (`/api/me` + context) — Cosmetic LOB v2
 

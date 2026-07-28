@@ -18,10 +18,10 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ### Fixed
 - Align tracked nginx `/api` proxy blocks with INV-019 300s `proxy_read_timeout` / `proxy_send_timeout` / `send_timeout` in `nginx.conf` and `nginx.docker.conf` — @firstmate — AUD-013 / INV-019.
-- Treat optional face provider as non-blocking for `GET /api/health`: bound either provider probe to 2 seconds, return HTTP 200 + `status:"degraded"` + `checks.faceService:false` when DB is up and face is down or stalled, and return HTTP 503 only when DB is down — @firstmate — AUD-038 / INV-014.
+- Treat optional face provider as non-blocking for `GET /api/health`: bound either provider probe to 2 seconds, abort the underlying provider request on timeout, return HTTP 200 + `status:"degraded"` + `checks.faceService:false` when DB is up and face is down or stalled, and return HTTP 503 only when DB is down — @firstmate — AUD-038 / INV-014.
 
 ### Testing
-- Added nginx conf timeout assertions and health degrade regressions (face down → 200; DB down → 503; never-settling local/CompreFace probe → bounded failure) — @firstmate — `api/tests/nginxTimeouts.test.js`, `api/tests/health.test.js`, `api/src/services/__tests__/faceRecognitionRuntime.test.js`.
+- Added nginx conf timeout assertions and health degrade regressions (face down → 200; DB down → 503; never-settling local/CompreFace probe → bounded failure with cancellation propagated to both provider fetches) — @firstmate — `api/tests/nginxTimeouts.test.js`, `api/tests/health.test.js`, `api/src/services/__tests__/faceRecognitionRuntime.test.js`, `api/src/services/__tests__/faceEngineClient.test.js`, `api/src/services/__tests__/comprefaceClient.test.js`.
 
 ### Docs
 - Documented health HTTP semantics, product-map ownership and regression coverage, TestSprite happy/failure paths, INV-014 enforcement, RUNBOOK Incident C tracked conf note, and test-matrix mapping — @firstmate — AUD-013 / AUD-038.
