@@ -4,11 +4,13 @@ summary: |
   CompreFace providers, and external health-checkup sync via Hosoonline API.
   Both integration families are optional features gated by env configuration.
 owns:
+  - api/src/server.js (GET /api/health only)
   - api/src/routes/faceRecognition.js
   - api/src/routes/externalCheckups.js
   - api/src/routes/publicTelemetryErrors.js
   - api/src/services/faceEngineClient.js
   - api/src/services/comprefaceClient.js (legacy fallback)
+  - api/src/services/faceRecognitionRuntime.js
   - api/src/services/faceMatchEngine.js
   - api/src/services/larkNotifier.js
   - website/src/components/customer/CustomerCameraWidget.tsx
@@ -37,6 +39,7 @@ tables:
   - dbo.partners
   - dbo.customer_face_embeddings
 endpoints:
+  - GET  /api/health
   - POST /api/face/recognize
   - POST /api/face/register
   - POST /api/face/re-register
@@ -65,15 +68,20 @@ affected_by:
   - Network reachability between api container and compreface-api
 impact_tests:
   - website/src/hooks/__tests__/useFaceRecognition.test.ts
+  - api/tests/health.test.js
   - api/tests/faceRecognition.test.js
+  - api/src/services/__tests__/faceRecognitionRuntime.test.js
+  - api/src/services/__tests__/faceEngineClient.test.js
+  - api/src/services/__tests__/comprefaceClient.test.js
   - api/src/routes/__tests__/externalCheckups.test.js
   - website/src/components/customer/AuthenticatedCheckupImage.test.tsx
 risk_level: medium
 notes:
   - Lark feedback alerts are optional and env-gated. The API process posts a text alert to the configured T-Group custom bot webhook only after a manual feedback thread or auto-detected telemetry feedback thread has committed locally.
-  - `FACE_RECOGNITION_PROVIDER=local` uses the Python FastAPI face-service with OpenCV YuNet (detection) and SFace (128-dim embedding extraction).
-  - `FACE_RECOGNITION_PROVIDER=compreface` uses CompreFace recognition subjects keyed by `partners.id`; TGClinic still updates `partners.face_subject_id` and `face_registered_at`.
+  - "`FACE_RECOGNITION_PROVIDER=local` uses the Python FastAPI face-service with OpenCV YuNet (detection) and SFace (128-dim embedding extraction)."
+  - "`FACE_RECOGNITION_PROVIDER=compreface` uses CompreFace recognition subjects keyed by `partners.id`; TGClinic still updates `partners.face_subject_id` and `face_registered_at`."
   - Compreface services are defined in docker-compose.yml but are not required for core app startup.
+  - "`GET /api/health` treats the database as required and the selected face provider as optional. Either provider health probe is bounded to 2 seconds and its request is aborted on timeout; a failure or timeout remains visible as `checks.faceService: false` while a healthy database still returns HTTP 200."
   - "Hosoonline is currently mixed-contract: login credentials take precedence for image reads (`Authorization: Bearer <token>` plus access_token cookie); `HOSOONLINE_API_KEY` / `X-API-Key` remains as fallback for older patient health-checkup endpoints."
   - The current observed Hosoonline website contract logs in through `/api/auth/login`, searches appointment media through `/api/appointments/search?q=<customerCode>&page=<page>`, and fetches bytes through `/api/appointments/image/:imageName`.
   - Hosoonline v2 API-key patient collection endpoints are routed through `/api/patients/_create` and `/api/patients/_search`; TGClinic proxies patient creation through `POST /api/ExternalCheckups/:customerCode/patient`.

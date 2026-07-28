@@ -24,6 +24,7 @@
 | v1.0.8 | 2026-07-04 | Investor users are restricted normal-portal staff sessions: `/api/Auth/login` may authenticate `dbo.investor_accounts`, but all data access stays on existing portal routes and is scoped by `dbo.investor_clients`. |
 | v1.0.9 | 2026-07-08 | Investor visibility admin controls (`GET`/`PATCH /api/Partners/investor-visibility`) are gated by admin group (`assertAdmin`) instead of `permissions.edit`, and admin list/toggle match `dbo.investor_clients` by the SAME scope union (`investor_id` = the investor's `partners.id` OR any active `dbo.investor_accounts.id`) that scopes the investor read. Customer id is validated with the canonical 8-4-4-4-12 UUID pattern. |
 | v1.0.10 | 2026-07-23 | Customer-source usage counts and deletion guards include both customer and sale-order references; new sale orders reject inactive/missing sources while an existing order may preserve its already-assigned inactive historical source. |
+| v1.0.11 | 2026-07-28 | `GET /api/health` treats the database as required and the selected face-recognition provider as optional, with a shared 2-second provider probe bound. |
 
 ---
 
@@ -534,6 +535,35 @@ Feedback attachment behavior:
 **Response 201:** `{ id: string }` (error_event row id)
 
 **Side effect:** The public telemetry ingestion route creates a `source='auto'` feedback thread for first-seen errors. If `LARK_FEEDBACK_WEBHOOK_URL` is configured, that new auto-feedback thread queues the same non-blocking Lark alert with error type, route, API context, and bounded error-message preview.
+
+---
+
+### 1.12 Runtime Health
+
+#### GET /api/health
+**Auth:** None.
+
+**Response 200:** The database probe succeeded. `status` is `"healthy"` when the selected face provider also succeeds and `"degraded"` when the optional face provider fails, throws, or exceeds the shared 2-second probe bound. Exceeding the bound aborts the selected provider request.
+
+**Response 503:** The database probe failed. `status` is `"degraded"` regardless of the optional face-provider result.
+
+```ts
+{
+  status: 'healthy' | 'degraded';
+  checks: {
+    db: boolean;
+    faceService: boolean;
+  };
+  faceProvider: 'local' | 'compreface';
+  latency: {
+    db: number;
+    faceService: number;
+  };
+  timestamp: string;
+}
+```
+
+The timeout path aborts the in-flight provider request and preserves `checks.faceService: false`; it does not report the optional provider as healthy or turn a healthy database response into HTTP 503.
 
 ---
 

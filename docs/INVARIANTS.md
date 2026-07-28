@@ -127,10 +127,10 @@
 **Enforced by:** `api/src/routes/externalCheckups.js` and frontend `AuthenticatedCheckupImage` component.
 **Cite when:** Changing external checkups routes, image display components, or CDN caching.
 
-### INV-014 — Compreface Optional Startup
+### INV-014 — Face Recognition Provider Optional Startup
 **Rule:** The core app MUST start successfully even if the configured Face ID provider is down. Face-recognition features may degrade but must not block unrelated workflows.
 **Rationale:** Face ID providers are optional operational dependencies; clinics may run without CompreFace or the local face-service.
-**Enforced by:** `api/src/server.js` health check reports `faceService: false` on failure and includes `faceProvider`; frontend handles missing face data gracefully.
+**Enforced by:** `api/src/services/faceRecognitionRuntime.js` bounds either selected provider health probe to 2 seconds and aborts the underlying provider request on timeout. `api/src/server.js` `GET /api/health` returns HTTP 200 with `status:"degraded"` and `checks.faceService:false` when DB is up and face is down or stalled (AUD-038); only DB failure yields HTTP 503. Payload always includes `faceProvider`. Frontend handles missing face data gracefully.
 **Cite when:** Changing face-service or CompreFace startup dependencies, health checks, provider routing, or Docker Compose.
 
 ---

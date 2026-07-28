@@ -12,6 +12,7 @@ async function comprefaceFetch(path, options = {}) {
     method: options.method || 'GET',
     headers,
     body: options.body,
+    signal: options.signal,
   });
 
   const text = await res.text();
@@ -99,13 +100,13 @@ async function deleteSubject(subjectId) {
   });
 }
 
-async function healthCheck() {
+async function healthCheck(signal) {
   if (!COMPREFACE_API_KEY) {
     return { ok: false, status: 0, message: 'COMPREFACE_API_KEY is not configured' };
   }
 
   try {
-    await comprefaceFetch('/subjects', { method: 'GET' });
+    await comprefaceFetch('/subjects', { method: 'GET', signal });
     return { ok: true };
   } catch (err) {
     return {

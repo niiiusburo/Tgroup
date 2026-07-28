@@ -297,6 +297,25 @@ describe('comprefaceClient', () => {
       );
     });
 
+    it('passes the supplied abort signal to fetch', async () => {
+      const { healthCheck } = loadClient({
+        COMPREFACE_URL: 'http://compreface-test',
+        COMPREFACE_API_KEY: 'secret-key',
+      });
+      const controller = new AbortController();
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        text: async () => JSON.stringify({ subjects: [] }),
+      });
+
+      await healthCheck(controller.signal);
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.stringContaining('/subjects'),
+        expect.objectContaining({ method: 'GET', signal: controller.signal }),
+      );
+    });
+
     it('returns not ok when API key is missing', async () => {
       const { healthCheck } = loadClient({ COMPREFACE_API_KEY: '' });
 

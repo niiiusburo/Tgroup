@@ -218,6 +218,22 @@ describe('healthCheck', () => {
     expect(result.data.status).toBe('ok');
   });
 
+  it('passes the supplied abort signal to fetch', async () => {
+    const { healthCheck } = loadClient();
+    const controller = new AbortController();
+    fetchSpy.mockResolvedValue({
+      ok: true,
+      json: async () => ({ status: 'ok' }),
+    });
+
+    await healthCheck(controller.signal);
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/health'),
+      expect.objectContaining({ method: 'GET', signal: controller.signal }),
+    );
+  });
+
   it('returns ok=false when service responds with error status', async () => {
     const { healthCheck } = loadClient();
     fetchSpy.mockResolvedValue({

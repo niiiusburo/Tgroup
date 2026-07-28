@@ -17,6 +17,12 @@
 | GET | `/me` | Auth | — | `{ user (with is_ctv?, lob_scope?), permissions }` |
 | POST | `/change-password` | Auth | `{ oldPassword, newPassword }` | `{ success, message }` |
 
+## Runtime Health (`/api/health`)
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/api/health` | Public | — | DB up: HTTP 200 with `status: healthy` when face is up or `status: degraded` with `checks.faceService:false` when optional face fails or exceeds the shared 2s bound; timeout aborts the provider request. DB down: HTTP 503 with `status: degraded`. Always includes `checks`, `faceProvider`, `latency`, and `timestamp`. |
+
 ## LOB & Business Unit (`/api/me` + context) — Cosmetic LOB v2
 
 | Method | Path | Auth | Body / Query | Response |
