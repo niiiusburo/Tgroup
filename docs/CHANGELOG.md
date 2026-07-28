@@ -23,6 +23,7 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ### Fixed
 - Sum multi-allocations against the same target and against the payment amount before insert; block lowering payment amount below already-allocated total on PATCH — @firstmate — INV-003 / coordinates with PR #70 sum/multi-alloc guards.
+- Accept optional Conventional Commit scopes such as `fix(payments):` in the PR-title CI gate while preserving the existing allowed type list — @codex — PR #83 CI compatibility.
 
 ### Testing
 - Added `paymentAllocationGuards.test.js`, `paymentPatchVoidBan.test.js`, and FOR UPDATE assertion on `paymentsTransaction.test.js` — @firstmate — AUD-006 / AUD-009.
