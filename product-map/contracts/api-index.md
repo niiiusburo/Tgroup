@@ -85,7 +85,7 @@ CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin ro
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/` | Auth | `?partner_id, offset, limit, search, sortField, sortOrder, date_from/dateFrom, date_to/dateTo, state, company_id/companyId, doctor_id/doctorId` | `PaginatedResponse<Appointment> + aggregates` |
+| GET | `/` | Auth | `?partner_id, offset, limit, search, sortField, sortOrder, date_from/dateFrom, date_to/dateTo, state, company_id/companyId, doctor_id/doctorId`. Dated queries older than 3 Vietnam calendar months return `400 LOOKBACK_EXCEEDED`. Undated customer-profile lists are uncapped. | `PaginatedResponse<Appointment> + aggregates` |
 | GET | `/:id` | Auth | — | Appointment detail |
 | POST | `/` | Perm:`appointments.add` | `{ date, time, partnerId/partnerid, doctorId/doctorid, companyId/companyid, note, timeExpected/timeexpected, color, state, productId/productid }` | Created appointment |
 | PUT | `/:id` | Perm:`appointments.edit` | `{ date, doctorId/doctorid, companyId/companyid, note, state, timeExpected/timeexpected, color, time, productId/productid, assistantId/assistantid, dentalAideId/dentalaideid }` | Updated appointment, including refreshed `companyid/companyname` when clinic/location changes |
@@ -234,6 +234,8 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 
 ## Reports (`/api/Reports`)
 
+Date-scoped report bodies require `dateFrom` and `dateTo` (`YYYY-MM-DD`) inside the last 3 Vietnam calendar months. Older dates return `{ success: false, error: 'LOOKBACK_EXCEEDED' }`; omitted dates return `{ success: false, error: 'Invalid params' }`. `/employees/overview` is not date-scoped.
+
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
 | POST | `/dashboard` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | Dashboard KPIs |
@@ -261,7 +263,7 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 | POST | `/:type/preview` | Auth + registry permission | `{ filters }`; `type` is `service-catalog`, `customers`, `appointments`, `services`, `payments`, `report-sales-employees`, `revenue-flat`, or `deposit-flat` | `{ type, label, rowCount, filename, filters, summary, exceedsMax }` + best-effort `exports_audit` row |
 | POST | `/:type/download` | Auth + registry permission | `{ filters }`; same type keys as preview | XLSX workbook stream + best-effort `exports_audit` row after response |
 
-Export permissions are defined by `api/src/services/exports/exportRegistry.js`: `customers.export`, `appointments.export`, `services.export`, `payments.export`, `products.export`, and `reports.export`. `appointments` accepts `search`, `companyId`, `dateFrom`, `dateTo`, `state`, and `doctorId`; its search includes customer phone and its workbook date must prefer `appointments.date`/`time` before falling back to legacy `datetimeappointment`. `report-sales-employees` accepts `companyId`, `employeeType` (`doctor`, `assistant`, `consultant`, `sales`), optional `employeeId`, `dateFrom`, and `dateTo`; `companyId=all` means full employee revenue extraction across branches for any caller that passes `reports.export`, while a requested explicit branch `companyId` returns 403 before export SQL runs when it is outside the caller's effective location list and the caller lacks `*`. `revenue-flat` and `deposit-flat` use `payments.export` with `search`, `companyId`, `dateFrom`, and `dateTo`. `revenue-flat` includes payment note and resolves customer source from sale order first, then customer fallback; `deposit-flat` includes deposit note and splits cash vs bank-transfer amounts from explicit split columns or payment method fallback.
+Export permissions are defined by `api/src/services/exports/exportRegistry.js`: `customers.export`, `appointments.export`, `services.export`, `payments.export`, `products.export`, and `reports.export`. `appointments` accepts `search`, `companyId`, `dateFrom`, `dateTo`, `state`, and `doctorId`; its search includes customer phone and its workbook date must prefer `appointments.date`/`time` before falling back to legacy `datetimeappointment`. `report-sales-employees` accepts `companyId`, `employeeType` (`doctor`, `assistant`, `consultant`, `sales`), optional `employeeId`, `dateFrom`, and `dateTo`; `companyId=all` means full employee revenue extraction across branches for any caller that passes `reports.export`, while a requested explicit branch `companyId` returns 403 before export SQL runs when it is outside the caller's effective location list and the caller lacks `*`. `revenue-flat` and `deposit-flat` use `payments.export` with `search`, `companyId`, `dateFrom`, and `dateTo`. For `appointments`, `report-sales-employees`, `revenue-flat`, and `deposit-flat`, empty or too-old `dateFrom` is clamped to 3 Vietnam calendar months before today. `revenue-flat` includes payment note and resolves customer source from sale order first, then customer fallback; `deposit-flat` includes deposit note and splits cash vs bank-transfer amounts from explicit split columns or payment method fallback.
 
 ## Dashboard Reports (`/api/DashboardReports`)
 

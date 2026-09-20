@@ -1,6 +1,7 @@
 'use strict';
 
 const { buildFilename } = require('./exportWorkbook');
+const { clampToLookback, getVietnamToday, isBeforeLookback } = require('../../lib/dateUtils');
 const serviceCatalogExport = require('./builders/serviceCatalogExport');
 const customersExport = require('./builders/customersExport');
 const appointmentsExport = require('./builders/appointmentsExport');
@@ -156,6 +157,16 @@ function sanitizeFilters(type, rawFilters = {}) {
       sanitized[key] = raw;
     }
   });
+
+  const lookbackTypes = new Set(['appointments', 'report-sales-employees', 'revenue-flat', 'deposit-flat']);
+  if (lookbackTypes.has(type) && Object.prototype.hasOwnProperty.call(entry.filterSchema, 'dateFrom')) {
+    const today = getVietnamToday();
+    sanitized.dateFrom = clampToLookback(sanitized.dateFrom, today);
+    if (sanitized.dateTo && isBeforeLookback(sanitized.dateTo, today)) {
+      sanitized.dateTo = sanitized.dateFrom;
+    }
+  }
+
   return sanitized;
 }
 

@@ -21,6 +21,8 @@ interface CalendarToolbarProps {
   readonly dateLabel: string;
   readonly onDateChange: (date: Date) => void;
   readonly onNavigate: (direction: 'prev' | 'next') => void;
+  readonly canNavigatePrev?: boolean;
+  readonly earliestLookbackDate?: string;
   readonly onToday: () => void;
   readonly search: string;
   readonly onSearchChange: (value: string) => void;
@@ -49,6 +51,8 @@ export function CalendarToolbar({
   dateLabel,
   onDateChange,
   onNavigate,
+  canNavigatePrev = true,
+  earliestLookbackDate,
   onToday,
   search,
   onSearchChange,
@@ -104,6 +108,8 @@ export function CalendarToolbar({
         dateLabel={dateLabel}
         onDateChange={onDateChange}
         onNavigate={onNavigate}
+        canNavigatePrev={canNavigatePrev}
+        earliestLookbackDate={earliestLookbackDate}
         onToday={onToday}
       />
 

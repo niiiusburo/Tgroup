@@ -4,6 +4,7 @@
   "weekView": "Week",
   "monthView": "Month",
   "today": "Today",
+  "lookbackLimit": "You can only look back 3 months",
   "noAppointments": "No appointments",
   "loadingAppointments": "Loading appointments...",
   "close": "Close",

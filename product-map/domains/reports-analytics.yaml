@@ -92,6 +92,7 @@ affected_by:
   - Investor access must scope report and export rows to admin-allowlisted customers only.
   - Any change to payment method enum
 impact_tests:
+  - api/src/routes/reports/__tests__/lookbackWindow.test.js
   - website/src/pages/reports/__tests__/ReportsDashboard.test.tsx
   - website/src/pages/reports/__tests__/ReportsSubpages.test.tsx
   - api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js
@@ -127,3 +128,4 @@ notes:
     and branch filters; cash-flow cards remain raw cash-movement context and are
     not the paid-revenue source of truth.
   - Overview Zone 1 and Zone 3 searches must be accent-insensitive so unaccented input matches Vietnamese names and labels with diacritics.
+  - Date-scoped report APIs and report Excel exports cannot query earlier than 3 calendar months before Vietnam today; the Reports All-time preset is removed.

@@ -68,14 +68,14 @@ describe('reports locations comparison', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/locations/comparison')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     const [locationsSql, locationsParams] = query.mock.calls[0];
     // Super Admin: no ANY() filter for company scope
     expect(locationsSql).not.toContain('c.id = ANY(');
     // First query: dateFrom/dateTo for appointments ($1,$2), dateFrom/dateTo for saleorders ($3,$4) — no company scope
-    expect(locationsParams).toEqual(['2026-05-01', '2026-05-31', '2026-05-01', '2026-05-31']);
+    expect(locationsParams).toEqual(['2026-07-01', '2026-07-31', '2026-07-01', '2026-07-31']);
     expect(res.body.data.locations).toHaveLength(2);
   });
 
@@ -91,13 +91,13 @@ describe('reports locations comparison', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/locations/comparison')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     const [locationsSql, locationsParams] = query.mock.calls[0];
     // Location-scoped: dates for appointments ($1,$2), dates for saleorders ($3,$4), company scope ($5)
     expect(locationsSql).toContain('WHERE c.id = ANY($5::uuid[])');
-    expect(locationsParams).toEqual(['2026-05-01', '2026-05-31', '2026-05-01', '2026-05-31', [LOC_A]]);
+    expect(locationsParams).toEqual(['2026-07-01', '2026-07-31', '2026-07-01', '2026-07-31', [LOC_A]]);
     expect(res.body.data.locations).toHaveLength(1);
     expect(res.body.data.locations[0].id).toBe(LOC_A);
   });
@@ -114,7 +114,7 @@ describe('reports locations comparison', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/locations/comparison')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     // First query: locations with scope at $5
@@ -122,7 +122,7 @@ describe('reports locations comparison', () => {
     // Second query: trend with scope at $3
     const [trendSql, trendParams] = query.mock.calls[1];
     expect(trendSql).toContain('AND c.id = ANY($3::uuid[])');
-    expect(trendParams).toEqual(['2026-05-01', '2026-05-31', [LOC_B]]);
+    expect(trendParams).toEqual(['2026-07-01', '2026-07-31', [LOC_B]]);
   });
 
   it('allows investor branch to see all locations and filter by their customer list', async () => {
@@ -143,7 +143,7 @@ describe('reports locations comparison', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/locations/comparison')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     // Investor: no location scope filter on companies, only customer filter
@@ -152,7 +152,7 @@ describe('reports locations comparison', () => {
     expect(locationsSql).toContain('partnerid = ANY($3::uuid[])');
     // $1,$2 = appointment dates, $3 = investor customer ids for appointments
     // $4,$5 = saleorder dates, $6 = investor customer ids for saleorders
-    expect(locationsParams).toEqual(['2026-05-01', '2026-05-31', ['55555555-5555-4555-8555-555555555555'], '2026-05-01', '2026-05-31', ['55555555-5555-4555-8555-555555555555']]);
+    expect(locationsParams).toEqual(['2026-07-01', '2026-07-31', ['55555555-5555-4555-8555-555555555555'], '2026-07-01', '2026-07-31', ['55555555-5555-4555-8555-555555555555']]);
   });
 
   it('merges revenue data from getCanonicalRevenueByLocation into location rows', async () => {
@@ -173,10 +173,10 @@ describe('reports locations comparison', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/locations/comparison')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
-    expect(getCanonicalRevenueByLocation).toHaveBeenCalledWith({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+    expect(getCanonicalRevenueByLocation).toHaveBeenCalledWith({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
     expect(res.body.data.locations[0]).toMatchObject({ id: LOC_B, revenue: 100000000 });
     expect(res.body.data.locations[1]).toMatchObject({ id: LOC_A, revenue: 50000000 });
   });
@@ -201,7 +201,7 @@ describe('reports locations comparison', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/locations/comparison')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.data.locations).toHaveLength(3);
@@ -220,13 +220,13 @@ describe('reports locations comparison', () => {
       { id: LOC_A, name: 'Location A', active: true, appointment_count: '5', done_count: '3', order_count: '2', employee_count: '4' },
     ]);
     query.mockResolvedValueOnce([
-      { name: 'Location A', month: new Date('2026-05-01'), cnt: '10' },
+      { name: 'Location A', month: new Date('2026-07-01'), cnt: '10' },
       { name: 'Location A', month: new Date('2026-06-01'), cnt: '15' },
     ]);
 
     const res = await request(makeApp())
       .post('/api/Reports/locations/comparison')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-06-30' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-08-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.data.trend).toHaveLength(2);

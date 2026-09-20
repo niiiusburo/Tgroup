@@ -14,7 +14,17 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
-## [0.32.59] — 2026-07-23
+## [0.32.60] — 2026-09-20
+### Added
+- 3-month Vietnam lookback on calendar navigation and date-scoped reports/exports — @agent — INV-026. Live NK/NK2 previously allowed All-time reports from 2000-01-01 and unbounded calendar back-navigation; APIs now reject `LOOKBACK_EXCEEDED`.
+
+### Testing
+- Lookback unit tests for date utils plus report dashboard 400/accept coverage — @agent — `dateUtils.lookback.test.js` / `lookbackWindow.test.ts` / `lookbackWindow.test.js`.
+
+### Docs
+- Documented INV-026, report date-scope contract v1.0.11, and calendar/report filter behavior — @agent — INV-026.
+
+
 
 ### Fixed
 - Preserve omitted writable UUID fields during partial customer updates so unrelated edits cannot clear assignments; make `partners.sourceid` read-only on normal Partner POST/PUT with stable `PARTNER_SOURCE_READ_ONLY` rejection for source assignment/change/clear, and remove source from frontend customer write payloads — @codex — INV-023 / INV-025 / FM-20260723-02.

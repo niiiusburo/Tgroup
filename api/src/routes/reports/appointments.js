@@ -1,7 +1,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID, dateCompanyFilter, resolveReportCompanyScope } = require('./helpers');
+const { err, rejectInvalidReportWindow, dateCompanyFilter, resolveReportCompanyScope } = require('./helpers');
 const { resolveInvestorScope } = require('../../services/permissionService');
 
 const router = express.Router();
@@ -11,7 +11,7 @@ const router = express.Router();
 router.post('/appointments/summary', requirePermission('reports.view'), async (req, res) => {
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
-    if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    if (rejectInvalidReportWindow(res, dateFrom, dateTo, companyId)) return;
 
     const scope = await resolveReportCompanyScope(req, res, companyId);
     if (!scope) return;
@@ -64,7 +64,7 @@ router.post('/appointments/summary', requirePermission('reports.view'), async (r
 router.post('/appointments/trend', requirePermission('reports.view'), async (req, res) => {
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
-    if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    if (rejectInvalidReportWindow(res, dateFrom, dateTo, companyId)) return;
 
     const scope = await resolveReportCompanyScope(req, res, companyId);
     if (!scope) return;

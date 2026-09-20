@@ -1,7 +1,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID, dateCompanyFilter, resolveReportCompanyScope } = require('./helpers');
+const { err, rejectInvalidReportWindow, dateCompanyFilter, resolveReportCompanyScope } = require('./helpers');
 const { resolveInvestorScope } = require('../../services/permissionService');
 const { getCanonicalRevenueByDoctor } = require('../../services/reports/canonicalRevenue');
 
@@ -12,7 +12,7 @@ const router = express.Router();
 router.post('/doctors/performance', requirePermission('reports.view'), async (req, res) => {
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
-    if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    if (rejectInvalidReportWindow(res, dateFrom, dateTo, companyId)) return;
 
     const scope = await resolveReportCompanyScope(req, res, companyId);
     if (!scope) return;

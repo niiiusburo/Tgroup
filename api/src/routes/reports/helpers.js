@@ -1,6 +1,7 @@
 'use strict';
 
 const { resolveEffectivePermissions } = require('../../services/permissionService');
+const { isBeforeLookback } = require('../../lib/dateUtils');
 
 function err(res, status, msg) {
   return res.status(status).json({ success: false, error: msg });
@@ -14,6 +15,21 @@ function validDate(s) {
 function validUUID(s) {
   if (s === undefined || s === null) return true;
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+}
+
+function rejectInvalidReportWindow(res, dateFrom, dateTo, companyId, options = {}) {
+  const requireCompanyId = options.requireCompanyId !== false;
+  const from = String(dateFrom || '').slice(0, 10);
+  const to = String(dateTo || '').slice(0, 10);
+  if (!from || !to || !validDate(from) || !validDate(to) || (requireCompanyId && !validUUID(companyId))) {
+    err(res, 400, 'Invalid params');
+    return true;
+  }
+  if (isBeforeLookback(from) || isBeforeLookback(to)) {
+    err(res, 400, 'LOOKBACK_EXCEEDED');
+    return true;
+  }
+  return false;
 }
 
 // NOTE on timestamps + ::date casts:
@@ -115,6 +131,7 @@ module.exports = {
   err,
   validDate,
   validUUID,
+  rejectInvalidReportWindow,
   dateCompanyFilter,
   resolveReportCompanyScope,
   datePaymentScopeFilter,
