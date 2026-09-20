@@ -18,6 +18,8 @@ interface CalendarDateNavigatorProps {
   readonly dateLabel: string;
   readonly onDateChange: (date: Date) => void;
   readonly onNavigate: (direction: 'prev' | 'next') => void;
+  readonly canNavigatePrev?: boolean;
+  readonly earliestLookbackDate?: string;
   readonly onToday: () => void;
 }
 
@@ -26,6 +28,8 @@ export function CalendarDateNavigator({
   dateLabel,
   onDateChange,
   onNavigate,
+  canNavigatePrev = true,
+  earliestLookbackDate,
   onToday,
 }: CalendarDateNavigatorProps) {
   const { t } = useTranslation('calendar');
@@ -81,16 +85,23 @@ export function CalendarDateNavigator({
       const nextMonth = direction === 'prev' ? month - 1 : month + 1;
       const nextYear = nextMonth < 1 ? year - 1 : nextMonth > 12 ? year + 1 : year;
       const actualMonth = nextMonth < 1 ? 12 : nextMonth > 12 ? 1 : nextMonth;
-      return new Date(`${nextYear}-${String(actualMonth).padStart(2, '0')}-01T12:00:00+07:00`);
+      const nextDate = new Date(`${nextYear}-${String(actualMonth).padStart(2, '0')}-01T12:00:00+07:00`);
+      if (earliestLookbackDate) {
+        const lastDayOfNext = new Date(Date.UTC(nextYear, actualMonth, 0, 12, 0, 0)).toISOString().slice(0, 10);
+        if (lastDayOfNext < earliestLookbackDate) return date;
+      }
+      return nextDate;
     });
   }
 
   return (
     <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto 2xl:shrink-0">
       <button
-        onClick={() => onNavigate('prev')}
-        className="min-h-10 min-w-10 p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+        onClick={() => canNavigatePrev && onNavigate('prev')}
+        disabled={!canNavigatePrev}
+        className="min-h-10 min-w-10 p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed"
         aria-label="Previous"
+        title={!canNavigatePrev ? t('lookbackLimit', 'Chỉ xem tối đa 3 tháng trước') : undefined}
       >
         <ChevronLeft className="w-5 h-5" />
       </button>
@@ -143,21 +154,26 @@ export function CalendarDateNavigator({
                 const dateKey = day.dateKey!;
                 const isSelected = dateKey === formatDate(currentDate, 'yyyy-MM-dd');
                 const isToday = dateKey === todayKeyForPicker;
+                const isBeforeLookback = Boolean(earliestLookbackDate && dateKey < earliestLookbackDate);
                 return (
                   <button
                     key={index}
                     type="button"
+                    disabled={isBeforeLookback}
                     onClick={() => {
+                      if (isBeforeLookback) return;
                       onDateChange(new Date(`${dateKey}T12:00:00+07:00`));
                       setIsOpen(false);
                     }}
                     className={cn(
                       'h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-all',
-                      isSelected
-                        ? 'bg-primary text-white shadow-md'
-                        : isToday
-                          ? 'bg-orange-50 text-orange-600 border border-orange-200'
-                          : 'text-gray-700 hover:bg-gray-100',
+                      isBeforeLookback
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : isSelected
+                          ? 'bg-primary text-white shadow-md'
+                          : isToday
+                            ? 'bg-orange-50 text-orange-600 border border-orange-200'
+                            : 'text-gray-700 hover:bg-gray-100',
                     )}
                   >
                     {day.date}

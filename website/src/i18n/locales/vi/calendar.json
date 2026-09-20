@@ -4,6 +4,7 @@
   "weekView": "Tuần",
   "monthView": "Tháng",
   "today": "Hôm nay",
+  "lookbackLimit": "Chỉ xem tối đa 3 tháng trước",
   "noAppointments": "Không có lịch hẹn",
   "loadingAppointments": "Đang tải lịch hẹn...",
   "close": "Đóng",

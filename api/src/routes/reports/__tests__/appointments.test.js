@@ -58,14 +58,14 @@ describe('reports appointments summary and trend', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/appointments/summary')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
       expect(res.status).toBe(200);
       expect(query).toHaveBeenCalledTimes(3);
       const [sql, params] = query.mock.calls[0];
       // Super Admin: no location filter, just date range
       expect(sql).not.toContain('companyid = ANY(');
-      expect(params).toEqual(['2026-05-01', '2026-05-31']);
+      expect(params).toEqual(['2026-07-01', '2026-07-31']);
     });
 
     it('allows Admin group to view all appointments without location filter', async () => {
@@ -80,12 +80,12 @@ describe('reports appointments summary and trend', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/appointments/summary')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
       expect(res.status).toBe(200);
       const [sql, params] = query.mock.calls[0];
       expect(sql).not.toContain('companyid = ANY(');
-      expect(params).toEqual(['2026-05-01', '2026-05-31']);
+      expect(params).toEqual(['2026-07-01', '2026-07-31']);
     });
 
     it('filters location-scoped staff to their allowed locations when no companyId requested', async () => {
@@ -102,13 +102,13 @@ describe('reports appointments summary and trend', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/appointments/summary')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
       expect(res.status).toBe(200);
       const [sql, params] = query.mock.calls[0];
       // Location-scoped staff: should have companyid = ANY($3::uuid[]) with [LOC_A, LOC_B]
       expect(sql).toContain('companyid = ANY($3::uuid[])');
-      expect(params).toEqual(['2026-05-01', '2026-05-31', [LOC_A, LOC_B]]);
+      expect(params).toEqual(['2026-07-01', '2026-07-31', [LOC_A, LOC_B]]);
     });
 
     it('filters location-scoped staff to their requested location when within scope', async () => {
@@ -122,12 +122,12 @@ describe('reports appointments summary and trend', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/appointments/summary')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_A });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_A });
 
       expect(res.status).toBe(200);
       const [sql, params] = query.mock.calls[0];
       expect(sql).toContain('companyid = ANY($3::uuid[])');
-      expect(params).toEqual(['2026-05-01', '2026-05-31', [LOC_A]]);
+      expect(params).toEqual(['2026-07-01', '2026-07-31', [LOC_A]]);
     });
 
     it('rejects location-scoped staff requesting a location outside their scope with 403', async () => {
@@ -138,7 +138,7 @@ describe('reports appointments summary and trend', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/appointments/summary')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_B });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_B });
 
       expect(res.status).toBe(403);
       expect(res.body).toEqual({ success: false, error: 'Location not allowed' });
@@ -161,14 +161,14 @@ describe('reports appointments summary and trend', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/appointments/summary')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_A });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_A });
 
       expect(res.status).toBe(200);
       const [sql, params] = query.mock.calls[0];
       // Investor scope: location filter + customer filter
       expect(sql).toContain('companyid = ANY($3::uuid[])');
       expect(sql).toContain('partnerid = ANY($4::uuid[])');
-      expect(params).toEqual(['2026-05-01', '2026-05-31', [LOC_A], ['44444444-4444-4444-8444-444444444444']]);
+      expect(params).toEqual(['2026-07-01', '2026-07-31', [LOC_A], ['44444444-4444-4444-8444-444444444444']]);
     });
   });
 
@@ -180,7 +180,7 @@ describe('reports appointments summary and trend', () => {
         locations: [],
       });
       query.mockResolvedValueOnce([
-        { week: '2026-05-01', total: '20', done: '18', cancelled: '1' },
+        { week: '2026-07-01', total: '20', done: '18', cancelled: '1' },
       ]);
       query.mockResolvedValueOnce([
         { hour: '9', cnt: '5' },
@@ -189,12 +189,12 @@ describe('reports appointments summary and trend', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/appointments/trend')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
       expect(res.status).toBe(200);
       const [sql, params] = query.mock.calls[0];
       expect(sql).not.toContain('companyid = ANY(');
-      expect(params).toEqual(['2026-05-01', '2026-05-31']);
+      expect(params).toEqual(['2026-07-01', '2026-07-31']);
     });
 
     it('filters location-scoped staff to their allowed locations in trend data', async () => {
@@ -203,7 +203,7 @@ describe('reports appointments summary and trend', () => {
         locations: [{ id: LOC_A, name: 'Location A' }],
       });
       query.mockResolvedValueOnce([
-        { week: '2026-05-01', total: '10', done: '9', cancelled: '0' },
+        { week: '2026-07-01', total: '10', done: '9', cancelled: '0' },
       ]);
       query.mockResolvedValueOnce([
         { hour: '14', cnt: '3' },
@@ -211,12 +211,12 @@ describe('reports appointments summary and trend', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/appointments/trend')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
       expect(res.status).toBe(200);
       const [sql, params] = query.mock.calls[0];
       expect(sql).toContain('companyid = ANY($3::uuid[])');
-      expect(params).toEqual(['2026-05-01', '2026-05-31', [LOC_A]]);
+      expect(params).toEqual(['2026-07-01', '2026-07-31', [LOC_A]]);
     });
 
     it('rejects location-scoped staff requesting trend for disallowed location with 403', async () => {
@@ -227,7 +227,7 @@ describe('reports appointments summary and trend', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/appointments/trend')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_B });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_B });
 
       expect(res.status).toBe(403);
       expect(res.body).toEqual({ success: false, error: 'Location not allowed' });
@@ -245,7 +245,7 @@ describe('reports appointments summary and trend', () => {
         allowedCustomerIds: ['44444444-4444-4444-8444-444444444444'],
       });
       query.mockResolvedValueOnce([
-        { week: '2026-05-01', total: '5', done: '5', cancelled: '0' },
+        { week: '2026-07-01', total: '5', done: '5', cancelled: '0' },
       ]);
       query.mockResolvedValueOnce([
         { hour: '10', cnt: '2' },
@@ -253,13 +253,13 @@ describe('reports appointments summary and trend', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/appointments/trend')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_A });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_A });
 
       expect(res.status).toBe(200);
       const [sql, params] = query.mock.calls[0];
       expect(sql).toContain('companyid = ANY($3::uuid[])');
       expect(sql).toContain('partnerid = ANY($4::uuid[])');
-      expect(params).toEqual(['2026-05-01', '2026-05-31', [LOC_A], ['44444444-4444-4444-8444-444444444444']]);
+      expect(params).toEqual(['2026-07-01', '2026-07-31', [LOC_A], ['44444444-4444-4444-8444-444444444444']]);
     });
 
     it('correctly reuses fWhere and fParams for both trend and hours queries', async () => {
@@ -267,12 +267,12 @@ describe('reports appointments summary and trend', () => {
         effectivePermissions: ['reports.view'],
         locations: [{ id: LOC_A, name: 'Location A' }],
       });
-      query.mockResolvedValueOnce([{ week: '2026-05-01', total: '8', done: '7', cancelled: '0' }]);
+      query.mockResolvedValueOnce([{ week: '2026-07-01', total: '8', done: '7', cancelled: '0' }]);
       query.mockResolvedValueOnce([{ hour: '11', cnt: '4' }]);
 
       const res = await request(makeApp())
         .post('/api/Reports/appointments/trend')
-        .send({ dateFrom: '2026-05-15', dateTo: '2026-05-20', companyId: LOC_A });
+        .send({ dateFrom: '2026-07-15', dateTo: '2026-07-20', companyId: LOC_A });
 
       expect(res.status).toBe(200);
       expect(query).toHaveBeenCalledTimes(2);
@@ -280,8 +280,8 @@ describe('reports appointments summary and trend', () => {
       // Both queries should use the same filter params
       const [sql1, params1] = query.mock.calls[0];
       const [sql2, params2] = query.mock.calls[1];
-      expect(params1).toEqual(['2026-05-15', '2026-05-20', [LOC_A]]);
-      expect(params2).toEqual(['2026-05-15', '2026-05-20', [LOC_A]]);
+      expect(params1).toEqual(['2026-07-15', '2026-07-20', [LOC_A]]);
+      expect(params2).toEqual(['2026-07-15', '2026-07-20', [LOC_A]]);
       expect(sql1).toContain('DATE_TRUNC');
       expect(sql2).toContain('EXTRACT(HOUR');
     });
@@ -291,7 +291,7 @@ describe('reports appointments summary and trend', () => {
     it('rejects invalid date format', async () => {
       const res = await request(makeApp())
         .post('/api/Reports/appointments/summary')
-        .send({ dateFrom: 'not-a-date', dateTo: '2026-05-31', companyId: LOC_A });
+        .send({ dateFrom: 'not-a-date', dateTo: '2026-07-31', companyId: LOC_A });
 
       expect(res.status).toBe(400);
       expect(res.body).toEqual({ success: false, error: 'Invalid params' });
@@ -301,7 +301,7 @@ describe('reports appointments summary and trend', () => {
     it('rejects invalid UUID format', async () => {
       const res = await request(makeApp())
         .post('/api/Reports/appointments/summary')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: 'not-a-uuid' });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: 'not-a-uuid' });
 
       expect(res.status).toBe(400);
       expect(res.body).toEqual({ success: false, error: 'Invalid params' });
@@ -319,7 +319,7 @@ describe('reports appointments summary and trend', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/appointments/summary')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: null });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: null });
 
       expect(res.status).toBe(200);
       expect(query).toHaveBeenCalled();

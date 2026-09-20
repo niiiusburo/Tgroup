@@ -31,6 +31,7 @@
     "7d": "1w",
     "30d": "1mo",
     "90d": "90d",
+    "maxLookback": "3mo",
     "allTime": "All",
     "ytd": "YTD"
   },
@@ -85,7 +86,7 @@
   },
   "charts": {
     "revenueTrend": "Revenue Trend",
-    "revenueTrend12Month": "12-Month Revenue Trend",
+    "revenueTrend12Month": "3-Month Revenue Trend",
     "appointmentTrend": "Appointment Trend",
     "serviceDistribution": "Service Distribution",
     "revenueByLocation": "Revenue by Location",

@@ -4,7 +4,36 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 ---
 
+# TestSprite Plan: calendar and report 3-month lookback 2026-09-20
+
+Feature/edit name: v0.32.60 — calendar navigation and date-scoped reports/exports cannot look back more than 3 Vietnam calendar months.
+
+Changed URLs / API routes / data flow:
+- Frontend: `/calendar` prev/date picker (`useCalendarData`, `CalendarDateNavigator`, `ExportDateRangeModal`); `/reports/*` filters (`ReportsFilters`) replacing All-time with a 3-month max.
+- API: `GET /api/Appointments` dated queries; `POST /api/Reports/dashboard` and other date-scoped `/api/Reports/*` routes; export `sanitizeFilters` for `appointments`, `report-sales-employees`, `revenue-flat`, `deposit-flat`.
+- Data flow: UI clamps to `getEarliestLookbackDate()`; reports reject `LOOKBACK_EXCEEDED` or omitted dates (`Invalid params`); calendar lists with `dateFrom`/`dateTo` reject older windows.
+
+Expected behavior:
+- Calendar previous control disables at today minus 3 calendar months; days before that bound are not selectable.
+- Reports has no All-time preset; date inputs `min` is the lookback floor; 3-month preset is that floor through today.
+- Dated report APIs return 400 `LOOKBACK_EXCEEDED` for `2020-01-01`; omitted dates return 400 `Invalid params`; a window on the floor succeeds.
+- Calendar `GET /api/Appointments?date_from=2020-01-01` returns 400 `LOOKBACK_EXCEEDED`.
+- Customer profile undated appointment lists remain uncapped.
+
+User roles: Staff/admin with `appointments.view` / `reports.view`; investor reads stay allowlisted inside the same window.
+
+Execution items:
+- [x] PASS: API lookback + report/appointment Jest — 114/114 (`dateUtils.lookback`, `lookbackWindow`, `readHandlers`, dashboard/locations/customers/revenue/cashFlow/services).
+- [x] PASS: Frontend `lookbackWindow.test.ts` — 1/1.
+- [x] PASS: Local authenticated browser at `127.0.0.1:5175` as `t@clinic.vn` — calendar prev disabled on June 2026 from 2026-09-20; reports 3-month preset `2026-06-20`→`2026-09-20`; date `min=2026-06-20`; live API `POST /api/Reports/dashboard` old range 400 `LOOKBACK_EXCEEDED`.
+- [ ] PENDING: NK production after deploy — login `t@clinic.vn` at `https://nk.2checkin.com/calendar` cannot go before the 3-month floor; `/reports/dashboard` has no All-time and rejects older dates.
+
+Setup/login data: Local and NK admin `t@clinic.vn`; do not print credentials in this ledger.
+
+---
+
 # TestSprite Plan: partner source read-only boundary 2026-07-23
+
 
 Feature/edit name: v0.32.59 — omission-safe partial customer updates and read-only `partners.sourceid` on normal customer writes.
 

@@ -48,12 +48,12 @@ describe('reports customers summary', () => {
 
     let res = await request(makeApp())
       .post('/api/Reports/customers/summary')
-      .send({ dateFrom: 'invalid-date', dateTo: '2026-05-31', companyId: LOC_A });
+      .send({ dateFrom: 'invalid-date', dateTo: '2026-07-31', companyId: LOC_A });
     expect(res.status).toBe(400);
 
     res = await request(makeApp())
       .post('/api/Reports/customers/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: 'invalid-uuid' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: 'invalid-uuid' });
     expect(res.status).toBe(400);
   });
 
@@ -73,7 +73,7 @@ describe('reports customers summary', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/customers/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
@@ -90,7 +90,7 @@ describe('reports customers summary', () => {
     // Check second query (newCust) - should have NO company filtering
     const [sql2, params2] = query.mock.calls[1];
     expect(sql2).toContain('SELECT COUNT(*) as cnt FROM dbo.partners WHERE customer=true AND isdeleted=false');
-    expect(params2).toEqual(['2026-05-01', '2026-05-31']);
+    expect(params2).toEqual(['2026-07-01', '2026-07-31']);
     expect(sql2).not.toContain('ANY(');
   });
 
@@ -105,11 +105,11 @@ describe('reports customers summary', () => {
       .mockResolvedValueOnce([{ cityname: 'Hanoi', cnt: '25' }])  // cities
       .mockResolvedValueOnce([{ id: '1', name: 'John', total_paid: '5000000', order_count: '10' }])  // ltv
       .mockResolvedValueOnce([{ id: '2', name: 'Jane', outstanding: '1000000' }])  // outstanding
-      .mockResolvedValueOnce([{ month: '2026-05-01', cnt: '5' }]);  // growth
+      .mockResolvedValueOnce([{ month: '2026-07-01', cnt: '5' }]);  // growth
 
     const res = await request(makeApp())
       .post('/api/Reports/customers/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
@@ -125,7 +125,7 @@ describe('reports customers summary', () => {
     expect(sql2).toContain('AND datecreated::date >= $1');
     expect(sql2).toContain('AND datecreated::date <= $2');
     expect(sql2).toContain('companyid = ANY($3::uuid[])');
-    expect(params2).toEqual(['2026-05-01', '2026-05-31', [LOC_A]]);
+    expect(params2).toEqual(['2026-07-01', '2026-07-31', [LOC_A]]);
 
     // Query 3: gender - should have company filter
     const [sql3, params3] = query.mock.calls[2];
@@ -152,7 +152,7 @@ describe('reports customers summary', () => {
     expect(sql7).toContain('AND datecreated::date >= $1');
     expect(sql7).toContain('AND datecreated::date <= $2');
     expect(sql7).toContain('companyid = ANY($3::uuid[])');
-    expect(params7).toEqual(['2026-05-01', '2026-05-31', [LOC_A]]);
+    expect(params7).toEqual(['2026-07-01', '2026-07-31', [LOC_A]]);
   });
 
   it('rejects requested location outside employee scope', async () => {
@@ -163,7 +163,7 @@ describe('reports customers summary', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/customers/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_B });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_B });
 
     expect(res.status).toBe(403);
     expect(res.body).toEqual({ success: false, error: 'Location not allowed' });
@@ -185,7 +185,7 @@ describe('reports customers summary', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/customers/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_A });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_A });
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
@@ -216,7 +216,7 @@ describe('reports customers summary', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/customers/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
 
@@ -229,7 +229,7 @@ describe('reports customers summary', () => {
     // Query 2: newCust with investor filter (dateFrom=$1, dateTo=$2, investor=$3)
     const [sql2, params2] = query.mock.calls[1];
     expect(sql2).toContain('id = ANY($3::uuid[])');
-    expect(params2).toEqual(['2026-05-01', '2026-05-31', ['44444444-4444-4444-8444-444444444444']]);
+    expect(params2).toEqual(['2026-07-01', '2026-07-31', ['44444444-4444-4444-8444-444444444444']]);
   });
 
   it('combines location scope and investor scope for all 7 queries', async () => {
@@ -252,7 +252,7 @@ describe('reports customers summary', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/customers/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_A });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_A });
 
     expect(res.status).toBe(200);
 
@@ -266,7 +266,7 @@ describe('reports customers summary', () => {
     const [sql2, params2] = query.mock.calls[1];
     expect(sql2).toContain('companyid = ANY($3::uuid[])');
     expect(sql2).toContain('id = ANY($4::uuid[])');
-    expect(params2).toEqual(['2026-05-01', '2026-05-31', [LOC_A], ['44444444-4444-4444-8444-444444444444']]);
+    expect(params2).toEqual(['2026-07-01', '2026-07-31', [LOC_A], ['44444444-4444-4444-8444-444444444444']]);
   });
 
   it('returns properly formatted customer summary response', async () => {
@@ -293,13 +293,13 @@ describe('reports customers summary', () => {
         { id: 'cust-3', name: 'Bob Wilson', outstanding: '2000000' },
       ])
       .mockResolvedValueOnce([
-        { month: '2026-05-01T00:00:00Z', cnt: '5' },
+        { month: '2026-07-01T00:00:00Z', cnt: '5' },
         { month: '2026-06-01T00:00:00Z', cnt: '8' },
       ]);
 
     const res = await request(makeApp())
       .post('/api/Reports/customers/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-06-30' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-08-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
@@ -328,29 +328,20 @@ describe('reports customers summary', () => {
     });
   });
 
-  it('handles null dateFrom gracefully (no lower date bound)', async () => {
+  it('rejects a missing dateFrom instead of returning unbounded history', async () => {
     resolveEffectivePermissions.mockResolvedValue({
       groupName: 'Admin',
       effectivePermissions: ['reports.view'],
       locations: [],
     });
-    query.mockResolvedValueOnce([{ cnt: '100' }])
-      .mockResolvedValueOnce([{ cnt: '20' }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([]);
 
     const res = await request(makeApp())
       .post('/api/Reports/customers/summary')
-      .send({ dateFrom: null, dateTo: '2026-05-31' });
+      .send({ dateFrom: null, dateTo: '2026-07-31' });
 
-    expect(res.status).toBe(200);
-    // newCust query should only have dateTo bound, not dateFrom
-    const [sql, params] = query.mock.calls[1];
-    expect(sql).toContain('datecreated::date <= $');
-    expect(params).toContain('2026-05-31');
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ success: false, error: 'Invalid params' });
+    expect(query).not.toHaveBeenCalled();
   });
 
   it('handles database errors gracefully', async () => {
@@ -363,7 +354,7 @@ describe('reports customers summary', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/customers/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(500);
     expect(res.body).toEqual({ success: false, error: 'Internal error' });

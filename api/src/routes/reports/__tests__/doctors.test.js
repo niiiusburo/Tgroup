@@ -57,7 +57,7 @@ describe('reports doctors performance', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/doctors/performance')
-      .send({ dateFrom: 'invalid', dateTo: '2026-05-31' });
+      .send({ dateFrom: 'invalid', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(400);
     expect(res.body).toEqual({ success: false, error: 'Invalid params' });
@@ -72,7 +72,7 @@ describe('reports doctors performance', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/doctors/performance')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: 'not-a-uuid' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: 'not-a-uuid' });
 
     expect(res.status).toBe(400);
     expect(res.body).toEqual({ success: false, error: 'Invalid params' });
@@ -99,7 +99,7 @@ describe('reports doctors performance', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/doctors/performance')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(query).toHaveBeenCalledTimes(1);
@@ -108,11 +108,11 @@ describe('reports doctors performance', () => {
     expect(sql).not.toContain('a.companyid = ANY(');
     expect(sql).not.toContain('p.companyid = ANY(');
     // Params should only have dates
-    expect(params).toEqual(['2026-05-01', '2026-05-31']);
+    expect(params).toEqual(['2026-07-01', '2026-07-31']);
     // getCanonicalRevenueByDoctor should be called with null companyId (unrestricted)
     expect(getCanonicalRevenueByDoctor).toHaveBeenCalledWith({
-      dateFrom: '2026-05-01',
-      dateTo: '2026-05-31',
+      dateFrom: '2026-07-01',
+      dateTo: '2026-07-31',
       companyId: null,
     });
     expect(res.body.data).toHaveLength(1);
@@ -147,13 +147,13 @@ describe('reports doctors performance', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/doctors/performance')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     const [sql, params] = query.mock.calls[0];
     // Admin gets unfiltered SQL
     expect(sql).not.toContain('a.companyid = ANY(');
-    expect(params).toEqual(['2026-05-01', '2026-05-31']);
+    expect(params).toEqual(['2026-07-01', '2026-07-31']);
     expect(res.body.data[0].revenue).toBe(8000000);
   });
 
@@ -177,17 +177,17 @@ describe('reports doctors performance', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/doctors/performance')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     const [sql, params] = query.mock.calls[0];
     // Location-scoped staff should have appointment date filter AND location filter
     expect(sql).toContain('a.date');
-    expect(params).toEqual(['2026-05-01', '2026-05-31', [LOC_A]]);
+    expect(params).toEqual(['2026-07-01', '2026-07-31', [LOC_A]]);
     // getCanonicalRevenueByDoctor should receive their allowed location
     expect(getCanonicalRevenueByDoctor).toHaveBeenCalledWith({
-      dateFrom: '2026-05-01',
-      dateTo: '2026-05-31',
+      dateFrom: '2026-07-01',
+      dateTo: '2026-07-31',
       companyId: [LOC_A],
     });
   });
@@ -212,14 +212,14 @@ describe('reports doctors performance', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/doctors/performance')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_A });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_A });
 
     expect(res.status).toBe(200);
     const [sql, params] = query.mock.calls[0];
-    expect(params).toEqual(['2026-05-01', '2026-05-31', [LOC_A]]);
+    expect(params).toEqual(['2026-07-01', '2026-07-31', [LOC_A]]);
     expect(getCanonicalRevenueByDoctor).toHaveBeenCalledWith({
-      dateFrom: '2026-05-01',
-      dateTo: '2026-05-31',
+      dateFrom: '2026-07-01',
+      dateTo: '2026-07-31',
       companyId: [LOC_A],
     });
     expect(res.body.data[0]).toMatchObject({
@@ -237,7 +237,7 @@ describe('reports doctors performance', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/doctors/performance')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_B });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_B });
 
     expect(res.status).toBe(403);
     expect(res.body).toEqual({ success: false, error: 'Location not allowed' });
@@ -277,7 +277,7 @@ describe('reports doctors performance', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/doctors/performance')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     const doctors = res.body.data;
@@ -315,7 +315,7 @@ describe('reports doctors performance', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/doctors/performance')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.data[0]).toMatchObject({
@@ -351,16 +351,16 @@ describe('reports doctors performance', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/doctors/performance')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_B });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_B });
 
     expect(res.status).toBe(200);
     const [sql, params] = query.mock.calls[0];
     // Investor gets both location scope AND customer allowlist filter in the appointment query
-    expect(params).toEqual(['2026-05-01', '2026-05-31', [LOC_B], ['66666666-6666-4666-8666-666666666666']]);
+    expect(params).toEqual(['2026-07-01', '2026-07-31', [LOC_B], ['66666666-6666-4666-8666-666666666666']]);
     // getCanonicalRevenueByDoctor should receive investor-filtered params
     expect(getCanonicalRevenueByDoctor).toHaveBeenCalledWith({
-      dateFrom: '2026-05-01',
-      dateTo: '2026-05-31',
+      dateFrom: '2026-07-01',
+      dateTo: '2026-07-31',
       companyId: [LOC_B],
       allowedCustomerIds: ['66666666-6666-4666-8666-666666666666'],
     });
@@ -377,7 +377,7 @@ describe('reports doctors performance', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/doctors/performance')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.data).toEqual([]);
@@ -404,7 +404,7 @@ describe('reports doctors performance', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/doctors/performance')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     const doc = res.body.data[0];
@@ -441,13 +441,13 @@ describe('reports doctors performance', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/doctors/performance')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_A });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_A });
 
     expect(res.status).toBe(200);
     // Verify that investor's allowed customers are still applied via getCanonicalRevenueByDoctor
     expect(getCanonicalRevenueByDoctor).toHaveBeenCalledWith({
-      dateFrom: '2026-05-01',
-      dateTo: '2026-05-31',
+      dateFrom: '2026-07-01',
+      dateTo: '2026-07-31',
       companyId: [LOC_A],
       allowedCustomerIds: ['77777777-7777-4777-8777-777777777777'],
     });

@@ -21,13 +21,13 @@ describe('appointment read handlers', () => {
     query.mockResolvedValueOnce([
       {
         id: 'appointment-1',
-        date: '2026-05-04',
+        date: '2026-07-04',
         time: '09:00:00',
         partnername: 'Test Customer',
       },
       {
         id: 'appointment-2',
-        date: '2026-05-04',
+        date: '2026-07-04',
         time: '10:00:00',
         partnername: 'Test Customer 2',
       },
@@ -37,8 +37,8 @@ describe('appointment read handlers', () => {
       query: {
         offset: '0',
         limit: '3000',
-        date_from: '2026-05-04',
-        date_to: '2026-05-10',
+        date_from: '2026-07-04',
+        date_to: '2026-07-10',
         calendar_mode: 'true',
         include_counts: 'false',
       },
@@ -53,7 +53,7 @@ describe('appointment read handlers', () => {
     expect(sql).not.toContain('LEFT JOIN dotkhams');
     expect(sql).not.toContain('LEFT JOIN saleorders');
     expect(sql).not.toContain('LEFT JOIN customerreceipts');
-    expect(params).toEqual(['2026-05-04', '2026-05-10 23:59:59', 3000, 0]);
+    expect(params).toEqual(['2026-07-04', '2026-07-10 23:59:59', 3000, 0]);
     expect(res.json).toHaveBeenCalledWith({
       offset: 0,
       limit: 3000,
@@ -79,6 +79,29 @@ describe('appointment read handlers', () => {
     expect(res.json).toHaveBeenCalledWith({
       errorCode: 'INVALID_LIMIT',
       message: 'limit must be between 1 and 500',
+    });
+  });
+
+  it('rejects calendar dateFrom older than 3 months', async () => {
+    const req = {
+      query: {
+        offset: '0',
+        limit: '3000',
+        date_from: '2020-01-01',
+        date_to: '2020-01-07',
+        calendar_mode: 'true',
+        include_counts: 'false',
+      },
+    };
+    const res = mockResponse();
+
+    await listAppointments(req, res);
+
+    expect(query).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      errorCode: 'LOOKBACK_EXCEEDED',
+      message: 'dateFrom cannot be more than 3 months before today',
     });
   });
 });

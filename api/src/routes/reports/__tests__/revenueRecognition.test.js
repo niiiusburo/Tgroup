@@ -53,7 +53,7 @@ describe('reports revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/revenue/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.data.orders).toEqual([
@@ -79,16 +79,16 @@ describe('reports revenue recognition', () => {
 
   it('uses payment dates for paid revenue in the trend', async () => {
     query
-      .mockResolvedValueOnce([{ month: '2026-05-01', order_count: '2', invoiced: '1000', outstanding: '200' }])
-      .mockResolvedValueOnce([{ month: '2026-05-01', paid: '650' }]);
+      .mockResolvedValueOnce([{ month: '2026-07-01', order_count: '2', invoiced: '1000', outstanding: '200' }])
+      .mockResolvedValueOnce([{ month: '2026-07-01', paid: '650' }]);
 
     const res = await request(makeApp())
       .post('/api/Reports/revenue/trend')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.data).toEqual([
-      { month: '2026-05-01', orderCount: 2, invoiced: 1000, paid: 650, outstanding: 200 },
+      { month: '2026-07-01', orderCount: 2, invoiced: 1000, paid: 650, outstanding: 200 },
     ]);
 
     const paidTrendSql = query.mock.calls[1][0];
@@ -104,7 +104,7 @@ describe('reports revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/revenue/by-doctor')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.data).toEqual([
@@ -124,7 +124,7 @@ describe('reports revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/revenue/by-category')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.data).toEqual([
@@ -151,7 +151,7 @@ describe('reports revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/revenue/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     const orderSql = query.mock.calls[0][0];
@@ -170,7 +170,7 @@ describe('reports revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/revenue/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_A });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_A });
 
     expect(res.status).toBe(200);
     const orderSql = query.mock.calls[0][0];
@@ -187,7 +187,7 @@ describe('reports revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/revenue/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_B });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_B });
 
     expect(res.status).toBe(403);
     expect(res.body).toEqual({ success: false, error: 'Location not allowed' });
@@ -203,7 +203,7 @@ describe('reports revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/revenue/by-doctor')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_A });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_A });
 
     expect(res.status).toBe(200);
     const sql = query.mock.calls[0][0];
@@ -220,7 +220,7 @@ describe('reports revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/revenue/by-doctor')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_B });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_B });
 
     expect(res.status).toBe(403);
     expect(res.body).toEqual({ success: false, error: 'Location not allowed' });
@@ -236,7 +236,7 @@ describe('reports revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/revenue/by-location')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_A });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_A });
 
     expect(res.status).toBe(200);
     const sql = query.mock.calls[0][0];
@@ -251,7 +251,7 @@ describe('reports revenue recognition', () => {
     });
     const rejected = await request(makeApp())
       .post('/api/Reports/revenue/by-location')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_B });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_B });
 
     expect(rejected.status).toBe(403);
     expect(rejected.body).toEqual({ success: false, error: 'Location not allowed' });
@@ -268,13 +268,13 @@ describe('reports revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/revenue/by-location')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     const sql = query.mock.calls[0][0];
     const params = query.mock.calls[0][1];
     expect(sql).not.toContain('ANY(');
-    expect(params).toEqual(['2026-05-01', '2026-05-31']);
+    expect(params).toEqual(['2026-07-01', '2026-07-31']);
   });
 
   it('applies location scope filter to by-source report and rejects out-of-scope requests', async () => {
@@ -286,7 +286,7 @@ describe('reports revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/revenue/by-source')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_A });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_A });
 
     expect(res.status).toBe(200);
     const sql = query.mock.calls[0][0];
@@ -297,7 +297,7 @@ describe('reports revenue recognition', () => {
     // {dateFrom, dateTo, companyId: scope.companyIds} and so produce identical
     // param arrays. Lock that invariant here so a future divergence fails loudly.
     expect(sql).toContain('ANY(');
-    expect(params).toEqual(['2026-05-01', '2026-05-31', [LOC_A]]);
+    expect(params).toEqual(['2026-07-01', '2026-07-31', [LOC_A]]);
 
     jest.clearAllMocks();
     resolveEffectivePermissions.mockResolvedValue({
@@ -306,7 +306,7 @@ describe('reports revenue recognition', () => {
     });
     const rejected = await request(makeApp())
       .post('/api/Reports/revenue/by-source')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_B });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_B });
 
     expect(rejected.status).toBe(403);
     expect(rejected.body).toEqual({ success: false, error: 'Location not allowed' });
@@ -323,13 +323,13 @@ describe('reports revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/revenue/by-source')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     const sql = query.mock.calls[0][0];
     const params = query.mock.calls[0][1];
     expect(sql).not.toContain('ANY(');
-    expect(params).toEqual(['2026-05-01', '2026-05-31']);
+    expect(params).toEqual(['2026-07-01', '2026-07-31']);
   });
 
   it('applies location scope filter to payment-plans report (both plans and installments queries) and rejects out-of-scope requests', async () => {
@@ -343,7 +343,7 @@ describe('reports revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/revenue/payment-plans')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_A });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_A });
 
     expect(res.status).toBe(200);
     const plansSql = query.mock.calls[0][0];
@@ -354,7 +354,7 @@ describe('reports revenue recognition', () => {
     const installmentsSql = query.mock.calls[1][0];
     const installmentsParams = query.mock.calls[1][1];
     expect(installmentsSql).toContain('mp.company_id = ANY(');
-    expect(installmentsParams).toEqual(['2026-05-01', '2026-05-31', [LOC_A]]);
+    expect(installmentsParams).toEqual(['2026-07-01', '2026-07-31', [LOC_A]]);
 
     jest.clearAllMocks();
     resolveEffectivePermissions.mockResolvedValue({
@@ -363,7 +363,7 @@ describe('reports revenue recognition', () => {
     });
     const rejected = await request(makeApp())
       .post('/api/Reports/revenue/payment-plans')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_B });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_B });
 
     expect(rejected.status).toBe(403);
     expect(rejected.body).toEqual({ success: false, error: 'Location not allowed' });
@@ -380,7 +380,7 @@ describe('reports revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/revenue/payment-plans')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     const plansSql = query.mock.calls[0][0];
@@ -388,7 +388,7 @@ describe('reports revenue recognition', () => {
     const installmentsParams = query.mock.calls[1][1];
     expect(plansSql).not.toContain('ANY(');
     expect(installmentsSql).not.toContain('mp.company_id');
-    expect(installmentsParams).toEqual(['2026-05-01', '2026-05-31']);
+    expect(installmentsParams).toEqual(['2026-07-01', '2026-07-31']);
   });
 
   describe('investor customer allowlist', () => {
@@ -411,7 +411,7 @@ describe('reports revenue recognition', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/revenue/summary')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
       expect(res.status).toBe(200);
       const orderSql = query.mock.calls[0][0];
@@ -423,12 +423,12 @@ describe('reports revenue recognition', () => {
 
     it('applies allowlist to revenue/trend', async () => {
       query
-        .mockResolvedValueOnce([{ month: '2026-05-01', order_count: '1', invoiced: '500', outstanding: '0' }])
-        .mockResolvedValueOnce([{ month: '2026-05-01', paid: '500' }]);
+        .mockResolvedValueOnce([{ month: '2026-07-01', order_count: '1', invoiced: '500', outstanding: '0' }])
+        .mockResolvedValueOnce([{ month: '2026-07-01', paid: '500' }]);
 
       const res = await request(makeApp())
         .post('/api/Reports/revenue/trend')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
       expect(res.status).toBe(200);
       expect(query.mock.calls[0][0]).toContain('partnerid = ANY(');
@@ -440,7 +440,7 @@ describe('reports revenue recognition', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/revenue/by-location')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
       expect(res.status).toBe(200);
       expect(query.mock.calls[0][0]).toContain('so.partnerid = ANY(');
@@ -452,7 +452,7 @@ describe('reports revenue recognition', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/revenue/by-doctor')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
       expect(res.status).toBe(200);
       expect(query.mock.calls[0][0]).toContain('so.partnerid = ANY(');
@@ -464,7 +464,7 @@ describe('reports revenue recognition', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/revenue/by-category')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
       expect(res.status).toBe(200);
       expect(query.mock.calls[0][0]).toContain('so.partnerid = ANY(');
@@ -476,7 +476,7 @@ describe('reports revenue recognition', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/revenue/by-source')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
       expect(res.status).toBe(200);
       const sql = query.mock.calls[0][0];
@@ -498,7 +498,7 @@ describe('reports revenue recognition', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/revenue/payment-plans')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
       expect(res.status).toBe(200);
       const plansSql = query.mock.calls[0][0];
@@ -522,7 +522,7 @@ describe('reports revenue recognition', () => {
 
       const res = await request(makeApp())
         .post('/api/Reports/revenue/by-source')
-        .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+        .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
       expect(res.status).toBe(200);
       expect(query.mock.calls[0][0]).not.toContain('partnerid = ANY(');

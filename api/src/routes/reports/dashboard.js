@@ -3,8 +3,8 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { getVietnamToday } = require('../../lib/dateUtils');
-const { err, validDate, validUUID, dateCompanyFilter, resolveReportCompanyScope } = require('./helpers');
+const { getVietnamToday, getEarliestLookbackDate } = require('../../lib/dateUtils');
+const { err, rejectInvalidReportWindow, dateCompanyFilter, resolveReportCompanyScope } = require('./helpers');
 const { resolveInvestorScope } = require('../../services/permissionService');
 const {
   getCanonicalRevenue,
@@ -32,7 +32,7 @@ function investorRevenueFilters(baseFilters, investorScope) {
 router.post('/', requirePermission('reports.view'), async (req, res) => {
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
-    if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    if (rejectInvalidReportWindow(res, dateFrom, dateTo, companyId)) return;
 
     const scope = await resolveReportCompanyScope(req, res, companyId);
     if (!scope) return;
@@ -80,30 +80,36 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
     const cust = await query(
       `SELECT COUNT(*) as new_customers FROM dbo.partners WHERE customer=true AND isdeleted=false ${cf.where}`, cf.params);
 
-    // Previous period for comparison
+    // Previous period for comparison — never reads older than the 3-month lookback.
+    const earliest = getEarliestLookbackDate();
     const days = dateFrom && dateTo ? Math.ceil((new Date(dateTo + 'T00:00:00Z') - new Date(dateFrom + 'T00:00:00Z')) / 86400000) : 30;
     const prevTo = dateFrom || dateTo || getVietnamToday();
     const prevFromDate = new Date(new Date(prevTo + 'T00:00:00Z') - days * 86400000);
-    const prevFrom = prevFromDate.toISOString().split('T')[0];
+    let prevFrom = prevFromDate.toISOString().split('T')[0];
+    if (prevFrom < earliest) prevFrom = earliest;
+    const canComparePrev = Boolean(dateFrom) && prevFrom < dateFrom;
 
-    const prevPaid = await getCanonicalRevenue(investorRevenueFilters({ dateFrom: prevFrom, dateTo: prevTo, companyId: scope.companyIds }, investorScope));
-    const revChange = prevPaid > 0 ? ((curPaid - prevPaid) / prevPaid * 100).toFixed(1) : null;
-
+    let revChange = null;
+    let apptChange = null;
     const curAppt = parseInt(appt[0]?.total || 0, 10);
-    const paf = applyInvestorPartnerScope(
-      dateCompanyFilter(prevFrom, prevTo, scope.companyIds, 'date'),
-      'partnerid',
-      investorScope
-    );
-    const prevAppt = await query(`SELECT COUNT(*) as total FROM dbo.appointments WHERE 1=1 ${paf.where}`, paf.params);
-    const prevApptCount = parseInt(prevAppt[0]?.total || 0, 10);
-    const apptChange = prevApptCount > 0 ? ((curAppt - prevApptCount) / prevApptCount * 100).toFixed(1) : null;
+    if (canComparePrev) {
+      const prevPaid = await getCanonicalRevenue(investorRevenueFilters({ dateFrom: prevFrom, dateTo: prevTo, companyId: scope.companyIds }, investorScope));
+      revChange = prevPaid > 0 ? ((curPaid - prevPaid) / prevPaid * 100).toFixed(1) : null;
 
-    // 12-month revenue trend — canonical (matches Excel) for the revenue line.
+      const paf = applyInvestorPartnerScope(
+        dateCompanyFilter(prevFrom, prevTo, scope.companyIds, 'date'),
+        'partnerid',
+        investorScope
+      );
+      const prevAppt = await query(`SELECT COUNT(*) as total FROM dbo.appointments WHERE 1=1 ${paf.where}`, paf.params);
+      const prevApptCount = parseInt(prevAppt[0]?.total || 0, 10);
+      apptChange = prevApptCount > 0 ? ((curAppt - prevApptCount) / prevApptCount * 100).toFixed(1) : null;
+    }
+
+    // Lookback-capped revenue trend — canonical (matches Excel) for the revenue line.
     // "invoiced" line keeps reading from saleorders since it's a different concept.
     const today = getVietnamToday();
-    const trendFromDate = new Date(new Date(today + 'T00:00:00Z') - 365 * 86400000);
-    const trendFrom = trendFromDate.toISOString().split('T')[0];
+    const trendFrom = earliest;
 
     const canonicalMonths = await getCanonicalRevenueByMonth(
       investorRevenueFilters({ dateFrom: trendFrom, dateTo: today, companyId: scope.companyIds }, investorScope)

@@ -1,7 +1,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID, resolveReportCompanyScope } = require('./helpers');
+const { err, rejectInvalidReportWindow, resolveReportCompanyScope } = require('./helpers');
 const { resolveInvestorScope } = require('../../services/permissionService');
 const {
   SERVICE_REVENUE_PAYMENT_CONDITION,
@@ -39,7 +39,7 @@ function mergePaidByKey(baseRows, paidRows, key) {
 router.post('/revenue/summary', requirePermission('reports.view'), async (req, res) => {
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
-    if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    if (rejectInvalidReportWindow(res, dateFrom, dateTo, companyId)) return;
 
     const scope = await resolveReportCompanyScope(req, res, companyId);
     if (!scope) return;
@@ -100,7 +100,7 @@ router.post('/revenue/summary', requirePermission('reports.view'), async (req, r
 router.post('/revenue/trend', requirePermission('reports.view'), async (req, res) => {
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
-    if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    if (rejectInvalidReportWindow(res, dateFrom, dateTo, companyId)) return;
 
     const scope = await resolveReportCompanyScope(req, res, companyId);
     if (!scope) return;
@@ -172,7 +172,7 @@ router.post('/revenue/trend', requirePermission('reports.view'), async (req, res
 router.post('/revenue/by-location', requirePermission('reports.view'), async (req, res) => {
   try {
     const { dateFrom, dateTo, companyId } = req.body || {};
-    if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
+    if (rejectInvalidReportWindow(res, dateFrom, dateTo, companyId)) return;
 
     const scope = await resolveReportCompanyScope(req, res, companyId);
     if (!scope) return;

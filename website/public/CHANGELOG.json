@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.32.60",
+    "date": "2026-09-20",
+    "commit": "pending",
+    "highlights": "Calendar and reports can only look back 3 months from today.",
+    "sections": [
+      {
+        "title": "Calendar & Reports",
+        "items": [
+          "Staff can no longer navigate the calendar or run reports/exports earlier than 3 months before today.",
+          "The Reports All-time preset is replaced by a 3-month maximum window.",
+          "The API rejects older date ranges instead of returning unbounded history."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.58",
     "date": "2026-07-23",
     "commit": "pending",

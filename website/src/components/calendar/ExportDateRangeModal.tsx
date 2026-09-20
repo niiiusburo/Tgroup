@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, CalendarDays } from 'lucide-react';
 import { useTimezone } from '@/contexts/TimezoneContext';
+import { clampToLookback, getEarliestLookbackDate } from '@/lib/dateUtils';
 
 interface ExportDateRangeModalProps {
   readonly isOpen: boolean;
@@ -10,7 +11,7 @@ interface ExportDateRangeModalProps {
   readonly referenceDate?: Date;
 }
 
-type PresetKey = '1day' | '7days' | 'week' | 'month' | '3weeks' | 'all';
+type PresetKey = '1day' | '7days' | 'week' | 'month' | '3weeks' | '3months';
 
 interface Preset {
   readonly key: PresetKey;
@@ -23,7 +24,7 @@ const PRESETS: readonly Preset[] = [
   { key: 'week', label: 'Tuần này' },
   { key: 'month', label: 'Tháng này' },
   { key: '3weeks', label: '3 tuần' },
-  { key: 'all', label: 'Tất cả' },
+  { key: '3months', label: '3 tháng' },
 ];
 
 export function ExportDateRangeModal({
@@ -34,6 +35,8 @@ export function ExportDateRangeModal({
 }: ExportDateRangeModalProps) {
   const { t } = useTranslation('exports');
   const { getToday, formatDate } = useTimezone();
+  const today = getToday();
+  const earliest = getEarliestLookbackDate(today);
 
   const baseDate = useMemo(() => {
     if (referenceDate) return new Date(referenceDate);
@@ -81,11 +84,11 @@ export function ExportDateRangeModal({
       case '3weeks': {
         const d = new Date(baseDate);
         d.setDate(d.getDate() - 20);
-        from = formatDate(d, 'yyyy-MM-dd');
+        from = clampToLookback(formatDate(d, 'yyyy-MM-dd'), today);
         break;
       }
-      case 'all': {
-        from = '';
+      case '3months': {
+        from = earliest;
         break;
       }
     }
@@ -145,8 +148,10 @@ export function ExportDateRangeModal({
                 <input
                   type="date"
                   value={dateFrom}
+                  min={earliest}
+                  max={today}
                   onChange={(e) => {
-                    setDateFrom(e.target.value);
+                    setDateFrom(clampToLookback(e.target.value, today));
                     setActivePreset(null);
                   }}
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
@@ -158,8 +163,11 @@ export function ExportDateRangeModal({
                 <input
                   type="date"
                   value={dateTo}
+                  min={earliest}
+                  max={today}
                   onChange={(e) => {
-                    setDateTo(e.target.value);
+                    const next = e.target.value;
+                    setDateTo(next < earliest ? earliest : next);
                     setActivePreset(null);
                   }}
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"

@@ -23,7 +23,7 @@
 | v1.0.7 | 2026-07-03 | Employee client role mapping clarified: `Trợ lý bác sĩ` assistant rows map to `doctor-assistant` before generic doctor, even when migrated data also has `isdoctor=true`. |
 | v1.0.8 | 2026-07-04 | Investor users are restricted normal-portal staff sessions: `/api/Auth/login` may authenticate `dbo.investor_accounts`, but all data access stays on existing portal routes and is scoped by `dbo.investor_clients`. |
 | v1.0.9 | 2026-07-08 | Investor visibility admin controls (`GET`/`PATCH /api/Partners/investor-visibility`) are gated by admin group (`assertAdmin`) instead of `permissions.edit`, and admin list/toggle match `dbo.investor_clients` by the SAME scope union (`investor_id` = the investor's `partners.id` OR any active `dbo.investor_accounts.id`) that scopes the investor read. Customer id is validated with the canonical 8-4-4-4-12 UUID pattern. |
-| v1.0.10 | 2026-07-23 | Customer-source usage counts and deletion guards include both customer and sale-order references; new sale orders reject inactive/missing sources while an existing order may preserve its already-assigned inactive historical source. |
+| v1.0.11 | 2026-09-20 | Calendar and date-scoped reports/exports reject or clamp `dateFrom` older than 3 calendar months before Vietnam today (`LOOKBACK_EXCEEDED`). |
 
 ---
 
@@ -414,7 +414,7 @@ All current `/api/Reports` endpoints use `POST`, require `reports.view`, and ret
   error?: string;
 }
 ```
-Date-scoped endpoints accept `{ dateFrom?: 'YYYY-MM-DD'; dateTo?: 'YYYY-MM-DD'; companyId?: string }` unless noted.
+Date-scoped endpoints require `{ dateFrom: 'YYYY-MM-DD'; dateTo: 'YYYY-MM-DD'; companyId?: string }` unless noted. Both dates must fall within the last 3 calendar months of Vietnam today; otherwise the route returns `{ success: false, error: 'LOOKBACK_EXCEEDED' }`. Omitting either date returns `{ success: false, error: 'Invalid params' }`.
 
 | Endpoint | Body | `data` shape |
 |---|---|---|

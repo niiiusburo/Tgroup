@@ -2,6 +2,7 @@ const { query } = require('../../db');
 const { errorResponse, isValidISODate, isValidUUID, VALID_STATES } = require('./helpers');
 const { addAccentInsensitiveSearchCondition } = require('../../utils/search');
 const { resolveInvestorScope } = require('../../services/permissionService');
+const { isBeforeLookback } = require('../../lib/dateUtils');
 
 /**
  * GET /api/Appointments
@@ -66,6 +67,14 @@ async function listAppointments(req, res) {
 
     if (dt && !isValidISODate(dt)) {
       return errorResponse(res, 400, 'INVALID_DATE_TO', 'dateTo must be a valid ISO date (YYYY-MM-DD)');
+    }
+
+    if (df && isBeforeLookback(df)) {
+      return errorResponse(res, 400, 'LOOKBACK_EXCEEDED', 'dateFrom cannot be more than 3 months before today');
+    }
+
+    if (dt && isBeforeLookback(dt)) {
+      return errorResponse(res, 400, 'LOOKBACK_EXCEEDED', 'dateTo cannot be more than 3 months before today');
     }
 
     // Validate state filter

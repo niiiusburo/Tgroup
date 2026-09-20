@@ -13,6 +13,7 @@ interface ReportsFiltersProps {
 
 import { useTranslation } from 'react-i18next';
 import { useTimezone } from '@/contexts/TimezoneContext';
+import { clampToLookback, getEarliestLookbackDate } from '@/lib/dateUtils';
 
 function formatPeriod(dateFrom: string, dateTo: string, locale: string): string {
   if (!dateFrom || !dateTo) return '';
@@ -45,7 +46,7 @@ export function ReportsFilters({
   const last7 = daysAgo(6);   // 1 week including today
   const last30 = daysAgo(29); // 1 month including today
   const last90 = daysAgo(89);
-  const allTimeStart = '2000-01-01';
+  const earliest = getEarliestLookbackDate(today);
 
   const activeLocation = companyId ? locations.find((l) => l.id === companyId) : null;
   const locationLabel = activeLocation ? activeLocation.name : t('allLocations', 'Tất cả chi nhánh');
@@ -77,8 +78,8 @@ export function ReportsFilters({
           { label: t('filters.3d'), from: last3, to: today },
           { label: t('filters.7d'), from: last7, to: today },
           { label: t('filters.30d'), from: last30, to: today },
-          { label: t('filters.90d'), from: last90, to: today },
-          { label: t('filters.allTime'), from: allTimeStart, to: today },
+          { label: t('filters.90d'), from: last90 < earliest ? earliest : last90, to: today },
+          { label: t('filters.maxLookback', '3mo'), from: earliest, to: today },
         ].map((p) => (
           <button
             key={p.label}
@@ -100,14 +101,21 @@ export function ReportsFilters({
         <input
           type="date"
           value={dateFrom}
-          onChange={(e) => onDateFromChange(e.target.value)}
+          min={earliest}
+          max={today}
+          onChange={(e) => onDateFromChange(clampToLookback(e.target.value, today))}
           className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
         />
         <span className="text-gray-400 text-sm">→</span>
         <input
           type="date"
           value={dateTo}
-          onChange={(e) => onDateToChange(e.target.value)}
+          min={earliest}
+          max={today}
+          onChange={(e) => {
+            const next = e.target.value;
+            onDateToChange(next < earliest ? earliest : next);
+          }}
           className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
         />
       </div>

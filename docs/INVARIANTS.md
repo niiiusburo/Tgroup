@@ -117,6 +117,12 @@
 **Enforced by:** `createPartner()` and `updatePartner()` return `PARTNER_SOURCE_READ_ONLY` at the normal mutation boundary; `updatePartner()` preserves undefined writable UUID fields before building its dynamic `UPDATE`. API tests cover source create/change/clear rejection, repeated-source compatibility, omitted-source preservation, and explicit empty-string clearing for a writable non-source UUID. `useCustomers` omits source from frontend create/update payloads.
 **Cite when:** Changing partner/customer update payloads, UUID normalization, or dynamic partner SQL updates.
 
+### INV-026 — Calendar And Report 3-Month Lookback
+**Rule:** Calendar views, calendar appointment list queries, date-scoped report endpoints, and calendar/report Excel exports MUST NOT return or display history older than 3 calendar months before Vietnam today (`Asia/Ho_Chi_Minh`). The UI clamps navigation and date pickers; the API rejects `LOOKBACK_EXCEEDED` (reports) or `400 LOOKBACK_EXCEEDED` (appointments with `dateFrom`/`dateTo`). Empty export `dateFrom` is clamped to the earliest allowed date. Customer profile and undated appointment lists are out of this rule.
+**Rationale:** Live NK/NK2 currently allow All-time reports from 2000-01-01 and unbounded calendar back-navigation, which over-fetches and exposes unbounded history.
+**Enforced by:** `getEarliestLookbackDate()` in `api/src/lib/dateUtils.js` and `website/src/lib/dateUtils.ts`; `rejectInvalidReportWindow()`; appointment `listAppointments`; export `sanitizeFilters` for `appointments`, `revenue-flat`, `deposit-flat`, and `report-sales-employees`.
+**Cite when:** Changing calendar navigation, report date filters, or operational export date windows.
+
 ---
 
 ## Integration Invariants
@@ -210,4 +216,4 @@
 | 2026-07-04 | INV-021..INV-022 | Added investor same-portal customer scope and live-commit deploy continuity invariants | codex/nk2-investor-same-portal-ship |
 | 2026-07-23 | INV-023 | Added historical customer-source attribution stability after the Q10 June report incident | codex/customer-source-incident-guard |
 | 2026-07-23 | INV-024 | Added inactive-source selection and reference-retention safeguards | codex/customer-source-incident-guard |
-| 2026-07-23 | INV-025 | Added omission-safe semantics for partial partner UUID updates | codex/partner-partial-update-fix |
+| 2026-09-20 | INV-026 | Added 3-month lookback for calendar views and reports | feat/calendar-report-3mo-lookback |

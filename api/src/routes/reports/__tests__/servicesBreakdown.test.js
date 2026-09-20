@@ -51,7 +51,7 @@ describe('reports services breakdown revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/services/breakdown')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.data.revenueByCategory).toEqual([
@@ -86,7 +86,7 @@ describe('reports services breakdown revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/services/breakdown')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(query).toHaveBeenCalledTimes(4);
@@ -95,13 +95,13 @@ describe('reports services breakdown revenue recognition', () => {
     const categorySql = query.mock.calls[1][0];
     const categoryParams = query.mock.calls[1][1];
     expect(categorySql).toContain('so.companyid = ANY($3::uuid[])');
-    expect(categoryParams).toEqual(['2026-05-01', '2026-05-31', [LOC_A]]);
+    expect(categoryParams).toEqual(['2026-07-01', '2026-07-31', [LOC_A]]);
 
     // Revenue by source should have location filter
     const sourceSql = query.mock.calls[2][0];
     const sourceParams = query.mock.calls[2][1];
     expect(sourceSql).toContain('so.companyid = ANY($3::uuid[])');
-    expect(sourceParams).toEqual(['2026-05-01', '2026-05-31', [LOC_A]]);
+    expect(sourceParams).toEqual(['2026-07-01', '2026-07-31', [LOC_A]]);
   });
 
   it('allows staff to request report for their allowed location', async () => {
@@ -117,14 +117,14 @@ describe('reports services breakdown revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/services/breakdown')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_A });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_A });
 
     expect(res.status).toBe(200);
     expect(query).toHaveBeenCalledTimes(4);
 
     // Revenue by category should scope to requested location
     const categoryParams = query.mock.calls[1][1];
-    expect(categoryParams).toEqual(['2026-05-01', '2026-05-31', [LOC_A]]);
+    expect(categoryParams).toEqual(['2026-07-01', '2026-07-31', [LOC_A]]);
   });
 
   it('rejects request for location outside staff scope', async () => {
@@ -135,7 +135,7 @@ describe('reports services breakdown revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/services/breakdown')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_B });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_B });
 
     expect(res.status).toBe(403);
     expect(res.body).toEqual({ success: false, error: 'Location not allowed' });
@@ -156,7 +156,7 @@ describe('reports services breakdown revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/services/breakdown')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
 
@@ -164,7 +164,7 @@ describe('reports services breakdown revenue recognition', () => {
     const categorySql = query.mock.calls[1][0];
     const categoryParams = query.mock.calls[1][1];
     expect(categorySql).not.toContain('ANY(');
-    expect(categoryParams).toEqual(['2026-05-01', '2026-05-31']);
+    expect(categoryParams).toEqual(['2026-07-01', '2026-07-31']);
   });
 
   it('allows investor to request all-location report with customer filter applied', async () => {
@@ -185,7 +185,7 @@ describe('reports services breakdown revenue recognition', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/services/breakdown')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
 
@@ -193,6 +193,6 @@ describe('reports services breakdown revenue recognition', () => {
     const categorySql = query.mock.calls[1][0];
     const categoryParams = query.mock.calls[1][1];
     expect(categorySql).toContain('so.partnerid = ANY($3::uuid[])');
-    expect(categoryParams).toEqual(['2026-05-01', '2026-05-31', ['44444444-4444-4444-8444-444444444444']]);
+    expect(categoryParams).toEqual(['2026-07-01', '2026-07-31', ['44444444-4444-4444-8444-444444444444']]);
   });
 });

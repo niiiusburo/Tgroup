@@ -33,6 +33,8 @@ export function Calendar() {
     setCurrentDate,
     goToToday,
     navigate,
+    canNavigatePrev,
+    earliestLookbackDate,
     weekDates,
     monthDates,
     getAppointmentsForDate,
@@ -266,6 +268,8 @@ export function Calendar() {
         dateLabel={dateLabel}
         onDateChange={setCurrentDate}
         onNavigate={navigate}
+        canNavigatePrev={canNavigatePrev}
+        earliestLookbackDate={earliestLookbackDate}
         onToday={goToToday}
         search={search}
         onSearchChange={setSearch}

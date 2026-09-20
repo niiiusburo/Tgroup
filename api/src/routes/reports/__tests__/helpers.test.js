@@ -9,21 +9,21 @@ const { dateCompanyFilter, resolveReportCompanyScope } = require('../helpers');
 
 describe('dateCompanyFilter', () => {
   it('filters by a single companyId with plain equality (unchanged legacy behavior)', () => {
-    const f = dateCompanyFilter('2026-05-01', '2026-05-31', 'loc-a', 'datecreated', 'companyid');
+    const f = dateCompanyFilter('2026-07-01', '2026-07-31', 'loc-a', 'datecreated', 'companyid');
     expect(f.where).toBe('AND datecreated::date >= $1 AND datecreated::date <= $2 AND companyid = $3');
-    expect(f.params).toEqual(['2026-05-01', '2026-05-31', 'loc-a']);
+    expect(f.params).toEqual(['2026-07-01', '2026-07-31', 'loc-a']);
   });
 
   it('filters by an array of companyIds using ANY(uuid[])', () => {
-    const f = dateCompanyFilter('2026-05-01', '2026-05-31', ['loc-a', 'loc-b'], 'datecreated', 'companyid');
+    const f = dateCompanyFilter('2026-07-01', '2026-07-31', ['loc-a', 'loc-b'], 'datecreated', 'companyid');
     expect(f.where).toBe('AND datecreated::date >= $1 AND datecreated::date <= $2 AND companyid = ANY($3::uuid[])');
-    expect(f.params).toEqual(['2026-05-01', '2026-05-31', ['loc-a', 'loc-b']]);
+    expect(f.params).toEqual(['2026-07-01', '2026-07-31', ['loc-a', 'loc-b']]);
   });
 
   it('omits the company condition entirely for an empty array (unrestricted access)', () => {
-    const f = dateCompanyFilter('2026-05-01', '2026-05-31', [], 'datecreated', 'companyid');
+    const f = dateCompanyFilter('2026-07-01', '2026-07-31', [], 'datecreated', 'companyid');
     expect(f.where).toBe('AND datecreated::date >= $1 AND datecreated::date <= $2');
-    expect(f.params).toEqual(['2026-05-01', '2026-05-31']);
+    expect(f.params).toEqual(['2026-07-01', '2026-07-31']);
   });
 
   it('omits the company condition for null/undefined companyId', () => {

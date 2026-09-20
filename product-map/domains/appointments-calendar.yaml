@@ -59,6 +59,7 @@ invariants:
   - Appointment edit saves must persist changed clinic/location values by writing `appointments.companyid` and returning the refreshed `companyid/companyname`.
   - Appointment exports must serialize the same `appointments.date` calendar value shown in `/calendar`, include `time` when present, and allow phone searches through `partners.phone`.
   - Appointment customer selectors must search by customer code as well as name, phone, and email.
+  - Calendar day/week/month navigation and appointment list dateFrom/dateTo cannot go earlier than 3 calendar months before Vietnam today.
 impact_tests:
   - api/src/routes/appointments/__tests__/readHandlers.test.js
   - api/src/routes/appointments/__tests__/mutationHandlers.test.js
@@ -67,6 +68,7 @@ impact_tests:
   - website/src/components/shared/CustomerSelector.test.tsx
   - website/src/components/appointments/WaitTimer.test.tsx
   - website/src/hooks/__tests__/useCalendarData.pagination.test.ts
+  - website/src/lib/__tests__/lookbackWindow.test.ts
   - website/src/pages/Calendar.click.test.tsx
   - website/src/__tests__/appointment-form-edit.test.tsx
   - website/e2e/team-alpha-appointments.spec.ts

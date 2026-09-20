@@ -57,7 +57,7 @@ describe('reports dashboard', () => {
   it('rejects invalid date parameters', async () => {
     const res = await request(makeApp())
       .post('/api/Reports')
-      .send({ dateFrom: 'invalid', dateTo: '2026-05-31' });
+      .send({ dateFrom: 'invalid', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(400);
     expect(res.body).toEqual({ success: false, error: 'Invalid params' });
@@ -67,7 +67,7 @@ describe('reports dashboard', () => {
   it('rejects invalid UUID', async () => {
     const res = await request(makeApp())
       .post('/api/Reports')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: 'not-a-uuid' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: 'not-a-uuid' });
 
     expect(res.status).toBe(400);
     expect(res.body).toEqual({ success: false, error: 'Invalid params' });
@@ -84,16 +84,16 @@ describe('reports dashboard', () => {
     query.mockResolvedValueOnce([{ total: 100, done: 90, cancelled: 5 }]); // appointments
     query.mockResolvedValueOnce([{ new_customers: 10 }]); // new customers
     query.mockResolvedValueOnce([{ total: 95 }]); // prev appointments
-    query.mockResolvedValueOnce([{ month: '2026-05-01', invoiced: 800000 }]); // invoiced by month
+    query.mockResolvedValueOnce([{ month: '2026-07-01', invoiced: 800000 }]); // invoiced by month
     getCanonicalRevenue.mockResolvedValueOnce(4500000); // current paid
     getCanonicalRevenue.mockResolvedValueOnce(4000000); // previous paid
     getCanonicalRevenueByMonth.mockResolvedValueOnce([
-      { month: new Date('2026-05-01'), revenue: 4500000 },
+      { month: new Date('2026-07-01'), revenue: 4500000 },
     ]);
 
     const res = await request(makeApp())
       .post('/api/Reports')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
@@ -119,16 +119,16 @@ describe('reports dashboard', () => {
     query.mockResolvedValueOnce([{ total: 50, done: 45, cancelled: 2 }]); // appointments
     query.mockResolvedValueOnce([{ new_customers: 5 }]); // new customers
     query.mockResolvedValueOnce([{ total: 48 }]); // prev appointments
-    query.mockResolvedValueOnce([{ month: '2026-05-01', invoiced: 400000 }]); // invoiced by month
+    query.mockResolvedValueOnce([{ month: '2026-07-01', invoiced: 400000 }]); // invoiced by month
     getCanonicalRevenue.mockResolvedValueOnce(2500000); // current paid
     getCanonicalRevenue.mockResolvedValueOnce(2400000); // previous paid
     getCanonicalRevenueByMonth.mockResolvedValueOnce([
-      { month: new Date('2026-05-01'), revenue: 2500000 },
+      { month: new Date('2026-07-01'), revenue: 2500000 },
     ]);
 
     const res = await request(makeApp())
       .post('/api/Reports')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
@@ -152,7 +152,7 @@ describe('reports dashboard', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_B });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_B });
 
     expect(res.status).toBe(403);
     expect(res.body).toEqual({ success: false, error: 'Location not allowed' });
@@ -169,16 +169,16 @@ describe('reports dashboard', () => {
     query.mockResolvedValueOnce([{ total: 50, done: 45, cancelled: 2 }]); // appointments
     query.mockResolvedValueOnce([{ new_customers: 5 }]); // new customers
     query.mockResolvedValueOnce([{ total: 48 }]); // prev appointments
-    query.mockResolvedValueOnce([{ month: '2026-05-01', invoiced: 400000 }]); // invoiced by month
+    query.mockResolvedValueOnce([{ month: '2026-07-01', invoiced: 400000 }]); // invoiced by month
     getCanonicalRevenue.mockResolvedValueOnce(2500000); // current paid
     getCanonicalRevenue.mockResolvedValueOnce(2400000); // previous paid
     getCanonicalRevenueByMonth.mockResolvedValueOnce([
-      { month: new Date('2026-05-01'), revenue: 2500000 },
+      { month: new Date('2026-07-01'), revenue: 2500000 },
     ]);
 
     const res = await request(makeApp())
       .post('/api/Reports')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_A });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_A });
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
@@ -203,16 +203,16 @@ describe('reports dashboard', () => {
     query.mockResolvedValueOnce([{ total: 30, done: 28, cancelled: 1 }]); // appointments
     query.mockResolvedValueOnce([{ new_customers: 3 }]); // new customers
     query.mockResolvedValueOnce([{ total: 29 }]); // prev appointments
-    query.mockResolvedValueOnce([{ month: '2026-05-01', invoiced: 250000 }]); // invoiced by month
+    query.mockResolvedValueOnce([{ month: '2026-07-01', invoiced: 250000 }]); // invoiced by month
     getCanonicalRevenue.mockResolvedValueOnce(1500000); // current paid
     getCanonicalRevenue.mockResolvedValueOnce(1450000); // previous paid
     getCanonicalRevenueByMonth.mockResolvedValueOnce([
-      { month: new Date('2026-05-01'), revenue: 1500000 },
+      { month: new Date('2026-07-01'), revenue: 1500000 },
     ]);
 
     const res = await request(makeApp())
       .post('/api/Reports')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
@@ -236,16 +236,16 @@ describe('reports dashboard', () => {
     query.mockResolvedValueOnce([{ total: 100, done: 90, cancelled: 5 }]); // appointments
     query.mockResolvedValueOnce([{ new_customers: 10 }]); // new customers
     query.mockResolvedValueOnce([{ total: 95 }]); // prev appointments
-    query.mockResolvedValueOnce([{ month: '2026-05-01', invoiced: 800000 }]); // invoiced by month
+    query.mockResolvedValueOnce([{ month: '2026-07-01', invoiced: 800000 }]); // invoiced by month
     getCanonicalRevenue.mockResolvedValueOnce(5000000); // current paid
     getCanonicalRevenue.mockResolvedValueOnce(4000000); // previous paid
     getCanonicalRevenueByMonth.mockResolvedValueOnce([
-      { month: new Date('2026-05-01'), revenue: 5000000 },
+      { month: new Date('2026-07-01'), revenue: 5000000 },
     ]);
 
     const res = await request(makeApp())
       .post('/api/Reports')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     const revChange = (5000000 - 4000000) / 4000000 * 100;
@@ -259,18 +259,18 @@ describe('reports dashboard', () => {
     query.mockResolvedValueOnce([{ total: 190 }]); // prev appointments
     query.mockResolvedValueOnce([
       { month: new Date('2026-04-01'), invoiced: 1500000 },
-      { month: new Date('2026-05-01'), invoiced: 1800000 },
+      { month: new Date('2026-07-01'), invoiced: 1800000 },
     ]); // invoiced by month (DB returns Date objects)
     getCanonicalRevenue.mockResolvedValueOnce(9000000); // current paid
     getCanonicalRevenue.mockResolvedValueOnce(8500000); // previous paid
     getCanonicalRevenueByMonth.mockResolvedValueOnce([
       { month: new Date('2026-04-01'), revenue: 8500000 },
-      { month: new Date('2026-05-01'), revenue: 9000000 },
+      { month: new Date('2026-07-01'), revenue: 9000000 },
     ]);
 
     const res = await request(makeApp())
       .post('/api/Reports')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.data.appointments.total).toBe(200);
@@ -289,23 +289,23 @@ describe('reports dashboard', () => {
     query.mockResolvedValueOnce([{ total: 100, done: 90, cancelled: 5 }]); // appointments
     query.mockResolvedValueOnce([{ new_customers: 10 }]); // new customers
     query.mockResolvedValueOnce([{ total: 95 }]); // prev appointments
-    query.mockResolvedValueOnce([{ month: '2026-05-01', invoiced: 800000 }]); // invoiced by month
+    query.mockResolvedValueOnce([{ month: '2026-07-01', invoiced: 800000 }]); // invoiced by month
     getCanonicalRevenue.mockResolvedValueOnce(5000000); // current paid
     getCanonicalRevenue.mockResolvedValueOnce(4000000); // previous paid
     getCanonicalRevenueByMonth.mockResolvedValueOnce([
-      { month: new Date('2026-05-01'), revenue: 5000000 },
+      { month: new Date('2026-07-01'), revenue: 5000000 },
     ]);
 
     const res = await request(makeApp())
       .post('/api/Reports')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
 
     // Verify no location filters are applied
     const [soSql, soParams] = query.mock.calls[0];
     expect(soSql).not.toContain('ANY(');
-    expect(soParams).toEqual(['2026-05-01', '2026-05-31']);
+    expect(soParams).toEqual(['2026-07-01', '2026-07-31']);
 
     // Verify getCanonicalRevenue has no location filter
     expect(getCanonicalRevenue).toHaveBeenCalledWith(
@@ -325,7 +325,7 @@ describe('reports dashboard', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.data.revenue.invoiced).toBe(0);

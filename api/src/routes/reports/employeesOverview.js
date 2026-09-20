@@ -1,7 +1,7 @@
 const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
-const { err, validDate, validUUID, resolveReportCompanyScope } = require('./helpers');
+const { err, validUUID, resolveReportCompanyScope } = require('./helpers');
 
 const router = express.Router();
 

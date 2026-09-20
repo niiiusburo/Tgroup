@@ -18,6 +18,8 @@ If behavior is accepted as product truth, promote it here or to a domain runbook
 - Loading states should tell staff what is being loaded when the wait is noticeable.
 - Empty states must distinguish "no records exist" from "data failed to load" and "you do not have permission".
 - Disabled controls must expose why they are disabled through nearby copy, tooltip, or state text.
+- Calendar date navigation and report date filters may not look back more than **3 calendar months** from Vietnam today. Previous-period controls disable at that bound; report "All time" is not offered. The API rejects older ranges instead of silently returning extra history.
+
 - Destructive actions require confirmation and should preserve enough context for staff to know what will be removed.
 - After successful writes, the visible surface must refresh immediately. Do not require a manual reload for normal staff workflows.
 - Search bars must be accent-insensitive across the project. Staff typing `Nguyen`, `Thoai`, `Duong`, or `Quyen` must match records such as `NGUYỄN`, `THOẠI`, `DƯƠNG`, or `Quyền`.

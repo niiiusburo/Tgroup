@@ -224,3 +224,23 @@ export function getFirstDayOfMonthInTimezone(dateStr: string, timezone: string):
   const d = parseDateInTimezone(`${year}-${String(month).padStart(2, '0')}-01`, timezone);
   return d.getDay();
 }
+
+/** Maximum past window for calendar views and reports. */
+export const LOOKBACK_MONTHS = 3;
+
+export function getEarliestLookbackDate(today: string, timezone = 'Asia/Ho_Chi_Minh'): string {
+  return addMonthsInTimezone(today, -LOOKBACK_MONTHS, timezone);
+}
+
+export function isBeforeLookback(dateStr: string, today: string, timezone = 'Asia/Ho_Chi_Minh'): boolean {
+  const dateOnly = dateStr.slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateOnly)) return false;
+  return dateOnly < getEarliestLookbackDate(today, timezone);
+}
+
+export function clampToLookback(dateStr: string, today: string, timezone = 'Asia/Ho_Chi_Minh'): string {
+  const earliest = getEarliestLookbackDate(today, timezone);
+  const dateOnly = dateStr.slice(0, 10);
+  if (!dateOnly) return earliest;
+  return dateOnly < earliest ? earliest : dateOnly;
+}

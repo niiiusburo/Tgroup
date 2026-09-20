@@ -68,11 +68,47 @@ function getUtcISOString() {
   return new Date().toISOString();
 }
 
+/** Maximum past window for calendar views and reports. */
+const LOOKBACK_MONTHS = 3;
+
+function toDateOnly(value) {
+  return String(value || '').slice(0, 10);
+}
+
+function addCalendarMonths(dateStr, months) {
+  const [year, month, day] = toDateOnly(dateStr).split('-').map(Number);
+  const utc = new Date(Date.UTC(year, month - 1, day));
+  utc.setUTCMonth(utc.getUTCMonth() + months);
+  return utc.toISOString().slice(0, 10);
+}
+
+function getEarliestLookbackDate(today = getVietnamToday()) {
+  return addCalendarMonths(today, -LOOKBACK_MONTHS);
+}
+
+function isBeforeLookback(dateStr, today = getVietnamToday()) {
+  const dateOnly = toDateOnly(dateStr);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateOnly)) return false;
+  return dateOnly < getEarliestLookbackDate(today);
+}
+
+function clampToLookback(dateStr, today = getVietnamToday()) {
+  const dateOnly = toDateOnly(dateStr);
+  const earliest = getEarliestLookbackDate(today);
+  if (!dateOnly) return earliest;
+  return dateOnly < earliest ? earliest : dateOnly;
+}
+
 module.exports = {
   VIETNAM_TZ,
+  LOOKBACK_MONTHS,
   formatToVietnam,
   getVietnamNow,
   getVietnamToday,
   getVietnamYear,
   getUtcISOString,
+  addCalendarMonths,
+  getEarliestLookbackDate,
+  isBeforeLookback,
+  clampToLookback,
 };

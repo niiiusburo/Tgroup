@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 import { fetchAppointments, updateAppointment } from '@/lib/api';
 import { useTimezone } from '@/contexts/TimezoneContext';
+import { clampToLookback, getEarliestLookbackDate } from '@/lib/dateUtils';
 import { PHASE_TO_API_STATE, type CalendarPhase } from '@/lib/appointmentStatusMapping';
 import { normalizeText } from '@/lib/utils';
 import { mapApiAppointmentToCalendar } from '@/lib/calendarUtils';
@@ -75,17 +76,23 @@ export function useCalendarData(selectedLocationId?: string) {
     setCurrentDateStr(getToday());
   }, [getToday]);
 
+  const earliestLookbackDate = useMemo(() => getEarliestLookbackDate(getToday(), timezone), [getToday, timezone]);
+
   const navigate = useCallback((direction: 'prev' | 'next') => {
     setCurrentDateStr((prevStr) => {
+      let next = prevStr;
       if (viewMode === 'day') {
-        return addDaysInTimezone(prevStr, direction === 'next' ? 1 : -1);
+        next = addDaysInTimezone(prevStr, direction === 'next' ? 1 : -1);
       } else if (viewMode === 'week') {
-        return addDaysInTimezone(prevStr, direction === 'next' ? 7 : -7);
+        next = addDaysInTimezone(prevStr, direction === 'next' ? 7 : -7);
       } else {
-        return addMonthsInTimezone(prevStr, direction === 'next' ? 1 : -1);
+        next = addMonthsInTimezone(prevStr, direction === 'next' ? 1 : -1);
       }
+      return clampToLookback(next, getToday(), timezone);
     });
-  }, [viewMode, addDaysInTimezone, addMonthsInTimezone]);
+  }, [viewMode, addDaysInTimezone, addMonthsInTimezone, getToday, timezone]);
+
+  const canNavigatePrev = currentDateStr > earliestLookbackDate;
 
   // Fetch appointments when viewMode, currentDate, or timezone changes
   const loadAppointments = useCallback(async () => {
@@ -104,13 +111,13 @@ export function useCalendarData(selectedLocationId?: string) {
       const endOfDay = (d: string) => `${d} 23:59:59`;
 
       if (viewMode === 'day') {
-        dateFrom = currentDateStr;
+        dateFrom = clampToLookback(currentDateStr, getToday(), timezone);
         dateTo = endOfDay(currentDateStr);
       } else if (viewMode === 'week') {
-        dateFrom = formatDate(weekDatesLocal[0], 'yyyy-MM-dd');
+        dateFrom = clampToLookback(formatDate(weekDatesLocal[0], 'yyyy-MM-dd'), getToday(), timezone);
         dateTo = endOfDay(formatDate(weekDatesLocal[6], 'yyyy-MM-dd'));
       } else {
-        dateFrom = formatDate(monthDatesLocal[0], 'yyyy-MM-dd');
+        dateFrom = clampToLookback(formatDate(monthDatesLocal[0], 'yyyy-MM-dd'), getToday(), timezone);
         dateTo = endOfDay(formatDate(monthDatesLocal[monthDatesLocal.length - 1], 'yyyy-MM-dd'));
       }
 
@@ -128,7 +135,7 @@ export function useCalendarData(selectedLocationId?: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [viewMode, currentDateStr, selectedLocationId, formatDate]);
+  }, [viewMode, currentDateStr, selectedLocationId, formatDate, getToday, timezone]);
 
   useEffect(() => {
     loadAppointments();
@@ -228,9 +235,14 @@ export function useCalendarData(selectedLocationId?: string) {
     viewMode,
     setViewMode,
     currentDate,
-    setCurrentDate: (date: Date) => setCurrentDateStr(formatDate(date, 'yyyy-MM-dd')),
+    setCurrentDate: (date: Date) => {
+      const next = formatDate(date, 'yyyy-MM-dd');
+      setCurrentDateStr(clampToLookback(next, getToday(), timezone));
+    },
     goToToday,
     navigate,
+    canNavigatePrev,
+    earliestLookbackDate,
     weekDates,
     monthDates,
     getAppointmentsForDate,

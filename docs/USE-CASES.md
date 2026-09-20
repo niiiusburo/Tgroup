@@ -125,7 +125,7 @@ When a use case is created or materially edited, add one compact `Traceability` 
 ## UC-005 — Schedule Appointment
 
 - **Actor:** Receptionist / Scheduler
-- **Trigger:** Calendar page → New appointment (click date cell or "+" button)
+- **Trigger:** Calendar page → New appointment (click date cell or "+" button). Calendar navigation cannot go earlier than 3 calendar months before Vietnam today (INV-026).
 - **Preconditions:** Customer and doctor exist; location selected; actor has `appointments.add`.
 - **Main flow:**
   1. Actor clicks date cell on `/calendar` → `AppointmentForm` modal opens.
@@ -285,18 +285,19 @@ When a use case is created or materially edited, add one compact `Traceability` 
 
 - **Actor:** Manager / Admin
 - **Trigger:** Reports page → Revenue → Export Excel
-- **Preconditions:** Actor has the export permission for the selected export type; date range selected.
+- **Preconditions:** Actor has the export permission for the selected export type; date range selected and within the 3-month lookback (INV-026).
 - **Main flow:**
   1. Actor navigates to `/reports/revenue`.
-  2. Sets date range, location, doctor filters.
+  2. Sets date range, location, doctor filters. Date pickers cannot go earlier than 3 calendar months before Vietnam today.
   3. Clicks Export → frontend calls `POST /api/Exports/revenue-flat/download` with `{ filters }`.
   4. Backend runs the legacy flat revenue export builder, using posted service payment allocations and allocation proration.
   5. File downloads; an `exports_audit` row is attempted on a best-effort basis.
 - **Alternate flows:**
   - **AF-1 Large dataset >60s:** Nginx timeout must be ≥300s (INV-019).
   - **AF-2 No data:** Returns empty workbook with headers.
+  - **AF-3 Lookback exceeded:** Report APIs return `{ success: false, error: 'LOOKBACK_EXCEEDED' }`; calendar/report exports clamp `dateFrom` to the earliest allowed date.
 - **Postconditions:** Excel file downloaded; audit log attempted without blocking the workbook response.
-- **Invariants touched:** INV-019 (nginx timeout), INV-020 (version bump if export builder changed).
+- **Invariants touched:** INV-019 (nginx timeout), INV-020 (version bump if export builder changed), INV-026 (3-month lookback).
 - **Traceability:** Related WF: WF-005, WF-013, UC-019. Contracts/routes: `POST /api/Reports/revenue/summary`, `POST /api/Reports/revenue/trend`, `POST /api/Reports/revenue/by-location`, `POST /api/Reports/revenue/by-doctor`, `POST /api/Reports/revenue/by-category`, `POST /api/Reports/cash-flow/summary`, `POST /api/Exports/:type/preview`, `POST /api/Exports/:type/download` with type `revenue-flat`. Data/tables: `dbo.payment_allocations`, `dbo.payments`, `dbo.saleorders`, `dbo.saleorderlines`, `dbo.partners`, `dbo.products`, `dbo.companies`, `dbo.customersources`, `dbo.exports_audit`. Tests: `api/src/routes/reports/__tests__/revenueRecognition.test.js`, `api/src/routes/reports/__tests__/cashFlow.test.js`, `api/src/routes/reports/__tests__/servicesBreakdown.test.js`, `api/src/services/reports/__tests__/canonicalRevenue.test.js`, `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `website/src/hooks/__tests__/useReportData.test.ts`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`. Product-map domains: `reports-analytics`, `payments-deposits`, `services-catalog`, `customers-partners`, `employees-hr`.
 
 ---

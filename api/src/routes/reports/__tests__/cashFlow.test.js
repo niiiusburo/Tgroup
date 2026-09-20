@@ -157,7 +157,7 @@ describe('reports cash-flow aggregation', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/cash-flow/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(query).toHaveBeenCalledTimes(1);
@@ -166,7 +166,7 @@ describe('reports cash-flow aggregation', () => {
     expect(sql).toContain('report_customer.companyid = ANY($3::uuid[])');
     expect(sql).toContain('dbo.payment_allocations');
     expect(sql).toContain('COALESCE(report_so.companyid, report_dk.companyid) = ANY($3::uuid[])');
-    expect(params).toEqual(['2026-05-01', '2026-05-31', [LOC_A]]);
+    expect(params).toEqual(['2026-07-01', '2026-07-31', [LOC_A]]);
   });
 
   it('mounts cash-flow summary through the parent reports router', async () => {
@@ -179,7 +179,7 @@ describe('reports cash-flow aggregation', () => {
 
     const res = await request(makeParentReportsApp())
       .post('/api/Reports/cash-flow/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     expect(res.body.data).toMatchObject({
@@ -199,13 +199,13 @@ describe('reports cash-flow aggregation', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/cash-flow/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     const [sql, params] = query.mock.calls[0];
     expect(sql).not.toContain('ANY(');
     expect(sql).not.toContain('p.companyid');
-    expect(params).toEqual(['2026-05-01', '2026-05-31']);
+    expect(params).toEqual(['2026-07-01', '2026-07-31']);
   });
 
   it('allows investor branch filters while still applying the customer allowlist', async () => {
@@ -222,15 +222,15 @@ describe('reports cash-flow aggregation', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/cash-flow/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_B });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_B });
 
     expect(res.status).toBe(200);
     const [sql, params] = query.mock.calls[0];
     expect(sql).toContain('report_customer.companyid = ANY($3::uuid[])');
     expect(sql).toContain('p.customer_id = ANY($4::uuid[])');
     expect(params).toEqual([
-      '2026-05-01',
-      '2026-05-31',
+      '2026-07-01',
+      '2026-07-31',
       [LOC_B],
       ['44444444-4444-4444-8444-444444444444'],
     ]);
@@ -246,12 +246,12 @@ describe('reports cash-flow aggregation', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/cash-flow/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31' });
 
     expect(res.status).toBe(200);
     const [sql, params] = query.mock.calls[0];
     expect(sql).not.toContain('ANY(');
-    expect(params).toEqual(['2026-05-01', '2026-05-31']);
+    expect(params).toEqual(['2026-07-01', '2026-07-31']);
   });
 
   it('rejects a requested cash-flow location outside the employee scope', async () => {
@@ -262,7 +262,7 @@ describe('reports cash-flow aggregation', () => {
 
     const res = await request(makeApp())
       .post('/api/Reports/cash-flow/summary')
-      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31', companyId: LOC_B });
+      .send({ dateFrom: '2026-07-01', dateTo: '2026-07-31', companyId: LOC_B });
 
     expect(res.status).toBe(403);
     expect(res.body).toEqual({ success: false, error: 'Location not allowed' });
