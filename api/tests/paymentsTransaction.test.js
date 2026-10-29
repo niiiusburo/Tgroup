@@ -83,6 +83,7 @@ describe('POST /api/Payments transaction integrity', () => {
         };
       }
       if (sql.includes('UPDATE saleorders SET residual')) return { rows: [] };
+      if (sql.includes('UPDATE saleorderlines sol')) return { rows: [] };
       throw new Error(`Unexpected client query: ${sql}`);
     });
 
@@ -119,6 +120,7 @@ describe('POST /api/Payments transaction integrity', () => {
       expect.stringContaining('INSERT INTO payments'),
       expect.stringContaining('INSERT INTO payment_allocations'),
       expect.stringContaining('UPDATE saleorders SET residual'),
+      expect.stringContaining('totalpaid = COALESCE(totalpaid, 0) + $1'),
       'COMMIT',
     ]));
     expect(client.query.mock.calls.map(([sql]) => sql)).not.toContain('ROLLBACK');

@@ -189,6 +189,12 @@
 **Enforced by:** `scripts/deploy-build-args.sh` calling `scripts/deploy-preflight.js`; release planning may also run `scripts/deploy-worktree-audit.js`.
 **Cite when:** Deploying, preparing a hotfix, or changing release scripts.
 
+### INV-027 — Treatment Order Paid Amount Moves With Residual
+**Rule:** Every write that adds or removes a `payment_allocations` row for a sale order MUST move `saleorders.totalpaid` by the same amount as `residual`, in the same statement, and copy the order's paid/owed onto the line of a single-line order. Never recompute `totalpaid` from allocations alone: legacy slips carry imported payments without allocations.
+**Rationale:** Payment create/void/delete moved `residual` only, so `totalpaid` went stale on ~4,600 NK slips (customer profile, partner KPIs, services export and top spenders showed a wrong "paid").
+**Enforced by:** `api/src/routes/payments.js` residual updates and `syncSingleLineOrderAmounts` in `api/src/routes/payments/helpers.js`; `api/src/routes/payments/__tests__/totalPaidSync.test.js`; repair `api/scripts/repair/2026-10-29-saleorder-totalpaid.sql`.
+**Cite when:** Editing payment create/void/delete/allocation code or sale-order money fields.
+
 ---
 
 ## Incident-Derived Invariants
@@ -217,3 +223,4 @@
 | 2026-07-23 | INV-023 | Added historical customer-source attribution stability after the Q10 June report incident | codex/customer-source-incident-guard |
 | 2026-07-23 | INV-024 | Added inactive-source selection and reference-retention safeguards | codex/customer-source-incident-guard |
 | 2026-09-20 | INV-026 | Added 3-month lookback for calendar views and reports | feat/calendar-report-3mo-lookback |
+| 2026-10-29 | INV-027 | Added treatment-order totalpaid moves with residual on every payment change | fix/saleorder-totalpaid-sync |

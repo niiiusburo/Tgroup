@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.32.61",
+    "date": "2026-10-29",
+    "commit": "pending",
+    "highlights": "Treatment slips now show the correct paid amount after each payment.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Recording, voiding or deleting a payment now updates the slip's paid amount, not only the amount owed.",
+          "Customer profile paid amounts, customer revenue KPIs, the services export and the top-spenders report read the corrected value."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.60",
     "date": "2026-09-20",
     "commit": "pending",

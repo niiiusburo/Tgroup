@@ -81,9 +81,26 @@ async function validateAllocationResidual(allocations, queryable = query) {
   return null;
 }
 
+// INV-027: a single-line treatment order shows paid/owed from its line row, so copy the
+// order totals onto that line (same rule as PATCH /api/SaleOrders). Multi-line orders
+// have no per-line allocation and are left unchanged.
+async function syncSingleLineOrderAmounts(client, saleOrderId) {
+  await client.query(
+    `UPDATE saleorderlines sol
+     SET amountpaid = so.totalpaid, amountresidual = so.residual
+     FROM saleorders so
+     WHERE so.id = $1
+       AND sol.orderid = so.id
+       AND sol.isdeleted = false
+       AND (SELECT COUNT(*) FROM saleorderlines x WHERE x.orderid = so.id AND x.isdeleted = false) = 1`,
+    [saleOrderId]
+  );
+}
+
 module.exports = {
   generateReceiptNumber,
   mapAllocations,
   rowsFrom,
+  syncSingleLineOrderAmounts,
   validateAllocationResidual,
 };
