@@ -14,6 +14,16 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.61] — 2026-10-29
+### Fixed
+- Payment create/void/delete now recompute `saleorders.totalpaid` from non-voided allocations in the same transaction — @agent — INV-027. Before, only `residual` moved, so ~4,600 NK slips showed a stale or zero "paid" amount in the customer profile, partner KPIs, services export and top-spenders report.
+
+### Testing
+- `totalPaidSync.test.js` covers create, void, delete and deposit-without-allocation paths — @agent — INV-027.
+
+### Data
+- One-time repair script `api/scripts/repair/2026-10-29-saleorder-totalpaid.sql` recomputes stale `totalpaid` on slips that have allocations — @agent — INV-027.
+
 ## [0.32.60] — 2026-09-20
 ### Added
 - 3-month Vietnam lookback on calendar navigation and date-scoped reports/exports — @agent — INV-026. Live NK/NK2 previously allowed All-time reports from 2000-01-01 and unbounded calendar back-navigation; APIs now reject `LOOKBACK_EXCEEDED`.

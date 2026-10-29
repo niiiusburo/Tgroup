@@ -4,6 +4,30 @@ When TestSprite runs, treat this file as the task list. For each relevant featur
 
 ---
 
+# TestSprite Plan: treatment-order paid amount sync 2026-10-29
+
+Feature/edit name: v0.32.61 — payments keep `saleorders.totalpaid` equal to non-voided allocations.
+
+Changed URLs / API routes / data flow:
+- API: `POST /api/Payments`, `POST /api/Payments/:id/void`, `DELETE /api/Payments/:id`.
+- Data flow: allocation insert/delete → `syncSaleOrdersTotalPaid` → `saleorders.totalpaid`; readers: customer profile services, partner KPI `actualrevenue`, services export `Đã thu`, Reports customers top spenders.
+
+Expected behavior:
+- After a payment allocated to a slip, the slip's paid amount rises by the allocated amount and owed falls by the same amount.
+- After void or delete, paid falls back and owed rises back.
+- Deposits without allocations do not change any slip.
+
+User roles: Staff/admin with `payment.add` / `payment.void`.
+
+Execution items:
+- [x] PASS: Jest `src/routes/payments` — new `totalPaidSync.test.js` 4/4 plus existing payment tests.
+- [ ] PENDING: Local browser — pay a slip on a test customer, check paid/owed in the customer profile, then void and check again.
+- [ ] PENDING: NK production after deploy and data repair — count of slips with `totalpaid` different from the allocation sum is 0 (legacy no-allocation slips excluded).
+
+Setup/login data: Local and NK admin `t@clinic.vn`; do not print credentials in this ledger.
+
+---
+
 # TestSprite Plan: calendar and report 3-month lookback 2026-09-20
 
 Feature/edit name: v0.32.60 — calendar navigation and date-scoped reports/exports cannot look back more than 3 Vietnam calendar months.

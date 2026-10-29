@@ -189,6 +189,12 @@
 **Enforced by:** `scripts/deploy-build-args.sh` calling `scripts/deploy-preflight.js`; release planning may also run `scripts/deploy-worktree-audit.js`.
 **Cite when:** Deploying, preparing a hotfix, or changing release scripts.
 
+### INV-027 — Treatment Order Paid Amount Follows Allocations
+**Rule:** Every write that adds or removes a `payment_allocations` row for a sale order MUST recompute `saleorders.totalpaid` from non-voided allocations in the same transaction.
+**Rationale:** Payment create/void/delete adjusted `residual` only, so `totalpaid` went stale on ~4,600 NK slips (customer profile, partner KPIs, services export and top spenders showed a wrong "paid").
+**Enforced by:** `syncSaleOrdersTotalPaid` in `api/src/lib/saleOrderTotals.js`; `api/src/routes/payments/__tests__/totalPaidSync.test.js`.
+**Cite when:** Editing payment create/void/delete/allocation code or sale-order money fields.
+
 ---
 
 ## Incident-Derived Invariants
@@ -217,3 +223,4 @@
 | 2026-07-23 | INV-023 | Added historical customer-source attribution stability after the Q10 June report incident | codex/customer-source-incident-guard |
 | 2026-07-23 | INV-024 | Added inactive-source selection and reference-retention safeguards | codex/customer-source-incident-guard |
 | 2026-09-20 | INV-026 | Added 3-month lookback for calendar views and reports | feat/calendar-report-3mo-lookback |
+| 2026-10-29 | INV-027 | Added treatment-order totalpaid sync with payment allocations | fix/saleorder-totalpaid-sync |

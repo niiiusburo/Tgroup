@@ -11,6 +11,7 @@ const {
   listDeposits,
   listPayments,
 } = require("./payments/readHandlers");
+const { syncSaleOrdersTotalPaid } = require("../lib/saleOrderTotals");
 
 // GET /api/Payments - List payments with allocations
 router.get("/", requirePermission('payment.view'), listPayments);
@@ -123,6 +124,7 @@ router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema)
             );
           }
         }
+        await syncSaleOrdersTotalPaid(client, createdAllocations.map(a => a.invoice_id));
       }
     }
 
@@ -295,6 +297,7 @@ router.delete("/:id", requirePermission('payment.void'), async (req, res) => {
         );
       }
     }
+    await syncSaleOrdersTotalPaid(client, allocationsToReverse.rows.map(a => a.invoice_id));
 
     const result = await client.query("DELETE FROM payments WHERE id = $1 RETURNING id", [id]);
     if (result.rows.length === 0) {
@@ -341,6 +344,7 @@ router.post("/:id/void", requirePermission('payment.void'), async (req, res) => 
         );
       }
     }
+    await syncSaleOrdersTotalPaid(client, allocationsToReverse.rows.map(a => a.invoice_id));
 
     const result = await client.query(
       `UPDATE payments SET status = 'voided', notes = COALESCE(notes, '') || ' | VOIDED: ' || $2 WHERE id = $1 AND status = 'posted' RETURNING *`,
