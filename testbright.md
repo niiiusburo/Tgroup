@@ -22,7 +22,10 @@ User roles: Staff/admin with `payment.add` / `payment.void`.
 Execution items:
 - [x] PASS: Jest `src/routes/payments` + `paymentsTransaction` — 10/10.
 - [x] PASS: Local browser `127.0.0.1:5175` as `t@clinic.vn` — SO62139 (legacy 2,645,000 unallocated) paid 700,000 → service history shows 3,345,000 paid; void → back to 2,645,000 / 29,095,000 on order and line.
-- [ ] PENDING: NK production after deploy and data repair — repair script reports `orders_still_off` = 0.
+- [x] PASS: NK production 2026-10-29 — API image `tgroup-api:0.32.61-44b83d8` (from main 44b83d82c, contains live d074148) healthy; rollback image `tgroup-api:rollback-0.32.60-d074148`; backup `/opt/tgroup-backups/20261029-totalpaid/saleorders_lines.dump`.
+- [x] PASS: NK repair applied — 13,608 orders raised (+56.93B VND paid label), 19,041 single-line rows synced, `orders_still_low` 0; rerun finds 0. 30 overpaid slips left unchanged by design.
+- [ ] PENDING: NK UI as `t@clinic.vn` — customer of SO07606 shows paid 2,937,000 / owed 26,063,000 (operator; agent may not type prod password).
+- [ ] NOT DONE: NK2 — runs unmerged `fix/nk-audit-remediation` (2d19076fa, not on GitHub); not redeployed to avoid erasing that lane.
 
 Setup/login data: Local and NK admin `t@clinic.vn`; do not print credentials in this ledger.
 

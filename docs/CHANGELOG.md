@@ -22,7 +22,7 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 - `totalPaidSync.test.js` covers create, void, delete, single-line copy and deposit-without-allocation paths; local browser check on SO62139 (legacy unallocated payments) — @agent — INV-027.
 
 ### Data
-- One-time repair script `api/scripts/repair/2026-10-29-saleorder-totalpaid.sql` sets `totalpaid = amounttotal - residual` and fixes single-line rows; dry run by default — @agent — INV-027.
+- One-time repair script `api/scripts/repair/2026-10-29-saleorder-totalpaid.sql` raises stale `totalpaid` to `amounttotal - residual` (never lowers it; overpaid slips keep their value) and syncs single-line rows; applied on NK 2026-10-29: 13,608 orders, 19,041 lines — @agent — INV-027.
 
 ## [0.32.60] — 2026-09-20
 ### Added
