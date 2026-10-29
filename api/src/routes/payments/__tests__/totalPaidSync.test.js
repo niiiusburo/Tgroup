@@ -54,10 +54,10 @@ function makeClient() {
 }
 
 function totalPaidSyncCalls(client) {
-  return client.query.mock.calls.filter(([sql]) => /UPDATE saleorders\s+SET totalpaid/.test(sql));
+  return client.query.mock.calls.filter(([sql]) => /UPDATE saleorders SET .*totalpaid/.test(sql));
 }
 
-describe('payments keep saleorders.totalpaid in sync with allocations', () => {
+describe('payments move saleorders.totalpaid with the same allocation as residual', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     resolveEffectivePermissions.mockResolvedValue({
@@ -66,7 +66,7 @@ describe('payments keep saleorders.totalpaid in sync with allocations', () => {
     });
   });
 
-  it('recomputes totalpaid for the treatment order when a payment is allocated to it', async () => {
+  it('raises totalpaid by the allocated amount when a payment is allocated to a treatment order', async () => {
     const client = makeClient();
 
     const res = await request(makeApp()).post('/api/Payments').send({
@@ -79,27 +79,47 @@ describe('payments keep saleorders.totalpaid in sync with allocations', () => {
     expect(res.status).toBe(201);
     const calls = totalPaidSyncCalls(client);
     expect(calls).toHaveLength(1);
-    expect(calls[0][1]).toEqual([ORDER_ID]);
-    expect(calls[0][0]).toMatch(/payment_allocations/);
-    expect(calls[0][0]).toMatch(/'voided'/);
+    expect(calls[0][0]).toMatch(/totalpaid = COALESCE\(totalpaid, 0\) \+ \$1/);
+    expect(calls[0][0]).toMatch(/residual = GREATEST\(0, residual - \$1\)/);
+    expect(calls[0][1]).toEqual(['3000000', ORDER_ID]);
   });
 
-  it('recomputes totalpaid when a payment is voided', async () => {
+  it('lowers totalpaid by the reversed amount when a payment is voided', async () => {
     const client = makeClient();
 
     const res = await request(makeApp()).post('/api/Payments/pay-1/void').send({ reason: 'test' });
 
     expect(res.status).toBe(200);
-    expect(totalPaidSyncCalls(client).map(([, params]) => params)).toEqual([[ORDER_ID]]);
+    const calls = totalPaidSyncCalls(client);
+    expect(calls.map(([, params]) => params)).toEqual([['3000000', ORDER_ID]]);
+    expect(calls[0][0]).toMatch(/totalpaid = GREATEST\(0, COALESCE\(totalpaid, 0\) - \$1\)/);
   });
 
-  it('recomputes totalpaid when a payment is deleted', async () => {
+  it('lowers totalpaid by the reversed amount when a payment is deleted', async () => {
     const client = makeClient();
 
     const res = await request(makeApp()).delete('/api/Payments/pay-1');
 
     expect(res.status).toBe(200);
-    expect(totalPaidSyncCalls(client).map(([, params]) => params)).toEqual([[ORDER_ID]]);
+    const calls = totalPaidSyncCalls(client);
+    expect(calls.map(([, params]) => params)).toEqual([['3000000', ORDER_ID]]);
+    expect(calls[0][0]).toMatch(/totalpaid = GREATEST\(0, COALESCE\(totalpaid, 0\) - \$1\)/);
+  });
+
+  it('copies order paid/owed onto the line of a single-line order after each change', async () => {
+    const client = makeClient();
+
+    await request(makeApp()).post('/api/Payments').send({
+      customer_id: CUSTOMER_ID,
+      amount: 3000000,
+      method: 'cash',
+      allocations: [{ invoice_id: ORDER_ID, allocated_amount: 3000000 }],
+    });
+    await request(makeApp()).post('/api/Payments/pay-1/void').send({ reason: 'test' });
+
+    const lineSyncs = client.query.mock.calls.filter(([sql]) => /UPDATE saleorderlines sol/.test(sql));
+    expect(lineSyncs.map(([, params]) => params)).toEqual([[ORDER_ID], [ORDER_ID]]);
+    expect(lineSyncs[0][0]).toMatch(/COUNT\(\*\)[\s\S]*= 1/);
   });
 
   it('does not touch saleorders.totalpaid for a deposit with no allocations', async () => {

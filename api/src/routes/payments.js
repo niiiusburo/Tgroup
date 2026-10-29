@@ -4,14 +4,19 @@ const { query, pool } = require("../db");
 const { requirePermission } = require("../middleware/auth");
 const { validate } = require("../middleware/validate");
 const { PaymentCreateSchema, PaymentUpdateSchema } = require("@tgroup/contracts");
-const { generateReceiptNumber, mapAllocations, rowsFrom, validateAllocationResidual } = require("./payments/helpers");
+const {
+  generateReceiptNumber,
+  mapAllocations,
+  rowsFrom,
+  syncSingleLineOrderAmounts,
+  validateAllocationResidual,
+} = require("./payments/helpers");
 const {
   getPaymentById,
   listDepositUsage,
   listDeposits,
   listPayments,
 } = require("./payments/readHandlers");
-const { syncSaleOrdersTotalPaid } = require("../lib/saleOrderTotals");
 
 // GET /api/Payments - List payments with allocations
 router.get("/", requirePermission('payment.view'), listPayments);
@@ -114,9 +119,11 @@ router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema)
         for (const a of createdAllocations) {
           if (a.invoice_id) {
             await client.query(
-              "UPDATE saleorders SET residual = GREATEST(0, residual - $1) WHERE id = $2",
+              // INV-027: totalpaid moves by the same allocation as residual.
+              "UPDATE saleorders SET residual = GREATEST(0, residual - $1), totalpaid = COALESCE(totalpaid, 0) + $1 WHERE id = $2",
               [a.allocated_amount, a.invoice_id]
             );
+            await syncSingleLineOrderAmounts(client, a.invoice_id);
           } else if (a.dotkham_id) {
             await client.query(
               "UPDATE dotkhams SET amountresidual = GREATEST(0, amountresidual - $1) WHERE id = $2",
@@ -124,7 +131,6 @@ router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema)
             );
           }
         }
-        await syncSaleOrdersTotalPaid(client, createdAllocations.map(a => a.invoice_id));
       }
     }
 
@@ -287,9 +293,10 @@ router.delete("/:id", requirePermission('payment.void'), async (req, res) => {
     for (const a of allocationsToReverse.rows) {
       if (a.invoice_id) {
         await client.query(
-          "UPDATE saleorders SET residual = residual + $1 WHERE id = $2",
+          "UPDATE saleorders SET residual = residual + $1, totalpaid = GREATEST(0, COALESCE(totalpaid, 0) - $1) WHERE id = $2",
           [a.allocated_amount, a.invoice_id]
         );
+        await syncSingleLineOrderAmounts(client, a.invoice_id);
       } else if (a.dotkham_id) {
         await client.query(
           "UPDATE dotkhams SET amountresidual = amountresidual + $1 WHERE id = $2",
@@ -297,7 +304,6 @@ router.delete("/:id", requirePermission('payment.void'), async (req, res) => {
         );
       }
     }
-    await syncSaleOrdersTotalPaid(client, allocationsToReverse.rows.map(a => a.invoice_id));
 
     const result = await client.query("DELETE FROM payments WHERE id = $1 RETURNING id", [id]);
     if (result.rows.length === 0) {
@@ -334,9 +340,10 @@ router.post("/:id/void", requirePermission('payment.void'), async (req, res) => 
     for (const a of allocationsToReverse.rows) {
       if (a.invoice_id) {
         await client.query(
-          "UPDATE saleorders SET residual = residual + $1 WHERE id = $2",
+          "UPDATE saleorders SET residual = residual + $1, totalpaid = GREATEST(0, COALESCE(totalpaid, 0) - $1) WHERE id = $2",
           [a.allocated_amount, a.invoice_id]
         );
+        await syncSingleLineOrderAmounts(client, a.invoice_id);
       } else if (a.dotkham_id) {
         await client.query(
           "UPDATE dotkhams SET amountresidual = amountresidual + $1 WHERE id = $2",
@@ -344,7 +351,6 @@ router.post("/:id/void", requirePermission('payment.void'), async (req, res) => 
         );
       }
     }
-    await syncSaleOrdersTotalPaid(client, allocationsToReverse.rows.map(a => a.invoice_id));
 
     const result = await client.query(
       `UPDATE payments SET status = 'voided', notes = COALESCE(notes, '') || ' | VOIDED: ' || $2 WHERE id = $1 AND status = 'posted' RETURNING *`,
